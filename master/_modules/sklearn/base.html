@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>sklearn.base &#8212; AutoSklearn 0.6.0 documentation</title>
+    <title>sklearn.base &#8212; AutoSklearn 0.7.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
 <meta charset='utf-8'>
@@ -51,7 +51,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.6.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.7.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -107,7 +107,11 @@
     <div class="body col-md-9 content" role="main">
       
   <h1>Source code for sklearn.base</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Base classes for all estimators.&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Base classes for all estimators.</span>
+
+<span class="sd">Used for VotingClassifier</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="c1"># Author: Gael Varoquaux &lt;gael.varoquaux@normalesup.org&gt;</span>
 <span class="c1"># License: BSD 3 clause</span>
@@ -126,7 +130,8 @@
 
 <span class="n">_DEFAULT_TAGS</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;non_deterministic&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s1">&#39;requires_positive_data&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s1">&#39;requires_positive_X&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s1">&#39;requires_positive_y&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
     <span class="s1">&#39;X_types&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;2darray&#39;</span><span class="p">],</span>
     <span class="s1">&#39;poor_score&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
     <span class="s1">&#39;no_validation&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
@@ -135,7 +140,9 @@
     <span class="s1">&#39;stateless&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
     <span class="s1">&#39;multilabel&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
     <span class="s1">&#39;_skip_test&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s1">&#39;multioutput_only&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+    <span class="s1">&#39;multioutput_only&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s1">&#39;binary_only&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s1">&#39;requires_fit&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
 
 
 <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -235,17 +242,6 @@
     <span class="k">return</span> <span class="n">lines</span>
 
 
-<span class="k">def</span> <span class="nf">_update_if_consistent</span><span class="p">(</span><span class="n">dict1</span><span class="p">,</span> <span class="n">dict2</span><span class="p">):</span>
-    <span class="n">common_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">dict1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">dict2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">common_keys</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">dict1</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">!=</span> <span class="n">dict2</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Inconsistent values for tag </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2"> != </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="n">key</span><span class="p">,</span> <span class="n">dict1</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">dict2</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-            <span class="p">))</span>
-    <span class="n">dict1</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dict2</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">dict1</span>
-
-
 <span class="k">class</span> <span class="nc">BaseEstimator</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Base class for all estimators in scikit-learn</span>
 
@@ -284,11 +280,12 @@
         <span class="k">return</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get parameters for this estimator.</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get parameters for this estimator.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        deep : boolean, optional</span>
+<span class="sd">        deep : bool, default=True</span>
 <span class="sd">            If True, will return the parameters for this estimator and</span>
 <span class="sd">            contained subobjects that are estimators.</span>
 
@@ -299,7 +296,15 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">out</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_param_names</span><span class="p">():</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;From version 0.24, get_params will raise an &#39;</span>
+                              <span class="s1">&#39;AttributeError if a parameter cannot be &#39;</span>
+                              <span class="s1">&#39;retrieved as an instance attribute. Previously &#39;</span>
+                              <span class="s1">&#39;it would return None.&#39;</span><span class="p">,</span>
+                              <span class="ne">FutureWarning</span><span class="p">)</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">deep</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;get_params&#39;</span><span class="p">):</span>
                 <span class="n">deep_items</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                 <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">((</span><span class="n">key</span> <span class="o">+</span> <span class="s1">&#39;__&#39;</span> <span class="o">+</span> <span class="n">k</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">deep_items</span><span class="p">)</span>
@@ -307,16 +312,23 @@
         <span class="k">return</span> <span class="n">out</span>
 
     <span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set the parameters of this estimator.</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the parameters of this estimator.</span>
 
 <span class="sd">        The method works on simple estimators as well as on nested objects</span>
 <span class="sd">        (such as pipelines). The latter have parameters of the form</span>
 <span class="sd">        ``&lt;component&gt;__&lt;parameter&gt;`` so that it&#39;s possible to update each</span>
 <span class="sd">        component of a nested object.</span>
 
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        **params : dict</span>
+<span class="sd">            Estimator parameters.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        self</span>
+<span class="sd">        self : object</span>
+<span class="sd">            Estimator instance.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">params</span><span class="p">:</span>
             <span class="c1"># Simple optimization to gain speed (inspect is slow)</span>
@@ -418,28 +430,29 @@
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">_more_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_DEFAULT_TAGS</span>
+
     <span class="k">def</span> <span class="nf">_get_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">collected_tags</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">base_class</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmro</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">base_class</span><span class="p">,</span> <span class="s1">&#39;_more_tags&#39;</span><span class="p">)</span>
-                    <span class="ow">and</span> <span class="n">base_class</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">base_class</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getmro</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base_class</span><span class="p">,</span> <span class="s1">&#39;_more_tags&#39;</span><span class="p">):</span>
+                <span class="c1"># need the if because mixins might not have _more_tags</span>
+                <span class="c1"># but might do redundant work in estimators</span>
+                <span class="c1"># (i.e. calling more tags on BaseEstimator multiple times)</span>
                 <span class="n">more_tags</span> <span class="o">=</span> <span class="n">base_class</span><span class="o">.</span><span class="n">_more_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-                <span class="n">collected_tags</span> <span class="o">=</span> <span class="n">_update_if_consistent</span><span class="p">(</span><span class="n">collected_tags</span><span class="p">,</span>
-                                                       <span class="n">more_tags</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_more_tags&#39;</span><span class="p">):</span>
-            <span class="n">more_tags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_more_tags</span><span class="p">()</span>
-            <span class="n">collected_tags</span> <span class="o">=</span> <span class="n">_update_if_consistent</span><span class="p">(</span><span class="n">collected_tags</span><span class="p">,</span> <span class="n">more_tags</span><span class="p">)</span>
-        <span class="n">tags</span> <span class="o">=</span> <span class="n">_DEFAULT_TAGS</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">tags</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">collected_tags</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">tags</span>
+                <span class="n">collected_tags</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">more_tags</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">collected_tags</span>
 
 
 <span class="k">class</span> <span class="nc">ClassifierMixin</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Mixin class for all classifiers in scikit-learn.&quot;&quot;&quot;</span>
+
     <span class="n">_estimator_type</span> <span class="o">=</span> <span class="s2">&quot;classifier&quot;</span>
 
     <span class="k">def</span> <span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns the mean accuracy on the given test data and labels.</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the mean accuracy on the given test data and labels.</span>
 
 <span class="sd">        In multi-label classification, this is the subset accuracy</span>
 <span class="sd">        which is a harsh metric since you require for each sample that</span>
@@ -447,20 +460,19 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        X : array-like, shape = (n_samples, n_features)</span>
+<span class="sd">        X : array-like of shape (n_samples, n_features)</span>
 <span class="sd">            Test samples.</span>
 
-<span class="sd">        y : array-like, shape = (n_samples) or (n_samples, n_outputs)</span>
+<span class="sd">        y : array-like of shape (n_samples,) or (n_samples, n_outputs)</span>
 <span class="sd">            True labels for X.</span>
 
-<span class="sd">        sample_weight : array-like, shape = [n_samples], optional</span>
+<span class="sd">        sample_weight : array-like of shape (n_samples,), default=None</span>
 <span class="sd">            Sample weights.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        score : float</span>
 <span class="sd">            Mean accuracy of self.predict(X) wrt. y.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">.metrics</span> <span class="kn">import</span> <span class="n">accuracy_score</span>
         <span class="k">return</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">)</span>
@@ -471,7 +483,7 @@
     <span class="n">_estimator_type</span> <span class="o">=</span> <span class="s2">&quot;regressor&quot;</span>
 
     <span class="k">def</span> <span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns the coefficient of determination R^2 of the prediction.</span>
+        <span class="sd">&quot;&quot;&quot;Return the coefficient of determination R^2 of the prediction.</span>
 
 <span class="sd">        The coefficient R^2 is defined as (1 - u/v), where u is the residual</span>
 <span class="sd">        sum of squares ((y_true - y_pred) ** 2).sum() and v is the total</span>
@@ -483,16 +495,17 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        X : array-like, shape = (n_samples, n_features)</span>
+<span class="sd">        X : array-like of shape (n_samples, n_features)</span>
 <span class="sd">            Test samples. For some estimators this may be a</span>
-<span class="sd">            precomputed kernel matrix instead, shape = (n_samples,</span>
-<span class="sd">            n_samples_fitted], where n_samples_fitted is the number of</span>
+<span class="sd">            precomputed kernel matrix or a list of generic objects instead,</span>
+<span class="sd">            shape = (n_samples, n_samples_fitted),</span>
+<span class="sd">            where n_samples_fitted is the number of</span>
 <span class="sd">            samples used in the fitting for the estimator.</span>
 
-<span class="sd">        y : array-like, shape = (n_samples) or (n_samples, n_outputs)</span>
+<span class="sd">        y : array-like of shape (n_samples,) or (n_samples, n_outputs)</span>
 <span class="sd">            True values for X.</span>
 
-<span class="sd">        sample_weight : array-like, shape = [n_samples], optional</span>
+<span class="sd">        sample_weight : array-like of shape (n_samples,), default=None</span>
 <span class="sd">            Sample weights.</span>
 
 <span class="sd">        Returns</span>
@@ -504,16 +517,17 @@
 <span class="sd">        -----</span>
 <span class="sd">        The R2 score used when calling ``score`` on a regressor will use</span>
 <span class="sd">        ``multioutput=&#39;uniform_average&#39;`` from version 0.23 to keep consistent</span>
-<span class="sd">        with `metrics.r2_score`. This will influence the ``score`` method of</span>
-<span class="sd">        all the multioutput regressors (except for</span>
-<span class="sd">        `multioutput.MultiOutputRegressor`). To specify the default value</span>
-<span class="sd">        manually and avoid the warning, please either call `metrics.r2_score`</span>
-<span class="sd">        directly or make a custom scorer with `metrics.make_scorer` (the</span>
-<span class="sd">        built-in scorer ``&#39;r2&#39;`` uses ``multioutput=&#39;uniform_average&#39;``).</span>
+<span class="sd">        with :func:`~sklearn.metrics.r2_score`. This will influence the</span>
+<span class="sd">        ``score`` method of all the multioutput regressors (except for</span>
+<span class="sd">        :class:`~sklearn.multioutput.MultiOutputRegressor`). To specify the</span>
+<span class="sd">        default value manually and avoid the warning, please either call</span>
+<span class="sd">        :func:`~sklearn.metrics.r2_score` directly or make a custom scorer with</span>
+<span class="sd">        :func:`~sklearn.metrics.make_scorer` (the built-in scorer ``&#39;r2&#39;`` uses</span>
+<span class="sd">        ``multioutput=&#39;uniform_average&#39;``).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="kn">from</span> <span class="nn">.metrics</span> <span class="kn">import</span> <span class="n">r2_score</span>
-        <span class="kn">from</span> <span class="nn">.metrics.regression</span> <span class="kn">import</span> <span class="n">_check_reg_targets</span>
+        <span class="kn">from</span> <span class="nn">.metrics._regression</span> <span class="kn">import</span> <span class="n">_check_reg_targets</span>
         <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         <span class="c1"># XXX: Remove the check in 0.23</span>
         <span class="n">y_type</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_check_reg_targets</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -536,7 +550,8 @@
     <span class="n">_estimator_type</span> <span class="o">=</span> <span class="s2">&quot;clusterer&quot;</span>
 
     <span class="k">def</span> <span class="nf">fit_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Performs clustering on X and returns cluster labels.</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform clustering on X and returns cluster labels.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -544,12 +559,12 @@
 <span class="sd">            Input data.</span>
 
 <span class="sd">        y : Ignored</span>
-<span class="sd">            not used, present for API consistency by convention.</span>
+<span class="sd">            Not used, present for API consistency by convention.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        labels : ndarray, shape (n_samples,)</span>
-<span class="sd">            cluster labels</span>
+<span class="sd">            Cluster labels.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># non-optimized default implementation; override when a better</span>
         <span class="c1"># method is possible for a given clustering algorithm</span>
@@ -607,7 +622,7 @@
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_submatrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns the submatrix corresponding to bicluster `i`.</span>
+        <span class="sd">&quot;&quot;&quot;Return the submatrix corresponding to bicluster `i`.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -636,7 +651,8 @@
     <span class="sd">&quot;&quot;&quot;Mixin class for all transformers in scikit-learn.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_params</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Fit to data, then transform it.</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fit to data, then transform it.</span>
 
 <span class="sd">        Fits transformer to X and y with optional parameters fit_params</span>
 <span class="sd">        and returns a transformed version of X.</span>
@@ -649,11 +665,13 @@
 <span class="sd">        y : numpy array of shape [n_samples]</span>
 <span class="sd">            Target values.</span>
 
+<span class="sd">        **fit_params : dict</span>
+<span class="sd">            Additional fit parameters.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        X_new : numpy array of shape [n_samples, n_features_new]</span>
 <span class="sd">            Transformed array.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># non-optimized default implementation; override when a better</span>
         <span class="c1"># method is possible for a given clustering algorithm</span>
@@ -670,11 +688,11 @@
     <span class="n">_estimator_type</span> <span class="o">=</span> <span class="s2">&quot;DensityEstimator&quot;</span>
 
     <span class="k">def</span> <span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns the score of the model on the data X</span>
+        <span class="sd">&quot;&quot;&quot;Return the score of the model on the data X</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        X : array-like, shape = (n_samples, n_features)</span>
+<span class="sd">        X : array-like of shape (n_samples, n_features)</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -688,7 +706,7 @@
     <span class="n">_estimator_type</span> <span class="o">=</span> <span class="s2">&quot;outlier_detector&quot;</span>
 
     <span class="k">def</span> <span class="nf">fit_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Performs fit on X and returns labels for X.</span>
+        <span class="sd">&quot;&quot;&quot;Perform fit on X and returns labels for X.</span>
 
 <span class="sd">        Returns -1 for outliers and 1 for inliers.</span>
 
@@ -698,7 +716,7 @@
 <span class="sd">            Input data.</span>
 
 <span class="sd">        y : Ignored</span>
-<span class="sd">            not used, present for API consistency by convention.</span>
+<span class="sd">            Not used, present for API consistency by convention.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -714,13 +732,13 @@
     <span class="sd">&quot;&quot;&quot;Mixin class for all meta estimators in scikit-learn.&quot;&quot;&quot;</span>
 
 
-<span class="k">class</span> <span class="nc">MultiOutputMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MultiOutputMixin</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Mixin to mark estimators that support multioutput.&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">_more_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;multioutput&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
 
 
-<span class="k">class</span> <span class="nc">_UnstableArchMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">_UnstableArchMixin</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Mark estimators that are non-determinstic on 32bit or PowerPC&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">_more_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;non_deterministic&#39;</span><span class="p">:</span> <span class="p">(</span>
@@ -728,7 +746,7 @@
 
 
 <span class="k">def</span> <span class="nf">is_classifier</span><span class="p">(</span><span class="n">estimator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns True if the given estimator is (probably) a classifier.</span>
+    <span class="sd">&quot;&quot;&quot;Return True if the given estimator is (probably) a classifier.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -744,7 +762,7 @@
 
 
 <span class="k">def</span> <span class="nf">is_regressor</span><span class="p">(</span><span class="n">estimator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns True if the given estimator is (probably) a regressor.</span>
+    <span class="sd">&quot;&quot;&quot;Return True if the given estimator is (probably) a regressor.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -760,7 +778,7 @@
 
 
 <span class="k">def</span> <span class="nf">is_outlier_detector</span><span class="p">(</span><span class="n">estimator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns True if the given estimator is (probably) an outlier detector.</span>
+    <span class="sd">&quot;&quot;&quot;Return True if the given estimator is (probably) an outlier detector.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -790,7 +808,7 @@
     </p>
     <p>
         &copy; Copyright 2014-2019, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.3.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.<br/>
     </p>
   </div>
 </footer>

@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>autosklearn.estimators &#8212; AutoSklearn 0.6.0 documentation</title>
+    <title>autosklearn.estimators &#8212; AutoSklearn 0.7.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
 <meta charset='utf-8'>
@@ -51,7 +51,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.6.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.7.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -134,6 +134,7 @@
         <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
         <span class="n">ensemble_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
         <span class="n">ensemble_nbest</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+        <span class="n">max_models_on_disc</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
         <span class="n">ensemble_memory_limit</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span>
         <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">ml_memory_limit</span><span class="o">=</span><span class="mi">3072</span><span class="p">,</span>
@@ -183,8 +184,15 @@
 
 <span class="sd">        ensemble_nbest : int, optional (default=50)</span>
 <span class="sd">            Only consider the ``ensemble_nbest`` models when building an</span>
-<span class="sd">            ensemble. Implements `Model Library Pruning` from `Getting the</span>
-<span class="sd">            most out of ensemble selection`.</span>
+<span class="sd">            ensemble.</span>
+
+<span class="sd">        max_models_on_disc: int, optional (default=50),</span>
+<span class="sd">            Defines the maximum number of models that are kept in the disc.</span>
+<span class="sd">            The additional number of models are permanently deleted. Due to the</span>
+<span class="sd">            nature of this variable, it sets the upper limit on how many models</span>
+<span class="sd">            can be used for an ensemble.</span>
+<span class="sd">            It must be an integer greater or equal than 1.</span>
+<span class="sd">            If set to None, all models are kept on the disc.</span>
 
 <span class="sd">        ensemble_memory_limit : int, optional (1024)</span>
 <span class="sd">            Memory limit in MB for the ensemble building process.</span>
@@ -223,6 +231,7 @@
 <span class="sd">            * &#39;holdout-iterative-fit&#39;:  67:33 (train:test) split, calls iterative</span>
 <span class="sd">              fit where possible</span>
 <span class="sd">            * &#39;cv&#39;: crossvalidation, requires &#39;folds&#39;</span>
+<span class="sd">            * &#39;cv-iterative-fit&#39;: crossvalidation, calls iterative fit where possible</span>
 <span class="sd">            * &#39;partial-cv&#39;: crossvalidation with intensification, requires</span>
 <span class="sd">              &#39;folds&#39;</span>
 <span class="sd">            * BaseCrossValidator object: any BaseCrossValidator class found</span>
@@ -245,6 +254,7 @@
 <span class="sd">            * &#39;holdout&#39;: {&#39;train_size&#39;: float}</span>
 <span class="sd">            * &#39;holdout-iterative-fit&#39;:  {&#39;train_size&#39;: float}</span>
 <span class="sd">            * &#39;cv&#39;: {&#39;folds&#39;: int}</span>
+<span class="sd">            * &#39;cv-iterative-fit&#39;: {&#39;folds&#39;: int}</span>
 <span class="sd">            * &#39;partial-cv&#39;: {&#39;folds&#39;: int, &#39;shuffle&#39;: bool}</span>
 <span class="sd">            * BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments</span>
 <span class="sd">                required by chosen class as specified in scikit-learn documentation.</span>
@@ -328,7 +338,7 @@
 
 <span class="sd">            Not all keys returned by scikit-learn are supported yet.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa (links are too long)</span>
         <span class="c1"># Raise error if the given total time budget is less than 60 seconds.</span>
         <span class="k">if</span> <span class="n">time_left_for_this_task</span> <span class="o">&lt;</span> <span class="mi">30</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Time left for this task must be at least &quot;</span>
@@ -338,6 +348,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">initial_configurations_via_metalearning</span> <span class="o">=</span> <span class="n">initial_configurations_via_metalearning</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ensemble_size</span> <span class="o">=</span> <span class="n">ensemble_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ensemble_nbest</span> <span class="o">=</span> <span class="n">ensemble_nbest</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_models_on_disc</span> <span class="o">=</span> <span class="n">max_models_on_disc</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ensemble_memory_limit</span> <span class="o">=</span> <span class="n">ensemble_memory_limit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ml_memory_limit</span> <span class="o">=</span> <span class="n">ml_memory_limit</span>
@@ -385,11 +396,13 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If shared_mode == True output_folder must &quot;</span>
                                  <span class="s2">&quot;not be None.&quot;</span><span class="p">)</span>
 
-        <span class="n">backend</span> <span class="o">=</span> <span class="n">create</span><span class="p">(</span><span class="n">temporary_directory</span><span class="o">=</span><span class="n">tmp_folder</span><span class="p">,</span>
-                         <span class="n">output_directory</span><span class="o">=</span><span class="n">output_folder</span><span class="p">,</span>
-                         <span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">delete_tmp_folder_after_terminate</span><span class="p">,</span>
-                         <span class="n">delete_output_folder_after_terminate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">delete_output_folder_after_terminate</span><span class="p">,</span>
-                         <span class="n">shared_mode</span><span class="o">=</span><span class="n">shared_mode</span><span class="p">)</span>
+        <span class="n">backend</span> <span class="o">=</span> <span class="n">create</span><span class="p">(</span>
+            <span class="n">temporary_directory</span><span class="o">=</span><span class="n">tmp_folder</span><span class="p">,</span>
+            <span class="n">output_directory</span><span class="o">=</span><span class="n">output_folder</span><span class="p">,</span>
+            <span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">delete_tmp_folder_after_terminate</span><span class="p">,</span>
+            <span class="n">delete_output_folder_after_terminate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">delete_output_folder_after_terminate</span><span class="p">,</span>
+            <span class="n">shared_mode</span><span class="o">=</span><span class="n">shared_mode</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">smac_scenario_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">smac_scenario_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">smac_scenario_args</span>
@@ -398,10 +411,10 @@
             <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">,</span>
             <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">time_left_for_this_task</span><span class="p">,</span>
             <span class="n">per_run_time_limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">per_run_time_limit</span><span class="p">,</span>
-            <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span>
-            <span class="n">initial_configurations_via_metalearning</span><span class="p">,</span>
+            <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="n">initial_configurations_via_metalearning</span><span class="p">,</span>
             <span class="n">ensemble_size</span><span class="o">=</span><span class="n">ensemble_size</span><span class="p">,</span>
             <span class="n">ensemble_nbest</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ensemble_nbest</span><span class="p">,</span>
+            <span class="n">max_models_on_disc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_models_on_disc</span><span class="p">,</span>
             <span class="n">ensemble_memory_limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ensemble_memory_limit</span><span class="p">,</span>
             <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
             <span class="n">ml_memory_limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ml_memory_limit</span><span class="p">,</span>
@@ -951,7 +964,7 @@
     </p>
     <p>
         &copy; Copyright 2014-2019, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.3.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.<br/>
     </p>
   </div>
 </footer>

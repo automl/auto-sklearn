@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>APIs &#8212; AutoSklearn 0.6.0 documentation</title>
+    <title>APIs &#8212; AutoSklearn 0.7.0 documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 <meta charset='utf-8'>
@@ -51,7 +51,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.6.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.7.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -131,9 +131,9 @@
 <h2>Main modules<a class="headerlink" href="#main-modules" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="classification">
 <h3>Classification<a class="headerlink" href="#classification" title="Permalink to this headline">¶</a></h3>
-<dl class="class">
+<dl class="py class">
 <dt id="autosklearn.classification.AutoSklearnClassifier">
-<em class="property">class </em><code class="sig-prename descclassname">autosklearn.classification.</code><code class="sig-name descname">AutoSklearnClassifier</code><span class="sig-paren">(</span><em class="sig-param">time_left_for_this_task=3600</em>, <em class="sig-param">per_run_time_limit=360</em>, <em class="sig-param">initial_configurations_via_metalearning=25</em>, <em class="sig-param">ensemble_size: int = 50</em>, <em class="sig-param">ensemble_nbest=50</em>, <em class="sig-param">ensemble_memory_limit=1024</em>, <em class="sig-param">seed=1</em>, <em class="sig-param">ml_memory_limit=3072</em>, <em class="sig-param">include_estimators=None</em>, <em class="sig-param">exclude_estimators=None</em>, <em class="sig-param">include_preprocessors=None</em>, <em class="sig-param">exclude_preprocessors=None</em>, <em class="sig-param">resampling_strategy='holdout'</em>, <em class="sig-param">resampling_strategy_arguments=None</em>, <em class="sig-param">tmp_folder=None</em>, <em class="sig-param">output_folder=None</em>, <em class="sig-param">delete_tmp_folder_after_terminate=True</em>, <em class="sig-param">delete_output_folder_after_terminate=True</em>, <em class="sig-param">shared_mode=False</em>, <em class="sig-param">n_jobs: Optional[int] = None</em>, <em class="sig-param">disable_evaluator_output=False</em>, <em class="sig-param">get_smac_object_callback=None</em>, <em class="sig-param">smac_scenario_args=None</em>, <em class="sig-param">logging_config=None</em>, <em class="sig-param">metadata_directory=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">autosklearn.classification.</code><code class="sig-name descname">AutoSklearnClassifier</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_left_for_this_task</span><span class="o">=</span><span class="default_value">3600</span></em>, <em class="sig-param"><span class="n">per_run_time_limit</span><span class="o">=</span><span class="default_value">360</span></em>, <em class="sig-param"><span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="default_value">25</span></em>, <em class="sig-param"><span class="n">ensemble_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">50</span></em>, <em class="sig-param"><span class="n">ensemble_nbest</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">max_models_on_disc</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">ensemble_memory_limit</span><span class="o">=</span><span class="default_value">1024</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">ml_memory_limit</span><span class="o">=</span><span class="default_value">3072</span></em>, <em class="sig-param"><span class="n">include_estimators</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">exclude_estimators</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">include_preprocessors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">exclude_preprocessors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">resampling_strategy</span><span class="o">=</span><span class="default_value">'holdout'</span></em>, <em class="sig-param"><span class="n">resampling_strategy_arguments</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tmp_folder</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">output_folder</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">delete_output_folder_after_terminate</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">shared_mode</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">n_jobs</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">disable_evaluator_output</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">get_smac_object_callback</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">smac_scenario_args</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logging_config</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">metadata_directory</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class implements the classification task.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
@@ -158,8 +158,14 @@ selection from libraries of models</em>. Models are drawn with
 replacement.</p>
 </dd>
 <dt><strong>ensemble_nbest</strong><span class="classifier">int, optional (default=50)</span></dt><dd><p>Only consider the <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> models when building an
-ensemble. Implements <cite>Model Library Pruning</cite> from <cite>Getting the
-most out of ensemble selection</cite>.</p>
+ensemble.</p>
+</dd>
+<dt><strong>max_models_on_disc: int, optional (default=50),</strong></dt><dd><p>Defines the maximum number of models that are kept in the disc.
+The additional number of models are permanently deleted. Due to the
+nature of this variable, it sets the upper limit on how many models
+can be used for an ensemble.
+It must be an integer greater or equal than 1.
+If set to None, all models are kept on the disc.</p>
 </dd>
 <dt><strong>ensemble_memory_limit</strong><span class="classifier">int, optional (1024)</span></dt><dd><p>Memory limit in MB for the ensemble building process.
 <cite>auto-sklearn</cite> will reduce the number of considered models
@@ -190,6 +196,7 @@ include_preprocessors.</p>
 <li><p>‘holdout-iterative-fit’:  67:33 (train:test) split, calls iterative
 fit where possible</p></li>
 <li><p>‘cv’: crossvalidation, requires ‘folds’</p></li>
+<li><p>‘cv-iterative-fit’: crossvalidation, calls iterative fit where possible</p></li>
 <li><p>‘partial-cv’: crossvalidation with intensification, requires
 ‘folds’</p></li>
 <li><dl class="simple">
@@ -221,6 +228,7 @@ splitting it into train and validation.</p></li>
 <li><p>‘holdout’: {‘train_size’: float}</p></li>
 <li><p>‘holdout-iterative-fit’:  {‘train_size’: float}</p></li>
 <li><p>‘cv’: {‘folds’: int}</p></li>
+<li><p>‘cv-iterative-fit’: {‘folds’: int}</p></li>
 <li><p>‘partial-cv’: {‘folds’: int, ‘shuffle’: bool}</p></li>
 <li><dl class="simple">
 <dt>BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments</dt><dd><p>required by chosen class as specified in scikit-learn documentation.
@@ -300,9 +308,9 @@ imported into a pandas <code class="docutils literal notranslate"><span class="p
 </dl>
 </dd>
 </dl>
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.classification.AutoSklearnClassifier.fit">
-<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em>, <em class="sig-param">X_test=None</em>, <em class="sig-param">y_test=None</em>, <em class="sig-param">metric=None</em>, <em class="sig-param">feat_type=None</em>, <em class="sig-param">dataset_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.fit" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">X_test</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">y_test</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">metric</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">feat_type</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dataset_name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit <em>auto-sklearn</em> to given training set (X, y).</p>
 <p>Fit both optimizes the machine learning models and builds an ensemble
 out of them. To disable ensembling, set <code class="docutils literal notranslate"><span class="pre">ensemble_size==0</span></code>.</p>
@@ -344,9 +352,9 @@ md5 hash of the dataset.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.classification.AutoSklearnClassifier.fit_ensemble">
-<code class="sig-name descname">fit_ensemble</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">y</em>, <em class="sig-param">task=None</em>, <em class="sig-param">metric=None</em>, <em class="sig-param">precision='32'</em>, <em class="sig-param">dataset_name=None</em>, <em class="sig-param">ensemble_nbest=None</em>, <em class="sig-param">ensemble_size=None</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.fit_ensemble" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit_ensemble</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">task</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">metric</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">precision</span><span class="o">=</span><span class="default_value">'32'</span></em>, <em class="sig-param"><span class="n">dataset_name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ensemble_nbest</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ensemble_size</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.fit_ensemble" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit an ensemble to models trained during an optimization process.</p>
 <p>All parameters are <code class="docutils literal notranslate"><span class="pre">None</span></code> by default. If no other value is given,
 the default values which were set in a call to <code class="docutils literal notranslate"><span class="pre">fit()</span></code> are used.</p>
@@ -386,9 +394,9 @@ introduced in <cite>Getting Most out of Ensemble Selection</cite>.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.classification.AutoSklearnClassifier.get_models_with_weights">
-<code class="sig-name descname">get_models_with_weights</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.get_models_with_weights" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_models_with_weights</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.get_models_with_weights" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a list of the final ensemble found by auto-sklearn.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -399,14 +407,14 @@ introduced in <cite>Getting Most out of Ensemble Selection</cite>.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.classification.AutoSklearnClassifier.get_params">
-<code class="sig-name descname">get_params</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">deep=True</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.get_params" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_params</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">deep</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.get_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get parameters for this estimator.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>deep</strong><span class="classifier">boolean, optional</span></dt><dd><p>If True, will return the parameters for this estimator and
+<dt><strong>deep</strong><span class="classifier">bool, default=True</span></dt><dd><p>If True, will return the parameters for this estimator and
 contained subobjects that are estimators.</p>
 </dd>
 </dl>
@@ -420,9 +428,9 @@ contained subobjects that are estimators.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.classification.AutoSklearnClassifier.predict">
-<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em>, <em class="sig-param">batch_size=None</em>, <em class="sig-param">n_jobs=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.predict" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">batch_size</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">n_jobs</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predict classes for X.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -439,9 +447,9 @@ contained subobjects that are estimators.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.classification.AutoSklearnClassifier.predict_proba">
-<code class="sig-name descname">predict_proba</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em>, <em class="sig-param">batch_size=None</em>, <em class="sig-param">n_jobs=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier.predict_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.predict_proba" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">predict_proba</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">batch_size</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">n_jobs</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier.predict_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.predict_proba" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predict probabilities of classes for all samples X.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -462,9 +470,9 @@ if <code class="docutils literal notranslate"><span class="pre">None</span></cod
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.classification.AutoSklearnClassifier.refit">
-<code class="sig-name descname">refit</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.refit" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">refit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.refit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Refit all models found with fit to new data.</p>
 <p>Necessary when using cross-validation. During training, auto-sklearn
 fits each model k times on the dataset, but does not keep any trained
@@ -489,26 +497,33 @@ only using 66% of the training data to fit the final model.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.classification.AutoSklearnClassifier.set_params">
-<code class="sig-name descname">set_params</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">**params</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.set_params" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_params</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">\*\*params</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.set_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the parameters of this estimator.</p>
 <p>The method works on simple estimators as well as on nested objects
 (such as pipelines). The latter have parameters of the form
 <code class="docutils literal notranslate"><span class="pre">&lt;component&gt;__&lt;parameter&gt;</span></code> so that it’s possible to update each
 component of a nested object.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt>self</dt><dd></dd>
+<dt><strong>**params</strong><span class="classifier">dict</span></dt><dd><p>Estimator parameters.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>self</strong><span class="classifier">object</span></dt><dd><p>Estimator instance.</p>
+</dd>
 </dl>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.classification.AutoSklearnClassifier.show_models">
-<code class="sig-name descname">show_models</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.show_models" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">show_models</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.show_models" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a representation of the final ensemble found by auto-sklearn.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -519,9 +534,9 @@ component of a nested object.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.classification.AutoSklearnClassifier.sprint_statistics">
-<code class="sig-name descname">sprint_statistics</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.sprint_statistics" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">sprint_statistics</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.sprint_statistics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the following statistics of the training result:</p>
 <ul class="simple">
 <li><p>dataset name</p></li>
@@ -547,9 +562,9 @@ component of a nested object.</p>
 </div>
 <div class="section" id="regression">
 <h3>Regression<a class="headerlink" href="#regression" title="Permalink to this headline">¶</a></h3>
-<dl class="class">
+<dl class="py class">
 <dt id="autosklearn.regression.AutoSklearnRegressor">
-<em class="property">class </em><code class="sig-prename descclassname">autosklearn.regression.</code><code class="sig-name descname">AutoSklearnRegressor</code><span class="sig-paren">(</span><em class="sig-param">time_left_for_this_task=3600</em>, <em class="sig-param">per_run_time_limit=360</em>, <em class="sig-param">initial_configurations_via_metalearning=25</em>, <em class="sig-param">ensemble_size: int = 50</em>, <em class="sig-param">ensemble_nbest=50</em>, <em class="sig-param">ensemble_memory_limit=1024</em>, <em class="sig-param">seed=1</em>, <em class="sig-param">ml_memory_limit=3072</em>, <em class="sig-param">include_estimators=None</em>, <em class="sig-param">exclude_estimators=None</em>, <em class="sig-param">include_preprocessors=None</em>, <em class="sig-param">exclude_preprocessors=None</em>, <em class="sig-param">resampling_strategy='holdout'</em>, <em class="sig-param">resampling_strategy_arguments=None</em>, <em class="sig-param">tmp_folder=None</em>, <em class="sig-param">output_folder=None</em>, <em class="sig-param">delete_tmp_folder_after_terminate=True</em>, <em class="sig-param">delete_output_folder_after_terminate=True</em>, <em class="sig-param">shared_mode=False</em>, <em class="sig-param">n_jobs: Optional[int] = None</em>, <em class="sig-param">disable_evaluator_output=False</em>, <em class="sig-param">get_smac_object_callback=None</em>, <em class="sig-param">smac_scenario_args=None</em>, <em class="sig-param">logging_config=None</em>, <em class="sig-param">metadata_directory=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnRegressor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">autosklearn.regression.</code><code class="sig-name descname">AutoSklearnRegressor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_left_for_this_task</span><span class="o">=</span><span class="default_value">3600</span></em>, <em class="sig-param"><span class="n">per_run_time_limit</span><span class="o">=</span><span class="default_value">360</span></em>, <em class="sig-param"><span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="default_value">25</span></em>, <em class="sig-param"><span class="n">ensemble_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">50</span></em>, <em class="sig-param"><span class="n">ensemble_nbest</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">max_models_on_disc</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">ensemble_memory_limit</span><span class="o">=</span><span class="default_value">1024</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">ml_memory_limit</span><span class="o">=</span><span class="default_value">3072</span></em>, <em class="sig-param"><span class="n">include_estimators</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">exclude_estimators</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">include_preprocessors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">exclude_preprocessors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">resampling_strategy</span><span class="o">=</span><span class="default_value">'holdout'</span></em>, <em class="sig-param"><span class="n">resampling_strategy_arguments</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tmp_folder</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">output_folder</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">delete_output_folder_after_terminate</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">shared_mode</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">n_jobs</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">disable_evaluator_output</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">get_smac_object_callback</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">smac_scenario_args</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logging_config</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">metadata_directory</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnRegressor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class implements the regression task.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
@@ -574,8 +589,14 @@ selection from libraries of models</em>. Models are drawn with
 replacement.</p>
 </dd>
 <dt><strong>ensemble_nbest</strong><span class="classifier">int, optional (default=50)</span></dt><dd><p>Only consider the <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> models when building an
-ensemble. Implements <cite>Model Library Pruning</cite> from <cite>Getting the
-most out of ensemble selection</cite>.</p>
+ensemble.</p>
+</dd>
+<dt><strong>max_models_on_disc: int, optional (default=50),</strong></dt><dd><p>Defines the maximum number of models that are kept in the disc.
+The additional number of models are permanently deleted. Due to the
+nature of this variable, it sets the upper limit on how many models
+can be used for an ensemble.
+It must be an integer greater or equal than 1.
+If set to None, all models are kept on the disc.</p>
 </dd>
 <dt><strong>ensemble_memory_limit</strong><span class="classifier">int, optional (1024)</span></dt><dd><p>Memory limit in MB for the ensemble building process.
 <cite>auto-sklearn</cite> will reduce the number of considered models
@@ -606,6 +627,7 @@ include_preprocessors.</p>
 <li><p>‘holdout-iterative-fit’:  67:33 (train:test) split, calls iterative
 fit where possible</p></li>
 <li><p>‘cv’: crossvalidation, requires ‘folds’</p></li>
+<li><p>‘cv-iterative-fit’: crossvalidation, calls iterative fit where possible</p></li>
 <li><p>‘partial-cv’: crossvalidation with intensification, requires
 ‘folds’</p></li>
 <li><dl class="simple">
@@ -637,6 +659,7 @@ splitting it into train and validation.</p></li>
 <li><p>‘holdout’: {‘train_size’: float}</p></li>
 <li><p>‘holdout-iterative-fit’:  {‘train_size’: float}</p></li>
 <li><p>‘cv’: {‘folds’: int}</p></li>
+<li><p>‘cv-iterative-fit’: {‘folds’: int}</p></li>
 <li><p>‘partial-cv’: {‘folds’: int, ‘shuffle’: bool}</p></li>
 <li><dl class="simple">
 <dt>BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments</dt><dd><p>required by chosen class as specified in scikit-learn documentation.
@@ -716,9 +739,9 @@ imported into a pandas <code class="docutils literal notranslate"><span class="p
 </dl>
 </dd>
 </dl>
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.regression.AutoSklearnRegressor.fit">
-<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em>, <em class="sig-param">X_test=None</em>, <em class="sig-param">y_test=None</em>, <em class="sig-param">metric=None</em>, <em class="sig-param">feat_type=None</em>, <em class="sig-param">dataset_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnRegressor.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.fit" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">X_test</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">y_test</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">metric</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">feat_type</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dataset_name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnRegressor.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit <em>Auto-sklearn</em> to given training set (X, y).</p>
 <p>Fit both optimizes the machine learning models and builds an ensemble
 out of them. To disable ensembling, set <code class="docutils literal notranslate"><span class="pre">ensemble_size==0</span></code>.</p>
@@ -758,9 +781,9 @@ md5 hash of the dataset.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.regression.AutoSklearnRegressor.fit_ensemble">
-<code class="sig-name descname">fit_ensemble</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">y</em>, <em class="sig-param">task=None</em>, <em class="sig-param">metric=None</em>, <em class="sig-param">precision='32'</em>, <em class="sig-param">dataset_name=None</em>, <em class="sig-param">ensemble_nbest=None</em>, <em class="sig-param">ensemble_size=None</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.fit_ensemble" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit_ensemble</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">task</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">metric</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">precision</span><span class="o">=</span><span class="default_value">'32'</span></em>, <em class="sig-param"><span class="n">dataset_name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ensemble_nbest</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ensemble_size</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.fit_ensemble" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit an ensemble to models trained during an optimization process.</p>
 <p>All parameters are <code class="docutils literal notranslate"><span class="pre">None</span></code> by default. If no other value is given,
 the default values which were set in a call to <code class="docutils literal notranslate"><span class="pre">fit()</span></code> are used.</p>
@@ -800,9 +823,9 @@ introduced in <cite>Getting Most out of Ensemble Selection</cite>.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.regression.AutoSklearnRegressor.get_models_with_weights">
-<code class="sig-name descname">get_models_with_weights</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.get_models_with_weights" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_models_with_weights</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.get_models_with_weights" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a list of the final ensemble found by auto-sklearn.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -813,14 +836,14 @@ introduced in <cite>Getting Most out of Ensemble Selection</cite>.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.regression.AutoSklearnRegressor.get_params">
-<code class="sig-name descname">get_params</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">deep=True</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.get_params" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_params</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">deep</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.get_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get parameters for this estimator.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>deep</strong><span class="classifier">boolean, optional</span></dt><dd><p>If True, will return the parameters for this estimator and
+<dt><strong>deep</strong><span class="classifier">bool, default=True</span></dt><dd><p>If True, will return the parameters for this estimator and
 contained subobjects that are estimators.</p>
 </dd>
 </dl>
@@ -834,9 +857,9 @@ contained subobjects that are estimators.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.regression.AutoSklearnRegressor.predict">
-<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em>, <em class="sig-param">batch_size=None</em>, <em class="sig-param">n_jobs=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnRegressor.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.predict" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">batch_size</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">n_jobs</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnRegressor.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predict regression target for X.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -853,9 +876,9 @@ contained subobjects that are estimators.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.regression.AutoSklearnRegressor.refit">
-<code class="sig-name descname">refit</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.refit" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">refit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.refit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Refit all models found with fit to new data.</p>
 <p>Necessary when using cross-validation. During training, auto-sklearn
 fits each model k times on the dataset, but does not keep any trained
@@ -880,26 +903,33 @@ only using 66% of the training data to fit the final model.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.regression.AutoSklearnRegressor.set_params">
-<code class="sig-name descname">set_params</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">**params</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.set_params" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_params</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">\*\*params</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.set_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the parameters of this estimator.</p>
 <p>The method works on simple estimators as well as on nested objects
 (such as pipelines). The latter have parameters of the form
 <code class="docutils literal notranslate"><span class="pre">&lt;component&gt;__&lt;parameter&gt;</span></code> so that it’s possible to update each
 component of a nested object.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt>self</dt><dd></dd>
+<dt><strong>**params</strong><span class="classifier">dict</span></dt><dd><p>Estimator parameters.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>self</strong><span class="classifier">object</span></dt><dd><p>Estimator instance.</p>
+</dd>
 </dl>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.regression.AutoSklearnRegressor.show_models">
-<code class="sig-name descname">show_models</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.show_models" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">show_models</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.show_models" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a representation of the final ensemble found by auto-sklearn.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -910,9 +940,9 @@ component of a nested object.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.regression.AutoSklearnRegressor.sprint_statistics">
-<code class="sig-name descname">sprint_statistics</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.sprint_statistics" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">sprint_statistics</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.sprint_statistics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the following statistics of the training result:</p>
 <ul class="simple">
 <li><p>dataset name</p></li>
@@ -939,9 +969,9 @@ component of a nested object.</p>
 </div>
 <div class="section" id="metrics">
 <h2>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="autosklearn.metrics.make_scorer">
-<code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">make_scorer</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">score_func</em>, <em class="sig-param">optimum=1</em>, <em class="sig-param">greater_is_better=True</em>, <em class="sig-param">needs_proba=False</em>, <em class="sig-param">needs_threshold=False</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/metrics.html#make_scorer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.metrics.make_scorer" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">make_scorer</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">score_func</em>, <em class="sig-param">optimum=1</em>, <em class="sig-param">greater_is_better=True</em>, <em class="sig-param">needs_proba=False</em>, <em class="sig-param">needs_threshold=False</em>, <em class="sig-param">\*\*kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/metrics.html#make_scorer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.metrics.make_scorer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make a scorer from a performance metric or loss function.</p>
 <p>Factory inspired by scikit-learn which wraps scikit-learn scoring functions
 to be used in auto-sklearn.</p>
@@ -986,130 +1016,125 @@ built-in metrics are applicable only for binary classification. In order to appl
 classification, please use the corresponding metrics with an appropriate averaging mechanism, such as <code class="docutils literal notranslate"><span class="pre">autosklearn.metrics.f1_macro</span></code>.
 For more information about how these metrics are used, please read
 <a class="reference external" href="http://scikit-learn.org/stable/modules/model_evaluation.html#precision-recall-and-f-measures">this scikit-learn documentation</a>.</p>
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.accuracy">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">accuracy</code><a class="headerlink" href="#autosklearn.metrics.accuracy" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.balanced_accuracy">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">balanced_accuracy</code><a class="headerlink" href="#autosklearn.metrics.balanced_accuracy" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.f1">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">f1</code><a class="headerlink" href="#autosklearn.metrics.f1" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.f1_macro">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">f1_macro</code><a class="headerlink" href="#autosklearn.metrics.f1_macro" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.f1_micro">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">f1_micro</code><a class="headerlink" href="#autosklearn.metrics.f1_micro" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.f1_samples">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">f1_samples</code><a class="headerlink" href="#autosklearn.metrics.f1_samples" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.f1_weighted">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">f1_weighted</code><a class="headerlink" href="#autosklearn.metrics.f1_weighted" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.roc_auc">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">roc_auc</code><a class="headerlink" href="#autosklearn.metrics.roc_auc" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.precision">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">precision</code><a class="headerlink" href="#autosklearn.metrics.precision" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.precision_macro">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">precision_macro</code><a class="headerlink" href="#autosklearn.metrics.precision_macro" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.precision_micro">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">precision_micro</code><a class="headerlink" href="#autosklearn.metrics.precision_micro" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.precision_samples">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">precision_samples</code><a class="headerlink" href="#autosklearn.metrics.precision_samples" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.precision_weighted">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">precision_weighted</code><a class="headerlink" href="#autosklearn.metrics.precision_weighted" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.average_precision">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">average_precision</code><a class="headerlink" href="#autosklearn.metrics.average_precision" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.recall">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">recall</code><a class="headerlink" href="#autosklearn.metrics.recall" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.recall_macro">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">recall_macro</code><a class="headerlink" href="#autosklearn.metrics.recall_macro" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.recall_micro">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">recall_micro</code><a class="headerlink" href="#autosklearn.metrics.recall_micro" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.recall_samples">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">recall_samples</code><a class="headerlink" href="#autosklearn.metrics.recall_samples" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.recall_weighted">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">recall_weighted</code><a class="headerlink" href="#autosklearn.metrics.recall_weighted" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.log_loss">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">log_loss</code><a class="headerlink" href="#autosklearn.metrics.log_loss" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="autosklearn.metrics.pac_score">
-<code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">pac_score</code><a class="headerlink" href="#autosklearn.metrics.pac_score" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
 <div class="section" id="regression-metrics">
 <h4>Regression metrics<a class="headerlink" href="#regression-metrics" title="Permalink to this headline">¶</a></h4>
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.r2">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">r2</code><a class="headerlink" href="#autosklearn.metrics.r2" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.mean_squared_error">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">mean_squared_error</code><a class="headerlink" href="#autosklearn.metrics.mean_squared_error" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.mean_absolute_error">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">mean_absolute_error</code><a class="headerlink" href="#autosklearn.metrics.mean_absolute_error" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="autosklearn.metrics.median_absolute_error">
 <code class="sig-prename descclassname">autosklearn.metrics.</code><code class="sig-name descname">median_absolute_error</code><a class="headerlink" href="#autosklearn.metrics.median_absolute_error" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -1119,15 +1144,15 @@ For more information about how these metrics are used, please read
 </div>
 <div class="section" id="extension-interfaces">
 <h2>Extension Interfaces<a class="headerlink" href="#extension-interfaces" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm">
 <em class="property">class </em><code class="sig-prename descclassname">autosklearn.pipeline.components.base.</code><code class="sig-name descname">AutoSklearnClassificationAlgorithm</code><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnClassificationAlgorithm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Provide an abstract interface for classification algorithms in
 auto-sklearn.</p>
 <p>See <a class="reference internal" href="extending.html#extending"><span class="std std-ref">Extending auto-sklearn</span></a> for more information.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.get_estimator">
-<code class="sig-name descname">get_estimator</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnClassificationAlgorithm.get_estimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.get_estimator" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_estimator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnClassificationAlgorithm.get_estimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.get_estimator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the underlying estimator object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1138,9 +1163,9 @@ auto-sklearn.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict">
-<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnClassificationAlgorithm.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnClassificationAlgorithm.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>The predict function calls the predict function of the
 underlying scikit-learn model and returns an array with the predictions.</p>
 <dl class="field-list simple">
@@ -1160,9 +1185,9 @@ underlying scikit-learn model and returns an array with the predictions.</p>
 <p>Please see the <a class="reference external" href="http://scikit-learn.org/dev/developers/index.html#apis-of-scikit-learn-objects">scikit-learn API documentation</a> for further information.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict_proba">
-<code class="sig-name descname">predict_proba</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnClassificationAlgorithm.predict_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict_proba" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">predict_proba</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnClassificationAlgorithm.predict_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict_proba" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predict probabilities.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1180,16 +1205,16 @@ underlying scikit-learn model and returns an array with the predictions.</p>
 
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm">
 <em class="property">class </em><code class="sig-prename descclassname">autosklearn.pipeline.components.base.</code><code class="sig-name descname">AutoSklearnRegressionAlgorithm</code><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnRegressionAlgorithm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Provide an abstract interface for regression algorithms in
 auto-sklearn.</p>
 <p>Make a subclass of this and put it into the directory
 <cite>autosklearn/pipeline/components/regression</cite> to make it available.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.get_estimator">
-<code class="sig-name descname">get_estimator</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnRegressionAlgorithm.get_estimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.get_estimator" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_estimator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnRegressionAlgorithm.get_estimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.get_estimator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the underlying estimator object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1200,9 +1225,9 @@ auto-sklearn.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.predict">
-<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnRegressionAlgorithm.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.predict" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnRegressionAlgorithm.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>The predict function calls the predict function of the
 underlying scikit-learn model and returns an array with the predictions.</p>
 <dl class="field-list simple">
@@ -1224,15 +1249,15 @@ underlying scikit-learn model and returns an array with the predictions.</p>
 
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm">
 <em class="property">class </em><code class="sig-prename descclassname">autosklearn.pipeline.components.base.</code><code class="sig-name descname">AutoSklearnPreprocessingAlgorithm</code><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnPreprocessingAlgorithm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Provide an abstract interface for preprocessing algorithms in
 auto-sklearn.</p>
 <p>See <a class="reference internal" href="extending.html#extending"><span class="std std-ref">Extending auto-sklearn</span></a> for more information.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.get_preprocessor">
-<code class="sig-name descname">get_preprocessor</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnPreprocessingAlgorithm.get_preprocessor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.get_preprocessor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_preprocessor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnPreprocessingAlgorithm.get_preprocessor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.get_preprocessor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the underlying preprocessor object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1243,9 +1268,9 @@ auto-sklearn.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.transform">
-<code class="sig-name descname">transform</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnPreprocessingAlgorithm.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.transform" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">transform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnPreprocessingAlgorithm.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.transform" title="Permalink to this definition">¶</a></dt>
 <dd><p>The transform function calls the transform function of the
 underlying scikit-learn model and returns the transformed array.</p>
 <dl class="field-list simple">
@@ -1290,7 +1315,7 @@ underlying scikit-learn model and returns the transformed array.</p>
     </p>
     <p>
         &copy; Copyright 2014-2019, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.3.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.<br/>
     </p>
   </div>
 </footer>

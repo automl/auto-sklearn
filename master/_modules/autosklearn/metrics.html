@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>autosklearn.metrics &#8212; AutoSklearn 0.6.0 documentation</title>
+    <title>autosklearn.metrics &#8212; AutoSklearn 0.7.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
 <meta charset='utf-8'>
@@ -51,7 +51,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.6.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.7.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -111,12 +111,12 @@
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">sklearn.metrics</span>
 <span class="kn">from</span> <span class="nn">sklearn.utils.multiclass</span> <span class="kn">import</span> <span class="n">type_of_target</span>
 
-<span class="kn">from</span> <span class="nn">autosklearn.constants</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">classification_metrics</span>
-<span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">autosklearn.constants</span> <span class="kn">import</span> <span class="n">REGRESSION_TASKS</span><span class="p">,</span> <span class="n">TASK_TYPES</span>
+<span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">sanitize_array</span>
 
 
 <span class="k">class</span> <span class="nc">Scorer</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
@@ -311,7 +311,7 @@
 <span class="n">accuracy</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span>
                        <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">)</span>
 <span class="n">balanced_accuracy</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;balanced_accuracy&#39;</span><span class="p">,</span>
-                                <span class="n">classification_metrics</span><span class="o">.</span><span class="n">balanced_accuracy</span><span class="p">)</span>
+                                <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">balanced_accuracy_score</span><span class="p">)</span>
 <span class="n">f1</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;f1&#39;</span><span class="p">,</span>
                  <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">f1_score</span><span class="p">)</span>
 
@@ -334,10 +334,6 @@
                        <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                        <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                        <span class="n">needs_proba</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">pac_score</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;pac_score&#39;</span><span class="p">,</span>
-                        <span class="n">classification_metrics</span><span class="o">.</span><span class="n">pac_score</span><span class="p">,</span>
-                        <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                        <span class="n">needs_proba</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="c1"># TODO what about mathews correlation coefficient etc?</span>
 
 
@@ -349,7 +345,7 @@
 <span class="n">CLASSIFICATION_METRICS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
 <span class="k">for</span> <span class="n">scorer</span> <span class="ow">in</span> <span class="p">[</span><span class="n">accuracy</span><span class="p">,</span> <span class="n">balanced_accuracy</span><span class="p">,</span> <span class="n">roc_auc</span><span class="p">,</span> <span class="n">average_precision</span><span class="p">,</span>
-               <span class="n">log_loss</span><span class="p">,</span> <span class="n">pac_score</span><span class="p">]:</span>
+               <span class="n">log_loss</span><span class="p">]:</span>
     <span class="n">CLASSIFICATION_METRICS</span><span class="p">[</span><span class="n">scorer</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">scorer</span>
 
 <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">metric</span> <span class="ow">in</span> <span class="p">[(</span><span class="s1">&#39;precision&#39;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">precision_score</span><span class="p">),</span>
@@ -432,7 +428,7 @@
     </p>
     <p>
         &copy; Copyright 2014-2019, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.3.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.<br/>
     </p>
   </div>
 </footer>

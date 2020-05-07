@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>Releases &#8212; AutoSklearn 0.6.0 documentation</title>
+    <title>Releases &#8212; AutoSklearn 0.7.0 documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 <meta charset='utf-8'>
@@ -51,7 +51,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.6.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.7.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -103,48 +103,52 @@
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
 <li><a class="reference internal" href="#">Releases</a><ul>
-<li><a class="reference internal" href="#version-0-6-0">Version 0.6.0</a><ul>
+<li><a class="reference internal" href="#version-0-7-0">Version 0.7.0</a><ul>
 <li><a class="reference internal" href="#contributors">Contributors</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#version-0-5-2">Version 0.5.2</a><ul>
+<li><a class="reference internal" href="#version-0-6-0">Version 0.6.0</a><ul>
 <li><a class="reference internal" href="#id2">Contributors</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#version-0-5-1">Version 0.5.1</a><ul>
+<li><a class="reference internal" href="#version-0-5-2">Version 0.5.2</a><ul>
 <li><a class="reference internal" href="#id3">Contributors</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#version-0-5-0">Version 0.5.0</a><ul>
+<li><a class="reference internal" href="#version-0-5-1">Version 0.5.1</a><ul>
 <li><a class="reference internal" href="#id4">Contributors</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#version-0-4-2">Version 0.4.2</a><ul>
+<li><a class="reference internal" href="#version-0-5-0">Version 0.5.0</a><ul>
 <li><a class="reference internal" href="#id5">Contributors</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#version-0-4-2">Version 0.4.2</a><ul>
+<li><a class="reference internal" href="#id6">Contributors</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#version-0-4-1">Version 0.4.1</a><ul>
-<li><a class="reference internal" href="#id11">Contributors</a></li>
+<li><a class="reference internal" href="#id12">Contributors</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#version-0-4-0">Version 0.4.0</a><ul>
-<li><a class="reference internal" href="#id20">Contributors</a></li>
+<li><a class="reference internal" href="#id21">Contributors</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#version-0-3-0">Version 0.3.0</a><ul>
-<li><a class="reference internal" href="#id22">Contributors</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#version-0-2-1">Version 0.2.1</a><ul>
 <li><a class="reference internal" href="#id23">Contributors</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#version-0-2-0">Version 0.2.0</a><ul>
+<li><a class="reference internal" href="#version-0-2-1">Version 0.2.1</a><ul>
 <li><a class="reference internal" href="#id24">Contributors</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#version-0-1-x">Version 0.1.x</a><ul>
+<li><a class="reference internal" href="#version-0-2-0">Version 0.2.0</a><ul>
 <li><a class="reference internal" href="#id25">Contributors</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-1-x">Version 0.1.x</a><ul>
+<li><a class="reference internal" href="#id26">Contributors</a></li>
 </ul>
 </li>
 </ul>
@@ -157,6 +161,38 @@
       
   <span class="target" id="releases"></span><div class="section" id="id1">
 <h1>Releases<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="version-0-7-0">
+<h2>Version 0.7.0<a class="headerlink" href="#version-0-7-0" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ADD #785: user control to reduce the hard drive memory required to store ensembles</p></li>
+<li><p>ADD #794: iterative fit for gradient boosting</p></li>
+<li><p>ADD #795: add successive halving evaluation strategy</p></li>
+<li><p>ADD #814: new sklearn.metrics.balanced_accuracy_score instead of custom metric</p></li>
+<li><p>ADD #815: new experimental evaluation mode called iterative_cv</p></li>
+<li><p>MAINT #774: move from scikit-learn 0.21.X to 0.22.X</p></li>
+<li><p>MAINT #791: move from smac 0.8 to 0.12</p></li>
+<li><p>MAINT #822: make autosklearn modules PEP8 compliant</p></li>
+<li><p>FIX #733: fix for n_jobs=-1</p></li>
+<li><p>FIX #739: remove unnecessary warning</p></li>
+<li><p>FIX ##769: fixed error in calculation of meta features</p></li>
+<li><p>FIX #778: support for python 3.8</p></li>
+<li><p>FIX #781: support for pandas 1.x</p></li>
+</ul>
+<div class="section" id="contributors">
+<h3>Contributors<a class="headerlink" href="#contributors" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Andrew Nader</p></li>
+<li><p>Gui Miotto</p></li>
+<li><p>Julian Berman</p></li>
+<li><p>Katharina Eggensperger</p></li>
+<li><p>Matthias Feurer</p></li>
+<li><p>Maximilian Peters</p></li>
+<li><p>Rong-Inspur</p></li>
+<li><p>Valentin Geffrier</p></li>
+<li><p>Francisco Rivera</p></li>
+</ul>
+</div>
+</div>
 <div class="section" id="version-0-6-0">
 <h2>Version 0.6.0<a class="headerlink" href="#version-0-6-0" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -165,8 +201,8 @@
 <li><p>FIX #680: Remove unnecessary print statement</p></li>
 <li><p>FIX #600: Remove unnecessary warning</p></li>
 </ul>
-<div class="section" id="contributors">
-<h3>Contributors<a class="headerlink" href="#contributors" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id2">
+<h3>Contributors<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Guilherme Miotto</p></li>
 <li><p>Matthias Feurer</p></li>
@@ -182,8 +218,8 @@
 <li><p>ADD #676: Allow brackets [ ] inside the temporary and output directory paths.</p></li>
 <li><p>ADD #424: (Experimental) scripts to reproduce the results from the original Auto-sklearn paper.</p></li>
 </ul>
-<div class="section" id="id2">
-<h3>Contributors<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id3">
+<h3>Contributors<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Jin Woo Ahn</p></li>
 <li><p>Herilalaina Rakotoarison</p></li>
@@ -204,8 +240,8 @@ be wrong.</p></li>
 <li><p>FIX #626: Fixes an issue where losses were not minimized, but maximized.</p></li>
 <li><p>MAINT #646: Do no longer restrict the numpy version to be less than 1.14.5.</p></li>
 </ul>
-<div class="section" id="id3">
-<h3>Contributors<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id4">
+<h3>Contributors<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Jin Woo Ahn</p></li>
 <li><p>Taneli Mielikäinen</p></li>
@@ -224,8 +260,8 @@ computing on a single machine.</p></li>
 <li><p>TEST #614: Test installation with clean Ubuntu on travis-ci.</p></li>
 <li><p>MAINT: Fixed broken link and typo in the documentation.</p></li>
 </ul>
-<div class="section" id="id4">
-<h3>Contributors<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id5">
+<h3>Contributors<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Mohd Shahril</p></li>
 <li><p>Adrian</p></li>
@@ -252,8 +288,8 @@ scikit-learn hyperparameter with different meaning.</p></li>
 <li><p>MAINT: remove dependency on the six package</p></li>
 <li><p>MAINT: upgrade to XGBoost 0.80</p></li>
 </ul>
-<div class="section" id="id5">
-<h3>Contributors<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id6">
+<h3>Contributors<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Taneli Mielikäinen</p></li>
 <li><p>Matthias Feurer</p></li>
@@ -287,8 +323,8 @@ target type was given for classification and regression before call to <code cla
 <li><p>Travis-ci now runs flake8 to enforce pep8 style guide, and uses travis-ci instead of circle-ci
 for deployment.</p></li>
 </ul>
-<div class="section" id="id11">
-<h3>Contributors<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id12">
+<h3>Contributors<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
 <li><p>Manuel Streuhofer</p></li>
@@ -336,8 +372,8 @@ to not accidentaly run on a Windows machine.</p></li>
 <li><p>Safeguard Auto-sklearn against deleting directories it did not create (Issue
 <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/317">#317</a>.</p></li>
 </ul>
-<div class="section" id="id20">
-<h3>Contributors<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id21">
+<h3>Contributors<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
 <li><p>kaa</p></li>
@@ -367,8 +403,8 @@ and <code class="docutils literal notranslate"><span class="pre">GradientBoostin
 <li><p>Allow passing an SMBO object into the <code class="docutils literal notranslate"><span class="pre">AutoSklearnClassifier</span></code> and
 <code class="docutils literal notranslate"><span class="pre">AutoSklearnRegressor</span></code>.</p></li>
 </ul>
-<div class="section" id="id22">
-<h3>Contributors<a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id23">
+<h3>Contributors<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
 <li><p>Jesper van Engelen</p></li>
@@ -388,8 +424,8 @@ using holdout resampling strategy.</p></li>
 <li><p>Typo fixes in print statements.</p></li>
 <li><p>New method to retrieve the models used in the final ensemble.</p></li>
 </ul>
-<div class="section" id="id23">
-<h3>Contributors<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id24">
+<h3>Contributors<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
 <li><p>Katharina Eggensperger</p></li>
@@ -414,8 +450,8 @@ the pyninsher.</p></li>
 <li><p><em>auto-sklearn</em> can use multiprocessing in calls to <code class="docutils literal notranslate"><span class="pre">predict()</span></code> and
 <code class="docutils literal notranslate"><span class="pre">predict_proba</span></code>. By <a class="reference external" href="https://github.com/lsorber">Laurent Sorber</a>.</p></li>
 </ul>
-<div class="section" id="id24">
-<h3>Contributors<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id25">
+<h3>Contributors<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
 <li><p>Katharina Eggensperger</p></li>
@@ -427,8 +463,8 @@ the pyninsher.</p></li>
 <div class="section" id="version-0-1-x">
 <h2>Version 0.1.x<a class="headerlink" href="#version-0-1-x" title="Permalink to this headline">¶</a></h2>
 <p>There are no release notes for auto-sklearn prior to version 0.2.0.</p>
-<div class="section" id="id25">
-<h3>Contributors<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id26">
+<h3>Contributors<a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
 <li><p>Katharina Eggensperger</p></li>
@@ -471,7 +507,7 @@ the pyninsher.</p></li>
     </p>
     <p>
         &copy; Copyright 2014-2019, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.3.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.<br/>
     </p>
   </div>
 </footer>

@@ -13,6 +13,7 @@ import sklearn.metrics
 
 import autosklearn.regression
 
+
 def main():
     X, y = sklearn.datasets.load_boston(return_X_y=True)
     feature_types = (['numerical'] * 3) + ['categorical'] + (['numerical'] * 9)

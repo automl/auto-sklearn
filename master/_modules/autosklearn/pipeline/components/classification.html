@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>autosklearn.pipeline.components.classification &#8212; AutoSklearn 0.6.0 documentation</title>
+    <title>autosklearn.pipeline.components.classification &#8212; AutoSklearn 0.7.0 documentation</title>
     <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/gallery.css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
 <meta charset='utf-8'>
@@ -51,7 +51,7 @@
         </button>
         <a class="navbar-brand" href="../../../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.6.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.7.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -110,14 +110,12 @@
 <span></span><span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;feurerm&#39;</span>
 
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
-<span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">AutoSklearnClassificationAlgorithm</span><span class="p">,</span> <span class="n">find_components</span><span class="p">,</span> \
     <span class="n">ThirdPartyComponents</span><span class="p">,</span> <span class="n">AutoSklearnChoice</span>
 <span class="kn">from</span> <span class="nn">ConfigSpace.configuration_space</span> <span class="kn">import</span> <span class="n">ConfigurationSpace</span>
 <span class="kn">from</span> <span class="nn">ConfigSpace.hyperparameters</span> <span class="kn">import</span> <span class="n">CategoricalHyperparameter</span>
-<span class="kn">from</span> <span class="nn">ConfigSpace.conditions</span> <span class="kn">import</span> <span class="n">EqualsCondition</span>
 
 <span class="n">classifier_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">_classifiers</span> <span class="o">=</span> <span class="n">find_components</span><span class="p">(</span><span class="n">__package__</span><span class="p">,</span>
@@ -170,11 +168,11 @@
 
             <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()[</span><span class="s1">&#39;handles_classification&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="k">continue</span>
-            <span class="k">if</span> <span class="n">dataset_properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;multiclass&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">entry</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()[</span>
-                <span class="s1">&#39;handles_multiclass&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dataset_properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;multiclass&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> \
+               <span class="n">entry</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()[</span><span class="s1">&#39;handles_multiclass&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="k">continue</span>
-            <span class="k">if</span> <span class="n">dataset_properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;multilabel&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">available_comp</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span> \
-                    <span class="n">get_properties</span><span class="p">()[</span><span class="s1">&#39;handles_multilabel&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dataset_properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;multilabel&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> \
+               <span class="n">available_comp</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()[</span><span class="s1">&#39;handles_multilabel&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="n">components_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span>
 
@@ -237,6 +235,18 @@
     <span class="k">def</span> <span class="nf">estimator_supports_iterative_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">choice</span><span class="p">,</span> <span class="s1">&#39;iterative_fit&#39;</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">get_max_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_supports_iterative_fit</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">choice</span><span class="o">.</span><span class="n">get_max_iter</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">get_current_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_supports_iterative_fit</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">choice</span><span class="o">.</span><span class="n">get_current_iter</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
     <span class="k">def</span> <span class="nf">iterative_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_params</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">fit_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">fit_params</span> <span class="o">=</span> <span class="p">{}</span>
@@ -261,7 +271,7 @@
     </p>
     <p>
         &copy; Copyright 2014-2019, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.3.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.<br/>
     </p>
   </div>
 </footer>
