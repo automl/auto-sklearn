@@ -90,7 +90,6 @@ This example demonstrates the usage of a different acquisition function inside S
         print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 
 
-
     if __name__ == '__main__':
         main()
 

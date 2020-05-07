@@ -238,6 +238,26 @@ General introductory examples for *auto-sklearn* can be found here.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example demonstrates how to create a new classification component for using in au...">
+
+.. only:: html
+
+ .. figure:: /examples/images/thumb/sphx_glr_example_extending_classification_thumb.png
+
+     :ref:`sphx_glr_examples_example_extending_classification.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/example_extending_classification
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="*Auto-sklearn* supports various built-in metrics, which can be found in the metrics section in ...">
 
 .. only:: html
@@ -258,13 +278,13 @@ General introductory examples for *auto-sklearn* can be found here.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="The following example demonstrates how to create a new classification component for using in au...">
+    <div class="sphx-glr-thumbcontainer" tooltip="Successive Halving">
 
 .. only:: html
 
- .. figure:: /examples/images/thumb/sphx_glr_example_extending_classification_thumb.png
+ .. figure:: /examples/images/thumb/sphx_glr_example_successive_halving_thumb.png
 
-     :ref:`sphx_glr_examples_example_extending_classification.py`
+     :ref:`sphx_glr_examples_example_successive_halving.py`
 
 .. raw:: html
 
@@ -274,7 +294,7 @@ General introductory examples for *auto-sklearn* can be found here.
 .. toctree::
    :hidden:
 
-   /examples/example_extending_classification
+   /examples/example_successive_halving
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>
