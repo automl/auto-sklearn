@@ -56,7 +56,9 @@ def _model_predict(self, X, batch_size, identifier):
             # Check that all probability values lie between 0 and 1.
             assert(
                 (prediction >= 0).all() and (prediction <= 1).all()
-            ), f"For {model}, prediction probability not within [0, 1]!"
+            ), "For {}, prediction probability not within [0, 1]!".format(
+                model
+            )
 
     if len(prediction.shape) < 1 or len(X_.shape) < 1 or \
             X_.shape[0] < 1 or prediction.shape[0] != X_.shape[0]:
