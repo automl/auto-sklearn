@@ -52,6 +52,12 @@ def _model_predict(self, X, batch_size, identifier):
             prediction = model.predict(X_, batch_size=batch_size)
         else:
             prediction = model.predict_proba(X_, batch_size=batch_size)
+
+            # Check that all probability values lie between 0 and 1.
+            assert(
+                (prediction >= 0).all() and (prediction <= 1).all()
+            ), f"For {model}, prediction probability not within [0, 1]!"
+
     if len(prediction.shape) < 1 or len(X_.shape) < 1 or \
             X_.shape[0] < 1 or prediction.shape[0] != X_.shape[0]:
         self._logger.warning("Prediction shape for model %s is %s "
@@ -621,6 +627,13 @@ class AutoML(BaseEstimator):
                                      str(list(self.models_.keys()))))
 
         predictions = self.ensemble_.predict(all_predictions)
+
+        if self._task not in REGRESSION_TASKS:
+            # Make sure average prediction probabilities
+            # are within a valid range
+            # Individual models are checked in _model_predict
+            predictions = np.clip(predictions, 0.0, 1.0)
+
         return predictions
 
     def fit_ensemble(self, y, task=None, metric=None, precision='32',
