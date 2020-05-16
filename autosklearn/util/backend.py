@@ -1,4 +1,5 @@
 import glob
+from hashlib import md5
 import os
 import tempfile
 import time
@@ -7,6 +8,7 @@ import lockfile
 import numpy as np
 import pickle
 import shutil
+import socket
 from typing import Union
 
 from autosklearn.util import logging_ as logging
@@ -37,13 +39,22 @@ def get_randomized_directory_names(
 ):
     random_number = random.randint(0, 10000)
     pid = os.getpid()
+    m5_hash = str(md5(
+        str(time.localtime()).encode('utf-8')
+    ).hexdigest())
+    hostname = socket.gethostname()
 
     temporary_directory = (
         temporary_directory
         if temporary_directory
         else os.path.join(
             tempfile.gettempdir(),
-            'autosklearn_tmp_%d_%d' % (pid, random_number),
+            "autosklearn_tmp_{}_{}_{}_{}".format(
+                pid,
+                random_number,
+                m5_hash,
+                hostname
+            ),
         )
     )
 
@@ -52,7 +63,12 @@ def get_randomized_directory_names(
         if output_directory
         else os.path.join(
             tempfile.gettempdir(),
-            'autosklearn_output_%d_%d' % (pid, random_number),
+            "autosklearn_output_{}_{}_{}_{}".format(
+                pid,
+                random_number,
+                m5_hash,
+                hostname
+            ),
         )
     )
 
@@ -208,6 +224,11 @@ class Backend(object):
 
         if not isinstance(start_time, float):
             raise ValueError("Start time must be a float, but is %s." % type(start_time))
+
+        if os.path.exists(filepath):
+            raise Exception(
+                "{filepath} already exist. Different seeds should be provided for different jobs."
+            )
 
         with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(filepath), delete=False) as fh:
             fh.write(str(start_time))
