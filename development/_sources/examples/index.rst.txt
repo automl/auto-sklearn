@@ -138,6 +138,26 @@ General introductory examples for *auto-sklearn* can be found here.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to query from a pipeline built by auto-sklearn ">
+
+.. only:: html
+
+ .. figure:: /examples/images/thumb/sphx_glr_example_get_pipeline_components_thumb.png
+
+     :ref:`sphx_glr_examples_example_get_pipeline_components.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/example_get_pipeline_components
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates the usage of a different acquisition function inside SMAC, namely `Ex...">
 
 .. only:: html
