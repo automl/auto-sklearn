@@ -1,15 +1,13 @@
 import glob
-from hashlib import md5
 import os
 import tempfile
 import time
-import random
 import lockfile
 import numpy as np
 import pickle
 import shutil
-import socket
 from typing import Union
+import uuid
 
 from autosklearn.util import logging_ as logging
 
@@ -37,23 +35,15 @@ def get_randomized_directory_names(
     temporary_directory=None,
     output_directory=None,
 ):
-    random_number = random.randint(0, 10000)
-    pid = os.getpid()
-    m5_hash = str(md5(
-        str(time.localtime()).encode('utf-8')
-    ).hexdigest())
-    hostname = socket.gethostname()
+    uuid_str = str(uuid.uuid1(clock_seq=os.getpid()))
 
     temporary_directory = (
         temporary_directory
         if temporary_directory
         else os.path.join(
             tempfile.gettempdir(),
-            "autosklearn_tmp_{}_{}_{}_{}".format(
-                pid,
-                random_number,
-                m5_hash,
-                hostname
+            "autosklearn_tmp_{}".format(
+                uuid_str,
             ),
         )
     )
@@ -63,11 +53,8 @@ def get_randomized_directory_names(
         if output_directory
         else os.path.join(
             tempfile.gettempdir(),
-            "autosklearn_output_{}_{}_{}_{}".format(
-                pid,
-                random_number,
-                m5_hash,
-                hostname
+            "autosklearn_output_{}".format(
+                uuid_str,
             ),
         )
     )
@@ -226,7 +213,7 @@ class Backend(object):
             raise ValueError("Start time must be a float, but is %s." % type(start_time))
 
         if os.path.exists(filepath):
-            raise Exception(
+            raise ValueError(
                 "{filepath} already exist. Different seeds should be provided for different jobs."
             )
 
