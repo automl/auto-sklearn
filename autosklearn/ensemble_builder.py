@@ -427,7 +427,7 @@ class EnsembleBuilder(multiprocessing.Process):
                                             all_scoring_functions=False)
 
                     if self.read_preds[y_ens_fn]["ens_score"] > -1:
-                        self.logger.critical(
+                        self.logger.debug(
                             'Changing ensemble score for file %s from %f to %f '
                             'because file modification time changed? %f - %f',
                             y_ens_fn,
