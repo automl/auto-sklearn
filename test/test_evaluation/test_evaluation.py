@@ -11,6 +11,7 @@ import numpy as np
 import pynisher
 from smac.tae.execute_ta_run import StatusType, BudgetExhaustedException
 from smac.stats.stats import Stats
+from smac.utils.constants import MAXINT
 
 from autosklearn.evaluation import ExecuteTaFuncWithQueue
 from autosklearn.metrics import accuracy, log_loss
@@ -156,7 +157,7 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[0], StatusType.MEMOUT)
 
         # For logloss, worst possible result is MAXINT
-        worst_possible_result = np.iinfo(np.uint32).max
+        worst_possible_result = MAXINT
         self.assertEqual(info[1], worst_possible_result)
         self.assertIsInstance(info[2], float)
 

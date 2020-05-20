@@ -12,9 +12,11 @@ import pynisher
 from smac.tae.execute_ta_run import StatusType, BudgetExhaustedException, \
     TAEAbortException
 from smac.tae.execute_func import AbstractTAFunc
+
 from ConfigSpace import Configuration
 from sklearn.model_selection._split import _RepeatedSplits, BaseShuffleSplit,\
     BaseCrossValidator
+from autosklearn.metrics import Scorer
 
 import autosklearn.evaluation.train_evaluator
 import autosklearn.evaluation.test_evaluator
@@ -42,15 +44,19 @@ def fit_predict_try_except_decorator(ta, queue, cost_for_crash, **kwargs):
 
 def get_cost_of_crash(metric):
 
-    # For metrics like accuracy that are bounded to [0,1]
-    # assume 1 as the worst cost as autosklearn works with err
-    worst_possible_result = 1.0
+    # The metric must always be defined to extract optimum/worst
+    if not isinstance(metric, Scorer):
+        raise ValueError("The metric must be stricly be an instance of Scorer")
 
-    if metric is not None:
-        # Else, we use the make_scorer info to define the
-        # worst possible result
-        if metric._sign < 0:
-            worst_possible_result = np.iinfo(np.uint32).max
+    # Autosklearn optimizes the err. This function translates
+    # worst_possible_result to be a minimization problem.
+    # For metrics like accuracy that are bounded to [0,1]
+    # metric.optimum==1 is the worst cost.
+    # A simple guide is to use greater_is_better embedded as sign
+    if metric._sign < 0:
+        worst_possible_result = metric._worst_possible_result
+    else:
+        worst_possible_result = metric._optimum - metric._worst_possible_result
 
     return worst_possible_result
 

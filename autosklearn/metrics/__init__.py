@@ -9,13 +9,16 @@ from sklearn.utils.multiclass import type_of_target
 from autosklearn.constants import REGRESSION_TASKS, TASK_TYPES
 from .util import sanitize_array
 
+from smac.utils.constants import MAXINT
+
 
 class Scorer(object, metaclass=ABCMeta):
-    def __init__(self, name, score_func, optimum, sign, kwargs):
+    def __init__(self, name, score_func, optimum, worst_possible_result, sign, kwargs):
         self.name = name
         self._kwargs = kwargs
         self._score_func = score_func
         self._optimum = optimum
+        self._worst_possible_result = worst_possible_result
         self._sign = sign
 
     @abstractmethod
@@ -134,7 +137,7 @@ class _ThresholdScorer(Scorer):
             return self._sign * self._score_func(y_true, y_pred, **self._kwargs)
 
 
-def make_scorer(name, score_func, optimum=1, greater_is_better=True,
+def make_scorer(name, score_func, optimum=1, worst_possible_result=0, greater_is_better=True,
                 needs_proba=False, needs_threshold=False, **kwargs):
     """Make a scorer from a performance metric or loss function.
 
@@ -179,7 +182,7 @@ def make_scorer(name, score_func, optimum=1, greater_is_better=True,
         cls = _ThresholdScorer
     else:
         cls = _PredictScorer
-    return cls(name, score_func, optimum, sign, kwargs)
+    return cls(name, score_func, optimum, worst_possible_result, sign, kwargs)
 
 
 # Standard regression scores
@@ -188,14 +191,17 @@ r2 = make_scorer('r2',
 mean_squared_error = make_scorer('mean_squared_error',
                                  sklearn.metrics.mean_squared_error,
                                  optimum=0,
+                                 worst_possible_result=MAXINT,
                                  greater_is_better=False)
 mean_absolute_error = make_scorer('mean_absolute_error',
                                   sklearn.metrics.mean_absolute_error,
                                   optimum=0,
+                                  worst_possible_result=MAXINT,
                                   greater_is_better=False)
 median_absolute_error = make_scorer('median_absolute_error',
                                     sklearn.metrics.median_absolute_error,
                                     optimum=0,
+                                    worst_possible_result=MAXINT,
                                     greater_is_better=False)
 
 # Standard Classification Scores
@@ -223,6 +229,7 @@ recall = make_scorer('recall',
 log_loss = make_scorer('log_loss',
                        sklearn.metrics.log_loss,
                        optimum=0,
+                       worst_possible_result=MAXINT,
                        greater_is_better=False,
                        needs_proba=True)
 # TODO what about mathews correlation coefficient etc?

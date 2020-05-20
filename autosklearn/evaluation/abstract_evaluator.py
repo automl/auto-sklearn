@@ -217,6 +217,17 @@ class AbstractEvaluator(object):
         return model
 
     def _loss(self, y_true, y_hat, all_scoring_functions=None):
+        """Auto-sklearn follows a minimization goal, so the make_scorer
+        sign is used as a guide to obtain the value to reduce.
+
+        On this regard, to optimize a metric:
+            1- score is calculared with calculate_score, with the caveat, that if
+            for the metric greater is not better, a negative score is returned.
+            2- the err (the optimization goal) is then:
+                optimum - (metric.sign * actual_score)
+                For accuracy for example: optimum(1) - (+1 * actual score)
+                For logloss for example: optimum(0) - (-1 * actual score)
+        """
         all_scoring_functions = (
             self.all_scoring_functions
             if all_scoring_functions is None
