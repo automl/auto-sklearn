@@ -2,12 +2,12 @@ import glob
 import os
 import tempfile
 import time
-import random
 import lockfile
 import numpy as np
 import pickle
 import shutil
 from typing import Union
+import uuid
 
 from autosklearn.util import logging_ as logging
 
@@ -35,15 +35,16 @@ def get_randomized_directory_names(
     temporary_directory=None,
     output_directory=None,
 ):
-    random_number = random.randint(0, 10000)
-    pid = os.getpid()
+    uuid_str = str(uuid.uuid1(clock_seq=os.getpid()))
 
     temporary_directory = (
         temporary_directory
         if temporary_directory
         else os.path.join(
             tempfile.gettempdir(),
-            'autosklearn_tmp_%d_%d' % (pid, random_number),
+            "autosklearn_tmp_{}".format(
+                uuid_str,
+            ),
         )
     )
 
@@ -52,7 +53,9 @@ def get_randomized_directory_names(
         if output_directory
         else os.path.join(
             tempfile.gettempdir(),
-            'autosklearn_output_%d_%d' % (pid, random_number),
+            "autosklearn_output_{}".format(
+                uuid_str,
+            ),
         )
     )
 
@@ -208,6 +211,11 @@ class Backend(object):
 
         if not isinstance(start_time, float):
             raise ValueError("Start time must be a float, but is %s." % type(start_time))
+
+        if os.path.exists(filepath):
+            raise ValueError(
+                "{filepath} already exist. Different seeds should be provided for different jobs."
+            )
 
         with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(filepath), delete=False) as fh:
             fh.write(str(start_time))
