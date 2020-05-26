@@ -2,7 +2,14 @@
 ==================
 Successive Halving
 ==================
-"""
+
+This advanced  example illustrates how to interact with
+the SMAC callback and get relevant information from the run, like
+the number of iterations. Particularly, it exemplifies how to select
+the intensification strategy to use in smac, in this case:
+`SuccessiveHalving <http://proceedings.mlr.press/v80/falkner18a/falkner18a-supp.pdf>`_.
+"""  # noqa (links are too long)
+
 
 import sklearn.model_selection
 import sklearn.datasets

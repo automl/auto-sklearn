@@ -39,6 +39,8 @@ def main():
         resampling_strategy='holdout',
         resampling_strategy_arguments={'train_size': 0.67},
         n_jobs=4,
+        # Each one of the 4 jobs is allocated 1024 MB
+        ml_memory_limit=1024,
         seed=5,
         delete_output_folder_after_terminate=False,
         delete_tmp_folder_after_terminate=False,

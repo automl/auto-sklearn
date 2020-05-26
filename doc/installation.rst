@@ -14,7 +14,7 @@ auto-sklearn has the following system requirements:
 * Linux operating system (for example Ubuntu) `(get Linux here) <https://www.wikihow.com/Install-Linux>`_,
 * Python (>=3.5) `(get Python here) <https://www.python.org/downloads/>`_.
 * C++ compiler (with C++11 supports) `(get GCC here) <https://www.tutorialspoint.com/How-to-Install-Cplusplus-Compiler-on-Linux>`_ and
-* SWIG (version 3.0 or later) `(get SWIG here) <http://www.swig.org/survey.html>`_.
+* SWIG (version 3.0.* is required; >=4.0.0 is not supported) `(get SWIG here) <http://www.swig.org/survey.html>`_.
 
 For an explanation of missing Microsoft Windows and MAC OSX support please
 check the Section `Windows/OSX compatibility`_.

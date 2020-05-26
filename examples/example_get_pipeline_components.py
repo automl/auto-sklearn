@@ -5,7 +5,9 @@ Query the Classification Pipeline
 =================================
 
 The following example shows how to query from a pipeline
-built by auto-sklearn
+built by auto-sklearn. Auto-sklearn is a wrapper on top of
+the sklearn models. This example illustrates how to interact
+with the sklearn components directly, in this case a PCA preprocessor.
 """
 import sklearn.model_selection
 import sklearn.datasets
