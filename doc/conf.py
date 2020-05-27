@@ -69,7 +69,7 @@ sphinx_gallery_conf = {
     #'reference_url': {
     #    'autosklearn': None
     #},
-    'backreferences_dir': False,
+    'backreferences_dir': None,
     'filename_pattern': 'example.*.py$',
 }
 
