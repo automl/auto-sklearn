@@ -11,9 +11,10 @@ import numpy as np
 import pynisher
 from smac.tae.execute_ta_run import StatusType, BudgetExhaustedException
 from smac.stats.stats import Stats
+from smac.utils.constants import MAXINT
 
 from autosklearn.evaluation import ExecuteTaFuncWithQueue
-from autosklearn.metrics import accuracy
+from autosklearn.metrics import accuracy, log_loss
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
@@ -151,10 +152,13 @@ class EvaluationTest(unittest.TestCase):
                                     logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
-                                    metric=accuracy)
+                                    metric=log_loss)
         info = ta.start(None, instance=None, cutoff=30)
         self.assertEqual(info[0], StatusType.MEMOUT)
-        self.assertEqual(info[1], 1.0)
+
+        # For logloss, worst possible result is MAXINT
+        worst_possible_result = MAXINT
+        self.assertEqual(info[1], worst_possible_result)
         self.assertIsInstance(info[2], float)
 
     @unittest.mock.patch('pynisher.enforce_limits')

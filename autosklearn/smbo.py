@@ -20,7 +20,7 @@ from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
 from autosklearn.metalearning.mismbo import suggest_via_metalearning
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
-from autosklearn.evaluation import ExecuteTaFuncWithQueue, WORST_POSSIBLE_RESULT
+from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.util.logging_ import get_logger
 from autosklearn.metalearning.metalearning.meta_base import MetaBase
 from autosklearn.metalearning.metafeatures.metafeatures import \
@@ -235,6 +235,7 @@ class AutoMLSMBO(object):
         self.resampling_strategy_args = resampling_strategy_args
 
         # and a bunch of useful limits
+        self.worst_possible_result = get_cost_of_crash(self.metric)
         self.total_walltime_limit = int(total_walltime_limit)
         self.func_eval_time_limit = int(func_eval_time_limit)
         self.memory_limit = memory_limit
@@ -442,7 +443,7 @@ class AutoMLSMBO(object):
             'run_obj': 'quality',
             'shared-model': self.shared_mode,
             'wallclock_limit': total_walltime_limit,
-            'cost_for_crash': WORST_POSSIBLE_RESULT,
+            'cost_for_crash': self.worst_possible_result,
         }
         if self.smac_scenario_args is not None:
             for arg in [

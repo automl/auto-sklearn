@@ -97,6 +97,7 @@ class AutoML(BaseEstimator):
                  get_smac_object_callback=None,
                  smac_scenario_args=None,
                  logging_config=None,
+                 metric=None,
                  ):
         super(AutoML, self).__init__()
         self._backend = backend
@@ -134,7 +135,7 @@ class AutoML(BaseEstimator):
         self._stopwatch = StopWatch()
         self._logger = None
         self._task = None
-        self._metric = None
+        self._metric = metric
         self._label_num = None
         self._parser = None
         self.models_ = None
