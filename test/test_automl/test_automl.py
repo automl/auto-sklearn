@@ -300,7 +300,9 @@ class AutoMLTest(Base, unittest.TestCase):
 
             auto = autosklearn.automl.AutoML(
                 backend_api, 20, 5,
-                initial_configurations_via_metalearning=25)
+                initial_configurations_via_metalearning=25,
+                metric=accuracy,
+            )
             setup_logger()
             auto._logger = get_logger('test_do_dummy_predictions')
             auto._backend._make_internals_directory()
@@ -332,6 +334,7 @@ class AutoMLTest(Base, unittest.TestCase):
                                          time_for_this_task,
                                          per_run_time,
                                          initial_configurations_via_metalearning=25,
+                                         metric=accuracy,
                                          )
         setup_logger()
         auto._logger = get_logger('test_fail_if_dummy_prediction_fails')
