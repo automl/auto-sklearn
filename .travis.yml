@@ -76,10 +76,10 @@ after_success: source ci_scripts/success.sh && source ci_scripts/create_doc.sh $
 
 deploy:
   provider: pages
-  skip-cleanup: true
-  github-token: $GITHUB_TOKEN # set in the settings page of my repository
-  keep-hisotry: true
-  commiter-from-gh: true
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN # set in the settings page of my repository
+  keep-history: true
+  committer-from-gh: true
   on:
     all_branches: true
     condition: $doc_result = "success"
