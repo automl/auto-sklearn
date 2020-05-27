@@ -118,13 +118,16 @@
 <span class="kn">from</span> <span class="nn">autosklearn.constants</span> <span class="kn">import</span> <span class="n">REGRESSION_TASKS</span><span class="p">,</span> <span class="n">TASK_TYPES</span>
 <span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">sanitize_array</span>
 
+<span class="kn">from</span> <span class="nn">smac.utils.constants</span> <span class="kn">import</span> <span class="n">MAXINT</span>
+
 
 <span class="k">class</span> <span class="nc">Scorer</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">score_func</span><span class="p">,</span> <span class="n">optimum</span><span class="p">,</span> <span class="n">sign</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">score_func</span><span class="p">,</span> <span class="n">optimum</span><span class="p">,</span> <span class="n">worst_possible_result</span><span class="p">,</span> <span class="n">sign</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span> <span class="o">=</span> <span class="n">score_func</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_optimum</span> <span class="o">=</span> <span class="n">optimum</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_worst_possible_result</span> <span class="o">=</span> <span class="n">worst_possible_result</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">=</span> <span class="n">sign</span>
 
     <span class="nd">@abstractmethod</span>
@@ -243,7 +246,7 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="make_scorer"><a class="viewcode-back" href="../../api.html#autosklearn.metrics.make_scorer">[docs]</a><span class="k">def</span> <span class="nf">make_scorer</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">score_func</span><span class="p">,</span> <span class="n">optimum</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<div class="viewcode-block" id="make_scorer"><a class="viewcode-back" href="../../api.html#autosklearn.metrics.make_scorer">[docs]</a><span class="k">def</span> <span class="nf">make_scorer</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">score_func</span><span class="p">,</span> <span class="n">optimum</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">worst_possible_result</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">needs_proba</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">needs_threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Make a scorer from a performance metric or loss function.</span>
 
@@ -288,7 +291,7 @@
         <span class="bp">cls</span> <span class="o">=</span> <span class="n">_ThresholdScorer</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="bp">cls</span> <span class="o">=</span> <span class="n">_PredictScorer</span>
-    <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">score_func</span><span class="p">,</span> <span class="n">optimum</span><span class="p">,</span> <span class="n">sign</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">score_func</span><span class="p">,</span> <span class="n">optimum</span><span class="p">,</span> <span class="n">worst_possible_result</span><span class="p">,</span> <span class="n">sign</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <span class="c1"># Standard regression scores</span>
@@ -297,14 +300,17 @@
 <span class="n">mean_squared_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span>
                                  <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">mean_squared_error</span><span class="p">,</span>
                                  <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                 <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
                                  <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">mean_absolute_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;mean_absolute_error&#39;</span><span class="p">,</span>
                                   <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">mean_absolute_error</span><span class="p">,</span>
                                   <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                  <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
                                   <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">median_absolute_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;median_absolute_error&#39;</span><span class="p">,</span>
                                     <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">median_absolute_error</span><span class="p">,</span>
                                     <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                    <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
                                     <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 <span class="c1"># Standard Classification Scores</span>
@@ -332,6 +338,7 @@
 <span class="n">log_loss</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;log_loss&#39;</span><span class="p">,</span>
                        <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">log_loss</span><span class="p">,</span>
                        <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                       <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
                        <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                        <span class="n">needs_proba</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="c1"># TODO what about mathews correlation coefficient etc?</span>
