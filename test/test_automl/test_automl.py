@@ -296,7 +296,7 @@ class AutoMLTest(Base, unittest.TestCase):
             self.assertTrue(np.allclose(D.data['X_train'], X_train))
 
         # Check that all directories are there
-        fixture = ['cv_models', 'true_targets_ensemble.npy',
+        fixture = ['cv_models', 'predictions_valid', 'true_targets_ensemble.npy',
                    'start_time_100', 'datamanager.pkl',
                    'predictions_ensemble',
                    'ensembles', 'predictions_test', 'models']
