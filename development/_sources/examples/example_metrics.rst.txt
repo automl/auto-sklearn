@@ -1,10 +1,12 @@
-.. note::
-    :class: sphx-glr-download-link-note
+.. only:: html
 
-    Click :ref:`here <sphx_glr_download_examples_example_metrics.py>` to download the full example code
-.. rst-class:: sphx-glr-example-title
+    .. note::
+        :class: sphx-glr-download-link-note
 
-.. _sphx_glr_examples_example_metrics.py:
+        Click :ref:`here <sphx_glr_download_examples_example_metrics.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_examples_example_metrics.py:
 
 
 =======
@@ -31,6 +33,20 @@ classification problem.
     import autosklearn.metrics
 
 
+
+
+
+
+
+
+
+Custom metrics definition
+=========================
+
+
+.. code-block:: default
+
+
     def accuracy(solution, prediction):
         # custom function defining accuracy
         return np.mean(solution == prediction)
@@ -53,140 +69,302 @@ classification problem.
         return np.mean(solution != prediction)
 
 
-    def main():
 
-        X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-        X_train, X_test, y_train, y_test = \
-            sklearn.model_selection.train_test_split(X, y, random_state=1)
 
-        # Print a list of available metrics
-        print("Available CLASSIFICATION metrics autosklearn.metrics.*:")
-        print("\t*" + "\n\t*".join(autosklearn.metrics.CLASSIFICATION_METRICS))
 
-        print("Available REGRESSION autosklearn.metrics.*:")
-        print("\t*" + "\n\t*".join(autosklearn.metrics.REGRESSION_METRICS))
 
-        # First example: Use predefined accuracy metric
-        print("#"*80)
-        print("Use predefined accuracy metric")
-        cls = autosklearn.classification.AutoSklearnClassifier(
-            time_left_for_this_task=60,
-            per_run_time_limit=30,
-            seed=1,
+
+
+
+Data Loading
+============
+
+
+.. code-block:: default
+
+
+    X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
+    X_train, X_test, y_train, y_test = \
+        sklearn.model_selection.train_test_split(X, y, random_state=1)
+
+
+
+
+
+
+
+
+Print a list of available metrics
+=================================
+
+
+.. code-block:: default
+
+
+    print("Available CLASSIFICATION metrics autosklearn.metrics.*:")
+    print("\t*" + "\n\t*".join(autosklearn.metrics.CLASSIFICATION_METRICS))
+
+    print("Available REGRESSION autosklearn.metrics.*:")
+    print("\t*" + "\n\t*".join(autosklearn.metrics.REGRESSION_METRICS))
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Available CLASSIFICATION metrics autosklearn.metrics.*:
+            *accuracy
+            *balanced_accuracy
+            *roc_auc
+            *average_precision
+            *log_loss
+            *precision
+            *precision_macro
+            *precision_micro
+            *precision_samples
+            *precision_weighted
+            *recall
+            *recall_macro
+            *recall_micro
+            *recall_samples
+            *recall_weighted
+            *f1
+            *f1_macro
+            *f1_micro
+            *f1_samples
+            *f1_weighted
+    Available REGRESSION autosklearn.metrics.*:
+            *r2
+            *mean_squared_error
+            *mean_absolute_error
+            *median_absolute_error
+
+
+
+
+First example: Use predefined accuracy metric
+=============================================
+
+
+.. code-block:: default
+
+
+    print("#"*80)
+    print("Use predefined accuracy metric")
+    cls = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=60,
+        per_run_time_limit=30,
+        seed=1,
+    )
+    cls.fit(X_train, y_train, metric=autosklearn.metrics.accuracy)
+
+    predictions = cls.predict(X_test)
+    print("Accuracy score {:g} using {:s}".
+          format(sklearn.metrics.accuracy_score(y_test, predictions),
+                 cls._automl[0]._metric.name))
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    ################################################################################
+    Use predefined accuracy metric
+    Accuracy score 0.965035 using accuracy
+
+
+
+
+Second example: Use own accuracy metric
+=======================================
+
+
+.. code-block:: default
+
+
+    print("#"*80)
+    print("Use self defined accuracy metric")
+    accuracy_scorer = autosklearn.metrics.make_scorer(
+        name="accu",
+        score_func=accuracy,
+        optimum=1,
+        greater_is_better=True,
+        needs_proba=False,
+        needs_threshold=False,
+    )
+    cls = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=60,
+        per_run_time_limit=30,
+        seed=1,
+    )
+    cls.fit(X_train, y_train, metric=accuracy_scorer)
+
+    predictions = cls.predict(X_test)
+    print("Accuracy score {:g} using {:s}".
+          format(sklearn.metrics.accuracy_score(y_test, predictions),
+                 cls._automl[0]._metric.name))
+
+    print("#"*80)
+    print("Use self defined error metric")
+    error_rate = autosklearn.metrics.make_scorer(
+        name='error',
+        score_func=error,
+        optimum=0,
+        greater_is_better=False,
+        needs_proba=False,
+        needs_threshold=False
+    )
+    cls = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=60,
+        per_run_time_limit=30,
+        seed=1
+    )
+    cls.fit(X_train, y_train, metric=error_rate)
+
+    cls.predictions = cls.predict(X_test)
+    print("Error rate {:g} using {:s}".
+          format(error_rate(y_test, predictions),
+                 cls._automl[0]._metric.name))
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    ################################################################################
+    Use self defined accuracy metric
+    [WARNING] [2020-05-28 16:01:21,278:AutoMLSMBO(1)::d6d58dae5b02e07797da6d4d126ac9b6] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.7.0-py3.7-linux-x86_64.egg/autosklearn/metalearning/files/accu_binary.classification_dense
+    Accuracy score 0.951049 using accu
+    ################################################################################
+    Use self defined error metric
+    [WARNING] [2020-05-28 16:02:16,488:AutoMLSMBO(1)::d6d58dae5b02e07797da6d4d126ac9b6] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.7.0-py3.7-linux-x86_64.egg/autosklearn/metalearning/files/error_binary.classification_dense
+    [WARNING] [2020-05-28 16:02:30,772:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:02:34,709:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:02:40,838:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:02:46,713:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:02:47,546:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:02:52,303:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:02:58,645:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:03:03,193:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    Error rate -0.048951 using error
+
+
+
+
+Third example: Use own accuracy metric with additional argument
+===============================================================
+
+
+.. code-block:: default
+
+
+    print("#"*80)
+    print("Use self defined accuracy with additional argument")
+    accuracy_scorer = autosklearn.metrics.make_scorer(
+        name="accu_add",
+        score_func=accuracy_wk,
+        optimum=1,
+        greater_is_better=True,
+        needs_proba=False,
+        needs_threshold=False,
+        dummy=None,
+    )
+    cls = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=60,
+        per_run_time_limit=30,
+        seed=1,
+    )
+    cls.fit(X_train, y_train, metric=accuracy_scorer)
+
+    predictions = cls.predict(X_test)
+    print(
+        "Accuracy score {:g} using {:s}".format(
+            sklearn.metrics.accuracy_score(y_test, predictions),
+            cls._automl[0]._metric.name
         )
-        cls.fit(X_train, y_train, metric=autosklearn.metrics.accuracy)
+    )
 
-        predictions = cls.predict(X_test)
-        print("Accuracy score {:g} using {:s}".
-              format(sklearn.metrics.accuracy_score(y_test, predictions),
-                     cls._automl[0]._metric.name))
+    print("#"*80)
+    print("Use self defined error with additional argument")
+    error_rate = autosklearn.metrics.make_scorer(
+        name="error_add",
+        score_func=error_wk,
+        optimum=0,
+        greater_is_better=True,
+        needs_proba=False,
+        needs_threshold=False,
+        dummy=None,
+    )
+    cls = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=60,
+        per_run_time_limit=30,
+        seed=1,
+    )
+    cls.fit(X_train, y_train, metric=error_rate)
 
-        # Second example: Use own accuracy metric
-        print("#"*80)
-        print("Use self defined accuracy metric")
-        accuracy_scorer = autosklearn.metrics.make_scorer(
-            name="accu",
-            score_func=accuracy,
-            optimum=1,
-            greater_is_better=True,
-            needs_proba=False,
-            needs_threshold=False,
+    predictions = cls.predict(X_test)
+    print(
+        "Error rate {:g} using {:s}".format(
+            error_rate(y_test, predictions),
+            cls._automl[0]._metric.name
         )
-        cls = autosklearn.classification.AutoSklearnClassifier(
-            time_left_for_this_task=60,
-            per_run_time_limit=30,
-            seed=1,
-        )
-        cls.fit(X_train, y_train, metric=accuracy_scorer)
-
-        predictions = cls.predict(X_test)
-        print("Accuracy score {:g} using {:s}".
-              format(sklearn.metrics.accuracy_score(y_test, predictions),
-                     cls._automl[0]._metric.name))
-
-        print("#"*80)
-        print("Use self defined error metric")
-        error_rate = autosklearn.metrics.make_scorer(
-            name='error',
-            score_func=error,
-            optimum=0,
-            greater_is_better=False,
-            needs_proba=False,
-            needs_threshold=False
-        )
-        cls = autosklearn.classification.AutoSklearnClassifier(
-            time_left_for_this_task=60,
-            per_run_time_limit=30,
-            seed=1
-        )
-        cls.fit(X_train, y_train, metric=error_rate)
-
-        cls.predictions = cls.predict(X_test)
-        print("Error rate {:g} using {:s}".
-              format(error_rate(y_test, predictions),
-                     cls._automl[0]._metric.name))
-
-        # Third example: Use own accuracy metric with additional argument
-        print("#"*80)
-        print("Use self defined accuracy with additional argument")
-        accuracy_scorer = autosklearn.metrics.make_scorer(
-            name="accu_add",
-            score_func=accuracy_wk,
-            optimum=1,
-            greater_is_better=True,
-            needs_proba=False,
-            needs_threshold=False,
-            dummy=None,
-        )
-        cls = autosklearn.classification.AutoSklearnClassifier(
-            time_left_for_this_task=60,
-            per_run_time_limit=30,
-            seed=1,
-        )
-        cls.fit(X_train, y_train, metric=accuracy_scorer)
-
-        predictions = cls.predict(X_test)
-        print(
-            "Accuracy score {:g} using {:s}".format(
-                sklearn.metrics.accuracy_score(y_test, predictions),
-                cls._automl[0]._metric.name
-            )
-        )
-
-        print("#"*80)
-        print("Use self defined error with additional argument")
-        error_rate = autosklearn.metrics.make_scorer(
-            name="error_add",
-            score_func=error_wk,
-            optimum=0,
-            greater_is_better=True,
-            needs_proba=False,
-            needs_threshold=False,
-            dummy=None,
-        )
-        cls = autosklearn.classification.AutoSklearnClassifier(
-            time_left_for_this_task=60,
-            per_run_time_limit=30,
-            seed=1,
-        )
-        cls.fit(X_train, y_train, metric=error_rate)
-
-        predictions = cls.predict(X_test)
-        print(
-            "Error rate {:g} using {:s}".format(
-                error_rate(y_test, predictions),
-                cls._automl[0]._metric.name
-            )
-        )
+    )
 
 
-    if __name__ == "__main__":
-        main()
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    ################################################################################
+    Use self defined accuracy with additional argument
+    [WARNING] [2020-05-28 16:03:11,419:AutoMLSMBO(1)::d6d58dae5b02e07797da6d4d126ac9b6] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.7.0-py3.7-linux-x86_64.egg/autosklearn/metalearning/files/accu_add_binary.classification_dense
+    Accuracy score 0.951049 using accu_add
+    ################################################################################
+    Use self defined error with additional argument
+    [WARNING] [2020-05-28 16:04:06,638:AutoMLSMBO(1)::d6d58dae5b02e07797da6d4d126ac9b6] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.7.0-py3.7-linux-x86_64.egg/autosklearn/metalearning/files/error_add_binary.classification_dense
+    [WARNING] [2020-05-28 16:04:07,739:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:04:10,228:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:04:12,998:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:04:17,729:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:04:20,858:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:04:24,849:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:04:25,512:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:04:27,620:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:04:31,773:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:04:32,355:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:04:36,470:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:04:41,165:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:04:46,163:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:04:50,591:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2020-05-28 16:04:54,865:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    Error rate 0.615385 using error_add
+
+
+
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.000 seconds)
+   **Total running time of the script:** ( 4 minutes  35.063 seconds)
 
 
 .. _sphx_glr_download_examples_example_metrics.py:
@@ -199,13 +377,13 @@ classification problem.
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-python
 
      :download:`Download Python source code: example_metrics.py <example_metrics.py>`
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
 
      :download:`Download Jupyter notebook: example_metrics.ipynb <example_metrics.ipynb>`
 

@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="_static/gallery-dataframe.css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
@@ -176,7 +178,8 @@ If set to None, all models are kept on the disc.</p>
 <dt><strong>ml_memory_limit</strong><span class="classifier">int, optional (3072)</span></dt><dd><p>Memory limit in MB for the machine learning algorithm.
 <cite>auto-sklearn</cite> will stop fitting the machine learning algorithm if
 it tries to allocate more than <cite>ml_memory_limit</cite> MB.
-If None is provided, no memory limit is set.</p>
+If None is provided, no memory limit is set.
+In case of multi-processing, <cite>ml_memory_limit</cite> will be per job.</p>
 </dd>
 <dt><strong>include_estimators</strong><span class="classifier">list, optional (None)</span></dt><dd><p>If None, all possible estimators are used. Otherwise specifies
 set of estimators to use.</p>
@@ -608,7 +611,8 @@ If set to None, all models are kept on the disc.</p>
 <dt><strong>ml_memory_limit</strong><span class="classifier">int, optional (3072)</span></dt><dd><p>Memory limit in MB for the machine learning algorithm.
 <cite>auto-sklearn</cite> will stop fitting the machine learning algorithm if
 it tries to allocate more than <cite>ml_memory_limit</cite> MB.
-If None is provided, no memory limit is set.</p>
+If None is provided, no memory limit is set.
+In case of multi-processing, <cite>ml_memory_limit</cite> will be per job.</p>
 </dd>
 <dt><strong>include_estimators</strong><span class="classifier">list, optional (None)</span></dt><dd><p>If None, all possible estimators are used. Otherwise specifies
 set of estimators to use.</p>

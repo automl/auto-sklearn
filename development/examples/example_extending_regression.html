@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery-dataframe.css" />
     <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
@@ -102,7 +104,13 @@
   <div class="row">
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
-<li><a class="reference internal" href="#">Extending Auto-Sklearn with Regression Component</a></li>
+<li><a class="reference internal" href="#">Extending Auto-Sklearn with Regression Component</a><ul>
+<li><a class="reference internal" href="#implement-kernel-ridge-regression-component-for-auto-sklearn">Implement kernel ridge regression component for auto-sklearn</a></li>
+<li><a class="reference internal" href="#generate-data">Generate data</a></li>
+<li><a class="reference internal" href="#fit-the-model-using-krr">Fit the model using KRR</a></li>
+<li><a class="reference internal" href="#print-prediction-score-and-statistics">Print prediction score and statistics</a></li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -111,7 +119,7 @@
       
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
-<p>Click <a class="reference internal" href="#sphx-glr-download-examples-example-extending-regression-py"><span class="std std-ref">here</span></a> to download the full example code</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-example-extending-regression-py"><span class="std std-ref">here</span></a>     to download the full example code</p>
 </div>
 <div class="sphx-glr-example-title section" id="extending-auto-sklearn-with-regression-component">
 <span id="sphx-glr-examples-example-extending-regression-py"></span><h1>Extending Auto-Sklearn with Regression Component<a class="headerlink" href="#extending-auto-sklearn-with-regression-component" title="Permalink to this headline">¶</a></h1>
@@ -128,9 +136,13 @@ component for using in auto-sklearn.</p>
 <span class="kn">from</span> <span class="nn">autosklearn.pipeline.constants</span> <span class="kn">import</span> <span class="n">SPARSE</span><span class="p">,</span> <span class="n">DENSE</span><span class="p">,</span> \
     <span class="n">SIGNED_DATA</span><span class="p">,</span> <span class="n">UNSIGNED_DATA</span><span class="p">,</span> <span class="n">PREDICTIONS</span>
 
-
-<span class="c1"># Implement kernel ridge regression component for auto-sklearn.</span>
-<span class="k">class</span> <span class="nc">KernelRidgeRegression</span><span class="p">(</span><span class="n">AutoSklearnRegressionAlgorithm</span><span class="p">):</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_diabetes</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+</pre></div>
+</div>
+<div class="section" id="implement-kernel-ridge-regression-component-for-auto-sklearn">
+<h2>Implement kernel ridge regression component for auto-sklearn<a class="headerlink" href="#implement-kernel-ridge-regression-component-for-auto-sklearn" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">KernelRidgeRegression</span><span class="p">(</span><span class="n">AutoSklearnRegressionAlgorithm</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="n">kernel</span>
@@ -194,43 +206,135 @@ component for using in auto-sklearn.</p>
         <span class="k">return</span> <span class="n">cs</span>
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="c1"># Add KRR component to auto-sklearn.</span>
-    <span class="n">autosklearn</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">regression</span><span class="o">.</span><span class="n">add_regressor</span><span class="p">(</span><span class="n">KernelRidgeRegression</span><span class="p">)</span>
-    <span class="n">cs</span> <span class="o">=</span> <span class="n">KernelRidgeRegression</span><span class="o">.</span><span class="n">get_hyperparameter_search_space</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span>
-
-    <span class="c1"># Generate data.</span>
-    <span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_diabetes</span>
-    <span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
-    <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_diabetes</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-
-    <span class="c1"># Fit the model using KRR.</span>
-    <span class="n">reg</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">regression</span><span class="o">.</span><span class="n">AutoSklearnRegressor</span><span class="p">(</span>
-        <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-        <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-        <span class="n">include_estimators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;KernelRidgeRegression&#39;</span><span class="p">],</span>
-    <span class="p">)</span>
-    <span class="n">reg</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
-
-    <span class="c1"># Print prediction score and statistics.</span>
-    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;r2 score: &quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y_test</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">reg</span><span class="o">.</span><span class="n">sprint_statistics</span><span class="p">())</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">reg</span><span class="o">.</span><span class="n">show_models</span><span class="p">())</span>
+<span class="c1"># Add KRR component to auto-sklearn.</span>
+<span class="n">autosklearn</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">regression</span><span class="o">.</span><span class="n">add_regressor</span><span class="p">(</span><span class="n">KernelRidgeRegression</span><span class="p">)</span>
+<span class="n">cs</span> <span class="o">=</span> <span class="n">KernelRidgeRegression</span><span class="o">.</span><span class="n">get_hyperparameter_search_space</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.000 seconds)</p>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Configuration space object:
+  Hyperparameters:
+    alpha, Type: UniformFloat, Range: [1e-05, 1.0], Default: 0.1, on log-scale
+    degree, Type: UniformInteger, Range: [2, 5], Default: 3
+    gamma, Type: UniformFloat, Range: [1e-05, 1.0], Default: 0.1, on log-scale
+    kernel, Type: Categorical, Choices: {linear, rbf, sigmoid, polynomial}, Default: linear
+</pre></div>
+</div>
+</div>
+<div class="section" id="generate-data">
+<h2>Generate data<a class="headerlink" href="#generate-data" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_diabetes</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="fit-the-model-using-krr">
+<h2>Fit the model using KRR<a class="headerlink" href="#fit-the-model-using-krr" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">reg</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">regression</span><span class="o">.</span><span class="n">AutoSklearnRegressor</span><span class="p">(</span>
+    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">include_estimators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;KernelRidgeRegression&#39;</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[WARNING] [2020-05-28 15:58:35,052:AutoMLSMBO(1)::3ab312a69548725a21e171b5bc6c13e8] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.7.0-py3.7-linux-x86_64.egg/autosklearn/metalearning/files/r2_regression_dense
+
+AutoSklearnRegressor(delete_output_folder_after_terminate=True,
+                     delete_tmp_folder_after_terminate=True,
+                     disable_evaluator_output=False, ensemble_memory_limit=1024,
+                     ensemble_nbest=50, ensemble_size=50,
+                     exclude_estimators=None, exclude_preprocessors=None,
+                     get_smac_object_callback=None,
+                     include_estimators=[&#39;KernelRidgeRegression&#39;],
+                     include_preprocessors=None,
+                     initial_configurations_via_metalearning=25,
+                     logging_config=None, max_models_on_disc=50,
+                     metadata_directory=None, ml_memory_limit=3072, n_jobs=None,
+                     output_folder=None, per_run_time_limit=10,
+                     resampling_strategy=&#39;holdout&#39;,
+                     resampling_strategy_arguments=None, seed=1,
+                     shared_mode=False, smac_scenario_args=None,
+                     time_left_for_this_task=30, tmp_folder=None)
+</pre></div>
+</div>
+</div>
+<div class="section" id="print-prediction-score-and-statistics">
+<h2>Print prediction score and statistics<a class="headerlink" href="#print-prediction-score-and-statistics" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">y_pred</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;r2 score: &quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y_test</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">reg</span><span class="o">.</span><span class="n">sprint_statistics</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">reg</span><span class="o">.</span><span class="n">show_models</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>r2 score:  -0.16461341337361346
+auto-sklearn results:
+  Dataset name: 3ab312a69548725a21e171b5bc6c13e8
+  Metric: r2
+  Best validation score: 0.479519
+  Number of target algorithm runs: 28
+  Number of successful target algorithm runs: 26
+  Number of crashed target algorithm runs: 2
+  Number of target algorithms that exceeded the time limit: 0
+  Number of target algorithms that exceeded the memory limit: 0
+
+[(0.540000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;minmax&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;fast_ica&#39;, &#39;regressor:__choice__&#39;: &#39;KernelRidgeRegression&#39;, &#39;feature_preprocessor:fast_ica:algorithm&#39;: &#39;deflation&#39;, &#39;feature_preprocessor:fast_ica:fun&#39;: &#39;logcosh&#39;, &#39;feature_preprocessor:fast_ica:whiten&#39;: &#39;False&#39;, &#39;regressor:KernelRidgeRegression:alpha&#39;: 0.003849452646594815, &#39;regressor:KernelRidgeRegression:degree&#39;: 4, &#39;regressor:KernelRidgeRegression:gamma&#39;: 0.0022292213231078608, &#39;regressor:KernelRidgeRegression:kernel&#39;: &#39;rbf&#39;},
+dataset_properties={
+  &#39;task&#39;: 4,
+  &#39;sparse&#39;: False,
+  &#39;multilabel&#39;: False,
+  &#39;multiclass&#39;: False,
+  &#39;target_type&#39;: &#39;regression&#39;,
+  &#39;signed&#39;: False})),
+(0.180000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;none&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;select_percentile_regression&#39;, &#39;regressor:__choice__&#39;: &#39;KernelRidgeRegression&#39;, &#39;feature_preprocessor:select_percentile_regression:percentile&#39;: 52.49326659378764, &#39;feature_preprocessor:select_percentile_regression:score_func&#39;: &#39;mutual_info&#39;, &#39;regressor:KernelRidgeRegression:alpha&#39;: 0.00017526760250595832, &#39;regressor:KernelRidgeRegression:degree&#39;: 4, &#39;regressor:KernelRidgeRegression:gamma&#39;: 1.0796172378706352e-05, &#39;regressor:KernelRidgeRegression:kernel&#39;: &#39;rbf&#39;},
+dataset_properties={
+  &#39;task&#39;: 4,
+  &#39;sparse&#39;: False,
+  &#39;multilabel&#39;: False,
+  &#39;multiclass&#39;: False,
+  &#39;target_type&#39;: &#39;regression&#39;,
+  &#39;signed&#39;: False})),
+(0.140000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;minmax&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;regressor:__choice__&#39;: &#39;KernelRidgeRegression&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.9553868315522818, &#39;feature_preprocessor:pca:whiten&#39;: &#39;True&#39;, &#39;regressor:KernelRidgeRegression:alpha&#39;: 0.04075843109503643, &#39;regressor:KernelRidgeRegression:degree&#39;: 5, &#39;regressor:KernelRidgeRegression:gamma&#39;: 1.0977359475327482e-05, &#39;regressor:KernelRidgeRegression:kernel&#39;: &#39;polynomial&#39;},
+dataset_properties={
+  &#39;task&#39;: 4,
+  &#39;sparse&#39;: False,
+  &#39;multilabel&#39;: False,
+  &#39;multiclass&#39;: False,
+  &#39;target_type&#39;: &#39;regression&#39;,
+  &#39;signed&#39;: False})),
+(0.120000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;robust_scaler&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;polynomial&#39;, &#39;regressor:__choice__&#39;: &#39;KernelRidgeRegression&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.0024105671078456115, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max&#39;: 0.8822187829073824, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min&#39;: 0.12598011499434483, &#39;feature_preprocessor:polynomial:degree&#39;: 2, &#39;feature_preprocessor:polynomial:include_bias&#39;: &#39;True&#39;, &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;True&#39;, &#39;regressor:KernelRidgeRegression:alpha&#39;: 0.00032143305838166873, &#39;regressor:KernelRidgeRegression:degree&#39;: 5, &#39;regressor:KernelRidgeRegression:gamma&#39;: 2.2679925329344036e-05, &#39;regressor:KernelRidgeRegression:kernel&#39;: &#39;polynomial&#39;},
+dataset_properties={
+  &#39;task&#39;: 4,
+  &#39;sparse&#39;: False,
+  &#39;multilabel&#39;: False,
+  &#39;multiclass&#39;: False,
+  &#39;target_type&#39;: &#39;regression&#39;,
+  &#39;signed&#39;: False})),
+(0.020000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;minmax&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;extra_trees_preproc_for_regression&#39;, &#39;regressor:__choice__&#39;: &#39;KernelRidgeRegression&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:bootstrap&#39;: &#39;True&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:criterion&#39;: &#39;mse&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:max_depth&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:max_features&#39;: 0.4535044674051194, &#39;feature_preprocessor:extra_trees_preproc_for_regression:max_leaf_nodes&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:min_samples_leaf&#39;: 7, &#39;feature_preprocessor:extra_trees_preproc_for_regression:min_samples_split&#39;: 16, &#39;feature_preprocessor:extra_trees_preproc_for_regression:min_weight_fraction_leaf&#39;: 0.0, &#39;feature_preprocessor:extra_trees_preproc_for_regression:n_estimators&#39;: 100, &#39;regressor:KernelRidgeRegression:alpha&#39;: 0.035056157115746625, &#39;regressor:KernelRidgeRegression:degree&#39;: 3, &#39;regressor:KernelRidgeRegression:gamma&#39;: 2.634221716863798e-05, &#39;regressor:KernelRidgeRegression:kernel&#39;: &#39;rbf&#39;},
+dataset_properties={
+  &#39;task&#39;: 4,
+  &#39;sparse&#39;: False,
+  &#39;multilabel&#39;: False,
+  &#39;multiclass&#39;: False,
+  &#39;target_type&#39;: &#39;regression&#39;,
+  &#39;signed&#39;: False})),
+]
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  24.319 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-example-extending-regression-py">
-<div class="sphx-glr-download docutils container">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/a9bf1f3a6510f41a85fa7da5c7571351/example_extending_regression.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_extending_regression.py</span></code></a></p>
 </div>
-<div class="sphx-glr-download docutils container">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/06736818d55dd7aa9df191ab6d8f674a/example_extending_regression.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">example_extending_regression.ipynb</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div>
 </div>
 
 

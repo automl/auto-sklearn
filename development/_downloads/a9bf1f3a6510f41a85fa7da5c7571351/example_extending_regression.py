@@ -1,7 +1,7 @@
 """
-====================================================================
+================================================
 Extending Auto-Sklearn with Regression Component
-====================================================================
+================================================
 
 The following example demonstrates how to create a new regression
 component for using in auto-sklearn.
@@ -18,8 +18,14 @@ from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import SPARSE, DENSE, \
     SIGNED_DATA, UNSIGNED_DATA, PREDICTIONS
 
+from sklearn.datasets import load_diabetes
+from sklearn.model_selection import train_test_split
 
-# Implement kernel ridge regression component for auto-sklearn.
+
+############################################################################
+# Implement kernel ridge regression component for auto-sklearn
+# ============================================================
+
 class KernelRidgeRegression(AutoSklearnRegressionAlgorithm):
     def __init__(self, alpha, kernel, gamma, degree, random_state=None):
         self.alpha = alpha
@@ -84,28 +90,33 @@ class KernelRidgeRegression(AutoSklearnRegressionAlgorithm):
         return cs
 
 
-if __name__ == '__main__':
-    # Add KRR component to auto-sklearn.
-    autosklearn.pipeline.components.regression.add_regressor(KernelRidgeRegression)
-    cs = KernelRidgeRegression.get_hyperparameter_search_space()
-    print(cs)
+# Add KRR component to auto-sklearn.
+autosklearn.pipeline.components.regression.add_regressor(KernelRidgeRegression)
+cs = KernelRidgeRegression.get_hyperparameter_search_space()
+print(cs)
 
-    # Generate data.
-    from sklearn.datasets import load_diabetes
-    from sklearn.model_selection import train_test_split
-    X, y = load_diabetes(return_X_y=True)
-    X_train, X_test, y_train, y_test = train_test_split(X, y)
+############################################################################
+# Generate data
+# =============
 
-    # Fit the model using KRR.
-    reg = autosklearn.regression.AutoSklearnRegressor(
-        time_left_for_this_task=30,
-        per_run_time_limit=10,
-        include_estimators=['KernelRidgeRegression'],
-    )
-    reg.fit(X_train, y_train)
+X, y = load_diabetes(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y)
 
-    # Print prediction score and statistics.
-    y_pred = reg.predict(X_test)
-    print("r2 score: ", sklearn.metrics.r2_score(y_pred, y_test))
-    print(reg.sprint_statistics())
-    print(reg.show_models())
+############################################################################
+# Fit the model using KRR
+# =======================
+
+reg = autosklearn.regression.AutoSklearnRegressor(
+    time_left_for_this_task=30,
+    per_run_time_limit=10,
+    include_estimators=['KernelRidgeRegression'],
+)
+reg.fit(X_train, y_train)
+
+############################################################################
+# Print prediction score and statistics
+# =====================================
+y_pred = reg.predict(X_test)
+print("r2 score: ", sklearn.metrics.r2_score(y_pred, y_test))
+print(reg.sprint_statistics())
+print(reg.show_models())

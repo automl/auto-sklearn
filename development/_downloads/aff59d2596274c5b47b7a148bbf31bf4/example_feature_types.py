@@ -12,51 +12,40 @@ In *auto-sklearn* it is possible to specify the feature types of a dataset when 
 import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
+from sklearn import preprocessing
 
 import autosklearn.classification
 
-try:
-    import openml
-except ImportError:
-    print("#"*80 + """
-    To run this example you need to install openml-python:
 
-    pip install git+https://github.com/renatopp/liac-arff
-    pip install requests xmltodict
-    pip install git+https://github.com/openml/openml-python@develop --no-deps\n""" +
-          "#"*80)
-    raise
+############################################################################
+# Data Loading
+# ============
+# Load adult dataset from openml.org, see https://www.openml.org/t/2117
+X, y = sklearn.datasets.fetch_openml(data_id=179, return_X_y=True)
 
+# y needs to be encoded, as fetch openml doesn't download a float
+y = preprocessing.LabelEncoder().fit_transform(y)
 
-def main():
-    # Load adult dataset from openml.org, see https://www.openml.org/t/2117
-    openml.config.apikey = '610344db6388d9ba34f6db45a3cf71de'
+X_train, X_test, y_train, y_test = \
+     sklearn.model_selection.train_test_split(X, y, random_state=1)
 
-    task = openml.tasks.get_task(2117)
-    train_indices, test_indices = task.get_train_test_split_indices()
-    X, y = task.get_X_and_y()
+# Create feature type list from openml.org indicator and run autosklearn
+data = sklearn.datasets.fetch_openml(data_id=179, as_frame=True)
+feat_type = ['Categorical' if x.name == 'category' else 'Numerical' for x in data['data'].dtypes]
 
-    X_train = X[train_indices]
-    y_train = y[train_indices]
-    X_test = X[test_indices]
-    y_test = y[test_indices]
+############################################################################
+# Build and fit a classifier
+# ==========================
 
-    dataset = task.get_dataset()
-    _, _, categorical_indicator, _ = dataset.get_data(target=task.target_name)
+cls = autosklearn.classification.AutoSklearnClassifier(
+    time_left_for_this_task=120,
+    per_run_time_limit=30,
+)
+cls.fit(X_train, y_train, feat_type=feat_type)
 
-    # Create feature type list from openml.org indicator and run autosklearn
-    feat_type = ['Categorical' if ci else 'Numerical'
-                 for ci in categorical_indicator]
+###########################################################################
+# Get the Score of the final ensemble
+# ===================================
 
-    cls = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=120,
-        per_run_time_limit=30,
-    )
-    cls.fit(X_train, y_train, feat_type=feat_type)
-
-    predictions = cls.predict(X_test)
-    print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
-
-
-if __name__ == "__main__":
-    main()
+predictions = cls.predict(X_test)
+print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))

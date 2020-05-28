@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-dataframe.css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
@@ -207,6 +209,7 @@
 <span class="sd">            `auto-sklearn` will stop fitting the machine learning algorithm if</span>
 <span class="sd">            it tries to allocate more than `ml_memory_limit` MB.</span>
 <span class="sd">            If None is provided, no memory limit is set.</span>
+<span class="sd">            In case of multi-processing, `ml_memory_limit` will be per job.</span>
 
 <span class="sd">        include_estimators : list, optional (None)</span>
 <span class="sd">            If None, all possible estimators are used. Otherwise specifies</span>
