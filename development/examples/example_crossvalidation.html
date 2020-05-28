@@ -137,7 +137,6 @@ cross-validation and how to set the folds when instantiating
         <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
         <span class="n">tmp_folder</span><span class="o">=</span><span class="s1">&#39;/tmp/autosklearn_cv_example_tmp&#39;</span><span class="p">,</span>
         <span class="n">output_folder</span><span class="o">=</span><span class="s1">&#39;/tmp/autosklearn_cv_example_out&#39;</span><span class="p">,</span>
-        <span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">resampling_strategy</span><span class="o">=</span><span class="s1">&#39;cv&#39;</span><span class="p">,</span>
         <span class="n">resampling_strategy_arguments</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;folds&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
     <span class="p">)</span>
@@ -145,13 +144,21 @@ cross-validation and how to set the folds when instantiating
     <span class="c1"># fit() changes the data in place, but refit needs the original data. We</span>
     <span class="c1"># therefore copy the data. In practice, one should reload the data</span>
     <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">y_train</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">dataset_name</span><span class="o">=</span><span class="s1">&#39;breast_cancer&#39;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">sprint_statistics</span><span class="p">())</span>
+
+    <span class="c1"># One can use models trained during cross-validation directly to predict</span>
+    <span class="c1"># for unseen data. For this, all k models trained during k-fold</span>
+    <span class="c1"># cross-validation are considered as a single soft-voting ensemble inside</span>
+    <span class="c1"># the ensemble constructed with ensemble selection.</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Before re-fit&#39;</span><span class="p">)</span>
+    <span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
+
     <span class="c1"># During fit(), models are fit on individual cross-validation folds. To use</span>
     <span class="c1"># all available data, we call refit() which trains all models in the</span>
     <span class="c1"># final ensemble on the whole dataset.</span>
     <span class="n">automl</span><span class="o">.</span><span class="n">refit</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">y_train</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">())</span>
-
     <span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
 

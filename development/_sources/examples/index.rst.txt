@@ -62,26 +62,6 @@ General introductory examples for *auto-sklearn* can be found here.
 
 .. only:: html
 
- .. figure:: /examples/images/thumb/sphx_glr_example_crossvalidation_thumb.png
-
-     :ref:`sphx_glr_examples_example_crossvalidation.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/example_crossvalidation
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="In *auto-sklearn* it is possible to use different resampling strategies by specifying the argum...">
-
-.. only:: html
-
  .. figure:: /examples/images/thumb/sphx_glr_example_holdout_thumb.png
 
      :ref:`sphx_glr_examples_example_holdout.py`
@@ -135,6 +115,26 @@ General introductory examples for *auto-sklearn* can be found here.
    :hidden:
 
    /examples/example_parallel_n_jobs
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In *auto-sklearn* it is possible to use different resampling strategies by specifying the argum...">
+
+.. only:: html
+
+ .. figure:: /examples/images/thumb/sphx_glr_example_crossvalidation_thumb.png
+
+     :ref:`sphx_glr_examples_example_crossvalidation.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/example_crossvalidation
 
 .. raw:: html
 
