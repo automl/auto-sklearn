@@ -16,7 +16,7 @@ import autosklearn.regression
 
 ############################################################################
 # Data Loading
-# ======================================
+# ============
 
 X, y = sklearn.datasets.load_boston(return_X_y=True)
 feature_types = (['numerical'] * 3) + ['categorical'] + (['numerical'] * 9)
@@ -25,7 +25,7 @@ X_train, X_test, y_train, y_test = \
 
 ############################################################################
 # Build and fit a regressor
-# ======================================
+# =========================
 
 automl = autosklearn.regression.AutoSklearnRegressor(
     time_left_for_this_task=120,
@@ -37,14 +37,14 @@ automl.fit(X_train, y_train, dataset_name='boston',
            feat_type=feature_types)
 
 ############################################################################
-# Print the final ensemble constructed by auto-sklearn.
-# ======================================
+# Print the final ensemble constructed by auto-sklearn
+# ====================================================
 
 print(automl.show_models())
 
 ###########################################################################
 # Get the Score of the final ensemble
-# ======================================
+# ===================================
 
 predictions = automl.predict(X_test)
 print("R2 score:", sklearn.metrics.r2_score(y_test, predictions))

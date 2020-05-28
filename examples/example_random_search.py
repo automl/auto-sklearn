@@ -24,7 +24,7 @@ import autosklearn.classification
 
 ############################################################################
 # Data Loading
-# ======================================
+# ============
 
 X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
 X_train, X_test, y_train, y_test = \
@@ -33,7 +33,7 @@ X_train, X_test, y_train, y_test = \
 
 ############################################################################
 # Fit a classifier using ROAR
-# ======================================
+# ===========================
 def get_roar_object_callback(
     scenario_dict,
     seed,
@@ -76,7 +76,7 @@ print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 
 ############################################################################
 # Fit a classifier using Random Search
-# ======================================
+# ====================================
 def get_random_search_object_callback(
         scenario_dict,
         seed,

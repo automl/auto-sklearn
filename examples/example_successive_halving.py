@@ -20,7 +20,7 @@ import autosklearn.classification
 
 ############################################################################
 # Define a callback that instantiates SuccessiveHalving
-# ======================================
+# =====================================================
 
 def get_smac_object_callback(budget_type):
     def get_smac_object(
@@ -69,7 +69,7 @@ def get_smac_object_callback(budget_type):
 
 ############################################################################
 # Data Loading
-# ======================================
+# ============
 
 X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
 X_train, X_test, y_train, y_test = \
@@ -77,7 +77,7 @@ X_train, X_test, y_train, y_test = \
 
 ############################################################################
 # Build and fit a classifier
-# ======================================
+# ==========================
 
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=30,
@@ -106,7 +106,7 @@ print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 
 ############################################################################
 # We can also use cross-validation with successive halving
-# ======================================
+# ========================================================
 
 X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
 X_train, X_test, y_train, y_test = \
@@ -136,8 +136,8 @@ print(automl.sprint_statistics())
 print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 
 ############################################################################
-# It is also possible to use an iterative fit cross-validation with successive halving
-# ======================================
+# Use an iterative fit cross-validation with successive halving
+# =============================================================
 
 X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
 X_train, X_test, y_train, y_test = \
@@ -168,7 +168,7 @@ print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 
 ############################################################################
 # Next, we see the use of subsampling as a budget in Auto-sklearn
-# ======================================
+# ===============================================================
 
 X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
 X_train, X_test, y_train, y_test = \
@@ -198,9 +198,10 @@ print(automl.sprint_statistics())
 print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 
 ############################################################################
+# Mixed budget approach
+# =====================
 # Finally, there's a mixed budget type which uses iterations where possible and
 # subsamples otherwise
-# ======================================
 
 X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
 X_train, X_test, y_train, y_test = \

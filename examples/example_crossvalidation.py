@@ -60,7 +60,7 @@ print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 
 ############################################################################
 # Perform a refit
-# ==========================
+# ===============
 # During fit(), models are fit on individual cross-validation folds. To use
 # all available data, we call refit() which trains all models in the
 # final ensemble on the whole dataset.

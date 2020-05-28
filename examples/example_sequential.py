@@ -46,14 +46,14 @@ automl.fit(X_train, y_train, dataset_name='breast_cancer')
 automl.fit_ensemble(y_train, ensemble_size=50)
 
 ############################################################################
-# Print the final ensemble constructed by auto-sklearn.
-# ======================================
+# Print the final ensemble constructed by auto-sklearn
+# ====================================================
 
 print(automl.show_models())
 
 ############################################################################
 # Get the Score of the final ensemble
-# ======================================
+# ===================================
 
 predictions = automl.predict(X_test)
 print(automl.sprint_statistics())
