@@ -304,7 +304,11 @@ class AutoML(BaseEstimator):
             return num_run
 
         self._logger.info("Starting to create dummy predictions.")
-        memory_limit = int(self._ml_memory_limit)
+
+        memory_limit = self._ml_memory_limit
+        if memory_limit is not None:
+            memory_limit = int(memory_limit)
+
         scenario_mock = unittest.mock.Mock()
         scenario_mock.wallclock_limit = self._time_for_task
         # This stats object is a hack - maybe the SMAC stats object should
