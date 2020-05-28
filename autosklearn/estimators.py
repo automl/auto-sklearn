@@ -98,6 +98,7 @@ class AutoSklearnEstimator(BaseEstimator):
             `auto-sklearn` will stop fitting the machine learning algorithm if
             it tries to allocate more than `ml_memory_limit` MB.
             If None is provided, no memory limit is set.
+            In case of multi-processing, `ml_memory_limit` will be per job.
 
         include_estimators : list, optional (None)
             If None, all possible estimators are used. Otherwise specifies

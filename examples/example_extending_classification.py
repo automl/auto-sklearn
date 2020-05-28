@@ -1,7 +1,7 @@
 """
-====================================================================
+====================================================
 Extending Auto-Sklearn with Classification Component
-====================================================================
+====================================================
 
 The following example demonstrates how to create a new classification
 component for using in auto-sklearn.
@@ -19,8 +19,14 @@ from autosklearn.pipeline.components.base \
 from autosklearn.pipeline.constants import DENSE, SIGNED_DATA, UNSIGNED_DATA, \
     PREDICTIONS
 
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
 
-# Create MLP classifier component for auto-sklearn.
+
+############################################################################
+# Create MLP classifier component for auto-sklearn
+# ================================================
+
 class MLPClassifier(AutoSklearnClassificationAlgorithm):
     def __init__(self,
                  hidden_layer_depth,
@@ -106,28 +112,34 @@ class MLPClassifier(AutoSklearnClassificationAlgorithm):
         return cs
 
 
-if __name__ == '__main__':
-    # Add MLP classifier component to auto-sklearn.
-    autosklearn.pipeline.components.classification.add_classifier(MLPClassifier)
-    cs = MLPClassifier.get_hyperparameter_search_space()
-    print(cs)
+# Add MLP classifier component to auto-sklearn.
+autosklearn.pipeline.components.classification.add_classifier(MLPClassifier)
+cs = MLPClassifier.get_hyperparameter_search_space()
+print(cs)
 
-    # Generate data.
-    from sklearn.datasets import load_breast_cancer
-    from sklearn.model_selection import train_test_split
-    X, y = load_breast_cancer(return_X_y=True)
-    X_train, X_test, y_train, y_test = train_test_split(X, y)
+############################################################################
+# Data Loading
+# ============
 
-    # Fit MLP classifier to the data.
-    clf = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=30,
-        per_run_time_limit=10,
-        include_estimators=['MLPClassifier'],
-    )
-    clf.fit(X_train, y_train)
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y)
 
-    # Print test accuracy and statistics.
-    y_pred = clf.predict(X_test)
-    print("accuracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
-    print(clf.sprint_statistics())
-    print(clf.show_models())
+############################################################################
+# Fit MLP classifier to the data
+# ==============================
+
+clf = autosklearn.classification.AutoSklearnClassifier(
+    time_left_for_this_task=30,
+    per_run_time_limit=10,
+    include_estimators=['MLPClassifier'],
+)
+clf.fit(X_train, y_train)
+
+############################################################################
+# Print test accuracy and statistics
+# ==================================
+
+y_pred = clf.predict(X_test)
+print("accuracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
+print(clf.sprint_statistics())
+print(clf.show_models())

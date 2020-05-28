@@ -25,9 +25,11 @@ aspects of its usage:
 * `Using custom metrics <examples/example_metrics.html>`_
 * `Random search <examples/example_random_search.html>`_
 * `EIPS <examples/example_eips.html>`_
+* `Successive Halving <examples/example_successive_halving.html>`_
 * `Extending with a new classifier <examples/example_extending_classification.html>`_
 * `Extending with a new regressor <examples/example_extending_regression.html>`_
 * `Extending with a new preprocessor <examples/example_extending_preprocessor.html>`_
+* `Iterating over the models <examples/example_get_pipeline_components.html>`_
 
 
 Time and memory limits
@@ -90,6 +92,16 @@ Resampling strategies
 
 Examples for using holdout and cross-validation can be found in `auto-sklearn/examples/ <examples/>`_
 
+Ensemble Building Process
+======================
+
+*auto-sklearn* uses ensemble selection by `Caruana et al. (2004) <https://dl.acm.org/doi/pdf/10.1145/1015330.1015432>`_ 
+to build an ensemble based on the models’ prediction for the validation set. The following hyperparameters control how the ensemble is constructed:
+
+* ``ensemble_size`` determines the maximal size of the ensemble. If it is set to zero, no ensemble will be constructed.
+* ``ensemble_nbest`` allows the user to directly specify the number of models considered for the ensemble.  This hyperparameter can be an integer *n*, such that only the best *n* models are used in the final ensemble. If a float between 0.0 and 1.0 is provided, ``ensemble_nbest`` would be interpreted as a fraction suggesting the percentage of models to use in the ensemble building process (namely, if ensemble_nbest is a float, library pruning is implemented as described in `Caruana et al. (2006) <https://dl.acm.org/doi/10.1109/ICDM.2006.76>`_).
+ * ``max_models_on_disc`` defines the maximum number of models that are kept on the disc, as a mechanism to control the amount of disc space consumed by *auto-sklearn*. Throughout the automl process, different individual models are optimized, and their predictions (and other metadata) is stored on disc. The user can set the upper bound on how many models are acceptable to keep on disc, yet this variable takes priority in the definition of the number of models used by the ensemble builder (that is, the minimum of ``ensemble_size``, ``ensemble_nbest`` and ``max_models_on_disc`` determines the maximal amount of models used in the ensemble). If set to None, this feature is disabled. 
+
 Inspecting the results
 ======================
 
@@ -107,7 +119,10 @@ statistics can be printed for the inspection.
 ``sprint_statistics()`` is a method that prints the name of the  dataset, the metric used, and the best validation score
 obtained by running *auto-sklearn*. It additionally prints the number of both successful and unsuccessful
 algorithm runs.
-The results obtained from the final ensemble can be printed by calling ``show_models()``.
+
+The results obtained from the final ensemble can be printed by calling ``show_models()``. *auto-sklearn* ensemble is composed of scikit-learn models that can be inspected as exemplified by  
+`model inspection example <examples/example_get_pipeline_components.html>`_
+.
 
 Parallel computation
 ====================
