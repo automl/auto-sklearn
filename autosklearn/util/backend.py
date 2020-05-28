@@ -324,8 +324,15 @@ class Backend(object):
     def get_model_dir(self):
         return os.path.join(self.internals_directory, 'models')
 
+    def get_cv_model_dir(self):
+        return os.path.join(self.internals_directory, 'cv_models')
+
     def get_model_path(self, seed, idx, budget):
         return os.path.join(self.get_model_dir(),
+                            '%s.%s.%s.model' % (seed, idx, budget))
+
+    def get_cv_model_path(self, seed, idx, budget):
+        return os.path.join(self.get_cv_model_dir(),
                             '%s.%s.%s.model' % (seed, idx, budget))
 
     def save_model(self, model, filepath):
@@ -389,6 +396,24 @@ class Backend(object):
 
     def load_model_by_seed_and_id_and_budget(self, seed, idx, budget):
         model_directory = self.get_model_dir()
+
+        model_file_name = '%s.%s.%s.model' % (seed, idx, budget)
+        model_file_path = os.path.join(model_directory, model_file_name)
+        with open(model_file_path, 'rb') as fh:
+            return pickle.load(fh)
+
+    def load_cv_models_by_identifiers(self, identifiers):
+        models = dict()
+
+        for identifier in identifiers:
+            seed, idx, budget = identifier
+            models[identifier] = self.load_cv_model_by_seed_and_id_and_budget(
+                seed, idx, budget)
+
+        return models
+
+    def load_cv_model_by_seed_and_id_and_budget(self, seed, idx, budget):
+        model_directory = self.get_cv_model_dir()
 
         model_file_name = '%s.%s.%s.model' % (seed, idx, budget)
         model_file_path = os.path.join(model_directory, model_file_name)

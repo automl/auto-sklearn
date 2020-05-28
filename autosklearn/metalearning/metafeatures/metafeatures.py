@@ -914,6 +914,7 @@ class PCAFractionOfComponentsFor95PercentVariance(MetaFeature):
             idx += 1
         return float(idx)/float(X.shape[1])
 
+
 # Kurtosis of first PC
 @metafeatures.define("PCAKurtosisFirstPC", dependency="PCA")
 class PCAKurtosisFirstPC(MetaFeature):
@@ -928,6 +929,7 @@ class PCAKurtosisFirstPC(MetaFeature):
 
         kurtosis = scipy.stats.kurtosis(transformed)
         return kurtosis[0]
+
 
 # Skewness of first PC
 @metafeatures.define("PCASkewnessFirstPC", dependency="PCA")

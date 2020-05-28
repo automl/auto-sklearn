@@ -61,8 +61,8 @@ class RescalingChoice(AutoSklearnChoice):
             cs.add_configuration_space(name, preprocessor_configuration_space,
                                        parent_hyperparameter=parent_hyperparameter)
 
-        self.configuration_space_ = cs
-        self.dataset_properties_ = dataset_properties
+        self.configuration_space = cs
+        self.dataset_properties = dataset_properties
         return cs
 
     def transform(self, X):

@@ -111,7 +111,7 @@ class DataPreprocessor(AutoSklearnComponent):
 
         for transf_name, transf_op in self._transformers:
             sub_configuration_space = transf_op.get_hyperparameter_search_space(
-                dataset_properties=self.dataset_properties_
+                dataset_properties=self.dataset_properties
             )
             sub_config_dict = {}
             for param in configuration:
@@ -143,7 +143,7 @@ class DataPreprocessor(AutoSklearnComponent):
         return self
 
     def get_hyperparameter_search_space(self, dataset_properties=None):
-        self.dataset_properties_ = dataset_properties
+        self.dataset_properties = dataset_properties
         cs = ConfigurationSpace()
         cs = DataPreprocessor._get_hyperparameter_search_space_recursevely(
             dataset_properties, cs, self._transformers)

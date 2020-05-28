@@ -3,6 +3,7 @@ import json
 import queue
 import multiprocessing
 import os
+import shutil
 import sys
 import unittest
 import unittest.mock
@@ -52,14 +53,19 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         """
         Creates a backend mock
         """
-        self.ev_path = os.path.join(this_directory, '.tmp_evaluations')
-        if not os.path.exists(self.ev_path):
-            os.mkdir(self.ev_path)
+        tmp_dir_name = self.id()
+        self.ev_path = os.path.join(this_directory, '.tmp_evaluations', tmp_dir_name)
+        if os.path.exists(self.ev_path):
+            shutil.rmtree(self.ev_path)
+        os.makedirs(self.ev_path, exist_ok=False)
         dummy_model_files = [os.path.join(self.ev_path, str(n)) for n in range(100)]
         dummy_pred_files = [os.path.join(self.ev_path, str(n)) for n in range(100, 200)]
+        dummy_cv_model_files = [os.path.join(self.ev_path, str(n)) for n in range(200, 300)]
         backend_mock = unittest.mock.Mock()
         backend_mock.get_model_dir.return_value = self.ev_path
+        backend_mock.get_cv_model_dir.return_value = self.ev_path
         backend_mock.get_model_path.side_effect = dummy_model_files
+        backend_mock.get_cv_model_path.side_effect = dummy_cv_model_files
         backend_mock.get_prediction_output_path.side_effect = dummy_pred_files
         self.backend_mock = backend_mock
 
@@ -575,6 +581,18 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(makedirs_mock.call_count, 1)
         self.assertEqual(self.backend_mock.save_model.call_count, 1)
 
+        evaluator.models = ['model2', 'model2']
+        rval = evaluator.file_output(
+            D.data['Y_train'],
+            D.data['Y_valid'],
+            D.data['Y_test'],
+        )
+        self.assertEqual(rval, (None, {}))
+        self.assertEqual(self.backend_mock.save_targets_ensemble.call_count, 2)
+        self.assertEqual(self.backend_mock.save_predictions_as_npy.call_count, 6)
+        self.assertEqual(makedirs_mock.call_count, 2)
+        self.assertEqual(self.backend_mock.save_model.call_count, 3)
+
         # Check for not containing NaNs - that the models don't predict nonsense
         # for unseen data
         D.data['Y_valid'][0] = np.NaN
@@ -714,11 +732,14 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy_args={'folds': 10},
                                    output_y_hat_optimization=False,
                                    metric=accuracy)
+
         evaluator.fit_predict_and_loss()
         Y_optimization_pred = self.backend_mock.save_predictions_as_npy.call_args_list[0][0][0]
 
         for i in range(7):
             self.assertEqual(0.9, Y_optimization_pred[i][1])
+
+        self.assertEqual(self.backend_mock.save_model.call_count, 2)
 
     @unittest.mock.patch.object(TrainEvaluator, 'file_output')
     @unittest.mock.patch.object(TrainEvaluator, '_partial_fit_and_predict_standard')
@@ -750,6 +771,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             output_y_hat_optimization=False,
             metric=accuracy,
         )
+        evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
+        evaluator.file_output.return_value = (None, {})
         evaluator.model = unittest.mock.Mock()
         evaluator.model.estimator_supports_iterative_fit.return_value = False
         evaluator.Y_targets[0] = np.array([1] * 23)
@@ -792,6 +815,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             output_y_hat_optimization=False,
             metric=accuracy,
         )
+        evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
+        evaluator.file_output.return_value = (None, {})
         evaluator.Y_targets[0] = np.array([1] * 35)
         evaluator.Y_targets[1] = np.array([1] * 34)
         evaluator.Y_train_targets = np.array([1] * 69)
@@ -841,6 +866,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             metric=accuracy,
             budget=0.0
         )
+        evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
+        evaluator.file_output.return_value = (None, {})
         evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
         evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
         rval = evaluator.fit_predict_and_loss(iterative=True)
@@ -874,6 +901,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             output_y_hat_optimization=False,
             metric=accuracy,
         )
+        evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
+        evaluator.file_output.return_value = (None, {})
+
         evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
         evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
         rval = evaluator.fit_predict_and_loss(iterative=True)
@@ -919,6 +949,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             budget_type='iterations',
             budget=50,
         )
+        evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
+        evaluator.file_output.return_value = (None, {})
+
         evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
         evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
         rval = evaluator.fit_predict_and_loss(iterative=False)
@@ -954,6 +987,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             budget_type='subsample',
             budget=50,
         )
+        evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
+        evaluator.file_output.return_value = (None, {})
+
         evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
         evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
         rval = evaluator.fit_predict_and_loss(iterative=False)
@@ -1588,14 +1624,19 @@ class FunctionsTest(unittest.TestCase):
         self.n = len(self.data.data['Y_train'])
         self.y = self.data.data['Y_train'].flatten()
 
-        self.ev_path = os.path.join(this_directory, '.tmp_evaluations')
-        if not os.path.exists(self.ev_path):
-            os.mkdir(self.ev_path)
+        tmp_dir_name = self.id()
+        self.ev_path = os.path.join(this_directory, '.tmp_evaluations', tmp_dir_name)
+        if os.path.exists(self.ev_path):
+            shutil.rmtree(self.ev_path)
+        os.makedirs(self.ev_path, exist_ok=False)
         self.backend = unittest.mock.Mock()
         self.backend.get_model_dir.return_value = self.ev_path
+        self.backend.get_cv_model_dir.return_value = self.ev_path
         dummy_model_files = [os.path.join(self.ev_path, str(n)) for n in range(100)]
         dummy_pred_files = [os.path.join(self.ev_path, str(n)) for n in range(100, 200)]
+        dummy_cv_model_files = [os.path.join(self.ev_path, str(n)) for n in range(200, 300)]
         self.backend.get_model_path.side_effect = dummy_model_files
+        self.backend.get_cv_model_path.side_effect = dummy_cv_model_files
         self.backend.get_prediction_output_path.side_effect = dummy_pred_files
         self.backend.load_datamanager.return_value = self.data
         self.backend.output_directory = 'duapdbaetpdbe'

@@ -74,17 +74,31 @@ class AutoMLTest(Base, unittest.TestCase):
         self._tearDown(backend_api.output_directory)
 
     def test_only_loads_ensemble_models(self):
+
+        def side_effect(ids, *args, **kwargs):
+            return models if ids is identifiers else {}
+
+        # Add a resampling strategy as this is required by load_models
+        self.automl._resampling_strategy = 'holdout'
         identifiers = [(1, 2), (3, 4)]
 
         models = [42]
-        self.automl._backend.load_ensemble.return_value.identifiers_ \
-            = identifiers
-        self.automl._backend.load_models_by_identifiers.side_effect \
-            = lambda ids: models if ids is identifiers else None
+        load_ensemble_mock = unittest.mock.Mock()
+        load_ensemble_mock.get_selected_model_identifiers.return_value = identifiers
+        self.automl._backend.load_ensemble.return_value = load_ensemble_mock
+        self.automl._backend.load_models_by_identifiers.side_effect = side_effect
 
         self.automl._load_models()
-
         self.assertEqual(models, self.automl.models_)
+        self.assertIsNone(self.automl.cv_models_)
+
+        self.automl._resampling_strategy = 'cv'
+
+        models = [42]
+        self.automl._backend.load_cv_models_by_identifiers.side_effect = side_effect
+
+        self.automl._load_models()
+        self.assertEqual(models, self.automl.cv_models_)
 
     def test_check_for_models_if_no_ensemble(self):
         models = [42]
@@ -259,7 +273,7 @@ class AutoMLTest(Base, unittest.TestCase):
                                         [1., 12., 2.]))
 
         # Check that all directories are there
-        fixture = ['predictions_valid', 'true_targets_ensemble.npy',
+        fixture = ['cv_models', 'predictions_valid', 'true_targets_ensemble.npy',
                    'start_time_100', 'datamanager.pkl',
                    'predictions_ensemble',
                    'ensembles', 'predictions_test', 'models']
@@ -361,31 +375,36 @@ class AutoMLTest(Base, unittest.TestCase):
         # the function raises error.
         ta_run_mock.return_value = StatusType.CRASHED, None, None, "test"
         self.assertRaisesRegex(ValueError,
-                               'Dummy prediction failed: test',
+                               'Dummy prediction failed with run state StatusType.CRASHED '
+                               'and additional output: test.',
                                auto._do_dummy_prediction,
                                D, 1,
                                )
         ta_run_mock.return_value = StatusType.ABORT, None, None, "test"
         self.assertRaisesRegex(ValueError,
-                               'Dummy prediction failed: test',
+                               'Dummy prediction failed with run state StatusType.ABORT '
+                               'and additional output: test.',
                                auto._do_dummy_prediction,
                                D, 1,
                                )
         ta_run_mock.return_value = StatusType.TIMEOUT, None, None, "test"
         self.assertRaisesRegex(ValueError,
-                               'Dummy prediction failed: test',
+                               'Dummy prediction failed with run state StatusType.TIMEOUT '
+                               'and additional output: test.',
                                auto._do_dummy_prediction,
                                D, 1,
                                )
         ta_run_mock.return_value = StatusType.MEMOUT, None, None, "test"
         self.assertRaisesRegex(ValueError,
-                               'Dummy prediction failed: test',
+                               'Dummy prediction failed with run state StatusType.MEMOUT '
+                               'and additional output: test.',
                                auto._do_dummy_prediction,
                                D, 1,
                                )
         ta_run_mock.return_value = StatusType.CAPPED, None, None, "test"
         self.assertRaisesRegex(ValueError,
-                               'Dummy prediction failed: test',
+                               'Dummy prediction failed with run state StatusType.CAPPED '
+                               'and additional output: test.',
                                auto._do_dummy_prediction,
                                D, 1,
                                )
