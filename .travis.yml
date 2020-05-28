@@ -21,13 +21,13 @@ matrix:
 
   include:
   - os: linux
-    env: DISTRIB="conda" EXAMPLES="true" PYTHON="3.7" SKIP_TESTS="true"
+    env: DISTRIB="conda" DOCPUSH="true" PYTHON="3.7" SKIP_TESTS="true"
   - os: linux
     env: DISTRIB="conda" RUN_FLAKE8="true" SKIP_TESTS="true"
   - os: linux
     env: DISTRIB="conda" PYTHON="3.5"
   - os: linux
-    env: DISTRIB="conda" COVERAGE="true" DOCPUSH="true" PYTHON="3.6"
+    env: DISTRIB="conda" COVERAGE="true" PYTHON="3.6"
   - os: linux
     env: DISTRIB="conda" TEST_DIST="true" PYTHON="3.7"
   - os: linux

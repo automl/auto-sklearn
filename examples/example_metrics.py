@@ -23,7 +23,7 @@ import autosklearn.metrics
 
 ############################################################################
 # Custom metrics definition
-# ======================================
+# =========================
 
 def accuracy(solution, prediction):
     # custom function defining accuracy
@@ -49,7 +49,7 @@ def error_wk(solution, prediction, dummy):
 
 ############################################################################
 # Data Loading
-# ======================================
+# ============
 
 X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
 X_train, X_test, y_train, y_test = \
@@ -57,7 +57,7 @@ X_train, X_test, y_train, y_test = \
 
 ############################################################################
 # Print a list of available metrics
-# ======================================
+# =================================
 
 print("Available CLASSIFICATION metrics autosklearn.metrics.*:")
 print("\t*" + "\n\t*".join(autosklearn.metrics.CLASSIFICATION_METRICS))
@@ -67,7 +67,7 @@ print("\t*" + "\n\t*".join(autosklearn.metrics.REGRESSION_METRICS))
 
 ############################################################################
 # First example: Use predefined accuracy metric
-# ======================================
+# =============================================
 
 print("#"*80)
 print("Use predefined accuracy metric")
@@ -85,7 +85,7 @@ print("Accuracy score {:g} using {:s}".
 
 ############################################################################
 # Second example: Use own accuracy metric
-# ======================================
+# =======================================
 
 print("#"*80)
 print("Use self defined accuracy metric")
@@ -133,7 +133,7 @@ print("Error rate {:g} using {:s}".
 
 ############################################################################
 # Third example: Use own accuracy metric with additional argument
-# ======================================
+# ===============================================================
 
 print("#"*80)
 print("Use self defined accuracy with additional argument")

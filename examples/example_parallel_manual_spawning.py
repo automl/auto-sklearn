@@ -40,8 +40,8 @@ for dir_ in [tmp_folder, output_folder]:
 
 
 ############################################################################
-# Define the spawner
-# ======================================
+# Define utility function for multiprocessing
+# ===========================================
 
 def get_spawn_classifier(X_train, y_train):
     def spawn_classifier(seed, dataset_name):
@@ -92,7 +92,7 @@ def get_spawn_classifier(X_train, y_train):
 
 ############################################################################
 # Data Loading
-# ======================================
+# ============
 
 X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
 X_train, X_test, y_train, y_test = \
@@ -100,7 +100,8 @@ X_train, X_test, y_train, y_test = \
 
 ############################################################################
 # Build and fit the classifier
-# ======================================
+# ============================
+
 processes = []
 spawn_classifier = get_spawn_classifier(X_train, y_train)
 for i in range(4):  # set this at roughly half of your cores
@@ -142,6 +143,7 @@ automl.fit_ensemble(
 ############################################################################
 # Report the score of the final ensemble
 # ======================================
+
 predictions = automl.predict(X_test)
 print(automl.show_models())
 print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))

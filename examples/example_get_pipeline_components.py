@@ -17,7 +17,7 @@ import autosklearn.classification
 
 ############################################################################
 # Data Loading
-# ======================================
+# ============
 
 X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
 X_train, X_test, y_train, y_test = \
@@ -25,7 +25,7 @@ X_train, X_test, y_train, y_test = \
 
 ############################################################################
 # Build and fit the classifier
-# ======================================
+# ============================
 
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
@@ -51,7 +51,7 @@ print("Accuracy score:{}".format(
 
 ############################################################################
 # Inspect the components of the best model
-# ======================================
+# ========================================
 
 # Iterate over the components of the model and print
 # The explained variance ratio per stage

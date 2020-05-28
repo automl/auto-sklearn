@@ -1,7 +1,7 @@
 """
-====================================================================
+================================================
 Extending Auto-Sklearn with Regression Component
-====================================================================
+================================================
 
 The following example demonstrates how to create a new regression
 component for using in auto-sklearn.
@@ -23,8 +23,8 @@ from sklearn.model_selection import train_test_split
 
 
 ############################################################################
-# Implement kernel ridge regression component for auto-sklearn.
-# ======================================
+# Implement kernel ridge regression component for auto-sklearn
+# ============================================================
 
 class KernelRidgeRegression(AutoSklearnRegressionAlgorithm):
     def __init__(self, alpha, kernel, gamma, degree, random_state=None):
@@ -96,15 +96,15 @@ cs = KernelRidgeRegression.get_hyperparameter_search_space()
 print(cs)
 
 ############################################################################
-# Generate data.
-# ======================================
+# Generate data
+# =============
 
 X, y = load_diabetes(return_X_y=True)
 X_train, X_test, y_train, y_test = train_test_split(X, y)
 
 ############################################################################
-# Fit the model using KRR.
-# ======================================
+# Fit the model using KRR
+# =======================
 
 reg = autosklearn.regression.AutoSklearnRegressor(
     time_left_for_this_task=30,
@@ -114,8 +114,8 @@ reg = autosklearn.regression.AutoSklearnRegressor(
 reg.fit(X_train, y_train)
 
 ############################################################################
-# Print prediction score and statistics.
-# ======================================
+# Print prediction score and statistics
+# =====================================
 y_pred = reg.predict(X_test)
 print("r2 score: ", sklearn.metrics.r2_score(y_pred, y_test))
 print(reg.sprint_statistics())

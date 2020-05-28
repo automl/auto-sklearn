@@ -37,7 +37,6 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     per_run_time_limit=30,
     tmp_folder='/tmp/autosklearn_cv_example_tmp',
     output_folder='/tmp/autosklearn_cv_example_out',
-    delete_tmp_folder_after_terminate=False,
     resampling_strategy='cv',
     resampling_strategy_arguments={'folds': 5},
 )

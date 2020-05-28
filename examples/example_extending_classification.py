@@ -1,7 +1,7 @@
 """
-====================================================================
+====================================================
 Extending Auto-Sklearn with Classification Component
-====================================================================
+====================================================
 
 The following example demonstrates how to create a new classification
 component for using in auto-sklearn.
@@ -24,8 +24,8 @@ from sklearn.model_selection import train_test_split
 
 
 ############################################################################
-# Create MLP classifier component for auto-sklearn.
-# ======================================
+# Create MLP classifier component for auto-sklearn
+# ================================================
 
 class MLPClassifier(AutoSklearnClassificationAlgorithm):
     def __init__(self,
@@ -119,14 +119,14 @@ print(cs)
 
 ############################################################################
 # Data Loading
-# ======================================
+# ============
 
 X, y = load_breast_cancer(return_X_y=True)
 X_train, X_test, y_train, y_test = train_test_split(X, y)
 
 ############################################################################
-# Fit MLP classifier to the data.
-# ======================================
+# Fit MLP classifier to the data
+# ==============================
 
 clf = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=30,
@@ -136,8 +136,8 @@ clf = autosklearn.classification.AutoSklearnClassifier(
 clf.fit(X_train, y_train)
 
 ############################################################################
-# Print test accuracy and statistics.
-# ======================================
+# Print test accuracy and statistics
+# ==================================
 
 y_pred = clf.predict(X_test)
 print("accuracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))

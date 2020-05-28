@@ -1,7 +1,7 @@
 """
-====================================================================
+==================================================
 Extending Auto-Sklearn with Preprocessor Component
-====================================================================
+==================================================
 
 The following example demonstrates how to create a wrapper around the linear
 discriminant analysis (LDA) algorithm from sklearn and use it as a preprocessor
@@ -27,8 +27,8 @@ from sklearn.model_selection import train_test_split
 
 
 ############################################################################
-# Create LDA component for auto-sklearn.
-# ======================================
+# Create LDA component for auto-sklearn
+# =====================================
 class LDA(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, solver, n_components, tol, shrinkage=None, random_state=None):
         self.solver = solver
@@ -99,22 +99,22 @@ class LDA(AutoSklearnPreprocessingAlgorithm):
 autosklearn.pipeline.components.feature_preprocessing.add_preprocessor(LDA)
 
 ############################################################################
-# Create dataset.
-# ======================================
+# Create dataset
+# ==============
 
 X, y = load_breast_cancer(return_X_y=True)
 X_train, X_test, y_train, y_test = train_test_split(X, y)
 
 ############################################################################
-# Configuration space.
-# ======================================
+# Configuration space
+# ===================
 
 cs = LDA.get_hyperparameter_search_space()
 print(cs)
 
 ############################################################################
-# Fit the model using LDA as preprocessor.
-# ======================================
+# Fit the model using LDA as preprocessor
+# =======================================
 
 clf = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=30,
@@ -123,8 +123,8 @@ clf = autosklearn.classification.AutoSklearnClassifier(
 clf.fit(X_train, y_train)
 
 ############################################################################
-# Print prediction score and statistics.
-# ======================================
+# Print prediction score and statistics
+# =====================================
 
 y_pred = clf.predict(X_test)
 print("accracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))

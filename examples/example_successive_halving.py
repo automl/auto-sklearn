@@ -19,7 +19,7 @@ import autosklearn.classification
 
 
 ############################################################################
-# Define a small callback that instantiates SuccessiveHalving
+# Define a callback that instantiates SuccessiveHalving
 # ======================================
 
 def get_smac_object_callback(budget_type):

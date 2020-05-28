@@ -24,7 +24,7 @@ import autosklearn.classification
 
 ############################################################################
 # EIPS callback
-# ======================================
+# =============
 # create a callack to change the acquisition function inside SMAC
 def get_eips_object_callback(
         scenario_dict,
@@ -61,7 +61,7 @@ def get_eips_object_callback(
 
 ############################################################################
 # Data Loading
-# ======================================
+# ============
 
 X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
 X_train, X_test, y_train, y_test = \
@@ -69,7 +69,7 @@ X_train, X_test, y_train, y_test = \
 
 ############################################################################
 # Building and fitting the classifier
-# ======================================
+# ===================================
 
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
@@ -82,15 +82,15 @@ automl = autosklearn.classification.AutoSklearnClassifier(
 automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
 ############################################################################
-# Print the final ensemble constructed by auto-sklearn.
-# ======================================
+# Print the final ensemble constructed by auto-sklearn
+# ====================================================
 
 # Print the final ensemble constructed by auto-sklearn via ROAR.
 print(automl.show_models())
 
 ############################################################################
 # Print statistics about the auto-sklearn run
-# ======================================
+# ===========================================
 
 # Print statistics about the auto-sklearn run such as number of
 # iterations, number of models failed with a time out.
@@ -98,7 +98,7 @@ print(automl.sprint_statistics())
 
 ############################################################################
 # Get the Score of the final ensemble
-# ======================================
+# ===================================
 
 predictions = automl.predict(X_test)
 print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
