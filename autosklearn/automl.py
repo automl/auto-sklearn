@@ -19,6 +19,8 @@ import joblib
 import sklearn.utils
 import scipy.sparse
 from sklearn.metrics._classification import type_of_target
+from sklearn.utils.validation import check_is_fitted
+from sklearn.dummy import DummyClassifier, DummyRegressor
 
 from autosklearn.metrics import Scorer
 from autosklearn.data.abstract_data_manager import AbstractDataManager
@@ -39,19 +41,24 @@ from autosklearn.constants import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFI
     REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION
 
 
-def _model_predict(self, X, batch_size, identifier):
+def _model_predict(model, X, batch_size, logger, task):
     def send_warnings_to_log(
             message, category, filename, lineno, file=None, line=None):
-        self._logger.debug('%s:%s: %s:%s' % (filename, lineno, category.__name__, message))
+        logger.debug('%s:%s: %s:%s' % (filename, lineno, category.__name__, message))
         return
-    model = self.models_[identifier]
     X_ = X.copy()
     with warnings.catch_warnings():
         warnings.showwarning = send_warnings_to_log
-        if self._task in REGRESSION_TASKS:
-            prediction = model.predict(X_, batch_size=batch_size)
+        if task in REGRESSION_TASKS:
+            if hasattr(model, 'batch_size'):
+                prediction = model.predict(X_, batch_size=batch_size)
+            else:
+                prediction = model.predict(X_)
         else:
-            prediction = model.predict_proba(X_, batch_size=batch_size)
+            if hasattr(model, 'batch_size'):
+                prediction = model.predict_proba(X_, batch_size=batch_size)
+            else:
+                prediction = model.predict_proba(X_)
 
             # Check that all probability values lie between 0 and 1.
             assert(
@@ -62,10 +69,10 @@ def _model_predict(self, X, batch_size, identifier):
 
     if len(prediction.shape) < 1 or len(X_.shape) < 1 or \
             X_.shape[0] < 1 or prediction.shape[0] != X_.shape[0]:
-        self._logger.warning("Prediction shape for model %s is %s "
-                             "while X_.shape is %s" %
-                             (model, str(prediction.shape),
-                              str(X_.shape)))
+        logger.warning(
+            "Prediction shape for model %s is %s while X_.shape is %s",
+            model, str(prediction.shape), str(X_.shape)
+        )
     return prediction
 
 
@@ -83,7 +90,6 @@ class AutoML(BaseEstimator):
                  seed=1,
                  ml_memory_limit=3072,
                  metadata_directory=None,
-                 keep_models=True,
                  debug_mode=False,
                  include_estimators=None,
                  exclude_estimators=None,
@@ -115,7 +121,6 @@ class AutoML(BaseEstimator):
         self._ml_memory_limit = ml_memory_limit
         self._data_memory_limit = None
         self._metadata_directory = metadata_directory
-        self._keep_models = keep_models
         self._include_estimators = include_estimators
         self._exclude_estimators = exclude_estimators
         self._include_preprocessors = include_preprocessors
@@ -139,6 +144,7 @@ class AutoML(BaseEstimator):
         self._label_num = None
         self._parser = None
         self.models_ = None
+        self.cv_models_ = None
         self.ensemble_ = None
         self._can_predict = False
 
@@ -324,7 +330,8 @@ class AutoML(BaseEstimator):
             self._logger.error('Error creating dummy predictions: %s ',
                                str(additional_info))
             # Fail if dummy prediction fails.
-            raise ValueError("Dummy prediction failed: %s " % str(additional_info))
+            raise ValueError("Dummy prediction failed with run state %s and additional output: %s."
+                             % (str(status), str(additional_info)))
 
         return ta.num_run
 
@@ -337,6 +344,7 @@ class AutoML(BaseEstimator):
     ):
         # Reset learnt stuff
         self.models_ = None
+        self.cv_models_ = None
         self.ensemble_ = None
 
         # Check arguments prior to doing anything!
@@ -377,12 +385,16 @@ class AutoML(BaseEstimator):
             self._resampling_strategy_arguments['folds'] = 5
 
         self._backend._make_internals_directory()
-        if self._keep_models:
-            try:
-                os.makedirs(self._backend.get_model_dir())
-            except (OSError, FileExistsError):
-                if not self._shared_mode:
-                    raise
+        try:
+            os.makedirs(self._backend.get_model_dir())
+        except (OSError, FileExistsError):
+            if not self._shared_mode:
+                raise
+        try:
+            os.makedirs(self._backend.get_cv_model_dir())
+        except (OSError, FileExistsError):
+            if not self._shared_mode:
+                raise
 
         self._metric = metric
         self._task = datamanager.info['task']
@@ -536,11 +548,7 @@ class AutoML(BaseEstimator):
 
     def refit(self, X, y):
 
-        if self._keep_models is not True:
-            raise ValueError(
-                "Refit can only be called if 'keep_models==True'")
-        if self.models_ is None or len(self.models_) == 0 or \
-                self.ensemble_ is None:
+        if self.models_ is None or len(self.models_) == 0 or self.ensemble_ is None:
             self._load_models()
 
         # Refit is not applicable when ensemble_size is set to zero.
@@ -549,38 +557,37 @@ class AutoML(BaseEstimator):
 
         random_state = np.random.RandomState(self._seed)
         for identifier in self.models_:
-            if identifier in self.ensemble_.get_selected_model_identifiers():
-                model = self.models_[identifier]
-                # this updates the model inplace, it can then later be used in
-                # predict method
+            model = self.models_[identifier]
+            # this updates the model inplace, it can then later be used in
+            # predict method
 
-                # try to fit the model. If it fails, shuffle the data. This
-                # could alleviate the problem in algorithms that depend on
-                # the ordering of the data.
-                for i in range(10):
-                    try:
-                        if self._budget_type is None:
-                            _fit_and_suppress_warnings(self._logger, model, X, y)
-                        else:
-                            _fit_with_budget(
-                                X_train=X,
-                                Y_train=y,
-                                budget=identifier[2],
-                                budget_type=self._budget_type,
-                                logger=self._logger,
-                                model=model,
-                                train_indices=np.arange(len(X), dtype=int),
-                                task_type=self._task,
-                            )
-                        break
-                    except ValueError as e:
-                        indices = list(range(X.shape[0]))
-                        random_state.shuffle(indices)
-                        X = X[indices]
-                        y = y[indices]
+            # try to fit the model. If it fails, shuffle the data. This
+            # could alleviate the problem in algorithms that depend on
+            # the ordering of the data.
+            for i in range(10):
+                try:
+                    if self._budget_type is None:
+                        _fit_and_suppress_warnings(self._logger, model, X, y)
+                    else:
+                        _fit_with_budget(
+                            X_train=X,
+                            Y_train=y,
+                            budget=identifier[2],
+                            budget_type=self._budget_type,
+                            logger=self._logger,
+                            model=model,
+                            train_indices=np.arange(len(X), dtype=int),
+                            task_type=self._task,
+                        )
+                    break
+                except ValueError as e:
+                    indices = list(range(X.shape[0]))
+                    random_state.shuffle(indices)
+                    X = X[indices]
+                    y = y[indices]
 
-                        if i == 9:
-                            raise e
+                    if i == 9:
+                        raise e
 
         self._can_predict = True
         return self
@@ -601,17 +608,16 @@ class AutoML(BaseEstimator):
             Parallelize the predictions across the models with n_jobs
             processes.
         """
-        if self._keep_models is not True:
-            raise ValueError(
-                "Predict can only be called if 'keep_models==True'")
-        if not self._can_predict and \
-                self._resampling_strategy not in ['holdout', 'holdout-iterative-fit']:
+        if (
+            self._resampling_strategy not in (
+                'holdout', 'holdout-iterative-fit', 'cv', 'cv-iterative-fit')
+            and not self._can_predict
+        ):
             raise NotImplementedError(
                 'Predict is currently not implemented for resampling '
                 'strategy %s, please call refit().' % self._resampling_strategy)
 
-        if self.models_ is None or len(self.models_) == 0 or \
-                self.ensemble_ is None:
+        if self.models_ is None or len(self.models_) == 0 or self.ensemble_ is None:
             self._load_models()
 
         # If self.ensemble_ is None, it means that ensemble_size is set to zero.
@@ -623,9 +629,26 @@ class AutoML(BaseEstimator):
 
         # Parallelize predictions across models with n_jobs processes.
         # Each process computes predictions in chunks of batch_size rows.
+        try:
+            for i, tmp_model in enumerate(self.models_.values()):
+                if isinstance(tmp_model, (DummyRegressor, DummyClassifier)):
+                    check_is_fitted(tmp_model)
+                else:
+                    check_is_fitted(tmp_model.steps[-1][-1])
+            models = self.models_
+        except sklearn.exceptions.NotFittedError:
+            try:
+                check_is_fitted(list(self.cv_models_.values())[0])
+                models = self.cv_models_
+            except sklearn.exceptions.NotFittedError:
+                raise ValueError('Found no fitted models!')
+
         all_predictions = joblib.Parallel(n_jobs=n_jobs)(
-            joblib.delayed(_model_predict)(self, X, batch_size, identifier)
-            for identifier in self.ensemble_.get_selected_model_identifiers())
+            joblib.delayed(_model_predict)(
+                models[identifier], X, batch_size, self._logger, self._task
+            )
+            for identifier in self.ensemble_.get_selected_model_identifiers()
+        )
 
         if len(all_predictions) == 0:
             raise ValueError('Something went wrong generating the predictions. '
@@ -723,10 +746,21 @@ class AutoML(BaseEstimator):
 
         self.ensemble_ = self._backend.load_ensemble(seed)
         if self.ensemble_:
-            identifiers = self.ensemble_.identifiers_
+            identifiers = self.ensemble_.get_selected_model_identifiers()
             self.models_ = self._backend.load_models_by_identifiers(identifiers)
-            if len(self.models_) == 0 and self._resampling_strategy not in \
-                    ['partial-cv', 'partial-cv-iterative-fit']:
+            if self._resampling_strategy in ('cv', 'cv-iterative-fit'):
+                self.cv_models_ = self._backend.load_cv_models_by_identifiers(identifiers)
+            else:
+                self.cv_models_ = None
+            if (
+                len(self.models_) == 0 and
+                self._resampling_strategy not in ['partial-cv', 'partial-cv-iterative-fit']
+            ):
+                raise ValueError('No models fitted!')
+            if (
+                self._resampling_strategy in ['cv', 'cv-iterative-fit']
+                and len(self.cv_models_) == 0
+            ):
                 raise ValueError('No models fitted!')
 
         elif self._disable_evaluator_output is False or \

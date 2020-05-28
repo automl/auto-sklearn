@@ -270,8 +270,8 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                     cs.get_hyperparameter(
                         'classifier:__choice__').default_value = default
 
-        self.configuration_space_ = cs
-        self.dataset_properties_ = dataset_properties
+        self.configuration_space = cs
+        self.dataset_properties = dataset_properties
         return cs
 
     def _get_pipeline_steps(self):

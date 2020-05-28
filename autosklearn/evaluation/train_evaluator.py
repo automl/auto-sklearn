@@ -231,10 +231,10 @@ class TrainEvaluator(AbstractEvaluator):
                 additional_run_info = None
                 train_splits = [None] * self.num_cv_folds
 
-                models = [self._get_model() for i in range(self.num_cv_folds)]
+                self.models = [self._get_model() for i in range(self.num_cv_folds)]
                 iterations = [1] * self.num_cv_folds
                 total_n_iterations = [0] * self.num_cv_folds
-                model_max_iter = [model.get_max_iter() for model in models]
+                model_max_iter = [model.get_max_iter() for model in self.models]
 
                 if self.budget_type in ['iterations', 'mixed'] and self.budget > 0:
                     max_n_iter_budget = int(
@@ -270,7 +270,7 @@ class TrainEvaluator(AbstractEvaluator):
                         if converged[i]:
                             continue
 
-                        model = models[i]
+                        model = self.models[i]
 
                         if iterations[i] == 1:
                             self.Y_train_targets[train_indices] = \
@@ -579,6 +579,7 @@ class TrainEvaluator(AbstractEvaluator):
                 # Bad style, but necessary for unit testing that self.model is
                 # actually a new model
                 self._added_empty_model = True
+                # TODO check if there might be reasons for do-not-advance here!
                 status = StatusType.SUCCESS
             elif (
                 self.budget_type == 'iterations'
@@ -805,6 +806,8 @@ class TrainEvaluator(AbstractEvaluator):
 
         if add_model_to_self:
             self.model = model
+        else:
+            self.models[fold] = model
 
         train_indices, test_indices = self.indices[fold]
         self.Y_targets[fold] = self.Y_train[test_indices]
@@ -851,6 +854,8 @@ class TrainEvaluator(AbstractEvaluator):
 
         if add_model_to_self:
             self.model = model
+        else:
+            self.models[fold] = model
 
         additional_run_info = model.get_additional_run_info()
         return (

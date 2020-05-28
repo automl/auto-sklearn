@@ -237,11 +237,10 @@ class EnsembleSelection(AbstractEnsemble):
 
     def get_models_with_weights(self, models):
         output = []
-
         for i, weight in enumerate(self.weights_):
-            identifier = self.identifiers_[i]
-            model = models[identifier]
             if weight > 0.0:
+                identifier = self.identifiers_[i]
+                model = models[identifier]
                 output.append((weight, model))
 
         output.sort(reverse=True, key=lambda t: t[0])
