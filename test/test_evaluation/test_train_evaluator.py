@@ -581,6 +581,18 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(makedirs_mock.call_count, 1)
         self.assertEqual(self.backend_mock.save_model.call_count, 1)
 
+        evaluator.models = ['model2', 'model2']
+        rval = evaluator.file_output(
+            D.data['Y_train'],
+            D.data['Y_valid'],
+            D.data['Y_test'],
+        )
+        self.assertEqual(rval, (None, {}))
+        self.assertEqual(self.backend_mock.save_targets_ensemble.call_count, 2)
+        self.assertEqual(self.backend_mock.save_predictions_as_npy.call_count, 6)
+        self.assertEqual(makedirs_mock.call_count, 2)
+        self.assertEqual(self.backend_mock.save_model.call_count, 3)
+
         # Check for not containing NaNs - that the models don't predict nonsense
         # for unseen data
         D.data['Y_valid'][0] = np.NaN
@@ -720,11 +732,14 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy_args={'folds': 10},
                                    output_y_hat_optimization=False,
                                    metric=accuracy)
+
         evaluator.fit_predict_and_loss()
         Y_optimization_pred = self.backend_mock.save_predictions_as_npy.call_args_list[0][0][0]
 
         for i in range(7):
             self.assertEqual(0.9, Y_optimization_pred[i][1])
+
+        self.assertEqual(self.backend_mock.save_model.call_count, 2)
 
     @unittest.mock.patch.object(TrainEvaluator, 'file_output')
     @unittest.mock.patch.object(TrainEvaluator, '_partial_fit_and_predict_standard')
@@ -756,6 +771,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             output_y_hat_optimization=False,
             metric=accuracy,
         )
+        evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
+        evaluator.file_output.return_value = (None, {})
         evaluator.model = unittest.mock.Mock()
         evaluator.model.estimator_supports_iterative_fit.return_value = False
         evaluator.Y_targets[0] = np.array([1] * 23)
@@ -798,6 +815,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             output_y_hat_optimization=False,
             metric=accuracy,
         )
+        evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
+        evaluator.file_output.return_value = (None, {})
         evaluator.Y_targets[0] = np.array([1] * 35)
         evaluator.Y_targets[1] = np.array([1] * 34)
         evaluator.Y_train_targets = np.array([1] * 69)
@@ -847,6 +866,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             metric=accuracy,
             budget=0.0
         )
+        evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
+        evaluator.file_output.return_value = (None, {})
         evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
         evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
         rval = evaluator.fit_predict_and_loss(iterative=True)
@@ -880,6 +901,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             output_y_hat_optimization=False,
             metric=accuracy,
         )
+        evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
+        evaluator.file_output.return_value = (None, {})
+
         evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
         evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
         rval = evaluator.fit_predict_and_loss(iterative=True)
@@ -925,6 +949,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             budget_type='iterations',
             budget=50,
         )
+        evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
+        evaluator.file_output.return_value = (None, {})
+
         evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
         evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
         rval = evaluator.fit_predict_and_loss(iterative=False)
@@ -960,6 +987,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             budget_type='subsample',
             budget=50,
         )
+        evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
+        evaluator.file_output.return_value = (None, {})
+
         evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
         evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
         rval = evaluator.fit_predict_and_loss(iterative=False)
