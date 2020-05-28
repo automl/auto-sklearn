@@ -39,6 +39,10 @@ for dir_ in [tmp_folder, output_folder]:
         pass
 
 
+############################################################################
+# Define utility function for multiprocessing
+# ===========================================
+
 def get_spawn_classifier(X_train, y_train):
     def spawn_classifier(seed, dataset_name):
         """Spawn a subprocess.
@@ -86,54 +90,60 @@ def get_spawn_classifier(X_train, y_train):
     return spawn_classifier
 
 
-def main():
+############################################################################
+# Data Loading
+# ============
 
-    X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-    X_train, X_test, y_train, y_test = \
-        sklearn.model_selection.train_test_split(X, y, random_state=1)
+X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = \
+    sklearn.model_selection.train_test_split(X, y, random_state=1)
 
-    processes = []
-    spawn_classifier = get_spawn_classifier(X_train, y_train)
-    for i in range(4):  # set this at roughly half of your cores
-        p = multiprocessing.Process(
-            target=spawn_classifier,
-            args=(i, 'breast_cancer'),
-        )
-        p.start()
-        processes.append(p)
-    for p in processes:
-        p.join()
+############################################################################
+# Build and fit the classifier
+# ============================
 
-    print('Starting to build an ensemble!')
-    automl = AutoSklearnClassifier(
-        time_left_for_this_task=30,
-        per_run_time_limit=15,
-        ml_memory_limit=1024,
-        shared_mode=True,
-        ensemble_size=50,
-        ensemble_nbest=200,
-        tmp_folder=tmp_folder,
-        output_folder=output_folder,
-        initial_configurations_via_metalearning=0,
-        seed=1,
+processes = []
+spawn_classifier = get_spawn_classifier(X_train, y_train)
+for i in range(4):  # set this at roughly half of your cores
+    p = multiprocessing.Process(
+        target=spawn_classifier,
+        args=(i, 'breast_cancer'),
     )
+    p.start()
+    processes.append(p)
+for p in processes:
+    p.join()
 
-    # Both the ensemble_size and ensemble_nbest parameters can be changed now if
-    # necessary
-    automl.fit_ensemble(
-        y_train,
-        task=MULTICLASS_CLASSIFICATION,
-        metric=accuracy,
-        precision='32',
-        dataset_name='digits',
-        ensemble_size=20,
-        ensemble_nbest=50,
-    )
+print('Starting to build an ensemble!')
+automl = AutoSklearnClassifier(
+    time_left_for_this_task=30,
+    per_run_time_limit=15,
+    ml_memory_limit=1024,
+    shared_mode=True,
+    ensemble_size=50,
+    ensemble_nbest=200,
+    tmp_folder=tmp_folder,
+    output_folder=output_folder,
+    initial_configurations_via_metalearning=0,
+    seed=1,
+)
 
-    predictions = automl.predict(X_test)
-    print(automl.show_models())
-    print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+# Both the ensemble_size and ensemble_nbest parameters can be changed now if
+# necessary
+automl.fit_ensemble(
+    y_train,
+    task=MULTICLASS_CLASSIFICATION,
+    metric=accuracy,
+    precision='32',
+    dataset_name='digits',
+    ensemble_size=20,
+    ensemble_nbest=50,
+)
 
+############################################################################
+# Report the score of the final ensemble
+# ======================================
 
-if __name__ == '__main__':
-    main()
+predictions = automl.predict(X_test)
+print(automl.show_models())
+print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
