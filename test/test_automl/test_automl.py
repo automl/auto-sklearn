@@ -393,6 +393,47 @@ class AutoMLTest(Base, unittest.TestCase):
         self._tearDown(backend_api.temporary_directory)
         self._tearDown(backend_api.output_directory)
 
+    @unittest.mock.patch('autosklearn.smbo.AutoMLSMBO.run_smbo')
+    def test_exceptions_inside_log_in_smbo(self, smbo_run_mock):
+
+        # Make sure that any exception during the AutoML fit due to
+        # SMAC are properly captured in a log file
+        backend_api = self._create_backend('test_exceptions_inside_log')
+        self._tearDown(backend_api.temporary_directory)
+        self._tearDown(backend_api.output_directory)
+
+        automl = autosklearn.automl.AutoML(backend_api, 20, 5)
+
+        output_file = 'test_exceptions_inside_log.log'
+        setup_logger(output_file=output_file)
+        logger = get_logger('test_exceptions_inside_log')
+
+        # Create a custom exception to prevent other errors to slip in
+        class MyException(Exception):
+            pass
+
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+        # The first call is on dummy predictor failure
+        message = str(np.random.randint(100)) + '_run_smbo'
+        smbo_run_mock.side_effect = MyException(message)
+
+        with unittest.mock.patch('autosklearn.automl.AutoML._get_logger') as mock:
+            mock.return_value = logger
+            with self.assertRaises(MyException):
+                automl.fit(
+                    X_train,
+                    Y_train,
+                    metric=accuracy,
+                    task=MULTICLASS_CLASSIFICATION,
+                )
+            with open(output_file) as f:
+                self.assertTrue(message in f.read())
+
+        # Cleanup
+        os.unlink(output_file)
+        self._tearDown(backend_api.temporary_directory)
+        self._tearDown(backend_api.output_directory)
+
 
 if __name__ == "__main__":
     unittest.main()
