@@ -249,7 +249,7 @@ class EnsembleBuilder(multiprocessing.Process):
             )
 
             # populates self.read_preds
-            if not self.read_ensemble_preds():
+            if not self.score_ensemble_preds():
                 time.sleep(self.sleep_duration)
                 continue
 
@@ -319,9 +319,9 @@ class EnsembleBuilder(multiprocessing.Process):
         if return_pred:
             return valid_pred, test_pred
 
-    def read_ensemble_preds(self):
+    def score_ensemble_preds(self):
         """
-            reading predictions on ensemble building data set;
+            score predictions on ensemble building data set;
             populates self.read_preds
         """
 
@@ -411,40 +411,36 @@ class EnsembleBuilder(multiprocessing.Process):
 
             # actually read the predictions and score them
             try:
-                if y_ens_fn.endswith("gz"):
-                    open_method = gzip.open
-                elif y_ens_fn.endswith("npy"):
-                    open_method = open
-                else:
-                    raise ValueError("Unknown filetype %s" % y_ens_fn)
-                with open_method(y_ens_fn, 'rb') as fp:
-                    y_ensemble = self._read_np_fn(fp=fp)
-                    score = calculate_score(solution=self.y_true_ensemble,
-                                            # y_ensemble = y_true for ensemble set
-                                            prediction=y_ensemble,
-                                            task_type=self.task_type,
-                                            metric=self.metric,
-                                            all_scoring_functions=False)
+                y_ensemble = self._read_np_fn(y_ens_fn)
+                score = calculate_score(solution=self.y_true_ensemble,
+                                        # y_ensemble = y_true for ensemble set
+                                        prediction=y_ensemble,
+                                        task_type=self.task_type,
+                                        metric=self.metric,
+                                        all_scoring_functions=False)
 
-                    if self.read_preds[y_ens_fn]["ens_score"] > -1:
-                        self.logger.debug(
-                            'Changing ensemble score for file %s from %f to %f '
-                            'because file modification time changed? %f - %f',
-                            y_ens_fn,
-                            self.read_preds[y_ens_fn]["ens_score"],
-                            score,
-                            self.read_preds[y_ens_fn]["mtime_ens"],
-                            os.path.getmtime(y_ens_fn),
-                        )
-
-                    self.read_preds[y_ens_fn]["ens_score"] = score
-                    self.read_preds[y_ens_fn][Y_ENSEMBLE] = y_ensemble
-                    self.read_preds[y_ens_fn]["mtime_ens"] = os.path.getmtime(
-                        y_ens_fn
+                if self.read_preds[y_ens_fn]["ens_score"] > -1:
+                    self.logger.debug(
+                        'Changing ensemble score for file %s from %f to %f '
+                        'because file modification time changed? %f - %f',
+                        y_ens_fn,
+                        self.read_preds[y_ens_fn]["ens_score"],
+                        score,
+                        self.read_preds[y_ens_fn]["mtime_ens"],
+                        os.path.getmtime(y_ens_fn),
                     )
-                    self.read_preds[y_ens_fn]["loaded"] = 1
 
-                    n_read_files += 1
+                self.read_preds[y_ens_fn]["ens_score"] = score
+
+                # It is not needed to create the object here
+                # To save memory, we just score the object.
+                # self.read_preds[y_ens_fn][Y_ENSEMBLE] = y_ensemble
+                self.read_preds[y_ens_fn]["mtime_ens"] = os.path.getmtime(
+                    y_ens_fn
+                )
+                self.read_preds[y_ens_fn]["loaded"] = 2
+
+                n_read_files += 1
 
             except Exception:
                 self.logger.warning(
@@ -468,7 +464,11 @@ class EnsembleBuilder(multiprocessing.Process):
             according to score on "ensemble set"
             n: self.ensemble_nbest
 
-            Side effect: delete predictions of non-candidate models
+            Side effects:
+                ->Define the n-best models to use in ensemble
+                ->Only the best models are loaded
+                ->Any model that is not best is candidate to deletion
+                  if max models in disc is exceeded.
         """
 
         sorted_keys = self._get_list_of_sorted_preds()
@@ -526,14 +526,7 @@ class EnsembleBuilder(multiprocessing.Process):
 
         for k, _, _ in sorted_keys[:keep_nbest]:
             if self.read_preds[k][Y_ENSEMBLE] is None:
-                if k.endswith("gz"):
-                    open_method = gzip.open
-                elif k.endswith("npy"):
-                    open_method = open
-                else:
-                    raise ValueError("Unknown filetype %s" % k)
-                with open_method(k, 'rb') as fp:
-                    self.read_preds[k][Y_ENSEMBLE] = self._read_np_fn(fp=fp)
+                self.read_preds[k][Y_ENSEMBLE] = self._read_np_fn(k)
                 # No need to load valid and test here because they are loaded
                 #  only if the model ends up in the ensemble
             self.read_preds[k]['loaded'] = 1
@@ -635,17 +628,10 @@ class EnsembleBuilder(multiprocessing.Process):
                     success_keys_valid.append(k)
                     continue
                 try:
-                    if valid_fn.endswith("gz"):
-                        open_method = gzip.open
-                    elif valid_fn.endswith("npy"):
-                        open_method = open
-                    else:
-                        raise ValueError("Unknown filetype %s" % valid_fn)
-                    with open_method(valid_fn, 'rb') as fp:
-                        y_valid = self._read_np_fn(fp)
-                        self.read_preds[k][Y_VALID] = y_valid
-                        success_keys_valid.append(k)
-                        self.read_preds[k]["mtime_valid"] = os.path.getmtime(valid_fn)
+                    y_valid = self._read_np_fn(valid_fn)
+                    self.read_preds[k][Y_VALID] = y_valid
+                    success_keys_valid.append(k)
+                    self.read_preds[k]["mtime_valid"] = os.path.getmtime(valid_fn)
                 except Exception:
                     self.logger.warning('Error loading %s: %s',
                                         valid_fn, traceback.format_exc())
@@ -663,17 +649,10 @@ class EnsembleBuilder(multiprocessing.Process):
                     success_keys_test.append(k)
                     continue
                 try:
-                    if test_fn.endswith("gz"):
-                        open_method = gzip.open
-                    elif test_fn.endswith("npy"):
-                        open_method = open
-                    else:
-                        raise ValueError("Unknown filetype %s" % test_fn)
-                    with open_method(test_fn, 'rb') as fp:
-                        y_test = self._read_np_fn(fp)
-                        self.read_preds[k][Y_TEST] = y_test
-                        success_keys_test.append(k)
-                        self.read_preds[k]["mtime_test"] = os.path.getmtime(test_fn)
+                    y_test = self._read_np_fn(test_fn)
+                    self.read_preds[k][Y_TEST] = y_test
+                    success_keys_test.append(k)
+                    self.read_preds[k]["mtime_test"] = os.path.getmtime(test_fn)
                 except Exception:
                     self.logger.warning('Error loading %s: %s',
                                         test_fn, traceback.format_exc())
@@ -950,13 +929,20 @@ class EnsembleBuilder(multiprocessing.Process):
             for lock in locks:
                 lock.release()
 
-    def _read_np_fn(self, fp):
-        if self.precision == "16":
-            predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float16)
-        elif self.precision == "32":
-            predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float32)
-        elif self.precision == "64":
-            predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float64)
+    def _read_np_fn(self, path):
+        if path.endswith("gz"):
+            open_method = gzip.open
+        elif path.endswith("npy"):
+            open_method = open
         else:
-            predictions = np.load(fp, allow_pickle=True)
-        return predictions
+            raise ValueError("Unknown filetype %s" % path)
+        with open_method(path, 'rb') as fp:
+            if self.precision == 16:
+                predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float16)
+            elif self.precision == 32:
+                predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float32)
+            elif self.precision == 64:
+                predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float64)
+            else:
+                predictions = np.load(fp, allow_pickle=True)
+            return predictions
