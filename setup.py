@@ -37,9 +37,6 @@ class BuildExt(build_ext):
 
 
 extensions = [
-    Extension('autosklearn.data.competition_c_functions',
-              sources=['autosklearn/data/competition_c_functions.pyx'],
-              language='c')
 ]
 
 

@@ -1,14 +1,14 @@
 # -*- encoding: utf-8 -*-
 import copy
 import multiprocessing
-from typing import Optional, List, Dict
+from typing import Optional, Dict
 
 import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.utils.multiclass import type_of_target
 import joblib
 
-from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, BaseAutoML
+from autosklearn.automl import AutoMLClassifier, AutoMLRegressor
 from autosklearn.util.backend import create, get_randomized_directory_names
 
 
@@ -263,7 +263,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.logging_config = logging_config
         self.metadata_directory = metadata_directory
 
-        self._automl = None  # type: Optional[List[BaseAutoML]]
+        self._automl = None
         # n_jobs after conversion to a number (b/c default is None)
         self._n_jobs = None
         super().__init__()

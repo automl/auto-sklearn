@@ -24,7 +24,6 @@ from sklearn.dummy import DummyClassifier, DummyRegressor
 
 from autosklearn.metrics import Scorer
 from autosklearn.data.abstract_data_manager import AbstractDataManager
-from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
@@ -226,32 +225,6 @@ class AutoML(BaseEstimator):
             metric=metric,
             load_models=load_models,
             only_return_configuration_space=only_return_configuration_space,
-        )
-
-    # TODO this is very old code which can be dropped!
-    def fit_automl_dataset(self, dataset, metric, load_models=True):
-        self._stopwatch = StopWatch()
-        self._backend.save_start_time(self._seed)
-
-        name = os.path.basename(dataset)
-        self._stopwatch.start_task(name)
-        self._start_task(self._stopwatch, name)
-        self._dataset_name = name
-
-        self._logger = self._get_logger(name)
-        self._logger.debug('======== Reading and converting data ==========')
-        # Encoding the labels will be done after the metafeature calculation!
-        self._data_memory_limit = float(self._ml_memory_limit) / 3
-        loaded_data_manager = CompetitionDataManager(
-            dataset, max_memory_in_mb=self._data_memory_limit)
-        loaded_data_manager_str = str(loaded_data_manager).split('\n')
-        for part in loaded_data_manager_str:
-            self._logger.debug(part)
-
-        return self._fit(
-            datamanager=loaded_data_manager,
-            metric=metric,
-            load_models=load_models,
         )
 
     def fit_on_datamanager(self, datamanager, metric, load_models=True):

@@ -15,11 +15,11 @@ from smac.facade.roar_facade import ROAR
 from autosklearn.util.backend import Backend
 from autosklearn.automl import AutoML
 import autosklearn.automl
+from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.metrics import accuracy
 import autosklearn.pipeline.util as putil
 from autosklearn.util.logging_ import setup_logger, get_logger
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION
-from autosklearn.smbo import load_data
 from smac.tae.execute_ta_run import StatusType
 
 sys.path.append(os.path.dirname(__file__))
@@ -209,6 +209,8 @@ class AutoMLTest(Base, unittest.TestCase):
             initial_configurations_via_metalearning=0,
             get_smac_object_callback=get_roar_object_callback,
         )
+        setup_logger()
+        automl._logger = get_logger('test_fit_roar')
         automl.fit(
             X_train, Y_train, metric=accuracy, task=MULTICLASS_CLASSIFICATION,
         )
@@ -254,26 +256,38 @@ class AutoMLTest(Base, unittest.TestCase):
     def test_automl_outputs(self):
         backend_api = self._create_backend('test_automl_outputs')
 
-        name = '31_bac'
-        dataset = os.path.join(self.test_dir, '..', '.data', name)
-        data_manager_file = os.path.join(backend_api.temporary_directory, '.auto-sklearn',
-                                         'datamanager.pkl')
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+        name = 'iris'
+        data_manager_file = os.path.join(
+            backend_api.temporary_directory,
+            '.auto-sklearn',
+            'datamanager.pkl'
+        )
 
         auto = autosklearn.automl.AutoML(
             backend_api, 20, 5,
             initial_configurations_via_metalearning=0,
             seed=100,
         )
-        auto.fit_automl_dataset(dataset, accuracy)
+        setup_logger()
+        auto._logger = get_logger('test_automl_outputs')
+        auto.fit(
+            X=X_train,
+            y=Y_train,
+            X_test=X_test,
+            y_test=Y_test,
+            metric=accuracy,
+            dataset_name=name,
+            task=MULTICLASS_CLASSIFICATION,
+        )
 
         # pickled data manager (without one hot encoding!)
         with open(data_manager_file, 'rb') as fh:
             D = pickle.load(fh)
-            self.assertTrue(np.allclose(D.data['X_train'][0, :3],
-                                        [1., 12., 2.]))
+            self.assertTrue(np.allclose(D.data['X_train'], X_train))
 
         # Check that all directories are there
-        fixture = ['cv_models', 'predictions_valid', 'true_targets_ensemble.npy',
+        fixture = ['cv_models', 'true_targets_ensemble.npy',
                    'start_time_100', 'datamanager.pkl',
                    'predictions_ensemble',
                    'ensembles', 'predictions_test', 'models']
@@ -307,10 +321,23 @@ class AutoMLTest(Base, unittest.TestCase):
         self._tearDown(backend_api.output_directory)
 
     def test_do_dummy_prediction(self):
-        for name in ['401_bac', '31_bac', 'adult', 'cadata']:
+        datasets = {
+            'breast_cancer': 'binary.classification',
+            'wine': 'multiclass.classification',
+            'diabetes': 'regression',
+        }
+
+        for name, task in datasets.items():
             backend_api = self._create_backend('test_do_dummy_prediction')
 
-            dataset = os.path.join(self.test_dir, '..', '.data', name)
+            X_train, Y_train, X_test, Y_test = putil.get_dataset(name)
+            datamanager = XYDataManager(
+                X_train, Y_train,
+                X_test, Y_test,
+                task=task,
+                dataset_name=name,
+                feat_type=None,
+            )
 
             auto = autosklearn.automl.AutoML(
                 backend_api, 20, 5,
@@ -319,9 +346,12 @@ class AutoMLTest(Base, unittest.TestCase):
             )
             setup_logger()
             auto._logger = get_logger('test_do_dummy_predictions')
-            auto._backend._make_internals_directory()
-            D = load_data(dataset, backend_api)
-            auto._backend.save_datamanager(D)
+            auto._backend.save_datamanager(datamanager)
+            D = backend_api.load_datamanager()
+
+            # Check if data manager is correcly loaded
+            self.assertEqual(D.info['task'], datamanager.info['task'])
+
             auto._do_dummy_prediction(D, 1)
 
             # Ensure that the dummy predictions are not in the current working
@@ -340,7 +370,14 @@ class AutoMLTest(Base, unittest.TestCase):
     def test_fail_if_dummy_prediction_fails(self, ta_run_mock):
         backend_api = self._create_backend('test_fail_if_dummy_prediction_fails')
 
-        dataset = os.path.join(self.test_dir, '..', '.data', '401_bac')
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+        datamanager = XYDataManager(
+            X_train, Y_train,
+            X_test, Y_test,
+            task=2,
+            feat_type=['Numerical' for i in range(X_train.shape[1])],
+            dataset_name='iris',
+        )
 
         time_for_this_task = 30
         per_run_time = 10
@@ -353,12 +390,11 @@ class AutoMLTest(Base, unittest.TestCase):
         setup_logger()
         auto._logger = get_logger('test_fail_if_dummy_prediction_fails')
         auto._backend._make_internals_directory()
-        D = load_data(dataset, backend_api)
-        auto._backend.save_datamanager(D)
+        auto._backend.save_datamanager(datamanager)
 
         # First of all, check that ta.run() is actually called.
         ta_run_mock.return_value = StatusType.SUCCESS, None, None, "test"
-        auto._do_dummy_prediction(D, 1)
+        auto._do_dummy_prediction(datamanager, 1)
         ta_run_mock.assert_called_once_with(1, cutoff=time_for_this_task)
 
         # Case 1. Check that function raises no error when statustype == success.
@@ -366,7 +402,7 @@ class AutoMLTest(Base, unittest.TestCase):
         ta_run_mock.return_value = StatusType.SUCCESS, None, None, "test"
         raised = False
         try:
-            auto._do_dummy_prediction(D, 1)
+            auto._do_dummy_prediction(datamanager, 1)
         except ValueError:
             raised = True
         self.assertFalse(raised, 'Exception raised')
@@ -378,35 +414,35 @@ class AutoMLTest(Base, unittest.TestCase):
                                'Dummy prediction failed with run state StatusType.CRASHED '
                                'and additional output: test.',
                                auto._do_dummy_prediction,
-                               D, 1,
+                               datamanager, 1,
                                )
         ta_run_mock.return_value = StatusType.ABORT, None, None, "test"
         self.assertRaisesRegex(ValueError,
                                'Dummy prediction failed with run state StatusType.ABORT '
                                'and additional output: test.',
                                auto._do_dummy_prediction,
-                               D, 1,
+                               datamanager, 1,
                                )
         ta_run_mock.return_value = StatusType.TIMEOUT, None, None, "test"
         self.assertRaisesRegex(ValueError,
                                'Dummy prediction failed with run state StatusType.TIMEOUT '
                                'and additional output: test.',
                                auto._do_dummy_prediction,
-                               D, 1,
+                               datamanager, 1,
                                )
         ta_run_mock.return_value = StatusType.MEMOUT, None, None, "test"
         self.assertRaisesRegex(ValueError,
                                'Dummy prediction failed with run state StatusType.MEMOUT '
                                'and additional output: test.',
                                auto._do_dummy_prediction,
-                               D, 1,
+                               datamanager, 1,
                                )
         ta_run_mock.return_value = StatusType.CAPPED, None, None, "test"
         self.assertRaisesRegex(ValueError,
                                'Dummy prediction failed with run state StatusType.CAPPED '
                                'and additional output: test.',
                                auto._do_dummy_prediction,
-                               D, 1,
+                               datamanager, 1,
                                )
 
         self._tearDown(backend_api.temporary_directory)
