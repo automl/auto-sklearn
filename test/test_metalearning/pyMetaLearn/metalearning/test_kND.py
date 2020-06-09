@@ -42,21 +42,21 @@ class kNDTest(unittest.TestCase):
         neighbor, distance = kND.kNearestDatasets(self.anneal, 1,
                                                   return_distance=True)
         self.assertEqual([233], neighbor)
-        np.testing.assert_array_almost_equal([1.82298937], distance)
+        np.testing.assert_array_almost_equal([3.8320802803440586], distance)
 
         neighbors = kND.kNearestDatasets(self.anneal, 2)
         self.assertEqual([233, 234], neighbors)
         neighbors, distance = kND.kNearestDatasets(self.anneal, 2,
                                                    return_distance=True)
         self.assertEqual([233, 234], neighbors)
-        np.testing.assert_array_almost_equal([1.822989, 2.267919], distance)
+        np.testing.assert_array_almost_equal([3.8320802803440586, 4.367919719655942], distance)
 
         neighbors = kND.kNearestDatasets(self.anneal, -1)
         self.assertEqual([233, 234], neighbors)
         neighbors, distance = kND.kNearestDatasets(self.anneal, -1,
                                                    return_distance=True)
         self.assertEqual([233, 234], neighbors)
-        np.testing.assert_array_almost_equal([1.822989, 2.267919], distance)
+        np.testing.assert_array_almost_equal([3.8320802803440586, 4.367919719655942], distance)
 
         self.assertRaises(ValueError, kND.kNearestDatasets, self.anneal, 0)
         self.assertRaises(ValueError, kND.kNearestDatasets, self.anneal, -2)
@@ -67,34 +67,22 @@ class kNDTest(unittest.TestCase):
                 self.runs.loc[:, [233, 234]])
         neighbor = kND.kBestSuggestions(self.anneal, 1)
         np.testing.assert_array_almost_equal(
-            [(233, 1.8229893712531495, 1)],
+            [(233, 3.8320802803440586, 1)],
             neighbor,
         )
         neighbors = kND.kBestSuggestions(self.anneal, 2)
         np.testing.assert_array_almost_equal(
-            [(233, 1.8229893712531495, 1), (234, 2.2679197196559415, 2)],
+            [(233, 3.8320802803440586, 1), (234, 4.367919719655942, 2)],
             neighbors,
         )
         neighbors = kND.kBestSuggestions(self.anneal, -1)
         np.testing.assert_array_almost_equal(
-            [(233, 1.8229893712531495, 1), (234, 2.2679197196559415, 2)],
+            [(233, 3.8320802803440586, 1), (234, 4.367919719655942, 2)],
             neighbors,
         )
 
         self.assertRaises(ValueError, kND.kBestSuggestions, self.anneal, 0)
         self.assertRaises(ValueError, kND.kBestSuggestions, self.anneal, -2)
-
-    def test_scale(self):
-        kND = KNearestDatasets()
-        metafeatures = pd.DataFrame([self.anneal, self.krvskp])
-        metafeatures, other = kND._scale(metafeatures, self.labor)
-        from pandas.util.testing import assert_series_equal
-        # Series.equal does not work properly with floats...
-        assert_series_equal(metafeatures.iloc[0],
-                            pd.Series({"number_of_instances": 0.267919719656,
-                                       "number_of_classes": 1,
-                                       "number_of_features": 1},
-                            name=232))
 
     def test_random_metric(self):
         kND = KNearestDatasets(metric=get_random_metric(random_state=1))

@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from sklearn.neighbors import NearestNeighbors
+from sklearn.preprocessing import MinMaxScaler
 import sklearn.utils
 
 from ....util.logging_ import get_logger
@@ -18,6 +19,7 @@ class KNearestDatasets(object):
         self.runs = None
         self.best_configuration_per_dataset = None
         self.random_state = sklearn.utils.check_random_state(random_state)
+        self.scaler = MinMaxScaler()
 
         if self.metric_params is None:
             self.metric_params = {}
@@ -43,6 +45,9 @@ class KNearestDatasets(object):
         self.metafeatures = metafeatures
         self.runs = runs
         self.num_datasets = runs.shape[1]
+
+        # Fit the metafeatures for scaler
+        self.scaler.fit(self.metafeatures)
 
         # for each dataset, sort the runs according to their result
         best_configuration_per_dataset = {}
@@ -102,8 +107,9 @@ class KNearestDatasets(object):
         elif k == -1:
             k = self.num_datasets
 
-        X_train, x = self._scale(self.metafeatures, x)
+        X_train = self.scaler.transform(self.metafeatures)
         x = x.values.reshape((1, -1))
+        x = self.scaler.transform(x)
         self._nearest_neighbors.fit(X_train)
         distances, neighbor_indices = self._nearest_neighbors.kneighbors(
             x, n_neighbors=k, return_distance=True)
@@ -126,6 +132,7 @@ class KNearestDatasets(object):
             raise ValueError('Number of neighbors k cannot be zero or negative.')
         nearest_datasets, distances = self.kNearestDatasets(x, -1,
                                                             return_distance=True)
+
         kbest = []
 
         added_configurations = set()
@@ -151,20 +158,3 @@ class KNearestDatasets(object):
         if k == -1:
             k = len(kbest)
         return kbest[:k]
-
-    def _scale(self, metafeatures, other):
-        assert isinstance(other, pd.Series), type(other)
-        assert other.values.dtype == np.float64
-        scaled_metafeatures = metafeatures.copy(deep=True)
-        other = other.copy(deep=True)
-
-        mins = scaled_metafeatures.min()
-        maxs = scaled_metafeatures.max()
-        # I also need to scale the target dataset meta features...
-        mins = pd.DataFrame(data=[mins, other]).min()
-        maxs = pd.DataFrame(data=[maxs, other]).max()
-        divisor = (maxs-mins)
-        divisor[divisor == 0] = 1
-        scaled_metafeatures = (scaled_metafeatures - mins) / divisor
-        other = (other - mins) / divisor
-        return scaled_metafeatures, other
