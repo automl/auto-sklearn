@@ -241,7 +241,7 @@ component for using in auto-sklearn.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[WARNING] [2020-06-08 21:34:29,418:AutoMLSMBO(1)::06e160863bd8c66e2adaf9051e769a90] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.7.0-py3.7-linux-x86_64.egg/autosklearn/metalearning/files/r2_regression_dense
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[WARNING] [2020-06-09 09:31:47,952:AutoMLSMBO(1)::af5994c42709896acafd89101abc01de] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.7.0-py3.7-linux-x86_64.egg/autosklearn/metalearning/files/r2_regression_dense
 
 AutoSklearnRegressor(delete_output_folder_after_terminate=True,
                      delete_tmp_folder_after_terminate=True,
@@ -271,18 +271,18 @@ AutoSklearnRegressor(delete_output_folder_after_terminate=True,
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>r2 score:  -0.15654551177586695
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>r2 score:  -0.20663829519274346
 auto-sklearn results:
-  Dataset name: 06e160863bd8c66e2adaf9051e769a90
+  Dataset name: af5994c42709896acafd89101abc01de
   Metric: r2
-  Best validation score: 0.516311
-  Number of target algorithm runs: 25
-  Number of successful target algorithm runs: 24
+  Best validation score: 0.524885
+  Number of target algorithm runs: 27
+  Number of successful target algorithm runs: 26
   Number of crashed target algorithm runs: 1
   Number of target algorithms that exceeded the time limit: 0
   Number of target algorithms that exceeded the memory limit: 0
 
-[(0.440000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;minmax&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;fast_ica&#39;, &#39;regressor:__choice__&#39;: &#39;KernelRidgeRegression&#39;, &#39;feature_preprocessor:fast_ica:algorithm&#39;: &#39;deflation&#39;, &#39;feature_preprocessor:fast_ica:fun&#39;: &#39;logcosh&#39;, &#39;feature_preprocessor:fast_ica:whiten&#39;: &#39;False&#39;, &#39;regressor:KernelRidgeRegression:alpha&#39;: 0.003849452646594815, &#39;regressor:KernelRidgeRegression:degree&#39;: 4, &#39;regressor:KernelRidgeRegression:gamma&#39;: 0.0022292213231078608, &#39;regressor:KernelRidgeRegression:kernel&#39;: &#39;rbf&#39;},
+[(0.640000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;none&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;regressor:__choice__&#39;: &#39;KernelRidgeRegression&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.27531082725097844, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.8932563386250971, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;, &#39;regressor:KernelRidgeRegression:alpha&#39;: 4.286080618741067e-05, &#39;regressor:KernelRidgeRegression:degree&#39;: 4, &#39;regressor:KernelRidgeRegression:gamma&#39;: 4.3674456343947476e-05, &#39;regressor:KernelRidgeRegression:kernel&#39;: &#39;rbf&#39;},
 dataset_properties={
   &#39;task&#39;: 4,
   &#39;sparse&#39;: False,
@@ -290,7 +290,7 @@ dataset_properties={
   &#39;multiclass&#39;: False,
   &#39;target_type&#39;: &#39;regression&#39;,
   &#39;signed&#39;: False})),
-(0.320000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;kitchen_sinks&#39;, &#39;regressor:__choice__&#39;: &#39;KernelRidgeRegression&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.0006225406258626483, &#39;feature_preprocessor:kitchen_sinks:gamma&#39;: 0.11059642805452681, &#39;feature_preprocessor:kitchen_sinks:n_components&#39;: 1027, &#39;regressor:KernelRidgeRegression:alpha&#39;: 0.008427010311759192, &#39;regressor:KernelRidgeRegression:degree&#39;: 4, &#39;regressor:KernelRidgeRegression:gamma&#39;: 0.0005282703510062793, &#39;regressor:KernelRidgeRegression:kernel&#39;: &#39;polynomial&#39;},
+(0.200000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;quantile_transformer&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;select_percentile_regression&#39;, &#39;regressor:__choice__&#39;: &#39;KernelRidgeRegression&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.009032372734073688, &#39;data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles&#39;: 1583, &#39;data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution&#39;: &#39;uniform&#39;, &#39;feature_preprocessor:select_percentile_regression:percentile&#39;: 61.522227911432154, &#39;feature_preprocessor:select_percentile_regression:score_func&#39;: &#39;mutual_info&#39;, &#39;regressor:KernelRidgeRegression:alpha&#39;: 0.0001268693553932718, &#39;regressor:KernelRidgeRegression:degree&#39;: 5, &#39;regressor:KernelRidgeRegression:gamma&#39;: 0.0021696387998641205, &#39;regressor:KernelRidgeRegression:kernel&#39;: &#39;sigmoid&#39;},
 dataset_properties={
   &#39;task&#39;: 4,
   &#39;sparse&#39;: False,
@@ -298,15 +298,7 @@ dataset_properties={
   &#39;multiclass&#39;: False,
   &#39;target_type&#39;: &#39;regression&#39;,
   &#39;signed&#39;: False})),
-(0.220000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;robust_scaler&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;extra_trees_preproc_for_regression&#39;, &#39;regressor:__choice__&#39;: &#39;KernelRidgeRegression&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.04855279604282778, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max&#39;: 0.898006848822175, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min&#39;: 0.2751062239714914, &#39;feature_preprocessor:extra_trees_preproc_for_regression:bootstrap&#39;: &#39;False&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:criterion&#39;: &#39;mae&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:max_depth&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:max_features&#39;: 0.6872993758767931, &#39;feature_preprocessor:extra_trees_preproc_for_regression:max_leaf_nodes&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:min_samples_leaf&#39;: 10, &#39;feature_preprocessor:extra_trees_preproc_for_regression:min_samples_split&#39;: 5, &#39;feature_preprocessor:extra_trees_preproc_for_regression:min_weight_fraction_leaf&#39;: 0.0, &#39;feature_preprocessor:extra_trees_preproc_for_regression:n_estimators&#39;: 100, &#39;regressor:KernelRidgeRegression:alpha&#39;: 0.0016280827229782364, &#39;regressor:KernelRidgeRegression:degree&#39;: 4, &#39;regressor:KernelRidgeRegression:gamma&#39;: 7.748817756107138e-05, &#39;regressor:KernelRidgeRegression:kernel&#39;: &#39;polynomial&#39;},
-dataset_properties={
-  &#39;task&#39;: 4,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;regression&#39;,
-  &#39;signed&#39;: False})),
-(0.020000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;none&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;kernel_pca&#39;, &#39;regressor:__choice__&#39;: &#39;KernelRidgeRegression&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.00010401737713413709, &#39;feature_preprocessor:kernel_pca:kernel&#39;: &#39;rbf&#39;, &#39;feature_preprocessor:kernel_pca:n_components&#39;: 803, &#39;regressor:KernelRidgeRegression:alpha&#39;: 0.02221545060655648, &#39;regressor:KernelRidgeRegression:degree&#39;: 5, &#39;regressor:KernelRidgeRegression:gamma&#39;: 0.0290156550975912, &#39;regressor:KernelRidgeRegression:kernel&#39;: &#39;rbf&#39;, &#39;feature_preprocessor:kernel_pca:gamma&#39;: 0.005135736022780924},
+(0.160000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;quantile_transformer&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;extra_trees_preproc_for_regression&#39;, &#39;regressor:__choice__&#39;: &#39;KernelRidgeRegression&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles&#39;: 855, &#39;data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution&#39;: &#39;uniform&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:bootstrap&#39;: &#39;True&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:criterion&#39;: &#39;mae&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:max_depth&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:max_features&#39;: 0.20577879596599347, &#39;feature_preprocessor:extra_trees_preproc_for_regression:max_leaf_nodes&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:min_samples_leaf&#39;: 12, &#39;feature_preprocessor:extra_trees_preproc_for_regression:min_samples_split&#39;: 6, &#39;feature_preprocessor:extra_trees_preproc_for_regression:min_weight_fraction_leaf&#39;: 0.0, &#39;feature_preprocessor:extra_trees_preproc_for_regression:n_estimators&#39;: 100, &#39;regressor:KernelRidgeRegression:alpha&#39;: 0.0031133818431307463, &#39;regressor:KernelRidgeRegression:degree&#39;: 2, &#39;regressor:KernelRidgeRegression:gamma&#39;: 0.020291629791371012, &#39;regressor:KernelRidgeRegression:kernel&#39;: &#39;rbf&#39;},
 dataset_properties={
   &#39;task&#39;: 4,
   &#39;sparse&#39;: False,
@@ -317,7 +309,7 @@ dataset_properties={
 ]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  24.251 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  24.226 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-example-extending-regression-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/a9bf1f3a6510f41a85fa7da5c7571351/example_extending_regression.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_extending_regression.py</span></code></a></p>
