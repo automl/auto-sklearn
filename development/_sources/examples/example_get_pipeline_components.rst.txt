@@ -170,42 +170,39 @@ Inspect the components of the best model
 
  .. code-block:: none
 
-    The 0th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243]
-    The 1th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
-    The 2th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299
-     0.0238431  0.01493261 0.01376414 0.01137049 0.01037373 0.00874117
-     0.0075763  0.00486529]
-    The 3th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
-    The 4th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
-    The 5th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757]
-    The 6th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243]
-    The 7th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757]
-    The 8th pipeline has a explained variance of [0.43295688 0.1790573 ]
-    The 9th pipeline has a explained variance of [0.43295688 0.1790573 ]
-    The 10th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243]
-    The 11th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757]
-    The 12th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299
+    The 0th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
+    The 1th pipeline has a explained variance of [0.43295688 0.1790573 ]
+    The 2th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243]
+    The 3th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299
      0.0238431  0.01493261 0.01376414 0.01137049]
+    The 4th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299
+     0.0238431 ]
+    The 5th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243]
+    The 6th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
+    The 7th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299
+     0.0238431  0.01493261 0.01376414 0.01137049 0.01037373 0.00874117]
+    The 8th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
+    The 9th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243]
+    The 10th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243]
+    The 11th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
+    The 12th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
     The 13th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
     The 14th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
-    The 15th pipeline has a explained variance of [0.43295688 0.1790573 ]
-    The 16th pipeline has a explained variance of [0.43295688 0.1790573 ]
+    The 15th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757]
+    The 16th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
     The 17th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757]
-    The 18th pipeline has a explained variance of [0.43295688 0.1790573 ]
-    The 19th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299
-     0.0238431 ]
+    The 18th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243]
+    The 19th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757]
     The 20th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
-    The 21th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
-    The 22th pipeline has a explained variance of [0.43295688 0.1790573 ]
+    The 21th pipeline has a explained variance of [0.43295688 0.1790573 ]
+    The 22th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
     The 23th pipeline has a explained variance of [0.43295688 0.1790573 ]
-    The 24th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299]
-    The 25th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243]
-    The 26th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
-    The 27th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299
-     0.0238431  0.01493261 0.01376414]
-    The 28th pipeline has a explained variance of [0.43295688 0.1790573 ]
-    The 29th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299
-     0.0238431  0.01493261 0.01376414]
+    The 24th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243]
+    The 25th pipeline has a explained variance of [0.43295688 0.1790573 ]
+    The 26th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299]
+    The 27th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299]
+    The 28th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299
+     0.0238431  0.01493261 0.01376414 0.01137049 0.01037373 0.00874117]
 
 
 
@@ -213,7 +210,7 @@ Inspect the components of the best model
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  54.845 seconds)
+   **Total running time of the script:** ( 1 minutes  54.835 seconds)
 
 
 .. _sphx_glr_download_examples_example_get_pipeline_components.py:
