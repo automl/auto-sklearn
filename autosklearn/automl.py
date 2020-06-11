@@ -667,7 +667,7 @@ class AutoML(BaseEstimator):
 
         return predictions
 
-    def fit_ensemble(self, y, task=None, metric=None, precision='32',
+    def fit_ensemble(self, y, task=None, metric=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
         if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit']:
@@ -1000,7 +1000,7 @@ class BaseAutoML(AutoML):
 
         return super().refit(X, y)
 
-    def fit_ensemble(self, y, task=None, metric=None, precision='32',
+    def fit_ensemble(self, y, task=None, metric=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
         _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
@@ -1081,7 +1081,7 @@ class AutoMLClassifier(BaseAutoML):
             load_models=load_models,
         )
 
-    def fit_ensemble(self, y, task=None, metric=None, precision='32',
+    def fit_ensemble(self, y, task=None, metric=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
         y, _classes, _n_classes = self._process_target_classes(y)
@@ -1176,7 +1176,7 @@ class AutoMLRegressor(BaseAutoML):
             load_models=load_models,
         )
 
-    def fit_ensemble(self, y, task=None, metric=None, precision='32',
+    def fit_ensemble(self, y, task=None, metric=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
         y = super()._check_y(y)

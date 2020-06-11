@@ -41,7 +41,7 @@ class EnsembleBuilder(multiprocessing.Process):
             seed: int = 1,
             shared_mode: bool = False,
             max_iterations: int = None,
-            precision: str = "32",
+            precision: str = 32,
             sleep_duration: int = 2,
             memory_limit: int = 1000,
             read_at_most: int = 5,
@@ -87,7 +87,7 @@ class EnsembleBuilder(multiprocessing.Process):
             max_iterations: int
                 maximal number of iterations to run this script
                 (default None --> deactivated)
-            precision: ["16","32","64","128"]
+            precision: [16,32,64,128]
                 precision of floats to read the predictions
             sleep_duration: int
                 duration of sleeping time between two iterations of this script (in sec)
@@ -413,7 +413,6 @@ class EnsembleBuilder(multiprocessing.Process):
             try:
                 y_ensemble = self._read_np_fn(y_ens_fn)
                 score = calculate_score(solution=self.y_true_ensemble,
-                                        # y_ensemble = y_true for ensemble set
                                         prediction=y_ensemble,
                                         task_type=self.task_type,
                                         metric=self.metric,
@@ -524,13 +523,6 @@ class EnsembleBuilder(multiprocessing.Process):
             )
             keep_nbest = self.max_models_on_disc
 
-        for k, _, _ in sorted_keys[:keep_nbest]:
-            if self.read_preds[k][Y_ENSEMBLE] is None:
-                self.read_preds[k][Y_ENSEMBLE] = self._read_np_fn(k)
-                # No need to load valid and test here because they are loaded
-                #  only if the model ends up in the ensemble
-            self.read_preds[k]['loaded'] = 1
-
         # consider performance_range_threshold
         if self.performance_range_threshold > 0:
             best_score = sorted_keys[0][1]
@@ -568,6 +560,14 @@ class EnsembleBuilder(multiprocessing.Process):
                     self.read_preds[k]['ens_score'],
                 )
                 self.read_preds[k]['loaded'] = 2
+
+        # Load the predictions for the winning
+        for k in sorted_keys[:ensemble_n_best]:
+            if self.read_preds[k][Y_ENSEMBLE] is None:
+                self.read_preds[k][Y_ENSEMBLE] = self._read_np_fn(k)
+                # No need to load valid and test here because they are loaded
+                #  only if the model ends up in the ensemble
+            self.read_preds[k]['loaded'] = 1
 
         # return best scored keys of self.read_preds
         return sorted_keys[:ensemble_n_best]
@@ -930,6 +930,16 @@ class EnsembleBuilder(multiprocessing.Process):
                 lock.release()
 
     def _read_np_fn(self, path):
+
+        # Support for string precision
+        if isinstance(self.precision, str):
+            precision = int(self.precision)
+            self.logger.warning("Interpreted str-precision as {}".format(
+                precision
+            ))
+        else:
+            precision = self.precision
+
         if path.endswith("gz"):
             open_method = gzip.open
         elif path.endswith("npy"):
@@ -937,11 +947,11 @@ class EnsembleBuilder(multiprocessing.Process):
         else:
             raise ValueError("Unknown filetype %s" % path)
         with open_method(path, 'rb') as fp:
-            if self.precision == 16:
+            if precision == 16:
                 predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float16)
-            elif self.precision == 32:
+            elif precision == 32:
                 predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float32)
-            elif self.precision == 64:
+            elif precision == 64:
                 predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float64)
             else:
                 predictions = np.load(fp, allow_pickle=True)
