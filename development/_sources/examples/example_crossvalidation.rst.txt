@@ -170,7 +170,7 @@ final ensemble on the whole dataset.
 
  .. code-block:: none
 
-    Accuracy score 0.972027972027972
+    Accuracy score 0.965034965034965
 
 
 
@@ -178,7 +178,7 @@ final ensemble on the whole dataset.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  10.353 seconds)
+   **Total running time of the script:** ( 2 minutes  10.633 seconds)
 
 
 .. _sphx_glr_download_examples_example_crossvalidation.py:
