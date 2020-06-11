@@ -9,6 +9,7 @@ import unittest.mock
 from joblib import Memory
 import numpy as np
 
+from sklearn.base import clone
 import sklearn.datasets
 import sklearn.decomposition
 import sklearn.model_selection
@@ -577,6 +578,30 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual((1647, 10), prediction.shape)
         self.assertEqual(84, cls_predict.call_count)
         np.testing.assert_array_almost_equal(prediction_, prediction)
+
+    def test_pipeline_clonability(self):
+        X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris')
+        auto = SimpleClassificationPipeline()
+        auto = auto.fit(X_train, Y_train)
+        auto_clone = clone(auto)
+        auto_clone_params = auto_clone.get_params()
+
+        # Make sure all keys are copied properly
+        for k, v in auto.get_params().items():
+            self.assertIn(k, auto_clone_params)
+
+        # Make sure the params getter of estimator are honored
+        klass = auto.__class__
+        new_object_params = auto.get_params(deep=False)
+        for name, param in new_object_params.items():
+            new_object_params[name] = clone(param, safe=False)
+        new_object = klass(**new_object_params)
+        params_set = new_object.get_params(deep=False)
+
+        for name in new_object_params:
+            param1 = new_object_params[name]
+            param2 = params_set[name]
+            self.assertEqual(param1, param2)
 
     def test_set_params(self):
         pass

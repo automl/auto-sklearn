@@ -32,7 +32,15 @@ class DataPreprocessor(AutoSklearnComponent):
             if categorical_features.dtype != 'bool':
                 raise ValueError('Parameter categorical_features must'
                                  ' only contain booleans.')
+        self.config = config
+        self.pipeline = pipeline
+        self.dataset_properties = dataset_properties
+        self.include = include
+        self.exclude = exclude
+        self.random_state = random_state
+        self.init_params = init_params
         self.categorical_features = categorical_features
+        self.force_sparse_output = force_sparse_output
 
         # The pipeline that will be applied to the categorical features (i.e. columns)
         # of the dataset
@@ -48,7 +56,6 @@ class DataPreprocessor(AutoSklearnComponent):
             ["categorical_transformer", self.categ_ppl],
             ["numerical_transformer", self.numer_ppl],
         ]
-        self.force_sparse = force_sparse_output
 
     def fit(self, X, y=None):
         n_feats = X.shape[1]
@@ -73,7 +80,7 @@ class DataPreprocessor(AutoSklearnComponent):
                 ["numerical_transformer", self.numer_ppl, num_feats]
             ]
 
-        self.sparse_ = sparse.issparse(X) or self.force_sparse
+        self.sparse_ = sparse.issparse(X) or self.force_sparse_output
         self.column_transformer = sklearn.compose.ColumnTransformer(
             transformers=sklearn_transf_spec,
             sparse_threshold=float(self.sparse_),
