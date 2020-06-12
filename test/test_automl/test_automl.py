@@ -19,7 +19,7 @@ from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.metrics import accuracy
 import autosklearn.pipeline.util as putil
 from autosklearn.util.logging_ import setup_logger, get_logger
-from autosklearn.constants import MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION
+from autosklearn.constants import MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION, REGRESSION
 from smac.tae.execute_ta_run import StatusType
 
 sys.path.append(os.path.dirname(__file__))
@@ -123,9 +123,14 @@ class AutoMLTest(Base, unittest.TestCase):
         backend_api = self._create_backend('test_fit')
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        automl = autosklearn.automl.AutoML(backend_api, 20, 5)
+        automl = autosklearn.automl.AutoML(
+            backend=backend_api,
+            time_left_for_this_task=20,
+            per_run_time_limit=5,
+            metric=accuracy,
+        )
         automl.fit(
-            X_train, Y_train, metric=accuracy, task=MULTICLASS_CLASSIFICATION,
+            X_train, Y_train, task=MULTICLASS_CLASSIFICATION,
         )
         score = automl.score(X_test, Y_test)
         self.assertGreaterEqual(score, 0.8)
@@ -150,10 +155,11 @@ class AutoMLTest(Base, unittest.TestCase):
             initial_configurations_via_metalearning=0,
             resampling_strategy='holdout',
             include_estimators=['sgd'],
-            include_preprocessors=['no_preprocessing']
+            include_preprocessors=['no_preprocessing'],
+            metric=accuracy,
         )
 
-        automl.fit(X, Y, metric=accuracy, task=MULTICLASS_CLASSIFICATION,
+        automl.fit(X, Y, task=MULTICLASS_CLASSIFICATION,
                    X_test=X, y_test=Y)
 
         # Assert at least one model file has been deleted and that there were no
@@ -208,11 +214,12 @@ class AutoMLTest(Base, unittest.TestCase):
             per_run_time_limit=5,
             initial_configurations_via_metalearning=0,
             get_smac_object_callback=get_roar_object_callback,
+            metric=accuracy,
         )
         setup_logger()
         automl._logger = get_logger('test_fit_roar')
         automl.fit(
-            X_train, Y_train, metric=accuracy, task=MULTICLASS_CLASSIFICATION,
+            X_train, Y_train, task=MULTICLASS_CLASSIFICATION,
         )
         score = automl.score(X_test, Y_test)
         self.assertGreaterEqual(score, 0.8)
@@ -239,9 +246,10 @@ class AutoMLTest(Base, unittest.TestCase):
 
         automl = autosklearn.automl.AutoML(backend_api, 20, 5,
                                            include_estimators=['sgd'],
-                                           include_preprocessors=['no_preprocessing'])
-        automl.fit(X_train, Y_train, task=BINARY_CLASSIFICATION,
-                   metric=accuracy)
+                                           include_preprocessors=['no_preprocessing'],
+                                            metric=accuracy,
+                                           )
+        automl.fit(X_train, Y_train, task=BINARY_CLASSIFICATION)
         self.assertEqual(automl._task, BINARY_CLASSIFICATION)
 
         # TODO, the assumption from above is not really tested here
@@ -268,6 +276,7 @@ class AutoMLTest(Base, unittest.TestCase):
             backend_api, 20, 5,
             initial_configurations_via_metalearning=0,
             seed=100,
+            metric=accuracy,
         )
         setup_logger()
         auto._logger = get_logger('test_automl_outputs')
@@ -276,7 +285,6 @@ class AutoMLTest(Base, unittest.TestCase):
             y=Y_train,
             X_test=X_test,
             y_test=Y_test,
-            metric=accuracy,
             dataset_name=name,
             task=MULTICLASS_CLASSIFICATION,
         )
@@ -322,9 +330,9 @@ class AutoMLTest(Base, unittest.TestCase):
 
     def test_do_dummy_prediction(self):
         datasets = {
-            'breast_cancer': 'binary.classification',
-            'wine': 'multiclass.classification',
-            'diabetes': 'regression',
+            'breast_cancer': BINARY_CLASSIFICATION,
+            'wine': MULTICLASS_CLASSIFICATION,
+            'diabetes': REGRESSION,
         }
 
         for name, task in datasets.items():
@@ -457,7 +465,12 @@ class AutoMLTest(Base, unittest.TestCase):
         self._tearDown(backend_api.temporary_directory)
         self._tearDown(backend_api.output_directory)
 
-        automl = autosklearn.automl.AutoML(backend_api, 20, 5)
+        automl = autosklearn.automl.AutoML(
+            backend_api,
+            20,
+            5,
+            metric=accuracy,
+        )
 
         output_file = 'test_exceptions_inside_log.log'
         setup_logger(output_file=output_file)
@@ -478,7 +491,6 @@ class AutoMLTest(Base, unittest.TestCase):
                 automl.fit(
                     X_train,
                     Y_train,
-                    metric=accuracy,
                     task=MULTICLASS_CLASSIFICATION,
                 )
             with open(output_file) as f:

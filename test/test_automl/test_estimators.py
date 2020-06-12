@@ -324,9 +324,9 @@ class EstimatorTest(Base, unittest.TestCase):
             seed=3,
             initial_configurations_via_metalearning=0,
             ensemble_size=0,
+            metric=accuracy,
         )
         automl.fit_ensemble(Y_train, task=BINARY_CLASSIFICATION,
-                            metric=accuracy,
                             precision='32',
                             dataset_name='breast_cancer',
                             ensemble_size=20,

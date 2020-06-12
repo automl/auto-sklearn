@@ -127,9 +127,46 @@ class AutoML(BaseEstimator):
         self._resampling_strategy = resampling_strategy
         self._resampling_strategy_arguments = resampling_strategy_arguments \
             if resampling_strategy_arguments is not None else {}
+        if self._resampling_strategy not in ['holdout',
+                                             'holdout-iterative-fit',
+                                             'cv',
+                                             'cv-iterative-fit',
+                                             'partial-cv',
+                                             'partial-cv-iterative-fit',
+                                             ] \
+           and not issubclass(self._resampling_strategy, BaseCrossValidator)\
+           and not issubclass(self._resampling_strategy, _RepeatedSplits)\
+           and not issubclass(self._resampling_strategy, BaseShuffleSplit):
+            raise ValueError('Illegal resampling strategy: %s' %
+                             self._resampling_strategy)
+
+        if self._resampling_strategy in ['partial-cv',
+                                         'partial-cv-iterative-fit',
+                                         ] \
+           and self._ensemble_size != 0:
+            raise ValueError("Resampling strategy %s cannot be used "
+                             "together with ensembles." % self._resampling_strategy)
+        if self._resampling_strategy in ['partial-cv',
+                                         'cv',
+                                         'cv-iterative-fit',
+                                         'partial-cv-iterative-fit',
+                                         ]\
+           and 'folds' not in self._resampling_strategy_arguments:
+            self._resampling_strategy_arguments['folds'] = 5
         self._shared_mode = shared_mode
         self.precision = precision
         self._disable_evaluator_output = disable_evaluator_output
+        # Check arguments prior to doing anything!
+        if not isinstance(self._disable_evaluator_output, (bool, list)):
+            raise ValueError('disable_evaluator_output must be of type bool '
+                             'or list.')
+        if isinstance(self._disable_evaluator_output, list):
+            allowed_elements = ['model', 'y_optimization']
+            for element in self._disable_evaluator_output:
+                if element not in allowed_elements:
+                    raise ValueError("List member '%s' for argument "
+                                     "'disable_evaluator_output' must be one "
+                                     "of " + str(allowed_elements))
         self._get_smac_object_callback = get_smac_object_callback
         self._smac_scenario_args = smac_scenario_args
         self.logging_config = logging_config
@@ -139,7 +176,9 @@ class AutoML(BaseEstimator):
         self._stopwatch = StopWatch()
         self._logger = None
         self._task = None
+
         self._metric = metric
+
         self._label_num = None
         self._parser = None
         self.models_ = None
@@ -158,90 +197,6 @@ class AutoML(BaseEstimator):
 
         # After assigning and checking variables...
         # self._backend = Backend(self._output_dir, self._tmp_dir)
-
-    def fit(
-        self,
-        X: np.ndarray,
-        y: np.ndarray,
-        task: int,
-        metric: Scorer,
-        X_test: Optional[np.ndarray] = None,
-        y_test: Optional[np.ndarray] = None,
-        feat_type: Optional[List[str]] = None,
-        dataset_name: Optional[str] = None,
-        only_return_configuration_space: Optional[bool] = False,
-        load_models: bool = True,
-    ):
-        if self._shared_mode:
-            # If this fails, it's likely that this is the first call to get
-            # the data manager
-            try:
-                D = self._backend.load_datamanager()
-                dataset_name = D.name
-            except IOError:
-                pass
-
-        if dataset_name is None:
-            dataset_name = hash_array_or_matrix(X)
-
-        self._backend.save_start_time(self._seed)
-        self._stopwatch = StopWatch()
-        self._dataset_name = dataset_name
-        self._stopwatch.start_task(self._dataset_name)
-
-        self._logger = self._get_logger(dataset_name)
-
-        if metric is None:
-            raise ValueError('No metric given.')
-        if not isinstance(metric, Scorer):
-            raise ValueError('Metric must be instance of '
-                             'autosklearn.metrics.Scorer.')
-
-        if feat_type is not None and len(feat_type) != X.shape[1]:
-            raise ValueError('Array feat_type does not have same number of '
-                             'variables as X has features. %d vs %d.' %
-                             (len(feat_type), X.shape[1]))
-        if feat_type is not None and not all([isinstance(f, str)
-                                              for f in feat_type]):
-            raise ValueError('Array feat_type must only contain strings.')
-        if feat_type is not None:
-            for ft in feat_type:
-                if ft.lower() not in ['categorical', 'numerical']:
-                    raise ValueError('Only `Categorical` and `Numerical` are '
-                                     'valid feature types, you passed `%s`' % ft)
-
-        self._data_memory_limit = None
-        loaded_data_manager = XYDataManager(
-            X, y,
-            X_test=X_test,
-            y_test=y_test,
-            task=task,
-            feat_type=feat_type,
-            dataset_name=dataset_name,
-        )
-
-        return self._fit(
-            datamanager=loaded_data_manager,
-            metric=metric,
-            load_models=load_models,
-            only_return_configuration_space=only_return_configuration_space,
-        )
-
-    def fit_on_datamanager(self, datamanager, metric, load_models=True):
-        self._stopwatch = StopWatch()
-        self._backend.save_start_time(self._seed)
-
-        name = os.path.basename(datamanager.name)
-        self._stopwatch.start_task(name)
-        self._start_task(self._stopwatch, name)
-        self._dataset_name = name
-
-        self._logger = self._get_logger(name)
-        self._fit(
-            datamanager=datamanager,
-            metric=metric,
-            load_models=load_models,
-        )
 
     def _get_logger(self, name):
         logger_name = 'AutoML(%d):%s' % (self._seed, name)
@@ -312,54 +267,72 @@ class AutoML(BaseEstimator):
 
         return ta.num_run
 
-    def _fit(
+    def fit(
         self,
-        datamanager: AbstractDataManager,
-        metric: Scorer,
-        load_models: bool,
-        only_return_configuration_space: bool = False,
+        X: np.ndarray,
+        y: np.ndarray,
+        task: int,
+        X_test: Optional[np.ndarray] = None,
+        y_test: Optional[np.ndarray] = None,
+        feat_type: Optional[List[str]] = None,
+        dataset_name: Optional[str] = None,
+        only_return_configuration_space: Optional[bool] = False,
+        load_models: bool = True,
     ):
         # Reset learnt stuff
         self.models_ = None
         self.cv_models_ = None
         self.ensemble_ = None
 
-        # Check arguments prior to doing anything!
-        if not isinstance(self._disable_evaluator_output, (bool, list)):
-            raise ValueError('disable_evaluator_output must be of type bool '
-                             'or list.')
-        if isinstance(self._disable_evaluator_output, list):
-            allowed_elements = ['model', 'y_optimization']
-            for element in self._disable_evaluator_output:
-                if element not in allowed_elements:
-                    raise ValueError("List member '%s' for argument "
-                                     "'disable_evaluator_output' must be one "
-                                     "of " + str(allowed_elements))
-        if self._resampling_strategy not in ['holdout',
-                                             'holdout-iterative-fit',
-                                             'cv',
-                                             'cv-iterative-fit',
-                                             'partial-cv',
-                                             'partial-cv-iterative-fit',
-                                             ] \
-           and not issubclass(self._resampling_strategy, BaseCrossValidator)\
-           and not issubclass(self._resampling_strategy, _RepeatedSplits)\
-           and not issubclass(self._resampling_strategy, BaseShuffleSplit):
-            raise ValueError('Illegal resampling strategy: %s' %
-                             self._resampling_strategy)
-        if self._resampling_strategy in ['partial-cv',
-                                         'partial-cv-iterative-fit',
-                                         ] \
-           and self._ensemble_size != 0:
-            raise ValueError("Resampling strategy %s cannot be used "
-                             "together with ensembles." % self._resampling_strategy)
-        if self._resampling_strategy in ['partial-cv',
-                                         'cv',
-                                         'cv-iterative-fit',
-                                         'partial-cv-iterative-fit',
-                                         ]\
-           and 'folds' not in self._resampling_strategy_arguments:
-            self._resampling_strategy_arguments['folds'] = 5
+        # The metric must exist as of this point
+        # It can be provided in the constructor, or automatically
+        # defined in the estimator fit call
+        if self._metric is None:
+            raise ValueError('No metric given.')
+        if not isinstance(self._metric, Scorer):
+            raise ValueError('Metric must be instance of '
+                             'autosklearn.metrics.Scorer.')
+        if self._shared_mode:
+            # If this fails, it's likely that this is the first call to get
+            # the data manager
+            try:
+                D = self._backend.load_datamanager()
+                dataset_name = D.name
+            except IOError:
+                pass
+
+        if dataset_name is None:
+            dataset_name = hash_array_or_matrix(X)
+
+        self._backend.save_start_time(self._seed)
+        self._stopwatch = StopWatch()
+        self._dataset_name = dataset_name
+        self._stopwatch.start_task(self._dataset_name)
+
+        self._logger = self._get_logger(dataset_name)
+
+        if feat_type is not None and len(feat_type) != X.shape[1]:
+            raise ValueError('Array feat_type does not have same number of '
+                             'variables as X has features. %d vs %d.' %
+                             (len(feat_type), X.shape[1]))
+        if feat_type is not None and not all([isinstance(f, str)
+                                              for f in feat_type]):
+            raise ValueError('Array feat_type must only contain strings.')
+        if feat_type is not None:
+            for ft in feat_type:
+                if ft.lower() not in ['categorical', 'numerical']:
+                    raise ValueError('Only `Categorical` and `Numerical` are '
+                                     'valid feature types, you passed `%s`' % ft)
+
+        datamanager = XYDataManager(
+            X, y,
+            X_test=X_test,
+            y_test=y_test,
+            task=task,
+            feat_type=feat_type,
+            dataset_name=dataset_name,
+        )
+
 
         self._backend._make_internals_directory()
         try:
@@ -373,7 +346,6 @@ class AutoML(BaseEstimator):
             if not self._shared_mode:
                 raise
 
-        self._metric = metric
         self._task = datamanager.info['task']
         self._label_num = datamanager.info['label_num']
 
@@ -644,7 +616,7 @@ class AutoML(BaseEstimator):
 
         return predictions
 
-    def fit_ensemble(self, y, task=None, metric=None, precision=32,
+    def fit_ensemble(self, y, task=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
         if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit']:
@@ -655,7 +627,7 @@ class AutoML(BaseEstimator):
             self._logger = self._get_logger(dataset_name)
 
         self._proc_ensemble = self._get_ensemble_process(
-            1, task, metric, precision, dataset_name, max_iterations=1,
+            1, task, precision, dataset_name, max_iterations=1,
             ensemble_nbest=ensemble_nbest, ensemble_size=ensemble_size)
         self._proc_ensemble.main()
         self._proc_ensemble = None
@@ -663,7 +635,7 @@ class AutoML(BaseEstimator):
         return self
 
     def _get_ensemble_process(self, time_left_for_ensembles,
-                              task=None, metric=None, precision=None,
+                              task=None, precision=None,
                               dataset_name=None, max_iterations=None,
                               ensemble_nbest=None, ensemble_size=None):
 
@@ -671,11 +643,6 @@ class AutoML(BaseEstimator):
             task = self._task
         else:
             self._task = task
-
-        if metric is None:
-            metric = self._metric
-        else:
-            self._metric = metric
 
         if precision is None:
             precision = self.precision
@@ -701,7 +668,7 @@ class AutoML(BaseEstimator):
             backend=self._backend,
             dataset_name=dataset_name,
             task_type=task,
-            metric=metric,
+            metric=self._metric,
             limit=time_left_for_ensembles,
             ensemble_size=ensemble_size,
             ensemble_nbest=ensemble_nbest,
@@ -977,7 +944,7 @@ class BaseAutoML(AutoML):
 
         return super().refit(X, y)
 
-    def fit_ensemble(self, y, task=None, metric=None, precision=32,
+    def fit_ensemble(self, y, task=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
         _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
@@ -986,7 +953,7 @@ class BaseAutoML(AutoML):
                              (self._n_outputs, _n_outputs))
 
         return super().fit_ensemble(
-            y, task=task, metric=metric, precision=precision,
+            y, task=task, precision=precision,
             dataset_name=dataset_name, ensemble_nbest=ensemble_nbest,
             ensemble_size=ensemble_size
         )
@@ -1006,7 +973,6 @@ class AutoMLClassifier(BaseAutoML):
         y: np.ndarray,
         X_test: Optional[np.ndarray] = None,
         y_test: Optional[np.ndarray] = None,
-        metric: Optional[Scorer] = None,
         feat_type: Optional[List[bool]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
@@ -1024,11 +990,11 @@ class AutoMLClassifier(BaseAutoML):
         if task is None:
             raise ValueError('Cannot work on data of type %s' % y_task)
 
-        if metric is None:
+        if self._metric is None:
             if task == MULTILABEL_CLASSIFICATION:
-                metric = f1_macro
+                self._metric = f1_macro
             else:
-                metric = accuracy
+                self._metric = accuracy
 
         y, self._classes, self._n_classes = self._process_target_classes(y)
         if y_test is not None:
@@ -1051,14 +1017,13 @@ class AutoMLClassifier(BaseAutoML):
             X_test=X_test,
             y_test=y_test,
             task=task,
-            metric=metric,
             feat_type=feat_type,
             dataset_name=dataset_name,
             only_return_configuration_space=only_return_configuration_space,
             load_models=load_models,
         )
 
-    def fit_ensemble(self, y, task=None, metric=None, precision=32,
+    def fit_ensemble(self, y, task=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
         y, _classes, _n_classes = self._process_target_classes(y)
@@ -1067,7 +1032,7 @@ class AutoMLClassifier(BaseAutoML):
         if not hasattr(self, '_n_classes'):
             self._n_classes = _n_classes
 
-        return super().fit_ensemble(y, task, metric, precision, dataset_name,
+        return super().fit_ensemble(y, task, precision, dataset_name,
                                     ensemble_nbest, ensemble_size)
 
     def _process_target_classes(self, y):
@@ -1128,7 +1093,6 @@ class AutoMLRegressor(BaseAutoML):
         y: np.ndarray,
         X_test: Optional[np.ndarray] = None,
         y_test: Optional[np.ndarray] = None,
-        metric: Optional[Scorer] = None,
         feat_type: Optional[List[bool]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
@@ -1139,23 +1103,22 @@ class AutoMLRegressor(BaseAutoML):
         if _n_outputs > 1:
             raise NotImplementedError(
                 'Multi-output regression is not implemented.')
-        if metric is None:
-            metric = r2
+        if self._metric is None:
+            self._metric = r2
         return super().fit(
             X, y,
             X_test=X_test,
             y_test=y_test,
             task=REGRESSION,
-            metric=metric,
             feat_type=feat_type,
             dataset_name=dataset_name,
             only_return_configuration_space=only_return_configuration_space,
             load_models=load_models,
         )
 
-    def fit_ensemble(self, y, task=None, metric=None, precision=32,
+    def fit_ensemble(self, y, task=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
         y = super()._check_y(y)
-        return super().fit_ensemble(y, task, metric, precision, dataset_name,
+        return super().fit_ensemble(y, task, precision, dataset_name,
                                     ensemble_nbest, ensemble_size)

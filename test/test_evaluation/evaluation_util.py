@@ -111,7 +111,6 @@ def get_multiclass_classification_datamanager():
 def get_abalone_datamanager():
     # https://www.openml.org/d/183
     dataset_name = 'abalone'
-    task = 'multiclass.classification'
     data = sklearn.datasets.fetch_openml(data_id=183, as_frame=True)
     feat_type = [
         'Categorical' if x.name == 'category' else 'Numerical' for x in data['data'].dtypes
@@ -125,7 +124,7 @@ def get_abalone_datamanager():
     D = XYDataManager(
         X_train, y_train,
         X_test, y_test,
-        task,
+        MULTICLASS_CLASSIFICATION,
         feat_type,
         dataset_name
     )
