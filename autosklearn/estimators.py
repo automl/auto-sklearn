@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 import copy
 import multiprocessing
-from typing import Optional, Dict
+from typing import Optional, List, Dict
 
 import numpy as np
 from sklearn.base import BaseEstimator
