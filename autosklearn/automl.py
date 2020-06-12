@@ -23,7 +23,6 @@ from sklearn.utils.validation import check_is_fitted
 from sklearn.dummy import DummyClassifier, DummyRegressor
 
 from autosklearn.metrics import Scorer
-from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
@@ -332,7 +331,6 @@ class AutoML(BaseEstimator):
             feat_type=feat_type,
             dataset_name=dataset_name,
         )
-
 
         self._backend._make_internals_directory()
         try:

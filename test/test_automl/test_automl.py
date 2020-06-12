@@ -244,11 +244,12 @@ class AutoMLTest(Base, unittest.TestCase):
         X_test = data[0][200:]
         Y_test = data[1][200:]
 
-        automl = autosklearn.automl.AutoML(backend_api, 20, 5,
-                                           include_estimators=['sgd'],
-                                           include_preprocessors=['no_preprocessing'],
-                                            metric=accuracy,
-                                           )
+        automl = autosklearn.automl.AutoML(
+            backend_api, 20, 5,
+            include_estimators=['sgd'],
+            include_preprocessors=['no_preprocessing'],
+            metric=accuracy,
+        )
         automl.fit(X_train, Y_train, task=BINARY_CLASSIFICATION)
         self.assertEqual(automl._task, BINARY_CLASSIFICATION)
 
