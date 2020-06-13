@@ -69,11 +69,11 @@ else:
 X_train, y_train, X_test, y_test, cat = load_task(task_id)
 
 if task_type == 'classification':
-    automl = AutoSklearnClassifier(**automl_arguments)
     automl_arguments['metric'] = balanced_accuracy
+    automl = AutoSklearnClassifier(**automl_arguments)
 elif task_type == 'regression':
-    automl = AutoSklearnRegressor(**automl_arguments)
     automl_arguments['metric'] = r2
+    automl = AutoSklearnRegressor(**automl_arguments)
 else:
     raise ValueError(task_type)
 
