@@ -75,7 +75,7 @@ cls = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=60,
     per_run_time_limit=30,
     seed=1,
-     metric=autosklearn.metrics.accuracy,
+    metric=autosklearn.metrics.accuracy,
 )
 cls.fit(X_train, y_train)
 
