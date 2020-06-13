@@ -56,7 +56,7 @@ class EnsembleTest(unittest.TestCase):
             seed=0,  # important to find the test files
         )
 
-        success = ensbuilder.read_ensemble_preds()
+        success = ensbuilder.score_ensemble_preds()
         self.assertTrue(success, str(ensbuilder.read_preds))
         self.assertEqual(len(ensbuilder.read_preds), 3)
 
@@ -93,7 +93,7 @@ class EnsembleTest(unittest.TestCase):
                 max_models_on_disc=models_in_disc,
             )
 
-            ensbuilder.read_ensemble_preds()
+            ensbuilder.score_ensemble_preds()
             sel_keys = ensbuilder.get_n_best_preds()
 
             self.assertEqual(len(sel_keys), exp)
@@ -168,7 +168,7 @@ class EnsembleTest(unittest.TestCase):
                                      ensemble_nbest=1
                                      )
 
-        ensbuilder.read_ensemble_preds()
+        ensbuilder.score_ensemble_preds()
 
         filename = os.path.join(
             self.backend.temporary_directory,
@@ -209,7 +209,7 @@ class EnsembleTest(unittest.TestCase):
                                      ensemble_nbest=1
                                      )
 
-        ensbuilder.read_ensemble_preds()
+        ensbuilder.score_ensemble_preds()
 
         d1 = os.path.join(
             self.backend.temporary_directory,
@@ -251,7 +251,7 @@ class EnsembleTest(unittest.TestCase):
         )
         ensbuilder.SAVE2DISC = False
 
-        ensbuilder.read_ensemble_preds()
+        ensbuilder.score_ensemble_preds()
 
         d2 = os.path.join(
             self.backend.temporary_directory,
