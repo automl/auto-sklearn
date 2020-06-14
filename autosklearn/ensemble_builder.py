@@ -77,7 +77,7 @@ class EnsembleBuilder(multiprocessing.Process):
                If float, it will be interpreted as the max megabytes allowed of disc space. That
                is, if the number of ensemble candidates require more disc space than this float
                value, the worst models will be deleted to keep within this budget.
-               models will be deleted.
+               Models and predictions of the worst-performing models will be deleted then'.
                If None, feature is disabled.
                It defines an upper bound on the models that can be used in the ensemble.
             performance_range_threshold: float
@@ -125,7 +125,7 @@ class EnsembleBuilder(multiprocessing.Process):
 
         self.ensemble_nbest = ensemble_nbest
 
-        # max_models_on_disc cna be a float, in such case we need to
+        # max_models_on_disc can be a float, in such case we need to
         # remember the user specified Megabytes and translate this to
         # max number of ensemble models. max_resident_models keeps the
         # maximum number of models in disc
@@ -332,41 +332,37 @@ class EnsembleBuilder(multiprocessing.Process):
         if return_pred:
             return valid_pred, test_pred
 
-    def get_worst_disk_consumption(self):
+    def get_disk_consumption(self, pred_path):
         """
         gets the cost of a model being on disc
         """
 
-        # Loop through the files currently in the directory
-        worst_consumption = 0
-        for pred_path in self.y_ens_files:
+        match = self.model_fn_re.search(pred_path)
+        if not match:
+            raise ValueError("Invalid path format %s" % pred_path)
+        _full_name = match.group(0)
+        _seed = match.group(1)
+        _num_run = match.group(2)
+        _budget = match.group(3)
 
-            match = self.model_fn_re.search(pred_path)
-            _full_name = match.group(0)
-            _seed = match.group(1)
-            _num_run = match.group(2)
-            _budget = match.group(3)
+        # Besides the prediction, we have to take care of three other files: model,
+        # validation and test.
+        model_name = '%s.%s.%s.model' % (_seed, _num_run, _budget)
+        model_path = os.path.join(self.dir_models, model_name)
+        pred_valid_name = 'predictions_valid' + _full_name
+        pred_valid_path = os.path.join(self.dir_valid, pred_valid_name)
+        pred_test_name = 'predictions_test' + _full_name
+        pred_test_path = os.path.join(self.dir_test, pred_test_name)
 
-            # Besides the prediction, we have to take care of three other files: model,
-            # validation and test.
-            model_name = '%s.%s.%s.model' % (_seed, _num_run, _budget)
-            model_path = os.path.join(self.dir_models, model_name)
-            pred_valid_name = 'predictions_valid' + _full_name
-            pred_valid_path = os.path.join(self.dir_valid, pred_valid_name)
-            pred_test_name = 'predictions_test' + _full_name
-            pred_test_path = os.path.join(self.dir_test, pred_test_name)
+        paths = [model_path, pred_path]
+        if os.path.exists(pred_valid_path):
+            paths.append(pred_valid_path)
+        if os.path.exists(pred_test_path):
+            paths.append(pred_test_path)
+        this_model_cost = sum([os.path.getsize(path) for path in paths])
 
-            paths = [model_path, pred_path]
-            if os.path.exists(pred_valid_path):
-                paths.append(pred_valid_path)
-            if os.path.exists(pred_test_path):
-                paths.append(pred_test_path)
-            this_model_cost = sum([os.path.getsize(path) for path in paths])
-            if this_model_cost > worst_consumption:
-                worst_consumption = this_model_cost
-
-        # get the worst consumption in megabytes
-        return round(worst_consumption / math.pow(1024, 2), 2)
+        # get the megabytes
+        return round(this_model_cost / math.pow(1024, 2), 2)
 
     def score_ensemble_preds(self):
         """
@@ -444,6 +440,7 @@ class EnsembleBuilder(multiprocessing.Process):
                     "seed": _seed,
                     "num_run": _num_run,
                     "budget": _budget,
+                    "disc_space_cost_mb": 0,
                     Y_ENSEMBLE: None,
                     Y_VALID: None,
                     Y_TEST: None,
@@ -476,6 +473,10 @@ class EnsembleBuilder(multiprocessing.Process):
                         score,
                         self.read_preds[y_ens_fn]["mtime_ens"],
                         os.path.getmtime(y_ens_fn),
+                    )
+                    self.read_preds[y_ens_fn]["loaded"] = 1
+                    self.read_preds[y_ens_fn]["disc_space_cost_mb"] = self.get_disk_consumption(
+                        y_ens_fn
                     )
 
                 self.read_preds[y_ens_fn]["ens_score"] = score
@@ -567,19 +568,30 @@ class EnsembleBuilder(multiprocessing.Process):
         # One can only read at most max_models_on_disc models
         if self.max_models_on_disc is not None:
             if not isinstance(self.max_models_on_disc, numbers.Integral):
-                worst_consumption = self.get_worst_disk_consumption()
+                worst_consumption = max([
+                    v["disc_space_cost_mb"] for v in self.read_preds.values()
+                ])
                 if worst_consumption:
                     num_models = math.floor(self.max_models_on_disc/worst_consumption)
-                    self.logger.debug("Limiting num of models via float max_models_on_disc"
-                                  "worst_consumption={} num_models={}".format(
-                                    worst_consumption,
-                                    num_models
-                                  )
-                                  )
+                    if num_models < 1:
+                        raise ValueError(
+                            "Max num of models due to user constrain of max_models_on_disc={}"
+                            "is to restrictive for model space={}.".format(
+                                self.max_models_on_disc,
+                                worst_consumption,
+                            )
+                        )
+                    self.logger.warning(
+                        "Limiting num of models via float max_models_on_disc"
+                        "worst_consumption={} num_models={}".format(
+                            worst_consumption,
+                            num_models
+                        )
+                    )
                     # The first call can be None. From there onwards, always keep
                     # the minimum number of models
                     sizes = [self.max_resident_models, int(num_models)]
-                    self.max_resident_models = min( i for i in sizes if i is not None )
+                    self.max_resident_models = min(i for i in sizes if i is not None)
             else:
                 self.max_resident_models = self.max_models_on_disc
 
