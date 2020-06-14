@@ -134,8 +134,10 @@ class EnsembleTest(unittest.TestCase):
 
             with unittest.mock.patch('os.path.getsize') as mock:
                 mock.return_value = 200*1024*1024
-                ensbuilder.read_ensemble_preds()
+                print(f"exp={exp} test_case={test_case}")
+                ensbuilder.score_ensemble_preds()
                 sel_keys = ensbuilder.get_n_best_preds()
+                print(sel_keys)
                 self.assertEqual(len(sel_keys), exp)
 
     @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python > 3.5")

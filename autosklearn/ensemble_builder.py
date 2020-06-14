@@ -474,10 +474,6 @@ class EnsembleBuilder(multiprocessing.Process):
                         self.read_preds[y_ens_fn]["mtime_ens"],
                         os.path.getmtime(y_ens_fn),
                     )
-                    self.read_preds[y_ens_fn]["loaded"] = 1
-                    self.read_preds[y_ens_fn]["disc_space_cost_mb"] = self.get_disk_consumption(
-                        y_ens_fn
-                    )
 
                 self.read_preds[y_ens_fn]["ens_score"] = score
 
@@ -488,6 +484,9 @@ class EnsembleBuilder(multiprocessing.Process):
                     y_ens_fn
                 )
                 self.read_preds[y_ens_fn]["loaded"] = 2
+                self.read_preds[y_ens_fn]["disc_space_cost_mb"] = self.get_disk_consumption(
+                    y_ens_fn
+                )
 
                 n_read_files += 1
 
