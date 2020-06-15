@@ -95,8 +95,8 @@ Building  and fitting the classifier
                           include_estimators=None, include_preprocessors=None,
                           initial_configurations...
                           logging_config=None, max_models_on_disc=50,
-                          metadata_directory=None, ml_memory_limit=3072,
-                          n_jobs=None,
+                          metadata_directory=None, metric=None,
+                          ml_memory_limit=3072, n_jobs=None,
                           output_folder='/tmp/autosklearn_cv_example_out',
                           per_run_time_limit=30, resampling_strategy='cv',
                           resampling_strategy_arguments={'folds': 5}, seed=1,
@@ -143,7 +143,7 @@ Print Results before refit
       Number of target algorithms that exceeded the memory limit: 0
 
     Before re-fit
-    Accuracy score 0.972027972027972
+    Accuracy score 0.958041958041958
 
 
 
@@ -170,7 +170,7 @@ final ensemble on the whole dataset.
 
  .. code-block:: none
 
-    Accuracy score 0.972027972027972
+    Accuracy score 0.965034965034965
 
 
 
@@ -178,7 +178,7 @@ final ensemble on the whole dataset.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  10.064 seconds)
+   **Total running time of the script:** ( 2 minutes  7.060 seconds)
 
 
 .. _sphx_glr_download_examples_example_crossvalidation.py:

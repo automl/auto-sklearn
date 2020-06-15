@@ -75,8 +75,9 @@ cls = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=60,
     per_run_time_limit=30,
     seed=1,
+    metric=autosklearn.metrics.accuracy,
 )
-cls.fit(X_train, y_train, metric=autosklearn.metrics.accuracy)
+cls.fit(X_train, y_train)
 
 predictions = cls.predict(X_test)
 print("Accuracy score {:g} using {:s}".
@@ -101,8 +102,9 @@ cls = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=60,
     per_run_time_limit=30,
     seed=1,
+    metric=accuracy_scorer,
 )
-cls.fit(X_train, y_train, metric=accuracy_scorer)
+cls.fit(X_train, y_train)
 
 predictions = cls.predict(X_test)
 print("Accuracy score {:g} using {:s}".
@@ -122,9 +124,10 @@ error_rate = autosklearn.metrics.make_scorer(
 cls = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=60,
     per_run_time_limit=30,
-    seed=1
+    seed=1,
+    metric=error_rate,
 )
-cls.fit(X_train, y_train, metric=error_rate)
+cls.fit(X_train, y_train)
 
 cls.predictions = cls.predict(X_test)
 print("Error rate {:g} using {:s}".
@@ -150,8 +153,9 @@ cls = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=60,
     per_run_time_limit=30,
     seed=1,
+    metric=accuracy_scorer
 )
-cls.fit(X_train, y_train, metric=accuracy_scorer)
+cls.fit(X_train, y_train)
 
 predictions = cls.predict(X_test)
 print(
@@ -176,8 +180,9 @@ cls = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=60,
     per_run_time_limit=30,
     seed=1,
+    metric=error_rate,
 )
-cls.fit(X_train, y_train, metric=error_rate)
+cls.fit(X_train, y_train)
 
 predictions = cls.predict(X_test)
 print(

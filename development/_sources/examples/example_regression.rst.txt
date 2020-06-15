@@ -87,7 +87,7 @@ Build and fit a regressor
 
  .. code-block:: none
 
-    [WARNING] [2020-06-14 21:18:29,118:AutoMLSMBO(1)::boston] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.7.0-py3.7-linux-x86_64.egg/autosklearn/metalearning/files/r2_regression_dense
+    [WARNING] [2020-06-15 08:15:28,837:AutoMLSMBO(1)::boston] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.7.0-py3.7.egg/autosklearn/metalearning/files/r2_regression_dense
 
     AutoSklearnRegressor(delete_output_folder_after_terminate=True,
                          delete_tmp_folder_after_terminate=True,
@@ -98,7 +98,8 @@ Build and fit a regressor
                          include_preprocessors=None,
                          initial_configurations_...
                          logging_config=None, max_models_on_disc=50,
-                         metadata_directory=None, ml_memory_limit=3072, n_jobs=None,
+                         metadata_directory=None, metric=None, ml_memory_limit=3072,
+                         n_jobs=None,
                          output_folder='/tmp/autosklearn_regression_example_out',
                          per_run_time_limit=30, resampling_strategy='holdout',
                          resampling_strategy_arguments=None, seed=1,
@@ -207,7 +208,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  54.986 seconds)
+   **Total running time of the script:** ( 1 minutes  54.938 seconds)
 
 
 .. _sphx_glr_download_examples_example_regression.py:

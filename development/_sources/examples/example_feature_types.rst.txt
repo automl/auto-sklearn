@@ -95,9 +95,9 @@ Build and fit a classifier
                           include_estimators=None, include_preprocessors=None,
                           initial_configurations_via_metalearning=25,
                           logging_config=None, max_models_on_disc=50,
-                          metadata_directory=None, ml_memory_limit=3072,
-                          n_jobs=None, output_folder=None, per_run_time_limit=30,
-                          resampling_strategy='holdout',
+                          metadata_directory=None, metric=None,
+                          ml_memory_limit=3072, n_jobs=None, output_folder=None,
+                          per_run_time_limit=30, resampling_strategy='holdout',
                           resampling_strategy_arguments=None, seed=1,
                           shared_mode=False, smac_scenario_args=None,
                           time_left_for_this_task=120, tmp_folder=None)
@@ -131,7 +131,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  1.352 seconds)
+   **Total running time of the script:** ( 2 minutes  0.573 seconds)
 
 
 .. _sphx_glr_download_examples_example_feature_types.py:
