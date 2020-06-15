@@ -46,6 +46,7 @@ class AutoSklearnEstimator(BaseEstimator):
         smac_scenario_args=None,
         logging_config=None,
         metadata_directory=None,
+        metric=None,
     ):
         """
         Parameters
@@ -222,6 +223,12 @@ class AutoSklearnEstimator(BaseEstimator):
             path to the metadata directory. If None, the default directory
             (autosklearn.metalearning.files) is used.
 
+        metric : Scorer, optional (None)
+            An instance of :class:`autosklearn.metrics.Scorer` as created by
+            :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
+            Metrics`_.
+            If None is provided, a default metric is selected depending on the task.
+
         Attributes
         ----------
 
@@ -262,6 +269,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.smac_scenario_args = smac_scenario_args
         self.logging_config = logging_config
         self.metadata_directory = metadata_directory
+        self._metric = metric
 
         self._automl = None  # type: Optional[List[BaseAutoML]]
         # n_jobs after conversion to a number (b/c default is None)
@@ -323,6 +331,7 @@ class AutoSklearnEstimator(BaseEstimator):
             smac_scenario_args=smac_scenario_args,
             logging_config=self.logging_config,
             metadata_directory=self.metadata_directory,
+            metric=self._metric
         )
 
         return automl
@@ -423,7 +432,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
         return self
 
-    def fit_ensemble(self, y, task=None, metric=None, precision='32',
+    def fit_ensemble(self, y, task=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
         """Fit an ensemble to models trained during an optimization process.
@@ -443,11 +452,6 @@ class AutoSklearnEstimator(BaseEstimator):
             A constant from the module ``autosklearn.constants``. Determines
             the task type (binary classification, multiclass classification,
             multilabel classification or regression).
-
-        metric : callable, optional
-            An instance of :class:`autosklearn.metrics.Scorer` as created by
-            :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
-            Metrics`_.
 
         precision : str
             Numeric precision used when loading ensemble data. Can be either
@@ -492,7 +496,6 @@ class AutoSklearnEstimator(BaseEstimator):
         self._automl[0].fit_ensemble(
             y=y,
             task=task,
-            metric=metric,
             precision=precision,
             dataset_name=dataset_name,
             ensemble_nbest=ensemble_nbest,
@@ -609,7 +612,6 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
     def fit(self, X, y,
             X_test=None,
             y_test=None,
-            metric=None,
             feat_type=None,
             dataset_name=None):
         """Fit *auto-sklearn* to given training set (X, y).
@@ -635,11 +637,6 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
             Test data target classes. Will be used to calculate the test error
             of all models. This allows to evaluate the performance of
             Auto-sklearn over time.
-
-        metric : callable, optional (default='autosklearn.metrics.accuracy')
-            An instance of :class:`autosklearn.metrics.Scorer` as created by
-            :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
-            Metrics`_.
 
         feat_type : list, optional (default=None)
             List of str of `len(X.shape[1])` describing the attribute type.
@@ -678,7 +675,6 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
             y=y,
             X_test=X_test,
             y_test=y_test,
-            metric=metric,
             feat_type=feat_type,
             dataset_name=dataset_name,
         )
@@ -751,7 +747,6 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
     def fit(self, X, y,
             X_test=None,
             y_test=None,
-            metric=None,
             feat_type=None,
             dataset_name=None):
         """Fit *Auto-sklearn* to given training set (X, y).
@@ -777,11 +772,6 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
             The regression target. Will be used to calculate the test error
             of all models. This allows to evaluate the performance of
             Auto-sklearn over time.
-
-        metric : callable, optional (default='autosklearn.metrics.r2')
-            An instance of :class:`autosklearn.metrics.Scorer` as created by
-            :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
-            Metrics`_.
 
         feat_type : list, optional (default=None)
             List of str of `len(X.shape[1])` describing the attribute type.
@@ -816,7 +806,6 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
             y=y,
             X_test=X_test,
             y_test=y_test,
-            metric=metric,
             feat_type=feat_type,
             dataset_name=dataset_name,
         )

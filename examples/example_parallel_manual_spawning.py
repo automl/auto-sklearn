@@ -126,6 +126,7 @@ automl = AutoSklearnClassifier(
     output_folder=output_folder,
     initial_configurations_via_metalearning=0,
     seed=1,
+    metric=accuracy,
 )
 
 # Both the ensemble_size and ensemble_nbest parameters can be changed now if
@@ -133,7 +134,6 @@ automl = AutoSklearnClassifier(
 automl.fit_ensemble(
     y_train,
     task=MULTICLASS_CLASSIFICATION,
-    metric=accuracy,
     precision='32',
     dataset_name='digits',
     ensemble_size=20,

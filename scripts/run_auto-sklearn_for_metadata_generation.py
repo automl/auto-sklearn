@@ -69,15 +69,15 @@ else:
 X_train, y_train, X_test, y_test, cat = load_task(task_id)
 
 if task_type == 'classification':
+    automl_arguments['metric'] = balanced_accuracy
     automl = AutoSklearnClassifier(**automl_arguments)
-    metric = balanced_accuracy
 elif task_type == 'regression':
+    automl_arguments['metric'] = r2
     automl = AutoSklearnRegressor(**automl_arguments)
-    metric = r2
 else:
     raise ValueError(task_type)
 
-automl.fit(X_train, y_train, dataset_name=str(task_id), metric=metric,
+automl.fit(X_train, y_train, dataset_name=str(task_id),
            feat_type=cat)
 data = automl._automl[0]._backend.load_datamanager()
 # Data manager can't be replaced with save_datamanager, it has to be deleted
@@ -123,7 +123,7 @@ for entry in trajectory:
                                     stats=stats,
                                     all_scoring_functions=True,
                                     include=include,
-                                    metric=metric)
+                                    metric=automl_arguments['metric'])
         status, cost, runtime, additional_run_info = ta.start(
             config=config, instance=None, cutoff=per_run_time_limit*3)
 
