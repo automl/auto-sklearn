@@ -1109,18 +1109,16 @@ class AutoMLRegressor(BaseAutoML):
             X, y,
             X_test=X_test,
             y_test=y_test,
-            task=task,
-            metric=metric,
+            task=REGRESSION,
             feat_type=feat_type,
             dataset_name=dataset_name,
             only_return_configuration_space=only_return_configuration_space,
             load_models=load_models,
         )
 
-    def fit_ensemble(self, y, task=None, metric=None, precision='32',
+    def fit_ensemble(self, y, task=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
         y = super()._check_y(y)
-
-        return super().fit_ensemble(y, task, metric, precision, dataset_name,
-                                    ensemble_nbest, ensemble_size) 
+        return super().fit_ensemble(y, task, precision, dataset_name,
+                                    ensemble_nbest, ensemble_size)
