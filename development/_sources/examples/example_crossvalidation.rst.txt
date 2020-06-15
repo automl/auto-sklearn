@@ -143,7 +143,7 @@ Print Results before refit
       Number of target algorithms that exceeded the memory limit: 0
 
     Before re-fit
-    Accuracy score 0.958041958041958
+    Accuracy score 0.972027972027972
 
 
 
@@ -170,7 +170,7 @@ final ensemble on the whole dataset.
 
  .. code-block:: none
 
-    Accuracy score 0.965034965034965
+    Accuracy score 0.972027972027972
 
 
 
@@ -178,7 +178,7 @@ final ensemble on the whole dataset.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  7.060 seconds)
+   **Total running time of the script:** ( 2 minutes  9.521 seconds)
 
 
 .. _sphx_glr_download_examples_example_crossvalidation.py:
