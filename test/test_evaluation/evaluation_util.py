@@ -1,16 +1,18 @@
 import functools
-import os
 import traceback
 import unittest
 
 import numpy as np
 from numpy.linalg import LinAlgError
 import sklearn.datasets
+from sklearn import preprocessing
+import sklearn.model_selection
+
 
 from autosklearn.constants import \
     MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION, BINARY_CLASSIFICATION, REGRESSION
 from autosklearn.util.data import convert_to_bin
-from autosklearn.data.competition_data_manager import CompetitionDataManager
+from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.pipeline.util import get_dataset
 
 N_TEST_RUNS = 5
@@ -107,10 +109,25 @@ def get_multiclass_classification_datamanager():
 
 
 def get_abalone_datamanager():
-    dataset = 'abalone'
-    dataset_path = os.path.join(os.path.dirname(__file__), '.datasets',
-                                dataset)
-    D = CompetitionDataManager(dataset_path)
+    # https://www.openml.org/d/183
+    dataset_name = 'abalone'
+    data = sklearn.datasets.fetch_openml(data_id=183, as_frame=True)
+    feat_type = [
+        'Categorical' if x.name == 'category' else 'Numerical' for x in data['data'].dtypes
+    ]
+    X, y = sklearn.datasets.fetch_openml(data_id=183, return_X_y=True)
+    y = preprocessing.LabelEncoder().fit_transform(y)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+        X, y, random_state=1
+    )
+
+    D = XYDataManager(
+        X_train, y_train,
+        X_test, y_test,
+        MULTICLASS_CLASSIFICATION,
+        feat_type,
+        dataset_name
+    )
     return D
 
 

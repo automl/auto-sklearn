@@ -2,8 +2,6 @@
 import os
 import sys
 from setuptools import setup, find_packages
-from setuptools.extension import Extension
-from setuptools.command.build_ext import build_ext
 
 
 # Check if Auto-sklearn *could* run on the given system
@@ -20,28 +18,6 @@ if sys.version_info < (3, 5):
         'Unsupported Python version %d.%d.%d found. Auto-sklearn requires Python '
         '3.5 or higher.' % (sys.version_info.major, sys.version_info.minor, sys.version_info.micro)
     )
-
-
-class BuildExt(build_ext):
-    """ build_ext command for use when numpy headers are needed.
-    SEE tutorial: https://stackoverflow.com/questions/2379898
-    SEE fix: https://stackoverflow.com/questions/19919905
-    """
-
-    def finalize_options(self):
-        build_ext.finalize_options(self)
-        # Prevent numpy from thinking it is still in its setup process:
-        # __builtins__.__NUMPY_SETUP__ = False
-        import numpy
-        self.include_dirs.append(numpy.get_include())
-
-
-extensions = [
-    Extension('autosklearn.data.competition_c_functions',
-              sources=['autosklearn/data/competition_c_functions.pyx'],
-              language='c')
-]
-
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 setup_reqs = ['Cython', 'numpy']
@@ -65,8 +41,6 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     version=version,
-    cmdclass={'build_ext': BuildExt},
-    ext_modules=extensions,
     packages=find_packages(exclude=['test', 'scripts', 'examples']),
     setup_requires=setup_reqs,
     install_requires=install_reqs,

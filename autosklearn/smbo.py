@@ -20,7 +20,6 @@ from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
     MULTIOUTPUT_REGRESSION
 from autosklearn.metalearning.mismbo import suggest_via_metalearning
 from autosklearn.data.abstract_data_manager import AbstractDataManager
-from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.util.logging_ import get_logger
 from autosklearn.metalearning.metalearning.meta_base import MetaBase
@@ -58,22 +57,6 @@ EXCLUDE_META_FEATURES_REGRESSION = {
     'LandmarkRandomNodeLearner',
     'PCA',
 }
-
-
-# dataset helpers
-def load_data(dataset_info, backend, max_mem=None):
-    try:
-        D = backend.load_datamanager()
-    except IOError:
-        D = None
-
-    # Datamanager probably doesn't exist
-    if D is None:
-        if max_mem is None:
-            D = CompetitionDataManager(dataset_info)
-        else:
-            D = CompetitionDataManager(dataset_info, max_memory_in_mb=max_mem)
-    return D
 
 
 # metalearning helpers
@@ -274,9 +257,7 @@ class AutoMLSMBO(object):
         if isinstance(self.dataset_name, AbstractDataManager):
             self.datamanager = self.dataset_name
         else:
-            self.datamanager = load_data(self.dataset_name,
-                                         self.backend,
-                                         max_mem=max_mem)
+            self.datamanager = self.backend.load_datamanager()
 
         self.task = self.datamanager.info['task']
 
