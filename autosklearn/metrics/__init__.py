@@ -125,7 +125,8 @@ class _ThresholdScorer(Scorer):
             raise ValueError("{0} format is not supported".format(y_type))
 
         if y_type == "binary":
-            y_pred = y_pred[:, 1]
+            if y_pred.ndim > 1:
+                y_pred = y_pred[:, 1]
         elif isinstance(y_pred, list):
             y_pred = np.vstack([p[:, -1] for p in y_pred]).T
 
