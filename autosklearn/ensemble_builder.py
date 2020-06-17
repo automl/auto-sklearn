@@ -567,30 +567,41 @@ class EnsembleBuilder(multiprocessing.Process):
         # One can only read at most max_models_on_disc models
         if self.max_models_on_disc is not None:
             if not isinstance(self.max_models_on_disc, numbers.Integral):
-                worst_consumption = max([
-                    v["disc_space_cost_mb"] for v in self.read_preds.values()
-                ])
-                if worst_consumption:
-                    num_models = math.floor(self.max_models_on_disc/worst_consumption)
-                    if num_models < 1:
-                        raise ValueError(
-                            "Max num of models due to user constrain of max_models_on_disc={}"
-                            "is to restrictive for model space={}.".format(
-                                self.max_models_on_disc,
-                                worst_consumption,
-                            )
-                        )
+                consumption = [
+                    [
+                        v["ens_score"],
+                        v["disc_space_cost_mb"],
+                     ] for v in self.read_preds.values()
+                ]
+                max_consumption = max(i[1] for i in consumption)
+
+                # We are pessimistic with the consumption limit indicated by
+                # max_models_on_disc by 1 model. Such model is assumed to spend
+                # max_consumption megabytes
+                if (sum(i[1] for i in consumption) + max_consumption) > self.max_models_on_disc:
+
+                    # just leave the best -- higher is better!
+                    # This list is in descending order, to preserve the best models
+                    sorted_cum_consumption = np.cumsum([
+                        i[1] for i in list(reversed(sorted(consumption)))
+                    ])
+                    max_models = np.argmax(sorted_cum_consumption > self.max_models_on_disc)
+
+                    # Make sure that at least 1 model survives
+                    self.max_resident_models = max(1, min(i for i in [
+                        self.max_resident_models,  # Can be None in first iter
+                        max_models,
+
+                    ] if i is not None))
                     self.logger.warning(
-                        "Limiting num of models via float max_models_on_disc"
-                        "worst_consumption={} num_models={}".format(
-                            worst_consumption,
-                            num_models
+                        "Limiting num of models via float max_models_on_disc={}"
+                        " as accumulated={} worst={} num_models={}".format(
+                            self.max_models_on_disc,
+                            (sum(i[1] for i in consumption) + max_consumption),
+                            max_consumption,
+                            self.max_resident_models
                         )
                     )
-                    # The first call can be None. From there onwards, always keep
-                    # the minimum number of models
-                    sizes = [self.max_resident_models, int(num_models)]
-                    self.max_resident_models = min(i for i in sizes if i is not None)
             else:
                 self.max_resident_models = self.max_models_on_disc
 
