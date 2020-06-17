@@ -1,0 +1,25 @@
+#https://help.github.com/en/actions/language-and-framework-guides/publishing-docker-images#publishing-images-to-github-packages
+name: Publish Docker image
+on:
+  push:
+    # Publish  on `master` and `development` 
+    branches:
+      - master
+      - development
+      - test_docker
+
+jobs:
+  push_to_registry:
+    name: Push Docker image to GitHub Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Push to GitHub Packages
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          repository: franchuterivera/auto-sklearn/auto-sklearn
+          tag_with_ref: true
