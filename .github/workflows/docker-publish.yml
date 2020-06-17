@@ -21,5 +21,5 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
-          repository: franchuterivera/auto-sklearn/auto-sklearn
+          repository: automl/auto-sklearn/auto-sklearn
           tag_with_ref: true

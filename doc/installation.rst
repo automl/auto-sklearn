@@ -107,3 +107,14 @@ Possible other solutions (not tested):
 
 * virtual machine
 * docker image
+
+Docker Image
+=========================
+A Docker image is also provided as a github package. The user must authenticate following the instructions from `GitHub Packages <https://help.github.com/en/packages/using-github-packages-with-your-projects-ecosystem/configuring-docker-for-use-with-github-packages>`_ . Then, the image can be downloaded as follows.
+.. code:: bash
+    docker pull docker.pkg.github.com/automl/auto-sklearn/auto-sklearn:latest
+    docker images  # Verify that the image was downloaded
+
+This image can be used to start an interactive session as follows:
+.. code:: bash
+    docker run -it docker.pkg.github.com/automl/auto-sklearn/auto-sklearn:latest
