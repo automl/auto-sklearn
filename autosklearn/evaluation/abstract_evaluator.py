@@ -531,7 +531,7 @@ class AbstractEvaluator(object):
 
         if len(Y_pred.shape) == 1:
             Y_pred = Y_pred.reshape((-1, 1))
-        Y_pred = self._ensure_prediction_array_sizes(Y_pred, Y_train)
+
         return Y_pred
 
     def _ensure_prediction_array_sizes(self, prediction, Y_train):
