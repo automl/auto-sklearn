@@ -923,6 +923,8 @@ class BaseAutoML(AutoML):
         y = sklearn.utils.check_array(y, ensure_2d=False)
         y = np.atleast_1d(y)
 
+        if y.ndim == 1:
+            return y
         if y.ndim == 2 and y.shape[1] == 1:
             warnings.warn("A column-vector y was passed when a 1d array was"
                           " expected. Will change shape via np.ravel().",
