@@ -1,5 +1,7 @@
 # -*- encoding: utf-8 -*-
-from autosklearn.constants import *
+from autosklearn.constants import CLASSIFICATION_TASKS, REGRESSION_TASKS, BINARY_CLASSIFICATION, \
+    MULTILABEL_CLASSIFICATION, REGRESSION, MULTICLASS_CLASSIFICATION, \
+    MULTIOUTPUT_REGRESSION
 from autosklearn.pipeline.classification import SimpleClassificationPipeline
 from autosklearn.pipeline.regression import SimpleRegressionPipeline
 
@@ -55,20 +57,23 @@ def _get_regression_configuration_space(info, include, exclude):
     task_type = info['task']
     sparse = False
     multioutput = False
-
     if task_type == MULTIOUTPUT_REGRESSION:
-        multioutput = True
-    if info['is_sparse'] == 1:
-        sparse = True
+        multioutput =True
 
     dataset_properties = {
         'multioutput': multioutput,
-        'sparse': sparse
+        'sparse':sparse
     }
 
-    return SimpleRegressionPipeline(
-       dataset_properties=dataset_properties,
-       include=include, exclude=exclude).get_hyperparameter_search_space()
+    if info['is_sparse'] == 1:
+        sparse = True
+    configuration_space = SimpleRegressionPipeline(
+        dataset_properties=dataset_properties,
+        include=include,
+        exclude=exclude
+    ).get_hyperparameter_search_space()
+    return configuration_space
+
 
 def _get_classification_configuration_space(info, include, exclude):
     task_type = info['task']

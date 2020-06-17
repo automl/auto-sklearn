@@ -3,7 +3,8 @@
 import numpy as np
 from scipy import sparse
 
-from autosklearn.constants import * 
+from autosklearn.constants import STRING_TO_TASK_TYPES, REGRESSION, BINARY_CLASSIFICATION, \
+    MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION, MULTIOUTPUT_REGRESSION
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 
 
@@ -26,7 +27,7 @@ class XYDataManager(AbstractDataManager):
         label_num = {
             REGRESSION: 1,
             BINARY_CLASSIFICATION: 2,
-            MULTIOUTPUT_REGRESSION: y.shape[1],
+            MULTIOUTPUT_REGRESSION: y.shape[-1],
             MULTICLASS_CLASSIFICATION: len(np.unique(y)),
             MULTILABEL_CLASSIFICATION: y.shape[-1]
         }

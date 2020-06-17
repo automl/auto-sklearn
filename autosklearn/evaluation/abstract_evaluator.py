@@ -218,8 +218,6 @@ class AbstractEvaluator(object):
                     'multilabel': self.task_type == MULTILABEL_CLASSIFICATION,
                     'multiclass': self.task_type == MULTICLASS_CLASSIFICATION,
                 }
-
-
             model = self.model_class(config=self.configuration,
                                      dataset_properties=dataset_properties,
                                      random_state=self.seed,
@@ -531,18 +529,19 @@ class AbstractEvaluator(object):
 
         if len(Y_pred.shape) == 1:
             Y_pred = Y_pred.reshape((-1, 1))
-        Y_pred = self._ensure_prediction_array_sizes(Y_pred, Y_train)
+
         return Y_pred
 
     def _ensure_prediction_array_sizes(self, prediction, Y_train):
         num_classes = self.datamanager.info['label_num']
-        multi_type = [MULTICLASS_CLASSIFICATION]
-        if self.task_type in multi_type and prediction.shape[1] < num_classes:
+
+        if self.task_type == MULTICLASS_CLASSIFICATION and \
+                prediction.shape[1] < num_classes:
             if Y_train is None:
                 raise ValueError('Y_train must not be None!')
             classes = list(np.unique(Y_train))
-            mapping = dict()
 
+            mapping = dict()
             for class_number in range(num_classes):
                 if class_number in classes:
                     index = classes.index(class_number)

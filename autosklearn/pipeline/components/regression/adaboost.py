@@ -46,6 +46,7 @@ class AdaboostRegressor(AutoSklearnRegressionAlgorithm):
                 'name': 'AdaBoost Regressor',
                 'handles_regression': True,
                 'handles_classification': False,
+                'handles_multiclass': False,
                 'handles_multilabel': False,
                 'handles_multioutput': False,
                 'is_deterministic': True,

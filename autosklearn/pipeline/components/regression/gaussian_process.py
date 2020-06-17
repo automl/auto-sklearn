@@ -52,8 +52,8 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
                 'handles_regression': True,
                 'handles_classification': False,
                 'handles_multiclass': False,
-                'handles_multioutput': True,
                 'handles_multilabel': False,
+                'handles_multioutput': True,
                 'is_deterministic': True,
                 'input': (DENSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,)}

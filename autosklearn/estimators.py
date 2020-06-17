@@ -791,8 +791,8 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         # type of data is compatible with auto-sklearn. Legal target
         # types are: continuous, binary, multiclass.
         target_type = type_of_target(y)
-        print(target_type)
-        if target_type in ['multilabel-indicator',
+        if target_type in ['multiclass-multioutput',
+                           'multilabel-indicator',
                            'unknown',
                            ]:
             raise ValueError("regression with data of type %s is not"

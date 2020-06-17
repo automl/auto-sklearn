@@ -31,10 +31,10 @@ class RegressorChoice(AutoSklearnChoice):
                                  dataset_properties=None,
                                  include=None,
                                  exclude=None):
-        if dataset_properties is None:
-            dataset_properties = {}
         available_comp = cls.get_components()
         components_dict = OrderedDict()
+        if dataset_properties is None:
+            dataset_properties = {}
 
         if include is not None and exclude is not None:
             raise ValueError(

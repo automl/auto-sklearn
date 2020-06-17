@@ -292,7 +292,7 @@ class AutoSklearnRegressionAlgorithm(AutoSklearnComponent):
 
         Returns
         -------
-        array, shape = (n_samples, ) or shape = (n_samples, n_targets)
+        array, shape = (n_samples,) or shape = (n_samples, n_targets)
             Returns the predicted values
 
         Notes

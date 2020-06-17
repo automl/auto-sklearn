@@ -35,9 +35,7 @@ from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix
 from autosklearn.metrics import f1_macro, accuracy, r2
-from autosklearn.constants import *
-
-
+from autosklearn.constants import * 
 
 def _model_predict(model, X, batch_size, logger, task):
     def send_warnings_to_log(
@@ -923,15 +921,16 @@ class BaseAutoML(AutoML):
 
     def _check_y(self, y):
         y = sklearn.utils.check_array(y, ensure_2d=False)
-        self._n_outputs = y.shape[1]
-
         y = np.atleast_1d(y)
+
         if y.ndim == 2 and y.shape[1] == 1:
             warnings.warn("A column-vector y was passed when a 1d array was"
                           " expected. Will change shape via np.ravel().",
                           sklearn.utils.DataConversionWarning, stacklevel=2)
             y = np.ravel(y)
+            return y
 
+        self._n_outputs = y.shape[1]
         return y
 
     def refit(self, X, y):
@@ -1087,7 +1086,7 @@ class AutoMLRegressor(BaseAutoML):
         super().__init__(*args, **kwargs)
         self._task_mapping = {'continuous-multioutput': MULTIOUTPUT_REGRESSION,
                 'continuous':REGRESSION}
-        
+
     def fit(
         self,
         X: np.ndarray,
@@ -1098,65 +1097,30 @@ class AutoMLRegressor(BaseAutoML):
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
-        ):
-        
+    ):
         X, y = super()._perform_input_checks(X, y)
-        
-        if X_test is not None:
-            X_test, y_test = self._perform_input_checks(X_test, y_test)
-            if len(y.shape) != len(y_test.shape):
-                raise ValueError('Target value shapes do not match: %s vs %s'
-                                 % (y.shape, y_test.shape))
-
         y_task = type_of_target(y)
         task = self._task_mapping.get(y_task)
-
+        print(task)
         if task is None:
             raise ValueError('Cannot work on data of type %s' % y_task)
 
-        if metric is None:
-            metric = r2
+        if self._metric is None:
+            self._metric = r2
         return super().fit(
             X, y,
             X_test=X_test,
             y_test=y_test,
-            task=REGRESSION,
+            task=task,
             feat_type=feat_type,
             dataset_name=dataset_name,
             only_return_configuration_space=only_return_configuration_space,
             load_models=load_models,
         )
-    def fit_ensemble(self, y, task=None, metric=None, precision='32',
+
+    def fit_ensemble(self, y, task=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
-        y, _target, _n_targets = self._process_targets(y)
-        if not hasattr(self, '_target'):
-            self._target = _target
-        if not hasattr(self, '_n_targets'):
-            self._n_targets = _n_targets
-
-        return super().fit_ensemble(y, task, metric, precision, dataset_name,
-                                    ensemble_nbest, ensemble_size)
-
-    def _process_targets(self, y):
         y = super()._check_y(y)
-        self._n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
-
-        y = np.copy(y)
-
-        _target = []
-        _n_targets = []
-
-        if self._n_outputs == 1:
-            target_k, y = np.unique(y, return_inverse=True)
-            _target.append(target_k)
-            _n_targets.append(target_k.shape[0])
-        else:
-            for k in range(self._n_outputs):
-                target_k, y[:, k] = np.unique(y[:, k], return_inverse=True)
-                _target.append(target_k)
-                _n_targets.append(target_k.shape[0])
-
-        _n_targets = np.array(_n_targets, dtype=np.int)
-
-        return y, _target, _n_targets
+        return super().fit_ensemble(y, task, precision, dataset_name,
+                                    ensemble_nbest, ensemble_size)
