@@ -35,7 +35,8 @@ from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix
 from autosklearn.metrics import f1_macro, accuracy, r2
-from autosklearn.constants import * 
+from autosklearn.constants import  MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
+    REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION
 
 def _model_predict(model, X, batch_size, logger, task):
     def send_warnings_to_log(
@@ -1087,7 +1088,8 @@ class AutoMLRegressor(BaseAutoML):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._task_mapping = {'continuous-multioutput': MULTIOUTPUT_REGRESSION,
-                'continuous':REGRESSION}
+                'continuous': REGRESSION, 'multiclass': REGRESSION,
+                'multiclass-multioutput': MULTIOUTPUT_REGRESSION}
 
     def fit(
         self,

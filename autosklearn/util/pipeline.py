@@ -58,11 +58,11 @@ def _get_regression_configuration_space(info, include, exclude):
     sparse = False
     multioutput = False
     if task_type == MULTIOUTPUT_REGRESSION:
-        multioutput =True
+        multioutput = True
 
     dataset_properties = {
         'multioutput': multioutput,
-        'sparse':sparse
+        'sparse': sparse
     }
 
     if info['is_sparse'] == 1:
