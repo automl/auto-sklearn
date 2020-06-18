@@ -187,7 +187,8 @@ class EstimatorTest(Base, unittest.TestCase):
 
         # Test that regressor raises error for illegal target types.
         reg = AutoSklearnRegressor()
-        # Illegal target types for regression: multilabel-indicator 
+        # Illegal target types for regression: multilabel-indicator,
+        # multiclass-multioutput
 
         self.assertRaisesRegex(
             ValueError,
@@ -198,8 +199,16 @@ class EstimatorTest(Base, unittest.TestCase):
             y=y_multilabel,
         )
 
+        self.assertRaisesRegex(
+            ValueError,
+            "regression with data of type"
+            " multiclass-multioutput is not supported",
+            reg.fit,
+            X=X,
+            y=y_multiclass_multioutput,
+        )
         # Legal target types: continuous, binary, multiclass,
-        # multiclass-multioutput, continuous-multioutput
+        # continuous-multioutput
         try:
             reg.fit(X, y_continuous)
         except ValueError:
@@ -217,12 +226,6 @@ class EstimatorTest(Base, unittest.TestCase):
         except ValueError:
             self.fail("reg.fit() raised ValueError while fitting "
                       "multiclass targets")
-
-        try:
-            reg.fit(X, y_multiclass_multioutput)
-        except ValueError:
-            self.fail("reg.fit() raised ValueError while fitting "
-                      "multiclass_multioutput targets")
 
         try:
             reg.fit(X, y_continuous_multioutput)

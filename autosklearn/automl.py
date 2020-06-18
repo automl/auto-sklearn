@@ -1088,8 +1088,8 @@ class AutoMLRegressor(BaseAutoML):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._task_mapping = {'continuous-multioutput': MULTIOUTPUT_REGRESSION,
-                'continuous': REGRESSION, 'multiclass': REGRESSION,
-                'multiclass-multioutput': MULTIOUTPUT_REGRESSION}
+                'continuous': REGRESSION, 
+                'multiclass': REGRESSION}
 
     def fit(
         self,
