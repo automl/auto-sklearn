@@ -38,8 +38,8 @@ from autosklearn.metrics import f1_macro, accuracy, r2
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
     REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION
 
-def _model_predict(model, X, batch_size, logger, task):
 
+def _model_predict(model, X, batch_size, logger, task):
     def send_warnings_to_log(
             message, category, filename, lineno, file=None, line=None):
         logger.debug('%s:%s: %s:%s' % (filename, lineno, category.__name__, message))
