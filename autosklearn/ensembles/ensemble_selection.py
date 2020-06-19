@@ -105,10 +105,16 @@ class EnsembleSelection(AbstractEnsemble):
             for j, pred in enumerate(predictions):
                 # TODO: this could potentially be vectorized! - let's profile
                 # the script first!
-                #fant_ensemble_prediction[:, :] = \
-                #    weighted_ensemble_prediction + (1. / float(s + 1)) * pred
-                np.add(fant_ensemble_prediction, weighted_ensemble_prediction, out=fant_ensemble_prediction)
-                np.add(fant_ensemble_prediction, (1. / float(s + 1)) * pred, out=fant_ensemble_prediction)
+                np.add(
+                    fant_ensemble_prediction,
+                    weighted_ensemble_prediction,
+                    out=fant_ensemble_prediction
+                )
+                np.add(
+                    fant_ensemble_prediction,
+                    (1. / float(s + 1)) * pred,
+                    out=fant_ensemble_prediction
+                )
                 scores[j] = self.metric._optimum - calculate_score(
                     solution=labels,
                     prediction=fant_ensemble_prediction,
