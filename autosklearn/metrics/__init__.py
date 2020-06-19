@@ -61,7 +61,7 @@ class _PredictScorer(Scorer):
             y_pred[y_pred > 0.5] = 1.0
             y_pred[y_pred <= 0.5] = 0.0
         elif type_true == 'continuous-multioutput':
-            pass 
+            pass
         else:
             raise ValueError(type_true)
 
