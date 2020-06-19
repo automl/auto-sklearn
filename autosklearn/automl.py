@@ -926,14 +926,13 @@ class BaseAutoML(AutoML):
 
         if y.ndim == 1:
             return y
-        if y.ndim == 2 and y.shape[1] == 1:
+        elif y.ndim == 2 and y.shape[1] == 1:
             warnings.warn("A column-vector y was passed when a 1d array was"
                           " expected. Will change shape via np.ravel().",
                           sklearn.utils.DataConversionWarning, stacklevel=2)
             y = np.ravel(y)
             return y
 
-        self._n_outputs = y.shape[1]
         return y
 
     def refit(self, X, y):
@@ -1105,7 +1104,6 @@ class AutoMLRegressor(BaseAutoML):
         X, y = super()._perform_input_checks(X, y)
         y_task = type_of_target(y)
         task = self._task_mapping.get(y_task)
-        print(task)
         if task is None:
             raise ValueError('Cannot work on data of type %s' % y_task)
 
