@@ -88,81 +88,81 @@ Build and fit the classifier
 
  .. code-block:: none
 
-    [WARNING] [2020-06-18 21:28:55,709:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,709:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,710:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,710:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,710:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,711:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,711:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,711:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,712:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,712:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,712:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,713:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,713:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,713:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,714:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,714:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,714:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,715:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,715:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,715:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,716:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,716:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,716:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,717:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,717:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,717:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,718:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,718:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,718:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,718:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,719:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,719:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,719:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,720:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,720:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,720:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,721:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,721:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,722:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,722:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,722:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,722:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,722:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,722:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,722:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,722:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,722:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,722:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,723:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,723:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,723:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,723:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,723:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,723:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,723:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,723:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,723:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,723:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,723:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,723:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,724:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,724:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,724:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,724:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,724:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,724:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,724:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,724:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,724:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,724:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,724:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,724:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,725:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,725:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
-    [WARNING] [2020-06-18 21:28:55,725:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,581:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,582:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,582:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,583:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,583:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,583:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,584:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,584:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,584:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,585:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,585:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,585:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,586:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,586:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,586:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,587:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,587:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,587:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,588:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,588:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,588:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,589:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,589:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,589:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,590:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,590:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,590:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,591:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,591:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,591:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,592:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,592:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,592:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,593:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,593:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,593:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,594:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,594:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,595:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,595:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,595:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,595:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,595:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,595:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,595:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,595:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,595:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,596:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,596:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,596:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,596:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,596:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,596:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,596:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,596:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,596:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,596:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,596:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,597:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,597:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,597:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,597:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,597:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,597:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,597:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,597:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,597:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,597:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,597:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,597:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,598:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,598:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,598:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,598:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
+    [WARNING] [2020-06-19 21:29:13,598:EnsembleBuilder(1):breast_cancer] Interpreted str-precision as 32
 
     AutoSklearnClassifier(delete_output_folder_after_terminate=True,
                           delete_tmp_folder_after_terminate=False,
@@ -470,7 +470,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  55.396 seconds)
+   **Total running time of the script:** ( 1 minutes  55.439 seconds)
 
 
 .. _sphx_glr_download_examples_example_sequential.py:
