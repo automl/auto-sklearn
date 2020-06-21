@@ -187,18 +187,8 @@ class EstimatorTest(Base, unittest.TestCase):
 
         # Test that regressor raises error for illegal target types.
         reg = AutoSklearnRegressor()
-        # Illegal target types for regression: multilabel-indicator,
-        # binary
-
-        self.assertRaisesRegex(
-            ValueError,
-            "regression with data of type"
-            " binary is not supported",
-            reg.fit,
-            X=X,
-            y=y_binary,
-        )
-
+        # Illegal target types for regression: multilabel-indicator
+        # multiclass-multioutput
         self.assertRaisesRegex(
             ValueError,
             "regression with data of type"
@@ -208,19 +198,23 @@ class EstimatorTest(Base, unittest.TestCase):
             y=y_multilabel,
         )
 
+        self.assertRaisesRegex(
+            ValueError,
+            "regression with data of type"
+            " multiclass-multioutput is not supported",
+            reg.fit,
+            X=X,
+            y=y_multiclass_multioutput,
+        )
+
         # Legal target types: continuous, multiclass,
-        # continuous-multioutput, multiclass-multitoutput
+        # continuous-multioutput,
+        # binary
         try:
             reg.fit(X, y_continuous)
         except ValueError:
             self.fail("reg.fit() raised ValueError while fitting "
                       "continuous targets")
-
-        try:
-            reg.fit(X, y_multiclass_multioutput)
-        except ValueError:
-            self.fail("reg.fit() raised ValueError while fitting "
-                      "multiclass_multioutput targets")
 
         try:
             reg.fit(X, y_multiclass)
@@ -233,6 +227,12 @@ class EstimatorTest(Base, unittest.TestCase):
         except ValueError:
             self.fail("reg.fit() raised ValueError while fitting "
                       "continuous_multioutput targets")
+
+        try:
+            reg.fit(X, y_binary)
+        except ValueError:
+            self.fail("reg.fit() raised ValueError while fitting "
+                      "binary targets")
 
     def test_fit_pSMAC(self):
         tmp = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_pSMAC')

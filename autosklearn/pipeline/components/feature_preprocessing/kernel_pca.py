@@ -67,7 +67,7 @@ class KernelPCA(AutoSklearnPreprocessingAlgorithm):
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
-                'handles_multioutput': True,
+                'handles_multioutput': False,
                 'is_deterministic': False,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (DENSE, UNSIGNED_DATA)}
