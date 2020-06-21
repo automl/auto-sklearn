@@ -188,7 +188,7 @@ class EstimatorTest(Base, unittest.TestCase):
         # Test that regressor raises error for illegal target types.
         reg = AutoSklearnRegressor()
         # Illegal target types for regression: multilabel-indicator,
-        # binary 
+        # binary
 
         self.assertRaisesRegex(
             ValueError,
