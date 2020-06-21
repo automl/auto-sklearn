@@ -24,6 +24,7 @@ class StandardScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
+                'handles_multioutput': True,
                 'is_deterministic': True,
                 # TODO find out if this is right!
                 'handles_sparse': True,

@@ -1088,6 +1088,7 @@ class AutoMLRegressor(BaseAutoML):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._task_mapping = {'continuous-multioutput': MULTIOUTPUT_REGRESSION,
+                              'multiclass-multioutput': MULTIOUTPUT_REGRESSION,
                               'continuous': REGRESSION,
                               'multiclass': REGRESSION}
 
@@ -1103,6 +1104,7 @@ class AutoMLRegressor(BaseAutoML):
         load_models: bool = True,
     ):
         X, y = super()._perform_input_checks(X, y)
+        self._n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
         y_task = type_of_target(y)
         task = self._task_mapping.get(y_task)
         if task is None:
