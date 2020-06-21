@@ -1,10 +1,12 @@
 import copy
 import resource
 import sys
+import tempfile
 import traceback
 import unittest
 import unittest.mock
 
+from joblib import Memory
 import numpy as np
 import sklearn.datasets
 import sklearn.decomposition
@@ -48,6 +50,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             self.assertIn('handles_classification', props)
             self.assertIn('handles_multiclass', props)
             self.assertIn('handles_multilabel', props)
+            self.assertIn('handles_multioutput', props)
             self.assertFalse(props['handles_classification'])
             self.assertFalse(props['handles_multiclass'])
             self.assertFalse(props['handles_multilabel'])
@@ -90,6 +93,38 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         self._test_configurations(cs, make_sparse=True,
                                   dataset_properties=dataset_properties)
 
+    def test_multioutput(self):
+        cache = Memory(cachedir=tempfile.gettempdir())
+        cached_func = cache.cache(
+            sklearn.datasets.make_regression
+        )
+        X, Y = cached_func(
+            n_samples=250,
+            n_features=20,
+            n_informative=9,
+            n_targets=4,
+            bias=0.5,
+            effective_rank=10,
+            tail_strength=0.4,
+            noise=0.3,
+            shuffle=True,
+            coef=False,
+            random_state=1
+        )
+        X_train = X[:200, :]
+        Y_train = Y[:200, :]
+        X_test = X[200:, :]
+        Y_test = Y[200:, :]
+
+        data = {'X_train': X_train, 'Y_train': Y_train,
+                'X_test': X_test, 'Y_test': Y_test}
+
+        dataset_properties = {'multioutput': True}
+        cs = SimpleRegressionPipeline(dataset_properties=dataset_properties).\
+            get_hyperparameter_search_space()
+        self._test_configurations(cs, data=data,
+                dataset_properties=dataset_properties)
+
     def _test_configurations(self, configurations_space, make_sparse=False,
                              data=None, dataset_properties=None):
         # Use a limit of ~4GiB
@@ -118,6 +153,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 restrict_to = restrictions[restrict_parameter]
                 if restrict_parameter in config and config[restrict_parameter] is not None:
                     config._values[restrict_parameter] = restrict_to
+
 
             if data is None:
                 X_train, Y_train, X_test, Y_test = get_dataset(

@@ -27,7 +27,7 @@ class RegressorChoice(AutoSklearnChoice):
         return components
 
     @classmethod
-    def get_available_components(cls, data_prop,
+    def get_available_components(cls,
                                  dataset_properties=None,
                                  include=None,
                                  exclude=None):
@@ -60,14 +60,14 @@ class RegressorChoice(AutoSklearnChoice):
 
             if entry.get_properties()['handles_regression'] is False:
                 continue
-            if dataset_properties.get('multioutput') is True and available_comp[name]. \
-                    get_properties()['handles_multioutput'] is False:
+            if dataset_properties.get('multioutput') is True and \
+               entry.get_properties()['handles_multioutput'] is False:
                 continue
             components_dict[name] = entry
 
         return components_dict
 
-    def get_hyperparameter_search_space(self, dataset_properties,
+    def get_hyperparameter_search_space(self, dataset_properties=None,
                                         default=None,
                                         include=None,
                                         exclude=None):
@@ -78,7 +78,7 @@ class RegressorChoice(AutoSklearnChoice):
 
         # Compile a list of all estimator objects for this problem
         available_estimators = self.get_available_components(
-            data_prop=dataset_properties,
+            dataset_properties=dataset_properties,
             include=include,
             exclude=exclude)
 

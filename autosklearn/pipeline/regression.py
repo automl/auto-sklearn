@@ -97,20 +97,6 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
             y[y < (0.5 * self.y_min_)] = 0.5 * self.y_min_
         return y
 
-    def get_available_components(self, available_comp, data_prop, inc, exc):
-        components_dict = OrderedDict()
-        for name in available_comp:
-            if inc is not None and name not in inc:
-                continue
-            elif exc is not None and name in exc:
-                continue
-            entry = available_comp[name]
-
-            if not entry.get_properties()['handles_regression']:
-                continue
-            components_dict[name] = entry
-        return components_dict
-
     def _get_hyperparameter_search_space(self, include=None, exclude=None,
                                          dataset_properties=None):
         """Return the configuration space for the CASH problem.
