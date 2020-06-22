@@ -78,6 +78,7 @@ class MLPClassifier(AutoSklearnClassificationAlgorithm):
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': False,
+                'handles_multioutput': False,
                 'is_deterministic': False,
                 # Both input and output must be tuple(iterable)
                 'input': [DENSE, SIGNED_DATA, UNSIGNED_DATA],
