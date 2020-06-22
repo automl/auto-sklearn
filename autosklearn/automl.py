@@ -440,6 +440,18 @@ class AutoML(BaseEstimator):
             else:
                 per_run_time_limit = self._per_run_time_limit
 
+            # Make sure that at least 2 models are created for the ensemble process
+            min_ensemble_time = time_left_for_smac // 10
+            num_models = time_left_for_smac // per_run_time_limit
+            if num_models < 2:
+                per_run_time_limit = time_left_for_smac//2 - min_ensemble_time
+                self._logger.warning(
+                    "Capping per_run_time_limit to {} to have "
+                    "at least 2 models for ensemble.".format(
+                        per_run_time_limit
+                    )
+                )
+
             _proc_smac = AutoMLSMBO(
                 config_space=self.configuration_space,
                 dataset_name=self._dataset_name,
