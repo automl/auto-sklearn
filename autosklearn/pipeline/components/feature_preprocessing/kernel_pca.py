@@ -76,7 +76,7 @@ class KernelPCA(AutoSklearnPreprocessingAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         n_components = UniformIntegerHyperparameter(
             "n_components", 10, 2000, default_value=100)
-        kernel = CategoricalHyperparameter('kernel', ['poly', 'rbf', 'sigmoid', 'cosine'], 'cosine')
+        kernel = CategoricalHyperparameter('kernel', ['poly', 'rbf', 'sigmoid', 'cosine'], 'rbf')
         gamma = UniformFloatHyperparameter(
             "gamma",
             3.0517578125e-05, 8,
