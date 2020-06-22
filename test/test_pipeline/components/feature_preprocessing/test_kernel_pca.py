@@ -14,7 +14,7 @@ class KernelPCAComponentTest(PreprocessingTestCase):
     def test_default_configuration(self):
         transformation, original = _test_preprocessing(KernelPCA,
                                                        dataset='digits',
-                                                       train_size_maximum=2000)
+                                                       train_size_maximum=979)
         self.assertEqual(transformation.shape[0], original.shape[0])
         self.assertFalse((transformation == 0).all())
 
@@ -29,7 +29,7 @@ class KernelPCAComponentTest(PreprocessingTestCase):
         for i in range(5):
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
                                                            make_sparse=False,
-                                                           train_size_maximum=1000)
+                                                           train_size_maximum=979)
             configuration_space = KernelPCA.get_hyperparameter_search_space()
             default = configuration_space.get_default_configuration()
             preprocessor = KernelPCA(random_state=1,
