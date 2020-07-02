@@ -446,8 +446,8 @@ class AutoML(BaseEstimator):
             if num_models < 2:
                 per_run_time_limit = time_left_for_smac//2 - min_ensemble_time
                 self._logger.warning(
-                    "Capping per_run_time_limit to {} to have "
-                    "at least 2 models for ensemble.".format(
+                    "Capping the per_run_time_limit to {} to have "
+                    "time for a least 2 models in each process.".format(
                         per_run_time_limit
                     )
                 )

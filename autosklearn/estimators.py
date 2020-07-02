@@ -344,7 +344,7 @@ class AutoSklearnEstimator(BaseEstimator):
                 'only one of them.'
             )
 
-        # Hanlde the number of jobs and the time for them
+        # Handle the number of jobs and the time for them
         if self.n_jobs is None or self.n_jobs == 1:
             self._n_jobs = 1
         elif self.n_jobs == -1:
@@ -352,7 +352,7 @@ class AutoSklearnEstimator(BaseEstimator):
         else:
             self._n_jobs = self.n_jobs
 
-        # Automaltically set the cutoff time per task
+        # Automatically set the cutoff time per task
         if self.per_run_time_limit is None:
             self.per_run_time_limit = self._n_jobs * self.time_left_for_this_task // 10
 
