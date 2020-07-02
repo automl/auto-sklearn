@@ -571,7 +571,7 @@ class EnsembleBuilder(multiprocessing.Process):
                     [
                         v["ens_score"],
                         v["disc_space_cost_mb"],
-                     ] for v in self.read_preds.values()
+                    ] for v in self.read_preds.values() if v["disc_space_cost_mb"] is not None
                 ]
                 max_consumption = max(i[1] for i in consumption)
 
