@@ -68,18 +68,9 @@ class EnsembleSelection(AbstractEnsemble):
             scores = np.zeros((len(predictions)))
             s = len(ensemble)
             if s == 0:
-                np.multiply(
-                    weighted_ensemble_prediction,
-                    0,
-                    out=weighted_ensemble_prediction,
-                )
+                weighted_ensemble_prediction.fill(0.0)
             else:
-                # Memory-efficient averaging!
-                np.multiply(
-                    weighted_ensemble_prediction,
-                    0,
-                    out=weighted_ensemble_prediction,
-                )
+                weighted_ensemble_prediction.fill(0.0)
                 for pred in ensemble:
                     np.add(
                         weighted_ensemble_prediction,
@@ -91,20 +82,17 @@ class EnsembleSelection(AbstractEnsemble):
                     1/s,
                     out=weighted_ensemble_prediction,
                 )
-
                 np.multiply(
                     weighted_ensemble_prediction,
                     (s / float(s + 1)),
                     out=weighted_ensemble_prediction,
                 )
-            np.multiply(
-                fant_ensemble_prediction,
-                0,
-                out=fant_ensemble_prediction,
-            )
+
+            # Memory-efficient averaging!
             for j, pred in enumerate(predictions):
                 # TODO: this could potentially be vectorized! - let's profile
                 # the script first!
+                fant_ensemble_prediction.fill(0.0)
                 np.add(
                     fant_ensemble_prediction,
                     weighted_ensemble_prediction,
