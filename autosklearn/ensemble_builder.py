@@ -77,8 +77,8 @@ class EnsembleBuilder(multiprocessing.Process):
                If float, it will be interpreted as the max megabytes allowed of disc space. That
                is, if the number of ensemble candidates require more disc space than this float
                value, the worst models will be deleted to keep within this budget.
-               Models and predictions of the worst-performing models will be deleted then'.
-               If None, feature is disabled.
+               Models and predictions of the worst-performing models will be deleted then.
+               If None, the feature is disabled.
                It defines an upper bound on the models that can be used in the ensemble.
             performance_range_threshold: float
                 Keep only models that are better than:
@@ -440,7 +440,7 @@ class EnsembleBuilder(multiprocessing.Process):
                     "seed": _seed,
                     "num_run": _num_run,
                     "budget": _budget,
-                    "disc_space_cost_mb": 0,
+                    "disc_space_cost_mb": None,
                     Y_ENSEMBLE: None,
                     Y_VALID: None,
                     Y_TEST: None,
@@ -588,11 +588,7 @@ class EnsembleBuilder(multiprocessing.Process):
                     max_models = np.argmax(sorted_cum_consumption > self.max_models_on_disc)
 
                     # Make sure that at least 1 model survives
-                    self.max_resident_models = max(1, min(i for i in [
-                        self.max_resident_models,  # Can be None in first iter
-                        max_models,
-
-                    ] if i is not None))
+                    self.max_resident_models = max(1, max_models)
                     self.logger.warning(
                         "Limiting num of models via float max_models_on_disc={}"
                         " as accumulated={} worst={} num_models={}".format(
