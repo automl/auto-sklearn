@@ -433,9 +433,11 @@ class AutoML(BaseEstimator):
         else:
             if self._per_run_time_limit is None or \
                     self._per_run_time_limit > time_left_for_smac:
-                self._logger.warning('Time limit for a single run is higher than total time '
-                      'limit. Capping the limit for a single run to the total '
-                      'time given to SMAC (%f)' % time_left_for_smac)
+                self._logger.warning(
+                    'Time limit for a single run is higher than total time '
+                    'limit. Capping the limit for a single run to the total '
+                    'time given to SMAC (%f)' % time_left_for_smac
+                )
                 per_run_time_limit = time_left_for_smac
             else:
                 per_run_time_limit = self._per_run_time_limit
