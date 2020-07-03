@@ -1,15 +1,17 @@
-.. note::
-    :class: sphx-glr-download-link-note
+.. only:: html
 
-    Click :ref:`here <sphx_glr_download_examples_example_extending_preprocessor.py>` to download the full example code
-.. rst-class:: sphx-glr-example-title
+    .. note::
+        :class: sphx-glr-download-link-note
 
-.. _sphx_glr_examples_example_extending_preprocessor.py:
+        Click :ref:`here <sphx_glr_download_examples_example_extending_preprocessor.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_examples_example_extending_preprocessor.py:
 
 
-====================================================================
+==================================================
 Extending Auto-Sklearn with Preprocessor Component
-====================================================================
+==================================================
 
 The following example demonstrates how to create a wrapper around the linear
 discriminant analysis (LDA) algorithm from sklearn and use it as a preprocessor
@@ -33,8 +35,23 @@ in auto-sklearn.
         UNSIGNED_DATA
     from autosklearn.util.common import check_none
 
+    from sklearn.datasets import load_breast_cancer
+    from sklearn.model_selection import train_test_split
 
-    # Create LDA component for auto-sklearn.
+
+
+
+
+
+
+
+
+Create LDA component for auto-sklearn
+=====================================
+
+
+.. code-block:: default
+
     class LDA(AutoSklearnPreprocessingAlgorithm):
         def __init__(self, solver, n_components, tol, shrinkage=None, random_state=None):
             self.solver = solver
@@ -101,37 +118,205 @@ in auto-sklearn.
             return cs
 
 
-    if __name__ == '__main__':
-        # Add LDA component to auto-sklearn.
-        autosklearn.pipeline.components.feature_preprocessing.add_preprocessor(LDA)
+    # Add LDA component to auto-sklearn.
+    autosklearn.pipeline.components.feature_preprocessing.add_preprocessor(LDA)
 
-        # Create dataset.
-        from sklearn.datasets import load_breast_cancer
-        from sklearn.model_selection import train_test_split
-        X, y = load_breast_cancer(return_X_y=True)
-        X_train, X_test, y_train, y_test = train_test_split(X, y)
 
-        # Configuration space.
-        cs = LDA.get_hyperparameter_search_space()
-        print(cs)
 
-        # Fit the model using LDA as preprocessor.
-        clf = autosklearn.classification.AutoSklearnClassifier(
-            time_left_for_this_task=30,
-            include_preprocessors=['LDA'],
-        )
-        clf.fit(X_train, y_train)
 
-        # Print prediction score and statistics.
-        y_pred = clf.predict(X_test)
-        print("accracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
-        print(clf.sprint_statistics())
-        print(clf.show_models())
+
+
+
+
+Create dataset
+==============
+
+
+.. code-block:: default
+
+
+    X, y = load_breast_cancer(return_X_y=True)
+    X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+
+
+
+
+
+
+
+Configuration space
+===================
+
+
+.. code-block:: default
+
+
+    cs = LDA.get_hyperparameter_search_space()
+    print(cs)
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Configuration space object:
+      Hyperparameters:
+        n_components, Type: UniformInteger, Range: [1, 29], Default: 10
+        shrinkage, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.5
+        solver, Type: Categorical, Choices: {svd, lsqr, eigen}, Default: svd
+        tol, Type: UniformFloat, Range: [0.0001, 1.0], Default: 0.0001
+      Conditions:
+        shrinkage | solver in {'lsqr', 'eigen'}
+
+
+
+
+
+Fit the model using LDA as preprocessor
+=======================================
+
+
+.. code-block:: default
+
+
+    clf = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=30,
+        include_preprocessors=['LDA'],
+    )
+    clf.fit(X_train, y_train)
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    AutoSklearnClassifier(delete_output_folder_after_terminate=True,
+                          delete_tmp_folder_after_terminate=True,
+                          disable_evaluator_output=False,
+                          ensemble_memory_limit=1024, ensemble_nbest=50,
+                          ensemble_size=50, exclude_estimators=None,
+                          exclude_preprocessors=None, get_smac_object_callback=None,
+                          include_estimators=None, include_preprocessors=['LDA'],
+                          initial_configurations_via_metalearning=25,
+                          logging_config=None, max_models_on_disc=50,
+                          metadata_directory=None, metric=None,
+                          ml_memory_limit=3072, n_jobs=None, output_folder=None,
+                          per_run_time_limit=3, resampling_strategy='holdout',
+                          resampling_strategy_arguments=None, seed=1,
+                          shared_mode=False, smac_scenario_args=None,
+                          time_left_for_this_task=30, tmp_folder=None)
+
+
+
+Print prediction score and statistics
+=====================================
+
+
+.. code-block:: default
+
+
+    y_pred = clf.predict(X_test)
+    print("accracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
+    print(clf.sprint_statistics())
+    print(clf.show_models())
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    accracy:  0.986013986013986
+    auto-sklearn results:
+      Dataset name: 405fe8d73d91bd6b6c54c5b4ae5b4ee6
+      Metric: accuracy
+      Best validation score: 0.964539
+      Number of target algorithm runs: 13
+      Number of successful target algorithm runs: 8
+      Number of crashed target algorithm runs: 5
+      Number of target algorithms that exceeded the time limit: 0
+      Number of target algorithms that exceeded the memory limit: 0
+
+    [(0.280000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'qda', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'LDA', 'classifier:qda:reg_param': 0.4048108135152626, 'feature_preprocessor:LDA:n_components': 9, 'feature_preprocessor:LDA:solver': 'eigen', 'feature_preprocessor:LDA:tol': 0.30212279358458555, 'feature_preprocessor:LDA:shrinkage': 0.03382058127012111},
+    dataset_properties={
+      'task': 1,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'classification',
+      'signed': False})),
+    (0.180000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'qda', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'LDA', 'classifier:qda:reg_param': 0.5648781292310845, 'feature_preprocessor:LDA:n_components': 18, 'feature_preprocessor:LDA:solver': 'svd', 'feature_preprocessor:LDA:tol': 0.24040244330249946},
+    dataset_properties={
+      'task': 1,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'classification',
+      'signed': False})),
+    (0.160000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'lda', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'LDA', 'classifier:lda:n_components': 83, 'classifier:lda:shrinkage': 'auto', 'classifier:lda:tol': 4.895551547060129e-05, 'feature_preprocessor:LDA:n_components': 10, 'feature_preprocessor:LDA:solver': 'svd', 'feature_preprocessor:LDA:tol': 0.7280470143215855},
+    dataset_properties={
+      'task': 1,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'classification',
+      'signed': False})),
+    (0.160000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'qda', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'LDA', 'classifier:qda:reg_param': 0.8578847478380041, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.00013406453480194083, 'feature_preprocessor:LDA:n_components': 22, 'feature_preprocessor:LDA:solver': 'svd', 'feature_preprocessor:LDA:tol': 0.12033382339340677},
+    dataset_properties={
+      'task': 1,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'classification',
+      'signed': False})),
+    (0.100000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'libsvm_svc', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'feature_preprocessor:__choice__': 'LDA', 'classifier:libsvm_svc:C': 171.2659942104564, 'classifier:libsvm_svc:gamma': 0.0054759286315644315, 'classifier:libsvm_svc:kernel': 'sigmoid', 'classifier:libsvm_svc:max_iter': -1, 'classifier:libsvm_svc:shrinking': 'True', 'classifier:libsvm_svc:tol': 0.0002892199420949573, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.4676209624623668, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max': 0.9855777560549435, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min': 0.09174267921099345, 'feature_preprocessor:LDA:n_components': 23, 'feature_preprocessor:LDA:solver': 'eigen', 'feature_preprocessor:LDA:tol': 0.8927388886451721, 'classifier:libsvm_svc:coef0': -0.469830831540343, 'feature_preprocessor:LDA:shrinkage': 0.2303997403682031},
+    dataset_properties={
+      'task': 1,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'classification',
+      'signed': False})),
+    (0.060000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'LDA', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'feature_preprocessor:LDA:n_components': 10, 'feature_preprocessor:LDA:solver': 'svd', 'feature_preprocessor:LDA:tol': 0.0001},
+    dataset_properties={
+      'task': 1,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'classification',
+      'signed': False})),
+    (0.060000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'k_nearest_neighbors', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:__choice__': 'LDA', 'classifier:k_nearest_neighbors:n_neighbors': 31, 'classifier:k_nearest_neighbors:p': 1, 'classifier:k_nearest_neighbors:weights': 'uniform', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.28262399169801017, 'feature_preprocessor:LDA:n_components': 15, 'feature_preprocessor:LDA:solver': 'eigen', 'feature_preprocessor:LDA:tol': 0.82698378074856, 'feature_preprocessor:LDA:shrinkage': 0.9748694882951665},
+    dataset_properties={
+      'task': 1,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'classification',
+      'signed': False})),
+    ]
+
+
+
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.000 seconds)
+   **Total running time of the script:** ( 0 minutes  24.477 seconds)
 
 
 .. _sphx_glr_download_examples_example_extending_preprocessor.py:
@@ -144,13 +329,13 @@ in auto-sklearn.
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-python
 
      :download:`Download Python source code: example_extending_preprocessor.py <example_extending_preprocessor.py>`
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
 
      :download:`Download Jupyter notebook: example_extending_preprocessor.ipynb <example_extending_preprocessor.ipynb>`
 

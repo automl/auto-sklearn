@@ -2,7 +2,14 @@
 ==================
 Successive Halving
 ==================
-"""
+
+This advanced  example illustrates how to interact with
+the SMAC callback and get relevant information from the run, like
+the number of iterations. Particularly, it exemplifies how to select
+the intensification strategy to use in smac, in this case:
+`SuccessiveHalving <http://proceedings.mlr.press/v80/falkner18a/falkner18a-supp.pdf>`_.
+"""  # noqa (links are too long)
+
 
 import sklearn.model_selection
 import sklearn.datasets
@@ -10,6 +17,10 @@ import sklearn.metrics
 
 import autosklearn.classification
 
+
+############################################################################
+# Define a callback that instantiates SuccessiveHalving
+# =====================================================
 
 def get_smac_object_callback(budget_type):
     def get_smac_object(
@@ -56,151 +67,166 @@ def get_smac_object_callback(budget_type):
     return get_smac_object
 
 
-def main():
-    X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-    X_train, X_test, y_train, y_test = \
-        sklearn.model_selection.train_test_split(X, y, random_state=1, shuffle=True)
+############################################################################
+# Data Loading
+# ============
 
-    automl = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=30,
-        per_run_time_limit=5,
-        tmp_folder='/tmp/autosklearn_sh_example_tmp',
-        output_folder='/tmp/autosklearn_sh_example_out',
-        disable_evaluator_output=False,
-        # 'holdout' with 'train_size'=0.67 is the default argument setting
-        # for AutoSklearnClassifier. It is explicitly specified in this example
-        # for demonstrational purpose.
-        resampling_strategy='holdout',
-        resampling_strategy_arguments={'train_size': 0.67},
-        include_estimators=['extra_trees', 'gradient_boosting', 'random_forest', 'sgd',
-                            'passive_aggressive'],
-        include_preprocessors=['no_preprocessing'],
-        get_smac_object_callback=get_smac_object_callback('iterations'),
-    )
-    automl.fit(X_train, y_train, dataset_name='breast_cancer')
+X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = \
+    sklearn.model_selection.train_test_split(X, y, random_state=1, shuffle=True)
 
-    # Print the final ensemble constructed by auto-sklearn.
-    print(automl.show_models())
-    predictions = automl.predict(X_test)
-    # Print statistics about the auto-sklearn run such as number of
-    # iterations, number of models failed with a time out.
-    print(automl.sprint_statistics())
-    print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+############################################################################
+# Build and fit a classifier
+# ==========================
 
-    # We can also use cross-validation with successive halving
-    X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-    X_train, X_test, y_train, y_test = \
-        sklearn.model_selection.train_test_split(X, y, random_state=1, shuffle=True)
+automl = autosklearn.classification.AutoSklearnClassifier(
+    time_left_for_this_task=30,
+    per_run_time_limit=5,
+    tmp_folder='/tmp/autosklearn_sh_example_tmp',
+    output_folder='/tmp/autosklearn_sh_example_out',
+    disable_evaluator_output=False,
+    # 'holdout' with 'train_size'=0.67 is the default argument setting
+    # for AutoSklearnClassifier. It is explicitly specified in this example
+    # for demonstrational purpose.
+    resampling_strategy='holdout',
+    resampling_strategy_arguments={'train_size': 0.67},
+    include_estimators=['extra_trees', 'gradient_boosting', 'random_forest', 'sgd',
+                        'passive_aggressive'],
+    include_preprocessors=['no_preprocessing'],
+    get_smac_object_callback=get_smac_object_callback('iterations'),
+)
+automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
-    automl = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=30,
-        per_run_time_limit=5,
-        tmp_folder='/tmp/autosklearn_sh_example_tmp',
-        output_folder='/tmp/autosklearn_sh_example_out',
-        disable_evaluator_output=False,
-        resampling_strategy='cv',
-        include_estimators=['extra_trees', 'gradient_boosting', 'random_forest', 'sgd',
-                            'passive_aggressive'],
-        include_preprocessors=['no_preprocessing'],
-        get_smac_object_callback=get_smac_object_callback('iterations'),
-    )
-    automl.fit(X_train, y_train, dataset_name='breast_cancer')
+print(automl.show_models())
+predictions = automl.predict(X_test)
+# Print statistics about the auto-sklearn run such as number of
+# iterations, number of models failed with a time out.
+print(automl.sprint_statistics())
+print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 
-    # Print the final ensemble constructed by auto-sklearn.
-    print(automl.show_models())
-    automl.refit(X_train, y_train)
-    predictions = automl.predict(X_test)
-    # Print statistics about the auto-sklearn run such as number of
-    # iterations, number of models failed with a time out.
-    print(automl.sprint_statistics())
-    print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+############################################################################
+# We can also use cross-validation with successive halving
+# ========================================================
 
-    # It is also possible to use an iterative fit cross-validation with successive halving
-    X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-    X_train, X_test, y_train, y_test = \
-        sklearn.model_selection.train_test_split(X, y, random_state=1, shuffle=True)
+X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = \
+    sklearn.model_selection.train_test_split(X, y, random_state=1, shuffle=True)
 
-    automl = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=30,
-        per_run_time_limit=5,
-        tmp_folder='/tmp/autosklearn_sh_example_tmp',
-        output_folder='/tmp/autosklearn_sh_example_out',
-        disable_evaluator_output=False,
-        resampling_strategy='cv-iterative-fit',
-        include_estimators=['extra_trees', 'gradient_boosting', 'random_forest', 'sgd',
-                            'passive_aggressive'],
-        include_preprocessors=['no_preprocessing'],
-        get_smac_object_callback=get_smac_object_callback('iterations'),
-    )
-    automl.fit(X_train, y_train, dataset_name='breast_cancer')
+automl = autosklearn.classification.AutoSklearnClassifier(
+    time_left_for_this_task=30,
+    per_run_time_limit=5,
+    tmp_folder='/tmp/autosklearn_sh_example_tmp',
+    output_folder='/tmp/autosklearn_sh_example_out',
+    disable_evaluator_output=False,
+    resampling_strategy='cv',
+    include_estimators=['extra_trees', 'gradient_boosting', 'random_forest', 'sgd',
+                        'passive_aggressive'],
+    include_preprocessors=['no_preprocessing'],
+    get_smac_object_callback=get_smac_object_callback('iterations'),
+)
+automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
-    # Print the final ensemble constructed by auto-sklearn.
-    print(automl.show_models())
-    automl.refit(X_train, y_train)
-    predictions = automl.predict(X_test)
-    # Print statistics about the auto-sklearn run such as number of
-    # iterations, number of models failed with a time out.
-    print(automl.sprint_statistics())
-    print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+# Print the final ensemble constructed by auto-sklearn.
+print(automl.show_models())
+automl.refit(X_train, y_train)
+predictions = automl.predict(X_test)
+# Print statistics about the auto-sklearn run such as number of
+# iterations, number of models failed with a time out.
+print(automl.sprint_statistics())
+print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 
-    # Next, we see the use of subsampling as a budget in Auto-sklearn
-    X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-    X_train, X_test, y_train, y_test = \
-        sklearn.model_selection.train_test_split(X, y, random_state=1, shuffle=True)
+############################################################################
+# Use an iterative fit cross-validation with successive halving
+# =============================================================
 
-    automl = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=30,
-        per_run_time_limit=5,
-        tmp_folder='/tmp/autosklearn_sh_example_tmp',
-        output_folder='/tmp/autosklearn_sh_example_out',
-        disable_evaluator_output=False,
-        # 'holdout' with 'train_size'=0.67 is the default argument setting
-        # for AutoSklearnClassifier. It is explicitly specified in this example
-        # for demonstrational purpose.
-        resampling_strategy='holdout',
-        resampling_strategy_arguments={'train_size': 0.67},
-        get_smac_object_callback=get_smac_object_callback('subsample'),
-    )
-    automl.fit(X_train, y_train, dataset_name='breast_cancer')
+X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = \
+    sklearn.model_selection.train_test_split(X, y, random_state=1, shuffle=True)
 
-    # Print the final ensemble constructed by auto-sklearn.
-    print(automl.show_models())
-    predictions = automl.predict(X_test)
-    # Print statistics about the auto-sklearn run such as number of
-    # iterations, number of models failed with a time out.
-    print(automl.sprint_statistics())
-    print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+automl = autosklearn.classification.AutoSklearnClassifier(
+    time_left_for_this_task=30,
+    per_run_time_limit=5,
+    tmp_folder='/tmp/autosklearn_sh_example_tmp',
+    output_folder='/tmp/autosklearn_sh_example_out',
+    disable_evaluator_output=False,
+    resampling_strategy='cv-iterative-fit',
+    include_estimators=['extra_trees', 'gradient_boosting', 'random_forest', 'sgd',
+                        'passive_aggressive'],
+    include_preprocessors=['no_preprocessing'],
+    get_smac_object_callback=get_smac_object_callback('iterations'),
+)
+automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
-    # Finally, there's a mixed budget type which uses iterations where possible and
-    # subsamples otherwise
-    X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-    X_train, X_test, y_train, y_test = \
-        sklearn.model_selection.train_test_split(X, y, random_state=1, shuffle=True)
+# Print the final ensemble constructed by auto-sklearn.
+print(automl.show_models())
+automl.refit(X_train, y_train)
+predictions = automl.predict(X_test)
+# Print statistics about the auto-sklearn run such as number of
+# iterations, number of models failed with a time out.
+print(automl.sprint_statistics())
+print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 
-    automl = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=30,
-        per_run_time_limit=5,
-        tmp_folder='/tmp/autosklearn_sh_example_tmp',
-        output_folder='/tmp/autosklearn_sh_example_out',
-        disable_evaluator_output=False,
-        # 'holdout' with 'train_size'=0.67 is the default argument setting
-        # for AutoSklearnClassifier. It is explicitly specified in this example
-        # for demonstrational purpose.
-        resampling_strategy='holdout',
-        resampling_strategy_arguments={'train_size': 0.67},
-        include_estimators=['extra_trees', 'gradient_boosting', 'random_forest', 'sgd'],
-        get_smac_object_callback=get_smac_object_callback('mixed'),
-    )
-    automl.fit(X_train, y_train, dataset_name='breast_cancer')
+############################################################################
+# Next, we see the use of subsampling as a budget in Auto-sklearn
+# ===============================================================
 
-    # Print the final ensemble constructed by auto-sklearn.
-    print(automl.show_models())
-    predictions = automl.predict(X_test)
-    # Print statistics about the auto-sklearn run such as number of
-    # iterations, number of models failed with a time out.
-    print(automl.sprint_statistics())
-    print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = \
+    sklearn.model_selection.train_test_split(X, y, random_state=1, shuffle=True)
 
+automl = autosklearn.classification.AutoSklearnClassifier(
+    time_left_for_this_task=30,
+    per_run_time_limit=5,
+    tmp_folder='/tmp/autosklearn_sh_example_tmp',
+    output_folder='/tmp/autosklearn_sh_example_out',
+    disable_evaluator_output=False,
+    # 'holdout' with 'train_size'=0.67 is the default argument setting
+    # for AutoSklearnClassifier. It is explicitly specified in this example
+    # for demonstrational purpose.
+    resampling_strategy='holdout',
+    resampling_strategy_arguments={'train_size': 0.67},
+    get_smac_object_callback=get_smac_object_callback('subsample'),
+)
+automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
-if __name__ == '__main__':
-    main()
+# Print the final ensemble constructed by auto-sklearn.
+print(automl.show_models())
+predictions = automl.predict(X_test)
+# Print statistics about the auto-sklearn run such as number of
+# iterations, number of models failed with a time out.
+print(automl.sprint_statistics())
+print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+
+############################################################################
+# Mixed budget approach
+# =====================
+# Finally, there's a mixed budget type which uses iterations where possible and
+# subsamples otherwise
+
+X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = \
+    sklearn.model_selection.train_test_split(X, y, random_state=1, shuffle=True)
+
+automl = autosklearn.classification.AutoSklearnClassifier(
+    time_left_for_this_task=30,
+    per_run_time_limit=5,
+    tmp_folder='/tmp/autosklearn_sh_example_tmp',
+    output_folder='/tmp/autosklearn_sh_example_out',
+    disable_evaluator_output=False,
+    # 'holdout' with 'train_size'=0.67 is the default argument setting
+    # for AutoSklearnClassifier. It is explicitly specified in this example
+    # for demonstrational purpose.
+    resampling_strategy='holdout',
+    resampling_strategy_arguments={'train_size': 0.67},
+    include_estimators=['extra_trees', 'gradient_boosting', 'random_forest', 'sgd'],
+    get_smac_object_callback=get_smac_object_callback('mixed'),
+)
+automl.fit(X_train, y_train, dataset_name='breast_cancer')
+
+# Print the final ensemble constructed by auto-sklearn.
+print(automl.show_models())
+predictions = automl.predict(X_test)
+# Print statistics about the auto-sklearn run such as number of
+# iterations, number of models failed with a time out.
+print(automl.sprint_statistics())
+print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))

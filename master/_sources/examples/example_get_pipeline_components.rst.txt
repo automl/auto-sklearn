@@ -1,0 +1,245 @@
+.. only:: html
+
+    .. note::
+        :class: sphx-glr-download-link-note
+
+        Click :ref:`here <sphx_glr_download_examples_example_get_pipeline_components.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_examples_example_get_pipeline_components.py:
+
+
+=================================
+Query the Classification Pipeline
+=================================
+
+The following example shows how to query from a pipeline
+built by auto-sklearn. Auto-sklearn is a wrapper on top of
+the sklearn models. This example illustrates how to interact
+with the sklearn components directly, in this case a PCA preprocessor.
+
+
+.. code-block:: default
+
+    import sklearn.model_selection
+    import sklearn.datasets
+    import sklearn.metrics
+
+    import autosklearn.classification
+
+
+
+
+
+
+
+
+Data Loading
+============
+
+
+.. code-block:: default
+
+
+    X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
+    X_train, X_test, y_train, y_test = \
+        sklearn.model_selection.train_test_split(X, y, random_state=1)
+
+
+
+
+
+
+
+
+Build and fit the classifier
+============================
+
+
+.. code-block:: default
+
+
+    automl = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=120,
+        per_run_time_limit=30,
+        disable_evaluator_output=False,
+        resampling_strategy='holdout',
+        # We want autosklearn to use pca as preprocessor
+        include_preprocessors=['pca'],
+    )
+    automl.fit(X_train, y_train, dataset_name='breast_cancer')
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    AutoSklearnClassifier(delete_output_folder_after_terminate=True,
+                          delete_tmp_folder_after_terminate=True,
+                          disable_evaluator_output=False,
+                          ensemble_memory_limit=1024, ensemble_nbest=50,
+                          ensemble_size=50, exclude_estimators=None,
+                          exclude_preprocessors=None, get_smac_object_callback=None,
+                          include_estimators=None, include_preprocessors=['pca'],
+                          initial_configurations_via_metalearning=25,
+                          logging_config=None, max_models_on_disc=50,
+                          metadata_directory=None, metric=None,
+                          ml_memory_limit=3072, n_jobs=None, output_folder=None,
+                          per_run_time_limit=30, resampling_strategy='holdout',
+                          resampling_strategy_arguments=None, seed=1,
+                          shared_mode=False, smac_scenario_args=None,
+                          time_left_for_this_task=120, tmp_folder=None)
+
+
+
+Report the model found by Auto-Sklearn
+======================================
+
+
+.. code-block:: default
+
+
+    predictions = automl.predict(X_test)
+    # Print statistics about the auto-sklearn run such as number of
+    # iterations, number of models failed with a time out.
+    print(automl.sprint_statistics())
+    print("Accuracy score:{}".format(
+        sklearn.metrics.accuracy_score(y_test, predictions))
+    )
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    auto-sklearn results:
+      Dataset name: breast_cancer
+      Metric: accuracy
+      Best validation score: 0.992908
+      Number of target algorithm runs: 77
+      Number of successful target algorithm runs: 76
+      Number of crashed target algorithm runs: 1
+      Number of target algorithms that exceeded the time limit: 0
+      Number of target algorithms that exceeded the memory limit: 0
+
+    Accuracy score:0.958041958041958
+
+
+
+
+Inspect the components of the best model
+========================================
+
+
+.. code-block:: default
+
+
+    # Iterate over the components of the model and print
+    # The explained variance ratio per stage
+    for i, (weight, pipeline) in enumerate(automl.get_models_with_weights()):
+        for stage_name, component in pipeline.named_steps.items():
+            if 'preprocessor' in stage_name:
+                print(
+                    "The {}th pipeline has a explained variance of {}".format(
+                        i,
+                        # The component is an instance of AutoSklearnChoice.
+                        # Access the sklearn object via the choice attribute
+                        # We want the explained variance attributed of
+                        # each principal component
+                        component.choice.preprocessor.explained_variance_ratio_
+                    )
+                )
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    The 0th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299
+     0.0238431 ]
+    The 1th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
+    The 2th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
+    The 3th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
+    The 4th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
+    The 5th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243]
+    The 6th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
+    The 7th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299]
+    The 8th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
+    The 9th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757]
+    The 10th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299
+     0.0238431  0.01493261 0.01376414]
+    The 11th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299
+     0.0238431  0.01493261 0.01376414 0.01137049 0.01037373 0.00874117
+     0.0075763  0.00486529]
+    The 12th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299
+     0.0238431  0.01493261 0.01376414]
+    The 13th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243]
+    The 14th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757]
+    The 15th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
+    The 16th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
+    The 17th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757]
+    The 18th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
+    The 19th pipeline has a explained variance of [0.43295688 0.1790573 ]
+    The 20th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
+    The 21th pipeline has a explained variance of [0.43295688 0.1790573 ]
+    The 22th pipeline has a explained variance of [0.43295688 0.1790573 ]
+    The 23th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299]
+    The 24th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299]
+    The 25th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243]
+    The 26th pipeline has a explained variance of [0.43295688 0.1790573 ]
+    The 27th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757]
+    The 28th pipeline has a explained variance of [0.43295688 0.1790573 ]
+    The 29th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299
+     0.0238431  0.01493261 0.01376414 0.01137049 0.01037373 0.00874117]
+    The 30th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243]
+
+
+
+
+
+.. rst-class:: sphx-glr-timing
+
+   **Total running time of the script:** ( 1 minutes  54.765 seconds)
+
+
+.. _sphx_glr_download_examples_example_get_pipeline_components.py:
+
+
+.. only :: html
+
+ .. container:: sphx-glr-footer
+    :class: sphx-glr-footer-example
+
+
+
+  .. container:: sphx-glr-download sphx-glr-download-python
+
+     :download:`Download Python source code: example_get_pipeline_components.py <example_get_pipeline_components.py>`
+
+
+
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+     :download:`Download Jupyter notebook: example_get_pipeline_components.ipynb <example_get_pipeline_components.ipynb>`
+
+
+.. only:: html
+
+ .. rst-class:: sphx-glr-signature
+
+    `Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_

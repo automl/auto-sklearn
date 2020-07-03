@@ -22,6 +22,10 @@ from smac.scenario.scenario import Scenario
 import autosklearn.classification
 
 
+############################################################################
+# EIPS callback
+# =============
+# create a callack to change the acquisition function inside SMAC
 def get_eips_object_callback(
         scenario_dict,
         seed,
@@ -55,29 +59,46 @@ def get_eips_object_callback(
     )
 
 
-def main():
-    X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-    X_train, X_test, y_train, y_test = \
-        sklearn.model_selection.train_test_split(X, y, random_state=1)
+############################################################################
+# Data Loading
+# ============
 
-    automl = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=120,
-        per_run_time_limit=30,
-        tmp_folder='/tmp/autosklearn_eips_example_tmp',
-        output_folder='/tmp/autosklearn_eips_example_out',
-        get_smac_object_callback=get_eips_object_callback,
-        initial_configurations_via_metalearning=0,
-    )
-    automl.fit(X_train, y_train, dataset_name='breast_cancer')
+X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = \
+    sklearn.model_selection.train_test_split(X, y, random_state=1)
 
-    # Print the final ensemble constructed by auto-sklearn via ROAR.
-    print(automl.show_models())
-    predictions = automl.predict(X_test)
-    # Print statistics about the auto-sklearn run such as number of
-    # iterations, number of models failed with a time out.
-    print(automl.sprint_statistics())
-    print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+############################################################################
+# Building and fitting the classifier
+# ===================================
 
+automl = autosklearn.classification.AutoSklearnClassifier(
+    time_left_for_this_task=120,
+    per_run_time_limit=30,
+    tmp_folder='/tmp/autosklearn_eips_example_tmp',
+    output_folder='/tmp/autosklearn_eips_example_out',
+    get_smac_object_callback=get_eips_object_callback,
+    initial_configurations_via_metalearning=0,
+)
+automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
-if __name__ == '__main__':
-    main()
+############################################################################
+# Print the final ensemble constructed by auto-sklearn
+# ====================================================
+
+# Print the final ensemble constructed by auto-sklearn via ROAR.
+print(automl.show_models())
+
+############################################################################
+# Print statistics about the auto-sklearn run
+# ===========================================
+
+# Print statistics about the auto-sklearn run such as number of
+# iterations, number of models failed with a time out.
+print(automl.sprint_statistics())
+
+############################################################################
+# Get the Score of the final ensemble
+# ===================================
+
+predictions = automl.predict(X_test)
+print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))

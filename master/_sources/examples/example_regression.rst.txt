@@ -1,10 +1,12 @@
-.. note::
-    :class: sphx-glr-download-link-note
+.. only:: html
 
-    Click :ref:`here <sphx_glr_download_examples_example_regression.py>` to download the full example code
-.. rst-class:: sphx-glr-example-title
+    .. note::
+        :class: sphx-glr-download-link-note
 
-.. _sphx_glr_examples_example_regression.py:
+        Click :ref:`here <sphx_glr_download_examples_example_regression.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_examples_example_regression.py:
 
 
 ==========
@@ -24,33 +26,189 @@ The following example shows how to fit a simple regression model with
     import autosklearn.regression
 
 
-    def main():
-        X, y = sklearn.datasets.load_boston(return_X_y=True)
-        feature_types = (['numerical'] * 3) + ['categorical'] + (['numerical'] * 9)
-        X_train, X_test, y_train, y_test = \
-            sklearn.model_selection.train_test_split(X, y, random_state=1)
-
-        automl = autosklearn.regression.AutoSklearnRegressor(
-            time_left_for_this_task=120,
-            per_run_time_limit=30,
-            tmp_folder='/tmp/autosklearn_regression_example_tmp',
-            output_folder='/tmp/autosklearn_regression_example_out',
-        )
-        automl.fit(X_train, y_train, dataset_name='boston',
-                   feat_type=feature_types)
-
-        print(automl.show_models())
-        predictions = automl.predict(X_test)
-        print("R2 score:", sklearn.metrics.r2_score(y_test, predictions))
 
 
-    if __name__ == '__main__':
-        main()
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/pyparsing.py:3190: FutureWarning: Possible set intersection at position 3
+      self.re = re.compile(self.reString)
+
+
+
+
+Data Loading
+============
+
+
+.. code-block:: default
+
+
+    X, y = sklearn.datasets.load_boston(return_X_y=True)
+    feature_types = (['numerical'] * 3) + ['categorical'] + (['numerical'] * 9)
+    X_train, X_test, y_train, y_test = \
+        sklearn.model_selection.train_test_split(X, y, random_state=1)
+
+
+
+
+
+
+
+
+Build and fit a regressor
+=========================
+
+
+.. code-block:: default
+
+
+    automl = autosklearn.regression.AutoSklearnRegressor(
+        time_left_for_this_task=120,
+        per_run_time_limit=30,
+        tmp_folder='/tmp/autosklearn_regression_example_tmp',
+        output_folder='/tmp/autosklearn_regression_example_out',
+    )
+    automl.fit(X_train, y_train, dataset_name='boston',
+               feat_type=feature_types)
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [WARNING] [2020-07-03 15:41:00,590:AutoMLSMBO(1)::boston] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.7.1-py3.7.egg/autosklearn/metalearning/files/r2_regression_dense
+
+    AutoSklearnRegressor(delete_output_folder_after_terminate=True,
+                         delete_tmp_folder_after_terminate=True,
+                         disable_evaluator_output=False, ensemble_memory_limit=1024,
+                         ensemble_nbest=50, ensemble_size=50,
+                         exclude_estimators=None, exclude_preprocessors=None,
+                         get_smac_object_callback=None, include_estimators=None,
+                         include_preprocessors=None,
+                         initial_configurations_...
+                         logging_config=None, max_models_on_disc=50,
+                         metadata_directory=None, metric=None, ml_memory_limit=3072,
+                         n_jobs=None,
+                         output_folder='/tmp/autosklearn_regression_example_out',
+                         per_run_time_limit=30, resampling_strategy='holdout',
+                         resampling_strategy_arguments=None, seed=1,
+                         shared_mode=False, smac_scenario_args=None,
+                         time_left_for_this_task=120,
+                         tmp_folder='/tmp/autosklearn_regression_example_tmp')
+
+
+
+Print the final ensemble constructed by auto-sklearn
+====================================================
+
+
+.. code-block:: default
+
+
+    print(automl.show_models())
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [(0.340000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'decision_tree', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.008755456297030593, 'regressor:decision_tree:criterion': 'mae', 'regressor:decision_tree:max_depth_factor': 1.6629418544103345, 'regressor:decision_tree:max_features': 1.0, 'regressor:decision_tree:max_leaf_nodes': 'None', 'regressor:decision_tree:min_impurity_decrease': 0.0, 'regressor:decision_tree:min_samples_leaf': 2, 'regressor:decision_tree:min_samples_split': 2, 'regressor:decision_tree:min_weight_fraction_leaf': 0.0},
+    dataset_properties={
+      'task': 4,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'regression',
+      'signed': False})),
+    (0.200000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'ard_regression', 'feature_preprocessor:polynomial:degree': 3, 'feature_preprocessor:polynomial:include_bias': 'False', 'feature_preprocessor:polynomial:interaction_only': 'False', 'regressor:ard_regression:alpha_1': 0.0007026338242300055, 'regressor:ard_regression:alpha_2': 0.00012755879709007033, 'regressor:ard_regression:fit_intercept': 'True', 'regressor:ard_regression:lambda_1': 7.859595663278212e-07, 'regressor:ard_regression:lambda_2': 1.2897724886540215e-08, 'regressor:ard_regression:n_iter': 300, 'regressor:ard_regression:threshold_lambda': 3067.2067747629453, 'regressor:ard_regression:tol': 0.07529438353404733},
+    dataset_properties={
+      'task': 4,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'regression',
+      'signed': False})),
+    (0.180000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'gradient_boosting', 'regressor:gradient_boosting:early_stop': 'off', 'regressor:gradient_boosting:l2_regularization': 2.2834097462655244e-05, 'regressor:gradient_boosting:learning_rate': 0.01599415902931848, 'regressor:gradient_boosting:loss': 'least_squares', 'regressor:gradient_boosting:max_bins': 255, 'regressor:gradient_boosting:max_depth': 'None', 'regressor:gradient_boosting:max_iter': 452, 'regressor:gradient_boosting:max_leaf_nodes': 15, 'regressor:gradient_boosting:min_samples_leaf': 3, 'regressor:gradient_boosting:scoring': 'loss', 'regressor:gradient_boosting:tol': 1e-07},
+    dataset_properties={
+      'task': 4,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'regression',
+      'signed': False})),
+    (0.120000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'feature_agglomeration', 'regressor:__choice__': 'gradient_boosting', 'feature_preprocessor:feature_agglomeration:affinity': 'cosine', 'feature_preprocessor:feature_agglomeration:linkage': 'complete', 'feature_preprocessor:feature_agglomeration:n_clusters': 400, 'feature_preprocessor:feature_agglomeration:pooling_func': 'max', 'regressor:gradient_boosting:early_stop': 'off', 'regressor:gradient_boosting:l2_regularization': 9.137930753785066e-05, 'regressor:gradient_boosting:learning_rate': 0.04569338460760868, 'regressor:gradient_boosting:loss': 'least_squares', 'regressor:gradient_boosting:max_bins': 255, 'regressor:gradient_boosting:max_depth': 'None', 'regressor:gradient_boosting:max_iter': 481, 'regressor:gradient_boosting:max_leaf_nodes': 16, 'regressor:gradient_boosting:min_samples_leaf': 20, 'regressor:gradient_boosting:scoring': 'loss', 'regressor:gradient_boosting:tol': 1e-07},
+    dataset_properties={
+      'task': 4,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'regression',
+      'signed': False})),
+    (0.120000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'fast_ica', 'regressor:__choice__': 'gradient_boosting', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.002280224988657733, 'feature_preprocessor:fast_ica:algorithm': 'deflation', 'feature_preprocessor:fast_ica:fun': 'cube', 'feature_preprocessor:fast_ica:whiten': 'False', 'regressor:gradient_boosting:early_stop': 'train', 'regressor:gradient_boosting:l2_regularization': 0.005666688884923078, 'regressor:gradient_boosting:learning_rate': 0.13661334253027937, 'regressor:gradient_boosting:loss': 'least_squares', 'regressor:gradient_boosting:max_bins': 255, 'regressor:gradient_boosting:max_depth': 'None', 'regressor:gradient_boosting:max_iter': 449, 'regressor:gradient_boosting:max_leaf_nodes': 8, 'regressor:gradient_boosting:min_samples_leaf': 7, 'regressor:gradient_boosting:scoring': 'loss', 'regressor:gradient_boosting:tol': 1e-07, 'regressor:gradient_boosting:n_iter_no_change': 6},
+    dataset_properties={
+      'task': 4,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'regression',
+      'signed': False})),
+    (0.040000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'gradient_boosting', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.00014484851986081628, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max': 0.8432048387153463, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min': 0.17580085053539646, 'regressor:gradient_boosting:early_stop': 'train', 'regressor:gradient_boosting:l2_regularization': 1.8371201665711813e-10, 'regressor:gradient_boosting:learning_rate': 0.13552227474859316, 'regressor:gradient_boosting:loss': 'least_squares', 'regressor:gradient_boosting:max_bins': 255, 'regressor:gradient_boosting:max_depth': 'None', 'regressor:gradient_boosting:max_iter': 369, 'regressor:gradient_boosting:max_leaf_nodes': 49, 'regressor:gradient_boosting:min_samples_leaf': 1, 'regressor:gradient_boosting:scoring': 'loss', 'regressor:gradient_boosting:tol': 1e-07, 'regressor:gradient_boosting:n_iter_no_change': 2},
+    dataset_properties={
+      'task': 4,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'regression',
+      'signed': False})),
+    ]
+
+
+
+
+Get the Score of the final ensemble
+===================================
+
+
+.. code-block:: default
+
+
+    predictions = automl.predict(X_test)
+    print("R2 score:", sklearn.metrics.r2_score(y_test, predictions))
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    R2 score: 0.903584588122512
+
+
+
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.000 seconds)
+   **Total running time of the script:** ( 1 minutes  54.957 seconds)
 
 
 .. _sphx_glr_download_examples_example_regression.py:
@@ -63,13 +221,13 @@ The following example shows how to fit a simple regression model with
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-python
 
      :download:`Download Python source code: example_regression.py <example_regression.py>`
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
 
      :download:`Download Jupyter notebook: example_regression.ipynb <example_regression.ipynb>`
 
