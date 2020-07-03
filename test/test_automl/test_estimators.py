@@ -187,17 +187,8 @@ class EstimatorTest(Base, unittest.TestCase):
 
         # Test that regressor raises error for illegal target types.
         reg = AutoSklearnRegressor()
-        # Illegal target types for regression: multiclass-multioutput,
-        # multilabel-indicator, continuous-multioutput.
-        self.assertRaisesRegex(
-            ValueError,
-            "regression with data of type"
-            " multiclass-multioutput is not supported",
-            reg.fit,
-            X=X,
-            y=y_multiclass_multioutput,
-        )
-
+        # Illegal target types for regression: multilabel-indicator
+        # multiclass-multioutput
         self.assertRaisesRegex(
             ValueError,
             "regression with data of type"
@@ -210,12 +201,15 @@ class EstimatorTest(Base, unittest.TestCase):
         self.assertRaisesRegex(
             ValueError,
             "regression with data of type"
-            " continuous-multioutput is not supported",
+            " multiclass-multioutput is not supported",
             reg.fit,
             X=X,
-            y=y_continuous_multioutput,
+            y=y_multiclass_multioutput,
         )
-        # Legal target types: continuous, binary, multiclass
+
+        # Legal target types: continuous, multiclass,
+        # continuous-multioutput,
+        # binary
         try:
             reg.fit(X, y_continuous)
         except ValueError:
@@ -223,16 +217,22 @@ class EstimatorTest(Base, unittest.TestCase):
                       "continuous targets")
 
         try:
-            reg.fit(X, y_binary)
-        except ValueError:
-            self.fail("reg.fit() raised ValueError while fitting "
-                      "binary targets")
-
-        try:
             reg.fit(X, y_multiclass)
         except ValueError:
             self.fail("reg.fit() raised ValueError while fitting "
                       "multiclass targets")
+
+        try:
+            reg.fit(X, y_continuous_multioutput)
+        except ValueError:
+            self.fail("reg.fit() raised ValueError while fitting "
+                      "continuous_multioutput targets")
+
+        try:
+            reg.fit(X, y_binary)
+        except ValueError:
+            self.fail("reg.fit() raised ValueError while fitting "
+                      "binary targets")
 
     def test_fit_pSMAC(self):
         tmp = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_pSMAC')

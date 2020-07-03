@@ -58,6 +58,7 @@ class LibLinear_SVR(AutoSklearnRegressionAlgorithm):
                 'handles_classification': False,
                 'handles_multiclass': False,
                 'handles_multilabel': False,
+                'handles_multioutput': False,
                 'is_deterministic': False,
                 'input': (SPARSE, DENSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,)}

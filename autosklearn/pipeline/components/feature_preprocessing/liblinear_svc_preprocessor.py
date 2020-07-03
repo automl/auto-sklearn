@@ -70,6 +70,7 @@ class LibLinear_Preprocessor(AutoSklearnPreprocessingAlgorithm):
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': False,
+                'handles_multioutput': False,
                 'input': (SPARSE, DENSE, UNSIGNED_DATA),
                 'output': (INPUT,)}
 

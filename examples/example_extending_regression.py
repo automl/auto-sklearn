@@ -62,6 +62,7 @@ class KernelRidgeRegression(AutoSklearnRegressionAlgorithm):
                 'handles_classification': False,
                 'handles_multiclass': False,
                 'handles_multilabel': False,
+                'handles_multioutput': True,
                 'is_deterministic': True,
                 'input': (SPARSE, DENSE, UNSIGNED_DATA, SIGNED_DATA),
                 'output': (PREDICTIONS,)}

@@ -103,6 +103,7 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
                 'handles_classification': False,
                 'handles_multiclass': False,
                 'handles_multilabel': False,
+                'handles_multioutput': False,
                 'prefers_data_normalized': False,
                 'is_deterministic': True,
                 'input': (DENSE, UNSIGNED_DATA),

@@ -36,6 +36,7 @@ class SelectPercentileRegression(SelectPercentileBase,
                 'handles_classification': False,
                 'handles_multiclass': False,
                 'handles_multilabel': False,
+                'handles_multioutput': False,
                 'is_deterministic': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (INPUT,)}

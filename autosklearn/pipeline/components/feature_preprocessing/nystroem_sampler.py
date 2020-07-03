@@ -73,6 +73,7 @@ class Nystroem(AutoSklearnPreprocessingAlgorithm):
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
+                'handles_multioutput': True,
                 'is_deterministic': True,
                 'input': (SPARSE, DENSE, data_type),
                 'output': (INPUT, UNSIGNED_DATA)}

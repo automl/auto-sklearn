@@ -52,6 +52,7 @@ class FeatureAgglomeration(AutoSklearnPreprocessingAlgorithm):
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
+                'handles_multioutput': True,
                 'is_deterministic': True,
                 'input': (DENSE, UNSIGNED_DATA),
                 'output': (INPUT,)}

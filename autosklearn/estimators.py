@@ -766,7 +766,7 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         X : array-like or sparse matrix of shape = [n_samples, n_features]
             The training input samples.
 
-        y : array-like, shape = [n_samples]
+        y : array-like, shape = [n_samples] or [n_samples, n_targets]
             The regression target.
 
         X_test : array-like or sparse matrix of shape = [n_samples, n_features]
@@ -774,7 +774,7 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
             all models. This allows to evaluate the performance of Auto-sklearn
             over time.
 
-        y_test : array-like, shape = [n_samples]
+        y_test : array-like, shape = [n_samples] or [n_samples, n_targets]
             The regression target. Will be used to calculate the test error
             of all models. This allows to evaluate the performance of
             Auto-sklearn over time.
@@ -799,7 +799,6 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         target_type = type_of_target(y)
         if target_type in ['multiclass-multioutput',
                            'multilabel-indicator',
-                           'continuous-multioutput',
                            'unknown',
                            ]:
             raise ValueError("regression with data of type %s is not"

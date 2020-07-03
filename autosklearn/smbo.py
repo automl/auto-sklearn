@@ -16,7 +16,8 @@ from smac.optimizer import pSMAC
 import autosklearn.metalearning
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
     BINARY_CLASSIFICATION, TASK_TYPES_TO_STRING, CLASSIFICATION_TASKS, \
-    REGRESSION_TASKS, MULTICLASS_CLASSIFICATION, REGRESSION
+    REGRESSION_TASKS, MULTICLASS_CLASSIFICATION, REGRESSION, \
+    MULTIOUTPUT_REGRESSION
 from autosklearn.metalearning.mismbo import suggest_via_metalearning
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
@@ -71,7 +72,8 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
         if data_info_task in CLASSIFICATION_TASKS else EXCLUDE_META_FEATURES_REGRESSION
 
     if data_info_task in [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION,
-                          MULTILABEL_CLASSIFICATION, REGRESSION]:
+                          MULTILABEL_CLASSIFICATION, REGRESSION,
+                          MULTIOUTPUT_REGRESSION]:
         logger.info('Start calculating metafeatures for %s', basename)
         result = calculate_all_metafeatures_with_labels(
             x_train, y_train, categorical=categorical,

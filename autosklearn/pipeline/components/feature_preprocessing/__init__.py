@@ -72,6 +72,9 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
             elif target_type == 'regression':
                 if entry.get_properties()['handles_regression'] is False:
                     continue
+                if dataset_properties.get('multioutput') is True and \
+                        entry.get_properties()['handles_multioutput'] is False:
+                    continue
 
             else:
                 raise ValueError('Unknown target type %s' % target_type)

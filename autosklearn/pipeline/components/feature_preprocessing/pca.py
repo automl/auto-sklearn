@@ -44,6 +44,7 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
+                'handles_multioutput': True,
                 # TODO document that we have to be very careful
                 'is_deterministic': False,
                 'input': (DENSE, UNSIGNED_DATA),

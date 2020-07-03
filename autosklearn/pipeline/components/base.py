@@ -44,8 +44,8 @@ class ThirdPartyComponents(object):
         properties = set(classifier.get_properties())
         should_be_there = {'shortname', 'name', 'handles_regression',
                            'handles_classification', 'handles_multiclass',
-                           'handles_multilabel', 'is_deterministic',
-                           'input', 'output'}
+                           'handles_multilabel', 'handles_multioutput',
+                           'is_deterministic', 'input', 'output'}
         for property in properties:
             if property not in should_be_there:
                 raise ValueError('Property %s must not be specified for '
@@ -54,7 +54,8 @@ class ThirdPartyComponents(object):
                                  (property, name, str(should_be_there)))
         for property in should_be_there:
             if property not in properties:
-                raise ValueError('Property %s not specified for algorithm %s')
+                raise ValueError('Property %s not specified for algorithm %s' %
+                                 (property, name))
 
         self.components[name] = classifier
 
@@ -292,7 +293,7 @@ class AutoSklearnRegressionAlgorithm(AutoSklearnComponent):
 
         Returns
         -------
-        array, shape = (n_samples,)
+        array, shape = (n_samples,) or shape = (n_samples, n_targets)
             Returns the predicted values
 
         Notes
