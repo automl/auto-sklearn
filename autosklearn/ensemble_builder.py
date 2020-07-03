@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+import math
 import numbers
 import multiprocessing
 import glob
@@ -41,7 +42,7 @@ class EnsembleBuilder(multiprocessing.Process):
             seed: int = 1,
             shared_mode: bool = False,
             max_iterations: int = None,
-            precision: str = "32",
+            precision: str = 32,
             sleep_duration: int = 2,
             memory_limit: int = 1000,
             read_at_most: int = 5,
@@ -71,7 +72,13 @@ class EnsembleBuilder(multiprocessing.Process):
                 If performance_range_threshold > 0, might return less models
             max_models_on_disc: int
                Defines the maximum number of models that are kept in the disc.
-               If int, it must be greater or equal than 1. If None, feature is disabled.
+               If int, it must be greater or equal than 1, and dictates the max number of
+               models to keep.
+               If float, it will be interpreted as the max megabytes allowed of disc space. That
+               is, if the number of ensemble candidates require more disc space than this float
+               value, the worst models will be deleted to keep within this budget.
+               Models and predictions of the worst-performing models will be deleted then.
+               If None, the feature is disabled.
                It defines an upper bound on the models that can be used in the ensemble.
             performance_range_threshold: float
                 Keep only models that are better than:
@@ -87,7 +94,7 @@ class EnsembleBuilder(multiprocessing.Process):
             max_iterations: int
                 maximal number of iterations to run this script
                 (default None --> deactivated)
-            precision: ["16","32","64","128"]
+            precision: [16,32,64,128]
                 precision of floats to read the predictions
             sleep_duration: int
                 duration of sleeping time between two iterations of this script (in sec)
@@ -118,11 +125,17 @@ class EnsembleBuilder(multiprocessing.Process):
 
         self.ensemble_nbest = ensemble_nbest
 
-        if max_models_on_disc is not None and max_models_on_disc < 1:
+        # max_models_on_disc can be a float, in such case we need to
+        # remember the user specified Megabytes and translate this to
+        # max number of ensemble models. max_resident_models keeps the
+        # maximum number of models in disc
+        if max_models_on_disc is not None and max_models_on_disc < 0:
             raise ValueError(
                 "max_models_on_disc has to be a positive number or None"
             )
         self.max_models_on_disc = max_models_on_disc
+        self.max_resident_models = None
+
         self.seed = seed
         self.shared_mode = shared_mode  # pSMAC?
         self.max_iterations = max_iterations
@@ -249,7 +262,7 @@ class EnsembleBuilder(multiprocessing.Process):
             )
 
             # populates self.read_preds
-            if not self.read_ensemble_preds():
+            if not self.score_ensemble_preds():
                 time.sleep(self.sleep_duration)
                 continue
 
@@ -319,9 +332,41 @@ class EnsembleBuilder(multiprocessing.Process):
         if return_pred:
             return valid_pred, test_pred
 
-    def read_ensemble_preds(self):
+    def get_disk_consumption(self, pred_path):
         """
-            reading predictions on ensemble building data set;
+        gets the cost of a model being on disc
+        """
+
+        match = self.model_fn_re.search(pred_path)
+        if not match:
+            raise ValueError("Invalid path format %s" % pred_path)
+        _full_name = match.group(0)
+        _seed = match.group(1)
+        _num_run = match.group(2)
+        _budget = match.group(3)
+
+        # Besides the prediction, we have to take care of three other files: model,
+        # validation and test.
+        model_name = '%s.%s.%s.model' % (_seed, _num_run, _budget)
+        model_path = os.path.join(self.dir_models, model_name)
+        pred_valid_name = 'predictions_valid' + _full_name
+        pred_valid_path = os.path.join(self.dir_valid, pred_valid_name)
+        pred_test_name = 'predictions_test' + _full_name
+        pred_test_path = os.path.join(self.dir_test, pred_test_name)
+
+        paths = [model_path, pred_path]
+        if os.path.exists(pred_valid_path):
+            paths.append(pred_valid_path)
+        if os.path.exists(pred_test_path):
+            paths.append(pred_test_path)
+        this_model_cost = sum([os.path.getsize(path) for path in paths])
+
+        # get the megabytes
+        return round(this_model_cost / math.pow(1024, 2), 2)
+
+    def score_ensemble_preds(self):
+        """
+            score predictions on ensemble building data set;
             populates self.read_preds
         """
 
@@ -395,6 +440,7 @@ class EnsembleBuilder(multiprocessing.Process):
                     "seed": _seed,
                     "num_run": _num_run,
                     "budget": _budget,
+                    "disc_space_cost_mb": None,
                     Y_ENSEMBLE: None,
                     Y_VALID: None,
                     Y_TEST: None,
@@ -411,40 +457,38 @@ class EnsembleBuilder(multiprocessing.Process):
 
             # actually read the predictions and score them
             try:
-                if y_ens_fn.endswith("gz"):
-                    open_method = gzip.open
-                elif y_ens_fn.endswith("npy"):
-                    open_method = open
-                else:
-                    raise ValueError("Unknown filetype %s" % y_ens_fn)
-                with open_method(y_ens_fn, 'rb') as fp:
-                    y_ensemble = self._read_np_fn(fp=fp)
-                    score = calculate_score(solution=self.y_true_ensemble,
-                                            # y_ensemble = y_true for ensemble set
-                                            prediction=y_ensemble,
-                                            task_type=self.task_type,
-                                            metric=self.metric,
-                                            all_scoring_functions=False)
+                y_ensemble = self._read_np_fn(y_ens_fn)
+                score = calculate_score(solution=self.y_true_ensemble,
+                                        prediction=y_ensemble,
+                                        task_type=self.task_type,
+                                        metric=self.metric,
+                                        all_scoring_functions=False)
 
-                    if self.read_preds[y_ens_fn]["ens_score"] > -1:
-                        self.logger.critical(
-                            'Changing ensemble score for file %s from %f to %f '
-                            'because file modification time changed? %f - %f',
-                            y_ens_fn,
-                            self.read_preds[y_ens_fn]["ens_score"],
-                            score,
-                            self.read_preds[y_ens_fn]["mtime_ens"],
-                            os.path.getmtime(y_ens_fn),
-                        )
-
-                    self.read_preds[y_ens_fn]["ens_score"] = score
-                    self.read_preds[y_ens_fn][Y_ENSEMBLE] = y_ensemble
-                    self.read_preds[y_ens_fn]["mtime_ens"] = os.path.getmtime(
-                        y_ens_fn
+                if self.read_preds[y_ens_fn]["ens_score"] > -1:
+                    self.logger.debug(
+                        'Changing ensemble score for file %s from %f to %f '
+                        'because file modification time changed? %f - %f',
+                        y_ens_fn,
+                        self.read_preds[y_ens_fn]["ens_score"],
+                        score,
+                        self.read_preds[y_ens_fn]["mtime_ens"],
+                        os.path.getmtime(y_ens_fn),
                     )
-                    self.read_preds[y_ens_fn]["loaded"] = 1
 
-                    n_read_files += 1
+                self.read_preds[y_ens_fn]["ens_score"] = score
+
+                # It is not needed to create the object here
+                # To save memory, we just score the object.
+                # self.read_preds[y_ens_fn][Y_ENSEMBLE] = y_ensemble
+                self.read_preds[y_ens_fn]["mtime_ens"] = os.path.getmtime(
+                    y_ens_fn
+                )
+                self.read_preds[y_ens_fn]["loaded"] = 2
+                self.read_preds[y_ens_fn]["disc_space_cost_mb"] = self.get_disk_consumption(
+                    y_ens_fn
+                )
+
+                n_read_files += 1
 
             except Exception:
                 self.logger.warning(
@@ -468,7 +512,11 @@ class EnsembleBuilder(multiprocessing.Process):
             according to score on "ensemble set"
             n: self.ensemble_nbest
 
-            Side effect: delete predictions of non-candidate models
+            Side effects:
+                ->Define the n-best models to use in ensemble
+                ->Only the best models are loaded
+                ->Any model that is not best is candidate to deletion
+                  if max models in disc is exceeded.
         """
 
         sorted_keys = self._get_list_of_sorted_preds()
@@ -515,28 +563,51 @@ class EnsembleBuilder(multiprocessing.Process):
             self.logger.debug("Library Pruning: using for ensemble only "
                               " %d (out of %d) models" % (keep_nbest, len(sorted_keys)))
 
+        # If max_models_on_disc is None, do nothing
         # One can only read at most max_models_on_disc models
-        if self.max_models_on_disc is not None and keep_nbest > self.max_models_on_disc:
+        if self.max_models_on_disc is not None:
+            if not isinstance(self.max_models_on_disc, numbers.Integral):
+                consumption = [
+                    [
+                        v["ens_score"],
+                        v["disc_space_cost_mb"],
+                    ] for v in self.read_preds.values() if v["disc_space_cost_mb"] is not None
+                ]
+                max_consumption = max(i[1] for i in consumption)
+
+                # We are pessimistic with the consumption limit indicated by
+                # max_models_on_disc by 1 model. Such model is assumed to spend
+                # max_consumption megabytes
+                if (sum(i[1] for i in consumption) + max_consumption) > self.max_models_on_disc:
+
+                    # just leave the best -- higher is better!
+                    # This list is in descending order, to preserve the best models
+                    sorted_cum_consumption = np.cumsum([
+                        i[1] for i in list(reversed(sorted(consumption)))
+                    ])
+                    max_models = np.argmax(sorted_cum_consumption > self.max_models_on_disc)
+
+                    # Make sure that at least 1 model survives
+                    self.max_resident_models = max(1, max_models)
+                    self.logger.warning(
+                        "Limiting num of models via float max_models_on_disc={}"
+                        " as accumulated={} worst={} num_models={}".format(
+                            self.max_models_on_disc,
+                            (sum(i[1] for i in consumption) + max_consumption),
+                            max_consumption,
+                            self.max_resident_models
+                        )
+                    )
+            else:
+                self.max_resident_models = self.max_models_on_disc
+
+        if self.max_resident_models is not None and keep_nbest > self.max_resident_models:
             self.logger.debug(
                 "Restricting the number of models to %d instead of %d due to argument "
                 "max_models_on_disc",
-                self.max_models_on_disc, keep_nbest,
+                self.max_resident_models, keep_nbest,
             )
-            keep_nbest = self.max_models_on_disc
-
-        for k, _, _ in sorted_keys[:keep_nbest]:
-            if self.read_preds[k][Y_ENSEMBLE] is None:
-                if k.endswith("gz"):
-                    open_method = gzip.open
-                elif k.endswith("npy"):
-                    open_method = open
-                else:
-                    raise ValueError("Unknown filetype %s" % k)
-                with open_method(k, 'rb') as fp:
-                    self.read_preds[k][Y_ENSEMBLE] = self._read_np_fn(fp=fp)
-                # No need to load valid and test here because they are loaded
-                #  only if the model ends up in the ensemble
-            self.read_preds[k]['loaded'] = 1
+            keep_nbest = self.max_resident_models
 
         # consider performance_range_threshold
         if self.performance_range_threshold > 0:
@@ -575,6 +646,14 @@ class EnsembleBuilder(multiprocessing.Process):
                     self.read_preds[k]['ens_score'],
                 )
                 self.read_preds[k]['loaded'] = 2
+
+        # Load the predictions for the winning
+        for k in sorted_keys[:ensemble_n_best]:
+            if self.read_preds[k][Y_ENSEMBLE] is None:
+                self.read_preds[k][Y_ENSEMBLE] = self._read_np_fn(k)
+                # No need to load valid and test here because they are loaded
+                #  only if the model ends up in the ensemble
+            self.read_preds[k]['loaded'] = 1
 
         # return best scored keys of self.read_preds
         return sorted_keys[:ensemble_n_best]
@@ -635,17 +714,10 @@ class EnsembleBuilder(multiprocessing.Process):
                     success_keys_valid.append(k)
                     continue
                 try:
-                    if valid_fn.endswith("gz"):
-                        open_method = gzip.open
-                    elif valid_fn.endswith("npy"):
-                        open_method = open
-                    else:
-                        raise ValueError("Unknown filetype %s" % valid_fn)
-                    with open_method(valid_fn, 'rb') as fp:
-                        y_valid = self._read_np_fn(fp)
-                        self.read_preds[k][Y_VALID] = y_valid
-                        success_keys_valid.append(k)
-                        self.read_preds[k]["mtime_valid"] = os.path.getmtime(valid_fn)
+                    y_valid = self._read_np_fn(valid_fn)
+                    self.read_preds[k][Y_VALID] = y_valid
+                    success_keys_valid.append(k)
+                    self.read_preds[k]["mtime_valid"] = os.path.getmtime(valid_fn)
                 except Exception:
                     self.logger.warning('Error loading %s: %s',
                                         valid_fn, traceback.format_exc())
@@ -663,17 +735,10 @@ class EnsembleBuilder(multiprocessing.Process):
                     success_keys_test.append(k)
                     continue
                 try:
-                    if test_fn.endswith("gz"):
-                        open_method = gzip.open
-                    elif test_fn.endswith("npy"):
-                        open_method = open
-                    else:
-                        raise ValueError("Unknown filetype %s" % test_fn)
-                    with open_method(test_fn, 'rb') as fp:
-                        y_test = self._read_np_fn(fp)
-                        self.read_preds[k][Y_TEST] = y_test
-                        success_keys_test.append(k)
-                        self.read_preds[k]["mtime_test"] = os.path.getmtime(test_fn)
+                    y_test = self._read_np_fn(test_fn)
+                    self.read_preds[k][Y_TEST] = y_test
+                    success_keys_test.append(k)
+                    self.read_preds[k]["mtime_test"] = os.path.getmtime(test_fn)
                 except Exception:
                     self.logger.warning('Error loading %s: %s',
                                         test_fn, traceback.format_exc())
@@ -713,7 +778,7 @@ class EnsembleBuilder(multiprocessing.Process):
             )
 
             # Delete files of non-candidate models
-            if self.max_models_on_disc is not None:
+            if self.max_resident_models is not None:
                 self._delete_excess_models()
 
             return None
@@ -755,7 +820,7 @@ class EnsembleBuilder(multiprocessing.Process):
             return None
 
         # Delete files of non-candidate models
-        if self.max_models_on_disc is not None:
+        if self.max_resident_models is not None:
             self._delete_excess_models()
 
         return ensemble
@@ -860,14 +925,14 @@ class EnsembleBuilder(multiprocessing.Process):
         sorted_keys = self._get_list_of_sorted_preds()
         sorted_keys = list(map(lambda x: x[0], sorted_keys))
 
-        if len(sorted_keys) <= self.max_models_on_disc:
+        if len(sorted_keys) <= self.max_resident_models:
             # Don't waste time if not enough models to delete
             return
 
-        # The top self.max_models_on_disc models would be the candidates
+        # The top self.max_resident_models models would be the candidates
         # Any other low performance model will be deleted
         # The list is in ascending order of score
-        candidates = sorted_keys[:self.max_models_on_disc]
+        candidates = sorted_keys[:self.max_resident_models]
 
         # Loop through the files currently in the directory
         for pred_path in self.y_ens_files:
@@ -950,13 +1015,30 @@ class EnsembleBuilder(multiprocessing.Process):
             for lock in locks:
                 lock.release()
 
-    def _read_np_fn(self, fp):
-        if self.precision == "16":
-            predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float16)
-        elif self.precision == "32":
-            predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float32)
-        elif self.precision == "64":
-            predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float64)
+    def _read_np_fn(self, path):
+
+        # Support for string precision
+        if isinstance(self.precision, str):
+            precision = int(self.precision)
+            self.logger.warning("Interpreted str-precision as {}".format(
+                precision
+            ))
         else:
-            predictions = np.load(fp, allow_pickle=True)
-        return predictions
+            precision = self.precision
+
+        if path.endswith("gz"):
+            open_method = gzip.open
+        elif path.endswith("npy"):
+            open_method = open
+        else:
+            raise ValueError("Unknown filetype %s" % path)
+        with open_method(path, 'rb') as fp:
+            if precision == 16:
+                predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float16)
+            elif precision == 32:
+                predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float32)
+            elif precision == 64:
+                predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float64)
+            else:
+                predictions = np.load(fp, allow_pickle=True)
+            return predictions

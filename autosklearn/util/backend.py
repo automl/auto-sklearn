@@ -2,12 +2,12 @@ import glob
 import os
 import tempfile
 import time
-import random
 import lockfile
 import numpy as np
 import pickle
 import shutil
 from typing import Union
+import uuid
 
 from autosklearn.util import logging_ as logging
 
@@ -35,15 +35,16 @@ def get_randomized_directory_names(
     temporary_directory=None,
     output_directory=None,
 ):
-    random_number = random.randint(0, 10000)
-    pid = os.getpid()
+    uuid_str = str(uuid.uuid1(clock_seq=os.getpid()))
 
     temporary_directory = (
         temporary_directory
         if temporary_directory
         else os.path.join(
             tempfile.gettempdir(),
-            'autosklearn_tmp_%d_%d' % (pid, random_number),
+            "autosklearn_tmp_{}".format(
+                uuid_str,
+            ),
         )
     )
 
@@ -52,7 +53,9 @@ def get_randomized_directory_names(
         if output_directory
         else os.path.join(
             tempfile.gettempdir(),
-            'autosklearn_output_%d_%d' % (pid, random_number),
+            "autosklearn_output_{}".format(
+                uuid_str,
+            ),
         )
     )
 
@@ -209,6 +212,11 @@ class Backend(object):
         if not isinstance(start_time, float):
             raise ValueError("Start time must be a float, but is %s." % type(start_time))
 
+        if os.path.exists(filepath):
+            raise ValueError(
+                "{filepath} already exist. Different seeds should be provided for different jobs."
+            )
+
         with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(filepath), delete=False) as fh:
             fh.write(str(start_time))
             tempname = fh.name
@@ -316,8 +324,15 @@ class Backend(object):
     def get_model_dir(self):
         return os.path.join(self.internals_directory, 'models')
 
+    def get_cv_model_dir(self):
+        return os.path.join(self.internals_directory, 'cv_models')
+
     def get_model_path(self, seed, idx, budget):
         return os.path.join(self.get_model_dir(),
+                            '%s.%s.%s.model' % (seed, idx, budget))
+
+    def get_cv_model_path(self, seed, idx, budget):
+        return os.path.join(self.get_cv_model_dir(),
                             '%s.%s.%s.model' % (seed, idx, budget))
 
     def save_model(self, model, filepath):
@@ -381,6 +396,24 @@ class Backend(object):
 
     def load_model_by_seed_and_id_and_budget(self, seed, idx, budget):
         model_directory = self.get_model_dir()
+
+        model_file_name = '%s.%s.%s.model' % (seed, idx, budget)
+        model_file_path = os.path.join(model_directory, model_file_name)
+        with open(model_file_path, 'rb') as fh:
+            return pickle.load(fh)
+
+    def load_cv_models_by_identifiers(self, identifiers):
+        models = dict()
+
+        for identifier in identifiers:
+            seed, idx, budget = identifier
+            models[identifier] = self.load_cv_model_by_seed_and_id_and_budget(
+                seed, idx, budget)
+
+        return models
+
+    def load_cv_model_by_seed_and_id_and_budget(self, seed, idx, budget):
+        model_directory = self.get_cv_model_dir()
 
         model_file_name = '%s.%s.%s.model' % (seed, idx, budget)
         model_file_path = os.path.join(model_directory, model_file_name)

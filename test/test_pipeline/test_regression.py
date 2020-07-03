@@ -8,6 +8,7 @@ import unittest.mock
 import numpy as np
 import sklearn.datasets
 import sklearn.decomposition
+from sklearn.base import clone
 import sklearn.ensemble
 import sklearn.svm
 
@@ -369,6 +370,30 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
     @unittest.skip("test_validate_input_Y Not yet Implemented")
     def test_validate_input_Y(self):
         raise NotImplementedError()
+
+    def test_pipeline_clonability(self):
+        X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
+        auto = SimpleRegressionPipeline()
+        auto = auto.fit(X_train, Y_train)
+        auto_clone = clone(auto)
+        auto_clone_params = auto_clone.get_params()
+
+        # Make sure all keys are copied properly
+        for k, v in auto.get_params().items():
+            self.assertIn(k, auto_clone_params)
+
+        # Make sure the params getter of estimator are honored
+        klass = auto.__class__
+        new_object_params = auto.get_params(deep=False)
+        for name, param in new_object_params.items():
+            new_object_params[name] = clone(param, safe=False)
+        new_object = klass(**new_object_params)
+        params_set = new_object.get_params(deep=False)
+
+        for name in new_object_params:
+            param1 = new_object_params[name]
+            param2 = params_set[name]
+            self.assertEqual(param1, param2)
 
     def test_set_params(self):
         pass

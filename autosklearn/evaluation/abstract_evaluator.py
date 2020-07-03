@@ -6,10 +6,12 @@ from collections import namedtuple
 import lockfile
 import numpy as np
 from sklearn.dummy import DummyClassifier, DummyRegressor
+from sklearn.ensemble import VotingClassifier, VotingRegressor
 
 import autosklearn.pipeline.classification
 import autosklearn.pipeline.regression
 from autosklearn.constants import (
+    CLASSIFICATION_TASKS,
     REGRESSION_TASKS,
     MULTILABEL_CLASSIFICATION,
     MULTICLASS_CLASSIFICATION,
@@ -217,6 +219,17 @@ class AbstractEvaluator(object):
         return model
 
     def _loss(self, y_true, y_hat, all_scoring_functions=None):
+        """Auto-sklearn follows a minimization goal, so the make_scorer
+        sign is used as a guide to obtain the value to reduce.
+
+        On this regard, to optimize a metric:
+            1- score is calculared with calculate_score, with the caveat, that if
+            for the metric greater is not better, a negative score is returned.
+            2- the err (the optimization goal) is then:
+                optimum - (metric.sign * actual_score)
+                For accuracy for example: optimum(1) - (+1 * actual score)
+                For logloss for example: optimum(0) - (-1 * actual score)
+        """
         all_scoring_functions = (
             self.all_scoring_functions
             if all_scoring_functions is None
@@ -390,7 +403,7 @@ class AbstractEvaluator(object):
         # But first we have to check which files have to be written.
         write_tasks = []
 
-        # File 1 of 4: model
+        # File 1 of 5: model
         if ('model' not in self.disable_file_output):
             if os.path.exists(self.backend.get_model_dir()):
                 file_path = self.backend.get_model_path(
@@ -402,7 +415,7 @@ class AbstractEvaluator(object):
                         args=(self.model, file_path)
                         ))
 
-        # File 2 of 4: predictions
+        # File 2 of 5: predictions
         if ('y_optimization' not in self.disable_file_output):
             file_path = self.backend.get_prediction_output_path(
                 'ensemble', self.seed, self.num_run, self.budget)
@@ -413,7 +426,7 @@ class AbstractEvaluator(object):
                     args=(Y_optimization_pred, file_path)
                     ))
 
-        # File 3 of 4: validation predictions
+        # File 3 of 5: validation predictions
         if Y_valid_pred is not None:
             file_path = self.backend.get_prediction_output_path(
                 'valid', self.seed, self.num_run, self.budget)
@@ -424,7 +437,7 @@ class AbstractEvaluator(object):
                     args=(Y_valid_pred, file_path)
                     ))
 
-        # File 4 of 4: test predictions
+        # File 4 of 5: test predictions
         if Y_test_pred is not None:
             file_path = self.backend.get_prediction_output_path(
                 'test', self.seed, self.num_run, self.budget)
@@ -434,6 +447,26 @@ class AbstractEvaluator(object):
                     writer=self.backend.save_predictions_as_npy,
                     args=(Y_test_pred, file_path)
                     ))
+
+        # File 5 of 5: ensemble of models in case of cross-validation
+        if hasattr(self, 'models') and len(self.models) > 0 and self.models[0] is not None:
+            if ('models' not in self.disable_file_output):
+
+                if self.task_type in CLASSIFICATION_TASKS:
+                    models = VotingClassifier(estimators=None, voting='soft', )
+                else:
+                    models = VotingRegressor(estimators=None)
+                models.estimators_ = self.models
+
+                if os.path.exists(self.backend.get_cv_model_dir()):
+                    file_path = self.backend.get_cv_model_path(
+                        self.seed, self.num_run, self.budget)
+                    write_tasks.append(
+                        WriteTask(
+                            lock=lockfile.LockFile(file_path),
+                            writer=self.backend.save_model,
+                            args=(models, file_path)
+                            ))
 
         # We then acquire the locks one by one in a stubborn fashion, i.e. if a file is
         # already locked, we keep probing it until it is unlocked. This will NOT create a

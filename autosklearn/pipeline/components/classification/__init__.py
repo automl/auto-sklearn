@@ -116,8 +116,8 @@ class ClassifierChoice(AutoSklearnChoice):
                                        estimator_configuration_space,
                                        parent_hyperparameter=parent_hyperparameter)
 
-        self.configuration_space_ = cs
-        self.dataset_properties_ = dataset_properties
+        self.configuration_space = cs
+        self.dataset_properties = dataset_properties
         return cs
 
     def predict_proba(self, X):
@@ -139,6 +139,8 @@ class ClassifierChoice(AutoSklearnChoice):
             raise NotImplementedError()
 
     def iterative_fit(self, X, y, n_iter=1, **fit_params):
+        # Allows to use check_is_fitted on the choice object
+        self.fitted_ = True
         if fit_params is None:
             fit_params = {}
         return self.choice.iterative_fit(X, y, n_iter=n_iter, **fit_params)

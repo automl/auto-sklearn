@@ -233,8 +233,8 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
                     cs.get_hyperparameter(
                         'regressor:__choice__').default_value = default
 
-        self.configuration_space_ = cs
-        self.dataset_properties_ = dataset_properties
+        self.configuration_space = cs
+        self.dataset_properties = dataset_properties
         return cs
 
     def _get_estimator_components(self):

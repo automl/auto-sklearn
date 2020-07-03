@@ -4,13 +4,12 @@ import sys
 import unittest
 import unittest.mock
 
-import sklearn
 import joblib
-
+from joblib import cpu_count
 import numpy as np
 import numpy.ma as npma
-
-from joblib import cpu_count
+import sklearn
+import sklearn.dummy
 
 import autosklearn.pipeline.util as putil
 import autosklearn.estimators  # noqa F401
@@ -26,9 +25,10 @@ sys.path.append(os.path.dirname(__file__))
 from base import Base  # noqa (E402: module level import not at top of file)
 
 
-class ArrayReturningDummyPredictor(object):
+class ArrayReturningDummyPredictor(sklearn.dummy.DummyClassifier):
     def __init__(self, test):
         self.arr = test
+        self.fitted_ = True
 
     def predict_proba(self, X, *args, **kwargs):
         return self.arr
@@ -324,9 +324,9 @@ class EstimatorTest(Base, unittest.TestCase):
             seed=3,
             initial_configurations_via_metalearning=0,
             ensemble_size=0,
+            metric=accuracy,
         )
         automl.fit_ensemble(Y_train, task=BINARY_CLASSIFICATION,
-                            metric=accuracy,
                             precision='32',
                             dataset_name='breast_cancer',
                             ensemble_size=20,

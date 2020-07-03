@@ -11,6 +11,7 @@ from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, SIGNED_
 class Balancing(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, strategy='none', random_state=None):
         self.strategy = strategy
+        self.random_state = random_state
 
     def fit(self, X, y=None):
         return self

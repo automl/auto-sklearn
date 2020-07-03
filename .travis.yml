@@ -21,13 +21,13 @@ matrix:
 
   include:
   - os: linux
-    env: DISTRIB="conda" EXAMPLES="true" PYTHON="3.7" SKIP_TESTS="true"
+    env: DISTRIB="conda" DOCPUSH="true" PYTHON="3.7" SKIP_TESTS="true"
   - os: linux
     env: DISTRIB="conda" RUN_FLAKE8="true" SKIP_TESTS="true"
   - os: linux
     env: DISTRIB="conda" PYTHON="3.5"
   - os: linux
-    env: DISTRIB="conda" COVERAGE="true" DOCPUSH="true" PYTHON="3.6"
+    env: DISTRIB="conda" COVERAGE="true" PYTHON="3.6"
   - os: linux
     env: DISTRIB="conda" TEST_DIST="true" PYTHON="3.7"
   - os: linux
@@ -76,10 +76,10 @@ after_success: source ci_scripts/success.sh && source ci_scripts/create_doc.sh $
 
 deploy:
   provider: pages
-  skip-cleanup: true
-  github-token: $GITHUB_TOKEN # set in the settings page of my repository
-  keep-hisotry: true
-  commiter-from-gh: true
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN # set in the settings page of my repository
+  keep-history: true
+  committer-from-gh: true
   on:
     all_branches: true
     condition: $doc_result = "success"

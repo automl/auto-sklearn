@@ -83,8 +83,6 @@ For more information about how these metrics are used, please read
 
 .. autoclass:: autosklearn.metrics.log_loss
 
-.. autoclass:: autosklearn.metrics.pac_score
-
 Regression metrics
 ~~~~~~~~~~~~~~~~~~
 
