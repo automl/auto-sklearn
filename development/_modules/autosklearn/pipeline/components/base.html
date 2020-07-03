@@ -156,8 +156,8 @@
         <span class="n">properties</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">classifier</span><span class="o">.</span><span class="n">get_properties</span><span class="p">())</span>
         <span class="n">should_be_there</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;shortname&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;handles_regression&#39;</span><span class="p">,</span>
                            <span class="s1">&#39;handles_classification&#39;</span><span class="p">,</span> <span class="s1">&#39;handles_multiclass&#39;</span><span class="p">,</span>
-                           <span class="s1">&#39;handles_multilabel&#39;</span><span class="p">,</span> <span class="s1">&#39;is_deterministic&#39;</span><span class="p">,</span>
-                           <span class="s1">&#39;input&#39;</span><span class="p">,</span> <span class="s1">&#39;output&#39;</span><span class="p">}</span>
+                           <span class="s1">&#39;handles_multilabel&#39;</span><span class="p">,</span> <span class="s1">&#39;handles_multioutput&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;is_deterministic&#39;</span><span class="p">,</span> <span class="s1">&#39;input&#39;</span><span class="p">,</span> <span class="s1">&#39;output&#39;</span><span class="p">}</span>
         <span class="k">for</span> <span class="nb">property</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">property</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">should_be_there</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Property </span><span class="si">%s</span><span class="s1"> must not be specified for &#39;</span>
@@ -166,7 +166,8 @@
                                  <span class="p">(</span><span class="nb">property</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">should_be_there</span><span class="p">)))</span>
         <span class="k">for</span> <span class="nb">property</span> <span class="ow">in</span> <span class="n">should_be_there</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">property</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Property </span><span class="si">%s</span><span class="s1"> not specified for algorithm </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Property </span><span class="si">%s</span><span class="s1"> not specified for algorithm </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                                 <span class="p">(</span><span class="nb">property</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">classifier</span>
 
@@ -404,7 +405,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        array, shape = (n_samples,)</span>
+<span class="sd">        array, shape = (n_samples,) or shape = (n_samples, n_targets)</span>
 <span class="sd">            Returns the predicted values</span>
 
 <span class="sd">        Notes</span>

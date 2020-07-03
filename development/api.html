@@ -759,13 +759,13 @@ out of them. To disable ensembling, set <code class="docutils literal notranslat
 <dd class="field-odd"><dl class="simple">
 <dt><strong>X</strong><span class="classifier">array-like or sparse matrix of shape = [n_samples, n_features]</span></dt><dd><p>The training input samples.</p>
 </dd>
-<dt><strong>y</strong><span class="classifier">array-like, shape = [n_samples]</span></dt><dd><p>The regression target.</p>
+<dt><strong>y</strong><span class="classifier">array-like, shape = [n_samples] or [n_samples, n_targets]</span></dt><dd><p>The regression target.</p>
 </dd>
 <dt><strong>X_test</strong><span class="classifier">array-like or sparse matrix of shape = [n_samples, n_features]</span></dt><dd><p>Test data input samples. Will be used to save test predictions for
 all models. This allows to evaluate the performance of Auto-sklearn
 over time.</p>
 </dd>
-<dt><strong>y_test</strong><span class="classifier">array-like, shape = [n_samples]</span></dt><dd><p>The regression target. Will be used to calculate the test error
+<dt><strong>y_test</strong><span class="classifier">array-like, shape = [n_samples] or [n_samples, n_targets]</span></dt><dd><p>The regression target. Will be used to calculate the test error
 of all models. This allows to evaluate the performance of
 Auto-sklearn over time.</p>
 </dd>
@@ -1239,7 +1239,7 @@ underlying scikit-learn model and returns an array with the predictions.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl class="simple">
-<dt>array, shape = (n_samples,)</dt><dd><p>Returns the predicted values</p>
+<dt>array, shape = (n_samples,) or shape = (n_samples, n_targets)</dt><dd><p>Returns the predicted values</p>
 </dd>
 </dl>
 </dd>

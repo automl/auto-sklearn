@@ -184,6 +184,9 @@
             <span class="k">elif</span> <span class="n">target_type</span> <span class="o">==</span> <span class="s1">&#39;regression&#39;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()[</span><span class="s1">&#39;handles_regression&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                     <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">dataset_properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;multioutput&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> \
+                        <span class="n">entry</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()[</span><span class="s1">&#39;handles_multioutput&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                    <span class="k">continue</span>
 
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown target type </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">target_type</span><span class="p">)</span>
