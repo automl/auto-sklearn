@@ -133,7 +133,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">3600</span><span class="p">,</span>
-        <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">360</span><span class="p">,</span>
+        <span class="n">per_run_time_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
         <span class="n">ensemble_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
         <span class="n">ensemble_nbest</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
@@ -168,7 +168,7 @@
 <span class="sd">            models. By increasing this value, *auto-sklearn* has a higher</span>
 <span class="sd">            chance of finding better models.</span>
 
-<span class="sd">        per_run_time_limit : int, optional (default=360)</span>
+<span class="sd">        per_run_time_limit : int, optional (default=1/10 of time_left_for_this_task)</span>
 <span class="sd">            Time limit for a single call to the machine learning model.</span>
 <span class="sd">            Model fitting will be terminated if the machine learning</span>
 <span class="sd">            algorithm runs over the time limit. Set this value high enough so</span>
@@ -456,8 +456,19 @@
                 <span class="s1">&#39;only one of them.&#39;</span>
             <span class="p">)</span>
 
+        <span class="c1"># Handle the number of jobs and the time for them</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span>
+
+        <span class="c1"># Automatically set the cutoff time per task</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">per_run_time_limit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">per_run_time_limit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_left_for_this_task</span> <span class="o">//</span> <span class="mi">10</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">shared_mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_mode</span>
             <span class="n">seed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span>
             <span class="n">automl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_automl</span><span class="p">(</span>
@@ -477,11 +488,6 @@
                 <span class="n">temporary_directory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tmp_folder</span><span class="p">,</span>
                 <span class="n">output_directory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_folder</span><span class="p">,</span>
             <span class="p">)</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span>
 
             <span class="n">shared_mode</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">seeds</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
