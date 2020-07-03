@@ -8,15 +8,17 @@ import joblib
 from joblib import cpu_count
 import numpy as np
 import numpy.ma as npma
+import pandas as pd
 import sklearn
 import sklearn.dummy
+import sklearn.datasets
 
 import autosklearn.pipeline.util as putil
 import autosklearn.estimators  # noqa F401
 from autosklearn.estimators import AutoSklearnEstimator
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
-from autosklearn.metrics import accuracy, f1_macro, mean_squared_error
+from autosklearn.metrics import accuracy, f1_macro, mean_squared_error, r2
 from autosklearn.automl import AutoMLClassifier, AutoML
 from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.constants import BINARY_CLASSIFICATION
@@ -672,6 +674,33 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         self.assertEqual(fit_ensemble.call_count, 1)
         self.assertIsInstance(fit_ensemble.call_args[0][0], np.ndarray)
 
+    def test_classification_pandas_support(self):
+        X, y = sklearn.datasets.fetch_openml(
+            data_id=37,  # diabetes
+            return_X_y=True,
+            as_frame=True,
+        )
+        # This test only make sense if input is dataframe
+        self.assertTrue(isinstance(X, pd.DataFrame))
+        self.assertTrue(isinstance(y, pd.Series))
+        automl = AutoSklearnClassifier(
+            time_left_for_this_task=30,
+            per_run_time_limit=5,
+        )
+
+        automl.fit(X, y)
+
+        # Make sure that at least better than random.
+        # We use same X_train==X_test to test code quality
+        self.assertTrue(automl.score(X, y) > 0.5)
+
+        automl.refit(X, y)
+
+        # Make sure that at least better than random.
+        # accuracy in sklearn needs valid data
+        y = automl._automl[0].InputValidator.validate_target(y)
+        self.assertTrue(accuracy(y, automl.predict(X)) > 0.5)
+
 
 class AutoMLRegressorTest(Base, unittest.TestCase):
     def test_regression(self):
@@ -711,6 +740,32 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         automl.fit_ensemble(y)
         self.assertEqual(fit_ensemble.call_count, 1)
         self.assertIsInstance(fit_ensemble.call_args[0][0], np.ndarray)
+
+    def test_regression_pandas_support(self):
+        X, y = sklearn.datasets.fetch_openml(
+            data_id=41514,  # diabetes
+            return_X_y=True,
+            as_frame=True,
+        )
+        # This test only make sense if input is dataframe
+        self.assertTrue(isinstance(X, pd.DataFrame))
+        self.assertTrue(isinstance(y, pd.Series))
+        automl = AutoSklearnRegressor(
+            time_left_for_this_task=30,
+            per_run_time_limit=5,
+        )
+
+        # Make sure we error out because y is not encoded
+        automl.fit(X, y)
+
+        # Make sure that at least better than random.
+        # We use same X_train==X_test to test code quality
+        self.assertTrue(automl.score(X, y) > 0.5)
+
+        automl.refit(X, y)
+
+        # Make sure that at least better than random.
+        self.assertTrue(r2(y, automl.predict(X)) > 0.5)
 
 
 class AutoSklearnClassifierTest(unittest.TestCase):

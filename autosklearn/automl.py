@@ -24,6 +24,7 @@ from sklearn.dummy import DummyClassifier, DummyRegressor
 
 from autosklearn.metrics import Scorer
 from autosklearn.data.xy_data_manager import XYDataManager
+from autosklearn.data.validation import InputValidator
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import _fit_with_budget
@@ -188,6 +189,8 @@ class AutoML(BaseEstimator):
 
         self._debug_mode = debug_mode
 
+        self.InputValidator = InputValidator()
+
         if not isinstance(self._time_for_task, int):
             raise ValueError("time_left_for_this_task not of type integer, "
                              "but %s" % str(type(self._time_for_task)))
@@ -281,6 +284,11 @@ class AutoML(BaseEstimator):
         only_return_configuration_space: Optional[bool] = False,
         load_models: bool = True,
     ):
+        # Input validation, and hence transformation happens in the
+        # Estimator.
+        # Make sure that input is valid
+        X, y = self.InputValidator.validate(X, y)
+
         # Reset learnt stuff
         self.models_ = None
         self.cv_models_ = None
@@ -325,6 +333,10 @@ class AutoML(BaseEstimator):
                 if ft.lower() not in ['categorical', 'numerical']:
                     raise ValueError('Only `Categorical` and `Numerical` are '
                                      'valid feature types, you passed `%s`' % ft)
+
+        # Feature types dynamically understood from dataframe
+        if feat_type is None and self.InputValidator.feature_types:
+            feat_type = self.InputValidator.feature_types
 
         datamanager = XYDataManager(
             X, y,
@@ -511,12 +523,18 @@ class AutoML(BaseEstimator):
 
     def refit(self, X, y):
 
+        # Make sure that input is valid
+        X, y = self.InputValidator.validate(X, y)
+
         if self.models_ is None or len(self.models_) == 0 or self.ensemble_ is None:
             self._load_models()
 
         # Refit is not applicable when ensemble_size is set to zero.
         if self.ensemble_ is None:
             raise ValueError("Refit can only be called if 'ensemble_size != 0'")
+
+        # Input Validation happens on estimator
+        # So no need to call input validator here
 
         random_state = np.random.RandomState(self._seed)
         for identifier in self.models_:
@@ -590,6 +608,9 @@ class AutoML(BaseEstimator):
             raise ValueError("Predict and predict_proba can only be called "
                              "if 'ensemble_size != 0'")
 
+        # Make sure that input is valid
+        X = self.InputValidator.validate_features(X)
+
         # Parallelize predictions across models with n_jobs processes.
         # Each process computes predictions in chunks of batch_size rows.
         try:
@@ -636,6 +657,9 @@ class AutoML(BaseEstimator):
         if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit']:
             raise ValueError('Cannot call fit_ensemble with resampling '
                              'strategy %s.' % self._resampling_strategy)
+
+        # Make sure that input is valid
+        y = self.InputValidator.validate_target(y)
 
         if self._logger is None:
             self._logger = self._get_logger(dataset_name)
@@ -772,6 +796,10 @@ class AutoML(BaseEstimator):
     def score(self, X, y):
         # fix: Consider only index 1 of second dimension
         # Don't know if the reshaping should be done there or in calculate_score
+
+        # Make sure that input is valid
+        X, y = self.InputValidator.validate(X, y)
+
         prediction = self.predict(X)
         return calculate_score(solution=y,
                                prediction=prediction,
@@ -958,36 +986,10 @@ class BaseAutoML(AutoML):
         self._n_outputs = 1
         super().__init__(*args, **kwargs)
 
-    def _perform_input_checks(self, X, y):
-        X = self._check_X(X)
-        if y is not None:
-            y = self._check_y(y)
-        return X, y
-
-    def _check_X(self, X):
-        X = sklearn.utils.check_array(X, accept_sparse="csr",
-                                      force_all_finite=False)
-        if scipy.sparse.issparse(X):
-            X.sort_indices()
-        return X
-
-    def _check_y(self, y):
-        y = sklearn.utils.check_array(y, ensure_2d=False)
-        y = np.atleast_1d(y)
-
-        if y.ndim == 1:
-            return y
-        elif y.ndim == 2 and y.shape[1] == 1:
-            warnings.warn("A column-vector y was passed when a 1d array was"
-                          " expected. Will change shape via np.ravel().",
-                          sklearn.utils.DataConversionWarning, stacklevel=2)
-            y = np.ravel(y)
-            return y
-
-        return y
-
     def refit(self, X, y):
-        X, y = self._perform_input_checks(X, y)
+        # Make sure that input is valid
+        X, y = self.InputValidator.validate(X, y)
+
         _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
         if self._n_outputs != _n_outputs:
             raise ValueError('Number of outputs changed from %d to %d!' %
@@ -998,6 +1000,8 @@ class BaseAutoML(AutoML):
     def fit_ensemble(self, y, task=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
+        # Make sure that input is valid
+        y = self.InputValidator.validate_target(y)
         _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
         if self._n_outputs != _n_outputs:
             raise ValueError('Number of outputs changed from %d to %d!' %
@@ -1029,9 +1033,10 @@ class AutoMLClassifier(BaseAutoML):
         only_return_configuration_space: bool = False,
         load_models: bool = True,
     ):
-        X, y = self._perform_input_checks(X, y)
+        # Make sure that input is valid
+        X, y = self.InputValidator.validate(X, y)
         if X_test is not None:
-            X_test, y_test = self._perform_input_checks(X_test, y_test)
+            X_test, y_test = self.InputValidator.validate(X_test, y_test)
             if len(y.shape) != len(y_test.shape):
                 raise ValueError('Target value shapes do not match: %s vs %s'
                                  % (y.shape, y_test.shape))
@@ -1077,6 +1082,8 @@ class AutoMLClassifier(BaseAutoML):
     def fit_ensemble(self, y, task=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
+        # Make sure that input is valid
+        y = self.InputValidator.validate_target(y)
         y, _classes, _n_classes = self._process_target_classes(y)
         if not hasattr(self, '_classes'):
             self._classes = _classes
@@ -1087,7 +1094,6 @@ class AutoMLClassifier(BaseAutoML):
                                     ensemble_nbest, ensemble_size)
 
     def _process_target_classes(self, y):
-        y = super()._check_y(y)
         self._n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
 
         y = np.copy(y)
@@ -1152,12 +1158,13 @@ class AutoMLRegressor(BaseAutoML):
         only_return_configuration_space: bool = False,
         load_models: bool = True,
     ):
-        X, y = super()._perform_input_checks(X, y)
+
+        # Make sure that input is valid
+        X, y = self.InputValidator.validate(X, y)
         y_task = type_of_target(y)
         task = self._task_mapping.get(y_task)
         if task is None:
             raise ValueError('Cannot work on data of type %s' % y_task)
-
         if self._metric is None:
             self._metric = r2
 
@@ -1176,6 +1183,5 @@ class AutoMLRegressor(BaseAutoML):
     def fit_ensemble(self, y, task=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
-        y = super()._check_y(y)
         return super().fit_ensemble(y, task, precision, dataset_name,
                                     ensemble_nbest, ensemble_size)

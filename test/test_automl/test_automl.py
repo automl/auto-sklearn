@@ -63,7 +63,8 @@ class AutoMLTest(Base, unittest.TestCase):
 
             auto.models_ = {(1, 1, 50.0): failing_model}
 
-            X = np.array([1, 2, 3])
+            # Make sure a valid 2D array is given to automl
+            X = np.array([1, 2, 3]).reshape(-1, 1)
             y = np.array([1, 2, 3])
             auto.refit(X, y)
 
