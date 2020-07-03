@@ -244,18 +244,18 @@ Print test accuracy and statistics
 
  .. code-block:: none
 
-    accuracy:  0.986013986013986
+    accuracy:  0.965034965034965
     auto-sklearn results:
-      Dataset name: 956bb1c8f820b2dc0daf2324d529fd5a
+      Dataset name: 74064308aa63df8f237d3e0a3a6117d3
       Metric: accuracy
-      Best validation score: 0.971631
+      Best validation score: 0.978723
       Number of target algorithm runs: 5
       Number of successful target algorithm runs: 3
       Number of crashed target algorithm runs: 0
       Number of target algorithms that exceeded the time limit: 2
       Number of target algorithms that exceeded the memory limit: 0
 
-    [(0.420000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'feature_preprocessor:__choice__': 'polynomial', 'classifier:MLPClassifier:activation': 'relu', 'classifier:MLPClassifier:alpha': 0.5485821752600709, 'classifier:MLPClassifier:hidden_layer_depth': 1, 'classifier:MLPClassifier:num_nodes_per_layer': 26, 'classifier:MLPClassifier:solver': 'sgd', 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max': 0.8752178290145324, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min': 0.007842430614695237, 'feature_preprocessor:polynomial:degree': 3, 'feature_preprocessor:polynomial:include_bias': 'False', 'feature_preprocessor:polynomial:interaction_only': 'False'},
+    [(0.500000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:MLPClassifier:activation': 'relu', 'classifier:MLPClassifier:alpha': 0.0001, 'classifier:MLPClassifier:hidden_layer_depth': 1, 'classifier:MLPClassifier:num_nodes_per_layer': 32, 'classifier:MLPClassifier:solver': 'adam', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -263,7 +263,7 @@ Print test accuracy and statistics
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.340000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:MLPClassifier:activation': 'relu', 'classifier:MLPClassifier:alpha': 0.0001, 'classifier:MLPClassifier:hidden_layer_depth': 1, 'classifier:MLPClassifier:num_nodes_per_layer': 32, 'classifier:MLPClassifier:solver': 'adam', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01},
+    (0.320000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'feature_preprocessor:__choice__': 'select_percentile_classification', 'classifier:MLPClassifier:activation': 'relu', 'classifier:MLPClassifier:alpha': 0.2612057244584386, 'classifier:MLPClassifier:hidden_layer_depth': 2, 'classifier:MLPClassifier:num_nodes_per_layer': 60, 'classifier:MLPClassifier:solver': 'adam', 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 482, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'normal', 'feature_preprocessor:select_percentile_classification:percentile': 70.57307716243938, 'feature_preprocessor:select_percentile_classification:score_func': 'mutual_info'},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -271,7 +271,7 @@ Print test accuracy and statistics
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.240000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'feature_preprocessor:__choice__': 'select_percentile_classification', 'classifier:MLPClassifier:activation': 'relu', 'classifier:MLPClassifier:alpha': 0.2612057244584386, 'classifier:MLPClassifier:hidden_layer_depth': 2, 'classifier:MLPClassifier:num_nodes_per_layer': 60, 'classifier:MLPClassifier:solver': 'adam', 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 482, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'normal', 'feature_preprocessor:select_percentile_classification:percentile': 70.57307716243938, 'feature_preprocessor:select_percentile_classification:score_func': 'mutual_info'},
+    (0.180000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'feature_preprocessor:__choice__': 'polynomial', 'classifier:MLPClassifier:activation': 'relu', 'classifier:MLPClassifier:alpha': 0.5485821752600709, 'classifier:MLPClassifier:hidden_layer_depth': 1, 'classifier:MLPClassifier:num_nodes_per_layer': 26, 'classifier:MLPClassifier:solver': 'sgd', 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max': 0.8752178290145324, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min': 0.007842430614695237, 'feature_preprocessor:polynomial:degree': 3, 'feature_preprocessor:polynomial:include_bias': 'False', 'feature_preprocessor:polynomial:interaction_only': 'False'},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -287,7 +287,7 @@ Print test accuracy and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  24.278 seconds)
+   **Total running time of the script:** ( 0 minutes  24.269 seconds)
 
 
 .. _sphx_glr_download_examples_example_extending_classification.py:
