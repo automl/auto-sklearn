@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+import math
 import numbers
 import multiprocessing
 import glob
@@ -71,7 +72,13 @@ class EnsembleBuilder(multiprocessing.Process):
                 If performance_range_threshold > 0, might return less models
             max_models_on_disc: int
                Defines the maximum number of models that are kept in the disc.
-               If int, it must be greater or equal than 1. If None, feature is disabled.
+               If int, it must be greater or equal than 1, and dictates the max number of
+               models to keep.
+               If float, it will be interpreted as the max megabytes allowed of disc space. That
+               is, if the number of ensemble candidates require more disc space than this float
+               value, the worst models will be deleted to keep within this budget.
+               Models and predictions of the worst-performing models will be deleted then.
+               If None, the feature is disabled.
                It defines an upper bound on the models that can be used in the ensemble.
             performance_range_threshold: float
                 Keep only models that are better than:
@@ -118,11 +125,17 @@ class EnsembleBuilder(multiprocessing.Process):
 
         self.ensemble_nbest = ensemble_nbest
 
-        if max_models_on_disc is not None and max_models_on_disc < 1:
+        # max_models_on_disc can be a float, in such case we need to
+        # remember the user specified Megabytes and translate this to
+        # max number of ensemble models. max_resident_models keeps the
+        # maximum number of models in disc
+        if max_models_on_disc is not None and max_models_on_disc < 0:
             raise ValueError(
                 "max_models_on_disc has to be a positive number or None"
             )
         self.max_models_on_disc = max_models_on_disc
+        self.max_resident_models = None
+
         self.seed = seed
         self.shared_mode = shared_mode  # pSMAC?
         self.max_iterations = max_iterations
@@ -319,6 +332,38 @@ class EnsembleBuilder(multiprocessing.Process):
         if return_pred:
             return valid_pred, test_pred
 
+    def get_disk_consumption(self, pred_path):
+        """
+        gets the cost of a model being on disc
+        """
+
+        match = self.model_fn_re.search(pred_path)
+        if not match:
+            raise ValueError("Invalid path format %s" % pred_path)
+        _full_name = match.group(0)
+        _seed = match.group(1)
+        _num_run = match.group(2)
+        _budget = match.group(3)
+
+        # Besides the prediction, we have to take care of three other files: model,
+        # validation and test.
+        model_name = '%s.%s.%s.model' % (_seed, _num_run, _budget)
+        model_path = os.path.join(self.dir_models, model_name)
+        pred_valid_name = 'predictions_valid' + _full_name
+        pred_valid_path = os.path.join(self.dir_valid, pred_valid_name)
+        pred_test_name = 'predictions_test' + _full_name
+        pred_test_path = os.path.join(self.dir_test, pred_test_name)
+
+        paths = [model_path, pred_path]
+        if os.path.exists(pred_valid_path):
+            paths.append(pred_valid_path)
+        if os.path.exists(pred_test_path):
+            paths.append(pred_test_path)
+        this_model_cost = sum([os.path.getsize(path) for path in paths])
+
+        # get the megabytes
+        return round(this_model_cost / math.pow(1024, 2), 2)
+
     def score_ensemble_preds(self):
         """
             score predictions on ensemble building data set;
@@ -395,6 +440,7 @@ class EnsembleBuilder(multiprocessing.Process):
                     "seed": _seed,
                     "num_run": _num_run,
                     "budget": _budget,
+                    "disc_space_cost_mb": None,
                     Y_ENSEMBLE: None,
                     Y_VALID: None,
                     Y_TEST: None,
@@ -438,6 +484,9 @@ class EnsembleBuilder(multiprocessing.Process):
                     y_ens_fn
                 )
                 self.read_preds[y_ens_fn]["loaded"] = 2
+                self.read_preds[y_ens_fn]["disc_space_cost_mb"] = self.get_disk_consumption(
+                    y_ens_fn
+                )
 
                 n_read_files += 1
 
@@ -514,14 +563,51 @@ class EnsembleBuilder(multiprocessing.Process):
             self.logger.debug("Library Pruning: using for ensemble only "
                               " %d (out of %d) models" % (keep_nbest, len(sorted_keys)))
 
+        # If max_models_on_disc is None, do nothing
         # One can only read at most max_models_on_disc models
-        if self.max_models_on_disc is not None and keep_nbest > self.max_models_on_disc:
+        if self.max_models_on_disc is not None:
+            if not isinstance(self.max_models_on_disc, numbers.Integral):
+                consumption = [
+                    [
+                        v["ens_score"],
+                        v["disc_space_cost_mb"],
+                    ] for v in self.read_preds.values() if v["disc_space_cost_mb"] is not None
+                ]
+                max_consumption = max(i[1] for i in consumption)
+
+                # We are pessimistic with the consumption limit indicated by
+                # max_models_on_disc by 1 model. Such model is assumed to spend
+                # max_consumption megabytes
+                if (sum(i[1] for i in consumption) + max_consumption) > self.max_models_on_disc:
+
+                    # just leave the best -- higher is better!
+                    # This list is in descending order, to preserve the best models
+                    sorted_cum_consumption = np.cumsum([
+                        i[1] for i in list(reversed(sorted(consumption)))
+                    ])
+                    max_models = np.argmax(sorted_cum_consumption > self.max_models_on_disc)
+
+                    # Make sure that at least 1 model survives
+                    self.max_resident_models = max(1, max_models)
+                    self.logger.warning(
+                        "Limiting num of models via float max_models_on_disc={}"
+                        " as accumulated={} worst={} num_models={}".format(
+                            self.max_models_on_disc,
+                            (sum(i[1] for i in consumption) + max_consumption),
+                            max_consumption,
+                            self.max_resident_models
+                        )
+                    )
+            else:
+                self.max_resident_models = self.max_models_on_disc
+
+        if self.max_resident_models is not None and keep_nbest > self.max_resident_models:
             self.logger.debug(
                 "Restricting the number of models to %d instead of %d due to argument "
                 "max_models_on_disc",
-                self.max_models_on_disc, keep_nbest,
+                self.max_resident_models, keep_nbest,
             )
-            keep_nbest = self.max_models_on_disc
+            keep_nbest = self.max_resident_models
 
         # consider performance_range_threshold
         if self.performance_range_threshold > 0:
@@ -692,7 +778,7 @@ class EnsembleBuilder(multiprocessing.Process):
             )
 
             # Delete files of non-candidate models
-            if self.max_models_on_disc is not None:
+            if self.max_resident_models is not None:
                 self._delete_excess_models()
 
             return None
@@ -734,7 +820,7 @@ class EnsembleBuilder(multiprocessing.Process):
             return None
 
         # Delete files of non-candidate models
-        if self.max_models_on_disc is not None:
+        if self.max_resident_models is not None:
             self._delete_excess_models()
 
         return ensemble
@@ -839,14 +925,14 @@ class EnsembleBuilder(multiprocessing.Process):
         sorted_keys = self._get_list_of_sorted_preds()
         sorted_keys = list(map(lambda x: x[0], sorted_keys))
 
-        if len(sorted_keys) <= self.max_models_on_disc:
+        if len(sorted_keys) <= self.max_resident_models:
             # Don't waste time if not enough models to delete
             return
 
-        # The top self.max_models_on_disc models would be the candidates
+        # The top self.max_resident_models models would be the candidates
         # Any other low performance model will be deleted
         # The list is in ascending order of score
-        candidates = sorted_keys[:self.max_models_on_disc]
+        candidates = sorted_keys[:self.max_resident_models]
 
         # Loop through the files currently in the directory
         for pred_path in self.y_ens_files:

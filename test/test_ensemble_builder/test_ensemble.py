@@ -74,7 +74,7 @@ class EnsembleTest(unittest.TestCase):
 
     @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python > 3.5")
     def testNBest(self):
-        for ensemble_nbest, models_in_disc, exp in (
+        for ensemble_nbest, models_on_disc, exp in (
                 (1, None, 1),
                 (1.0, None, 2),
                 (0.1, None, 1),
@@ -90,7 +90,7 @@ class EnsembleTest(unittest.TestCase):
                 limit=-1,  # not used,
                 seed=0,  # important to find the test files
                 ensemble_nbest=ensemble_nbest,
-                max_models_on_disc=models_in_disc,
+                max_models_on_disc=models_on_disc,
             )
 
             ensbuilder.score_ensemble_preds()
@@ -103,6 +103,70 @@ class EnsembleTest(unittest.TestCase):
                 ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_0.0.npy"
             )
             self.assertEqual(sel_keys[0], fixture)
+
+    @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python > 3.5")
+    def testMaxModelsOnDisc(self):
+
+        ensemble_nbest = 4
+        for (test_case, exp) in [
+                # If None, no reduction
+                (None, 2),
+                # If Int, limit only on exceed
+                (4, 2),
+                (1, 1),
+                # If Float, translate float to # models.
+                # below, mock of each file is 100 Mb and
+                # 4 files .model and .npy (test/val/pred) exist
+                (700.0, 1),
+                (800.0, 2),
+                (9999.0, 2),
+        ]:
+            ensbuilder = EnsembleBuilder(
+                backend=self.backend,
+                dataset_name="TEST",
+                task_type=1,  # Binary Classification
+                metric=roc_auc,
+                limit=-1,  # not used,
+                seed=0,  # important to find the test files
+                ensemble_nbest=ensemble_nbest,
+                max_models_on_disc=test_case,
+            )
+
+            with unittest.mock.patch('os.path.getsize') as mock:
+                mock.return_value = 100*1024*1024
+                ensbuilder.score_ensemble_preds()
+                sel_keys = ensbuilder.get_n_best_preds()
+                self.assertEqual(len(sel_keys), exp)
+
+        # Test for Extreme scenarios
+        # Make sure that the best predictions are kept
+        ensbuilder = EnsembleBuilder(
+            backend=self.backend,
+            dataset_name="TEST",
+            task_type=1,  # Binary Classification
+            metric=roc_auc,
+            limit=-1,  # not used,
+            seed=0,  # important to find the test files
+            ensemble_nbest=50,
+            max_models_on_disc=10000.0,
+        )
+        ensbuilder.read_preds = {}
+        for i in range(50):
+            ensbuilder.read_preds['pred'+str(i)] = {
+                'ens_score': i*10,
+                'num_run': i,
+                0: True,
+                'loaded': 1,
+                "seed": 1,
+                "disc_space_cost_mb": 50*i,
+            }
+        sel_keys = ensbuilder.get_n_best_preds()
+        self.assertListEqual(['pred49', 'pred48', 'pred47', 'pred46'], sel_keys)
+
+        # Make sure at least one model is kept alive
+        ensbuilder.max_models_on_disc = 0.0
+        sel_keys = ensbuilder.get_n_best_preds()
+        self.assertListEqual(['pred49'], sel_keys)
 
     @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python > 3.5")
     def testPerformanceRangeThreshold(self):
