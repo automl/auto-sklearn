@@ -433,12 +433,25 @@ class AutoML(BaseEstimator):
         else:
             if self._per_run_time_limit is None or \
                     self._per_run_time_limit > time_left_for_smac:
-                print('Time limit for a single run is higher than total time '
-                      'limit. Capping the limit for a single run to the total '
-                      'time given to SMAC (%f)' % time_left_for_smac)
+                self._logger.warning(
+                    'Time limit for a single run is higher than total time '
+                    'limit. Capping the limit for a single run to the total '
+                    'time given to SMAC (%f)' % time_left_for_smac
+                )
                 per_run_time_limit = time_left_for_smac
             else:
                 per_run_time_limit = self._per_run_time_limit
+
+            # Make sure that at least 2 models are created for the ensemble process
+            num_models = time_left_for_smac // per_run_time_limit
+            if num_models < 2:
+                per_run_time_limit = time_left_for_smac//2
+                self._logger.warning(
+                    "Capping the per_run_time_limit to {} to have "
+                    "time for a least 2 models in each process.".format(
+                        per_run_time_limit
+                    )
+                )
 
             _proc_smac = AutoMLSMBO(
                 config_space=self.configuration_space,

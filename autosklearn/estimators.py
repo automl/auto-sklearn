@@ -21,7 +21,7 @@ class AutoSklearnEstimator(BaseEstimator):
     def __init__(
         self,
         time_left_for_this_task=3600,
-        per_run_time_limit=360,
+        per_run_time_limit=None,
         initial_configurations_via_metalearning=25,
         ensemble_size: int = 50,
         ensemble_nbest=50,
@@ -56,7 +56,7 @@ class AutoSklearnEstimator(BaseEstimator):
             models. By increasing this value, *auto-sklearn* has a higher
             chance of finding better models.
 
-        per_run_time_limit : int, optional (default=360)
+        per_run_time_limit : int, optional (default=1/10 of time_left_for_this_task)
             Time limit for a single call to the machine learning model.
             Model fitting will be terminated if the machine learning
             algorithm runs over the time limit. Set this value high enough so
@@ -344,8 +344,19 @@ class AutoSklearnEstimator(BaseEstimator):
                 'only one of them.'
             )
 
+        # Handle the number of jobs and the time for them
         if self.n_jobs is None or self.n_jobs == 1:
             self._n_jobs = 1
+        elif self.n_jobs == -1:
+            self._n_jobs = joblib.cpu_count()
+        else:
+            self._n_jobs = self.n_jobs
+
+        # Automatically set the cutoff time per task
+        if self.per_run_time_limit is None:
+            self.per_run_time_limit = self._n_jobs * self.time_left_for_this_task // 10
+
+        if self.n_jobs is None or self.n_jobs == 1:
             shared_mode = self.shared_mode
             seed = self.seed
             automl = self.build_automl(
@@ -365,11 +376,6 @@ class AutoSklearnEstimator(BaseEstimator):
                 temporary_directory=self.tmp_folder,
                 output_directory=self.output_folder,
             )
-
-            if self.n_jobs == -1:
-                self._n_jobs = joblib.cpu_count()
-            else:
-                self._n_jobs = self.n_jobs
 
             shared_mode = True
             seeds = set()
