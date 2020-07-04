@@ -438,7 +438,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
         return self
 
-    def fit_ensemble(self, y, task=None, precision='32',
+    def fit_ensemble(self, y, task=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
         """Fit an ensemble to models trained during an optimization process.
