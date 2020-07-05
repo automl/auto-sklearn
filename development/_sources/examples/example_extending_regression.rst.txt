@@ -181,7 +181,7 @@ Fit the model using KRR
 
  .. code-block:: none
 
-    [WARNING] [2020-07-04 21:47:34,546:AutoMLSMBO(1)::2466b8aa8d0d0b3811d2ebd3c9f1656d] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.7.1-py3.7.egg/autosklearn/metalearning/files/r2_regression_dense
+    [WARNING] [2020-07-05 21:47:55,970:AutoMLSMBO(1)::5888217b0bab2a42a519cb84b7affb5b] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.7.1-py3.7.egg/autosklearn/metalearning/files/r2_regression_dense
 
     AutoSklearnRegressor(delete_output_folder_after_terminate=True,
                          delete_tmp_folder_after_terminate=True,
@@ -222,32 +222,39 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    r2 score:  -0.14298057378596218
+    r2 score:  -0.10545285062861609
     auto-sklearn results:
-      Dataset name: 2466b8aa8d0d0b3811d2ebd3c9f1656d
+      Dataset name: 5888217b0bab2a42a519cb84b7affb5b
       Metric: r2
-      Best validation score: 0.561288
-      Number of target algorithm runs: 24
-      Number of successful target algorithm runs: 23
-      Number of crashed target algorithm runs: 1
+      Best validation score: 0.522509
+      Number of target algorithm runs: 26
+      Number of successful target algorithm runs: 26
+      Number of crashed target algorithm runs: 0
       Number of target algorithms that exceeded the time limit: 0
       Number of target algorithms that exceeded the memory limit: 0
 
-    [(0.540000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'fast_ica', 'regressor:__choice__': 'KernelRidgeRegression', 'feature_preprocessor:fast_ica:algorithm': 'deflation', 'feature_preprocessor:fast_ica:fun': 'logcosh', 'feature_preprocessor:fast_ica:whiten': 'False', 'regressor:KernelRidgeRegression:alpha': 0.003849452646594815, 'regressor:KernelRidgeRegression:degree': 4, 'regressor:KernelRidgeRegression:gamma': 0.0022292213231078608, 'regressor:KernelRidgeRegression:kernel': 'rbf'},
+    [(0.440000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:__choice__': 'kitchen_sinks', 'regressor:__choice__': 'KernelRidgeRegression', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.08452793658135356, 'feature_preprocessor:kitchen_sinks:gamma': 0.00012599138462350863, 'feature_preprocessor:kitchen_sinks:n_components': 8888, 'regressor:KernelRidgeRegression:alpha': 0.0028850461516285995, 'regressor:KernelRidgeRegression:degree': 4, 'regressor:KernelRidgeRegression:gamma': 0.19433097403807092, 'regressor:KernelRidgeRegression:kernel': 'polynomial'},
     dataset_properties={
       'task': 4,
       'sparse': False,
       'multioutput': False,
       'target_type': 'regression',
       'signed': False})),
-    (0.240000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'KernelRidgeRegression', 'feature_preprocessor:polynomial:degree': 3, 'feature_preprocessor:polynomial:include_bias': 'False', 'feature_preprocessor:polynomial:interaction_only': 'True', 'regressor:KernelRidgeRegression:alpha': 0.12307951748941862, 'regressor:KernelRidgeRegression:degree': 4, 'regressor:KernelRidgeRegression:gamma': 0.00011267807060791731, 'regressor:KernelRidgeRegression:kernel': 'polynomial'},
+    (0.320000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:__choice__': 'pca', 'regressor:__choice__': 'KernelRidgeRegression', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0006718517919917986, 'feature_preprocessor:pca:keep_variance': 0.9823896066537414, 'feature_preprocessor:pca:whiten': 'False', 'regressor:KernelRidgeRegression:alpha': 0.0007756310240003299, 'regressor:KernelRidgeRegression:degree': 3, 'regressor:KernelRidgeRegression:gamma': 0.0008044291375396163, 'regressor:KernelRidgeRegression:kernel': 'polynomial'},
     dataset_properties={
       'task': 4,
       'sparse': False,
       'multioutput': False,
       'target_type': 'regression',
       'signed': False})),
-    (0.220000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'feature_preprocessor:__choice__': 'select_percentile_regression', 'regressor:__choice__': 'KernelRidgeRegression', 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 1154, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'uniform', 'feature_preprocessor:select_percentile_regression:percentile': 38.14157705803296, 'feature_preprocessor:select_percentile_regression:score_func': 'f_regression', 'regressor:KernelRidgeRegression:alpha': 0.00027544384015886603, 'regressor:KernelRidgeRegression:degree': 3, 'regressor:KernelRidgeRegression:gamma': 7.768854309207494e-05, 'regressor:KernelRidgeRegression:kernel': 'rbf'},
+    (0.220000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:__choice__': 'nystroem_sampler', 'regressor:__choice__': 'KernelRidgeRegression', 'feature_preprocessor:nystroem_sampler:kernel': 'sigmoid', 'feature_preprocessor:nystroem_sampler:n_components': 9633, 'regressor:KernelRidgeRegression:alpha': 0.009281706720947289, 'regressor:KernelRidgeRegression:degree': 2, 'regressor:KernelRidgeRegression:gamma': 0.00494264335798129, 'regressor:KernelRidgeRegression:kernel': 'sigmoid', 'feature_preprocessor:nystroem_sampler:coef0': -0.54715265557739, 'feature_preprocessor:nystroem_sampler:gamma': 0.028604677107853096},
+    dataset_properties={
+      'task': 4,
+      'sparse': False,
+      'multioutput': False,
+      'target_type': 'regression',
+      'signed': False})),
+    (0.020000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'nystroem_sampler', 'regressor:__choice__': 'KernelRidgeRegression', 'feature_preprocessor:nystroem_sampler:kernel': 'rbf', 'feature_preprocessor:nystroem_sampler:n_components': 104, 'regressor:KernelRidgeRegression:alpha': 0.001456069765333117, 'regressor:KernelRidgeRegression:degree': 4, 'regressor:KernelRidgeRegression:gamma': 0.0022964788725962134, 'regressor:KernelRidgeRegression:kernel': 'rbf', 'feature_preprocessor:nystroem_sampler:gamma': 0.32856826685764046},
     dataset_properties={
       'task': 4,
       'sparse': False,
@@ -262,7 +269,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  24.240 seconds)
+   **Total running time of the script:** ( 0 minutes  24.319 seconds)
 
 
 .. _sphx_glr_download_examples_example_extending_regression.py:
