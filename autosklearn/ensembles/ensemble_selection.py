@@ -15,7 +15,6 @@ class EnsembleSelection(AbstractEnsemble):
         ensemble_size: int,
         task_type: int,
         metric: Scorer,
-        sorted_initialization: bool = False,
         bagging: bool = False,
         mode: str = 'fast',
         random_state: np.random.RandomState = None,
@@ -23,7 +22,6 @@ class EnsembleSelection(AbstractEnsemble):
         self.ensemble_size = ensemble_size
         self.task_type = task_type
         self.metric = metric
-        self.sorted_initialization = sorted_initialization
         self.bagging = bagging
         self.mode = mode
         self.random_state = random_state
@@ -64,38 +62,47 @@ class EnsembleSelection(AbstractEnsemble):
 
         ensemble_size = self.ensemble_size
 
-        if self.sorted_initialization:
-            n_best = 20
-            indices = self._sorted_initialization(predictions, labels, n_best)
-            for idx in indices:
-                ensemble.append(predictions[idx])
-                order.append(idx)
-                ensemble_ = np.array(ensemble).mean(axis=0)
-                ensemble_performance = calculate_score(
-                    labels, ensemble_, self.task_type, self.metric,
-                    ensemble_.shape[1])
-                trajectory.append(ensemble_performance)
-            ensemble_size -= n_best
-
+        weighted_ensemble_prediction = np.zeros(predictions[0].shape)
+        fant_ensemble_prediction = np.zeros(weighted_ensemble_prediction.shape)
         for i in range(ensemble_size):
             scores = np.zeros((len(predictions)))
             s = len(ensemble)
             if s == 0:
-                weighted_ensemble_prediction = np.zeros(predictions[0].shape)
+                weighted_ensemble_prediction.fill(0.0)
             else:
-                # Memory-efficient averaging!
-                ensemble_prediction = np.zeros(ensemble[0].shape)
+                weighted_ensemble_prediction.fill(0.0)
                 for pred in ensemble:
-                    ensemble_prediction += pred
-                ensemble_prediction /= s
+                    np.add(
+                        weighted_ensemble_prediction,
+                        pred,
+                        out=weighted_ensemble_prediction,
+                    )
+                np.multiply(
+                    weighted_ensemble_prediction,
+                    1/s,
+                    out=weighted_ensemble_prediction,
+                )
+                np.multiply(
+                    weighted_ensemble_prediction,
+                    (s / float(s + 1)),
+                    out=weighted_ensemble_prediction,
+                )
 
-                weighted_ensemble_prediction = (s / float(s + 1)) * ensemble_prediction
-            fant_ensemble_prediction = np.zeros(weighted_ensemble_prediction.shape)
+            # Memory-efficient averaging!
             for j, pred in enumerate(predictions):
                 # TODO: this could potentially be vectorized! - let's profile
                 # the script first!
-                fant_ensemble_prediction[:, :] = \
-                    weighted_ensemble_prediction + (1. / float(s + 1)) * pred
+                fant_ensemble_prediction.fill(0.0)
+                np.add(
+                    fant_ensemble_prediction,
+                    weighted_ensemble_prediction,
+                    out=fant_ensemble_prediction
+                )
+                np.add(
+                    fant_ensemble_prediction,
+                    (1. / float(s + 1)) * pred,
+                    out=fant_ensemble_prediction
+                )
                 scores[j] = self.metric._optimum - calculate_score(
                     solution=labels,
                     prediction=fant_ensemble_prediction,
@@ -126,22 +133,6 @@ class EnsembleSelection(AbstractEnsemble):
         order = []
 
         ensemble_size = self.ensemble_size
-
-        if self.sorted_initialization:
-            n_best = 20
-            indices = self._sorted_initialization(predictions, labels, n_best)
-            for idx in indices:
-                ensemble.append(predictions[idx])
-                order.append(idx)
-                ensemble_ = np.array(ensemble).mean(axis=0)
-                ensemble_performance = calculate_score(
-                    solution=labels,
-                    prediction=ensemble_,
-                    task_type=self.task_type,
-                    metric=self.metric,
-                    all_scoring_functions=False)
-                trajectory.append(ensemble_performance)
-            ensemble_size -= n_best
 
         for i in range(ensemble_size):
             scores = np.zeros([predictions.shape[0]])
@@ -179,16 +170,6 @@ class EnsembleSelection(AbstractEnsemble):
             weights = weights / np.sum(weights)
 
         self.weights_ = weights
-
-    def _sorted_initialization(self, predictions, labels, n_best):
-        perf = np.zeros([predictions.shape[0]])
-
-        for idx, prediction in enumerate(predictions):
-            perf[idx] = calculate_score(labels, prediction, self.task_type,
-                                        self.metric, predictions.shape[1])
-
-        indices = np.argsort(perf)[perf.shape[0] - n_best:]
-        return indices
 
     def _bagging(self, predictions, labels, fraction=0.5, n_bags=20):
         """Rich Caruana's ensemble selection method with bagging."""

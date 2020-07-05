@@ -11,6 +11,33 @@
 Releases
 ========
 
+Version 0.7.1
+=============
+
+* ADD #764: support for automatic per_run_time_limit selection
+* ADD #864: add the possibility to predict with cross-validation
+* ADD #874: support to limit the disk space consumption
+* MAINT #862: improved documentation and render examples in web page
+* MAINT #869: removal of competition data manager support
+* MAINT #870: memory improvements when building ensemble
+* MAINT #882: memory improvements when performing ensemble selection
+* FIX #701: scaling factors for metafeatures should not be learned using test data
+* FIX #715: allow unlimited ML memory
+* FIX #771: improved worst possible result calculation
+* FIX #843: default value for SelectPercentileRegression
+* FIX #852: clip probabilities within [0-1]
+* FIX #854: improved tmp file naming
+* FIX #863: SMAC exceptions also registered in log file
+* FIX #876: allow Auto-sklearn model to be cloned
+* FIX #879: allow 1-D binary predictions
+
+Contributors
+************
+
+* Matthias Feurer
+* Xiaodong DENG
+* Francisco Rivera
+
 Version 0.7.0
 =============
 
