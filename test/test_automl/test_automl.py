@@ -29,6 +29,7 @@ from base import Base  # noqa (E402: module level import not at top of file)
 class AutoMLStub(AutoML):
     def __init__(self):
         self.__class__ = AutoML
+        self._task = None
 
 
 class AutoMLTest(Base, unittest.TestCase):
@@ -499,6 +500,41 @@ class AutoMLTest(Base, unittest.TestCase):
 
         # Cleanup
         os.unlink(output_file)
+        self._tearDown(backend_api.temporary_directory)
+        self._tearDown(backend_api.output_directory)
+
+    @unittest.mock.patch(
+        'autosklearn.ensemble_builder.EnsembleBuilder.run',
+        **{'return_value.raiseError.side_effect': MemoryError}
+        )
+    def test_load_best_individual_model(self, ensemble_mock):
+
+        backend_api = self._create_backend('test_fit')
+
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+        automl = autosklearn.automl.AutoML(
+            backend=backend_api,
+            time_left_for_this_task=20,
+            per_run_time_limit=5,
+            metric=accuracy,
+        )
+        automl.fit(
+            X_train, Y_train, task=MULTICLASS_CLASSIFICATION,
+        )
+
+        # A memory error occurs in the ensemble construction
+        self.assertTrue(automl._backend.load_ensemble(automl._seed) is None)
+
+        # The load model is robust to this and loads the best model
+        automl._load_models()
+        self.assertTrue(automl.ensemble_ is not None)
+
+        # Just 1 model is there for ensemble and all weight must be on it
+        get_models_with_weights = automl.get_models_with_weights()
+        self.assertEqual(len(get_models_with_weights), 1)
+        self.assertEqual(get_models_with_weights[0][0], 1.0)
+
+        del automl
         self._tearDown(backend_api.temporary_directory)
         self._tearDown(backend_api.output_directory)
 

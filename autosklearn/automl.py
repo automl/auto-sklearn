@@ -32,6 +32,7 @@ from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import get_logger, setup_logger
 from autosklearn.util import pipeline
 from autosklearn.ensemble_builder import EnsembleBuilder
+from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix
 from autosklearn.metrics import f1_macro, accuracy, r2
@@ -700,6 +701,11 @@ class AutoML(BaseEstimator):
             seed = self._seed
 
         self.ensemble_ = self._backend.load_ensemble(seed)
+
+        # If no ensemble is loaded, try to get the best performing model
+        if not self.ensemble_:
+            self.ensemble_ = self._load_best_individual_model()
+
         if self.ensemble_:
             identifiers = self.ensemble_.get_selected_model_identifiers()
             self.models_ = self._backend.load_models_by_identifiers(identifiers)
@@ -731,6 +737,49 @@ class AutoML(BaseEstimator):
 
         else:
             self.models_ = []
+
+    def _load_best_individual_model(self):
+        """
+        Wrapper around ensemble selection to load the best
+        predictor, in case no ensemble is created.
+        """
+
+        # We also require that the model is fit and a task is defined
+        # We should intend to do an ensemble
+        if not self._task or self._ensemble_size < 1:
+            return None
+
+        self._proc_ensemble = self._get_ensemble_process(-1)
+
+        # Check to see if there are predictions
+        if not self._proc_ensemble.score_ensemble_preds():
+            return None
+
+        # Get the best performing model
+        best_model = self._proc_ensemble._get_list_of_sorted_preds()[0][0]
+
+        # Create the ensemble selection object
+        ensemble = EnsembleSelection(
+            ensemble_size=self._ensemble_size,
+            task_type=self._task,
+            metric=self._metric,
+            random_state=self._seed,
+        )
+        ensemble._calculate_weights()
+        ensemble.identifiers_ = [
+            (
+                self._proc_ensemble.read_preds[best_model]["seed"],
+                self._proc_ensemble.read_preds[best_model]["num_run"],
+                self._proc_ensemble.read_preds[best_model]["budget"],
+            )
+        ]
+        self._logger.warning(
+            "No valid ensemble was created. Please check the log"
+            "file for errors. Default to the best individual estimator:{}".format(
+                ensemble.identifiers_
+            )
+        )
+        return ensemble
 
     def score(self, X, y):
         # fix: Consider only index 1 of second dimension
