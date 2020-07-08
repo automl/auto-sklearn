@@ -4,3 +4,5 @@ recursive-include autosklearn/metalearning/files *.txt
 include autosklearn/util/logging.yaml
 recursive-include autosklearn *.pyx
 include requirements.txt
+recursive-include autosklearn/experimental/askl2_portfolios *.json
+include autosklearn/experimental/askl2_training_data.json

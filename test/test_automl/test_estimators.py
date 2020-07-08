@@ -20,6 +20,7 @@ from autosklearn.metrics import accuracy, f1_macro, mean_squared_error
 from autosklearn.automl import AutoMLClassifier, AutoML
 from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.constants import BINARY_CLASSIFICATION
+from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 
 sys.path.append(os.path.dirname(__file__))
 from base import Base  # noqa (E402: module level import not at top of file)
@@ -740,6 +741,23 @@ class AutoSklearnRegressorTest(unittest.TestCase):
         automl = AutoSklearnRegressor(time_left_for_this_task=30,
                                       per_run_time_limit=5,
                                       ensemble_size=0)
+
+        automl_fitted = automl.fit(X_train, y_train)
+        self.assertIs(automl, automl_fitted)
+
+        automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
+        self.assertIs(automl, automl_ensemble_fitted)
+
+        automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+        self.assertIs(automl, automl_refitted)
+
+
+class AutoSklearn2ClassifierTest(unittest.TestCase):
+    # Currently this class only tests that the methods of AutoSklearnClassifier
+    # which should return self actually return self.
+    def test_classification_methods_returns_self(self):
+        X_train, y_train, X_test, y_test = putil.get_dataset('iris')
+        automl = AutoSklearn2Classifier(time_left_for_this_task=60, ensemble_size=0,)
 
         automl_fitted = automl.fit(X_train, y_train)
         self.assertIs(automl, automl_fitted)

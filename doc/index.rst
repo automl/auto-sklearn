@@ -23,6 +23,17 @@ the technology behind *auto-sklearn* by reading our paper published at
 `NIPS 2015 <http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf>`_
 .
 
+.. topic:: NEW: Auto-sklearn 2.0
+
+    Auto-sklearn 2.0 includes latest research on automatically configuring the AutoML system itself
+    and contains a multitude of improvements which speed up the fitting the AutoML system.
+
+*auto-sklearn 2.0* works the same way as regular *auto-sklearn* and you can use it via
+
+    >>> from autosklearn.experimental.askl2 import AutoSklearn2Classifier
+
+A paper describing our advances will be available on arXiv.org soon.
+
 Example
 *******
 
@@ -79,6 +90,22 @@ reference to the following paper:
         year = {2015},
         publisher = {Curran Associates, Inc.},
         url = {http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf}
+     }
+
+If you are using Auto-sklearn 2.0, please also cite
+
+
+ Auto-Sklearn 2.0: The Next Generation, Feurer *et al.*, to appear (2020).
+
+ Bibtex entry::
+
+     @article{ASKL2,
+        title = {Auto-Sklearn 2.0},
+        author = {Feurer, Matthias and Eggensperger, Katharina and
+                  Falkner, Stefan and Lindauer, Marius and Hutter, Frank},
+        booktitle = {Advances in Neural Information Processing Systems 28},
+        year = {2020},
+        journal = {arXiv:2006.???? [cs.LG]},
      }
 
 Contributing
