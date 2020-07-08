@@ -948,6 +948,10 @@ class TrainEvaluator(AbstractEvaluator):
                 init_dict.pop('groups', None)
                 if 'folds' in init_dict:
                     init_dict['n_splits'] = init_dict.pop('folds', None)
+                # delete redundent variables in init_dict
+                delete = [key for key in init_dict if key not in ref_arg_dict]
+                for key in delete:
+                    del init_dict[key]
                 cv = copy.deepcopy(self.resampling_strategy)(**init_dict)
 
                 if 'groups' not in self.resampling_strategy_args:
