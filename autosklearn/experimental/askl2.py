@@ -2,7 +2,6 @@ import json
 import multiprocessing
 import os
 import pickle
-import sys
 from typing import Any, Dict, Optional, Union
 
 from ConfigSpace import Configuration
@@ -10,26 +9,25 @@ import numpy as np
 import pandas as pd
 
 from autosklearn.classification import AutoSklearnClassifier
+import autosklearn.experimental.selector
 from autosklearn.metrics import Scorer
 
 
 CALLBACK_COUNTER = multiprocessing.Value('i', 0)
 
 
-this_directory = os.path.dirname(__file__)
+this_directory = os.path.abspath(os.path.dirname(__file__))
 selector_file = os.path.join(this_directory, 'selector.pkl')
-sys.path.append(this_directory)
 training_data_file = os.path.join(this_directory, 'askl2_training_data.json')
 with open(training_data_file) as fh:
     training_data = json.load(fh)
-import autoauto_dynamic
 metafeatures = pd.DataFrame(training_data['metafeatures'])
 y_values = np.array(training_data['y_values'])
 strategies = training_data['strategies']
 minima_for_methods = training_data['minima_for_methods']
 maxima_for_methods = training_data['maxima_for_methods']
 if not os.path.exists(selector_file):
-    selector = autoauto_dynamic.OneVSOneSelector(
+    selector = autosklearn.experimental.selector.OneVSOneSelector(
         configuration=training_data['configuration'],
         default_strategy_idx=strategies.index('RF_SH-eta4-i_holdout_iterative_es_if'),
         rng=1,
@@ -150,7 +148,9 @@ def get_sh_or_hb_object_callback(budget_type, bandit_strategy, eta, initial_budg
                 'eta': eta,
                 'min_chall': 1},
             )
-        smac4ac.solver.epm_chooser.min_samples_model = int(len(scenario.cs.get_hyperparameters()) / 2)
+        smac4ac.solver.epm_chooser.min_samples_model = int(
+            len(scenario.cs.get_hyperparameters()) / 2
+        )
         return smac4ac
     return get_smac_object
 

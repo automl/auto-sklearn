@@ -39,7 +39,9 @@ class OneVSOneSelector:
                 if np.all([target == y_i_j[0] for target in y_i_j]):
                     n_zeros = int(np.ceil(len(y_i_j) / 2))
                     n_ones = int(np.floor(len(y_i_j) / 2))
-                    base_model = sklearn.dummy.DummyClassifier(strategy='constant', constant=y_i_j[0])
+                    base_model = sklearn.dummy.DummyClassifier(
+                        strategy='constant', constant=y_i_j[0],
+                    )
                     base_model.fit(
                         X.values,
                         np.array(([[0]] * n_zeros) + ([[1]] * n_ones)).flatten(),
@@ -79,7 +81,9 @@ class OneVSOneSelector:
 
             if not use_prediction:
                 print('Using Backup selector')
-                return np.array([1 if i == self.default_strategy_idx else 0 for i in self.target_indices])
+                return np.array(
+                    [1 if i == self.default_strategy_idx else 0 for i in self.target_indices]
+                )
             print('Using no backup selector')
 
         X = X.reshape((1, -1))
