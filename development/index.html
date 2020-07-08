@@ -135,6 +135,16 @@ optimization</em>, <em>meta-learning</em> and <em>ensemble construction</em>. Le
 the technology behind <em>auto-sklearn</em> by reading our paper published at
 <a class="reference external" href="http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf">NIPS 2015</a>
 .</p>
+<div class="topic">
+<p class="topic-title">NEW: Auto-sklearn 2.0</p>
+<p>Auto-sklearn 2.0 includes latest research on automatically configuring the AutoML system itself
+and contains a multitude of improvements which speed up the fitting the AutoML system.</p>
+</div>
+<p><em>auto-sklearn 2.0</em> works the same way as regular <em>auto-sklearn</em> and you can use it via</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">autosklearn.experimental.askl2</span> <span class="kn">import</span> <span class="n">AutoSklearn2Classifier</span>
+</pre></div>
+</div>
+<p>A paper describing our advances will be available on arXiv.org soon.</p>
 <div class="section" id="example">
 <h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
@@ -185,6 +195,21 @@ Feurer <em>et al.</em>, Advances in Neural Information Processing Systems 28 (NI
    <span class="n">publisher</span> <span class="o">=</span> <span class="p">{</span><span class="n">Curran</span> <span class="n">Associates</span><span class="p">,</span> <span class="n">Inc</span><span class="o">.</span><span class="p">},</span>
    <span class="n">url</span> <span class="o">=</span> <span class="p">{</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">papers</span><span class="o">.</span><span class="n">nips</span><span class="o">.</span><span class="n">cc</span><span class="o">/</span><span class="n">paper</span><span class="o">/</span><span class="mi">5872</span><span class="o">-</span><span class="n">efficient</span><span class="o">-</span><span class="ow">and</span><span class="o">-</span><span class="n">robust</span><span class="o">-</span><span class="n">automated</span><span class="o">-</span><span class="n">machine</span><span class="o">-</span><span class="n">learning</span><span class="o">.</span><span class="n">pdf</span><span class="p">}</span>
 <span class="p">}</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>If you are using Auto-sklearn 2.0, please also cite</p>
+<blockquote>
+<div><p>Auto-Sklearn 2.0: The Next Generation, Feurer <em>et al.</em>, to appear (2020).</p>
+<p>Bibtex entry:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>@article{ASKL2,
+   title = {Auto-Sklearn 2.0},
+   author = {Feurer, Matthias and Eggensperger, Katharina and
+             Falkner, Stefan and Lindauer, Marius and Hutter, Frank},
+   booktitle = {Advances in Neural Information Processing Systems 28},
+   year = {2020},
+   journal = {arXiv:2006.???? [cs.LG]},
+}
 </pre></div>
 </div>
 </div></blockquote>
