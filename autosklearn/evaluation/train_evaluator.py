@@ -28,7 +28,7 @@ __baseCrossValidator_defaults__ = {'GroupKFold': {'n_splits': 3},
                                    'LeavePGroupsOut': {'n_groups': 2},
                                    'LeaveOneOut': {},
                                    'LeavePOut': {'p': 2},
-                                   'PredefinedSplit': {},
+                                   'PredefinedSplit': {'test_fold': [0, 1, 2, 3]},
                                    'RepeatedKFold': {'n_splits': 5,
                                                      'n_repeats': 10,
                                                      'random_state': None},
@@ -948,6 +948,10 @@ class TrainEvaluator(AbstractEvaluator):
                 init_dict.pop('groups', None)
                 if 'folds' in init_dict:
                     init_dict['n_splits'] = init_dict.pop('folds', None)
+                # delete redundent variables in init_dict
+                delete = [key for key in init_dict if key not in ref_arg_dict]
+                for key in delete:
+                    init_dict.pop(key, None)
                 cv = copy.deepcopy(self.resampling_strategy)(**init_dict)
 
                 if 'groups' not in self.resampling_strategy_args:
