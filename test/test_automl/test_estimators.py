@@ -20,6 +20,7 @@ from autosklearn.metrics import accuracy, f1_macro, mean_squared_error
 from autosklearn.automl import AutoMLClassifier, AutoML
 from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.constants import BINARY_CLASSIFICATION
+from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 
 sys.path.append(os.path.dirname(__file__))
 from base import Base  # noqa (E402: module level import not at top of file)
@@ -187,17 +188,8 @@ class EstimatorTest(Base, unittest.TestCase):
 
         # Test that regressor raises error for illegal target types.
         reg = AutoSklearnRegressor()
-        # Illegal target types for regression: multiclass-multioutput,
-        # multilabel-indicator, continuous-multioutput.
-        self.assertRaisesRegex(
-            ValueError,
-            "regression with data of type"
-            " multiclass-multioutput is not supported",
-            reg.fit,
-            X=X,
-            y=y_multiclass_multioutput,
-        )
-
+        # Illegal target types for regression: multilabel-indicator
+        # multiclass-multioutput
         self.assertRaisesRegex(
             ValueError,
             "regression with data of type"
@@ -210,12 +202,15 @@ class EstimatorTest(Base, unittest.TestCase):
         self.assertRaisesRegex(
             ValueError,
             "regression with data of type"
-            " continuous-multioutput is not supported",
+            " multiclass-multioutput is not supported",
             reg.fit,
             X=X,
-            y=y_continuous_multioutput,
+            y=y_multiclass_multioutput,
         )
-        # Legal target types: continuous, binary, multiclass
+
+        # Legal target types: continuous, multiclass,
+        # continuous-multioutput,
+        # binary
         try:
             reg.fit(X, y_continuous)
         except ValueError:
@@ -223,16 +218,22 @@ class EstimatorTest(Base, unittest.TestCase):
                       "continuous targets")
 
         try:
-            reg.fit(X, y_binary)
-        except ValueError:
-            self.fail("reg.fit() raised ValueError while fitting "
-                      "binary targets")
-
-        try:
             reg.fit(X, y_multiclass)
         except ValueError:
             self.fail("reg.fit() raised ValueError while fitting "
                       "multiclass targets")
+
+        try:
+            reg.fit(X, y_continuous_multioutput)
+        except ValueError:
+            self.fail("reg.fit() raised ValueError while fitting "
+                      "continuous_multioutput targets")
+
+        try:
+            reg.fit(X, y_binary)
+        except ValueError:
+            self.fail("reg.fit() raised ValueError while fitting "
+                      "binary targets")
 
     def test_fit_pSMAC(self):
         tmp = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_pSMAC')
@@ -740,6 +741,23 @@ class AutoSklearnRegressorTest(unittest.TestCase):
         automl = AutoSklearnRegressor(time_left_for_this_task=30,
                                       per_run_time_limit=5,
                                       ensemble_size=0)
+
+        automl_fitted = automl.fit(X_train, y_train)
+        self.assertIs(automl, automl_fitted)
+
+        automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
+        self.assertIs(automl, automl_ensemble_fitted)
+
+        automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+        self.assertIs(automl, automl_refitted)
+
+
+class AutoSklearn2ClassifierTest(unittest.TestCase):
+    # Currently this class only tests that the methods of AutoSklearnClassifier
+    # which should return self actually return self.
+    def test_classification_methods_returns_self(self):
+        X_train, y_train, X_test, y_test = putil.get_dataset('iris')
+        automl = AutoSklearn2Classifier(time_left_for_this_task=60, ensemble_size=0,)
 
         automl_fitted = automl.fit(X_train, y_train)
         self.assertIs(automl, automl_fitted)

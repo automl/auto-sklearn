@@ -22,6 +22,7 @@ class NoEncoding(AutoSklearnPreprocessingAlgorithm):
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
+                'handles_multioutput': True,
                 'handles_sparse': True,
                 'handles_dense': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),

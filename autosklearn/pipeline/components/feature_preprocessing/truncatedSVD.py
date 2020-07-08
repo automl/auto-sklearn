@@ -39,6 +39,7 @@ class TruncatedSVD(AutoSklearnPreprocessingAlgorithm):
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
+                'handles_multioutput': True,
                 'is_deterministic': True,
                 'input': (SPARSE, UNSIGNED_DATA),
                 'output': (DENSE, INPUT)}

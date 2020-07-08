@@ -98,6 +98,7 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
+                'handles_multioutput': False,
                 'is_deterministic': True,
                 'handles_sparse': True,
                 'handles_dense': True,

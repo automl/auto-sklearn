@@ -36,7 +36,7 @@ from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix
 from autosklearn.metrics import f1_macro, accuracy, r2
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
-    REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION
+    REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION
 
 
 def _model_predict(model, X, batch_size, logger, task):
@@ -936,13 +936,16 @@ class BaseAutoML(AutoML):
 
     def _check_y(self, y):
         y = sklearn.utils.check_array(y, ensure_2d=False)
-
         y = np.atleast_1d(y)
-        if y.ndim == 2 and y.shape[1] == 1:
+
+        if y.ndim == 1:
+            return y
+        elif y.ndim == 2 and y.shape[1] == 1:
             warnings.warn("A column-vector y was passed when a 1d array was"
                           " expected. Will change shape via np.ravel().",
                           sklearn.utils.DataConversionWarning, stacklevel=2)
             y = np.ravel(y)
+            return y
 
         return y
 
@@ -1097,6 +1100,9 @@ class AutoMLClassifier(BaseAutoML):
 class AutoMLRegressor(BaseAutoML):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._task_mapping = {'continuous-multioutput': MULTIOUTPUT_REGRESSION,
+                              'continuous': REGRESSION,
+                              'multiclass': REGRESSION}
 
     def fit(
         self,
@@ -1110,17 +1116,20 @@ class AutoMLRegressor(BaseAutoML):
         load_models: bool = True,
     ):
         X, y = super()._perform_input_checks(X, y)
-        _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
-        if _n_outputs > 1:
-            raise NotImplementedError(
-                'Multi-output regression is not implemented.')
+        y_task = type_of_target(y)
+        task = self._task_mapping.get(y_task)
+        if task is None:
+            raise ValueError('Cannot work on data of type %s' % y_task)
+
         if self._metric is None:
             self._metric = r2
+
+        self._n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
         return super().fit(
             X, y,
             X_test=X_test,
             y_test=y_test,
-            task=REGRESSION,
+            task=task,
             feat_type=feat_type,
             dataset_name=dataset_name,
             only_return_configuration_space=only_return_configuration_space,

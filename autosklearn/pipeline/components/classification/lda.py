@@ -70,6 +70,7 @@ class LDA(AutoSklearnClassificationAlgorithm):
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
+                'handles_multioutput': False,
                 'is_deterministic': True,
                 'input': (DENSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,)}

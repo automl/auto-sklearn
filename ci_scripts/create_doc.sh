@@ -13,10 +13,6 @@ if ! [[ -z ${DOCPUSH+x} ]]; then
         # $1 is the branch name
         # $2 is the global variable where we set the script status
 
-        if ! { [ $1 = "master" ] || [ $1 = "development" ]; }; then
-            { echo "Not one of the allowed branches"; exit 0; }
-        fi
-
         # delete any previous documentation folder
         if [ -d doc/$1 ]; then
             rm -rf doc/$1
@@ -24,6 +20,10 @@ if ! [[ -z ${DOCPUSH+x} ]]; then
 
         # create the documentation
         cd doc && make html 2>&1
+
+        if ! { [ $1 = "master" ] || [ $1 = "development" ]; }; then
+            { echo "Not one of the allowed branches"; exit 0; }
+        fi
 
         # create directory with branch name
         # the documentation for dev/stable from git will be stored here
