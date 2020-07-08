@@ -530,9 +530,6 @@ class AutoML(BaseEstimator):
         if self.ensemble_ is None:
             raise ValueError("Refit can only be called if 'ensemble_size != 0'")
 
-        # Input Validation happens on estimator
-        # So no need to call input validator here
-
         random_state = np.random.RandomState(self._seed)
         for identifier in self.models_:
             model = self.models_[identifier]
