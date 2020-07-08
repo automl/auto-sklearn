@@ -18,7 +18,6 @@ class EnsembleSelection(AbstractEnsemble):
         bagging: bool = False,
         mode: str = 'fast',
         random_state: np.random.RandomState = None,
-        precision: int = 64,
     ):
         self.ensemble_size = ensemble_size
         self.task_type = task_type
@@ -26,20 +25,6 @@ class EnsembleSelection(AbstractEnsemble):
         self.bagging = bagging
         self.mode = mode
         self.random_state = random_state
-
-        # Make sure precision is 64
-        if isinstance(precision, str):
-            precision = int(precision)
-            self.logger.warning("Interpreted str-precision as {}".format(
-                precision
-            ))
-        self.precision = np.float64
-        if precision == 128:
-            self.precision = np.float128
-        elif precision == 32:
-            self.precision = np.float64
-        elif precision == 16:
-            self.precision = np.float16
 
     def fit(self, predictions, labels, identifiers):
         self.ensemble_size = int(self.ensemble_size)
@@ -79,16 +64,16 @@ class EnsembleSelection(AbstractEnsemble):
 
         weighted_ensemble_prediction = np.zeros(
             predictions[0].shape,
-            dtype=self.precision,
+            dtype=np.float64,
         )
         fant_ensemble_prediction = np.zeros(
             weighted_ensemble_prediction.shape,
-            dtype=self.precision,
+            dtype=np.float64,
         )
         for i in range(ensemble_size):
             scores = np.zeros(
                 (len(predictions)),
-                dtype=self.precision,
+                dtype=np.float64,
             )
             s = len(ensemble)
             if s == 0:
@@ -161,7 +146,7 @@ class EnsembleSelection(AbstractEnsemble):
         for i in range(ensemble_size):
             scores = np.zeros(
                 [predictions.shape[0]],
-                dtype=self.precision,
+                dtype=np.float64,
             )
             for j, pred in enumerate(predictions):
                 ensemble.append(pred)
@@ -184,11 +169,11 @@ class EnsembleSelection(AbstractEnsemble):
 
         self.indices_ = np.array(
             order,
-            dtype=self.precision,
+            dtype=np.int64,
         )
         self.trajectory_ = np.array(
             trajectory,
-            dtype=self.precision,
+            dtype=np.float64,
         )
         self.train_score_ = trajectory[-1]
 
@@ -196,7 +181,7 @@ class EnsembleSelection(AbstractEnsemble):
         ensemble_members = Counter(self.indices_).most_common()
         weights = np.zeros(
             (self.num_input_models_,),
-            dtype=self.precision,
+            dtype=np.float64,
         )
         for ensemble_member in ensemble_members:
             weight = float(ensemble_member[1]) / self.ensemble_size
@@ -223,13 +208,13 @@ class EnsembleSelection(AbstractEnsemble):
 
         return np.array(
             order_of_each_bag,
-            dtype=self.precision,
+            dtype=np.int64,
         )
 
     def predict(self, predictions):
         predictions = np.asarray(
             predictions,
-            dtype=self.precision,
+            dtype=np.float64,
         )
 
         # if predictions.shape[0] == len(self.weights_),
