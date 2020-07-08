@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>autosklearn.metrics &#8212; AutoSklearn 0.7.1 documentation</title>
+    <title>autosklearn.metrics &#8212; AutoSklearn 0.8.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.7.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.8.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -172,6 +172,8 @@
         <span class="k">elif</span> <span class="n">type_true</span> <span class="o">==</span> <span class="s1">&#39;multilabel-indicator&#39;</span><span class="p">:</span>
             <span class="n">y_pred</span><span class="p">[</span><span class="n">y_pred</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
             <span class="n">y_pred</span><span class="p">[</span><span class="n">y_pred</span> <span class="o">&lt;=</span> <span class="mf">0.5</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">elif</span> <span class="n">type_true</span> <span class="o">==</span> <span class="s1">&#39;continuous-multioutput&#39;</span><span class="p">:</span>
+            <span class="k">pass</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">type_true</span><span class="p">)</span>
 

@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>autosklearn.estimators &#8212; AutoSklearn 0.7.1 documentation</title>
+    <title>autosklearn.estimators &#8212; AutoSklearn 0.8.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.7.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.8.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -878,7 +878,7 @@
 <span class="sd">        X : array-like or sparse matrix of shape = [n_samples, n_features]</span>
 <span class="sd">            The training input samples.</span>
 
-<span class="sd">        y : array-like, shape = [n_samples]</span>
+<span class="sd">        y : array-like, shape = [n_samples] or [n_samples, n_targets]</span>
 <span class="sd">            The regression target.</span>
 
 <span class="sd">        X_test : array-like or sparse matrix of shape = [n_samples, n_features]</span>
@@ -886,7 +886,7 @@
 <span class="sd">            all models. This allows to evaluate the performance of Auto-sklearn</span>
 <span class="sd">            over time.</span>
 
-<span class="sd">        y_test : array-like, shape = [n_samples]</span>
+<span class="sd">        y_test : array-like, shape = [n_samples] or [n_samples, n_targets]</span>
 <span class="sd">            The regression target. Will be used to calculate the test error</span>
 <span class="sd">            of all models. This allows to evaluate the performance of</span>
 <span class="sd">            Auto-sklearn over time.</span>
@@ -911,7 +911,6 @@
         <span class="n">target_type</span> <span class="o">=</span> <span class="n">type_of_target</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">target_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;multiclass-multioutput&#39;</span><span class="p">,</span>
                            <span class="s1">&#39;multilabel-indicator&#39;</span><span class="p">,</span>
-                           <span class="s1">&#39;continuous-multioutput&#39;</span><span class="p">,</span>
                            <span class="s1">&#39;unknown&#39;</span><span class="p">,</span>
                            <span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;regression with data of type </span><span class="si">%s</span><span class="s2"> is not&quot;</span>

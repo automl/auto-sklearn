@@ -11,6 +11,12 @@
 Releases
 ========
 
+Version 0.8
+===========
+
+* ADD #803: multi-output regression
+* ADD #893: new Auto-sklearn mode Auto-sklearn 2.0
+
 Version 0.7.1
 =============
 

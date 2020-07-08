@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>autosklearn.pipeline.components.feature_preprocessing &#8212; AutoSklearn 0.7.1 documentation</title>
+    <title>autosklearn.pipeline.components.feature_preprocessing &#8212; AutoSklearn 0.8.0 documentation</title>
     <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.7.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.8.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -183,6 +183,9 @@
 
             <span class="k">elif</span> <span class="n">target_type</span> <span class="o">==</span> <span class="s1">&#39;regression&#39;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()[</span><span class="s1">&#39;handles_regression&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">dataset_properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;multioutput&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> \
+                        <span class="n">entry</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()[</span><span class="s1">&#39;handles_multioutput&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                     <span class="k">continue</span>
 
             <span class="k">else</span><span class="p">:</span>
