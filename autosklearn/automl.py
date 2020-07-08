@@ -750,21 +750,13 @@ class AutoML(BaseEstimator):
             return None
 
         # Create the ensemble selection object
-        ensemble = EnsembleSelection(
+        ensemble = SingleModelEnsemble(
             ensemble_size=self._ensemble_size,
             task_type=self._task,
             metric=self._metric,
             random_state=self._seed,
             run_history=self.runhistory_,
         )
-        ensemble._calculate_weights()
-        ensemble.identifiers_ = [
-            (
-                self._proc_ensemble.read_preds[best_model]["seed"],
-                self._proc_ensemble.read_preds[best_model]["num_run"],
-                self._proc_ensemble.read_preds[best_model]["budget"],
-            )
-        ]
         self._logger.warning(
             "No valid ensemble was created. Please check the log"
             "file for errors. Default to the best individual estimator:{}".format(

@@ -2,10 +2,13 @@ import os
 import sys
 import unittest.mock
 
+import numpy as np
+from smac.runhistory.runhistory import RunValue, RunKey, RunHistory
+
 from autosklearn.metrics import roc_auc, accuracy
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensemble_builder import EnsembleBuilder, Y_VALID, Y_TEST
-import numpy as np
+from autosklearn.ensembles.singlemodel_ensemble import SingleModelEnsemble
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
@@ -463,3 +466,62 @@ class EnsembleSelectionTest(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             ensemble.predict(per_model_pred)
+
+
+class SingleModelEnsembleTest(unittest.TestCase):
+    def test_get_identifiers_from_run_history(self):
+        run_history = RunHistory()
+        run_history._add(
+            RunKey(
+                config_id=3,
+                instance_id='{"task_id": "breast_cancer"}',
+                seed=1,
+                budget=3.0
+            ),
+            RunValue(
+                cost=0.11347517730496459,
+                time=0.21858787536621094,
+                status=None,
+                additional_info={
+                    'duration': 0.20323538780212402,
+                    'num_run': 3,
+                    'configuration_origin': 'Random Search'}
+            ),
+            status=None,
+            origin=None,
+        )
+        run_history._add(
+            RunKey(
+                config_id=6,
+                instance_id='{"task_id": "breast_cancer"}',
+                seed=1,
+                budget=6.0
+            ),
+            RunValue(
+                cost=2*0.11347517730496459,
+                time=2*0.21858787536621094,
+                status=None,
+                additional_info={
+                    'duration': 0.20323538780212402,
+                    'num_run': 6,
+                    'configuration_origin': 'Random Search'}
+            ),
+            status=None,
+            origin=None,
+        )
+        ensemble = SingleModelEnsemble(
+             ensemble_size=5,
+             task_type=None,
+             metric=accuracy,
+             random_state=1,
+             run_history=run_history,
+        )
+
+        # Just one model
+        self.assertEqual(len(ensemble.identifiers_), 1)
+
+        # That model must be the best
+        seed, num_run, budget = ensemble.identifiers_[0]
+        self.assertEqual(num_run, 3)
+        self.assertEqual(seed, 1)
+        self.assertEqual(budget, 3.0)
