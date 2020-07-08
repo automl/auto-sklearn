@@ -32,7 +32,7 @@ from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import get_logger, setup_logger
 from autosklearn.util import pipeline
 from autosklearn.ensemble_builder import EnsembleBuilder
-from autosklearn.ensembles.ensemble_selection import EnsembleSelection
+from autosklearn.ensembles.singlemodel_ensemble import SingleModelEnsemble
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix
 from autosklearn.metrics import f1_macro, accuracy, r2
@@ -749,21 +749,13 @@ class AutoML(BaseEstimator):
         if not self._task or self._ensemble_size < 1:
             return None
 
-        self._proc_ensemble = self._get_ensemble_process(-1)
-
-        # Check to see if there are predictions
-        if not self._proc_ensemble.score_ensemble_preds():
-            return None
-
-        # Get the best performing model
-        best_model = self._proc_ensemble._get_list_of_sorted_preds()[0][0]
-
         # Create the ensemble selection object
         ensemble = EnsembleSelection(
             ensemble_size=self._ensemble_size,
             task_type=self._task,
             metric=self._metric,
             random_state=self._seed,
+            run_history=self.runhistory_,
         )
         ensemble._calculate_weights()
         ensemble.identifiers_ = [
