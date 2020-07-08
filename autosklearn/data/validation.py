@@ -1,16 +1,17 @@
 # -*- encoding: utf-8 -*-
 
-from typing import Union, Tuple
 import warnings
+from typing import List, Tuple, Union
 
 import numpy as np
+
 import pandas as pd
+
+import scipy.sparse
 
 import sklearn.utils
 from sklearn import preprocessing
 from sklearn.compose import make_column_transformer
-
-import scipy.sparse
 
 
 class InputValidator:
@@ -24,8 +25,6 @@ class InputValidator:
     """
     def __init__(
         self,
-        feature_encoder_type: str = 'OrdinalEncoder',
-        target_encoder_type: str = 'LabelEncoder',
     ):
         self.valid_pd_enc_dtypes = ['category', 'bool']
 
@@ -41,13 +40,14 @@ class InputValidator:
         self.target_encoder = None
         self.enc_columns = []
 
-        self.feature_encoder_type = feature_encoder_type
-        self.target_encoder_type = target_encoder_type
+        # Check for n-outputs change
+        self._n_outputs = None
 
     def validate(
         self,
         X: Union[pd.DataFrame, np.ndarray],
         y: Union[pd.DataFrame, np.ndarray],
+        is_classification: bool = False,
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Wrapper for feature/targets validation
@@ -57,7 +57,7 @@ class InputValidator:
         """
 
         X = self.validate_features(X)
-        y = self.validate_target(y)
+        y = self.validate_target(y, is_classification)
 
         if X.shape[0] != y.shape[0]:
             raise ValueError(
@@ -99,21 +99,47 @@ class InputValidator:
     def validate_target(
         self,
         y: Union[pd.DataFrame, np.ndarray],
+        is_classification: bool = False,
     ) -> np.ndarray:
         """
         Wrapper around sklearn check_array. Translates a pandas
         Dataframe to a valid input for sklearn.
         """
-        # Support also Pandas object in the targets
-        if hasattr(y, "iloc"):
-            y = self._validate_dataframe_target(y)
+        if not hasattr(y, "iloc"):
+            y = np.atleast_1d(y)
+            if y.ndim == 2 and y.shape[1] == 1:
+                warnings.warn("A column-vector y was passed when a 1d array was"
+                              " expected. Will change shape via np.ravel().",
+                              sklearn.utils.DataConversionWarning, stacklevel=2)
+                y = np.ravel(y)
 
-        y = np.atleast_1d(y)
-        if y.ndim == 2 and y.shape[1] == 1:
-            warnings.warn("A column-vector y was passed when a 1d array was"
-                          " expected. Will change shape via np.ravel().",
-                          sklearn.utils.DataConversionWarning, stacklevel=2)
-            y = np.ravel(y)
+        # During classification, we do ordinal encoding
+        # We train a common model for test and train
+        # If an encoder was ever done for an estimator,
+        # use it always
+        # For regression, we default to the check_array in sklearn
+        # learn. This handles numerical checking and object conversion
+        # For regression, we expect the user to provide numerical input
+        # Next check will catch that
+        if is_classification or self.target_encoder is not None:
+            y = self._check_and_encode_target(y)
+
+        # In code check to make sure everything is numeric
+        if hasattr(y, "iloc"):
+            is_number = np.vectorize(lambda x: np.issubdtype(x, np.number))
+            if not np.all(is_number(y.dtypes)):
+                raise ValueError(
+                    "Input dataframe to autosklearn must only contain numerical"
+                    " dtypes, yet it has: {}".format(
+                        y.dtypes
+                    )
+                )
+        elif not np.issubdtype(y.dtype, np.number):
+            raise ValueError(
+                "Input to autosklearn must have a numerical dtype, yet it is: {}".format(
+                    y.dtype
+                )
+            )
 
         # sklearn check array will make sure we have the
         # correct numerical features for the array
@@ -124,19 +150,27 @@ class InputValidator:
             accept_sparse='csr',
             ensure_2d=False,
         )
+
+        if self._n_outputs is None:
+            self._n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
+        else:
+            _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
+            if self._n_outputs != _n_outputs:
+                raise ValueError('Number of outputs changed from %d to %d!' %
+                                 (self._n_outputs, _n_outputs))
+
         return y
 
-    def _validate_dataframe_features(
+    def is_single_column_target(self):
+        """
+        Output is encoded with a single column encoding
+        """
+        return self._n_outputs == 1
+
+    def _check_and_get_columns_to_encode(
         self,
         X: pd.DataFrame,
-    ) -> Union[pd.DataFrame, np.ndarray]:
-        """
-        Interprets a Pandas
-        Uses .iloc as a safe way to deal with pandas object
-        """
-
-        # Start with the features
-
+    ) -> Tuple[List[int], List[str]]:
         # Register if a column needs encoding
         enc_columns = []
 
@@ -149,11 +183,16 @@ class InputValidator:
                 enc_columns.append(i)
                 feature_types.append('categorical')
             elif not np.issubdtype(X[column].dtype, np.number):
-                if X[column].dtype.name == 'Object':
+                if X[column].dtype.name == 'object':
                     raise ValueError(
                         "Input Column {} has invalid type object. "
-                        "Cast it to a numerical value before using it in Auto-Sklearn."
-                        "You can use pandas.to_numeric() to do this".format(
+                        "Cast it to a valid dtype before using it in Auto-Sklearn. "
+                        "Valid types are numerical, categorical or boolean. "
+                        "You can cast it to a valid dtype using "
+                        "pandas.Series.astype ."
+                        "If working with string objects, the following "
+                        "tutorial illustrates how to work with text data: "
+                        "https://scikit-learn.org/stable/tutorial/text_analytics/working_with_text_data.html".format(  # noqa: E501
                             column,
                         )
                     )
@@ -161,11 +200,10 @@ class InputValidator:
                     X[column].dtype
                 ):
                     raise ValueError(
-                        "Input Column {} has invalid time-type. "
-                        "Please convert the time information to a categorical value. "
-                        "Usually, time information can be separated into a set of categorical "
-                        "features. For example, hour of the day can be converted to 24 "
-                        " categories.".format(
+                        "Auto-sklearn does not support time and/or date datatype as given "
+                        "in column {}. Please convert the time information to a numerical value "
+                        "first. One example on how to do this can be found on "
+                        "https://stats.stackexchange.com/questions/311494/".format(
                             column,
                         )
                     )
@@ -181,6 +219,19 @@ class InputValidator:
                     )
             else:
                 feature_types.append('numerical')
+        return enc_columns, feature_types
+
+    def _validate_dataframe_features(
+        self,
+        X: pd.DataFrame,
+    ) -> Union[pd.DataFrame, np.ndarray]:
+        """
+        Interprets a Pandas
+        Uses .iloc as a safe way to deal with pandas object
+        """
+
+        # Start with the features
+        enc_columns, feature_types = self._check_and_get_columns_to_encode(X)
 
         # Make sure we only set this once. It should not change
         if not self.feature_types:
@@ -192,30 +243,21 @@ class InputValidator:
         if enc_columns:
             if self.enc_columns and self.enc_columns != enc_columns:
                 raise ValueError(
-                    "Validation was already performed on input with enc columns={} "
-                    "yet, another set of features with columns to encode={} was "
-                    "provided. Feature changing after fit is not allowed.".format(
+                    "Changing the column-types of the input data to Auto-Sklearn is not "
+                    "allowed. The estimator previously was fitted with categorical/boolean "
+                    "columns {}, yet, the new input data has categorical/boolean values {}. "
+                    "Please recreate the estimator from scratch when changing the input "
+                    "data. ".format(
+                        self.enc_columns,
                         enc_columns,
-                        self.enc_columns
                     )
                 )
             else:
                 self.enc_columns = enc_columns
 
             if not self.feature_encoder:
-                if self.feature_encoder_type == 'OneHotEncoder':
-                    encoder = preprocessing.OneHotEncoder(sparse=False)
-                elif self.feature_encoder_type == 'OrdinalEncoder':
-                    encoder = preprocessing.OrdinalEncoder()
-                else:
-                    raise ValueError(
-                        "Unsupported feature encoder provided {}".format(
-                            self.feature_encoder_type
-                        )
-                    )
-
                 self.feature_encoder = make_column_transformer(
-                    (encoder, self.enc_columns),
+                    (preprocessing.OrdinalEncoder(), self.enc_columns),
                     remainder="passthrough"
                 )
 
@@ -224,9 +266,25 @@ class InputValidator:
         if self.feature_encoder:
             X = self.feature_encoder.transform(X)
 
+        # In code check to make sure everything is numeric
+        if hasattr(X, "iloc"):
+            is_number = np.vectorize(lambda x: np.issubdtype(x, np.number))
+            if not np.all(is_number(X.dtypes)):
+                raise ValueError(
+                    "Failed to convert the input dataframe to numerical dtypes: {}".format(
+                        X.dtypes
+                    )
+                )
+        elif not np.issubdtype(X.dtype, np.number):
+            raise ValueError(
+                "Failed to convert the input dataframe to numerical dtype: {}".format(
+                    X.dtype
+                )
+            )
+
         return X
 
-    def _validate_dataframe_target(
+    def _check_and_encode_target(
         self,
         y: Union[pd.DataFrame, np.ndarray],
     ) -> Union[pd.DataFrame, np.ndarray]:
@@ -234,11 +292,8 @@ class InputValidator:
         This method encodes
         categorical series to a numerical equivalent.
 
-        No change to numerical values.
+        An ordinal encoder is used for the translation
 
-        Dataframes with more than 1 column are ambiguous because
-        two column could be a label or multilabel. Force the user
-        to use numerical encoding via sklearn checks
         """
 
         # Convert pd.Series to dataframe as categorical series
@@ -246,42 +301,39 @@ class InputValidator:
         if isinstance(y, pd.Series):
             y = y.to_frame().reset_index(drop=True)
 
-        # handle categorical encoding of a Dataframes
-        # with a single column
-        # A dataframe target with multiple columns is ambiguous
-        # We don't know if all columns should share same encoding
-        # or Not
+        if hasattr(y, "iloc"):
+            self._check_and_get_columns_to_encode(y)
 
-        if y.ndim == 2 and y.shape[1] == 1:
-            if y.dtypes[0].name in self.valid_pd_enc_dtypes:
-                if self.target_encoder_type == 'OneHotEncoder':
-                    self.target_encoder = preprocessing.OneHotEncoder(sparse=False)
-                elif self.target_encoder_type == 'OrdinalEncoder':
-                    self.target_encoder = preprocessing.OrdinalEncoder()
-                elif self.target_encoder_type == 'LabelEncoder':
-                    self.target_encoder = preprocessing.LabelEncoder()
-                else:
-                    raise ValueError(
-                        "Unsupported feature encoder provided {}".format(
-                            self.target_encoder_type
-                        )
-                    )
-                self.target_encoder.fit(y.values.reshape(-1, 1))
-            elif not np.issubdtype(y.dtypes[0], np.number):
-                raise ValueError(
-                    "Target Series y has unsupported dtype {}. "
-                    "Supported column types are categorical/bool/numerical dtypes. "
-                    "Make sure your data is formatted in a correct way, "
-                    "before feeding it to Auto-Sklearn.".format(
-                        y.dtypes[0].name,
-                    )
+        if not self.target_encoder:
+            if y.ndim == 1 or (y.ndim > 1 and y.shape[1] == 1):
+                # The label encoder makes sure data is, and remains
+                # 1 dimensional
+                self.target_encoder = preprocessing.LabelEncoder()
+            else:
+                self.target_encoder = make_column_transformer(
+                    (preprocessing.OrdinalEncoder(), list(range(y.shape[1]))),
                 )
-            if self.target_encoder:
-                y = self.target_encoder.transform(y)
+
+            self.target_encoder.fit(y)
+
+        y = self.target_encoder.transform(y)
 
         return y
 
-    def decode(
+    def encode_target(
+        self,
+        y: np.ndarray,
+    ) -> np.ndarray:
+        """
+        Encodes the target if there is any encoder
+        """
+        if self.target_encoder is None:
+            return y
+        else:
+
+            return self.target_encoder.transform(y)
+
+    def decode_target(
         self,
         y: np.ndarray,
     ) -> np.ndarray:
@@ -291,7 +343,10 @@ class InputValidator:
         to decode the original features
         """
         if self.target_encoder is None:
-            raise ValueError(
-                "No point in calling decode when the input y was not encoded"
-            )
-        return self.target_encoder.inverse_transform(y)
+            return y
+
+        # Handle different ndim encoder for target
+        if hasattr(self.target_encoder, 'inverse_transform'):
+            return self.target_encoder.inverse_transform(y)
+        else:
+            return self.target_encoder.named_transformers_['ordinalencoder'].inverse_transform(y)

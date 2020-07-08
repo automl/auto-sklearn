@@ -2,13 +2,14 @@
 import io
 import json
 import os
-from typing import Optional, List
+from typing import Optional, List, Union
 import unittest.mock
 import warnings
 
 from ConfigSpace.read_and_write import pcs
 import numpy as np
 import numpy.ma as ma
+import pandas as pd
 import scipy.stats
 from sklearn.base import BaseEstimator
 from sklearn.model_selection._split import _RepeatedSplits, \
@@ -284,10 +285,6 @@ class AutoML(BaseEstimator):
         only_return_configuration_space: Optional[bool] = False,
         load_models: bool = True,
     ):
-        # Input validation, and hence transformation happens in the
-        # Estimator.
-        # Make sure that input is valid
-        X, y = self.InputValidator.validate(X, y)
 
         # Reset learnt stuff
         self.models_ = None
@@ -523,7 +520,7 @@ class AutoML(BaseEstimator):
 
     def refit(self, X, y):
 
-        # Make sure that input is valid
+        # Make sure input data is valid
         X, y = self.InputValidator.validate(X, y)
 
         if self.models_ is None or len(self.models_) == 0 or self.ensemble_ is None:
@@ -657,9 +654,6 @@ class AutoML(BaseEstimator):
         if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit']:
             raise ValueError('Cannot call fit_ensemble with resampling '
                              'strategy %s.' % self._resampling_strategy)
-
-        # Make sure that input is valid
-        y = self.InputValidator.validate_target(y)
 
         if self._logger is None:
             self._logger = self._get_logger(dataset_name)
@@ -801,6 +795,13 @@ class AutoML(BaseEstimator):
         X, y = self.InputValidator.validate(X, y)
 
         prediction = self.predict(X)
+
+        # Prediction on classification needs to be decoded for score
+        # That is, when doing bool/categorical predictions, a categorical
+        # prediction is returned by the estimator, yet we compare a
+        # numerical metric
+        prediction = self.InputValidator.encode_target(prediction)
+
         return calculate_score(solution=y,
                                prediction=prediction,
                                task_type=self._task,
@@ -983,29 +984,13 @@ class BaseAutoML(AutoML):
     regression and classification."""
 
     def __init__(self, *args, **kwargs):
-        self._n_outputs = 1
         super().__init__(*args, **kwargs)
-
-    def refit(self, X, y):
-        # Make sure that input is valid
-        X, y = self.InputValidator.validate(X, y)
-
-        _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
-        if self._n_outputs != _n_outputs:
-            raise ValueError('Number of outputs changed from %d to %d!' %
-                             (self._n_outputs, _n_outputs))
-
-        return super().refit(X, y)
 
     def fit_ensemble(self, y, task=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
         # Make sure that input is valid
         y = self.InputValidator.validate_target(y)
-        _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
-        if self._n_outputs != _n_outputs:
-            raise ValueError('Number of outputs changed from %d to %d!' %
-                             (self._n_outputs, _n_outputs))
 
         return super().fit_ensemble(
             y, task=task, precision=precision,
@@ -1024,17 +1009,19 @@ class AutoMLClassifier(BaseAutoML):
 
     def fit(
         self,
-        X: np.ndarray,
-        y: np.ndarray,
-        X_test: Optional[np.ndarray] = None,
-        y_test: Optional[np.ndarray] = None,
+        X: Union[np.ndarray, pd.DataFrame],
+        y: Union[np.ndarray, pd.DataFrame],
+        X_test: Union[np.ndarray, pd.DataFrame] = None,
+        y_test: Union[np.ndarray, pd.DataFrame] = None,
         feat_type: Optional[List[bool]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
     ):
         # Make sure that input is valid
-        X, y = self.InputValidator.validate(X, y)
+        # Performs Ordinal one hot encoding to the target
+        # both for train and test data
+        X, y = self.InputValidator.validate(X, y, is_classification=True)
         if X_test is not None:
             X_test, y_test = self.InputValidator.validate(X_test, y_test)
             if len(y.shape) != len(y_test.shape):
@@ -1052,22 +1039,6 @@ class AutoMLClassifier(BaseAutoML):
             else:
                 self._metric = accuracy
 
-        y, self._classes, self._n_classes = self._process_target_classes(y)
-        if y_test is not None:
-            # Map test values to actual values - TODO: copy to all kinds of
-            # other parts in this code and test it!!!
-            y_test_new = []
-            for output_idx in range(len(self._classes)):
-                mapping = {self._classes[output_idx][idx]: idx
-                           for idx in range(len(self._classes[output_idx]))}
-                enumeration = y_test if len(self._classes) == 1 else y_test[output_idx]
-                y_test_new.append(
-                    np.array([mapping[value] for value in enumeration])
-                )
-            y_test = np.array(y_test_new)
-            if self._n_outputs == 1:
-                y_test = y_test.flatten()
-
         return super().fit(
             X, y,
             X_test=X_test,
@@ -1079,62 +1050,16 @@ class AutoMLClassifier(BaseAutoML):
             load_models=load_models,
         )
 
-    def fit_ensemble(self, y, task=None, precision=32,
-                     dataset_name=None, ensemble_nbest=None,
-                     ensemble_size=None):
-        # Make sure that input is valid
-        y = self.InputValidator.validate_target(y)
-        y, _classes, _n_classes = self._process_target_classes(y)
-        if not hasattr(self, '_classes'):
-            self._classes = _classes
-        if not hasattr(self, '_n_classes'):
-            self._n_classes = _n_classes
-
-        return super().fit_ensemble(y, task, precision, dataset_name,
-                                    ensemble_nbest, ensemble_size)
-
-    def _process_target_classes(self, y):
-        self._n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
-
-        y = np.copy(y)
-
-        _classes = []
-        _n_classes = []
-
-        if self._n_outputs == 1:
-            classes_k, y = np.unique(y, return_inverse=True)
-            _classes.append(classes_k)
-            _n_classes.append(classes_k.shape[0])
-        else:
-            for k in range(self._n_outputs):
-                classes_k, y[:, k] = np.unique(y[:, k], return_inverse=True)
-                _classes.append(classes_k)
-                _n_classes.append(classes_k.shape[0])
-
-        _n_classes = np.array(_n_classes, dtype=np.int)
-
-        return y, _classes, _n_classes
-
     def predict(self, X, batch_size=None, n_jobs=1):
         predicted_probabilities = super().predict(X, batch_size=batch_size,
                                                   n_jobs=n_jobs)
 
-        if self._n_outputs == 1:
+        if self.InputValidator.is_single_column_target() == 1:
             predicted_indexes = np.argmax(predicted_probabilities, axis=1)
-            predicted_classes = self._classes[0].take(predicted_indexes)
-
-            return predicted_classes
         else:
-            predicted_indices = (predicted_probabilities > 0.5).astype(int)
-            n_samples = predicted_probabilities.shape[0]
-            predicted_classes = np.zeros((n_samples, self._n_outputs))
+            predicted_indexes = (predicted_probabilities > 0.5).astype(int)
 
-            for k in range(self._n_outputs):
-                output_predicted_indexes = predicted_indices[:, k].reshape(-1)
-                predicted_classes[:, k] = self._classes[k].take(
-                    output_predicted_indexes)
-
-            return predicted_classes
+        return self.InputValidator.decode_target(predicted_indexes)
 
     def predict_proba(self, X, batch_size=None, n_jobs=1):
         return super().predict(X, batch_size=batch_size, n_jobs=n_jobs)
@@ -1149,10 +1074,10 @@ class AutoMLRegressor(BaseAutoML):
 
     def fit(
         self,
-        X: np.ndarray,
-        y: np.ndarray,
-        X_test: Optional[np.ndarray] = None,
-        y_test: Optional[np.ndarray] = None,
+        X: Union[np.ndarray, pd.DataFrame],
+        y: Union[np.ndarray, pd.DataFrame],
+        X_test: Union[np.ndarray, pd.DataFrame] = None,
+        y_test: Union[np.ndarray, pd.DataFrame] = None,
         feat_type: Optional[List[bool]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
@@ -1179,9 +1104,3 @@ class AutoMLRegressor(BaseAutoML):
             only_return_configuration_space=only_return_configuration_space,
             load_models=load_models,
         )
-
-    def fit_ensemble(self, y, task=None, precision=32,
-                     dataset_name=None, ensemble_nbest=None,
-                     ensemble_size=None):
-        return super().fit_ensemble(y, task, precision, dataset_name,
-                                    ensemble_nbest, ensemble_size)

@@ -516,7 +516,6 @@ class EstimatorTest(Base, unittest.TestCase):
 class AutoMLClassifierTest(Base, unittest.TestCase):
     @unittest.mock.patch('autosklearn.automl.AutoML.predict')
     def test_multiclass_prediction(self, predict_mock):
-        classes = [['a', 'b', 'c']]
         predicted_probabilities = [[0, 0, 0.99], [0, 0.99, 0], [0.99, 0, 0],
                                    [0, 0.99, 0], [0, 0, 0.99]]
         predicted_indexes = [2, 1, 0, 1, 2]
@@ -529,9 +528,10 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
             per_run_time_limit=1,
             backend=None,
         )
-        classifier._classes = [np.array(classes)]
-        classifier._n_outputs = 1
-        classifier._n_classes = np.array([3])
+        classifier.InputValidator.validate_target(
+            pd.DataFrame(expected_result, dtype='category'),
+            is_classification=True,
+        )
 
         actual_result = classifier.predict([None] * len(predicted_indexes))
 
@@ -539,7 +539,6 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
     @unittest.mock.patch('autosklearn.automl.AutoML.predict')
     def test_multilabel_prediction(self, predict_mock):
-        classes = [[1, 2], [13, 17]]
         predicted_probabilities = [[0.99, 0],
                                    [0.99, 0],
                                    [0, 0.99],
@@ -555,9 +554,10 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
             per_run_time_limit=1,
             backend=None,
         )
-        classifier._classes = list(map(np.array, classes))
-        classifier._n_outputs = 2
-        classifier._n_classes = np.array([3, 2])
+        classifier.InputValidator.validate_target(
+            pd.DataFrame(expected_result, dtype='int64'),
+            is_classification=True,
+        )
 
         actual_result = classifier.predict([None] * len(predicted_indexes))
 
@@ -668,18 +668,20 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         self.assertIsInstance(fit.call_args[0][1], np.ndarray)
         automl.refit(X, y)
         self.assertEqual(refit.call_count, 1)
-        self.assertIsInstance(refit.call_args[0][0], np.ndarray)
-        self.assertIsInstance(refit.call_args[0][1], np.ndarray)
         automl.fit_ensemble(y)
         self.assertEqual(fit_ensemble.call_count, 1)
         self.assertIsInstance(fit_ensemble.call_args[0][0], np.ndarray)
 
     def test_classification_pandas_support(self):
         X, y = sklearn.datasets.fetch_openml(
-            data_id=37,  # diabetes
+            data_id=2,  # diabetes
             return_X_y=True,
             as_frame=True,
         )
+
+        # Drop NAN!!
+        X = X.dropna('columns')
+
         # This test only make sense if input is dataframe
         self.assertTrue(isinstance(X, pd.DataFrame))
         self.assertTrue(isinstance(y, pd.Series))
@@ -698,8 +700,9 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
         # Make sure that at least better than random.
         # accuracy in sklearn needs valid data
-        y = automl._automl[0].InputValidator.validate_target(y)
-        self.assertTrue(accuracy(y, automl.predict(X)) > 0.5)
+        y = automl._automl[0].InputValidator.encode_target(y)
+        prediction = automl._automl[0].InputValidator.encode_target(automl.predict(X))
+        self.assertTrue(accuracy(y, prediction) > 0.5)
 
 
 class AutoMLRegressorTest(Base, unittest.TestCase):
@@ -735,8 +738,6 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         self.assertIsInstance(fit.call_args[0][1], np.ndarray)
         automl.refit(X, y)
         self.assertEqual(refit.call_count, 1)
-        self.assertIsInstance(refit.call_args[0][0], np.ndarray)
-        self.assertIsInstance(refit.call_args[0][1], np.ndarray)
         automl.fit_ensemble(y)
         self.assertEqual(fit_ensemble.call_count, 1)
         self.assertIsInstance(fit_ensemble.call_args[0][0], np.ndarray)
