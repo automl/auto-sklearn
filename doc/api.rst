@@ -17,6 +17,10 @@ Classification
     :members:
     :inherited-members: show_models, fit_ensemble, refit, sprint_statistics
 
+.. autoclass:: autosklearn.experimental.AutoSklearn2Classifier
+    :inherited-members: show_models, fit_ensemble, refit, sprint_statistics, fit, predict, predict_proba
+
+
 ~~~~~~~~~~
 Regression
 ~~~~~~~~~~
