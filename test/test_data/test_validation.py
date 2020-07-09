@@ -91,6 +91,14 @@ class InputValidatorTest(unittest.TestCase):
                 pd.DataFrame({'string': ['foo']})
             )
 
+        X = pd.DataFrame(data=['a', 'b', 'c'], dtype='category')
+        with unittest.mock.patch('autosklearn.data.validation.InputValidator._check_and_get_columns_to_encode') as mock_foo:  # noqa E501
+            # Mock that all columns are ok. There should be a
+            # checker to catch for bugs
+            mock_foo.return_value = ([], [])
+            with self.assertRaisesRegex(ValueError, 'Failed to convert the input'):
+                validator.validate_features(X)
+
     def test_dataframe_econding_1D(self):
         validator = InputValidator()
         y = validator.validate_target(

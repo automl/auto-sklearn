@@ -126,7 +126,7 @@ class InputValidator:
 
         # In code check to make sure everything is numeric
         if hasattr(y, "iloc"):
-            is_number = np.vectorize(lambda x: np.issubdtype(x, np.number))
+            is_number = np.vectorize(lambda x: pd.api.types.is_numeric_dtype(x))
             if not np.all(is_number(y.dtypes)):
                 raise ValueError(
                     "Input dataframe to autosklearn must only contain numerical"
@@ -268,7 +268,7 @@ class InputValidator:
 
         # In code check to make sure everything is numeric
         if hasattr(X, "iloc"):
-            is_number = np.vectorize(lambda x: np.issubdtype(x, np.number))
+            is_number = np.vectorize(lambda x: pd.api.types.is_numeric_dtype(x))
             if not np.all(is_number(X.dtypes)):
                 raise ValueError(
                     "Failed to convert the input dataframe to numerical dtypes: {}".format(

@@ -986,8 +986,6 @@ class BaseAutoML(AutoML):
     def fit_ensemble(self, y, task=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
-        # Make sure that input is valid
-        y = self.InputValidator.validate_target(y)
 
         return super().fit_ensemble(
             y, task=task, precision=precision,
@@ -1047,6 +1045,18 @@ class AutoMLClassifier(BaseAutoML):
             load_models=load_models,
         )
 
+    def fit_ensemble(self, y, task=None, precision=32,
+                     dataset_name=None, ensemble_nbest=None,
+                     ensemble_size=None):
+        # Make sure that input is valid
+        y = self.InputValidator.validate_target(y, is_classification=True)
+
+        return super().fit_ensemble(
+            y, task=task, precision=precision,
+            dataset_name=dataset_name, ensemble_nbest=ensemble_nbest,
+            ensemble_size=ensemble_size
+        )
+
     def predict(self, X, batch_size=None, n_jobs=1):
         predicted_probabilities = super().predict(X, batch_size=batch_size,
                                                   n_jobs=n_jobs)
@@ -1100,4 +1110,16 @@ class AutoMLRegressor(BaseAutoML):
             dataset_name=dataset_name,
             only_return_configuration_space=only_return_configuration_space,
             load_models=load_models,
+        )
+
+    def fit_ensemble(self, y, task=None, precision=32,
+                     dataset_name=None, ensemble_nbest=None,
+                     ensemble_size=None):
+        # Make sure that input is valid
+        y = self.InputValidator.validate_target(y)
+
+        return super().fit_ensemble(
+            y, task=task, precision=precision,
+            dataset_name=dataset_name, ensemble_nbest=ensemble_nbest,
+            ensemble_size=ensemble_size
         )
