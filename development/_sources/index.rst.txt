@@ -32,7 +32,7 @@ the technology behind *auto-sklearn* by reading our paper published at
 
     >>> from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 
-A paper describing our advances will be available on arXiv.org soon.
+A paper describing our advances is available on `arXiv <https://arxiv.org/abs/2007.04074>`_.
 
 Example
 *******

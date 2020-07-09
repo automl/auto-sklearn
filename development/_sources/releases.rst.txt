@@ -17,6 +17,12 @@ Version 0.8
 * ADD #803: multi-output regression
 * ADD #893: new Auto-sklearn mode Auto-sklearn 2.0
 
+Contributors
+************
+
+* Chu-Cheng Fu
+* Matthias Feurer
+
 Version 0.7.1
 =============
 
