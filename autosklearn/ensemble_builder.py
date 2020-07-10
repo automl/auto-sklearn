@@ -42,7 +42,7 @@ class EnsembleBuilder(multiprocessing.Process):
             seed: int = 1,
             shared_mode: bool = False,
             max_iterations: int = None,
-            precision: str = 32,
+            precision: int = 32,
             sleep_duration: int = 2,
             memory_limit: int = 1000,
             read_at_most: int = 5,

@@ -62,10 +62,19 @@ class EnsembleSelection(AbstractEnsemble):
 
         ensemble_size = self.ensemble_size
 
-        weighted_ensemble_prediction = np.zeros(predictions[0].shape)
-        fant_ensemble_prediction = np.zeros(weighted_ensemble_prediction.shape)
+        weighted_ensemble_prediction = np.zeros(
+            predictions[0].shape,
+            dtype=np.float64,
+        )
+        fant_ensemble_prediction = np.zeros(
+            weighted_ensemble_prediction.shape,
+            dtype=np.float64,
+        )
         for i in range(ensemble_size):
-            scores = np.zeros((len(predictions)))
+            scores = np.zeros(
+                (len(predictions)),
+                dtype=np.float64,
+            )
             s = len(ensemble)
             if s == 0:
                 weighted_ensemble_prediction.fill(0.0)
@@ -135,7 +144,10 @@ class EnsembleSelection(AbstractEnsemble):
         ensemble_size = self.ensemble_size
 
         for i in range(ensemble_size):
-            scores = np.zeros([predictions.shape[0]])
+            scores = np.zeros(
+                [predictions.shape[0]],
+                dtype=np.float64,
+            )
             for j, pred in enumerate(predictions):
                 ensemble.append(pred)
                 ensemble_prediction = np.mean(np.array(ensemble), axis=0)
@@ -155,13 +167,22 @@ class EnsembleSelection(AbstractEnsemble):
             if len(predictions) == 1:
                 break
 
-        self.indices_ = np.array(order)
-        self.trajectory_ = np.array(trajectory)
+        self.indices_ = np.array(
+            order,
+            dtype=np.int64,
+        )
+        self.trajectory_ = np.array(
+            trajectory,
+            dtype=np.float64,
+        )
         self.train_score_ = trajectory[-1]
 
     def _calculate_weights(self):
         ensemble_members = Counter(self.indices_).most_common()
-        weights = np.zeros((self.num_input_models_,), dtype=float)
+        weights = np.zeros(
+            (self.num_input_models_,),
+            dtype=np.float64,
+        )
         for ensemble_member in ensemble_members:
             weight = float(ensemble_member[1]) / self.ensemble_size
             weights[ensemble_member[0]] = weight
@@ -185,10 +206,16 @@ class EnsembleSelection(AbstractEnsemble):
             order, _ = self._fit(bag, labels)
             order_of_each_bag.append(order)
 
-        return np.array(order_of_each_bag)
+        return np.array(
+            order_of_each_bag,
+            dtype=np.int64,
+        )
 
     def predict(self, predictions):
-        predictions = np.asarray(predictions)
+        predictions = np.asarray(
+            predictions,
+            dtype=np.float64,
+        )
 
         # if predictions.shape[0] == len(self.weights_),
         # predictions include those of zero-weight models.
