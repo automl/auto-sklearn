@@ -22,7 +22,8 @@ http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning
 
 Auto-Sklearn 2.0: The Next Generation  
 Authors: Matthias Feurer, Katharina Eggensperger, Stefan Falkner, Marius Lindauer and Frank Hutter  
-To appear
+arXiv:2007.04074 [cs.LG], 2020
+https://arxiv.org/abs/2007.04074
 
 ## Status
 
