@@ -25,6 +25,17 @@ with open(os.path.join(HERE, 'requirements.txt')) as fp:
     install_reqs = [r.rstrip() for r in fp.readlines()
                     if not r.startswith('#') and not r.startswith('git+')]
 
+extras_reqs={
+    "test": [
+        "pytest>=4.6",
+        "pytest-xdist",
+        "pytest-timeout",
+        "flaky",
+        "pytest-cov",
+
+    ]
+}
+
 with open("autosklearn/__version__.py") as fh:
     version = fh.readlines()[-1].split()[-1].strip("\"'")
 
@@ -43,6 +54,7 @@ setup(
     version=version,
     packages=find_packages(exclude=['test', 'scripts', 'examples']),
     setup_requires=setup_reqs,
+    extras_require=extras_reqs,
     install_requires=install_reqs,
     include_package_data=True,
     license='BSD',
