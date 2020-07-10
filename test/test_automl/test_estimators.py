@@ -674,7 +674,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
     def test_classification_pandas_support(self):
         X, y = sklearn.datasets.fetch_openml(
-            data_id=2,  # diabetes
+            data_id=40981,  # cat/num Australian
             return_X_y=True,
             as_frame=True,
         )
@@ -685,21 +685,25 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         # This test only make sense if input is dataframe
         self.assertTrue(isinstance(X, pd.DataFrame))
         self.assertTrue(isinstance(y, pd.Series))
+        print(f"Got here")
         automl = AutoSklearnClassifier(
             time_left_for_this_task=30,
             per_run_time_limit=5,
         )
 
+        print(f"Got there")
         automl.fit(X, y)
 
         # Make sure that at least better than random.
         # We use same X_train==X_test to test code quality
         self.assertTrue(automl.score(X, y) > 0.5)
 
+        print(f"Got uthere")
         automl.refit(X, y)
 
         # Make sure that at least better than random.
         # accuracy in sklearn needs valid data
+        print(f"Got vthere")
         y = automl._automl[0].InputValidator.encode_target(y)
         prediction = automl._automl[0].InputValidator.encode_target(automl.predict(X))
         self.assertTrue(accuracy(y, prediction) > 0.5)
