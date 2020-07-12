@@ -193,62 +193,70 @@ Build and fit the classifier
  .. code-block:: none
 
     Starting to build an ensemble!
-    [WARNING] [2020-07-11 21:52:33,896:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,897:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,897:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,897:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,898:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,898:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,899:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,899:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,900:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,900:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,900:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,901:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,901:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,902:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,902:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,902:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,903:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,903:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,903:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,904:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,904:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,905:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,905:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,905:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,906:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,906:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,907:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,907:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,907:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,908:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,908:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,909:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,909:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,909:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,909:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,909:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,909:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,909:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,909:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,909:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,909:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,910:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,910:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,910:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,910:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,910:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,910:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,910:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,910:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,910:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,910:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,910:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,911:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,911:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,911:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-07-11 21:52:33,911:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,549:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,550:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,551:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,551:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,551:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,552:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,552:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,553:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,553:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,553:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,554:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,554:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,554:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,555:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,555:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,556:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,556:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,557:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,557:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,557:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,558:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,558:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,558:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,559:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,559:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,560:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,560:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,560:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,561:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,561:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,562:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,562:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,562:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,563:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,564:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,564:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,564:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,564:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,564:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,564:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,564:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,564:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,564:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,564:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,565:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,565:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,565:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,565:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,565:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,565:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,565:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,565:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,565:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,565:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,565:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,566:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,566:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,566:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,566:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,566:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,566:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,566:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,566:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-07-12 21:52:54,566:EnsembleBuilder(1):digits] Interpreted str-precision as 32
 
     AutoSklearnClassifier(delete_output_folder_after_terminate=False,
                           delete_tmp_folder_after_terminate=False,
@@ -290,7 +298,7 @@ Report the score of the final ensemble
 
  .. code-block:: none
 
-    [(0.150000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'passive_aggressive', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:passive_aggressive:C': 0.0025284431286285098, 'classifier:passive_aggressive:average': 'False', 'classifier:passive_aggressive:fit_intercept': 'True', 'classifier:passive_aggressive:loss': 'hinge', 'classifier:passive_aggressive:tol': 0.000940728104940636, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0001748471161975719},
+    [(0.100000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'passive_aggressive', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:passive_aggressive:C': 0.0025284431286285098, 'classifier:passive_aggressive:average': 'False', 'classifier:passive_aggressive:fit_intercept': 'True', 'classifier:passive_aggressive:loss': 'hinge', 'classifier:passive_aggressive:tol': 0.000940728104940636, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0001748471161975719},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -298,7 +306,7 @@ Report the score of the final ensemble
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.100000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'sgd', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:sgd:alpha': 0.00039927077813935847, 'classifier:sgd:average': 'True', 'classifier:sgd:fit_intercept': 'True', 'classifier:sgd:learning_rate': 'constant', 'classifier:sgd:loss': 'log', 'classifier:sgd:penalty': 'l1', 'classifier:sgd:tol': 2.3026724800524452e-05, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0005751185552832477, 'classifier:sgd:eta0': 0.0002226431182528295},
+    (0.100000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'liblinear_svc_preprocessor', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.31482574716831474, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 15, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'feature_preprocessor:liblinear_svc_preprocessor:C': 1.0, 'feature_preprocessor:liblinear_svc_preprocessor:dual': 'False', 'feature_preprocessor:liblinear_svc_preprocessor:fit_intercept': 'True', 'feature_preprocessor:liblinear_svc_preprocessor:intercept_scaling': 1, 'feature_preprocessor:liblinear_svc_preprocessor:loss': 'squared_hinge', 'feature_preprocessor:liblinear_svc_preprocessor:multi_class': 'ovr', 'feature_preprocessor:liblinear_svc_preprocessor:penalty': 'l1', 'feature_preprocessor:liblinear_svc_preprocessor:tol': 5.5234897124903465e-05},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -306,7 +314,7 @@ Report the score of the final ensemble
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.100000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01},
+    (0.100000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'sgd', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'feature_preprocessor:__choice__': 'pca', 'classifier:sgd:alpha': 2.722748550306871e-05, 'classifier:sgd:average': 'True', 'classifier:sgd:fit_intercept': 'True', 'classifier:sgd:learning_rate': 'constant', 'classifier:sgd:loss': 'hinge', 'classifier:sgd:penalty': 'elasticnet', 'classifier:sgd:tol': 2.8379181449158643e-05, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.02237069237299988, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max': 0.8953635695610596, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min': 0.2655030414609918, 'feature_preprocessor:pca:keep_variance': 0.5365823062890427, 'feature_preprocessor:pca:whiten': 'True', 'classifier:sgd:eta0': 3.3349247095699437e-06, 'classifier:sgd:l1_ratio': 1.077193110152558e-09},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -314,7 +322,7 @@ Report the score of the final ensemble
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.100000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'passive_aggressive', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:__choice__': 'kitchen_sinks', 'classifier:passive_aggressive:C': 0.4177635558897493, 'classifier:passive_aggressive:average': 'True', 'classifier:passive_aggressive:fit_intercept': 'True', 'classifier:passive_aggressive:loss': 'hinge', 'classifier:passive_aggressive:tol': 0.00036622547004230247, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.3298639925115399, 'feature_preprocessor:kitchen_sinks:gamma': 0.02443001336430177, 'feature_preprocessor:kitchen_sinks:n_components': 7802},
+    (0.100000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'adaboost', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'select_percentile_classification', 'classifier:adaboost:algorithm': 'SAMME', 'classifier:adaboost:learning_rate': 0.3611232856502331, 'classifier:adaboost:max_depth': 3, 'classifier:adaboost:n_estimators': 235, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.00017445320065443738, 'feature_preprocessor:select_percentile_classification:percentile': 15.763128036885705, 'feature_preprocessor:select_percentile_classification:score_func': 'chi2'},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -322,7 +330,7 @@ Report the score of the final ensemble
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.100000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'libsvm_svc', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'feature_preprocessor:__choice__': 'select_rates', 'classifier:libsvm_svc:C': 114.37037237306517, 'classifier:libsvm_svc:gamma': 0.013196149743002957, 'classifier:libsvm_svc:kernel': 'rbf', 'classifier:libsvm_svc:max_iter': -1, 'classifier:libsvm_svc:shrinking': 'False', 'classifier:libsvm_svc:tol': 2.2119982336561568e-05, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.030600209348810598, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max': 0.8903774541072713, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min': 0.14849508114407797, 'feature_preprocessor:select_rates:alpha': 0.10727720089253716, 'feature_preprocessor:select_rates:mode': 'fwe', 'feature_preprocessor:select_rates:score_func': 'f_classif'},
+    (0.100000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'feature_preprocessor:__choice__': 'polynomial', 'classifier:random_forest:bootstrap': 'False', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.17441006141098558, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 13, 'classifier:random_forest:min_samples_split': 12, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0016408141075143646, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max': 0.8774789540039492, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min': 0.05163964528378324, 'feature_preprocessor:polynomial:degree': 2, 'feature_preprocessor:polynomial:include_bias': 'False', 'feature_preprocessor:polynomial:interaction_only': 'False'},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -330,7 +338,7 @@ Report the score of the final ensemble
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.050000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:random_forest:bootstrap': 'False', 'classifier:random_forest:criterion': 'entropy', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.14699663235614766, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 7, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.010362166964374616, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 1023, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'uniform'},
+    (0.050000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'sgd', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:sgd:alpha': 0.00039927077813935847, 'classifier:sgd:average': 'True', 'classifier:sgd:fit_intercept': 'True', 'classifier:sgd:learning_rate': 'constant', 'classifier:sgd:loss': 'log', 'classifier:sgd:penalty': 'l1', 'classifier:sgd:tol': 2.3026724800524452e-05, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0005751185552832477, 'classifier:sgd:eta0': 0.0002226431182528295},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -338,7 +346,7 @@ Report the score of the final ensemble
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.050000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'qda', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:qda:reg_param': 0.563056219822946, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.32793677336996485},
+    (0.050000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -346,7 +354,7 @@ Report the score of the final ensemble
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.050000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'gradient_boosting', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'select_rates', 'classifier:gradient_boosting:early_stop': 'off', 'classifier:gradient_boosting:l2_regularization': 2.050858257794119e-10, 'classifier:gradient_boosting:learning_rate': 0.0509713008465305, 'classifier:gradient_boosting:loss': 'auto', 'classifier:gradient_boosting:max_bins': 255, 'classifier:gradient_boosting:max_depth': 'None', 'classifier:gradient_boosting:max_leaf_nodes': 17, 'classifier:gradient_boosting:min_samples_leaf': 16, 'classifier:gradient_boosting:scoring': 'loss', 'classifier:gradient_boosting:tol': 1e-07, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0006772048110168395, 'feature_preprocessor:select_rates:alpha': 0.42719682445182733, 'feature_preprocessor:select_rates:mode': 'fdr', 'feature_preprocessor:select_rates:score_func': 'f_classif'},
+    (0.050000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'passive_aggressive', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:__choice__': 'kitchen_sinks', 'classifier:passive_aggressive:C': 0.4177635558897493, 'classifier:passive_aggressive:average': 'True', 'classifier:passive_aggressive:fit_intercept': 'True', 'classifier:passive_aggressive:loss': 'hinge', 'classifier:passive_aggressive:tol': 0.00036622547004230247, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.3298639925115399, 'feature_preprocessor:kitchen_sinks:gamma': 0.02443001336430177, 'feature_preprocessor:kitchen_sinks:n_components': 7802},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -354,7 +362,7 @@ Report the score of the final ensemble
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.050000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'sgd', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'feature_preprocessor:__choice__': 'pca', 'classifier:sgd:alpha': 2.722748550306871e-05, 'classifier:sgd:average': 'True', 'classifier:sgd:fit_intercept': 'True', 'classifier:sgd:learning_rate': 'constant', 'classifier:sgd:loss': 'hinge', 'classifier:sgd:penalty': 'elasticnet', 'classifier:sgd:tol': 2.8379181449158643e-05, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.02237069237299988, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max': 0.8953635695610596, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min': 0.2655030414609918, 'feature_preprocessor:pca:keep_variance': 0.5365823062890427, 'feature_preprocessor:pca:whiten': 'True', 'classifier:sgd:eta0': 3.3349247095699437e-06, 'classifier:sgd:l1_ratio': 1.077193110152558e-09},
+    (0.050000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'polynomial', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.527652780264615, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.010739139664277112, 'feature_preprocessor:polynomial:degree': 3, 'feature_preprocessor:polynomial:include_bias': 'False', 'feature_preprocessor:polynomial:interaction_only': 'True'},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -362,7 +370,7 @@ Report the score of the final ensemble
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.050000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'gradient_boosting', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:gradient_boosting:early_stop': 'off', 'classifier:gradient_boosting:l2_regularization': 0.6993161849181185, 'classifier:gradient_boosting:learning_rate': 0.44235005157802176, 'classifier:gradient_boosting:loss': 'auto', 'classifier:gradient_boosting:max_bins': 255, 'classifier:gradient_boosting:max_depth': 'None', 'classifier:gradient_boosting:max_leaf_nodes': 270, 'classifier:gradient_boosting:min_samples_leaf': 15, 'classifier:gradient_boosting:scoring': 'loss', 'classifier:gradient_boosting:tol': 1e-07, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0077758033214372},
+    (0.050000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'libsvm_svc', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'feature_preprocessor:__choice__': 'select_rates', 'classifier:libsvm_svc:C': 114.37037237306517, 'classifier:libsvm_svc:gamma': 0.013196149743002957, 'classifier:libsvm_svc:kernel': 'rbf', 'classifier:libsvm_svc:max_iter': -1, 'classifier:libsvm_svc:shrinking': 'False', 'classifier:libsvm_svc:tol': 2.2119982336561568e-05, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.030600209348810598, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max': 0.8903774541072713, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min': 0.14849508114407797, 'feature_preprocessor:select_rates:alpha': 0.10727720089253716, 'feature_preprocessor:select_rates:mode': 'fwe', 'feature_preprocessor:select_rates:score_func': 'f_classif'},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -370,15 +378,7 @@ Report the score of the final ensemble
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.050000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'adaboost', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'select_percentile_classification', 'classifier:adaboost:algorithm': 'SAMME', 'classifier:adaboost:learning_rate': 0.3611232856502331, 'classifier:adaboost:max_depth': 3, 'classifier:adaboost:n_estimators': 235, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.00017445320065443738, 'feature_preprocessor:select_percentile_classification:percentile': 15.763128036885705, 'feature_preprocessor:select_percentile_classification:score_func': 'chi2'},
-    dataset_properties={
-      'task': 1,
-      'sparse': False,
-      'multilabel': False,
-      'multiclass': False,
-      'target_type': 'classification',
-      'signed': False})),
-    (0.050000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'liblinear_svc_preprocessor', 'classifier:random_forest:bootstrap': 'False', 'classifier:random_forest:criterion': 'entropy', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.0014276905808866536, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 20, 'classifier:random_forest:min_samples_split': 16, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.010731585953295115, 'feature_preprocessor:liblinear_svc_preprocessor:C': 13.167511150959719, 'feature_preprocessor:liblinear_svc_preprocessor:dual': 'False', 'feature_preprocessor:liblinear_svc_preprocessor:fit_intercept': 'True', 'feature_preprocessor:liblinear_svc_preprocessor:intercept_scaling': 1, 'feature_preprocessor:liblinear_svc_preprocessor:loss': 'squared_hinge', 'feature_preprocessor:liblinear_svc_preprocessor:multi_class': 'ovr', 'feature_preprocessor:liblinear_svc_preprocessor:penalty': 'l1', 'feature_preprocessor:liblinear_svc_preprocessor:tol': 1.6098240066437894e-05},
+    (0.050000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'lda', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'nystroem_sampler', 'classifier:lda:n_components': 89, 'classifier:lda:shrinkage': 'auto', 'classifier:lda:tol': 0.0819425045156221, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.37737820096945385, 'feature_preprocessor:nystroem_sampler:kernel': 'poly', 'feature_preprocessor:nystroem_sampler:n_components': 1212, 'feature_preprocessor:nystroem_sampler:coef0': 0.5073162154954842, 'feature_preprocessor:nystroem_sampler:degree': 2, 'feature_preprocessor:nystroem_sampler:gamma': 0.004207352122999392},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -402,8 +402,24 @@ Report the score of the final ensemble
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
+    (0.050000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:__choice__': 'random_trees_embedding', 'classifier:random_forest:bootstrap': 'False', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.8776485417904601, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 16, 'classifier:random_forest:min_samples_split': 13, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'feature_preprocessor:random_trees_embedding:bootstrap': 'False', 'feature_preprocessor:random_trees_embedding:max_depth': 7, 'feature_preprocessor:random_trees_embedding:max_leaf_nodes': 'None', 'feature_preprocessor:random_trees_embedding:min_samples_leaf': 1, 'feature_preprocessor:random_trees_embedding:min_samples_split': 10, 'feature_preprocessor:random_trees_embedding:min_weight_fraction_leaf': 1.0, 'feature_preprocessor:random_trees_embedding:n_estimators': 21},
+    dataset_properties={
+      'task': 1,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'classification',
+      'signed': False})),
+    (0.050000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'sgd', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'feature_preprocessor:__choice__': 'kitchen_sinks', 'classifier:sgd:alpha': 0.01816532609359846, 'classifier:sgd:average': 'True', 'classifier:sgd:fit_intercept': 'True', 'classifier:sgd:learning_rate': 'invscaling', 'classifier:sgd:loss': 'log', 'classifier:sgd:penalty': 'l2', 'classifier:sgd:tol': 1.1927420318341e-05, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 747, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'normal', 'feature_preprocessor:kitchen_sinks:gamma': 7.830130720376948, 'feature_preprocessor:kitchen_sinks:n_components': 221, 'classifier:sgd:eta0': 2.3638521375771664e-06, 'classifier:sgd:power_t': 0.15739369251272145},
+    dataset_properties={
+      'task': 1,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'classification',
+      'signed': False})),
     ]
-    Accuracy score 0.965034965034965
+    Accuracy score 0.958041958041958
 
 
 
@@ -411,7 +427,7 @@ Report the score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  3.877 seconds)
+   **Total running time of the script:** ( 1 minutes  6.255 seconds)
 
 
 .. _sphx_glr_download_examples_example_parallel_manual_spawning.py:
