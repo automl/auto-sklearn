@@ -1,5 +1,4 @@
 setuptools
-pytest>=4.6
 Cython
 
 numpy>=1.9.0
