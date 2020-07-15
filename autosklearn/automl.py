@@ -285,6 +285,16 @@ class AutoML(BaseEstimator):
         only_return_configuration_space: Optional[bool] = False,
         load_models: bool = True,
     ):
+        # Make sure that input is valid
+        # Performs Ordinal one hot encoding to the target
+        # both for train and test data
+        X, y = self.InputValidator.validate(X, y)
+
+        if X_test is not None:
+            X_test, y_test = self.InputValidator.validate(X_test, y_test)
+            if len(y.shape) != len(y_test.shape):
+                raise ValueError('Target value shapes do not match: %s vs %s'
+                                 % (y.shape, y_test.shape))
 
         # Reset learnt stuff
         self.models_ = None
@@ -655,6 +665,9 @@ class AutoML(BaseEstimator):
         if self._logger is None:
             self._logger = self._get_logger(dataset_name)
 
+        # Make sure that input is valid
+        y = self.InputValidator.validate_target(y, is_classification=True)
+
         self._proc_ensemble = self._get_ensemble_process(
             1, task, precision, dataset_name, max_iterations=1,
             ensemble_nbest=ensemble_nbest, ensemble_size=ensemble_size)
@@ -793,10 +806,12 @@ class AutoML(BaseEstimator):
 
         prediction = self.predict(X)
 
-        # Prediction on classification needs to be decoded for score
-        # That is, when doing bool/categorical predictions, a categorical
-        # prediction is returned by the estimator, yet we compare a
-        # numerical metric
+        # Encode the prediction using the input validator
+        # We train autosklearn with a encoded version of y,
+        # which is decoded by predict().
+        # Above call to validate() encodes the y given for score()
+        # Below call encodes the prediction, so we compare in the
+        # same representation domain
         prediction = self.InputValidator.encode_target(prediction)
 
         return calculate_score(solution=y,
@@ -976,25 +991,7 @@ class AutoML(BaseEstimator):
         return configuration_space
 
 
-class BaseAutoML(AutoML):
-    """Base class for AutoML objects to hold abstract functions for both
-    regression and classification."""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def fit_ensemble(self, y, task=None, precision=32,
-                     dataset_name=None, ensemble_nbest=None,
-                     ensemble_size=None):
-
-        return super().fit_ensemble(
-            y, task=task, precision=precision,
-            dataset_name=dataset_name, ensemble_nbest=ensemble_nbest,
-            ensemble_size=ensemble_size
-        )
-
-
-class AutoMLClassifier(BaseAutoML):
+class AutoMLClassifier(AutoML):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -1006,24 +1003,19 @@ class AutoMLClassifier(BaseAutoML):
         self,
         X: Union[np.ndarray, pd.DataFrame],
         y: Union[np.ndarray, pd.DataFrame],
-        X_test: Union[np.ndarray, pd.DataFrame] = None,
-        y_test: Union[np.ndarray, pd.DataFrame] = None,
+        X_test: Optional[Union[np.ndarray, pd.DataFrame]] = None,
+        y_test: Optional[Union[np.ndarray, pd.DataFrame]] = None,
         feat_type: Optional[List[bool]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
     ):
-        # Make sure that input is valid
-        # Performs Ordinal one hot encoding to the target
-        # both for train and test data
-        X, y = self.InputValidator.validate(X, y, is_classification=True)
-        if X_test is not None:
-            X_test, y_test = self.InputValidator.validate(X_test, y_test)
-            if len(y.shape) != len(y_test.shape):
-                raise ValueError('Target value shapes do not match: %s vs %s'
-                                 % (y.shape, y_test.shape))
 
-        y_task = type_of_target(y)
+        # We first validate the dtype of the target provided by the user
+        # In doing so, we also fit the internal encoder for classification
+        y_task = type_of_target(
+            self.InputValidator.validate_target(y, is_classification=True)
+        )
         task = self._task_mapping.get(y_task)
         if task is None:
             raise ValueError('Cannot work on data of type %s' % y_task)
@@ -1045,18 +1037,6 @@ class AutoMLClassifier(BaseAutoML):
             load_models=load_models,
         )
 
-    def fit_ensemble(self, y, task=None, precision=32,
-                     dataset_name=None, ensemble_nbest=None,
-                     ensemble_size=None):
-        # Make sure that input is valid
-        y = self.InputValidator.validate_target(y, is_classification=True)
-
-        return super().fit_ensemble(
-            y, task=task, precision=precision,
-            dataset_name=dataset_name, ensemble_nbest=ensemble_nbest,
-            ensemble_size=ensemble_size
-        )
-
     def predict(self, X, batch_size=None, n_jobs=1):
         predicted_probabilities = super().predict(X, batch_size=batch_size,
                                                   n_jobs=n_jobs)
@@ -1072,7 +1052,7 @@ class AutoMLClassifier(BaseAutoML):
         return super().predict(X, batch_size=batch_size, n_jobs=n_jobs)
 
 
-class AutoMLRegressor(BaseAutoML):
+class AutoMLRegressor(AutoML):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._task_mapping = {'continuous-multioutput': MULTIOUTPUT_REGRESSION,
@@ -1083,24 +1063,26 @@ class AutoMLRegressor(BaseAutoML):
         self,
         X: Union[np.ndarray, pd.DataFrame],
         y: Union[np.ndarray, pd.DataFrame],
-        X_test: Union[np.ndarray, pd.DataFrame] = None,
-        y_test: Union[np.ndarray, pd.DataFrame] = None,
+        X_test: Optional[Union[np.ndarray, pd.DataFrame]] = None,
+        y_test: Optional[Union[np.ndarray, pd.DataFrame]] = None,
         feat_type: Optional[List[bool]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
     ):
 
-        # Make sure that input is valid
-        X, y = self.InputValidator.validate(X, y)
-        y_task = type_of_target(y)
+        # Check the data provided in y
+        # After the y data type is validated,
+        # check the task type
+        y_task = type_of_target(
+            self.InputValidator.validate_target(y)
+        )
         task = self._task_mapping.get(y_task)
         if task is None:
             raise ValueError('Cannot work on data of type %s' % y_task)
         if self._metric is None:
             self._metric = r2
 
-        self._n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
         return super().fit(
             X, y,
             X_test=X_test,
@@ -1110,16 +1092,4 @@ class AutoMLRegressor(BaseAutoML):
             dataset_name=dataset_name,
             only_return_configuration_space=only_return_configuration_space,
             load_models=load_models,
-        )
-
-    def fit_ensemble(self, y, task=None, precision=32,
-                     dataset_name=None, ensemble_nbest=None,
-                     ensemble_size=None):
-        # Make sure that input is valid
-        y = self.InputValidator.validate_target(y)
-
-        return super().fit_ensemble(
-            y, task=task, precision=precision,
-            dataset_name=dataset_name, ensemble_nbest=ensemble_nbest,
-            ensemble_size=ensemble_size
         )

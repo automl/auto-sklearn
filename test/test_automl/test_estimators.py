@@ -19,7 +19,7 @@ from autosklearn.estimators import AutoSklearnEstimator
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
 from autosklearn.metrics import accuracy, f1_macro, mean_squared_error, r2
-from autosklearn.automl import AutoMLClassifier, AutoML
+from autosklearn.automl import AutoMLClassifier
 from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier
@@ -655,23 +655,6 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         output_files = os.listdir(output)
         self.assertIn('binary_test_dataset_test_1.predict', output_files)
 
-    @unittest.mock.patch.object(AutoML, 'fit')
-    @unittest.mock.patch.object(AutoML, 'refit')
-    @unittest.mock.patch.object(AutoML, 'fit_ensemble')
-    def test_conversion_of_list_to_np(self, fit_ensemble, refit, fit):
-        automl = AutoSklearnClassifier()
-        X = [[1], [2], [3]]
-        y = [1, 2, 3]
-        automl.fit(X, y)
-        self.assertEqual(fit.call_count, 1)
-        self.assertIsInstance(fit.call_args[0][0], np.ndarray)
-        self.assertIsInstance(fit.call_args[0][1], np.ndarray)
-        automl.refit(X, y)
-        self.assertEqual(refit.call_count, 1)
-        automl.fit_ensemble(y)
-        self.assertEqual(fit_ensemble.call_count, 1)
-        self.assertIsInstance(fit_ensemble.call_args[0][0], np.ndarray)
-
     def test_classification_pandas_support(self):
         X, y = sklearn.datasets.fetch_openml(
             data_id=40981,  # cat/num Australian
@@ -694,15 +677,16 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
         # Make sure that at least better than random.
         # We use same X_train==X_test to test code quality
-        self.assertTrue(automl.score(X, y) > 0.5)
+        self.assertTrue(automl.score(X, y) > 0.555)
 
         automl.refit(X, y)
 
         # Make sure that at least better than random.
         # accuracy in sklearn needs valid data
+        # It should be 0.555 as the dataset is unbalanced.
         y = automl._automl[0].InputValidator.encode_target(y)
         prediction = automl._automl[0].InputValidator.encode_target(automl.predict(X))
-        self.assertTrue(accuracy(y, prediction) > 0.5)
+        self.assertTrue(accuracy(y, prediction) > 0.555)
 
 
 class AutoMLRegressorTest(Base, unittest.TestCase):
@@ -724,23 +708,6 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         score = mean_squared_error(Y_test, predictions)
         # On average np.sqrt(30) away from the target -> ~5.5 on average
         self.assertGreaterEqual(score, -30)
-
-    @unittest.mock.patch.object(AutoML, 'fit')
-    @unittest.mock.patch.object(AutoML, 'refit')
-    @unittest.mock.patch.object(AutoML, 'fit_ensemble')
-    def test_conversion_of_list_to_np(self, fit_ensemble, refit, fit):
-        automl = AutoSklearnRegressor()
-        X = [[1], [2], [3]]
-        y = [1, 2, 3]
-        automl.fit(X, y)
-        self.assertEqual(fit.call_count, 1)
-        self.assertIsInstance(fit.call_args[0][0], np.ndarray)
-        self.assertIsInstance(fit.call_args[0][1], np.ndarray)
-        automl.refit(X, y)
-        self.assertEqual(refit.call_count, 1)
-        automl.fit_ensemble(y)
-        self.assertEqual(fit_ensemble.call_count, 1)
-        self.assertIsInstance(fit_ensemble.call_args[0][0], np.ndarray)
 
     def test_regression_pandas_support(self):
         X, y = sklearn.datasets.fetch_openml(

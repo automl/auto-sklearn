@@ -1,10 +1,12 @@
 import unittest
+import unittest.mock
 
 from autosklearn.data.validation import InputValidator
 
 import numpy as np
 import pandas as pd
 from scipy import sparse
+from sklearn.utils.multiclass import type_of_target
 
 
 class InputValidatorTest(unittest.TestCase):
@@ -80,6 +82,23 @@ class InputValidatorTest(unittest.TestCase):
             self.assertIsNotNone(validator.target_encoder)
             self.assertIsNotNone(validator.feature_encoder)
 
+    def test_binary_conversion(self):
+        validator = InputValidator()
+
+        # Just 2 classes, 1 and 2
+        y_train = validator.validate_target(
+            np.array([1.0, 2.0, 2.0, 1.0], dtype=np.float64),
+            is_classification=True,
+        )
+        self.assertEqual('binary', type_of_target(y_train))
+
+        # Also make sure that a re-use of the generator is also binary
+        y_valid = validator.validate_target(
+            np.array([2.0, 2.0, 2.0, 2.0], dtype=np.float64),
+            is_classification=True,
+        )
+        self.assertEqual('binary', type_of_target(y_valid))
+
     def test_dataframe_input_unsupported(self):
         validator = InputValidator()
         with self.assertRaisesRegex(ValueError, "Auto-sklearn does not support time"):
@@ -90,6 +109,12 @@ class InputValidatorTest(unittest.TestCase):
             validator.validate_features(
                 pd.DataFrame({'string': ['foo']})
             )
+
+        with self.assertRaisesRegex(ValueError, "Expected 2D array, got"):
+            validator.validate_features({'input1': 1, 'input2': 2})
+
+        with self.assertRaisesRegex(ValueError, "Expected 2D array, got"):
+            validator.validate_features(InputValidator())
 
         X = pd.DataFrame(data=['a', 'b', 'c'], dtype='category')
         with unittest.mock.patch('autosklearn.data.validation.InputValidator._check_and_get_columns_to_encode') as mock_foo:  # noqa E501

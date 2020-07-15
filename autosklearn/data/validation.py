@@ -40,7 +40,10 @@ class InputValidator:
         self.target_encoder = None
         self.enc_columns = []
 
-        # Check for n-outputs change
+        # During consecutive calls to the validator,
+        # track the number of outputs of the targets
+        # We need to make sure y_train/y_test have the
+        # same dimensionality
         self._n_outputs = None
 
     def validate(
@@ -129,13 +132,17 @@ class InputValidator:
             is_number = np.vectorize(lambda x: pd.api.types.is_numeric_dtype(x))
             if not np.all(is_number(y.dtypes)):
                 raise ValueError(
+                    "During the target validation (y_train/y_test) an invalid"
+                    " input was detected. "
                     "Input dataframe to autosklearn must only contain numerical"
-                    " dtypes, yet it has: {}".format(
+                    " dtypes, yet it has: {} dtypes.".format(
                         y.dtypes
                     )
                 )
         elif not np.issubdtype(y.dtype, np.number):
             raise ValueError(
+                "During the target validation (y_train/y_test) an invalid"
+                " input was detected. "
                 "Input to autosklearn must have a numerical dtype, yet it is: {}".format(
                     y.dtype
                 )

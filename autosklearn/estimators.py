@@ -8,7 +8,7 @@ from sklearn.base import BaseEstimator
 from sklearn.utils.multiclass import type_of_target
 import joblib
 
-from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, BaseAutoML
+from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, AutoML
 from autosklearn.util.backend import create, get_randomized_directory_names
 
 
@@ -271,7 +271,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.metadata_directory = metadata_directory
         self._metric = metric
 
-        self._automl = None  # type: Optional[List[BaseAutoML]]
+        self._automl = None  # type: Optional[List[AutoML]]
         # n_jobs after conversion to a number (b/c default is None)
         self._n_jobs = None
         super().__init__()
