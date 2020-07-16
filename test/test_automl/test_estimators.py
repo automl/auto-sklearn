@@ -657,7 +657,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
     def test_classification_pandas_support(self):
         X, y = sklearn.datasets.fetch_openml(
-            data_id=40981,  # cat/num Australian
+            data_id=2,  # cat/num dataset
             return_X_y=True,
             as_frame=True,
         )
@@ -671,6 +671,8 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         automl = AutoSklearnClassifier(
             time_left_for_this_task=30,
             per_run_time_limit=5,
+            exclude_estimators=['libsvm_svc'],
+            seed=5,
         )
 
         automl.fit(X, y)
