@@ -5,10 +5,10 @@ import unittest.mock
 import numpy as np
 from smac.runhistory.runhistory import RunValue, RunKey, RunHistory
 
-from autosklearn.metrics import roc_auc, accuracy
+from autosklearn.metrics import roc_auc, accuracy, log_loss
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensemble_builder import EnsembleBuilder, Y_VALID, Y_TEST
-from autosklearn.ensembles.singlemodel_ensemble import SingleModelEnsemble
+from autosklearn.ensembles.singlebest_ensemble import SingleBest
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
@@ -468,10 +468,10 @@ class EnsembleSelectionTest(unittest.TestCase):
             ensemble.predict(per_model_pred)
 
 
-class SingleModelEnsembleTest(unittest.TestCase):
-    def test_get_identifiers_from_run_history(self):
-        run_history = RunHistory()
-        run_history._add(
+class SingleBestTest(unittest.TestCase):
+    def setUp(self):
+        self.run_history = RunHistory()
+        self.run_history._add(
             RunKey(
                 config_id=3,
                 instance_id='{"task_id": "breast_cancer"}',
@@ -490,7 +490,7 @@ class SingleModelEnsembleTest(unittest.TestCase):
             status=None,
             origin=None,
         )
-        run_history._add(
+        self.run_history._add(
             RunKey(
                 config_id=6,
                 instance_id='{"task_id": "breast_cancer"}',
@@ -509,12 +509,28 @@ class SingleModelEnsembleTest(unittest.TestCase):
             status=None,
             origin=None,
         )
-        ensemble = SingleModelEnsemble(
-             ensemble_size=5,
-             task_type=None,
+
+    def test_get_identifiers_from_run_history_accuracy(self):
+        ensemble = SingleBest(
              metric=accuracy,
              random_state=1,
-             run_history=run_history,
+             run_history=self.run_history,
+        )
+
+        # Just one model
+        self.assertEqual(len(ensemble.identifiers_), 1)
+
+        # That model must be the best
+        seed, num_run, budget = ensemble.identifiers_[0]
+        self.assertEqual(num_run, 3)
+        self.assertEqual(seed, 1)
+        self.assertEqual(budget, 3.0)
+
+    def test_get_identifiers_from_run_history_log_loss(self):
+        ensemble = SingleBest(
+             metric=log_loss,
+             random_state=1,
+             run_history=self.run_history,
         )
 
         # Just one model

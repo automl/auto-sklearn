@@ -32,7 +32,7 @@ from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import get_logger, setup_logger
 from autosklearn.util import pipeline
 from autosklearn.ensemble_builder import EnsembleBuilder
-from autosklearn.ensembles.singlemodel_ensemble import SingleModelEnsemble
+from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix
 from autosklearn.metrics import f1_macro, accuracy, r2
@@ -740,19 +740,21 @@ class AutoML(BaseEstimator):
 
     def _load_best_individual_model(self):
         """
-        Wrapper around ensemble selection to load the best
-        predictor, in case no ensemble is created.
+        In case of failure during ensemble building,
+        this method returns the single best model found
+        by AutoML.
+        This is a robust mechanism to be able to predict,
+        even though no ensemble was found by ensemble builder.
         """
 
         # We also require that the model is fit and a task is defined
-        # We should intend to do an ensemble
+        # The ensemble size must also be greater than 1, else it means
+        # that the user intentionally does not want an ensemble
         if not self._task or self._ensemble_size < 1:
             return None
 
-        # Create the ensemble selection object
-        ensemble = SingleModelEnsemble(
-            ensemble_size=self._ensemble_size,
-            task_type=self._task,
+        # SingleBest contains the best model found by AutoML
+        ensemble = SingleBest(
             metric=self._metric,
             random_state=self._seed,
             run_history=self.runhistory_,

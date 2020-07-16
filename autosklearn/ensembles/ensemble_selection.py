@@ -26,10 +26,6 @@ class EnsembleSelection(AbstractEnsemble):
         self.mode = mode
         self.random_state = random_state
 
-        # Add some default values -- at least 1 model in ensemble is assumed
-        self.num_input_models_ = 1
-        self.indices_ = [0]
-
     def fit(self, predictions, labels, identifiers):
         self.ensemble_size = int(self.ensemble_size)
         if self.ensemble_size < 1:
