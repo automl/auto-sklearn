@@ -3,6 +3,9 @@ import sys
 import unittest.mock
 
 import numpy as np
+
+import pandas as pd
+
 from smac.runhistory.runhistory import RunValue, RunKey, RunHistory
 
 from autosklearn.metrics import roc_auc, accuracy, log_loss
@@ -23,6 +26,17 @@ class BackendMock(object):
         self.temporary_directory = os.path.join(
             this_directory, 'data',
         )
+
+    def load_datamanager(self):
+        manager = unittest.mock.Mock()
+        array = np.load(os.path.join(
+            this_directory, 'data',
+            '.auto-sklearn',
+            'predictions_test',
+            'predictions_test_0_3_100.0.npy'
+        ))
+        manager.data.get.return_value = array
+        return manager
 
     def load_targets_ensemble(self):
         with open(os.path.join(
@@ -367,7 +381,7 @@ class EnsembleTest(unittest.TestCase):
         ensbuilder = EnsembleBuilder(
             backend=self.backend,
             dataset_name="TEST",
-            task_type=1,  # Binary Classification
+            task_type=3,  # Multilabel Classification
             metric=roc_auc,
             limit=-1,  # not used,
             seed=0,  # important to find the test files
@@ -382,6 +396,23 @@ class EnsembleTest(unittest.TestCase):
         self.assertEqual(len(ensbuilder.read_preds), 3)
         self.assertIsNotNone(ensbuilder.last_hash)
         self.assertIsNotNone(ensbuilder.y_true_ensemble)
+
+        # Make sure the run history is ok
+        run_history = ensbuilder.get_ensemble_history()
+
+        # We expect 1 element to be the ensemble
+        self.assertEqual(len(run_history), 1)
+
+        # As the data loader loads the same val/train/test
+        # we expect 1.0 as score and all keys available
+        expected_performance = {
+            'train_score': 1.0,
+            'val_score': 1.0,
+            'test_score': 1.0
+        }
+        self.assertDictContainsSubset(expected_performance, run_history[0])
+        self.assertIn('Timestamp', run_history[0])
+        self.assertIsInstance(run_history[0]['Timestamp'], pd.Timestamp)
 
     def testLimit(self):
         ensbuilder = EnsembleBuilderMemMock(backend=self.backend,
