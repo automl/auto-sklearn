@@ -909,7 +909,7 @@ class TrainEvaluator(AbstractEvaluator):
                     raise ValueError('Unknown CrossValidator.')
                 ref_arg_dict = __baseCrossValidator_defaults__[class_name]
 
-                y = D.data['Y_train'].ravel()
+                y = D.data['Y_train']
                 if class_name == 'PredefinedSplit':
                     if 'test_fold' not in self.resampling_strategy_args:
                         raise ValueError('Must provide parameter test_fold'
@@ -922,7 +922,7 @@ class TrainEvaluator(AbstractEvaluator):
                         raise ValueError('Must provide parameter groups '
                                          'for chosen CrossValidator.')
                     try:
-                        if self.resampling_strategy_args['groups'].shape != y.shape:
+                        if self.resampling_strategy_args['groups'].shape[-1] != y.shape[-1]:
                             raise ValueError('Groups must be array-like '
                                              'with shape (n_samples,).')
                     except Exception:
@@ -930,7 +930,7 @@ class TrainEvaluator(AbstractEvaluator):
                                          'with shape (n_samples,).')
                 else:
                     if 'groups' in self.resampling_strategy_args:
-                        if self.resampling_strategy_args['groups'].shape != y.shape:
+                        if self.resampling_strategy_args['groups'].shape[-1] != y.shape[-1]:
                             raise ValueError('Groups must be array-like'
                                              ' with shape (n_samples,).')
 
