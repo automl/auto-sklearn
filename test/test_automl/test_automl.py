@@ -525,11 +525,11 @@ class AutoMLTest(Base, unittest.TestCase):
                 )
 
             # A memory error occurs in the ensemble construction
-            self.assertTrue(automl._backend.load_ensemble(automl._seed) is None)
+            self.assertIsNone(automl._backend.load_ensemble(automl._seed))
 
             # The load model is robust to this and loads the best model
             automl._load_models()
-            self.assertTrue(automl.ensemble_ is not None)
+            self.assertIsNotNone(automl.ensemble_)
 
             # Just 1 model is there for ensemble and all weight must be on it
             get_models_with_weights = automl.get_models_with_weights()
