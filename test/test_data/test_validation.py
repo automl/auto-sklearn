@@ -99,6 +99,71 @@ class InputValidatorTest(unittest.TestCase):
         )
         self.assertEqual('binary', type_of_target(y_valid))
 
+        # Make sure binary also works with PD dataframes
+        validator = InputValidator()
+
+        # Just 2 classes, 1 and 2
+        y_train = validator.validate_target(
+            pd.DataFrame([1.0, 2.0, 2.0, 1.0], dtype='category'),
+            is_classification=True,
+        )
+        self.assertEqual('binary', type_of_target(y_train))
+
+    def test_multiclass_conversion(self):
+        # Multiclass conversion for different datatype
+        for input_object in [
+            [1.0, 2.0, 2.0, 4.0, 3],
+            np.array([1.0, 2.0, 2.0, 4.0, 3], dtype=np.float64),
+            pd.DataFrame([1.0, 2.0, 2.0, 4.0, 3], dtype='category'),
+        ]:
+            validator = InputValidator()
+            y_train = validator.validate_target(
+                input_object,
+                is_classification=True,
+            )
+            self.assertEqual('multiclass', type_of_target(y_train))
+
+    def test_multilabel_conversion(self):
+        # Multi-label conversion for different datatype
+        for input_object in [
+            [[1, 0, 0, 1], [0, 0, 1, 1], [0, 0, 0, 0]],
+            np.array([[1, 0, 0, 1], [0, 0, 1, 1], [0, 0, 0, 0]]),
+            pd.DataFrame([[1, 0, 0, 1], [0, 0, 1, 1], [0, 0, 0, 0]], dtype='category'),
+        ]:
+            validator = InputValidator()
+            y_train = validator.validate_target(
+                input_object,
+                is_classification=True,
+            )
+            self.assertEqual('multilabel-indicator', type_of_target(y_train))
+
+    def test_continuous_multioutput_conversion(self):
+        # Regression multi out conversion for different datatype
+        for input_object in [
+            [[31.4, 94], [40.5, 109], [25.0, 30]],
+            np.array([[31.4, 94], [40.5, 109], [25.0, 30]]),
+            pd.DataFrame([[31.4, 94], [40.5, 109], [25.0, 30]]),
+        ]:
+            validator = InputValidator()
+            y_train = validator.validate_target(
+                input_object,
+                is_classification=False,
+            )
+            self.assertEqual('continuous-multioutput', type_of_target(y_train))
+
+    def test_regression_conversion(self):
+        for input_object in [
+            [1.0, 76.9, 123, 4.0, 81.1],
+            np.array([1.0, 76.9, 123, 4.0, 81.1]),
+            pd.DataFrame([1.0, 76.9, 123, 4.0, 81.1]),
+        ]:
+            validator = InputValidator()
+            y_train = validator.validate_target(
+                input_object,
+                is_classification=False,
+            )
+            self.assertEqual('continuous', type_of_target(y_train))
+
     def test_dataframe_input_unsupported(self):
         validator = InputValidator()
         with self.assertRaisesRegex(ValueError, "Auto-sklearn does not support time"):

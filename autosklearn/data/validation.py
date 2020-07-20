@@ -28,10 +28,12 @@ class InputValidator:
     ):
         self.valid_pd_enc_dtypes = ['category', 'bool']
 
-        # Whether we should treat the feature as a
-        # categorical or numerical input. If None,
-        # (The input was not a dataframe)
-        # The estimator will try to guess
+        # If a dataframe was provided, we populate
+        # this attribute with the column types from the dataframe
+        # That is, this attribute contains whether autosklearn
+        # should treat a column as categorical or numerical
+        # During fit, if the user provided feature_types, the user
+        # constrain is honored. If not, this attribute is used.
         self.feature_types = None
 
         # Whereas autosklearn performed encoding on the dataframe
