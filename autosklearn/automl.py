@@ -32,6 +32,7 @@ from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import get_logger, setup_logger
 from autosklearn.util import pipeline
 from autosklearn.ensemble_builder import EnsembleBuilder
+from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix
 from autosklearn.metrics import f1_macro, accuracy, r2
@@ -700,6 +701,11 @@ class AutoML(BaseEstimator):
             seed = self._seed
 
         self.ensemble_ = self._backend.load_ensemble(seed)
+
+        # If no ensemble is loaded, try to get the best performing model
+        if not self.ensemble_:
+            self.ensemble_ = self._load_best_individual_model()
+
         if self.ensemble_:
             identifiers = self.ensemble_.get_selected_model_identifiers()
             self.models_ = self._backend.load_models_by_identifiers(identifiers)
@@ -731,6 +737,35 @@ class AutoML(BaseEstimator):
 
         else:
             self.models_ = []
+
+    def _load_best_individual_model(self):
+        """
+        In case of failure during ensemble building,
+        this method returns the single best model found
+        by AutoML.
+        This is a robust mechanism to be able to predict,
+        even though no ensemble was found by ensemble builder.
+        """
+
+        # We also require that the model is fit and a task is defined
+        # The ensemble size must also be greater than 1, else it means
+        # that the user intentionally does not want an ensemble
+        if not self._task or self._ensemble_size < 1:
+            return None
+
+        # SingleBest contains the best model found by AutoML
+        ensemble = SingleBest(
+            metric=self._metric,
+            random_state=self._seed,
+            run_history=self.runhistory_,
+        )
+        self._logger.warning(
+            "No valid ensemble was created. Please check the log"
+            "file for errors. Default to the best individual estimator:{}".format(
+                ensemble.identifiers_
+            )
+        )
+        return ensemble
 
     def score(self, X, y):
         # fix: Consider only index 1 of second dimension

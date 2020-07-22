@@ -16,7 +16,7 @@ from autosklearn.util.backend import Backend
 from autosklearn.automl import AutoML
 import autosklearn.automl
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.metrics import accuracy
+from autosklearn.metrics import accuracy, log_loss, balanced_accuracy
 import autosklearn.pipeline.util as putil
 from autosklearn.util.logging_ import setup_logger, get_logger
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION, REGRESSION
@@ -29,6 +29,7 @@ from base import Base  # noqa (E402: module level import not at top of file)
 class AutoMLStub(AutoML):
     def __init__(self):
         self.__class__ = AutoML
+        self._task = None
 
 
 class AutoMLTest(Base, unittest.TestCase):
@@ -501,6 +502,49 @@ class AutoMLTest(Base, unittest.TestCase):
         os.unlink(output_file)
         self._tearDown(backend_api.temporary_directory)
         self._tearDown(backend_api.output_directory)
+
+    def test_load_best_individual_model(self):
+
+        backend_api = self._create_backend('test_fit')
+
+        for metric in [log_loss, balanced_accuracy]:
+            X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+            automl = autosklearn.automl.AutoML(
+                backend=backend_api,
+                time_left_for_this_task=20,
+                per_run_time_limit=5,
+                metric=metric,
+            )
+
+            with unittest.mock.patch(
+                'autosklearn.ensemble_builder.EnsembleBuilder.run'
+            ) as mock_ensemble_run:
+                mock_ensemble_run.side_effect = MemoryError
+                automl.fit(
+                    X_train, Y_train, task=MULTICLASS_CLASSIFICATION,
+                )
+
+            # A memory error occurs in the ensemble construction
+            self.assertIsNone(automl._backend.load_ensemble(automl._seed))
+
+            # The load model is robust to this and loads the best model
+            automl._load_models()
+            self.assertIsNotNone(automl.ensemble_)
+
+            # Just 1 model is there for ensemble and all weight must be on it
+            get_models_with_weights = automl.get_models_with_weights()
+            self.assertEqual(len(get_models_with_weights), 1)
+            self.assertEqual(get_models_with_weights[0][0], 1.0)
+
+            # Match a toy dataset
+            if metric._sign < 0:
+                self.assertLessEqual(automl.score(X_test, Y_test), 0.2)
+            else:
+                self.assertGreaterEqual(automl.score(X_test, Y_test), 0.8)
+
+            del automl
+            self._tearDown(backend_api.temporary_directory)
+            self._tearDown(backend_api.output_directory)
 
 
 if __name__ == "__main__":
