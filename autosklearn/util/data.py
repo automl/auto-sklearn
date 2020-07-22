@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 # Functions performing various data conversions for the ChaLearn AutoML
 # challenge
+from typing import List, Union
 
 import numpy as np
 
@@ -11,7 +12,7 @@ __all__ = [
 ]
 
 
-def binarization(array):
+def binarization(array: Union[List, np.ndarray]) -> np.ndarray:
     # Takes a binary-class datafile and turn the max value (positive class)
     # into 1 and the min into 0
     array = np.array(array, dtype=float)  # conversion needed to use np.inf
@@ -27,12 +28,12 @@ def binarization(array):
     return np.array(array, dtype=int)
 
 
-def multilabel_to_multiclass(array):
+def multilabel_to_multiclass(array: Union[List, np.ndarray]) -> np.ndarray:
     array = binarization(array)
     return np.array([np.nonzero(array[i, :])[0][0] for i in range(len(array))])
 
 
-def convert_to_num(Ybin):
+def convert_to_num(Ybin: np.ndarray) -> np.ndarray:
     """
     Convert binary targets to numeric vector
     typically classification target values
@@ -45,7 +46,7 @@ def convert_to_num(Ybin):
     return result
 
 
-def convert_to_bin(Ycont, nval, verbose=True):
+def convert_to_bin(Ycont: List, nval: int, verbose: bool = True) -> List:
     # Convert numeric vector to binary (typically classification target values)
     if verbose:
         pass
@@ -57,7 +58,7 @@ def convert_to_bin(Ycont, nval, verbose=True):
     return Ybin
 
 
-def predict_RAM_usage(X, categorical):
+def predict_RAM_usage(X: np.ndarray, categorical: List[bool]) -> float:
     # Return estimated RAM usage of dataset after OneHotEncoding in bytes.
     estimated_columns = 0
     for i, cat in enumerate(categorical):

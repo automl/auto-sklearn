@@ -1,10 +1,11 @@
 import hashlib
 
 import numpy as np
+
 import scipy.sparse
 
 
-def hash_array_or_matrix(X):
+def hash_array_or_matrix(X: np.ndarray) -> str:
     m = hashlib.md5()
 
     if scipy.sparse.issparse(X):
