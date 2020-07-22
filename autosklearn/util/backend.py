@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import glob
 import os
 import pickle
@@ -31,7 +29,7 @@ def create(
     delete_tmp_folder_after_terminate: bool = True,
     delete_output_folder_after_terminate: bool = True,
     shared_mode: bool = False
-) -> Backend:
+) -> 'Backend':
     context = BackendContext(temporary_directory, output_directory,
                              delete_tmp_folder_after_terminate,
                              delete_output_folder_after_terminate,

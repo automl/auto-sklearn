@@ -1,6 +1,4 @@
 # -*- encoding: utf-8 -*-
-from __future__ import annotations
-
 import logging
 import logging.config
 import os
@@ -30,7 +28,7 @@ def _create_logger(name: str) -> logging.Logger:
     return logging.getLogger(name)
 
 
-def get_logger(name: str) -> PickableLoggerAdapter:
+def get_logger(name: str) -> 'PickableLoggerAdapter':
     logger = PickableLoggerAdapter(name)
     return logger
 
