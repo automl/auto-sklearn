@@ -9,6 +9,7 @@ ADD . /auto-sklearn/
 RUN apt-get update
 
 # Set the locale
+# workaround for https://github.com/automl/auto-sklearn/issues/867
 RUN apt-get -y install locales
 RUN touch /usr/share/locale/locale.alias
 RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && locale-gen
