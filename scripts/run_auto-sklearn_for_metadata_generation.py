@@ -6,7 +6,7 @@ import sys
 
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
-from autosklearn.evaluation import ExecuteTaFuncWithQueue
+from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.metrics import r2, balanced_accuracy
 
 from smac.stats.stats import Stats
@@ -123,7 +123,9 @@ for entry in trajectory:
                                     stats=stats,
                                     all_scoring_functions=True,
                                     include=include,
-                                    metric=automl_arguments['metric'])
+                                    metric=automl_arguments['metric'],
+                                    cost_for_crash=get_cost_of_crash(automl_arguments['metric']),
+                                    abort_on_first_run_crash=False,)
         status, cost, runtime, additional_run_info = ta.start(
             config=config, instance=None, cutoff=per_run_time_limit*3)
 
