@@ -29,7 +29,7 @@ jobs:
           tag_with_ref: true
           tags: ${{ steps.extract_branch.outputs.branch }}
       - name: Docker Login
-        run: docker login docker.pkg.github.com -u $GITHUB_ACTOR -p $GITHUB_TOKEN
+        run: docker login docker.pkg.github.com -u $GITHUB_ACTOR --password-stdin $GITHUB_TOKEN
         env:
             GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Pull Docker image
