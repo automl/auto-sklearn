@@ -115,6 +115,7 @@
 <li><a class="reference internal" href="#mac-osx">Mac OSX</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#docker-image">Docker Image</a></li>
 </ul>
 </li>
 </ul>
@@ -210,6 +211,20 @@ and <a class="reference external" href="https://github.com/automl/ConfigSpace">C
 <li><p>docker image</p></li>
 </ul>
 </div>
+</div>
+<div class="section" id="docker-image">
+<h2>Docker Image<a class="headerlink" href="#docker-image" title="Permalink to this headline">¶</a></h2>
+<p>A Docker image is also provided as a github package. The user must authenticate following the instructions from <a class="reference external" href="https://help.github.com/en/packages/using-github-packages-with-your-projects-ecosystem/configuring-docker-for-use-with-github-packages">GitHub Packages</a> . Then, the image can be downloaded as follows.
+.. code:: bash</p>
+<blockquote>
+<div><p>docker pull docker.pkg.github.com/automl/auto-sklearn/auto-sklearn:latest
+docker images  # Verify that the image was downloaded</p>
+</div></blockquote>
+<p>This image can be used to start an interactive session as follows:
+.. code:: bash</p>
+<blockquote>
+<div><p>docker run -it docker.pkg.github.com/automl/auto-sklearn/auto-sklearn:latest</p>
+</div></blockquote>
 </div>
 </div>
 
