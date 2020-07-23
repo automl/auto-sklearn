@@ -13,7 +13,7 @@ from smac.tae.execute_ta_run import StatusType, BudgetExhaustedException
 from smac.stats.stats import Stats
 from smac.utils.constants import MAXINT
 
-from autosklearn.evaluation import ExecuteTaFuncWithQueue
+from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.metrics import accuracy, log_loss
 
 this_directory = os.path.dirname(__file__)
@@ -88,7 +88,10 @@ class EvaluationTest(unittest.TestCase):
                                     logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
-                                    metric=accuracy)
+                                    metric=accuracy,
+                                    cost_for_crash=get_cost_of_crash(accuracy),
+                                    abort_on_first_run_crash=False,
+                                    )
         info = ta.start(None, instance=None, cutoff=30)
         self.assertEqual(info[0], StatusType.SUCCESS)
         self.assertEqual(info[1], 0.5)
@@ -100,7 +103,10 @@ class EvaluationTest(unittest.TestCase):
                                     resampling_strategy='holdout',
                                     logger=self.logger,
                                     stats=self.stats,
-                                    metric=accuracy)
+                                    metric=accuracy,
+                                    cost_for_crash=get_cost_of_crash(accuracy),
+                                    abort_on_first_run_crash=False,
+                                    )
         self.scenario.wallclock_limit = 5
         self.stats.ta_runs += 1
         self.assertRaises(BudgetExhaustedException, ta.start, None,
@@ -112,7 +118,10 @@ class EvaluationTest(unittest.TestCase):
                                     resampling_strategy='holdout',
                                     logger=self.logger,
                                     stats=self.stats,
-                                    metric=accuracy)
+                                    metric=accuracy,
+                                    cost_for_crash=get_cost_of_crash(accuracy),
+                                    abort_on_first_run_crash=False,
+                                    )
         self.stats.ta_runs = 1
         ta.start(None, cutoff=30, instance=None)
         self.assertEqual(pynisher_mock.call_args[1]['wall_time_in_s'], 4)
@@ -126,7 +135,10 @@ class EvaluationTest(unittest.TestCase):
                                     logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
-                                    metric=accuracy)
+                                    metric=accuracy,
+                                    cost_for_crash=get_cost_of_crash(accuracy),
+                                    abort_on_first_run_crash=False,
+                                    )
 
         # The following should not fail because abort on first config crashed is false
         info = ta.start(config=None, instance=None, cutoff=60)
@@ -152,7 +164,10 @@ class EvaluationTest(unittest.TestCase):
                                     logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
-                                    metric=log_loss)
+                                    metric=log_loss,
+                                    cost_for_crash=get_cost_of_crash(log_loss),
+                                    abort_on_first_run_crash=False,
+                                    )
         info = ta.start(None, instance=None, cutoff=30)
         self.assertEqual(info[0], StatusType.MEMOUT)
 
@@ -174,7 +189,10 @@ class EvaluationTest(unittest.TestCase):
                                     logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
-                                    metric=accuracy)
+                                    metric=accuracy,
+                                    cost_for_crash=get_cost_of_crash(accuracy),
+                                    abort_on_first_run_crash=False,
+                                    )
         info = ta.start(config=None, instance=None, cutoff=30)
         self.assertEqual(info[0], StatusType.TIMEOUT)
         self.assertEqual(info[1], 1.0)
@@ -201,7 +219,10 @@ class EvaluationTest(unittest.TestCase):
                                     logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
-                                    metric=accuracy)
+                                    metric=accuracy,
+                                    cost_for_crash=get_cost_of_crash(accuracy),
+                                    abort_on_first_run_crash=False,
+                                    )
         info = ta.start(None, instance=None, cutoff=30)
         self.assertEqual(info[0], StatusType.SUCCESS)
         self.assertEqual(info[1], 0.5)
@@ -219,7 +240,10 @@ class EvaluationTest(unittest.TestCase):
                                     logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
-                                    metric=accuracy)
+                                    metric=accuracy,
+                                    cost_for_crash=get_cost_of_crash(accuracy),
+                                    abort_on_first_run_crash=False,
+                                    )
         info = ta.start(None, instance=None, cutoff=30)
         self.assertEqual(info[0], StatusType.CRASHED)
         self.assertEqual(info[1], 1.0)
@@ -238,7 +262,10 @@ class EvaluationTest(unittest.TestCase):
                                     logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
-                                    metric=accuracy)
+                                    metric=accuracy,
+                                    cost_for_crash=get_cost_of_crash(accuracy),
+                                    abort_on_first_run_crash=False,
+                                    )
         self.scenario.wallclock_limit = 180
         instance = "{'subsample': 30}"
         info = ta.start(None, cutoff=30, instance=instance)
@@ -254,7 +281,10 @@ class EvaluationTest(unittest.TestCase):
                                     logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
-                                    metric=accuracy)
+                                    metric=accuracy,
+                                    cost_for_crash=get_cost_of_crash(accuracy),
+                                    abort_on_first_run_crash=False,
+                                    )
         self.stats.ta_runs += 1
         info = ta.start(None, instance=None, cutoff=30)
         self.assertEqual(info[0], StatusType.CRASHED)
