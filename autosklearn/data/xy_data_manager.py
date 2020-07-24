@@ -11,7 +11,6 @@ from autosklearn.constants import (
     MULTILABEL_CLASSIFICATION,
     MULTIOUTPUT_REGRESSION,
     REGRESSION,
-    STRING_TO_TASK_TYPES,
 )
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 
@@ -24,14 +23,11 @@ class XYDataManager(AbstractDataManager):
         y: np.ndarray,
         X_test: Optional[np.ndarray],
         y_test: Optional[np.ndarray],
-        task: Union[str, int],
+        task: int,
         feat_type: List[str],
         dataset_name: str
     ):
         super(XYDataManager, self).__init__(dataset_name)
-
-        if isinstance(task, str):
-            task = STRING_TO_TASK_TYPES[task]
 
         self.info['task'] = task
         if sparse.issparse(X):

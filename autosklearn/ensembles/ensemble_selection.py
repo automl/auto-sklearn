@@ -1,6 +1,6 @@
 import random
 from collections import Counter
-from typing import List, Tuple
+from typing import cast, List, Tuple
 
 import numpy as np
 
@@ -126,19 +126,20 @@ class EnsembleSelection(AbstractEnsemble):
                     (1. / float(s + 1)) * pred,
                     out=fant_ensemble_prediction
                 )
-                this_score = calculate_score(
-                    solution=labels,
-                    prediction=fant_ensemble_prediction,
-                    task_type=self.task_type,
-                    metric=self.metric,
-                    all_scoring_functions=False)
-                if isinstance(this_score, float):
-                    scores[j] = self.metric._optimum - this_score
-                else:
-                    raise ValueError(
-                        "Could not score prediction pair {},{} of metric {}"
-                        "".format(j, pred, self.metric)
+
+                # Calculate score is versatile and can return a dict of score
+                # when all_scoring_functions=False, we know it will be a float
+                calculated_score = cast(
+                    float,
+                    calculate_score(
+                        solution=labels,
+                        prediction=fant_ensemble_prediction,
+                        task_type=self.task_type,
+                        metric=self.metric,
+                        all_scoring_functions=False
                     )
+                )
+                scores[j] = self.metric._optimum - calculated_score
 
             all_best = np.argwhere(scores == np.nanmin(scores)).flatten()
             best = self.random_state.choice(all_best)
@@ -176,19 +177,19 @@ class EnsembleSelection(AbstractEnsemble):
             for j, pred in enumerate(predictions):
                 ensemble.append(pred)
                 ensemble_prediction = np.mean(np.array(ensemble), axis=0)
-                this_score = calculate_score(
-                    solution=labels,
-                    prediction=ensemble_prediction,
-                    task_type=self.task_type,
-                    metric=self.metric,
-                    all_scoring_functions=False)
-                if isinstance(this_score, float):
-                    scores[j] = self.metric._optimum - this_score
-                else:
-                    raise ValueError(
-                        "Could not score prediction pair {},{} of metric {}"
-                        "".format(j, pred, self.metric)
+                # Calculate score is versatile and can return a dict of score
+                # when all_scoring_functions=False, we know it will be a float
+                calculated_score = cast(
+                    float,
+                    calculate_score(
+                        solution=labels,
+                        prediction=ensemble_prediction,
+                        task_type=self.task_type,
+                        metric=self.metric,
+                        all_scoring_functions=False
                     )
+                )
+                scores[j] = self.metric._optimum - calculated_score
                 ensemble.pop()
             best = np.nanargmin(scores)
             ensemble.append(predictions[best])
@@ -284,7 +285,7 @@ class EnsembleSelection(AbstractEnsemble):
     def get_models_with_weights(
         self,
         models: BasePipeline
-    ) -> List[Tuple[List, BasePipeline]]:
+    ) -> List[Tuple[float, BasePipeline]]:
         output = []
         for i, weight in enumerate(self.weights_):
             if weight > 0.0:
