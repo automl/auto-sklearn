@@ -24,7 +24,7 @@ from sklearn.dummy import DummyClassifier, DummyRegressor
 
 from autosklearn.metrics import Scorer
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.evaluation import ExecuteTaFuncWithQueue
+from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import _fit_with_budget
 from autosklearn.metrics import calculate_score
@@ -252,6 +252,8 @@ class AutoML(BaseEstimator):
                                     metric=self._metric,
                                     memory_limit=memory_limit,
                                     disable_file_output=self._disable_evaluator_output,
+                                    abort_on_first_run_crash=False,
+                                    cost_for_crash=get_cost_of_crash(self._metric),
                                     **self._resampling_strategy_arguments)
 
         status, cost, runtime, additional_info = \
