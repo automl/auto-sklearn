@@ -84,9 +84,11 @@ class InputValidator:
         """
 
         # Pre-process dataframe to make them numerical
-        if hasattr(X, "iloc"):
+        # Also, encode numpy categorical objects
+        if (hasattr(X, "iloc") or (hasattr(X, "dtype") and X.dtype.type is np.str_)) \
+                and not scipy.sparse.issparse(X):
             # Pandas validation provide extra user information
-            X = self._validate_dataframe_features(X)
+            X = self._check_and_encode_features(X)
 
         if scipy.sparse.issparse(X):
             X.sort_indices()
@@ -110,6 +112,23 @@ class InputValidator:
         Wrapper around sklearn check_array. Translates a pandas
         Dataframe to a valid input for sklearn.
         """
+
+        # Target data as sparse is not supported
+        if scipy.sparse.issparse(y):
+            raise ValueError("Unsupported target data provided"
+                             "Input targets to auto-sklearn must not be of "
+                             "type sparse. Please convert the target input (y) "
+                             "to a dense array via scipy.sparse.csr_matrix.todense(). "
+                             )
+
+        # No Nan is supported
+        if np.any(pd.isnull(y)):
+            raise ValueError("Target values cannot contain missing/NaN values. "
+                             "You can pre-process your data via: "
+                             "https://scikit-learn.org/stable/modules/impute.html "
+                             "before feeding it to auto-sklearn."
+                             )
+
         if not hasattr(y, "iloc"):
             y = np.atleast_1d(y)
             if y.ndim == 2 and y.shape[1] == 1:
@@ -159,6 +178,11 @@ class InputValidator:
             accept_sparse='csr',
             ensure_2d=False,
         )
+
+        # When translating a dataframe to numpy, make sure we
+        # honor the ravel requirement
+        if y.ndim == 2 and y.shape[1] == 1:
+            y = np.ravel(y)
 
         if self._n_outputs is None:
             self._n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
@@ -230,7 +254,7 @@ class InputValidator:
                 feature_types.append('numerical')
         return enc_columns, feature_types
 
-    def _validate_dataframe_features(
+    def _check_and_encode_features(
         self,
         X: pd.DataFrame,
     ) -> Union[pd.DataFrame, np.ndarray]:
@@ -239,8 +263,25 @@ class InputValidator:
         Uses .iloc as a safe way to deal with pandas object
         """
 
+        # No Nan is supported
+        if np.any(pd.isnull(X)):
+            raise ValueError("Categorical features array cannot contain missing/NaN values. "
+                             "You can pre-process your data via: "
+                             "https://scikit-learn.org/stable/modules/impute.html "
+                             "before feeding it to auto-sklearn."
+                             )
+
         # Start with the features
-        enc_columns, feature_types = self._check_and_get_columns_to_encode(X)
+        if hasattr(X, "iloc"):
+            enc_columns, feature_types = self._check_and_get_columns_to_encode(X)
+        else:
+            if len(X.shape) < 1:
+                raise ValueError("Expected features to have more than 1 dimensionality"
+                                 "Your features should at least be a 2-D like array object."
+                                 "You can do so via np.reshape(-1,1). "
+                                 )
+            enc_columns = list(range(X.shape[1]))
+            feature_types = ['categorical' for f in enc_columns]
 
         # Make sure we only set this once. It should not change
         if not self.feature_types:
@@ -273,7 +314,24 @@ class InputValidator:
                 self.feature_encoder.fit(X)
 
         if self.feature_encoder:
-            X = self.feature_encoder.transform(X)
+            try:
+                X = self.feature_encoder.transform(X)
+            except ValueError as e:
+                if 'Found unknown categories' in e.args[0]:
+                    # Make the message more informative
+                    raise ValueError(
+                        "During fit, the input features contained categorical values in columns"
+                        "{}, with categories {} which were encoded by Auto-sklearn automatically."
+                        "Nevertheless, a new input contained new categories not seen during "
+                        " training = {}."
+                        "".format(
+                            self.enc_columns,
+                            self.feature_encoder.transformers_[0][1].categories_,
+                            e.args[0],
+                        )
+                    )
+                else:
+                    raise e
 
         # In code check to make sure everything is numeric
         if hasattr(X, "iloc"):
@@ -286,7 +344,7 @@ class InputValidator:
                 )
         elif not np.issubdtype(X.dtype, np.number):
             raise ValueError(
-                "Failed to convert the input dataframe to numerical dtype: {}".format(
+                "Failed to convert the input array to numerical dtype: {}".format(
                     X.dtype
                 )
             )
@@ -325,7 +383,35 @@ class InputValidator:
 
             self.target_encoder.fit(y)
 
-        y = self.target_encoder.transform(y)
+        try:
+            y = self.target_encoder.transform(y)
+        except ValueError as e:
+            if 'Found unknown categories' in e.args[0]:
+                # Make the message more informative for Ordinal
+                raise ValueError(
+                    "During fit, the target array contained the categorical values {} "
+                    "which were encoded by Auto-sklearn automatically. "
+                    "Nevertheless, a new target set contained new categories not seen during "
+                    " training = {}."
+                    "".format(
+                        self.target_encoder.transformers_[0][1].categories_,
+                        e.args[0],
+                    )
+                )
+            elif 'contains previously unseen labels' in e.args[0]:
+                # Make the message more informative
+                raise ValueError(
+                    "During fit, the target array contained the categorical values {} "
+                    "which were encoded by Auto-sklearn automatically. "
+                    "Nevertheless, a new target set contained new categories not seen during "
+                    " training = {}."
+                    "".format(
+                        self.target_encoder.classes_,
+                        e.args[0],
+                    )
+                )
+            else:
+                raise e
 
         return y
 

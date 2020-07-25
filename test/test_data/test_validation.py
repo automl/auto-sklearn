@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from scipy import sparse
 from sklearn.utils.multiclass import type_of_target
+import sklearn.datasets
 
 
 class InputValidatorTest(unittest.TestCase):
@@ -20,6 +21,9 @@ class InputValidatorTest(unittest.TestCase):
         self.y = [0, 1, 0]
 
     def test_list_input(self):
+        """
+        Makes sure that a list is converted to nparray
+        """
         validator = InputValidator()
         X, y = validator.validate(self.X, self.y)
 
@@ -27,9 +31,16 @@ class InputValidatorTest(unittest.TestCase):
         self.assertIsInstance(y, np.ndarray)
 
     def test_numpy_input(self):
+        """
+        Makes sure that no encoding is needed for a
+        numpy float object. Also test features/target
+        validation methods
+        """
         validator = InputValidator()
-        X, y = validator.validate(
+        X = validator.validate_features(
             np.array(self.X),
+        )
+        y = validator.validate_target(
             np.array(self.y)
         )
 
@@ -38,15 +49,21 @@ class InputValidatorTest(unittest.TestCase):
         self.assertIsNone(validator.target_encoder)
         self.assertIsNone(validator.feature_encoder)
 
-    def test_sparse_input(self):
+    def test_sparse_numpy_input(self):
+        """
+        Makes sure that no encoder is needed when
+        working with sparse float data
+        """
         validator = InputValidator()
 
         # Sparse data
         row_ind = np.array([0, 1, 2])
         col_ind = np.array([1, 2, 1])
         X_sparse = sparse.csr_matrix((np.ones(3), (row_ind, col_ind)))
-        X, y = validator.validate(
+        X = validator.validate_features(
             X_sparse,
+        )
+        y = validator.validate_target(
             np.array(self.y)
         )
 
@@ -55,11 +72,24 @@ class InputValidatorTest(unittest.TestCase):
         self.assertIsNone(validator.target_encoder)
         self.assertIsNone(validator.feature_encoder)
 
+        # Sparse targets should not be supported
+        data = np.array([1, 2, 3, 4, 5, 6])
+        col = np.array([0, 0, 0, 0, 0, 0])
+        row = np.array([0,  2,  3,  6,  7, 10])
+        y = sparse.csr_matrix((data, (row, col)), shape=(11, 1))
+        with self.assertRaisesRegex(ValueError, 'scipy.sparse.csr_matrix.todense'):
+            validator = InputValidator().validate_target(y)
+
     def test_dataframe_input_numerical(self):
+        """
+        Makes sure that we don't encode numerical data
+        """
         for test_type in ['int64', 'float64', 'int8']:
             validator = InputValidator()
-            X, y = validator.validate(
+            X = validator.validate_features(
                 pd.DataFrame(data=self.X, dtype=test_type),
+            )
+            y = validator.validate_target(
                 pd.DataFrame(data=self.y, dtype=test_type),
             )
 
@@ -69,10 +99,15 @@ class InputValidatorTest(unittest.TestCase):
             self.assertIsNone(validator.feature_encoder)
 
     def test_dataframe_input_categorical(self):
+        """
+        Makes sure we automatically encode categorical data
+        """
         for test_type in ['bool', 'category']:
             validator = InputValidator()
-            X, y = validator.validate(
+            X = validator.validate_features(
                 pd.DataFrame(data=self.X, dtype=test_type),
+            )
+            y = validator.validate_target(
                 pd.DataFrame(data=self.y, dtype=test_type),
                 is_classification=True,
             )
@@ -83,6 +118,10 @@ class InputValidatorTest(unittest.TestCase):
             self.assertIsNotNone(validator.feature_encoder)
 
     def test_binary_conversion(self):
+        """
+        Makes sure that a encoded target for classification
+        properly retains the binary target type
+        """
         validator = InputValidator()
 
         # Just 2 classes, 1 and 2
@@ -110,6 +149,10 @@ class InputValidatorTest(unittest.TestCase):
         self.assertEqual('binary', type_of_target(y_train))
 
     def test_multiclass_conversion(self):
+        """
+        Makes sure that a encoded target for classification
+        properly retains the multiclass target type
+        """
         # Multiclass conversion for different datatype
         for input_object in [
             [1.0, 2.0, 2.0, 4.0, 3],
@@ -124,6 +167,10 @@ class InputValidatorTest(unittest.TestCase):
             self.assertEqual('multiclass', type_of_target(y_train))
 
     def test_multilabel_conversion(self):
+        """
+        Makes sure that a encoded target for classification
+        properly retains the multilabel target type
+        """
         # Multi-label conversion for different datatype
         for input_object in [
             [[1, 0, 0, 1], [0, 0, 1, 1], [0, 0, 0, 0]],
@@ -138,6 +185,10 @@ class InputValidatorTest(unittest.TestCase):
             self.assertEqual('multilabel-indicator', type_of_target(y_train))
 
     def test_continuous_multioutput_conversion(self):
+        """
+        Makes sure that an input for regression
+        properly retains the multiout continious target type
+        """
         # Regression multi out conversion for different datatype
         for input_object in [
             [[31.4, 94], [40.5, 109], [25.0, 30]],
@@ -152,6 +203,10 @@ class InputValidatorTest(unittest.TestCase):
             self.assertEqual('continuous-multioutput', type_of_target(y_train))
 
     def test_regression_conversion(self):
+        """
+        Makes sure that a regression input
+        properly retains the continious target type
+        """
         for input_object in [
             [1.0, 76.9, 123, 4.0, 81.1],
             np.array([1.0, 76.9, 123, 4.0, 81.1]),
@@ -165,6 +220,10 @@ class InputValidatorTest(unittest.TestCase):
             self.assertEqual('continuous', type_of_target(y_train))
 
     def test_dataframe_input_unsupported(self):
+        """
+        Makes sure we raise a proper message to the user,
+        when providing not supported data input
+        """
         validator = InputValidator()
         with self.assertRaisesRegex(ValueError, "Auto-sklearn does not support time"):
             validator.validate_features(
@@ -190,6 +249,9 @@ class InputValidatorTest(unittest.TestCase):
                 validator.validate_features(X)
 
     def test_dataframe_econding_1D(self):
+        """
+        Test that the encoding/decoding works in 1D
+        """
         validator = InputValidator()
         y = validator.validate_target(
             pd.DataFrame(data=self.y, dtype=bool),
@@ -216,6 +278,9 @@ class InputValidatorTest(unittest.TestCase):
         self.assertListEqual(['a', 'a', 'b', 'c', 'a'], y_decoded.tolist())
 
     def test_dataframe_econding_2D(self):
+        """
+        Test that the encoding/decoding works in 2D
+        """
         validator = InputValidator()
         multi_label = pd.DataFrame(
             np.array([[1, 0, 0, 1], [0, 0, 1, 1], [0, 0, 0, 0]]),
@@ -229,3 +294,234 @@ class InputValidatorTest(unittest.TestCase):
 
         y_decoded = validator.decode_target(y)
         np.testing.assert_array_almost_equal(y, y_decoded)
+
+    def test_noNaN(self):
+        """
+        Makes sure that during classification/regression task,
+        the transformed data is not corrupted.
+
+        Testing is given without Nan and no sparse data
+        """
+        # numpy - categorical - classification
+        x = np.array(['a', 'b', 'c', 'a', 'b', 'c']).reshape(-1, 1)
+        validator = InputValidator()
+        x_t, y_t = validator.validate(x, np.copy(x), is_classification=True)
+        self.assertTrue(np.issubdtype(x_t.dtype, np.number))
+        self.assertTrue(np.issubdtype(y_t.dtype, np.number))
+        self.assertEqual(type_of_target(y_t), 'multiclass')
+        self.assertTupleEqual(np.shape(x), np.shape(x_t))
+
+        # numpy - categorical - regression
+        x = np.array(['a', 'b', 'c', 'a', 'b', 'c']).reshape(-1, 1)
+        y = np.random.random_sample((6, 1))
+        validator = InputValidator()
+        x_t, y_t = validator.validate(x, y, is_classification=False)
+        self.assertTrue(np.issubdtype(x_t.dtype, np.number))
+        self.assertTrue(np.issubdtype(y_t.dtype, np.number))
+        self.assertEqual(type_of_target(y_t), 'continuous')
+        self.assertTupleEqual(np.shape(x), np.shape(x_t))
+        self.assertTupleEqual(np.shape(y.reshape(-1)), np.shape(y_t))  # ravel version
+
+        # numpy - numerical - classification
+        x = np.random.random_sample((4, 4))
+        y = np.random.choice([0, 1], 4)
+        validator = InputValidator()
+        x_t, y_t = validator.validate(x, y, is_classification=True)
+        self.assertTrue(np.issubdtype(x_t.dtype, np.number))
+        self.assertTrue(np.issubdtype(y_t.dtype, np.number))
+        self.assertEqual(type_of_target(y_t), 'binary')
+        self.assertTupleEqual(np.shape(x), np.shape(x_t))
+        self.assertTupleEqual(np.shape(y), np.shape(y_t))
+
+        # numpy - numerical - regression
+        x = np.random.random_sample((4, 4))
+        y = np.random.random_sample(4)
+        validator = InputValidator()
+        x_t, y_t = validator.validate(x, y, is_classification=False)
+        np.testing.assert_array_equal(x, x_t)  # No change to valid data
+        np.testing.assert_array_equal(y, y_t)
+        self.assertEqual(type_of_target(y_t), 'continuous')
+
+        # pandas - categorical - classification
+        x = pd.DataFrame({'A': np.random.choice(['a', 'b'], 4),
+                          'B': np.random.choice(['a', 'b'], 4)},
+                         dtype='category')
+        y = pd.DataFrame(np.random.choice(['c', 'd'], 4), dtype='category')
+        validator = InputValidator()
+        x_t, y_t = validator.validate(x, y, is_classification=True)
+        self.assertTrue(np.issubdtype(x_t.dtype, np.number))
+        self.assertTrue(np.issubdtype(y_t.dtype, np.number))
+        self.assertEqual(type_of_target(y_t), 'binary')
+        self.assertTupleEqual(np.shape(x), np.shape(x_t))
+        self.assertTupleEqual(np.shape(y.to_numpy().reshape(-1)), np.shape(y_t))  # ravel
+
+        # pandas - categorical - regression
+        x = pd.DataFrame({'A': np.random.choice(['a', 'b'], 4),
+                          'B': np.random.choice(['a', 'b'], 4)},
+                         dtype='category')
+        y = pd.DataFrame(np.random.random_sample(4))
+        validator = InputValidator()
+        x_t, y_t = validator.validate(x, y, is_classification=False)
+        self.assertTrue(np.issubdtype(x_t.dtype, np.number))
+        self.assertTrue(np.issubdtype(y_t.dtype, np.number))
+        self.assertEqual(type_of_target(y_t), 'continuous')
+        self.assertTupleEqual(np.shape(x), np.shape(x_t))
+        np.testing.assert_array_equal(y.to_numpy().reshape(-1), y_t)
+        self.assertTupleEqual(np.shape(y.to_numpy().reshape(-1)), np.shape(y_t))  # ravel version
+
+        # pandas - numerical - classification
+        x = pd.DataFrame({'A': np.random.random_sample(4),
+                          'B': np.random.choice([2.5, 1.2], 4)})
+        y = pd.DataFrame([1.0, 2.2, 3.2, 2.2])
+        validator = InputValidator()
+        x_t, y_t = validator.validate(x, y, is_classification=True)
+        self.assertTrue(np.issubdtype(x_t.dtype, np.number))
+        self.assertTrue(np.issubdtype(y_t.dtype, np.number))
+        self.assertEqual(type_of_target(y_t), 'multiclass')
+        self.assertTupleEqual(np.shape(x), np.shape(x_t))
+        np.testing.assert_array_equal(np.array([0, 1, 2, 1]), y_t)
+        self.assertTupleEqual(np.shape(y.to_numpy().reshape(-1)), np.shape(y_t))  # ravel
+
+        # pandas - numerical - regression
+        x = pd.DataFrame({'A': np.random.choice([1.5, 3.6], 4),
+                          'B': np.random.choice([2.5, 1.2], 4)})
+        y = pd.DataFrame(np.random.random_sample(4))
+        validator = InputValidator()
+        x_t, y_t = validator.validate(x, y, is_classification=False)
+        self.assertTrue(np.issubdtype(x_t.dtype, np.number))
+        self.assertTrue(np.issubdtype(y_t.dtype, np.number))
+        self.assertEqual(type_of_target(y_t), 'continuous')
+        self.assertTupleEqual(np.shape(x), np.shape(x_t))
+        self.assertTupleEqual(np.shape(y.to_numpy().reshape(-1)), np.shape(y_t))  # ravel
+        np.testing.assert_array_equal(y.to_numpy().reshape(-1), y_t)
+        return
+
+    def test_NaN(self):
+        # numpy - categorical - classification
+        # np.nan in categorical array means that the array will be
+        # type string, and np.nan will be casted as 'nan'.
+        # In turn, 'nan' will be another category
+        x = np.array(['a', 'b', 'c', 'a', 'b', np.nan]).reshape(-1, 1)
+        validator = InputValidator()
+        x_t, y_t = validator.validate(x, np.copy(x), is_classification=True)
+        self.assertTrue(np.issubdtype(x_t.dtype, np.number))
+        self.assertTrue(np.issubdtype(y_t.dtype, np.number))
+        self.assertFalse(np.isnan(x_t).any())
+        self.assertEqual(type_of_target(y_t), 'multiclass')
+        self.assertTupleEqual(np.shape(x), np.shape(x_t))
+
+        # numpy - categorical - regression
+        # nan in target should raise error
+        y = np.random.random_sample((6, 1))
+        y[1] = np.nan
+        with self.assertRaisesRegex(ValueError, 'Target values cannot contain missing/NaN'):
+            InputValidator().validate_target(y)
+
+        # numpy - numerical - classification
+        # Numerical numpy features should continue without encoding
+        # categorical encoding of Nan for the targets is not supported
+        x = np.random.random_sample((4, 4))
+        x[3] = np.nan
+        y = np.random.choice([0.0, 1.0], 4)
+        y[1] = np.nan
+        x_t = InputValidator().validate_features(x)
+        self.assertTrue(np.issubdtype(x_t.dtype, np.number))
+        self.assertTrue(np.isnan(x_t).any())
+        self.assertEqual(type_of_target(y_t), 'multiclass')
+        self.assertTupleEqual(np.shape(x), np.shape(x_t))
+
+        with self.assertRaisesRegex(ValueError, 'Target values cannot contain missing/NaN'):
+            InputValidator().validate_target(y, is_classification=True)
+
+        with self.assertRaisesRegex(ValueError, 'Target values cannot contain missing/NaN'):
+            InputValidator().validate_target(y, is_classification=False)
+
+        x = np.random.random_sample(4)
+        x[3] = np.nan
+        x = pd.DataFrame(data={'A': x, 'B': x*2})
+        y = np.random.choice([0.0, 1.0], 4)
+        y[1] = np.nan
+        y = pd.DataFrame(y)
+
+        with self.assertRaisesRegex(ValueError, 'Categorical features array cannot contain'):
+            InputValidator().validate_features(x)
+
+        with self.assertRaisesRegex(ValueError, 'Target values cannot contain missing/NaN'):
+            InputValidator().validate_target(y, is_classification=True)
+
+        with self.assertRaisesRegex(ValueError, 'Target values cannot contain missing/NaN'):
+            InputValidator().validate_target(y, is_classification=False)
+        return
+
+    def test_no_new_category_after_fit(self):
+        # First make sure no problem if no categorical
+        x = pd.DataFrame({'A': [1, 2, 3, 4], 'B': [5, 6, 7, 8]})
+        y = pd.DataFrame([1, 2, 3, 4])
+        validator = InputValidator()
+        validator.validate(x, y, is_classification=True)
+        validator.validate_features(x)
+        x['A'] = x['A'].apply(lambda x: x*x)
+        validator.validate_features(x)
+
+        # Then make sure we catch categorical extra categories
+        x = pd.DataFrame({'A': [1, 2, 3, 4], 'B': [5, 6, 7, 8]}, dtype='category')
+        y = pd.DataFrame([1, 2, 3, 4])
+        validator = InputValidator()
+        validator.validate(x, y, is_classification=True)
+        validator.validate_features(x)
+        x['A'] = x['A'].apply(lambda x: x*x)
+        with self.assertRaisesRegex(
+            ValueError,
+            'During fit, the input features contained categorical values'
+        ):
+            validator.validate_features(x)
+
+        # For label encoder of targets
+        with self.assertRaisesRegex(
+            ValueError,
+            'During fit, the target array contained the categorical'
+        ):
+            validator.validate_target(pd.DataFrame([1, 2, 5, 4]))
+
+        # For ordinal encoder of targets
+        x = pd.DataFrame({'A': [1, 2, 3, 4], 'B': [5, 6, 7, 8]}, dtype='category')
+        validator = InputValidator()
+        validator.validate(x, x, is_classification=True)
+        validator.validate_target(pd.DataFrame(
+            {'A': [1, 2, 3, 4], 'B': [5, 6, 7, 8]}, dtype='category')
+        )
+        with self.assertRaisesRegex(
+            ValueError,
+            'During fit, the target array contained the categorical'
+        ):
+            validator.validate_target(pd.DataFrame(
+                {'A': [1, 2, 3, 4], 'B': [5, 9, 7, 8]}, dtype='category')
+            )
+        return
+
+    def test_big_dataset_encoding(self):
+        x, y = sklearn.datasets.fetch_openml(data_id=2, return_X_y=True, as_frame=True)
+        validator = InputValidator()
+
+        with self.assertRaisesRegex(
+            ValueError,
+            'Categorical features array cannot contain missing/NaN values'
+        ):
+            x_t, y_t = validator.validate(x, y, is_classification=True)
+
+        # Make sure translation works apart from Nan
+
+        # Drop columns that are all nan
+        x = x.dropna('columns')
+        # Fill the nan with forward/backward references and retry
+        x = x.fillna(method='ffill')
+        x_t, y_t = validator.validate(x, y, is_classification=True)
+        self.assertFalse(np.isnan(x_t).any())
+
+        # make sure everything was encoded to number
+        self.assertTrue(np.issubdtype(x_t.dtype, np.number))
+
+        # No change to numerical columns
+        np.testing.assert_array_equal(x['carbon'].to_numpy(), x_t[:, 3])
+
+        return
