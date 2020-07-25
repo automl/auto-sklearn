@@ -910,6 +910,8 @@ class TrainEvaluator(AbstractEvaluator):
                 ref_arg_dict = __baseCrossValidator_defaults__[class_name]
 
                 y = D.data['Y_train']
+                if D.info['task'] in CLASSIFICATION_TASKS and D.info['task'] != MULTILABEL_CLASSIFICATION:
+                    y = y.ravel()
                 if class_name == 'PredefinedSplit':
                     if 'test_fold' not in self.resampling_strategy_args:
                         raise ValueError('Must provide parameter test_fold'
