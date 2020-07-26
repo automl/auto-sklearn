@@ -5,36 +5,36 @@
 
 Computation times
 =================
-**28:34.915** total execution time for **examples** files:
+**28:43.898** total execution time for **examples** files:
 
 +--------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_example_metrics.py` (``example_metrics.py``)                                   | 04:34.952 | 0.0 MB |
+| :ref:`sphx_glr_examples_example_metrics.py` (``example_metrics.py``)                                   | 04:35.171 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_example_random_search.py` (``example_random_search.py``)                       | 03:50.548 | 0.0 MB |
+| :ref:`sphx_glr_examples_example_random_search.py` (``example_random_search.py``)                       | 03:51.319 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_example_crossvalidation.py` (``example_crossvalidation.py``)                   | 02:10.514 | 0.0 MB |
+| :ref:`sphx_glr_examples_example_crossvalidation.py` (``example_crossvalidation.py``)                   | 02:10.427 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_example_successive_halving.py` (``example_successive_halving.py``)             | 02:06.799 | 0.0 MB |
+| :ref:`sphx_glr_examples_example_successive_halving.py` (``example_successive_halving.py``)             | 02:06.464 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_example_feature_types.py` (``example_feature_types.py``)                       | 02:01.510 | 0.0 MB |
+| :ref:`sphx_glr_examples_example_parallel_n_jobs.py` (``example_parallel_n_jobs.py``)                   | 02:06.410 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_example_parallel_n_jobs.py` (``example_parallel_n_jobs.py``)                   | 02:00.515 | 0.0 MB |
+| :ref:`sphx_glr_examples_example_feature_types.py` (``example_feature_types.py``)                       | 02:01.443 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_example_sequential.py` (``example_sequential.py``)                             | 01:55.549 | 0.0 MB |
+| :ref:`sphx_glr_examples_example_sequential.py` (``example_sequential.py``)                             | 01:55.557 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_example_holdout.py` (``example_holdout.py``)                                   | 01:55.423 | 0.0 MB |
+| :ref:`sphx_glr_examples_example_eips.py` (``example_eips.py``)                                         | 01:55.506 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_example_eips.py` (``example_eips.py``)                                         | 01:55.103 | 0.0 MB |
+| :ref:`sphx_glr_examples_example_holdout.py` (``example_holdout.py``)                                   | 01:55.268 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_example_get_pipeline_components.py` (``example_get_pipeline_components.py``)   | 01:55.044 | 0.0 MB |
+| :ref:`sphx_glr_examples_example_regression.py` (``example_regression.py``)                             | 01:55.021 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_example_regression.py` (``example_regression.py``)                             | 01:55.004 | 0.0 MB |
+| :ref:`sphx_glr_examples_example_get_pipeline_components.py` (``example_get_pipeline_components.py``)   | 01:54.800 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_example_parallel_manual_spawning.py` (``example_parallel_manual_spawning.py``) | 01:00.878 | 0.0 MB |
+| :ref:`sphx_glr_examples_example_parallel_manual_spawning.py` (``example_parallel_manual_spawning.py``) | 01:03.459 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_example_extending_preprocessor.py` (``example_extending_preprocessor.py``)     | 00:24.514 | 0.0 MB |
+| :ref:`sphx_glr_examples_example_extending_classification.py` (``example_extending_classification.py``) | 00:24.392 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_example_extending_classification.py` (``example_extending_classification.py``) | 00:24.298 | 0.0 MB |
+| :ref:`sphx_glr_examples_example_extending_preprocessor.py` (``example_extending_preprocessor.py``)     | 00:24.337 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_example_extending_regression.py` (``example_extending_regression.py``)         | 00:24.266 | 0.0 MB |
+| :ref:`sphx_glr_examples_example_extending_regression.py` (``example_extending_regression.py``)         | 00:24.322 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------+-----------+--------+
