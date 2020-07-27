@@ -416,7 +416,12 @@ class AutoML(BaseEstimator):
 
             # Create a queue to communicate with the ensemble process
             # And get the run history
-            queue = multiprocessing.Queue()
+            # Use a Manager as a workaround to memory errors cause
+            # by three subprocesses (Automl-ensemble_builder-pynisher)
+            mgr = multiprocessing.Manager()
+            mgr.Namespace()
+            queue = mgr.Queue()
+
             self._proc_ensemble = self._get_ensemble_process(
                 time_left_for_ensembles,
                 queue=queue,
@@ -517,6 +522,7 @@ class AutoML(BaseEstimator):
             self.ensemble_performance_history = self._proc_ensemble.get_ensemble_history()
 
         self._proc_ensemble = None
+
         if load_models:
             self._load_models()
 

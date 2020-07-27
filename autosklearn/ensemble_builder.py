@@ -215,12 +215,16 @@ class EnsembleBuilder(multiprocessing.Process):
         # A Queue is needed to handle multiprocessing, not only
         # internally for pynisher calls, but to return data
         # to the main process
-        # We need to do a put/get to properly initialize the queue
-        # else we run into pynisher problems. For that reason we initialize
-        # a queue namespace. This makes the code robust against a termination
-        mgr = multiprocessing.Manager()
-        mgr.Namespace()
-        self.queue = queue if queue is not None else multiprocessing.Queue()
+        # Hence, because we are using three different processes,
+        # the below strategy prevents MemoryErrors. That is,
+        # without clearly isolating the queue with a manger,
+        # we run into a threading MemoryError
+        if queue is None:
+            mgr = multiprocessing.Manager()
+            mgr.Namespace()
+            self.queue = mgr.Queue()
+        else:
+            self.queue = queue
         self.queue.put([])
         self.queue.get()
 
@@ -904,9 +908,7 @@ class EnsembleBuilder(multiprocessing.Process):
         if n_preds == predictions.shape[0]:
             y = ensemble.predict(predictions)
             if self.task_type == BINARY_CLASSIFICATION:
-                # If on a binary task, and uncertain predictions (0.5)
-                # Make sure we round to 0/1
-                y = np.around(y[:, 1], decimals=0)
+                y = y[:, 1]
             if self.SAVE2DISC:
                 self.backend.save_predictions_as_txt(
                     predictions=y,
