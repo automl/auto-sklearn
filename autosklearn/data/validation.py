@@ -83,10 +83,19 @@ class InputValidator:
         Dataframe to a valid input for sklearn.
         """
 
+        # Do not support category/string numpy data. Only numbers
+        if hasattr(X, "dtype") and not np.issubdtype(X.dtype.type, np.number):
+            raise ValueError(
+                "When providing a numpy array to Auto-sklearn, the only valid "
+                "dtypes are numerical ones. The provided data type {} is not supported."
+                "".format(
+                    X.dtype.type,
+                )
+            )
+
         # Pre-process dataframe to make them numerical
         # Also, encode numpy categorical objects
-        if (hasattr(X, "iloc") or (hasattr(X, "dtype") and X.dtype.type is np.str_)) \
-                and not scipy.sparse.issparse(X):
+        if hasattr(X, "iloc") and not scipy.sparse.issparse(X):
             # Pandas validation provide extra user information
             X = self._check_and_encode_features(X)
 
@@ -124,9 +133,7 @@ class InputValidator:
         # No Nan is supported
         if np.any(pd.isnull(y)):
             raise ValueError("Target values cannot contain missing/NaN values. "
-                             "You can pre-process your data via: "
-                             "https://scikit-learn.org/stable/modules/impute.html "
-                             "before feeding it to auto-sklearn."
+                             "This is not supported by scikit-learn. "
                              )
 
         if not hasattr(y, "iloc"):
@@ -213,7 +220,11 @@ class InputValidator:
         # Make sure each column is a valid type
         for i, column in enumerate(X.columns):
             if X[column].dtype.name in self.valid_pd_enc_dtypes:
-                enc_columns.append(i)
+
+                if hasattr(X, "iloc"):
+                    enc_columns.append(column)
+                else:
+                    enc_columns.append(i)
                 feature_types.append('categorical')
             elif not np.issubdtype(X[column].dtype, np.number):
                 if X[column].dtype.name == 'object':
@@ -263,13 +274,22 @@ class InputValidator:
         Uses .iloc as a safe way to deal with pandas object
         """
 
-        # No Nan is supported
-        if np.any(pd.isnull(X)):
+        # If there is a Nan, we cannot encode it due to a scikit learn limitation
+        if np.any(pd.isnull(X.dropna(axis='columns', how='all'))):
+            # Ignore all NaN columns, and if still a NaN
+            # Error out
             raise ValueError("Categorical features array cannot contain missing/NaN values. "
                              "You can pre-process your data via: "
                              "https://scikit-learn.org/stable/modules/impute.html "
                              "before feeding it to auto-sklearn."
                              )
+        elif np.any(pd.isnull(X)):
+            # After above check it means that if there is a NaN
+            # the whole column must be NaN
+            # Make sure it is numerical and let the pipeline handle it
+            for column in X.columns:
+                if X[column].isna().all():
+                    X[column] = pd.to_numeric(X[column])
 
         # Start with the features
         if hasattr(X, "iloc"):
@@ -277,7 +297,7 @@ class InputValidator:
         else:
             if len(X.shape) < 1:
                 raise ValueError("Expected features to have more than 1 dimensionality"
-                                 "Your features should at least be a 2-D like array object."
+                                 "Your features should be reshaped to a 2-D like array object."
                                  "You can do so via np.reshape(-1,1). "
                                  )
             enc_columns = list(range(X.shape[1]))
@@ -323,7 +343,9 @@ class InputValidator:
                         "During fit, the input features contained categorical values in columns"
                         "{}, with categories {} which were encoded by Auto-sklearn automatically."
                         "Nevertheless, a new input contained new categories not seen during "
-                        " training = {}."
+                        "training = {}. The OrdinalEncoder used by Auto-sklearn cannot handle "
+                        "this yet (due to a limitation on scikit-learn being addressed via:"
+                        " https://github.com/scikit-learn/scikit-learn/issues/17123)"
                         "".format(
                             self.enc_columns,
                             self.feature_encoder.transformers_[0][1].categories_,
@@ -392,7 +414,9 @@ class InputValidator:
                     "During fit, the target array contained the categorical values {} "
                     "which were encoded by Auto-sklearn automatically. "
                     "Nevertheless, a new target set contained new categories not seen during "
-                    " training = {}."
+                    "training = {}. The OrdinalEncoder used by Auto-sklearn cannot handle "
+                    "this yet (due to a limitation on scikit-learn being addressed via:"
+                    " https://github.com/scikit-learn/scikit-learn/issues/17123)"
                     "".format(
                         self.target_encoder.transformers_[0][1].categories_,
                         e.args[0],
@@ -404,8 +428,8 @@ class InputValidator:
                     "During fit, the target array contained the categorical values {} "
                     "which were encoded by Auto-sklearn automatically. "
                     "Nevertheless, a new target set contained new categories not seen during "
-                    " training = {}."
-                    "".format(
+                    "training = {}. This is a limitation in scikit-learn encoders being "
+                    "discussed in //github.com/scikit-learn/scikit-learn/issues/17123".format(
                         self.target_encoder.classes_,
                         e.args[0],
                     )

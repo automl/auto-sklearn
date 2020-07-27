@@ -305,22 +305,14 @@ class InputValidatorTest(unittest.TestCase):
         # numpy - categorical - classification
         x = np.array(['a', 'b', 'c', 'a', 'b', 'c']).reshape(-1, 1)
         validator = InputValidator()
-        x_t, y_t = validator.validate(x, np.copy(x), is_classification=True)
-        self.assertTrue(np.issubdtype(x_t.dtype, np.number))
-        self.assertTrue(np.issubdtype(y_t.dtype, np.number))
-        self.assertEqual(type_of_target(y_t), 'multiclass')
-        self.assertTupleEqual(np.shape(x), np.shape(x_t))
+        with self.assertRaisesRegex(ValueError,
+                                    'the only valid dtypes are numerical ones'):
+            x_t, y_t = validator.validate(x, np.copy(x), is_classification=True)
 
         # numpy - categorical - regression
-        x = np.array(['a', 'b', 'c', 'a', 'b', 'c']).reshape(-1, 1)
-        y = np.random.random_sample((6, 1))
-        validator = InputValidator()
-        x_t, y_t = validator.validate(x, y, is_classification=False)
-        self.assertTrue(np.issubdtype(x_t.dtype, np.number))
-        self.assertTrue(np.issubdtype(y_t.dtype, np.number))
-        self.assertEqual(type_of_target(y_t), 'continuous')
-        self.assertTupleEqual(np.shape(x), np.shape(x_t))
-        self.assertTupleEqual(np.shape(y.reshape(-1)), np.shape(y_t))  # ravel version
+        with self.assertRaisesRegex(ValueError,
+                                    'the only valid dtypes are numerical ones'):
+            x_t, y_t = validator.validate(x, np.copy(x), is_classification=False)
 
         # numpy - numerical - classification
         x = np.random.random_sample((4, 4))
@@ -401,12 +393,13 @@ class InputValidatorTest(unittest.TestCase):
         # np.nan in categorical array means that the array will be
         # type string, and np.nan will be casted as 'nan'.
         # In turn, 'nan' will be another category
-        x = np.array(['a', 'b', 'c', 'a', 'b', np.nan]).reshape(-1, 1)
+        x = np.array([1, 2, 3, 4, 5.0, np.nan]).reshape(-1, 1)
+        y = np.array([1, 2, 3, 4, 5.0, 6.0]).reshape(-1, 1)
         validator = InputValidator()
-        x_t, y_t = validator.validate(x, np.copy(x), is_classification=True)
+        x_t, y_t = validator.validate(x, y, is_classification=True)
         self.assertTrue(np.issubdtype(x_t.dtype, np.number))
         self.assertTrue(np.issubdtype(y_t.dtype, np.number))
-        self.assertFalse(np.isnan(x_t).any())
+        self.assertTrue(np.isnan(x_t).any())  # Preserve NaN in features
         self.assertEqual(type_of_target(y_t), 'multiclass')
         self.assertTupleEqual(np.shape(x), np.shape(x_t))
 
@@ -511,12 +504,24 @@ class InputValidatorTest(unittest.TestCase):
 
         # Make sure translation works apart from Nan
 
-        # Drop columns that are all nan
-        x = x.dropna('columns')
-        # Fill the nan with forward/backward references and retry
-        x = x.fillna(method='ffill')
+        # NaN is not supported in categories, so
+        # drop columns with them. Also, do a proof of concept
+        # that all nan column is preserved, so that the pipeline deal
+        # with it
+        x = x.dropna('columns', 'any')
+        x.insert(len(x.columns), 'NaNColumn', np.nan, True)
         x_t, y_t = validator.validate(x, y, is_classification=True)
-        self.assertFalse(np.isnan(x_t).any())
+        self.assertTupleEqual(np.shape(x), np.shape(x_t))
+
+        self.assertTrue(np.all(pd.isnull(x_t[:, -1])))
+
+        # Leave columns that are complete NaN
+        # The sklearn pipeline will handle that
+        self.assertTrue(np.isnan(x_t).any())
+        np.testing.assert_array_equal(
+            pd.isnull(x.dropna(axis='columns', how='all')),
+            pd.isnull(x.dropna(axis='columns', how='any'))
+        )
 
         # make sure everything was encoded to number
         self.assertTrue(np.issubdtype(x_t.dtype, np.number))
