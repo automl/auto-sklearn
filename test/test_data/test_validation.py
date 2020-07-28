@@ -436,7 +436,7 @@ class InputValidatorTest(unittest.TestCase):
         y[1] = np.nan
         y = pd.DataFrame(y)
 
-        with self.assertRaisesRegex(ValueError, 'Categorical features array cannot contain'):
+        with self.assertRaisesRegex(ValueError, 'Categorical features in a dataframe cannot'):
             InputValidator().validate_features(x)
 
         with self.assertRaisesRegex(ValueError, 'Target values cannot contain missing/NaN'):
@@ -498,7 +498,7 @@ class InputValidatorTest(unittest.TestCase):
 
         with self.assertRaisesRegex(
             ValueError,
-            'Categorical features array cannot contain missing/NaN values'
+            'Categorical features in a dataframe cannot contain missing/NaN'
         ):
             x_t, y_t = validator.validate(x, y, is_classification=True)
 
