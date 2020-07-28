@@ -259,7 +259,7 @@ class Backend(object):
         filepath = self._get_targets_ensemble_filename()
 
         # Try to open the file without locking it, this will reduce the
-        # number of times where we erronously keep a lock on the ensemble
+        # number of times where we erroneously keep a lock on the ensemble
         # targets file although the process already was killed
         try:
             existing_targets = np.load(filepath, allow_pickle=True)

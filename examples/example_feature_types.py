@@ -8,7 +8,7 @@ In *auto-sklearn* it is possible to specify the feature types of a dataset when 
 :meth:`fit() <autosklearn.classification.AutoSklearnClassifier.fit>` by specifying the argument
 ``feat_type``. The following example demonstrates a way it can be done.
 """
-
+import pandas as pd
 import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
@@ -41,7 +41,7 @@ cls = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
     per_run_time_limit=30,
 )
-cls.fit(X_train, y_train, feat_type=feat_type)
+cls.fit(X_train, y_train, X_test, y_test, feat_type=feat_type)
 
 ###########################################################################
 # Get the Score of the final ensemble
@@ -49,3 +49,9 @@ cls.fit(X_train, y_train, feat_type=feat_type)
 
 predictions = cls.predict(X_test)
 print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+
+############################################################################
+# Print the ensemble performance
+# ===================================
+ensemble_performance_frame = pd.DataFrame(cls._automl[0].ensemble_performance_history)
+print(ensemble_performance_frame)

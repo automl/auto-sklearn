@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 import io
 import json
+import multiprocessing
 import os
 from typing import Optional, List
 import unittest.mock
@@ -187,6 +188,10 @@ class AutoML(BaseEstimator):
         self._can_predict = False
 
         self._debug_mode = debug_mode
+
+        # Place holder for the run history of the
+        # Ensemble building process
+        self.ensemble_performance_history = []
 
         if not isinstance(self._time_for_task, int):
             raise ValueError("time_left_for_this_task not of type integer, "
@@ -408,7 +413,19 @@ class AutoML(BaseEstimator):
         else:
             self._logger.info(
                 'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
-            self._proc_ensemble = self._get_ensemble_process(time_left_for_ensembles)
+
+            # Create a queue to communicate with the ensemble process
+            # And get the run history
+            # Use a Manager as a workaround to memory errors cause
+            # by three subprocesses (Automl-ensemble_builder-pynisher)
+            mgr = multiprocessing.Manager()
+            mgr.Namespace()
+            queue = mgr.Queue()
+
+            self._proc_ensemble = self._get_ensemble_process(
+                time_left_for_ensembles,
+                queue=queue,
+            )
             self._proc_ensemble.start()
 
         self._stopwatch.stop_task(ensemble_task_name)
@@ -502,8 +519,10 @@ class AutoML(BaseEstimator):
         # while the ensemble builder tries to access the data
         if self._proc_ensemble is not None and self._ensemble_size > 0:
             self._proc_ensemble.join()
+            self.ensemble_performance_history = self._proc_ensemble.get_ensemble_history()
 
         self._proc_ensemble = None
+
         if load_models:
             self._load_models()
 
@@ -644,6 +663,7 @@ class AutoML(BaseEstimator):
             1, task, precision, dataset_name, max_iterations=1,
             ensemble_nbest=ensemble_nbest, ensemble_size=ensemble_size)
         self._proc_ensemble.main()
+        self.ensemble_performance_history = self._proc_ensemble.get_ensemble_history()
         self._proc_ensemble = None
         self._load_models()
         return self
@@ -651,7 +671,7 @@ class AutoML(BaseEstimator):
     def _get_ensemble_process(self, time_left_for_ensembles,
                               task=None, precision=None,
                               dataset_name=None, max_iterations=None,
-                              ensemble_nbest=None, ensemble_size=None):
+                              ensemble_nbest=None, ensemble_size=None, queue=None):
 
         if task is None:
             task = self._task
@@ -694,6 +714,7 @@ class AutoML(BaseEstimator):
             read_at_most=np.inf,
             memory_limit=self._ensemble_memory_limit,
             random_state=self._seed,
+            queue=queue,
         )
 
     def _load_models(self):
