@@ -192,7 +192,7 @@ class AutoML(BaseEstimator):
         self._debug_mode = debug_mode
 
         self.InputValidator = InputValidator()
-        
+
         # Place holder for the run history of the
         # Ensemble building process
         self.ensemble_performance_history = []
