@@ -282,7 +282,7 @@ class InputValidator:
                              "missing/NaN values. The OrdinalEncoder used by "
                              "Auto-sklearn cannot handle this yet (due to a "
                              "limitation on scikit-learn being addressed via: "
-                             "https://github.com/scikit-learn/scikit-learn/issues/17123)""
+                             "https://github.com/scikit-learn/scikit-learn/issues/17123)"
                              )
         elif np.any(pd.isnull(X)):
             # After above check it means that if there is a NaN
