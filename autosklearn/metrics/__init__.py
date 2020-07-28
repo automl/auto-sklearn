@@ -50,7 +50,13 @@ class _PredictScorer(Scorer):
             Score function applied to prediction of estimator on X.
         """
         type_true = type_of_target(y_true)
-        if len(y_pred.shape) == 1 or y_pred.shape[1] == 1 or \
+        if type_true == 'binary' and type_of_target(y_pred) == 'continuous' and \
+                len(y_pred.shape) == 1:
+            # For a pred scorer, no threshold, nor probability is required
+            # If y_true is binary, and y_pred is continuous
+            # it means that a rounding is necessary to obtain the binary class
+            y_pred = np.around(y_pred, decimals=0)
+        elif len(y_pred.shape) == 1 or y_pred.shape[1] == 1 or \
                 type_true == 'continuous':
             # must be regression, all other task types would return at least
             # two probabilities
