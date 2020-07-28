@@ -278,10 +278,11 @@ class InputValidator:
         if np.any(pd.isnull(X.dropna(axis='columns', how='all'))):
             # Ignore all NaN columns, and if still a NaN
             # Error out
-            raise ValueError("Categorical features array cannot contain missing/NaN values. "
-                             "You can pre-process your data via: "
-                             "https://scikit-learn.org/stable/modules/impute.html "
-                             "before feeding it to auto-sklearn."
+            raise ValueError("Categorical features in a dataframe cannot contain "
+                             "missing/NaN values. The OrdinalEncoder used by "
+                             "Auto-sklearn cannot handle this yet (due to a "
+                             "limitation on scikit-learn being addressed via: "
+                             "https://github.com/scikit-learn/scikit-learn/issues/17123)""
                              )
         elif np.any(pd.isnull(X)):
             # After above check it means that if there is a NaN
@@ -296,8 +297,8 @@ class InputValidator:
             enc_columns, feature_types = self._check_and_get_columns_to_encode(X)
         else:
             if len(X.shape) < 1:
-                raise ValueError("Expected features to have more than 1 dimensionality"
-                                 "Your features should be reshaped to a 2-D like array object."
+                raise ValueError("Input data X cannot be one dimensional "
+                                 "and need to be reshaped to a 2-D array-like object."
                                  "You can do so via np.reshape(-1,1). "
                                  )
             enc_columns = list(range(X.shape[1]))
