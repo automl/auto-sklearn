@@ -162,7 +162,13 @@
 <span class="sd">            Score function applied to prediction of estimator on X.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">type_true</span> <span class="o">=</span> <span class="n">type_of_target</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">y_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> \
+        <span class="k">if</span> <span class="n">type_true</span> <span class="o">==</span> <span class="s1">&#39;binary&#39;</span> <span class="ow">and</span> <span class="n">type_of_target</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span> <span class="ow">and</span> \
+                <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># For a pred scorer, no threshold, nor probability is required</span>
+            <span class="c1"># If y_true is binary, and y_pred is continuous</span>
+            <span class="c1"># it means that a rounding is necessary to obtain the binary class</span>
+            <span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">y_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> \
                 <span class="n">type_true</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
             <span class="c1"># must be regression, all other task types would return at least</span>
             <span class="c1"># two probabilities</span>
