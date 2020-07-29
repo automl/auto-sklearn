@@ -1,11 +1,21 @@
 from abc import ABCMeta, abstractmethod
+from typing import Dict, List, Tuple
+
+import numpy as np
+
+from autosklearn.pipeline.base import BasePipeline
 
 
 class AbstractEnsemble(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def fit(self, base_models_predictions, true_targets, model_identifiers):
+    def fit(
+        self,
+        base_models_predictions: np.ndarray,
+        true_targets: np.ndarray,
+        model_identifiers: List[Tuple[int, int, float]],
+    ) -> 'AbstractEnsemble':
         """Fit an ensemble given predictions of base models and targets.
 
         Ensemble building maximizes performance (in contrast to
@@ -30,7 +40,7 @@ class AbstractEnsemble(object):
         pass
 
     @abstractmethod
-    def predict(self, base_models_predictions):
+    def predict(self, base_models_predictions: np.ndarray) -> np.ndarray:
         """Create ensemble predictions from the base model predictions.
 
         Parameters
@@ -45,7 +55,7 @@ class AbstractEnsemble(object):
         self
 
     @abstractmethod
-    def get_models_with_weights(self, models):
+    def get_models_with_weights(self, models: Dict) -> List[Tuple[float, BasePipeline]]:
         """Return a list of (weight, model) pairs
 
         Parameters
@@ -60,7 +70,7 @@ class AbstractEnsemble(object):
         """
 
     @abstractmethod
-    def get_selected_model_identifiers(self):
+    def get_selected_model_identifiers(self) -> List[Tuple[int, int, float]]:
         """Return identifiers of models in the ensemble.
 
         This includes models which have a weight of zero!
@@ -71,7 +81,7 @@ class AbstractEnsemble(object):
         """
 
     @abstractmethod
-    def get_validation_performance(self):
+    def get_validation_performance(self) -> float:
         """Return validation performance of ensemble.
 
         Return

@@ -2,7 +2,7 @@
 import numpy as np
 
 
-def sanitize_array(array):
+def sanitize_array(array: np.ndarray) -> np.ndarray:
     """
     Replace NaN and Inf (there should not be any!)
     :param array:

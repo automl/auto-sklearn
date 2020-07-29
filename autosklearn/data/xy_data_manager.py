@@ -1,20 +1,33 @@
 # -*- encoding: utf-8 -*-
+from typing import List, Optional
 
 import numpy as np
+
 from scipy import sparse
 
-from autosklearn.constants import STRING_TO_TASK_TYPES, REGRESSION, BINARY_CLASSIFICATION, \
-    MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION, MULTIOUTPUT_REGRESSION
+from autosklearn.constants import (
+    BINARY_CLASSIFICATION,
+    MULTICLASS_CLASSIFICATION,
+    MULTILABEL_CLASSIFICATION,
+    MULTIOUTPUT_REGRESSION,
+    REGRESSION,
+)
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 
 
 class XYDataManager(AbstractDataManager):
 
-    def __init__(self, X, y, X_test, y_test, task, feat_type, dataset_name):
+    def __init__(
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        X_test: Optional[np.ndarray],
+        y_test: Optional[np.ndarray],
+        task: int,
+        feat_type: List[str],
+        dataset_name: str
+    ):
         super(XYDataManager, self).__init__(dataset_name)
-
-        if isinstance(task, str):
-            task = STRING_TO_TASK_TYPES[task]
 
         self.info['task'] = task
         if sparse.issparse(X):

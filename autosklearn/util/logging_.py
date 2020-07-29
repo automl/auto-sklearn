@@ -2,11 +2,13 @@
 import logging
 import logging.config
 import os
+from typing import Any, Dict, Optional
 
 import yaml
 
 
-def setup_logger(output_file=None, logging_config=None):
+def setup_logger(output_file: Optional[str] = None, logging_config: Optional[Dict] = None
+                 ) -> None:
     # logging_config must be a dictionary object specifying the configuration
     # for the loggers to be used in auto-sklearn.
     if logging_config is not None:
@@ -22,22 +24,22 @@ def setup_logger(output_file=None, logging_config=None):
         logging.config.dictConfig(logging_config)
 
 
-def _create_logger(name):
+def _create_logger(name: str) -> logging.Logger:
     return logging.getLogger(name)
 
 
-def get_logger(name):
+def get_logger(name: str) -> 'PickableLoggerAdapter':
     logger = PickableLoggerAdapter(name)
     return logger
 
 
 class PickableLoggerAdapter(object):
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         self.name = name
         self.logger = _create_logger(name)
 
-    def __getstate__(self):
+    def __getstate__(self) -> Dict[str, Any]:
         """
         Method is called when pickle dumps an object.
 
@@ -48,7 +50,7 @@ class PickableLoggerAdapter(object):
         """
         return {'name': self.name}
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: Dict[str, Any]) -> None:
         """
         Method is called when pickle loads an object. Retrieves the name and
         creates a logger.
@@ -61,26 +63,26 @@ class PickableLoggerAdapter(object):
         self.name = state['name']
         self.logger = _create_logger(self.name)
 
-    def debug(self, msg, *args, **kwargs):
+    def debug(self, msg: str, *args: Any, **kwargs: Any) -> None:
         self.logger.debug(msg, *args, **kwargs)
 
-    def info(self, msg, *args, **kwargs):
+    def info(self, msg: str, *args: Any, **kwargs: Any) -> None:
         self.logger.info(msg, *args, **kwargs)
 
-    def warning(self, msg, *args, **kwargs):
+    def warning(self, msg: str, *args: Any, **kwargs: Any) -> None:
         self.logger.warning(msg, *args, **kwargs)
 
-    def error(self, msg, *args, **kwargs):
+    def error(self, msg: str, *args: Any, **kwargs: Any) -> None:
         self.logger.error(msg, *args, **kwargs)
 
-    def exception(self, msg, *args, **kwargs):
+    def exception(self, msg: str, *args: Any, **kwargs: Any) -> None:
         self.logger.exception(msg, *args, **kwargs)
 
-    def critical(self, msg, *args, **kwargs):
+    def critical(self, msg: str, *args: Any, **kwargs: Any) -> None:
         self.logger.critical(msg, *args, **kwargs)
 
-    def log(self, level, msg, *args, **kwargs):
+    def log(self, level: int, msg: str, *args: Any, **kwargs: Any) -> None:
         self.logger.log(level, msg, *args, **kwargs)
 
-    def isEnabledFor(self, level):
+    def isEnabledFor(self, level: int) -> bool:
         return self.logger.isEnabledFor(level)

@@ -1,9 +1,12 @@
+from typing import List, Tuple
+
 import numpy as np
+
+from smac.runhistory.runhistory import RunHistory
 
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.metrics import Scorer
-
-from smac.runhistory.runhistory import RunHistory
+from autosklearn.pipeline.base import BasePipeline
 
 
 class SingleBest(AbstractEnsemble):
@@ -18,19 +21,19 @@ class SingleBest(AbstractEnsemble):
     def __init__(
         self,
         metric: Scorer,
-        random_state: np.random.RandomState = None,
-        run_history: RunHistory = None,
+        run_history: RunHistory,
+        random_state: np.random.RandomState,
     ):
         self.metric = metric
         self.random_state = random_state
 
         # Add some default values -- at least 1 model in ensemble is assumed
         self.indices_ = [0]
-        self.weights_ = [1]
+        self.weights_ = [1.0]
         self.run_history = run_history
         self.identifiers_ = self.get_identifiers_from_run_history()
 
-    def get_identifiers_from_run_history(self):
+    def get_identifiers_from_run_history(self) -> List[Tuple[int, int, float]]:
         """
         This method parses the run history, to identify
         the best performing model
@@ -38,7 +41,7 @@ class SingleBest(AbstractEnsemble):
         It populates the identifiers attribute, which is used
         by the backend to access the actual model
         """
-        best_model_identifier = None
+        best_model_identifier = []
         best_model_score = self.metric._worst_possible_result
 
         for run_key in self.run_history.data.keys():
@@ -51,7 +54,7 @@ class SingleBest(AbstractEnsemble):
                 ]
                 best_model_score = score
 
-        if best_model_identifier is None:
+        if not best_model_identifier:
             raise ValueError(
                 "No valid model found in run history. This means smac was not able to fit"
                 " a valid model. Please check the log file for errors."
@@ -59,10 +62,10 @@ class SingleBest(AbstractEnsemble):
 
         return best_model_identifier
 
-    def predict(self, predictions):
+    def predict(self, predictions: np.ndarray) -> np.ndarray:
         return predictions[0]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return 'Single Model Selection:\n\tMembers: %s' \
                '\n\tWeights: %s\n\tIdentifiers: %s' % \
                (self.indices_, self.weights_,
@@ -70,7 +73,8 @@ class SingleBest(AbstractEnsemble):
                           enumerate(self.identifiers_)
                           if self.weights_[idx] > 0]))
 
-    def get_models_with_weights(self, models):
+    def get_models_with_weights(self, models: BasePipeline
+                                ) -> List[Tuple[float, BasePipeline]]:
         output = []
         for i, weight in enumerate(self.weights_):
             if weight > 0.0:
@@ -82,7 +86,7 @@ class SingleBest(AbstractEnsemble):
 
         return output
 
-    def get_selected_model_identifiers(self):
+    def get_selected_model_identifiers(self) -> List[Tuple[int, int, float]]:
         output = []
 
         for i, weight in enumerate(self.weights_):

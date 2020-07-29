@@ -448,6 +448,7 @@ class EnsembleSelectionTest(unittest.TestCase):
         # If none of the above is the case, predict() raises Error.
         ensemble = EnsembleSelection(ensemble_size=3,
                                      task_type=1,
+                                     random_state=np.random.RandomState(0),
                                      metric=accuracy,
                                      )
         # Test for case 1. Create (3, 2, 2) predictions.

@@ -28,6 +28,7 @@ with open(os.path.join(HERE, 'requirements.txt')) as fp:
 extras_reqs={
     "test": [
         "pytest>=4.6",
+        "mypy",
         "pytest-xdist",
         "pytest-timeout",
         "flaky",
