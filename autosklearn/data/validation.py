@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 
 import warnings
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -23,9 +23,7 @@ class InputValidator:
     This class also perform checks for data integrity and flags the user
     via informative errors.
     """
-    def __init__(
-        self,
-    ):
+    def __init__(self) -> None:
         self.valid_pd_enc_dtypes = ['category', 'bool']
 
         # If a dataframe was provided, we populate
@@ -34,13 +32,13 @@ class InputValidator:
         # should treat a column as categorical or numerical
         # During fit, if the user provided feature_types, the user
         # constrain is honored. If not, this attribute is used.
-        self.feature_types = None
+        self.feature_types = None  # type: Optional[List[str]]
 
         # Whereas autosklearn performed encoding on the dataframe
         # We need the target encoder as a decoder mechanism
         self.feature_encoder = None
         self.target_encoder = None
-        self.enc_columns = []
+        self.enc_columns = []  # type: List[int]
 
         # During consecutive calls to the validator,
         # track the number of outputs of the targets
@@ -201,7 +199,7 @@ class InputValidator:
 
         return y
 
-    def is_single_column_target(self):
+    def is_single_column_target(self) -> bool:
         """
         Output is encoded with a single column encoding
         """
@@ -332,6 +330,8 @@ class InputValidator:
                     remainder="passthrough"
                 )
 
+                # Mypy redefinition
+                assert self.feature_encoder is not None
                 self.feature_encoder.fit(X)
 
         if self.feature_encoder:
@@ -404,6 +404,8 @@ class InputValidator:
                     (preprocessing.OrdinalEncoder(), list(range(y.shape[1]))),
                 )
 
+            # Mypy redefinition
+            assert self.target_encoder is not None
             self.target_encoder.fit(y)
 
         try:
