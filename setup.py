@@ -8,8 +8,8 @@ from setuptools import setup, find_packages
 if os.name != 'posix':
     raise ValueError(
         'Detected unsupported operating system: %s. Please check '
-        'the compability information of auto-sklearn: http://automl.github.io'
-        '/auto-sklearn/stable/installation.html#windows-osx-compability' %
+        'the compability information of auto-sklearn: https://automl.github.io'
+        '/auto-sklearn/master/installation.html#windows-osx-compatibility' %
         sys.platform
     )
 
