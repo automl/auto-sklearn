@@ -578,6 +578,20 @@ class InputValidatorTest(unittest.TestCase):
             [2, 2, 3, 4, 5, 3, 4, 5, 6, 1]
         )
 
+        # Make sure some messages are triggered
+        y = np.array([[1, 0, 0, 1], [0, 0, 1, 1], [0, 0, 0, 0]])
+        y_test = np.array([3, 4, 5, 6, 1])
+        with self.assertRaisesRegex(
+            ValueError,
+            'Train and test targets must have the same dimensionality'
+        ):
+            joined = validator.join_and_check(y, y_test)
+        with self.assertRaisesRegex(
+            ValueError,
+            'Train and test targets must be of the same type'
+        ):
+            joined = validator.join_and_check(y, pd.DataFrame(y_test))
+
     def test_big_dataset_encoding2(self):
         """
         Makes sure that when there are multiple classes,
@@ -595,7 +609,7 @@ class InputValidatorTest(unittest.TestCase):
         # and y_train have different classes
         all_classes = set(np.unique(y_test)).union(set(np.unique(y_train)))
         elements_in_test_only = np.setdiff1d(np.unique(y_test), np.unique(y_train))
-        self.assertTrue(elements_in_test_only)
+        self.assertGreater(len(elements_in_test_only), 0)
 
         validator = InputValidator()
         common = validator.join_and_check(
@@ -607,4 +621,4 @@ class InputValidatorTest(unittest.TestCase):
 
         encoded_classes = validator.target_encoder.classes_
         missing = all_classes - set(encoded_classes)
-        self.assertFalse(missing)
+        self.assertEqual(len(missing), 0)

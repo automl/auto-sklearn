@@ -512,7 +512,7 @@ class InputValidator:
         elif isinstance(y, np.ndarray):
             # The have to have the same columns and types
             if len(y.shape) != len(y_test.shape) \
-                    or (len(y.shape) > 1 and (y.shape[2] != y_test.shape[2])):
+                    or (len(y.shape) > 1 and (y.shape[1] != y_test.shape[1])):
                 raise ValueError("Train and test targets must have the same dimensionality")
 
             if y.dtype != y_test.dtype:
@@ -523,7 +523,13 @@ class InputValidator:
             # Provide flexibility in the list. When transformed to np.ndarray
             # further checks are performed downstream
             return y + y_test
-        else:
-            # If reached this point, it is an object we don't support on
-            # encoding, so we can let it pass. For instance a sparse int array
+        elif scipy.sparse.issparse(y):
+            # Here just return y, vstack from scipy cause ufunc 'isnan' type errors
+            # in multilabel sparse matrices. Since we don't encode scipy matrices,
+            # No functionality impact.
             return y
+        else:
+            raise ValueError("Unsupported input type y={type(y)}. Auto-Sklearn supports "
+                             "Pandas DataFrames, numpy arrays, scipy csr  or  python lists. "
+                             "Kindly cast your targets to a supported type."
+                             )
