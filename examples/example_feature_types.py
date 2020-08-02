@@ -38,8 +38,11 @@ feat_type = ['Categorical' if x.name == 'category' else 'Numerical' for x in dat
 # ==========================
 
 cls = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=120,
-    per_run_time_limit=30,
+    time_left_for_this_task=60,
+    # Bellow two flags are provided to speed up calculations
+    # Not recommended for a real implementation
+    initial_configurations_via_metalearning=0,
+    smac_scenario_args={'runcount_limit': 1},
 )
 cls.fit(X_train, y_train, X_test, y_test, feat_type=feat_type)
 
@@ -49,9 +52,3 @@ cls.fit(X_train, y_train, X_test, y_test, feat_type=feat_type)
 
 predictions = cls.predict(X_test)
 print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
-
-############################################################################
-# Print the ensemble performance
-# ===================================
-ensemble_performance_frame = pd.DataFrame(cls._automl[0].ensemble_performance_history)
-print(ensemble_performance_frame)

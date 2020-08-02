@@ -30,6 +30,7 @@ aspects of its usage:
 * `Extending with a new regressor <examples/example_extending_regression.html>`_
 * `Extending with a new preprocessor <examples/example_extending_preprocessor.html>`_
 * `Iterating over the models <examples/example_get_pipeline_components.html>`_
+* `Pandas Train and Test inputs <examples/example_pandas_train_test.html>`_
 
 
 Time and memory limits
@@ -91,6 +92,21 @@ Resampling strategies
 =====================
 
 Examples for using holdout and cross-validation can be found in `auto-sklearn/examples/ <examples/>`_
+
+Supported Inputs
+================
+*auto-sklearn* can accept targets for the following tasks (more details on `Sklearn algorithms <https://scikit-learn.org/stable/modules/multiclass.html>`_):
+* Binary Classification
+* Multiclass Classification
+* Multilabel Classification
+* Regression
+* Multioutput Regression
+
+You can provide both a features/targets training pair (X_train/y_train) and an optional testing pair (X_test/Y_test) as exemplified in `Pandas Train and Test inputs <examples/example_pandas_train_test.html>`_. Supported formats for these training and testing pairs are: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.
+
+If your data contains categorical values (in the features or targets), autosklearn will automatically encode your data using a `sklearn.preprocessing.LabelEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_ for unidimensional data and a `sklearn.preprocessing.OrdinalEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html>`_ for multidimensional data. Target vectors (y_train/y_test) are automatically encoded for classification if using one of the aforementioned supported formats (test and train classes are encoded in a common space to prevent unseen classes during testing). In the case of features (X_train, X_test) your data must be provided as a pd.DataFrame for the automatic encoding to trigger. Additionally, the categorical columns of such pandas DataFrame must have boolean or category dtype (`Working with categorical data <https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html>`_). Numerical columns will preserve their dtype. Other pandas DataFrame dtypes (Object, time series) must be first converted to a valid categorical or numerical dtype.
+
+If you are working with time series, it is recommended that you follow this approach `Working with time data <https://stats.stackexchange.com/questions/311494/>`_.
 
 Ensemble Building Process
 =========================
