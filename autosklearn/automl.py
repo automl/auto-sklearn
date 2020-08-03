@@ -1034,8 +1034,11 @@ class AutoMLClassifier(AutoML):
 
         # We first validate the dtype of the target provided by the user
         # In doing so, we also fit the internal encoder for classification
+        # In case y_test is provided, we proactively check their type
+        # and make sure the enconding accounts for both y_test/y_train classes
+        input_y = self.InputValidator.join_and_check(y, y_test) if y_test is not None else y
         y_task = type_of_target(
-            self.InputValidator.validate_target(y, is_classification=True)
+            self.InputValidator.validate_target(input_y, is_classification=True)
         )
         task = self._task_mapping.get(y_task)
         if task is None:

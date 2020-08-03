@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import unittest.mock
 
 import numpy as np
@@ -514,6 +515,8 @@ class SingleBestTest(unittest.TestCase):
                 cost=0.11347517730496459,
                 time=0.21858787536621094,
                 status=None,
+                starttime=time.time(),
+                endtime=time.time(),
                 additional_info={
                     'duration': 0.20323538780212402,
                     'num_run': 3,
@@ -533,6 +536,8 @@ class SingleBestTest(unittest.TestCase):
                 cost=2*0.11347517730496459,
                 time=2*0.21858787536621094,
                 status=None,
+                starttime=time.time(),
+                endtime=time.time(),
                 additional_info={
                     'duration': 0.20323538780212402,
                     'num_run': 6,

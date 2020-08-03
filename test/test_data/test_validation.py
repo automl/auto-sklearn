@@ -1,13 +1,17 @@
 import unittest
 import unittest.mock
 
-from autosklearn.data.validation import InputValidator
-
 import numpy as np
+
 import pandas as pd
+
 from scipy import sparse
-from sklearn.utils.multiclass import type_of_target
+
 import sklearn.datasets
+import sklearn.model_selection
+from sklearn.utils.multiclass import type_of_target
+
+from autosklearn.data.validation import InputValidator
 
 
 class InputValidatorTest(unittest.TestCase):
@@ -530,3 +534,91 @@ class InputValidatorTest(unittest.TestCase):
         np.testing.assert_array_equal(x['carbon'].to_numpy(), x_t[:, 3])
 
         return
+
+    def test_join_and_check(self):
+        validator = InputValidator()
+
+        # Numpy Testing
+        y = np.array([2, 2, 3, 4, 5])
+        y_test = np.array([3, 4, 5, 6, 1])
+
+        joined = validator.join_and_check(y, y_test)
+        np.testing.assert_array_equal(
+            joined,
+            np.array([2, 2, 3, 4, 5, 3, 4, 5, 6, 1])
+        )
+
+        validator.validate_target(joined, is_classification=True)
+        y_encoded = validator.validate_target(y)
+        y_test_encoded = validator.validate_target(y_test)
+
+        # If a common encoding happened, then common elements
+        # should have a common encoding
+        self.assertEqual(y_encoded[2], y_test_encoded[0])
+
+        # Pandas Testing
+        validator = InputValidator()
+        joined = validator.join_and_check(
+            pd.DataFrame(y),
+            pd.DataFrame(y_test)
+        )
+        np.testing.assert_array_equal(
+            joined,
+            pd.DataFrame([2, 2, 3, 4, 5, 3, 4, 5, 6, 1])
+        )
+
+        # List Testing
+        validator = InputValidator()
+        joined = validator.join_and_check(
+            [2, 2, 3, 4, 5],
+            [3, 4, 5, 6, 1]
+        )
+        np.testing.assert_array_equal(
+            joined,
+            [2, 2, 3, 4, 5, 3, 4, 5, 6, 1]
+        )
+
+        # Make sure some messages are triggered
+        y = np.array([[1, 0, 0, 1], [0, 0, 1, 1], [0, 0, 0, 0]])
+        y_test = np.array([3, 4, 5, 6, 1])
+        with self.assertRaisesRegex(
+            ValueError,
+            'Train and test targets must have the same dimensionality'
+        ):
+            joined = validator.join_and_check(y, y_test)
+        with self.assertRaisesRegex(
+            ValueError,
+            'Train and test targets must be of the same type'
+        ):
+            joined = validator.join_and_check(y, pd.DataFrame(y_test))
+
+    def test_big_dataset_encoding2(self):
+        """
+        Makes sure that when there are multiple classes,
+        and test/train targets differ, we proactively encode together
+        the data between test and train
+        """
+        X, y = sklearn.datasets.fetch_openml(data_id=183, return_X_y=True, as_frame=True)
+        X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+            X,
+            y,
+            random_state=1
+        )
+
+        # Make sure this test makes sense, so that y_test
+        # and y_train have different classes
+        all_classes = set(np.unique(y_test)).union(set(np.unique(y_train)))
+        elements_in_test_only = np.setdiff1d(np.unique(y_test), np.unique(y_train))
+        self.assertGreater(len(elements_in_test_only), 0)
+
+        validator = InputValidator()
+        common = validator.join_and_check(
+            pd.DataFrame(y),
+            pd.DataFrame(y_test)
+        )
+
+        validator.validate_target(common, is_classification=True)
+
+        encoded_classes = validator.target_encoder.classes_
+        missing = all_classes - set(encoded_classes)
+        self.assertEqual(len(missing), 0)

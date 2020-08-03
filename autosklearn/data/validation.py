@@ -472,3 +472,64 @@ class InputValidator:
             return self.target_encoder.inverse_transform(y)
         else:
             return self.target_encoder.named_transformers_['ordinalencoder'].inverse_transform(y)
+
+    def join_and_check(
+        self,
+        y: Union[np.ndarray, pd.DataFrame],
+        y_test: Union[np.ndarray, pd.DataFrame]
+    ) -> Union[np.ndarray, pd.DataFrame]:
+        """
+        This method checks for basic input quality before
+        merging the inputs to Auto-sklearn for a common
+        encoding if needed
+        """
+
+        # We expect same type of object
+        if type(y) != type(y_test):
+            raise ValueError(
+                "Train and test targets must be of the same type, yet y={} and y_test={}"
+                "".format(
+                    type(y),
+                    type(y_test)
+                )
+            )
+
+        if isinstance(y, pd.DataFrame):
+            # The have to have the same columns and types
+            if y.columns != y_test.columns:
+                raise ValueError(
+                    "Train and test targets must both have the same columns, yet "
+                    "y={} and y_test={} ".format(
+                        type(y),
+                        type(y_test)
+                    )
+                )
+
+            if list(y.dtypes) != list(y_test.dtypes):
+                raise ValueError("Train and test targets must both have the same dtypes")
+
+            return pd.concat([y, y_test], ignore_index=True, sort=False)
+        elif isinstance(y, np.ndarray):
+            # The have to have the same columns and types
+            if len(y.shape) != len(y_test.shape) \
+                    or (len(y.shape) > 1 and (y.shape[1] != y_test.shape[1])):
+                raise ValueError("Train and test targets must have the same dimensionality")
+
+            if y.dtype != y_test.dtype:
+                raise ValueError("Train and test targets must both have the same dtype")
+
+            return np.concatenate((y, y_test))
+        elif isinstance(y, list):
+            # Provide flexibility in the list. When transformed to np.ndarray
+            # further checks are performed downstream
+            return y + y_test
+        elif scipy.sparse.issparse(y):
+            # Here just return y, vstack from scipy cause ufunc 'isnan' type errors
+            # in multilabel sparse matrices. Since we don't encode scipy matrices,
+            # No functionality impact.
+            return y
+        else:
+            raise ValueError("Unsupported input type y={type(y)}. Auto-Sklearn supports "
+                             "Pandas DataFrames, numpy arrays, scipy csr  or  python lists. "
+                             "Kindly cast your targets to a supported type."
+                             )
