@@ -34,10 +34,6 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     resampling_strategy='holdout',
     # We want autosklearn to use pca as preprocessor
     include_preprocessors=['pca'],
-    # Bellow two flags are provided to speed up calculations
-    # Not recommended for a real implementation
-    initial_configurations_via_metalearning=0,
-    smac_scenario_args={'runcount_limit': 1},
 )
 automl.fit(X_train, y_train, dataset_name='breast_cancer')
 

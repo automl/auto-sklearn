@@ -8,7 +8,6 @@ In *auto-sklearn* it is possible to specify the feature types of a dataset when 
 :meth:`fit() <autosklearn.classification.AutoSklearnClassifier.fit>` by specifying the argument
 ``feat_type``. The following example demonstrates a way it can be done.
 """
-import pandas as pd
 import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
