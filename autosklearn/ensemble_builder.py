@@ -243,8 +243,12 @@ class EnsembleBuilder(multiprocessing.Process):
                 # reduce nbest to reduce memory consumption and try it again
                 if isinstance(self.ensemble_nbest, numbers.Integral) and \
                         self.ensemble_nbest == 1:
-                    self.logger.critical("Memory Exception --"
-                                         " Unable to escape from memory exception")
+                    self.logger.critical(
+                        "Memory Exception -- Unable to further reduce the number of ensemble "
+                        "members -- please restart Auto-sklearn with a higher value for the "
+                        "argument 'ensemble_memory_limit' (current limit is %d MB).",
+                        self.memory_limit,
+                    )
                 else:
                     if isinstance(self.ensemble_nbest, numbers.Integral):
                         self.ensemble_nbest = int(self.ensemble_nbest / 2)
