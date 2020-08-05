@@ -138,7 +138,7 @@
         <span class="n">ensemble_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
         <span class="n">ensemble_nbest</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
         <span class="n">max_models_on_disc</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-        <span class="n">ensemble_memory_limit</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span>
+        <span class="n">ensemble_memory_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">,</span>
         <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">ml_memory_limit</span><span class="o">=</span><span class="mi">3072</span><span class="p">,</span>
         <span class="n">include_estimators</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -202,6 +202,7 @@
 <span class="sd">            Memory limit in MB for the ensemble building process.</span>
 <span class="sd">            `auto-sklearn` will reduce the number of considered models</span>
 <span class="sd">            (``ensemble_nbest``) if the memory limit is reached.</span>
+<span class="sd">            If ``None``, no memory limit is enforced.</span>
 
 <span class="sd">        seed : int, optional (default=1)</span>
 <span class="sd">            Used to seed SMAC. Will determine the output file names.</span>
