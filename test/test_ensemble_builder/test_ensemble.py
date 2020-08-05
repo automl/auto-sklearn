@@ -408,7 +408,8 @@ class EnsembleTest(unittest.TestCase):
         # we expect 1.0 as score and all keys available
         expected_performance = {
             'ensemble_val_score': 1.0,
-            'ensemble_test_score': 1.0
+            'ensemble_test_score': 1.0,
+            'ensemble_optimization_score': 1.0,
         }
         self.assertDictContainsSubset(expected_performance, run_history[0])
         self.assertIn('Timestamp', run_history[0])

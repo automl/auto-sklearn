@@ -966,7 +966,7 @@ class EnsembleBuilder(multiprocessing.Process):
         """
         performance_stamp = {
             'Timestamp': pd.Timestamp.now(),
-            'ensemble_val_score': calculate_score(
+            'ensemble_optimization_score': calculate_score(
                 solution=self.y_true_ensemble,
                 prediction=train_pred,
                 task_type=self.task_type,

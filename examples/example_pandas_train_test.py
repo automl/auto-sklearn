@@ -13,9 +13,9 @@ to unseen data (i.e. data not in X_train/y_train). Using test data is a good mec
 if the trained model suffers from overfit, and more details can be found on `evaluating estimator
 performance <https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation>`_.
 This example further highlights through a plot, the best individual models found by *auto-sklearn*
-through time (under indv_model_val_score/indv_model_test_score's legend). It also shows the
-training and test performance of the ensemble build using the best performing models (under
-ensemble_train_score and ensemble_test_score respectively).
+through time (under single_best_optimization_score/single_best_test_score's legend).
+It also shows the training and test performance of the ensemble build using the best
+performing models (under ensemble_optimization_score and ensemble_test_score respectively).
 
 There is also support to manually indicate the feature types (whether a column is categorical
 or numerical) via the argument feat_types from fit(). This is important when working with
@@ -50,8 +50,8 @@ def get_runhistory_models_performance(automl):
         test_score = metric._optimum - (metric._sign * run_value.additional_info['test_loss'])
         performance_list.append({
             'Timestamp': endtime,
-            'indv_model_val_score': val_score,
-            'indv_model_test_score': test_score,
+            'single_best_optimization_score': val_score,
+            'single_best_test_score': test_score,
         })
     return pd.DataFrame(performance_list)
 
