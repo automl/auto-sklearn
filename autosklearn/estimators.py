@@ -26,7 +26,7 @@ class AutoSklearnEstimator(BaseEstimator):
         ensemble_size: int = 50,
         ensemble_nbest=50,
         max_models_on_disc=50,
-        ensemble_memory_limit=1024,
+        ensemble_memory_limit: Optional[int] = 1024,
         seed=1,
         ml_memory_limit=3072,
         include_estimators=None,
@@ -90,6 +90,7 @@ class AutoSklearnEstimator(BaseEstimator):
             Memory limit in MB for the ensemble building process.
             `auto-sklearn` will reduce the number of considered models
             (``ensemble_nbest``) if the memory limit is reached.
+            If ``None``, no memory limit is enforced.
 
         seed : int, optional (default=1)
             Used to seed SMAC. Will determine the output file names.

@@ -45,7 +45,7 @@ class EnsembleBuilder(multiprocessing.Process):
             max_iterations: int = None,
             precision: int = 32,
             sleep_duration: int = 2,
-            memory_limit: int = 1000,
+            memory_limit: Optional[int] = 1024,
             read_at_most: int = 5,
             random_state: Optional[Union[int, np.random.RandomState]] = None,
             queue: multiprocessing.Queue = None
@@ -100,8 +100,8 @@ class EnsembleBuilder(multiprocessing.Process):
                 precision of floats to read the predictions
             sleep_duration: int
                 duration of sleeping time between two iterations of this script (in sec)
-            memory_limit: int
-                memory limit in mb
+            memory_limit: Optional[int]
+                memory limit in mb. If ``None``, no memory limit is enforced.
             read_at_most: int
                 read at most n new prediction files in each iteration
         """
@@ -246,8 +246,8 @@ class EnsembleBuilder(multiprocessing.Process):
                     self.logger.critical(
                         "Memory Exception -- Unable to further reduce the number of ensemble "
                         "members -- please restart Auto-sklearn with a higher value for the "
-                        "argument 'ensemble_memory_limit' (current limit is %d MB).",
-                        self.memory_limit,
+                        "argument 'ensemble_memory_limit' (current limit is {} MB)."
+                        "".format(self.memory_limit)
                     )
                 else:
                     if isinstance(self.ensemble_nbest, numbers.Integral):
