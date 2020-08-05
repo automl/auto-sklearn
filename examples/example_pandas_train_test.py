@@ -19,7 +19,8 @@ ensemble_train_score and ensemble_test_score respectively).
 
 There is also support to manually indicate the feature types (whether a column is categorical
 or numerical) via the argument feat_types from fit(). This is important when working with
-list or numpy arrays as there is no per-column dtype (further details in the example `Continuous and categorical data <examples/example_feature_types.html>`_).
+list or numpy arrays as there is no per-column dtype (further details in the example
+`Continuous and categorical data <examples/example_feature_types.html>`_).
 """
 import time
 

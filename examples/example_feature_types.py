@@ -15,7 +15,6 @@ types will be automatically inferred, as demonstrated in
 import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
-from sklearn import preprocessing
 
 import autosklearn.classification
 
