@@ -88,7 +88,7 @@ class AutoML(BaseEstimator):
                  ensemble_size=1,
                  ensemble_nbest=1,
                  max_models_on_disc=1,
-                 ensemble_memory_limit=1000,
+                 ensemble_memory_limit: Optional[int] = 1024,
                  seed=1,
                  ml_memory_limit=3072,
                  metadata_directory=None,
