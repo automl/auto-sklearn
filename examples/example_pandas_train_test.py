@@ -13,7 +13,7 @@ to unseen data (i.e. data not in X_train/y_train). Using test data is a good mec
 if the trained model suffers from overfit, and more details can be found on `evaluating estimator
 performance <https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation>`_.
 This example further highlights through a plot, the best individual models found by *auto-sklearn*
-through time (under indv_model_train_score/indv_model_test_score's legend). It also shows the
+through time (under indv_model_val_score/indv_model_test_score's legend). It also shows the
 training and test performance of the ensemble build using the best performing models (under
 ensemble_train_score and ensemble_test_score respectively).
 
@@ -46,11 +46,11 @@ def get_runhistory_models_performance(automl):
             continue
         endtime = pd.Timestamp(time.strftime('%Y-%m-%d %H:%M:%S',
                                              time.localtime(run_value.endtime)))
-        train_score = metric._optimum - (metric._sign * run_value.cost)
+        val_score = metric._optimum - (metric._sign * run_value.cost)
         test_score = metric._optimum - (metric._sign * run_value.additional_info['test_loss'])
         performance_list.append({
             'Timestamp': endtime,
-            'indv_model_train_score': train_score,
+            'indv_model_val_score': val_score,
             'indv_model_test_score': test_score,
         })
     return pd.DataFrame(performance_list)
@@ -98,7 +98,7 @@ print(X.dtypes)
 # ==========================
 
 cls = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=60,
+    time_left_for_this_task=120,
     per_run_time_limit=30,
     metric=accuracy,
 )

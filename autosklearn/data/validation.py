@@ -408,15 +408,15 @@ class InputValidator:
             assert self.target_encoder is not None
 
             # remove ravel warning from pandas Series
-            if len(y.shape) > 1 and y.shape[1] == 1 and hasattr(y, "values"):
-                self.target_encoder.fit(y.values.ravel())
+            if len(y.shape) > 1 and y.shape[1] == 1 and hasattr(y, "to_numpy"):
+                self.target_encoder.fit(y.to_numpy().ravel())
             else:
                 self.target_encoder.fit(y)
 
         try:
             # remove ravel warning from pandas Series
-            if len(y.shape) > 1 and y.shape[1] == 1 and hasattr(y, "values"):
-                y = self.target_encoder.transform(y.values.ravel())
+            if len(y.shape) > 1 and y.shape[1] == 1 and hasattr(y, "to_numpy"):
+                y = self.target_encoder.transform(y.to_numpy().ravel())
             else:
                 y = self.target_encoder.transform(y)
         except ValueError as e:

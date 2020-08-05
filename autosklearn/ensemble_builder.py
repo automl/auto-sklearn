@@ -966,7 +966,7 @@ class EnsembleBuilder(multiprocessing.Process):
         """
         performance_stamp = {
             'Timestamp': pd.Timestamp.now(),
-            'ensemble_train_score': calculate_score(
+            'ensemble_val_score': calculate_score(
                 solution=self.y_true_ensemble,
                 prediction=train_pred,
                 task_type=self.task_type,
@@ -975,6 +975,8 @@ class EnsembleBuilder(multiprocessing.Process):
             )
         }
         if valid_pred is not None:
+            # TODO: valid_pred are a legacy from competition manager
+            # and this if never happens. Re-evaluate Y_valid support
             performance_stamp['ensemble_val_score'] = calculate_score(
                 solution=self.y_valid,
                 prediction=valid_pred,

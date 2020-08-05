@@ -347,7 +347,13 @@ class AutoML(BaseEstimator):
                                      'valid feature types, you passed `%s`' % ft)
 
         # Feature types dynamically understood from dataframe
-        if feat_type is None and self.InputValidator.feature_types:
+        if feat_type is not None and self.InputValidator.feature_types:
+            raise ValueError("feat_type cannot be provided when using pandas "
+                             "DataFrame as input. Auto-sklearn extracts the feature types "
+                             "automatically from the columns dtypes, so providing feat_type "
+                             "not only is not necessary, but not allowed."
+                             )
+        elif feat_type is None and self.InputValidator.feature_types:
             feat_type = self.InputValidator.feature_types
 
         datamanager = XYDataManager(

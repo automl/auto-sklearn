@@ -12,6 +12,8 @@ Additionally, you can provide a properly formatted pandas DataFrame, and the fea
 types will be automatically inferred, as demonstrated in
 `Pandas Train and Test inputs <examples/example_pandas_train_test.html>`_.
 """
+import numpy as np
+
 import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
@@ -23,19 +25,19 @@ import autosklearn.classification
 # Data Loading
 # ============
 # Load Australian dataset from https://www.openml.org/d/40981
-X, y = sklearn.datasets.fetch_openml(data_id=40981, return_X_y=True, as_frame=True)
+bunch = data = sklearn.datasets.fetch_openml(data_id=40981, as_frame=True)
+y = y = bunch['target'].to_numpy()
+X = bunch['data'].to_numpy(np.float)
 
 X_train, X_test, y_train, y_test = \
      sklearn.model_selection.train_test_split(X, y, random_state=1)
 
 # Auto-sklearn can automatically recognize categorical/numerical data from a pandas
 # DataFrame. This example highlights how the user can provide the feature types,
-# which is particularly important when using numpy arrays, as there is no
-# per-column dtype in this case. Auto-sklearn will honor the argument feat_type
-# in any case.
+# when using numpy arrays, as there is no per-column dtype in this case.
 # feat_type is a list that tags each column from a DataFrame/ numpy array / list
 # with the case-insensitive string categorical or numerical, accordingly.
-feat_type = ['Categorical' if x.name == 'category' else 'Numerical' for x in X.dtypes]
+feat_type = ['Categorical' if x.name == 'category' else 'Numerical' for x in bunch['data'].dtypes]
 
 ############################################################################
 # Build and fit a classifier
