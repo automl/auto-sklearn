@@ -407,7 +407,6 @@ class EnsembleTest(unittest.TestCase):
         # As the data loader loads the same val/train/test
         # we expect 1.0 as score and all keys available
         expected_performance = {
-            'ensemble_train_score': 1.0,
             'ensemble_val_score': 1.0,
             'ensemble_test_score': 1.0
         }
