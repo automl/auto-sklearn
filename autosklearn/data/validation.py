@@ -406,10 +406,19 @@ class InputValidator:
 
             # Mypy redefinition
             assert self.target_encoder is not None
-            self.target_encoder.fit(y)
+
+            # remove ravel warning from pandas Series
+            if len(y.shape) > 1 and y.shape[1] == 1 and hasattr(y, "values"):
+                self.target_encoder.fit(y.values.ravel())
+            else:
+                self.target_encoder.fit(y)
 
         try:
-            y = self.target_encoder.transform(y)
+            # remove ravel warning from pandas Series
+            if len(y.shape) > 1 and y.shape[1] == 1 and hasattr(y, "values"):
+                y = self.target_encoder.transform(y.values.ravel())
+            else:
+                y = self.target_encoder.transform(y)
         except ValueError as e:
             if 'Found unknown categories' in e.args[0]:
                 # Make the message more informative for Ordinal

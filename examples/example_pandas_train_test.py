@@ -16,6 +16,10 @@ This example further highlights through a plot, the best individual models found
 through time (under indv_model_train_score/indv_model_test_score's legend). It also shows the
 training and test performance of the ensemble build using the best performing models (under
 ensemble_train_score and ensemble_test_score respectively).
+
+There is also support to manually indicate the feature types (whether a column is categorical
+or numerical) via the argument feat_types from fit(). This is important when working with
+list or numpy arrays as there is no per-column dtype (further details in the example `Continuous and categorical data <examples/example_feature_types.html>`_).
 """
 import time
 
@@ -24,6 +28,8 @@ import pandas as pd
 import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
+
+from smac.tae.execute_ta_run import StatusType
 
 import autosklearn.classification
 from autosklearn.metrics import accuracy
@@ -34,12 +40,12 @@ def get_runhistory_models_performance(automl):
     data = automl._automl[0].runhistory_.data
     performance_list = []
     for run_key, run_value in data.items():
-        if 'train_loss' not in run_value.additional_info:
+        if run_value.status != StatusType.SUCCESS:
             # Ignore crashed runs
             continue
         endtime = pd.Timestamp(time.strftime('%Y-%m-%d %H:%M:%S',
                                              time.localtime(run_value.endtime)))
-        train_score = metric._optimum - (metric._sign * run_value.additional_info['train_loss'])
+        train_score = metric._optimum - (metric._sign * run_value.cost)
         test_score = metric._optimum - (metric._sign * run_value.additional_info['test_loss'])
         performance_list.append({
             'Timestamp': endtime,

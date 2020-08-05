@@ -7,6 +7,10 @@ Feature Types
 In *auto-sklearn* it is possible to specify the feature types of a dataset when calling the method
 :meth:`fit() <autosklearn.classification.AutoSklearnClassifier.fit>` by specifying the argument
 ``feat_type``. The following example demonstrates a way it can be done.
+
+Additionally, you can provide a properly formatted pandas DataFrame, and the feature
+types will be automatically inferred, as demonstrated in
+`Pandas Train and Test inputs <examples/example_pandas_train_test.html>`_.
 """
 import sklearn.model_selection
 import sklearn.datasets
@@ -19,18 +23,20 @@ import autosklearn.classification
 ############################################################################
 # Data Loading
 # ============
-# Load adult dataset from openml.org, see https://www.openml.org/t/2117
-X, y = sklearn.datasets.fetch_openml(data_id=179, return_X_y=True)
-
-# y needs to be encoded, as fetch openml doesn't download a float
-y = preprocessing.LabelEncoder().fit_transform(y)
+# Load Australian dataset from https://www.openml.org/d/40981
+X, y = sklearn.datasets.fetch_openml(data_id=40981, return_X_y=True, as_frame=True)
 
 X_train, X_test, y_train, y_test = \
      sklearn.model_selection.train_test_split(X, y, random_state=1)
 
-# Create feature type list from openml.org indicator and run autosklearn
-data = sklearn.datasets.fetch_openml(data_id=179, as_frame=True)
-feat_type = ['Categorical' if x.name == 'category' else 'Numerical' for x in data['data'].dtypes]
+# Auto-sklearn can automatically recognize categorical/numerical data from a pandas
+# DataFrame. This example highlights how the user can provide the feature types,
+# which is particularly important when using numpy arrays, as there is no
+# per-column dtype in this case. Auto-sklearn will honor the argument feat_type
+# in any case.
+# feat_type is a list that tags each column from a DataFrame/ numpy array / list
+# with the case-insensitive string categorical or numerical, accordingly.
+feat_type = ['Categorical' if x.name == 'category' else 'Numerical' for x in X.dtypes]
 
 ############################################################################
 # Build and fit a classifier
