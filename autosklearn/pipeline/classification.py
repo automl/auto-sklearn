@@ -81,14 +81,14 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         if fit_params is None:
             fit_params = {}
 
-        if self.configuration['balancing:strategy'] == 'weighting':
+        if self.config['balancing:strategy'] == 'weighting':
             balancing = Balancing(strategy='weighting')
             _init_params, _fit_params = balancing.get_weights(
-                y, self.configuration['classifier:__choice__'],
-                self.configuration['feature_preprocessor:__choice__'],
+                y, self.config['classifier:__choice__'],
+                self.config['feature_preprocessor:__choice__'],
                 {}, {})
             _init_params.update(self.init_params)
-            self.set_hyperparameters(configuration=self.configuration,
+            self.set_hyperparameters(configuration=self.config,
                                      init_params=_init_params)
 
             if _fit_params is not None:
