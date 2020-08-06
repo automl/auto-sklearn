@@ -39,27 +39,6 @@ General introductory examples for *auto-sklearn* can be found here.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="In *auto-sklearn* it is possible to specify the feature types of a dataset when calling the met...">
-
-.. only:: html
-
- .. figure:: /examples/images/thumb/sphx_glr_example_feature_types_thumb.png
-     :alt: Feature Types
-
-     :ref:`sphx_glr_examples_example_feature_types.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/example_feature_types
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="In *auto-sklearn* it is possible to use different resampling strategies by specifying the argum...">
 
 .. only:: html
@@ -99,6 +78,27 @@ General introductory examples for *auto-sklearn* can be found here.
    :hidden:
 
    /examples/example_sequential
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In *auto-sklearn* it is possible to specify the feature types of a dataset when calling the met...">
+
+.. only:: html
+
+ .. figure:: /examples/images/thumb/sphx_glr_example_feature_types_thumb.png
+     :alt: Feature Types
+
+     :ref:`sphx_glr_examples_example_feature_types.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/example_feature_types
 
 .. raw:: html
 
@@ -207,6 +207,48 @@ General introductory examples for *auto-sklearn* can be found here.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="*auto-sklearn* can automatically encode categorical columns using a label/ordinal encoder. This...">
+
+.. only:: html
+
+ .. figure:: /examples/images/thumb/sphx_glr_example_pandas_train_test_thumb.png
+     :alt: Test and Train data with Pandas
+
+     :ref:`sphx_glr_examples_example_pandas_train_test.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/example_pandas_train_test
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="*Auto-sklearn* uses *SMAC* to automatically optimize the hyperparameters of the training models...">
+
+.. only:: html
+
+ .. figure:: /examples/images/thumb/sphx_glr_example_parallel_manual_spawning_thumb.png
+     :alt: Parallel Usage with manual process spawning
+
+     :ref:`sphx_glr_examples_example_parallel_manual_spawning.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/example_parallel_manual_spawning
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="The following example demonstrates how to create a new regression component for using in auto-s...">
 
 .. only:: html
@@ -246,27 +288,6 @@ General introductory examples for *auto-sklearn* can be found here.
    :hidden:
 
    /examples/example_extending_preprocessor
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="*Auto-sklearn* uses *SMAC* to automatically optimize the hyperparameters of the training models...">
-
-.. only:: html
-
- .. figure:: /examples/images/thumb/sphx_glr_example_parallel_manual_spawning_thumb.png
-     :alt: Parallel Usage with manual process spawning
-
-     :ref:`sphx_glr_examples_example_parallel_manual_spawning.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/example_parallel_manual_spawning
 
 .. raw:: html
 

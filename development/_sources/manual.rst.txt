@@ -30,6 +30,7 @@ aspects of its usage:
 * `Extending with a new regressor <examples/example_extending_regression.html>`_
 * `Extending with a new preprocessor <examples/example_extending_preprocessor.html>`_
 * `Iterating over the models <examples/example_get_pipeline_components.html>`_
+* `Pandas Train and Test inputs <examples/example_pandas_train_test.html>`_
 
 
 Time and memory limits
@@ -91,6 +92,26 @@ Resampling strategies
 =====================
 
 Examples for using holdout and cross-validation can be found in `auto-sklearn/examples/ <examples/>`_
+
+Supported Inputs
+================
+*auto-sklearn* can accept targets for the following tasks (more details on `Sklearn algorithms <https://scikit-learn.org/stable/modules/multiclass.html>`_):
+* Binary Classification
+* Multiclass Classification
+* Multilabel Classification
+* Regression
+* Multioutput Regression
+
+You can provide feature and target training pairs (X_train/y_train) to *auto-sklearn* to fit an ensemble of pipelines as described in the next section. This X_train/y_train dataset must belong to one of the supported formats: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.
+ Optionally, you can measure the ability of this fitted model to generalize to unseen data by providing an optional testing pair (X_test/Y_test). For further details, please refer to the example `Pandas Train and Test inputs <examples/example_pandas_train_test.html>`_. Supported formats for these training and testing pairs are: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.
+
+If your data contains categorical values (in the features or targets), autosklearn will automatically encode your data using a `sklearn.preprocessing.LabelEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_ for unidimensional data and a `sklearn.preprocessing.OrdinalEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html>`_ for multidimensional data. 
+
+Regarding the features, there are two methods to guide *auto-sklearn* to properly encode categorical columns:
+* Providing a X_train/X_test numpy array with the optional flag feat_type. For further details, you can check the example `Feature Types <examples/example_feature_types.html>`_.
+* You can provide a pandas DataFrame, with properly formatted columns. If a column has numerical dtype, *auto-sklearn* will not encode it and it will be passed directly to scikit-learn. If the column has a categorical/boolean class, it will be encoded. If the column is of any other type (Object or Timeseries), an error will be raised. For further details on how to properly encode your data, you can check the example `Working with categorical data <https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html>`_). If you are working with time series, it is recommended that you follow this approach `Working with time data <https://stats.stackexchange.com/questions/311494/>`_.
+
+Regarding the targets (y_train/y_test), if the task involves a classification problem, such features will be automatically encoded. It is recommended to provide both y_train and y_test during fit, so that a common encoding is created between these splits (if only y_train is provided during fit, the categorical encoder will not be able to handle new classes that are exclusive to y_test). If the task is regression, no encoding happens on the targets. 
 
 Ensemble Building Process
 =========================

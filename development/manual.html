@@ -113,6 +113,7 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#resampling-strategies">Resampling strategies</a></li>
+<li><a class="reference internal" href="#supported-inputs">Supported Inputs</a></li>
 <li><a class="reference internal" href="#ensemble-building-process">Ensemble Building Process</a></li>
 <li><a class="reference internal" href="#inspecting-the-results">Inspecting the results</a></li>
 <li><a class="reference internal" href="#parallel-computation">Parallel computation</a></li>
@@ -150,6 +151,7 @@ aspects of its usage:</p>
 <li><p><a class="reference external" href="examples/example_extending_regression.html">Extending with a new regressor</a></p></li>
 <li><p><a class="reference external" href="examples/example_extending_preprocessor.html">Extending with a new preprocessor</a></p></li>
 <li><p><a class="reference external" href="examples/example_get_pipeline_components.html">Iterating over the models</a></p></li>
+<li><p><a class="reference external" href="examples/example_pandas_train_test.html">Pandas Train and Test inputs</a></p></li>
 </ul>
 </div>
 <div class="section" id="time-and-memory-limits">
@@ -207,6 +209,24 @@ This can be turned off by setting
 <div class="section" id="resampling-strategies">
 <h2>Resampling strategies<a class="headerlink" href="#resampling-strategies" title="Permalink to this headline">¶</a></h2>
 <p>Examples for using holdout and cross-validation can be found in <a class="reference external" href="examples/">auto-sklearn/examples/</a></p>
+</div>
+<div class="section" id="supported-inputs">
+<h2>Supported Inputs<a class="headerlink" href="#supported-inputs" title="Permalink to this headline">¶</a></h2>
+<p><em>auto-sklearn</em> can accept targets for the following tasks (more details on <a class="reference external" href="https://scikit-learn.org/stable/modules/multiclass.html">Sklearn algorithms</a>):
+* Binary Classification
+* Multiclass Classification
+* Multilabel Classification
+* Regression
+* Multioutput Regression</p>
+<dl class="simple">
+<dt>You can provide feature and target training pairs (X_train/y_train) to <em>auto-sklearn</em> to fit an ensemble of pipelines as described in the next section. This X_train/y_train dataset must belong to one of the supported formats: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.</dt><dd><p>Optionally, you can measure the ability of this fitted model to generalize to unseen data by providing an optional testing pair (X_test/Y_test). For further details, please refer to the example <a class="reference external" href="examples/example_pandas_train_test.html">Pandas Train and Test inputs</a>. Supported formats for these training and testing pairs are: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.</p>
+</dd>
+</dl>
+<p>If your data contains categorical values (in the features or targets), autosklearn will automatically encode your data using a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html">sklearn.preprocessing.LabelEncoder</a> for unidimensional data and a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html">sklearn.preprocessing.OrdinalEncoder</a> for multidimensional data.</p>
+<p>Regarding the features, there are two methods to guide <em>auto-sklearn</em> to properly encode categorical columns:
+* Providing a X_train/X_test numpy array with the optional flag feat_type. For further details, you can check the example <a class="reference external" href="examples/example_feature_types.html">Feature Types</a>.
+* You can provide a pandas DataFrame, with properly formatted columns. If a column has numerical dtype, <em>auto-sklearn</em> will not encode it and it will be passed directly to scikit-learn. If the column has a categorical/boolean class, it will be encoded. If the column is of any other type (Object or Timeseries), an error will be raised. For further details on how to properly encode your data, you can check the example <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html">Working with categorical data</a>). If you are working with time series, it is recommended that you follow this approach <a class="reference external" href="https://stats.stackexchange.com/questions/311494/">Working with time data</a>.</p>
+<p>Regarding the targets (y_train/y_test), if the task involves a classification problem, such features will be automatically encoded. It is recommended to provide both y_train and y_test during fit, so that a common encoding is created between these splits (if only y_train is provided during fit, the categorical encoder will not be able to handle new classes that are exclusive to y_test). If the task is regression, no encoding happens on the targets.</p>
 </div>
 <div class="section" id="ensemble-building-process">
 <h2>Ensemble Building Process<a class="headerlink" href="#ensemble-building-process" title="Permalink to this headline">¶</a></h2>

@@ -1,0 +1,297 @@
+.. only:: html
+
+    .. note::
+        :class: sphx-glr-download-link-note
+
+        Click :ref:`here <sphx_glr_download_examples_example_pandas_train_test.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_examples_example_pandas_train_test.py:
+
+
+===============================
+Test and Train data with Pandas
+===============================
+
+*auto-sklearn* can automatically encode categorical columns using a label/ordinal encoder.
+This example highlights how to properly set the dtype in a DataFrame for this to happen,
+and showcase how to input also testing data to autosklearn.
+The X_train/y_train arguments to the fit function will be used to fit the scikit-learn model,
+whereas the X_test/y_test will be used to evaluate how good this scikit-learn model generalizes
+to unseen data (i.e. data not in X_train/y_train). Using test data is a good mechanism to measure
+if the trained model suffers from overfit, and more details can be found on `evaluating estimator
+performance <https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation>`_.
+This example further highlights through a plot, the best individual models found by *auto-sklearn*
+through time (under single_best_optimization_score/single_best_test_score's legend).
+It also shows the training and test performance of the ensemble build using the best
+performing models (under ensemble_optimization_score and ensemble_test_score respectively).
+
+There is also support to manually indicate the feature types (whether a column is categorical
+or numerical) via the argument feat_types from fit(). This is important when working with
+list or numpy arrays as there is no per-column dtype (further details in the example
+`Continuous and categorical data <examples/example_feature_types.html>`_).
+
+
+.. code-block:: default
+
+    import time
+
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    import sklearn.model_selection
+    import sklearn.datasets
+    import sklearn.metrics
+
+    from smac.tae.execute_ta_run import StatusType
+
+    import autosklearn.classification
+    from autosklearn.metrics import accuracy
+
+
+    def get_runhistory_models_performance(automl):
+        metric = cls._automl[0]._metric
+        data = automl._automl[0].runhistory_.data
+        performance_list = []
+        for run_key, run_value in data.items():
+            if run_value.status != StatusType.SUCCESS:
+                # Ignore crashed runs
+                continue
+            endtime = pd.Timestamp(time.strftime('%Y-%m-%d %H:%M:%S',
+                                                 time.localtime(run_value.endtime)))
+            val_score = metric._optimum - (metric._sign * run_value.cost)
+            test_score = metric._optimum - (metric._sign * run_value.additional_info['test_loss'])
+            performance_list.append({
+                'Timestamp': endtime,
+                'single_best_optimization_score': val_score,
+                'single_best_test_score': test_score,
+            })
+        return pd.DataFrame(performance_list)
+
+
+
+
+
+
+
+
+
+Data Loading
+============
+
+
+.. code-block:: default
+
+
+    # Using Australian dataset https://www.openml.org/d/40981.
+    # This example will use the command fetch_openml, which will
+    # download a properly formatted dataframe if you use as_frame=True.
+    # For demonstration purposes, we will download a numpy array using
+    # as_frame=False, and manually creating the pandas DataFrame
+    X, y = sklearn.datasets.fetch_openml(data_id=40981, return_X_y=True, as_frame=False)
+
+    # bool and category will be automatically encoded.
+    # Targets for classification are also automatically encoded
+    # If using fetch_openml, data is already properly encoded, below
+    # is an example for user reference
+    X = pd.DataFrame(
+        data=X,
+        columns=['A' + str(i) for i in range(1, 15)]
+    )
+    desired_boolean_columns = ['A1']
+    desired_categorical_columns = ['A4', 'A5', 'A6', 'A8', 'A9', 'A11', 'A12']
+    desired_numerical_columns = ['A2', 'A3', 'A7', 'A10', 'A13', 'A14']
+    for column in X.columns:
+        if column in desired_boolean_columns:
+            X[column] = X[column].astype('bool')
+        elif column in desired_categorical_columns:
+            X[column] = X[column].astype('category')
+        else:
+            X[column] = pd.to_numeric(X[column])
+
+    y = pd.DataFrame(y, dtype='category')
+
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+        X, y, test_size=0.5, random_state=3
+    )
+    print(X.dtypes)
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    A1         bool
+    A2      float64
+    A3      float64
+    A4     category
+    A5     category
+    A6     category
+    A7      float64
+    A8     category
+    A9     category
+    A10     float64
+    A11    category
+    A12    category
+    A13     float64
+    A14     float64
+    dtype: object
+
+
+
+
+Build and fit a classifier
+==========================
+
+
+.. code-block:: default
+
+
+    cls = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=120,
+        per_run_time_limit=30,
+        metric=accuracy,
+    )
+    cls.fit(X_train, y_train, X_test, y_test)
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    AutoSklearnClassifier(delete_output_folder_after_terminate=True,
+                          delete_tmp_folder_after_terminate=True,
+                          disable_evaluator_output=False,
+                          ensemble_memory_limit=1024, ensemble_nbest=50,
+                          ensemble_size=50, exclude_estimators=None,
+                          exclude_preprocessors=None, get_smac_object_callback=None,
+                          include_estimators=None, include_preprocessors=None,
+                          initial_configurations_via_metalearning=25,
+                          logging_config=None, max_models_on_disc=50,
+                          metadata_directory=None, metric=None,
+                          ml_memory_limit=3072, n_jobs=None, output_folder=None,
+                          per_run_time_limit=30, resampling_strategy='holdout',
+                          resampling_strategy_arguments=None, seed=1,
+                          shared_mode=False, smac_scenario_args=None,
+                          time_left_for_this_task=120, tmp_folder=None)
+
+
+
+Get the Score of the final ensemble
+===================================
+
+
+.. code-block:: default
+
+
+    predictions = cls.predict(X_test)
+    print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Accuracy score 0.8666666666666667
+
+
+
+
+Plot the ensemble performance
+===================================
+
+
+.. code-block:: default
+
+
+    ensemble_performance_frame = pd.DataFrame(cls._automl[0].ensemble_performance_history)
+    individual_performance_frame = get_runhistory_models_performance(cls)
+    pd.merge(
+        ensemble_performance_frame,
+        individual_performance_frame,
+        on="Timestamp", how='outer'
+    ).sort_values('Timestamp').fillna(method='ffill').plot(
+        x='Timestamp',
+        kind='line',
+        legend=True,
+        title='Auto-sklearn accuracy over time',
+        grid=True,
+    )
+    plt.show()
+
+
+
+.. image:: /examples/images/sphx_glr_example_pandas_train_test_001.png
+    :alt: Auto-sklearn accuracy over time
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/pandas/plotting/_matplotlib/converter.py:245: MatplotlibDeprecationWarning: 
+    The epoch2num function was deprecated in Matplotlib 3.3 and will be removed two minor releases later.
+      base = dates.epoch2num(dt.asi8 / 1.0e9)
+    /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/pandas/plotting/_matplotlib/converter.py:245: MatplotlibDeprecationWarning: 
+    The epoch2num function was deprecated in Matplotlib 3.3 and will be removed two minor releases later.
+      base = dates.epoch2num(dt.asi8 / 1.0e9)
+    /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/pandas/plotting/_matplotlib/converter.py:245: MatplotlibDeprecationWarning: 
+    The epoch2num function was deprecated in Matplotlib 3.3 and will be removed two minor releases later.
+      base = dates.epoch2num(dt.asi8 / 1.0e9)
+    /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/pandas/plotting/_matplotlib/converter.py:245: MatplotlibDeprecationWarning: 
+    The epoch2num function was deprecated in Matplotlib 3.3 and will be removed two minor releases later.
+      base = dates.epoch2num(dt.asi8 / 1.0e9)
+
+
+
+
+
+.. rst-class:: sphx-glr-timing
+
+   **Total running time of the script:** ( 1 minutes  54.871 seconds)
+
+
+.. _sphx_glr_download_examples_example_pandas_train_test.py:
+
+
+.. only :: html
+
+ .. container:: sphx-glr-footer
+    :class: sphx-glr-footer-example
+
+
+
+  .. container:: sphx-glr-download sphx-glr-download-python
+
+     :download:`Download Python source code: example_pandas_train_test.py <example_pandas_train_test.py>`
+
+
+
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+     :download:`Download Jupyter notebook: example_pandas_train_test.ipynb <example_pandas_train_test.ipynb>`
+
+
+.. only:: html
+
+ .. rst-class:: sphx-glr-signature
+
+    `Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_
