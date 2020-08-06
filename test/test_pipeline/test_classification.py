@@ -70,18 +70,6 @@ class DummyPreprocessor(AutoSklearnPreprocessingAlgorithm):
         return cs
 
 
-def translate_config_to_implementation(config, matching_string):
-    """
-    Given a configuration, this utility extracts from a given config,
-    the relevant matching_string configuration.
-    In other words, config is expected to be a super configuration
-    from which we want to extract a subset of it that complies with
-    matching_string
-    """
-    translated_dict = {}
-    return translated_dict
-
-
 class SimpleClassificationPipelineTest(unittest.TestCase):
     _multiprocess_can_split_ = True
 
