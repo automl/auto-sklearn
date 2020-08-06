@@ -8,6 +8,7 @@ import unittest
 import unittest.mock
 
 import numpy as np
+import pandas as pd
 import sklearn.datasets
 from smac.scenario.scenario import Scenario
 from smac.facade.roar_facade import ROAR
@@ -546,6 +547,54 @@ class AutoMLTest(Base, unittest.TestCase):
             del automl
             self._tearDown(backend_api.temporary_directory)
             self._tearDown(backend_api.output_directory)
+
+    def test_fail_if_feat_type_on_pandas_input(self):
+        """We do not support feat type when pandas
+        is provided as an input
+        """
+        backend_api = self._create_backend('test_fail_feat_pandas')
+        automl = autosklearn.automl.AutoML(
+            backend=backend_api,
+            time_left_for_this_task=20,
+            per_run_time_limit=5,
+            metric=accuracy,
+        )
+
+        X_train = pd.DataFrame({'a': [1, 1], 'c': [1, 2]})
+        y_train = [1, 0]
+        with self.assertRaisesRegex(ValueError,
+                                    "feat_type cannot be provided when using pandas"):
+            automl.fit(
+                X_train, y_train,
+                task=BINARY_CLASSIFICATION,
+                feat_type=['Categorical', 'Numerical'],
+            )
+        self._tearDown(backend_api.temporary_directory)
+        self._tearDown(backend_api.output_directory)
+
+    def test_fail_if_dtype_changes_automl(self):
+        """We do not support changes in the input type.
+        Once a estimator is fitted, it should not change data type
+        """
+        backend_api = self._create_backend('test_fail_feat_typechange')
+        automl = autosklearn.automl.AutoML(
+            backend=backend_api,
+            time_left_for_this_task=20,
+            per_run_time_limit=5,
+            metric=accuracy,
+        )
+
+        X_train = pd.DataFrame({'a': [1, 1], 'c': [1, 2]})
+        y_train = [1, 0]
+        automl.InputValidator.validate(X_train, y_train, is_classification=True)
+        with self.assertRaisesRegex(ValueError,
+                                    "Auto-sklearn previously received features of type"):
+            automl.fit(
+                X_train.to_numpy(), y_train,
+                task=BINARY_CLASSIFICATION,
+            )
+        self._tearDown(backend_api.temporary_directory)
+        self._tearDown(backend_api.output_directory)
 
 
 if __name__ == "__main__":

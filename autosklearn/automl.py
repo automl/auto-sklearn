@@ -347,7 +347,13 @@ class AutoML(BaseEstimator):
                                      'valid feature types, you passed `%s`' % ft)
 
         # Feature types dynamically understood from dataframe
-        if feat_type is None and self.InputValidator.feature_types:
+        if feat_type is not None and self.InputValidator.feature_types:
+            raise ValueError("feat_type cannot be provided when using pandas "
+                             "DataFrame as input. Auto-sklearn extracts the feature types "
+                             "automatically from the columns dtypes, so providing feat_type "
+                             "not only is not necessary, but not allowed."
+                             )
+        elif feat_type is None and self.InputValidator.feature_types:
             feat_type = self.InputValidator.feature_types
 
         datamanager = XYDataManager(
@@ -822,10 +828,15 @@ class AutoML(BaseEstimator):
         # fix: Consider only index 1 of second dimension
         # Don't know if the reshaping should be done there or in calculate_score
 
+        # Predict has validate within it, so we
+        # call it before the upcoming validate call
+        # The reason is we do not want to trigger the
+        # check for changing input types on successive
+        # input validator calls
+        prediction = self.predict(X)
+
         # Make sure that input is valid
         X, y = self.InputValidator.validate(X, y)
-
-        prediction = self.predict(X)
 
         # Encode the prediction using the input validator
         # We train autosklearn with a encoded version of y,

@@ -1,3 +1,5 @@
+import itertools
+
 import unittest
 import unittest.mock
 
@@ -238,12 +240,15 @@ class InputValidatorTest(unittest.TestCase):
                 pd.DataFrame({'string': ['foo']})
             )
 
+        validator = InputValidator()
         with self.assertRaisesRegex(ValueError, "Expected 2D array, got"):
             validator.validate_features({'input1': 1, 'input2': 2})
 
+        validator = InputValidator()
         with self.assertRaisesRegex(ValueError, "Expected 2D array, got"):
             validator.validate_features(InputValidator())
 
+        validator = InputValidator()
         X = pd.DataFrame(data=['a', 'b', 'c'], dtype='category')
         with unittest.mock.patch('autosklearn.data.validation.InputValidator._check_and_get_columns_to_encode') as mock_foo:  # noqa E501
             # Mock that all columns are ok. There should be a
@@ -264,7 +269,7 @@ class InputValidatorTest(unittest.TestCase):
         np.testing.assert_array_almost_equal(np.array([0, 1, 0]), y)
 
         # Result should not change on a multi call
-        y = validator.validate_target(y)
+        y = validator.validate_target(pd.DataFrame(data=self.y, dtype=bool))
         np.testing.assert_array_almost_equal(np.array([0, 1, 0]), y)
 
         y_decoded = validator.decode_target(y)
@@ -622,3 +627,24 @@ class InputValidatorTest(unittest.TestCase):
         encoded_classes = validator.target_encoder.classes_
         missing = all_classes - set(encoded_classes)
         self.assertEqual(len(missing), 0)
+
+    def test_all_posible_dtype_changes(self):
+        """We do not allow a change in dtype once inputvalidator
+        is fitted"""
+        data = [[1, 0, 1], [1, 1, 1]]
+        type_perms = list(itertools.permutations([
+            data,
+            np.array(data),
+            pd.DataFrame(data)
+        ], r=2))
+
+        for first, second in type_perms:
+            validator = InputValidator()
+            validator.validate_target(first)
+            with self.assertRaisesRegex(ValueError,
+                                        "Auto-sklearn previously received targets of type"):
+                validator.validate_target(second)
+            validator.validate_features(first)
+            with self.assertRaisesRegex(ValueError,
+                                        "Auto-sklearn previously received features of type"):
+                validator.validate_features(second)
