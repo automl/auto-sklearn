@@ -70,6 +70,32 @@ class DummyPreprocessor(AutoSklearnPreprocessingAlgorithm):
         return cs
 
 
+class CrashPreprocessor(AutoSklearnPreprocessingAlgorithm):
+    def __init__(*args, **kwargs):
+        pass
+
+    @staticmethod
+    def get_properties(dataset_properties=None):
+        return {'shortname': 'AB',
+                'name': 'AdaBoost Classifier',
+                'handles_regression': False,
+                'handles_classification': True,
+                'handles_multiclass': True,
+                'handles_multilabel': True,
+                'handles_multioutput': False,
+                'is_deterministic': True,
+                'input': (DENSE, SPARSE, UNSIGNED_DATA),
+                'output': (INPUT,)}
+
+    def fit(self, X, y):
+        raise ValueError("Make sure fit is called")
+
+    @staticmethod
+    def get_hyperparameter_search_space(dataset_properties=None):
+        cs = ConfigurationSpace()
+        return cs
+
+
 class SimpleClassificationPipelineTest(unittest.TestCase):
     _multiprocess_can_split_ = True
 
@@ -769,3 +795,23 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
             # Make sure we checked the whole configuration
             self.assertSetEqual(set(config_dict.keys()), set(keys_checked))
+
+    def test_fit_instantiates_component(self):
+        """Make sure that if a preprocessor is added, it's fit
+        method is called"""
+        preprocessing_components.add_preprocessor(CrashPreprocessor)
+        cls = SimpleClassificationPipeline()
+        cs = cls.get_hyperparameter_search_space()
+        self.assertIn('CrashPreprocessor', str(cs))
+        config = cs.sample_configuration()
+        config['feature_preprocessor:__choice__'] = 'CrashPreprocessor'
+        cls.set_hyperparameters(config)
+        with self.assertRaisesRegex(
+            ValueError,
+            "Make sure fit is called"
+        ):
+            cls.fit(
+                X=np.array([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]),
+                y=np.array([1, 0, 1, 1])
+            )
+        del preprocessing_components._addons.components['CrashPreprocessor']
