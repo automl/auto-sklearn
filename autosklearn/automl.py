@@ -828,10 +828,15 @@ class AutoML(BaseEstimator):
         # fix: Consider only index 1 of second dimension
         # Don't know if the reshaping should be done there or in calculate_score
 
+        # Predict has validate within it, so we
+        # call it before the upcoming validate call
+        # The reason is we do not want to trigger the
+        # check for changing input types on successive
+        # input validator calls
+        prediction = self.predict(X)
+
         # Make sure that input is valid
         X, y = self.InputValidator.validate(X, y)
-
-        prediction = self.predict(X)
 
         # Encode the prediction using the input validator
         # We train autosklearn with a encoded version of y,

@@ -46,6 +46,13 @@ class InputValidator:
         # same dimensionality
         self._n_outputs = None
 
+        # Add support to make sure that the input to
+        # autosklearn has consistent dtype through calls.
+        # That is, once fitted, changes in the input dtype
+        # are not allowed
+        self.features_type = None  # type: Optional[type]
+        self.target_type = None  # type: Optional[type]
+
     def validate(
         self,
         X: Union[pd.DataFrame, np.ndarray],
@@ -80,6 +87,18 @@ class InputValidator:
         Wrapper around sklearn check_array. Translates a pandas
         Dataframe to a valid input for sklearn.
         """
+
+        # Make sure that once fitted, we don't allow new dtypes
+        if self.features_type is None:
+            self.features_type = type(X)
+        if self.features_type != type(X):
+            raise ValueError("Auto-sklearn previously received features of type {} "
+                             "yet the current features have type {}. Changing the dtype "
+                             "of inputs to an estimator is not supported.".format(
+                                    self.features_type,
+                                    type(X)
+                                )
+                             )
 
         # Do not support category/string numpy data. Only numbers
         if hasattr(X, "dtype") and not np.issubdtype(X.dtype.type, np.number):
@@ -119,6 +138,18 @@ class InputValidator:
         Wrapper around sklearn check_array. Translates a pandas
         Dataframe to a valid input for sklearn.
         """
+
+        # Make sure that once fitted, we don't allow new dtypes
+        if self.target_type is None:
+            self.target_type = type(y)
+        if self.target_type != type(y):
+            raise ValueError("Auto-sklearn previously received targets of type {} "
+                             "yet the current target has type {}. Changing the dtype "
+                             "of inputs to an estimator is not supported.".format(
+                                    self.target_type,
+                                    type(y)
+                                )
+                             )
 
         # Target data as sparse is not supported
         if scipy.sparse.issparse(y):

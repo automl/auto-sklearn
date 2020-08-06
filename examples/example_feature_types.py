@@ -26,7 +26,7 @@ import autosklearn.classification
 # ============
 # Load Australian dataset from https://www.openml.org/d/40981
 bunch = data = sklearn.datasets.fetch_openml(data_id=40981, as_frame=True)
-y = y = bunch['target'].to_numpy()
+y = bunch['target'].to_numpy()
 X = bunch['data'].to_numpy(np.float)
 
 X_train, X_test, y_train, y_test = \
