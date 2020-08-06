@@ -173,7 +173,7 @@ class BasePipeline(Pipeline):
                 return y
 
     def set_hyperparameters(self, configuration, init_params=None):
-        self.configuration = configuration
+        self.config = configuration
 
         for node_idx, n_ in enumerate(self.steps):
             node_name, node = n_
