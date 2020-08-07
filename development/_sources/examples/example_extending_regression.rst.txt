@@ -228,9 +228,9 @@ Print prediction score and statistics
 
     r2 score:  0.0
     auto-sklearn results:
-      Dataset name: 85fe481ea453870b40f5bf59655b7ee2
+      Dataset name: ce3b2a67eeffb1b5eb39bc32bd2f9ffd
       Metric: r2
-      Best validation score: -2.397165
+      Best validation score: -2.105017
       Number of target algorithm runs: 1
       Number of successful target algorithm runs: 1
       Number of crashed target algorithm runs: 0
@@ -248,7 +248,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  24.259 seconds)
+   **Total running time of the script:** ( 0 minutes  24.258 seconds)
 
 
 .. _sphx_glr_download_examples_example_extending_regression.py:

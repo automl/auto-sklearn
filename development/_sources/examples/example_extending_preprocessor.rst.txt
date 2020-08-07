@@ -247,11 +247,11 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    accracy:  0.951048951048951
+    accracy:  0.9230769230769231
     auto-sklearn results:
-      Dataset name: b2d72ab96f3a4f54e2ff89c0863f8cb6
+      Dataset name: 41570688d52c0f29b28977d1fbbd77a2
       Metric: accuracy
-      Best validation score: 0.943262
+      Best validation score: 0.971631
       Number of target algorithm runs: 1
       Number of successful target algorithm runs: 1
       Number of crashed target algorithm runs: 0
@@ -274,7 +274,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  24.360 seconds)
+   **Total running time of the script:** ( 0 minutes  24.367 seconds)
 
 
 .. _sphx_glr_download_examples_example_extending_preprocessor.py:
