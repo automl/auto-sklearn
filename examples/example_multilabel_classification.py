@@ -22,11 +22,14 @@ import autosklearn.classification
 # Data Loading
 # ============
 
-# Using reuters multilabel dataset -- https://www.openml.org/d/40597
+# Using reuters multilabel dataset -- https://www.openml.org/d/40594
 X, y = sklearn.datasets.fetch_openml(data_id=40594, return_X_y=True, as_frame=False)
 
 # fetch openml downloads a numpy array with TRUE/FALSE strings. Re-map it to
 # integer dtype with ones and zeros
+# This is to comply with Scikit-learn requirement:
+# "Positive classes are indicated with 1 and negative classes with 0 or -1."
+# More information on: https://scikit-learn.org/stable/modules/multiclass.html
 y[y == 'TRUE'] = 1
 y[y == 'FALSE'] = 0
 y = y.astype(np.int)

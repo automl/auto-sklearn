@@ -145,7 +145,7 @@ class EstimatorTest(Base, unittest.TestCase):
         # Illegal target types for classification: continuous,
         # multiclass-multioutput, continuous-multioutput.
         self.assertRaisesRegex(ValueError,
-                               "classification with data of type"
+                               "Classification with data of type"
                                " multiclass-multioutput is not supported",
                                cls.fit,
                                X=X,
@@ -153,7 +153,7 @@ class EstimatorTest(Base, unittest.TestCase):
                                )
 
         self.assertRaisesRegex(ValueError,
-                               "classification with data of type"
+                               "Classification with data of type"
                                " continuous is not supported",
                                cls.fit,
                                X=X,
@@ -161,7 +161,7 @@ class EstimatorTest(Base, unittest.TestCase):
                                )
 
         self.assertRaisesRegex(ValueError,
-                               "classification with data of type"
+                               "Classification with data of type"
                                " continuous-multioutput is not supported",
                                cls.fit,
                                X=X,
@@ -194,7 +194,7 @@ class EstimatorTest(Base, unittest.TestCase):
         # multiclass-multioutput
         self.assertRaisesRegex(
             ValueError,
-            "regression with data of type"
+            "Regression with data of type"
             " multilabel-indicator is not supported",
             reg.fit,
             X=X,
@@ -203,7 +203,7 @@ class EstimatorTest(Base, unittest.TestCase):
 
         self.assertRaisesRegex(
             ValueError,
-            "regression with data of type"
+            "Regression with data of type"
             " multiclass-multioutput is not supported",
             reg.fit,
             X=X,

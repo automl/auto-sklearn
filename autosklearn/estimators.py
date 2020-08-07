@@ -665,13 +665,15 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         # type of data is compatible with auto-sklearn. Legal target
         # types are: binary, multiclass, multilabel-indicator.
         target_type = type_of_target(y)
-        if target_type in ['multiclass-multioutput',
-                           'continuous',
-                           'continuous-multioutput',
-                           'unknown',
-                           ]:
-            raise ValueError("classification with data of type %s is"
-                             " not supported" % target_type)
+        supported_types = ['binary', 'multiclass', 'multilabel-indicator']
+        if target_type not in supported_types:
+            raise ValueError("Classification with data of type {} is "
+                             "not supported. Supported types are {}. "
+                             "".format(
+                                    target_type,
+                                    supported_types
+                                )
+                             )
 
         # remember target type for using in predict_proba later.
         self.target_type = target_type
@@ -795,14 +797,18 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         """
         # Before running anything else, first check that the
         # type of data is compatible with auto-sklearn. Legal target
-        # types are: continuous, binary, multiclass.
+        # types are: continuous, continuous-multioutput, 'multiclass'
+        # binary
         target_type = type_of_target(y)
-        if target_type in ['multiclass-multioutput',
-                           'multilabel-indicator',
-                           'unknown',
-                           ]:
-            raise ValueError("regression with data of type %s is not"
-                             " supported" % target_type)
+        supported_types = ['continuous', 'binary', 'multiclass', 'continuous-multioutput']
+        if target_type not in supported_types:
+            raise ValueError("Regression with data of type {} is "
+                             "not supported. Supported types are {}. "
+                             "".format(
+                                    target_type,
+                                    supported_types
+                                )
+                             )
 
         # Fit is supposed to be idempotent!
         # But not if we use share_mode.
