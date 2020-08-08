@@ -193,66 +193,66 @@ Build and fit the classifier
  .. code-block:: none
 
     Starting to build an ensemble!
-    [WARNING] [2020-08-07 22:17:09,883:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,884:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,886:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,886:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,887:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,887:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,888:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,888:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,889:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,889:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,890:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,890:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,891:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,892:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,892:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,893:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,893:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,894:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,894:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,895:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,895:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,896:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,896:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,897:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,897:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,898:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,898:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,898:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,899:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,899:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,900:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,900:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,901:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,901:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,901:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,902:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,902:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,902:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,902:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,902:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,902:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,902:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,902:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,902:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,902:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,903:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,903:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,903:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,903:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,903:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,903:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,903:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,903:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,903:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,904:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,904:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,904:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,904:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,904:EnsembleBuilder(1):digits] Interpreted str-precision as 32
-    [WARNING] [2020-08-07 22:17:09,904:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,286:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,287:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,288:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,289:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,289:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,290:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,291:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,291:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,292:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,292:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,293:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,294:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,294:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,295:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,295:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,296:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,297:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,297:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,298:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,299:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,299:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,300:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,300:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,301:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,301:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,302:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,302:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,303:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,303:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,304:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,304:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,305:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,305:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,305:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,306:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,306:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,306:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,306:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,306:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,306:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,306:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,306:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,307:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,307:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,307:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,307:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,307:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,307:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,307:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,307:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,307:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,308:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,308:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,308:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,308:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,308:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,308:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,308:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,308:EnsembleBuilder(1):digits] Interpreted str-precision as 32
+    [WARNING] [2020-08-08 22:04:02,308:EnsembleBuilder(1):digits] Interpreted str-precision as 32
 
     AutoSklearnClassifier(delete_output_folder_after_terminate=False,
                           delete_tmp_folder_after_terminate=False,
@@ -415,7 +415,7 @@ Report the score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  2.110 seconds)
+   **Total running time of the script:** ( 1 minutes  1.218 seconds)
 
 
 .. _sphx_glr_download_examples_example_parallel_manual_spawning.py:
