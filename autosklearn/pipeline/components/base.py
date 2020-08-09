@@ -376,7 +376,15 @@ class AutoSklearnChoice(object):
             elif exclude is not None and name in exclude:
                 continue
 
-            # TODO maybe check for sparse?
+            # Add support for components that do not support
+            # sparse data. That is, we don't want to add them as choices
+            properties = available_comp[name].get_properties()
+            if 'sparse' in dataset_properties and dataset_properties['sparse']:
+                # In case the dataset is sparse, ignore
+                # components that do not handle sparse data
+                if not properties['handles_sparse']:
+                    print(f"skipping {name}")
+                    continue
 
             components_dict[name] = available_comp[name]
 

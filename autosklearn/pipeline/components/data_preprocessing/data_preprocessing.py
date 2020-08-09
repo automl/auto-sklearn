@@ -44,14 +44,24 @@ class DataPreprocessor(AutoSklearnComponent):
 
         # The pipeline that will be applied to the categorical features (i.e. columns)
         # of the dataset
+        # Configuration of the data-preprocessor is different from the configuration of
+        # the categorical pipeline. Hence, force to None
+        # TODO: Extract the child configuration space from the datapreprocessor to the
+        # pipeline if needed
         self.categ_ppl = CategoricalPreprocessingPipeline(
-            config, pipeline, dataset_properties, include, exclude,
-            random_state, init_params)
+            config=None, steps=pipeline, dataset_properties=dataset_properties,
+            include=include, exclude=exclude, random_state=random_state,
+            init_params=init_params)
         # The pipeline that will be applied to the numerical features (i.e. columns)
         # of the dataset
+        # Configuration of the data-preprocessor is different from the configuration of
+        # the numerical pipeline. Hence, force to None
+        # TODO: Extract the child configuration space from the datapreprocessor to the
+        # pipeline if needed
         self.numer_ppl = NumericalPreprocessingPipeline(
-            config, pipeline, dataset_properties, include, exclude,
-            random_state, init_params)
+            config=None, steps=pipeline, dataset_properties=dataset_properties,
+            include=include, exclude=exclude, random_state=random_state,
+            init_params=init_params)
         self._transformers = [
             ["categorical_transformer", self.categ_ppl],
             ["numerical_transformer", self.numer_ppl],

@@ -87,8 +87,11 @@ class CategoricalPreprocessingPipeline(BasePipeline):
         self.dataset_properties_ = dataset_properties
         return cs
 
-    def _get_pipeline_steps(self):
+    def _get_pipeline_steps(self, dataset_properties=None):
         steps = []
+        default_dataset_properties = {}
+        if dataset_properties is not None and isinstance(dataset_properties, dict):
+            default_dataset_properties.update(dataset_properties)
 
         steps.extend([
             ["category_shift", CategoryShift()],
