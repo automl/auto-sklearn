@@ -755,7 +755,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                         for sub_name, sub_step in pipeline.items():
                             # If it is a Choice, make sure it is the correct one!
                             if isinstance(sub_step, AutoSklearnChoice):
-                                key = f"data_preprocessing:{data_type}:{sub_name}:__choice__"
+                                key = "data_preprocessing:{}:{}:__choice__".format(
+                                    data_type,
+                                    sub_name
+                                )
                                 keys_checked.extend(
                                     self._test_set_hyperparameter_choice(
                                         key, sub_step, config_dict
@@ -765,7 +768,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                             elif isinstance(sub_step, AutoSklearnComponent):
                                 keys_checked.extend(
                                     self._test_set_hyperparameter_component(
-                                        f"data_preprocessing:{data_type}:{sub_name}",
+                                        "data_preprocessing:{}:{}".format(
+                                            data_type,
+                                            sub_name
+                                        ),
                                         sub_step, config_dict
                                     )
                                 )

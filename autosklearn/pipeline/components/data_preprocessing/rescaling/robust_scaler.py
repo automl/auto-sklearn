@@ -1,3 +1,4 @@
+from scipy import sparse
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter
 
@@ -44,3 +45,9 @@ class RobustScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
         )
         cs.add_hyperparameters((q_min, q_max))
         return cs
+
+    def fit(self, X, y=None):
+        if sparse.isspmatrix(X):
+            self.preprocessor.set_params(with_centering=False)
+
+        return super(RobustScalerComponent, self).fit(X, y)
