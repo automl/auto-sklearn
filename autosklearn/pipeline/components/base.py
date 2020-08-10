@@ -383,7 +383,6 @@ class AutoSklearnChoice(object):
                 # In case the dataset is sparse, ignore
                 # components that do not handle sparse data
                 if not properties['handles_sparse']:
-                    print(f"skipping {name}")
                     continue
 
             components_dict[name] = available_comp[name]

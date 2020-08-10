@@ -46,6 +46,7 @@ class DataPreprocessor(AutoSklearnComponent):
         # of the dataset
         # Configuration of the data-preprocessor is different from the configuration of
         # the categorical pipeline. Hence, force to None
+        # It is actually the call to set_hyperparameter who properly sets this argument
         # TODO: Extract the child configuration space from the datapreprocessor to the
         # pipeline if needed
         self.categ_ppl = CategoricalPreprocessingPipeline(
@@ -56,6 +57,7 @@ class DataPreprocessor(AutoSklearnComponent):
         # of the dataset
         # Configuration of the data-preprocessor is different from the configuration of
         # the numerical pipeline. Hence, force to None
+        # It is actually the call to set_hyperparameter who properly sets this argument
         # TODO: Extract the child configuration space from the datapreprocessor to the
         # pipeline if needed
         self.numer_ppl = NumericalPreprocessingPipeline(
