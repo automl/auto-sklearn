@@ -2,7 +2,7 @@ from scipy import sparse
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter
 
-from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, SIGNED_DATA, INPUT
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, SIGNED_DATA, INPUT, SPARSE
 from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_rescaling \
     import Rescaling
 from autosklearn.pipeline.components.base import \
@@ -31,7 +31,7 @@ class RobustScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
                 # TODO find out if this is right!
                 'handles_sparse': True,
                 'handles_dense': True,
-                'input': (DENSE, UNSIGNED_DATA),
+                'input': (SPARSE, DENSE, UNSIGNED_DATA),
                 'output': (INPUT, SIGNED_DATA),
                 'preferred_dtype': None}
 
