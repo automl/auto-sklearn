@@ -96,27 +96,30 @@ class SelectRatesComponentTest(unittest.TestCase):
         Xt = preprocessor.transform(X_train)
         self.assertEqual(Xt.dtype, np.float64)
 
-
     def test_default_configuration_regression(self):
-        transformation, original = \
-                            _test_preprocessing(SelectRates, task='regression')
+        transformation, original = _test_preprocessing(
+            SelectRates,
+            dataset='boston',
+            task='regression',
+        )
         self.assertEqual(transformation.shape[0], original.shape[0])
-        self.assertEqual(transformation.shape[1], 4)
+        # From 13 to 12 features
+        self.assertEqual(transformation.shape[1], 12)
         self.assertFalse((transformation == 0).all())
-
 
     def test_preprocessing_dtype_regression(self):
         # Dense
         # np.float32
-        X_train, Y_train, X_test, Y_test = get_dataset("iris")
+        X_train, Y_train, X_test, Y_test = get_dataset("boston")
         self.assertEqual(X_train.dtype, np.float32)
 
         dataset_properties = {'target_type': 'regression'}
 
-        configuration_space = \
-                SelectRates.get_hyperparameter_search_space(dataset_properties)
+        configuration_space = SelectRates.get_hyperparameter_search_space(
+            dataset_properties
+        )
         default = configuration_space.get_default_configuration()
-        preprocessor = SelectRates(random_state=1, task='regression',
+        preprocessor = SelectRates(random_state=1,
                                    **{hp_name: default[hp_name] for hp_name in
                                       default})
         preprocessor.fit(X_train, Y_train)
@@ -124,12 +127,13 @@ class SelectRatesComponentTest(unittest.TestCase):
         self.assertEqual(Xt.dtype, np.float32)
 
         # np.float64
-        X_train, Y_train, X_test, Y_test = get_dataset("iris")
+        X_train, Y_train, X_test, Y_test = get_dataset("boston")
         X_train = X_train.astype(np.float64)
-        configuration_space = \
-                SelectRates.get_hyperparameter_search_space(dataset_properties)
+        configuration_space = SelectRates.get_hyperparameter_search_space(
+            dataset_properties
+        )
         default = configuration_space.get_default_configuration()
-        preprocessor = SelectRates(random_state=1, task='regression',
+        preprocessor = SelectRates(random_state=1,
                                    **{hp_name: default[hp_name] for hp_name in
                                       default})
         preprocessor.fit(X_train, Y_train)

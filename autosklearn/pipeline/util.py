@@ -168,8 +168,8 @@ def _test_classifier_predict_proba(classifier, dataset='iris', sparse=False,
     return predictions, Y_test
 
 
-def _test_preprocessing(Preprocessor, dataset='iris', make_sparse=False, task=None,
-                        train_size_maximum=150):
+def _test_preprocessing(Preprocessor, dataset='iris', make_sparse=False,
+                        train_size_maximum=150, task=None):
     X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
                                                    make_sparse=make_sparse,
                                                    train_size_maximum=train_size_maximum)
@@ -184,10 +184,7 @@ def _test_preprocessing(Preprocessor, dataset='iris', make_sparse=False, task=No
     default = configuration_space.get_default_configuration()
 
     kwargs = {hp_name: default[hp_name] for hp_name in
-                                   default if default[hp_name] is not None}
-
-    if task is not None:
-        kwargs['task'] = task
+              default if default[hp_name] is not None}
 
     preprocessor = Preprocessor(random_state=np.random.RandomState(1),
                                 **kwargs)
