@@ -1,4 +1,5 @@
 import copy
+import itertools
 import resource
 import sys
 import tempfile
@@ -446,7 +447,6 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         keys_checked = [expected_key]
         implementation_type = config_dict[expected_key]
         expected_type = implementation.get_components()[implementation_type]
-        keys_checked.append(expected_key)
         self.assertIsInstance(implementation.choice, expected_type)
 
         # Are there further hyperparams?
@@ -502,13 +502,14 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         configuration from Config was checked
         """
 
-        for dataset_properties in [
-                {'sparse': True, 'multilabel': True},
-                {'multilabel': True, 'multiclass': True},
-                {'multilabel': False, 'multiclass': False},
-                {'signed': True},
-                {'signed': False},
-        ]:
+        all_combinations = list(itertools.combinations([True, False], r=4))
+        for sparse, multilabel, signed, multiclass, in all_combinations:
+            dataset_properties = {
+                'sparse': sparse,
+                'multilabel': multilabel,
+                'multiclass': multiclass,
+                'signed': signed,
+            }
             auto = SimpleRegressionPipeline(
                 random_state=1,
                 dataset_properties=dataset_properties,

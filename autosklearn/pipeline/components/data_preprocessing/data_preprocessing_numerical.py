@@ -86,13 +86,12 @@ class NumericalPreprocessingPipeline(BasePipeline):
             exclude=exclude, include=include, pipeline=self.steps)
 
         self.configuration_space_ = cs
-        self.dataset_properties_ = dataset_properties
         return cs
 
     def _get_pipeline_steps(self, dataset_properties=None):
         steps = []
 
-        default_dataset_properties = {'target_type': 'classification'}
+        default_dataset_properties = {}
         if dataset_properties is not None and isinstance(dataset_properties, dict):
             default_dataset_properties.update(dataset_properties)
 

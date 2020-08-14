@@ -385,7 +385,7 @@ class BasePipeline(Pipeline):
 
         return rval
 
-    def _get_pipeline_steps(self, dataset_properties=None):
+    def _get_pipeline_steps(self, dataset_properties):
         raise NotImplementedError()
 
     def _get_estimator_hyperparameter_name(self):

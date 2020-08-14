@@ -274,7 +274,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         self.dataset_properties = dataset_properties
         return cs
 
-    def _get_pipeline_steps(self, dataset_properties=None):
+    def _get_pipeline_steps(self, dataset_properties):
         steps = []
 
         default_dataset_properties = {'target_type': 'classification'}
