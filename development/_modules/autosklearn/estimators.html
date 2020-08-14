@@ -778,13 +778,18 @@
         <span class="c1"># type of data is compatible with auto-sklearn. Legal target</span>
         <span class="c1"># types are: binary, multiclass, multilabel-indicator.</span>
         <span class="n">target_type</span> <span class="o">=</span> <span class="n">type_of_target</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">target_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;multiclass-multioutput&#39;</span><span class="p">,</span>
-                           <span class="s1">&#39;continuous&#39;</span><span class="p">,</span>
-                           <span class="s1">&#39;continuous-multioutput&#39;</span><span class="p">,</span>
-                           <span class="s1">&#39;unknown&#39;</span><span class="p">,</span>
-                           <span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;classification with data of type </span><span class="si">%s</span><span class="s2"> is&quot;</span>
-                             <span class="s2">&quot; not supported&quot;</span> <span class="o">%</span> <span class="n">target_type</span><span class="p">)</span>
+        <span class="n">supported_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;binary&#39;</span><span class="p">,</span> <span class="s1">&#39;multiclass&#39;</span><span class="p">,</span> <span class="s1">&#39;multilabel-indicator&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">target_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_types</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Classification with data of type </span><span class="si">{}</span><span class="s2"> is &quot;</span>
+                             <span class="s2">&quot;not supported. Supported types are </span><span class="si">{}</span><span class="s2">. &quot;</span>
+                             <span class="s2">&quot;You can find more information about scikit-learn &quot;</span>
+                             <span class="s2">&quot;data types in: &quot;</span>
+                             <span class="s2">&quot;https://scikit-learn.org/stable/modules/multiclass.html&quot;</span>
+                             <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                    <span class="n">target_type</span><span class="p">,</span>
+                                    <span class="n">supported_types</span>
+                                <span class="p">)</span>
+                             <span class="p">)</span>
 
         <span class="c1"># remember target type for using in predict_proba later.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_type</span> <span class="o">=</span> <span class="n">target_type</span>
@@ -908,14 +913,22 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Before running anything else, first check that the</span>
         <span class="c1"># type of data is compatible with auto-sklearn. Legal target</span>
-        <span class="c1"># types are: continuous, binary, multiclass.</span>
+        <span class="c1"># types are: continuous, continuous-multioutput, and the special cases:</span>
+        <span class="c1"># multiclass : because [3.0, 1.0, 5.0] is considered as multiclass</span>
+        <span class="c1"># binary: because [1.0, 0.0] is considered multiclass</span>
         <span class="n">target_type</span> <span class="o">=</span> <span class="n">type_of_target</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">target_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;multiclass-multioutput&#39;</span><span class="p">,</span>
-                           <span class="s1">&#39;multilabel-indicator&#39;</span><span class="p">,</span>
-                           <span class="s1">&#39;unknown&#39;</span><span class="p">,</span>
-                           <span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;regression with data of type </span><span class="si">%s</span><span class="s2"> is not&quot;</span>
-                             <span class="s2">&quot; supported&quot;</span> <span class="o">%</span> <span class="n">target_type</span><span class="p">)</span>
+        <span class="n">supported_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;continuous&#39;</span><span class="p">,</span> <span class="s1">&#39;binary&#39;</span><span class="p">,</span> <span class="s1">&#39;multiclass&#39;</span><span class="p">,</span> <span class="s1">&#39;continuous-multioutput&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">target_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_types</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Regression with data of type </span><span class="si">{}</span><span class="s2"> is &quot;</span>
+                             <span class="s2">&quot;not supported. Supported types are </span><span class="si">{}</span><span class="s2">. &quot;</span>
+                             <span class="s2">&quot;You can find more information about scikit-learn &quot;</span>
+                             <span class="s2">&quot;data types in: &quot;</span>
+                             <span class="s2">&quot;https://scikit-learn.org/stable/modules/multiclass.html&quot;</span>
+                             <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                    <span class="n">target_type</span><span class="p">,</span>
+                                    <span class="n">supported_types</span>
+                                <span class="p">)</span>
+                             <span class="p">)</span>
 
         <span class="c1"># Fit is supposed to be idempotent!</span>
         <span class="c1"># But not if we use share_mode.</span>

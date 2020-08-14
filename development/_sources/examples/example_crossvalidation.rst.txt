@@ -136,14 +136,14 @@ Print Results before refit
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.978873
-      Number of target algorithm runs: 17
-      Number of successful target algorithm runs: 16
+      Number of target algorithm runs: 19
+      Number of successful target algorithm runs: 18
       Number of crashed target algorithm runs: 0
       Number of target algorithms that exceeded the time limit: 1
       Number of target algorithms that exceeded the memory limit: 0
 
     Before re-fit
-    Accuracy score 0.965034965034965
+    Accuracy score 0.972027972027972
 
 
 
@@ -170,7 +170,7 @@ final ensemble on the whole dataset.
 
  .. code-block:: none
 
-    Accuracy score 0.972027972027972
+    Accuracy score 0.965034965034965
 
 
 
@@ -178,7 +178,7 @@ final ensemble on the whole dataset.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  8.425 seconds)
+   **Total running time of the script:** ( 2 minutes  10.057 seconds)
 
 
 .. _sphx_glr_download_examples_example_crossvalidation.py:

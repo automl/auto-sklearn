@@ -144,6 +144,27 @@ General introductory examples for *auto-sklearn* can be found here.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="This examples shows how to format the targets for a multilabel classification problem. Details ...">
+
+.. only:: html
+
+ .. figure:: /examples/images/thumb/sphx_glr_example_multilabel_classification_thumb.png
+     :alt: example_multilabel_classification
+
+     :ref:`sphx_glr_examples_example_multilabel_classification.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/example_multilabel_classification
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to query from a pipeline built by auto-sklearn. Auto-sklearn is...">
 
 .. only:: html

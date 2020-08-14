@@ -241,32 +241,13 @@ Plot the ensemble performance
     :class: sphx-glr-single-img
 
 
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-    /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/pandas/plotting/_matplotlib/converter.py:245: MatplotlibDeprecationWarning: 
-    The epoch2num function was deprecated in Matplotlib 3.3 and will be removed two minor releases later.
-      base = dates.epoch2num(dt.asi8 / 1.0e9)
-    /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/pandas/plotting/_matplotlib/converter.py:245: MatplotlibDeprecationWarning: 
-    The epoch2num function was deprecated in Matplotlib 3.3 and will be removed two minor releases later.
-      base = dates.epoch2num(dt.asi8 / 1.0e9)
-    /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/pandas/plotting/_matplotlib/converter.py:245: MatplotlibDeprecationWarning: 
-    The epoch2num function was deprecated in Matplotlib 3.3 and will be removed two minor releases later.
-      base = dates.epoch2num(dt.asi8 / 1.0e9)
-    /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/pandas/plotting/_matplotlib/converter.py:245: MatplotlibDeprecationWarning: 
-    The epoch2num function was deprecated in Matplotlib 3.3 and will be removed two minor releases later.
-      base = dates.epoch2num(dt.asi8 / 1.0e9)
-
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  56.024 seconds)
+   **Total running time of the script:** ( 1 minutes  55.755 seconds)
 
 
 .. _sphx_glr_download_examples_example_pandas_train_test.py:
