@@ -225,10 +225,12 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     def _get_estimator_components(self):
         return regression_components._regressors
 
-    def _get_pipeline_steps(self, init_params=None):
+    def _get_pipeline_steps(self, dataset_properties, init_params=None):
         steps = []
 
         default_dataset_properties = {'target_type': 'regression'}
+        if dataset_properties is not None and isinstance(dataset_properties, dict):
+            default_dataset_properties.update(dataset_properties)
 
         steps.extend([
             ['data_preprocessing',

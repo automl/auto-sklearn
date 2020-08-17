@@ -44,20 +44,35 @@ class DataPreprocessor(AutoSklearnComponent):
 
         # The pipeline that will be applied to the categorical features (i.e. columns)
         # of the dataset
+        # Configuration of the data-preprocessor is different from the configuration of
+        # the categorical pipeline. Hence, force to None
+        # It is actually the call to set_hyperparameter who properly sets this argument
+        # TODO: Extract the child configuration space from the datapreprocessor to the
+        # pipeline if needed
         self.categ_ppl = CategoricalPreprocessingPipeline(
-            config, pipeline, dataset_properties, include, exclude,
-            random_state, init_params)
+            config=None, steps=pipeline, dataset_properties=dataset_properties,
+            include=include, exclude=exclude, random_state=random_state,
+            init_params=init_params)
         # The pipeline that will be applied to the numerical features (i.e. columns)
         # of the dataset
+        # Configuration of the data-preprocessor is different from the configuration of
+        # the numerical pipeline. Hence, force to None
+        # It is actually the call to set_hyperparameter who properly sets this argument
+        # TODO: Extract the child configuration space from the datapreprocessor to the
+        # pipeline if needed
         self.numer_ppl = NumericalPreprocessingPipeline(
-            config, pipeline, dataset_properties, include, exclude,
-            random_state, init_params)
+            config=None, steps=pipeline, dataset_properties=dataset_properties,
+            include=include, exclude=exclude, random_state=random_state,
+            init_params=init_params)
         self._transformers = [
             ["categorical_transformer", self.categ_ppl],
             ["numerical_transformer", self.numer_ppl],
         ]
+        if self.config:
+            self.set_hyperparameters(self.config, init_params=init_params)
 
     def fit(self, X, y=None):
+
         n_feats = X.shape[1]
         # If categorical_features is none or an array made just of False booleans, then
         # only the numerical transformer is used
@@ -114,7 +129,7 @@ class DataPreprocessor(AutoSklearnComponent):
         if init_params is not None and 'categorical_features' in init_params.keys():
             self.categorical_features = init_params['categorical_features']
 
-        self.configuration = configuration
+        self.config = configuration
 
         for transf_name, transf_op in self._transformers:
             sub_configuration_space = transf_op.get_hyperparameter_search_space(
