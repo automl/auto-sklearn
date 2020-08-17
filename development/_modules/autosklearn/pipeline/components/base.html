@@ -119,6 +119,8 @@
 <span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span>
 <span class="kn">from</span> <span class="nn">sklearn.utils</span> <span class="kn">import</span> <span class="n">check_random_state</span>
 
+<span class="kn">from</span> <span class="nn">autosklearn.pipeline.constants</span> <span class="kn">import</span> <span class="n">SPARSE</span>
+
 
 <span class="k">def</span> <span class="nf">find_components</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">base_class</span><span class="p">):</span>
     <span class="n">components</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
@@ -488,7 +490,15 @@
             <span class="k">elif</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">:</span>
                 <span class="k">continue</span>
 
-            <span class="c1"># TODO maybe check for sparse?</span>
+            <span class="k">if</span> <span class="s1">&#39;sparse&#39;</span> <span class="ow">in</span> <span class="n">dataset_properties</span> <span class="ow">and</span> <span class="n">dataset_properties</span><span class="p">[</span><span class="s1">&#39;sparse&#39;</span><span class="p">]:</span>
+                <span class="c1"># In case the dataset is sparse, ignore</span>
+                <span class="c1"># components that do not handle sparse data</span>
+                <span class="c1"># Auto-sklearn uses SPARSE constant as a mechanism</span>
+                <span class="c1"># to indicate whether a component can handle sparse data.</span>
+                <span class="c1"># If SPARSE is not in the input properties of the component, it</span>
+                <span class="c1"># means SPARSE is not a valid input to this component, so filter it out</span>
+                <span class="k">if</span> <span class="n">SPARSE</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_comp</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()[</span><span class="s1">&#39;input&#39;</span><span class="p">]:</span>
+                    <span class="k">continue</span>
 
             <span class="n">components_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">available_comp</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
 
