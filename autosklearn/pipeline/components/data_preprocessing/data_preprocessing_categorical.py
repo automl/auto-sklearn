@@ -83,7 +83,6 @@ class CategoricalPreprocessingPipeline(BasePipeline):
             cs=cs, dataset_properties=dataset_properties,
             exclude=exclude, include=include, pipeline=self.steps)
 
-        self.configuration_space_ = cs
         return cs
 
     def _get_pipeline_steps(self, dataset_properties=None):

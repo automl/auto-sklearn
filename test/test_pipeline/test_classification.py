@@ -16,6 +16,7 @@ import sklearn.decomposition
 import sklearn.model_selection
 import sklearn.ensemble
 import sklearn.svm
+from sklearn.utils.validation import check_is_fitted
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
@@ -720,7 +721,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         configuration from Config was checked
         """
 
-        all_combinations = list(itertools.combinations([True, False], r=4))
+        all_combinations = list(itertools.product([True, False], repeat=4))
         for sparse, multilabel, signed, multiclass, in all_combinations:
             dataset_properties = {
                 'sparse': sparse,
@@ -822,3 +823,37 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 y=np.array([1, 0, 1, 1])
             )
         del preprocessing_components._addons.components['CrashPreprocessor']
+
+    def test_check_is_fitted(self):
+        """Makes sure that instantiating and estimator, does not cause the object
+        to be treated as fitted. That is, when an estimator is created, it should
+        not be recognized as a fitted object. Only after it is fitted
+
+        Sklearn adds a fitted_ var to the estimator, nevertheless the check_is_fitted
+        widely checks for any key in vars() ending with _. This unit testing
+        enforces that check_is_fitted works.
+        """
+
+        all_combinations = list(itertools.product([True, False], repeat=4))
+        for sparse, multilabel, signed, multiclass, in all_combinations:
+            dataset_properties = {
+                'sparse': sparse,
+                'multilabel': multilabel,
+                'multiclass': multiclass,
+                'signed': signed,
+            }
+            auto = SimpleClassificationPipeline(
+                random_state=1,
+                dataset_properties=dataset_properties,
+            )
+            cs = auto.get_hyperparameter_search_space()
+            config = cs.sample_configuration()
+
+            # Set hyperparameters takes a given config and translate
+            # a config to an actual implementation
+            auto.set_hyperparameters(config)
+
+            for name, step in auto.named_steps.items():
+                with self.assertRaisesRegex(sklearn.exceptions.NotFittedError,
+                                            "instance is not fitted yet"):
+                    check_is_fitted(step)

@@ -711,6 +711,33 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         # On average np.sqrt(30) away from the target -> ~5.5 on average
         self.assertGreaterEqual(score, -30)
 
+    def test_cv_regression(self):
+        """
+        Makes sure that when using a cv strategy, we are able to fit
+        a regressor
+        """
+        tmp = os.path.join(self.test_dir, '..', '.tmp_regression_fit')
+        output = os.path.join(self.test_dir, '..', '.out_regression_fit')
+        self._setUp(tmp)
+        self._setUp(output)
+
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('boston')
+        automl = AutoSklearnRegressor(time_left_for_this_task=30,
+                                      per_run_time_limit=5,
+                                      resampling_strategy='cv',
+                                      tmp_folder=tmp,
+                                      output_folder=output)
+
+        automl.fit(X_train, Y_train)
+        predictions = automl.predict(X_test)
+        self.assertEqual(predictions.shape, (356,))
+        score = mean_squared_error(Y_test, predictions)
+        # On average np.sqrt(30) away from the target -> ~5.5 on average
+        self.assertGreaterEqual(score, -30)
+
+        self._tearDown(tmp)
+        self._tearDown(output)
+
     def test_regression_pandas_support(self):
         X, y = sklearn.datasets.fetch_openml(
             data_id=41514,  # diabetes
