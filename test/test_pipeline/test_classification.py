@@ -335,8 +335,30 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                                                dataset_properties=dataset_properties,
                                                init_params=init_params_,)
             cls.set_hyperparameters(config, init_params=init_params_)
+
+            # First make sure that for this configuration, setting the parameters
+            # does not mistakenly set the estimator as fitted
+            for name, step in cls.named_steps.items():
+                with self.assertRaisesRegex(sklearn.exceptions.NotFittedError,
+                                            "instance is not fitted yet"):
+                    check_is_fitted(step)
+
             try:
                 cls.fit(X_train, Y_train)
+
+                # After fit, the classifier must be tagged as fitted
+                # by sklearn. Check is fitted raises an exception if that
+                # is not the case
+                # This is not enforced over every step of the pipeline, as
+                # components (like No choice) don't change the object and simply
+                # return self
+                try:
+                    check_is_fitted(cls.steps[-1][-1])
+                except sklearn.exceptions.NotFittedError:
+                    self.fail("config={} raised NotFittedError unexpectedly!".format(
+                        config
+                    ))
+
                 cls.predict(X_test.copy())
                 cls.predict_proba(X_test)
             except MemoryError:
@@ -823,37 +845,3 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 y=np.array([1, 0, 1, 1])
             )
         del preprocessing_components._addons.components['CrashPreprocessor']
-
-    def test_check_is_fitted(self):
-        """Makes sure that instantiating and estimator, does not cause the object
-        to be treated as fitted. That is, when an estimator is created, it should
-        not be recognized as a fitted object. Only after it is fitted
-
-        Sklearn adds a fitted_ var to the estimator, nevertheless the check_is_fitted
-        widely checks for any key in vars() ending with _. This unit testing
-        enforces that check_is_fitted works.
-        """
-
-        all_combinations = list(itertools.product([True, False], repeat=4))
-        for sparse, multilabel, signed, multiclass, in all_combinations:
-            dataset_properties = {
-                'sparse': sparse,
-                'multilabel': multilabel,
-                'multiclass': multiclass,
-                'signed': signed,
-            }
-            auto = SimpleClassificationPipeline(
-                random_state=1,
-                dataset_properties=dataset_properties,
-            )
-            cs = auto.get_hyperparameter_search_space()
-            config = cs.sample_configuration()
-
-            # Set hyperparameters takes a given config and translate
-            # a config to an actual implementation
-            auto.set_hyperparameters(config)
-
-            for name, step in auto.named_steps.items():
-                with self.assertRaisesRegex(sklearn.exceptions.NotFittedError,
-                                            "instance is not fitted yet"):
-                    check_is_fitted(step)
