@@ -346,14 +346,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             try:
                 cls.fit(X_train, Y_train)
 
-                # After fit, the classifier must be tagged as fitted
+                # After fit, all components should be tagged as fitted
                 # by sklearn. Check is fitted raises an exception if that
                 # is not the case
-                # This is not enforced over every step of the pipeline, as
-                # components (like No choice) don't change the object and simply
-                # return self
                 try:
-                    check_is_fitted(cls.steps[-1][-1])
+                    for name, step in cls.named_steps.items():
+                        check_is_fitted(step)
                 except sklearn.exceptions.NotFittedError:
                     self.fail("config={} raised NotFittedError unexpectedly!".format(
                         config
