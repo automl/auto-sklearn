@@ -108,8 +108,6 @@ class RegressorChoice(AutoSklearnChoice):
             cs.add_configuration_space(estimator_name, estimator_configuration_space,
                                        parent_hyperparameter=parent_hyperparameter)
 
-        self.configuration_space_ = cs
-        self.dataset_properties_ = dataset_properties
         return cs
 
     def estimator_supports_iterative_fit(self):

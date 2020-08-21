@@ -16,6 +16,7 @@ import sklearn.decomposition
 import sklearn.model_selection
 import sklearn.ensemble
 import sklearn.svm
+from sklearn.utils.validation import check_is_fitted
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
@@ -334,8 +335,28 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                                                dataset_properties=dataset_properties,
                                                init_params=init_params_,)
             cls.set_hyperparameters(config, init_params=init_params_)
+
+            # First make sure that for this configuration, setting the parameters
+            # does not mistakenly set the estimator as fitted
+            for name, step in cls.named_steps.items():
+                with self.assertRaisesRegex(sklearn.exceptions.NotFittedError,
+                                            "instance is not fitted yet"):
+                    check_is_fitted(step)
+
             try:
                 cls.fit(X_train, Y_train)
+
+                # After fit, all components should be tagged as fitted
+                # by sklearn. Check is fitted raises an exception if that
+                # is not the case
+                try:
+                    for name, step in cls.named_steps.items():
+                        check_is_fitted(step)
+                except sklearn.exceptions.NotFittedError:
+                    self.fail("config={} raised NotFittedError unexpectedly!".format(
+                        config
+                    ))
+
                 cls.predict(X_test.copy())
                 cls.predict_proba(X_test)
             except MemoryError:
@@ -720,7 +741,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         configuration from Config was checked
         """
 
-        all_combinations = list(itertools.combinations([True, False], r=4))
+        all_combinations = list(itertools.product([True, False], repeat=4))
         for sparse, multilabel, signed, multiclass, in all_combinations:
             dataset_properties = {
                 'sparse': sparse,

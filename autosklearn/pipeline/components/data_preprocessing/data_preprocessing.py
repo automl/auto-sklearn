@@ -22,7 +22,8 @@ class DataPreprocessor(AutoSklearnComponent):
 
     def __init__(self, config=None, pipeline=None, dataset_properties=None, include=None,
                  exclude=None, random_state=None, init_params=None,
-                 categorical_features=None, force_sparse_output=False):
+                 categorical_features=None, force_sparse_output=False,
+                 column_transformer=None):
 
         if pipeline is not None:
             raise ValueError("DataPreprocessor's argument 'pipeline' should be None")
@@ -70,6 +71,7 @@ class DataPreprocessor(AutoSklearnComponent):
         ]
         if self.config:
             self.set_hyperparameters(self.config, init_params=init_params)
+        self.column_transformer = column_transformer
 
     def fit(self, X, y=None):
 
@@ -105,7 +107,10 @@ class DataPreprocessor(AutoSklearnComponent):
 
     def transform(self, X):
         if self.column_transformer is None:
-            raise NotImplementedError()
+            raise ValueError("Cannot call transform on a Datapreprocessor that has not"
+                             "yet been fit. Please check the log files for errors "
+                             "while trying to fit the model."
+                             )
         return self.column_transformer.transform(X)
 
     def fit_transform(self, X, y=None):

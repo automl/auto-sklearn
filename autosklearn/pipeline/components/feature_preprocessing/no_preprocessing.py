@@ -12,6 +12,7 @@ class NoPreprocessing(AutoSklearnPreprocessingAlgorithm):
 
     def fit(self, X, Y=None):
         self.preprocessor = 0
+        self.fitted_ = True
         return self
 
     def transform(self, X):

@@ -650,6 +650,11 @@ class AutoML(BaseEstimator):
                     check_is_fitted(tmp_model.steps[-1][-1])
             models = self.models_
         except sklearn.exceptions.NotFittedError:
+            # When training a cross validation model, self.cv_models_
+            # will contain the Voting classifier/regressor product of cv
+            # self.models_ in the case of cv, contains unfitted models
+            # Raising above exception is a mechanism to detect which
+            # attribute contains the relevant models for prediction
             try:
                 check_is_fitted(list(self.cv_models_.values())[0])
                 models = self.cv_models_
