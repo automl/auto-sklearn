@@ -178,7 +178,7 @@ final ensemble on the whole dataset.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  14.272 seconds)
+   **Total running time of the script:** ( 2 minutes  13.791 seconds)
 
 
 .. _sphx_glr_download_examples_example_crossvalidation.py:
