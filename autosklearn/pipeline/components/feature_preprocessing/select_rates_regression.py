@@ -7,26 +7,16 @@ from autosklearn.pipeline.components.base import \
 from autosklearn.pipeline.constants import SIGNED_DATA, UNSIGNED_DATA, SPARSE, DENSE, INPUT
 
 
-class SelectRates(AutoSklearnPreprocessingAlgorithm):
+class SelectRegressionRates(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, alpha, mode='percentile',
-                 score_func="chi2", random_state=None):
+                 score_func="f_regression", random_state=None):
         import sklearn.feature_selection
 
         self.random_state = random_state  # We don't use this
         self.alpha = alpha
         self.mode = mode
 
-        if score_func == "chi2":
-            self.score_func = sklearn.feature_selection.chi2
-        elif score_func == "f_classif":
-            self.score_func = sklearn.feature_selection.f_classif
-        elif score_func == "mutual_info_classif":
-            self.score_func = sklearn.feature_selection.mutual_info_classif
-            # Work Around as SMAC does not handle Not Equal
-            # Mutual info needs scikit learn default to prevent
-            # running into p_values problem (no pvalue found)
-            self.mode = 'percentile'
-        elif score_func == "f_regression":
+        if score_func == "f_regression":
             self.score_func = sklearn.feature_selection.f_regression
         elif score_func == "mutual_info_regression":
             self.score_func = sklearn.feature_selection.mutual_info_regression
@@ -35,9 +25,7 @@ class SelectRates(AutoSklearnPreprocessingAlgorithm):
             # running into p_values problem (no pvalue found)
             self.mode = 'percentile'
         else:
-            raise ValueError("score_func must be in ('chi2, 'f_classif', 'mutual_info_classif') "
-                             "for classification "
-                             "or in ('f_regression, 'mutual_info_regression') "
+            raise ValueError("score_func must be in ('f_regression, 'mutual_info_regression') "
                              "for task=regression "
                              "but is: %s " % (score_func))
 
@@ -62,16 +50,6 @@ class SelectRates(AutoSklearnPreprocessingAlgorithm):
         return self
 
     def transform(self, X):
-        import scipy.sparse
-        import sklearn.feature_selection
-
-        # Because the pipeline guarantees that each feature is positive,
-        # clip all values below zero to zero
-        if self.score_func == sklearn.feature_selection.chi2:
-            if scipy.sparse.issparse(X):
-                X.data[X.data < 0] = 0.0
-            else:
-                X[X < 0] = 0.0
 
         if self.preprocessor is None:
             raise NotImplementedError()
@@ -99,13 +77,10 @@ class SelectRates(AutoSklearnPreprocessingAlgorithm):
             if signed is not None:
                 data_type = SIGNED_DATA if signed is True else UNSIGNED_DATA
 
-        # This component handles regression and classification.
-        # It does so by building a hyperparameter search space according
-        # to the dataset properties
         return {'shortname': 'SR',
                 'name': 'Univariate Feature Selection based on rates',
                 'handles_regression': True,
-                'handles_classification': True,
+                'handles_classification': False,
                 'handles_multiclass': True,
                 'handles_multilabel': False,
                 'handles_multioutput': False,
@@ -118,32 +93,16 @@ class SelectRates(AutoSklearnPreprocessingAlgorithm):
         alpha = UniformFloatHyperparameter(
             name="alpha", lower=0.01, upper=0.5, default_value=0.1)
 
-        target_type = 'classification'
-        if dataset_properties is not None:
-            # Whether or not this component supports regression, depends
-            # on the dataset properties. If the dataset properties is for a regression
-            # task (target_type==regression) we can build the configuration space
-            # accordingly
-            if dataset_properties.get('target_type') is not None:
-                target_type = dataset_properties.get('target_type')
-
-        if target_type == 'regression':
-            if dataset_properties is not None and 'sparse' in dataset_properties \
-                    and dataset_properties['sparse']:
-                choices = ['mutual_info_regression']
-            else:
-                choices = ['f_regression', 'mutual_info_regression']
+        if dataset_properties is not None and 'sparse' in dataset_properties \
+                and dataset_properties['sparse']:
+            choices = ['mutual_info_regression']
         else:
-            if dataset_properties is not None and 'sparse' in dataset_properties \
-                    and dataset_properties['sparse']:
-                choices = ['chi2', 'mutual_info_classif']
-            else:
-                choices = ['chi2', 'f_classif', 'mutual_info_classif']
+            choices = ['f_regression', 'mutual_info_regression']
 
         score_func = CategoricalHyperparameter(
             name="score_func",
             choices=choices,
-            default_value="chi2" if 'chi2' in choices else choices[0])
+            default_value="f_regression" if 'f_regression' in choices else choices[0])
 
         mode = CategoricalHyperparameter('mode', ['fpr', 'fdr', 'fwe'], 'fpr')
 

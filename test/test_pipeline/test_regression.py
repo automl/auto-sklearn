@@ -457,9 +457,10 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         does not include classification components"""
         cs = SimpleRegressionPipeline().get_hyperparameter_search_space()
         # This check only makes sense if select rates is a valid choice
-        self.assertIn('select_rates',
+        self.assertIn('select_rates_regression',
                       cs.get_hyperparameter('feature_preprocessor:__choice__').choices)
-        choices = cs.get_hyperparameter('feature_preprocessor:select_rates:score_func').choices
+        choices = cs.get_hyperparameter(
+            'feature_preprocessor:select_rates_regression:score_func').choices
 
         # Below classification choices should not be valid in regression
         self.assertNotIn('f_classif', choices)
