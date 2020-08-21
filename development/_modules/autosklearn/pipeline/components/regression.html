@@ -220,8 +220,6 @@
             <span class="n">cs</span><span class="o">.</span><span class="n">add_configuration_space</span><span class="p">(</span><span class="n">estimator_name</span><span class="p">,</span> <span class="n">estimator_configuration_space</span><span class="p">,</span>
                                        <span class="n">parent_hyperparameter</span><span class="o">=</span><span class="n">parent_hyperparameter</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">configuration_space_</span> <span class="o">=</span> <span class="n">cs</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_properties_</span> <span class="o">=</span> <span class="n">dataset_properties</span>
         <span class="k">return</span> <span class="n">cs</span>
 
     <span class="k">def</span> <span class="nf">estimator_supports_iterative_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
