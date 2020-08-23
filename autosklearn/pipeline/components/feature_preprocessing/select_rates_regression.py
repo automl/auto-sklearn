@@ -95,9 +95,9 @@ class SelectRegressionRates(AutoSklearnPreprocessingAlgorithm):
 
         if dataset_properties is not None and 'sparse' in dataset_properties \
                 and dataset_properties['sparse']:
-            choices = ['mutual_info_regression']
+            choices = ['mutual_info_regression', 'f_regression']
         else:
-            choices = ['f_regression', 'mutual_info_regression']
+            choices = ['f_regression']
 
         score_func = CategoricalHyperparameter(
             name="score_func",
