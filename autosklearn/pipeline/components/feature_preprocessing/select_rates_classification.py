@@ -22,9 +22,7 @@ class SelectClassificationRates(AutoSklearnPreprocessingAlgorithm):
             self.score_func = sklearn.feature_selection.f_classif
         elif score_func == "mutual_info_classif":
             self.score_func = sklearn.feature_selection.mutual_info_classif
-            # Work Around as SMAC does not handle Not Equal
-            # Mutual info needs scikit learn default to prevent
-            # running into p_values problem (no pvalue found)
+            # mutual info classif constantly crashes without mode percentile
             self.mode = 'percentile'
         else:
             raise ValueError("score_func must be in ('chi2, 'f_classif', 'mutual_info_classif') "
@@ -105,8 +103,7 @@ class SelectClassificationRates(AutoSklearnPreprocessingAlgorithm):
         alpha = UniformFloatHyperparameter(
             name="alpha", lower=0.01, upper=0.5, default_value=0.1)
 
-        if dataset_properties is not None and 'sparse' in dataset_properties \
-                and dataset_properties['sparse']:
+        if dataset_properties is not None and dataset_properties.get('sparse'):
             choices = ['chi2', 'mutual_info_classif']
         else:
             choices = ['chi2', 'f_classif', 'mutual_info_classif']
@@ -114,7 +111,7 @@ class SelectClassificationRates(AutoSklearnPreprocessingAlgorithm):
         score_func = CategoricalHyperparameter(
             name="score_func",
             choices=choices,
-            default_value="chi2" if 'chi2' in choices else choices[0])
+            default_value="chi2")
 
         mode = CategoricalHyperparameter('mode', ['fpr', 'fdr', 'fwe'], 'fpr')
 
@@ -122,5 +119,11 @@ class SelectClassificationRates(AutoSklearnPreprocessingAlgorithm):
         cs.add_hyperparameter(alpha)
         cs.add_hyperparameter(score_func)
         cs.add_hyperparameter(mode)
+
+        # TODO: Add when smac supports NotEqualConditionyy
+        # mutual_info_classif constantly crashes if mode is not percentile
+        # as a WA, fix the mode for this score
+        #cond = NotEqualsCondition(mode, score_func, 'mutual_info_classif')
+        #cs.add_condition(cond)
 
         return cs

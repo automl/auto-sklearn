@@ -20,9 +20,7 @@ class SelectRegressionRates(AutoSklearnPreprocessingAlgorithm):
             self.score_func = sklearn.feature_selection.f_regression
         elif score_func == "mutual_info_regression":
             self.score_func = sklearn.feature_selection.mutual_info_regression
-            # Work Around as SMAC does not handle Not Equal
-            # Mutual info needs scikit learn default to prevent
-            # running into p_values problem (no pvalue found)
+            # Mutual info consistently crashes if percentile is not the mode
             self.mode = 'percentile'
         else:
             raise ValueError("score_func must be in ('f_regression, 'mutual_info_regression') "
@@ -37,14 +35,6 @@ class SelectRegressionRates(AutoSklearnPreprocessingAlgorithm):
 
         self.preprocessor = sklearn.feature_selection.GenericUnivariateSelect(
             score_func=self.score_func, param=self.alpha, mode=self.mode)
-
-        # Because the pipeline guarantees that each feature is positive,
-        # clip all values below zero to zero
-        if self.score_func == sklearn.feature_selection.chi2:
-            if scipy.sparse.issparse(X):
-                X.data[X.data < 0] = 0.0
-            else:
-                X[X < 0] = 0.0
 
         self.preprocessor.fit(X, y)
         return self
@@ -70,13 +60,6 @@ class SelectRegressionRates(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        data_type = UNSIGNED_DATA
-
-        if dataset_properties is not None:
-            signed = dataset_properties.get('signed')
-            if signed is not None:
-                data_type = SIGNED_DATA if signed is True else UNSIGNED_DATA
-
         return {'shortname': 'SR',
                 'name': 'Univariate Feature Selection based on rates',
                 'handles_regression': True,
@@ -85,7 +68,7 @@ class SelectRegressionRates(AutoSklearnPreprocessingAlgorithm):
                 'handles_multilabel': False,
                 'handles_multioutput': False,
                 'is_deterministic': True,
-                'input': (SPARSE, DENSE, data_type),
+                'input': (SPARSE, DENSE, UNSIGNED_DATA),
                 'output': (INPUT,)}
 
     @staticmethod
@@ -93,8 +76,7 @@ class SelectRegressionRates(AutoSklearnPreprocessingAlgorithm):
         alpha = UniformFloatHyperparameter(
             name="alpha", lower=0.01, upper=0.5, default_value=0.1)
 
-        if dataset_properties is not None and 'sparse' in dataset_properties \
-                and dataset_properties['sparse']:
+        if dataset_properties is not None and dataset_properties.get('sparse'):
             choices = ['mutual_info_regression', 'f_regression']
         else:
             choices = ['f_regression']
@@ -102,7 +84,7 @@ class SelectRegressionRates(AutoSklearnPreprocessingAlgorithm):
         score_func = CategoricalHyperparameter(
             name="score_func",
             choices=choices,
-            default_value="f_regression" if 'f_regression' in choices else choices[0])
+            default_value="f_regression")
 
         mode = CategoricalHyperparameter('mode', ['fpr', 'fdr', 'fwe'], 'fpr')
 
@@ -111,16 +93,10 @@ class SelectRegressionRates(AutoSklearnPreprocessingAlgorithm):
         cs.add_hyperparameter(score_func)
         cs.add_hyperparameter(mode)
 
-        # In case of mutual info regression, the mode needs to be percentile
-        # Which is the scikit learn default, else we run into p_values problem
-        # SMAC Cannot handle OR, so leave this code here for the future.
-        # Right now, we will have mode in the config space when we
-        # have mutual_info, yet it is not needed
+        # TODO: Add when SMAC supports not equal condition
+        # Mutual info consistently crashes if percentile is not the mode
         # if 'mutual_info_regression' in choices:
-        #     cond = NotEqualsCondition(mode, score_func, 'mutual_info_regression')
-        #     cs.add_condition(cond)
-        # if 'mutual_info_classif' in choices:
-        #     cond = NotEqualsCondition(mode, score_func, 'mutual_info_classif')
-        #     cs.add_condition(cond)
+        #    cond = NotEqualsCondition(mode, score_func, 'mutual_info_regression')
+        #    cs.add_condition(cond)
 
         return cs

@@ -22,7 +22,7 @@ class SelectRegressionRatesComponentTest(unittest.TestCase):
         self.assertEqual(transformation.shape[0], original.shape[0])
         self.assertEqual(transformation.shape[1], int(original.shape[1] / 2))
 
-        # Custom preprocessing test to check if clipping to zero works
+        # Makes sure that the features are reduced, not the number of samples
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
         original_X_train = X_train.copy()
         ss = sklearn.preprocessing.StandardScaler()
@@ -45,7 +45,6 @@ class SelectRegressionRatesComponentTest(unittest.TestCase):
         transformation, original = _test_preprocessing(
             SelectRegressionRates,
             dataset='boston',
-            task='regression',
         )
         self.assertEqual(transformation.shape[0], original.shape[0])
         # From 13 to 12 features
