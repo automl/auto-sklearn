@@ -87,7 +87,7 @@ Build and fit a regressor
 
  .. code-block:: none
 
-    [WARNING] [2020-08-25 21:52:11,403:AutoMLSMBO(1)::boston] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.8.0-py3.7.egg/autosklearn/metalearning/files/r2_regression_dense
+    [WARNING] [2020-08-26 21:52:24,187:AutoMLSMBO(1)::boston] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.8.0-py3.7.egg/autosklearn/metalearning/files/r2_regression_dense
 
     AutoSklearnRegressor(delete_output_folder_after_terminate=True,
                          delete_tmp_folder_after_terminate=True,
@@ -128,7 +128,7 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    [(0.600000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'gradient_boosting', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0006518510819251123, 'regressor:gradient_boosting:early_stop': 'off', 'regressor:gradient_boosting:l2_regularization': 0.004581975243902548, 'regressor:gradient_boosting:learning_rate': 0.03688297221811219, 'regressor:gradient_boosting:loss': 'least_squares', 'regressor:gradient_boosting:max_bins': 255, 'regressor:gradient_boosting:max_depth': 'None', 'regressor:gradient_boosting:max_iter': 417, 'regressor:gradient_boosting:max_leaf_nodes': 7, 'regressor:gradient_boosting:min_samples_leaf': 1, 'regressor:gradient_boosting:scoring': 'loss', 'regressor:gradient_boosting:tol': 1e-07},
+    [(0.620000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'gradient_boosting', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0006518510819251123, 'regressor:gradient_boosting:early_stop': 'off', 'regressor:gradient_boosting:l2_regularization': 0.004581975243902548, 'regressor:gradient_boosting:learning_rate': 0.03688297221811219, 'regressor:gradient_boosting:loss': 'least_squares', 'regressor:gradient_boosting:max_bins': 255, 'regressor:gradient_boosting:max_depth': 'None', 'regressor:gradient_boosting:max_iter': 417, 'regressor:gradient_boosting:max_leaf_nodes': 7, 'regressor:gradient_boosting:min_samples_leaf': 1, 'regressor:gradient_boosting:scoring': 'loss', 'regressor:gradient_boosting:tol': 1e-07},
     dataset_properties={
       'task': 4,
       'sparse': False,
@@ -150,13 +150,6 @@ Print the final ensemble constructed by auto-sklearn
       'target_type': 'regression',
       'signed': False})),
     (0.040000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'pca', 'regressor:__choice__': 'gradient_boosting', 'feature_preprocessor:pca:keep_variance': 0.8869390970690898, 'feature_preprocessor:pca:whiten': 'False', 'regressor:gradient_boosting:early_stop': 'valid', 'regressor:gradient_boosting:l2_regularization': 0.25955037998426794, 'regressor:gradient_boosting:learning_rate': 0.3124501434484479, 'regressor:gradient_boosting:loss': 'least_squares', 'regressor:gradient_boosting:max_bins': 255, 'regressor:gradient_boosting:max_depth': 'None', 'regressor:gradient_boosting:max_iter': 53, 'regressor:gradient_boosting:max_leaf_nodes': 307, 'regressor:gradient_boosting:min_samples_leaf': 9, 'regressor:gradient_boosting:scoring': 'loss', 'regressor:gradient_boosting:tol': 1e-07, 'regressor:gradient_boosting:n_iter_no_change': 7, 'regressor:gradient_boosting:validation_fraction': 0.16378313088191299},
-    dataset_properties={
-      'task': 4,
-      'sparse': False,
-      'multioutput': False,
-      'target_type': 'regression',
-      'signed': False})),
-    (0.020000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'gradient_boosting', 'regressor:gradient_boosting:early_stop': 'off', 'regressor:gradient_boosting:l2_regularization': 5.86044209649378e-09, 'regressor:gradient_boosting:learning_rate': 0.046820947860841206, 'regressor:gradient_boosting:loss': 'least_squares', 'regressor:gradient_boosting:max_bins': 255, 'regressor:gradient_boosting:max_depth': 'None', 'regressor:gradient_boosting:max_iter': 493, 'regressor:gradient_boosting:max_leaf_nodes': 3, 'regressor:gradient_boosting:min_samples_leaf': 17, 'regressor:gradient_boosting:scoring': 'loss', 'regressor:gradient_boosting:tol': 1e-07},
     dataset_properties={
       'task': 4,
       'sparse': False,
@@ -194,7 +187,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.906999994295258
+    R2 score: 0.9065163488620487
 
 
 
@@ -202,7 +195,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  54.962 seconds)
+   **Total running time of the script:** ( 1 minutes  55.006 seconds)
 
 
 .. _sphx_glr_download_examples_example_regression.py:

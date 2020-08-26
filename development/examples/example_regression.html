@@ -160,7 +160,7 @@
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[WARNING] [2020-08-25 21:52:11,403:AutoMLSMBO(1)::boston] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.8.0-py3.7.egg/autosklearn/metalearning/files/r2_regression_dense
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[WARNING] [2020-08-26 21:52:24,187:AutoMLSMBO(1)::boston] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.8.0-py3.7.egg/autosklearn/metalearning/files/r2_regression_dense
 
 AutoSklearnRegressor(delete_output_folder_after_terminate=True,
                      delete_tmp_folder_after_terminate=True,
@@ -188,7 +188,7 @@ AutoSklearnRegressor(delete_output_folder_after_terminate=True,
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(0.600000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;minmax&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;regressor:__choice__&#39;: &#39;gradient_boosting&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.0006518510819251123, &#39;regressor:gradient_boosting:early_stop&#39;: &#39;off&#39;, &#39;regressor:gradient_boosting:l2_regularization&#39;: 0.004581975243902548, &#39;regressor:gradient_boosting:learning_rate&#39;: 0.03688297221811219, &#39;regressor:gradient_boosting:loss&#39;: &#39;least_squares&#39;, &#39;regressor:gradient_boosting:max_bins&#39;: 255, &#39;regressor:gradient_boosting:max_depth&#39;: &#39;None&#39;, &#39;regressor:gradient_boosting:max_iter&#39;: 417, &#39;regressor:gradient_boosting:max_leaf_nodes&#39;: 7, &#39;regressor:gradient_boosting:min_samples_leaf&#39;: 1, &#39;regressor:gradient_boosting:scoring&#39;: &#39;loss&#39;, &#39;regressor:gradient_boosting:tol&#39;: 1e-07},
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(0.620000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;minmax&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;regressor:__choice__&#39;: &#39;gradient_boosting&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.0006518510819251123, &#39;regressor:gradient_boosting:early_stop&#39;: &#39;off&#39;, &#39;regressor:gradient_boosting:l2_regularization&#39;: 0.004581975243902548, &#39;regressor:gradient_boosting:learning_rate&#39;: 0.03688297221811219, &#39;regressor:gradient_boosting:loss&#39;: &#39;least_squares&#39;, &#39;regressor:gradient_boosting:max_bins&#39;: 255, &#39;regressor:gradient_boosting:max_depth&#39;: &#39;None&#39;, &#39;regressor:gradient_boosting:max_iter&#39;: 417, &#39;regressor:gradient_boosting:max_leaf_nodes&#39;: 7, &#39;regressor:gradient_boosting:min_samples_leaf&#39;: 1, &#39;regressor:gradient_boosting:scoring&#39;: &#39;loss&#39;, &#39;regressor:gradient_boosting:tol&#39;: 1e-07},
 dataset_properties={
   &#39;task&#39;: 4,
   &#39;sparse&#39;: False,
@@ -216,13 +216,6 @@ dataset_properties={
   &#39;multioutput&#39;: False,
   &#39;target_type&#39;: &#39;regression&#39;,
   &#39;signed&#39;: False})),
-(0.020000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;regressor:__choice__&#39;: &#39;gradient_boosting&#39;, &#39;regressor:gradient_boosting:early_stop&#39;: &#39;off&#39;, &#39;regressor:gradient_boosting:l2_regularization&#39;: 5.86044209649378e-09, &#39;regressor:gradient_boosting:learning_rate&#39;: 0.046820947860841206, &#39;regressor:gradient_boosting:loss&#39;: &#39;least_squares&#39;, &#39;regressor:gradient_boosting:max_bins&#39;: 255, &#39;regressor:gradient_boosting:max_depth&#39;: &#39;None&#39;, &#39;regressor:gradient_boosting:max_iter&#39;: 493, &#39;regressor:gradient_boosting:max_leaf_nodes&#39;: 3, &#39;regressor:gradient_boosting:min_samples_leaf&#39;: 17, &#39;regressor:gradient_boosting:scoring&#39;: &#39;loss&#39;, &#39;regressor:gradient_boosting:tol&#39;: 1e-07},
-dataset_properties={
-  &#39;task&#39;: 4,
-  &#39;sparse&#39;: False,
-  &#39;multioutput&#39;: False,
-  &#39;target_type&#39;: &#39;regression&#39;,
-  &#39;signed&#39;: False})),
 (0.020000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;minmax&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;regressor:__choice__&#39;: &#39;gradient_boosting&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.004408690932989652, &#39;regressor:gradient_boosting:early_stop&#39;: &#39;off&#39;, &#39;regressor:gradient_boosting:l2_regularization&#39;: 9.974469087947384e-08, &#39;regressor:gradient_boosting:learning_rate&#39;: 0.10268529737528577, &#39;regressor:gradient_boosting:loss&#39;: &#39;least_squares&#39;, &#39;regressor:gradient_boosting:max_bins&#39;: 255, &#39;regressor:gradient_boosting:max_depth&#39;: &#39;None&#39;, &#39;regressor:gradient_boosting:max_iter&#39;: 155, &#39;regressor:gradient_boosting:max_leaf_nodes&#39;: 570, &#39;regressor:gradient_boosting:min_samples_leaf&#39;: 1, &#39;regressor:gradient_boosting:scoring&#39;: &#39;loss&#39;, &#39;regressor:gradient_boosting:tol&#39;: 1e-07},
 dataset_properties={
   &#39;task&#39;: 4,
@@ -241,10 +234,10 @@ dataset_properties={
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.906999994295258
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.9065163488620487
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  54.962 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  55.006 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-example-regression-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/d0c50aa4381e9e22c5668d3b6d777ff3/example_regression.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_regression.py</span></code></a></p>
