@@ -21,6 +21,7 @@ def add_classifier(classifier):
 
 class ClassifierChoice(AutoSklearnChoice):
 
+    @classmethod
     def get_components(cls):
         components = OrderedDict()
         components.update(_classifiers)

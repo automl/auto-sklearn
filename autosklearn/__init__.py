@@ -3,7 +3,7 @@ import os
 import pkg_resources
 import sys
 
-from autosklearn.util import dependencies, RE_PATTERN
+from autosklearn.util import dependencies
 from autosklearn.__version__ import __version__  # noqa (imported but unused)
 
 

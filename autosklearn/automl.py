@@ -1,5 +1,4 @@
 # -*- encoding: utf-8 -*-
-from distutils.version import LooseVersion
 import io
 import json
 import multiprocessing
@@ -45,6 +44,12 @@ from autosklearn.util.hash import hash_array_or_matrix
 from autosklearn.metrics import f1_macro, accuracy, r2
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
     REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION
+from autosklearn.pipeline.components.classification import ClassifierChoice
+from autosklearn.pipeline.components.regression import RegressorChoice
+from autosklearn.pipeline.components.feature_preprocessing import FeaturePreprocessorChoice
+from autosklearn.pipeline.components.data_preprocessing.categorical_encoding import OHEChoice
+from autosklearn.pipeline.components.data_preprocessing.minority_coalescense import CoalescenseChoice
+from autosklearn.pipeline.components.data_preprocessing.rescaling import RescalingChoice
 
 
 def _model_predict(model, X, batch_size, logger, task):
@@ -417,6 +422,17 @@ class AutoML(BaseEstimator):
         self._logger.debug('  logging_config: %s', str(self.logging_config))
         self._logger.debug('  metric: %s', str(self._metric))
         self._logger.debug('Done printing arguments to auto-sklearn')
+        self._logger.debug('Starting to print available components')
+        for choice in (
+            ClassifierChoice, RegressorChoice, FeaturePreprocessorChoice,
+            OHEChoice, RescalingChoice, CoalescenseChoice,
+        ):
+            self._logger.debug(
+                '%s: %s',
+                choice.__name__,
+                choice.get_components(),
+            )
+        self._logger.debug('Done printing available components')
 
         datamanager = XYDataManager(
             X, y,

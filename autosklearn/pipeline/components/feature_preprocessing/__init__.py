@@ -19,7 +19,8 @@ def add_preprocessor(preprocessor):
 
 class FeaturePreprocessorChoice(AutoSklearnChoice):
 
-    def get_components(self):
+    @classmethod
+    def get_components(cls):
         components = OrderedDict()
         components.update(_preprocessors)
         components.update(_addons.components)
