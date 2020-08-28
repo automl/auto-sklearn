@@ -2,7 +2,9 @@
 import io
 import json
 import multiprocessing
+import platform
 import os
+import sys
 from typing import Optional, List, Union
 import unittest.mock
 import warnings
@@ -11,6 +13,7 @@ from ConfigSpace.read_and_write import pcs
 import numpy as np
 import numpy.ma as ma
 import pandas as pd
+import pkg_resources
 import scipy.stats
 from sklearn.base import BaseEstimator
 from sklearn.model_selection._split import _RepeatedSplits, \
@@ -33,7 +36,7 @@ from autosklearn.evaluation.train_evaluator import _fit_with_budget
 from autosklearn.metrics import calculate_score
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import get_logger, setup_logger
-from autosklearn.util import pipeline
+from autosklearn.util import pipeline, RE_PATTERN
 from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.smbo import AutoMLSMBO
@@ -41,6 +44,14 @@ from autosklearn.util.hash import hash_array_or_matrix
 from autosklearn.metrics import f1_macro, accuracy, r2
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
     REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION
+from autosklearn.pipeline.components.classification import ClassifierChoice
+from autosklearn.pipeline.components.regression import RegressorChoice
+from autosklearn.pipeline.components.feature_preprocessing import FeaturePreprocessorChoice
+from autosklearn.pipeline.components.data_preprocessing.categorical_encoding import OHEChoice
+from autosklearn.pipeline.components.data_preprocessing.minority_coalescense import (
+    CoalescenseChoice
+)
+from autosklearn.pipeline.components.data_preprocessing.rescaling import RescalingChoice
 
 
 def _model_predict(model, X, batch_size, logger, task):
@@ -355,6 +366,80 @@ class AutoML(BaseEstimator):
                              )
         elif feat_type is None and self.InputValidator.feature_types:
             feat_type = self.InputValidator.feature_types
+
+        # Produce debug information to the logfile
+        self._logger.debug('Starting to print environment information')
+        self._logger.debug('  Python version: %s', sys.version.split('\n'))
+        try:
+            self._logger.debug('  Distribution: %s', platform.linux_distribution())
+        except AttributeError:
+            # platform.linux_distribution() was removed in Python3.8
+            # We should move to the distro package as soon as it supports Windows and OSX
+            pass
+        self._logger.debug('  System: %s', platform.system())
+        self._logger.debug('  Machine: %s', platform.machine())
+        self._logger.debug('  Platform: %s', platform.platform())
+        # UNAME appears to leak sensible information
+        # self._logger.debug('  uname: %s', platform.uname())
+        self._logger.debug('  Version: %s', platform.version())
+        self._logger.debug('  Mac version: %s', platform.mac_ver())
+        requirements = pkg_resources.resource_string('autosklearn', 'requirements.txt')
+        requirements = requirements.decode('utf-8')
+        requirements = [requirement for requirement in requirements.split('\n')]
+        for requirement in requirements:
+            if not requirement:
+                continue
+            match = RE_PATTERN.match(requirement)
+            if match:
+                name = match.group('name')
+                module_dist = pkg_resources.get_distribution(name)
+                self._logger.debug('  %s', module_dist)
+            else:
+                raise ValueError('Unable to read requirement: %s' % requirement)
+        self._logger.debug('Done printing environment information')
+        self._logger.debug('Starting to print arguments to auto-sklearn')
+        self._logger.debug('  output_folder: %s', self._backend.context._output_directory)
+        self._logger.debug('  tmp_folder: %s', self._backend.context._temporary_directory)
+        self._logger.debug('  time_left_for_this_task: %f', self._time_for_task)
+        self._logger.debug('  per_run_time_limit: %f', self._per_run_time_limit)
+        self._logger.debug(
+            '  initial_configurations_via_metalearning: %d',
+            self._initial_configurations_via_metalearning,
+        )
+        self._logger.debug('  ensemble_size: %d', self._ensemble_size)
+        self._logger.debug('  ensemble_nbest: %f', self._ensemble_nbest)
+        self._logger.debug('  max_models_on_disc: %d', self._max_models_on_disc)
+        self._logger.debug('  ensemble_memory_limit: %d', self._ensemble_memory_limit)
+        self._logger.debug('  seed: %d', self._seed)
+        self._logger.debug('  ml_memory_limit: %d', self._ml_memory_limit)
+        self._logger.debug('  metadata_directory: %s', self._metadata_directory)
+        self._logger.debug('  debug_mode: %s', self._debug_mode)
+        self._logger.debug('  include_estimators: %s', str(self._include_estimators))
+        self._logger.debug('  exclude_estimators: %s', str(self._exclude_estimators))
+        self._logger.debug('  include_preprocessors: %s', str(self._include_preprocessors))
+        self._logger.debug('  exclude_preprocessors: %s', str(self._exclude_preprocessors))
+        self._logger.debug('  resampling_strategy: %s', str(self._resampling_strategy))
+        self._logger.debug('  resampling_strategy_arguments: %s',
+                           str(self._resampling_strategy_arguments))
+        self._logger.debug('  shared_mode: %s', str(self._shared_mode))
+        self._logger.debug('  precision: %s', str(self.precision))
+        self._logger.debug('  disable_evaluator_output: %s', str(self._disable_evaluator_output))
+        self._logger.debug('  get_smac_objective_callback: %s', str(self._get_smac_object_callback))
+        self._logger.debug('  smac_scenario_args: %s', str(self._smac_scenario_args))
+        self._logger.debug('  logging_config: %s', str(self.logging_config))
+        self._logger.debug('  metric: %s', str(self._metric))
+        self._logger.debug('Done printing arguments to auto-sklearn')
+        self._logger.debug('Starting to print available components')
+        for choice in (
+            ClassifierChoice, RegressorChoice, FeaturePreprocessorChoice,
+            OHEChoice, RescalingChoice, CoalescenseChoice,
+        ):
+            self._logger.debug(
+                '%s: %s',
+                choice.__name__,
+                choice.get_components(),
+            )
+        self._logger.debug('Done printing available components')
 
         datamanager = XYDataManager(
             X, y,

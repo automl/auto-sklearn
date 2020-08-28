@@ -92,7 +92,7 @@ class BackendContext(object):
         self._tmp_dir_created = False
         self._output_dir_created = False
 
-        self.__temporary_directory, self.__output_directory = (
+        self._temporary_directory, self._output_directory = (
             get_randomized_directory_names(
                 temporary_directory=temporary_directory,
                 output_directory=output_directory,
@@ -104,12 +104,12 @@ class BackendContext(object):
     @property
     def output_directory(self) -> str:
         # make sure that tilde does not appear on the path.
-        return os.path.expanduser(os.path.expandvars(self.__output_directory))
+        return os.path.expanduser(os.path.expandvars(self._output_directory))
 
     @property
     def temporary_directory(self) -> str:
         # make sure that tilde does not appear on the path.
-        return os.path.expanduser(os.path.expandvars(self.__temporary_directory))
+        return os.path.expanduser(os.path.expandvars(self._temporary_directory))
 
     def create_directories(self) -> None:
         if self.shared_mode:

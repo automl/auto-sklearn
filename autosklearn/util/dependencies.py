@@ -1,14 +1,10 @@
 import importlib
-import re
 from distutils.version import LooseVersion
 from typing import List, Optional, Union, no_type_check
 
 import pkg_resources
 
-
-SUBPATTERN = r'((?P<operation%d>==|>=|>|<)(?P<version%d>(\d+)?(\.[a-zA-Z0-9]+)?(\.\d+)?))'
-RE_PATTERN = re.compile(
-    r'^(?P<name>[\w\-]+)%s?(,%s)?$' % (SUBPATTERN % (1, 1), SUBPATTERN % (2, 2)))
+from autosklearn.util import RE_PATTERN
 
 
 def verify_packages(packages: Optional[Union[str, List[str]]]) -> None:
@@ -53,6 +49,8 @@ def _verify_package(name: str, operation: Optional[str], version: str) -> None:
         check = required_version == installed_version
     elif operation == '>':
         check = installed_version > required_version
+    elif operation == '<':
+        check = installed_version < required_version
     elif operation == '>=':
         check = installed_version > required_version or \
                 installed_version == required_version

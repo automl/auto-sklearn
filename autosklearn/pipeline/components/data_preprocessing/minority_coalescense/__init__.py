@@ -16,7 +16,9 @@ def add_mc(mc):
 
 
 class CoalescenseChoice(AutoSklearnChoice):
-    def get_components(self):
+
+    @classmethod
+    def get_components(cls):
         components = OrderedDict()
         components.update(_mcs)
         components.update(_addons.components)
