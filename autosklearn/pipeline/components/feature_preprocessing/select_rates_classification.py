@@ -1,6 +1,7 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter
+from ConfigSpace import NotEqualsCondition
 
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
@@ -120,10 +121,9 @@ class SelectClassificationRates(AutoSklearnPreprocessingAlgorithm):
         cs.add_hyperparameter(score_func)
         cs.add_hyperparameter(mode)
 
-        # TODO: Add when smac supports NotEqualConditionyy
         # mutual_info_classif constantly crashes if mode is not percentile
         # as a WA, fix the mode for this score
-        #cond = NotEqualsCondition(mode, score_func, 'mutual_info_classif')
-        #cs.add_condition(cond)
+        cond = NotEqualsCondition(mode, score_func, 'mutual_info_classif')
+        cs.add_condition(cond)
 
         return cs

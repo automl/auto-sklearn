@@ -1,10 +1,11 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter
+from ConfigSpace import NotEqualsCondition
 
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import SIGNED_DATA, UNSIGNED_DATA, SPARSE, DENSE, INPUT
+from autosklearn.pipeline.constants import UNSIGNED_DATA, SPARSE, DENSE, INPUT
 
 
 class SelectRegressionRates(AutoSklearnPreprocessingAlgorithm):
@@ -28,7 +29,6 @@ class SelectRegressionRates(AutoSklearnPreprocessingAlgorithm):
                              "but is: %s " % (score_func))
 
     def fit(self, X, y):
-        import scipy.sparse
         import sklearn.feature_selection
 
         self.alpha = float(self.alpha)
@@ -93,10 +93,9 @@ class SelectRegressionRates(AutoSklearnPreprocessingAlgorithm):
         cs.add_hyperparameter(score_func)
         cs.add_hyperparameter(mode)
 
-        # TODO: Add when SMAC supports not equal condition
         # Mutual info consistently crashes if percentile is not the mode
-        # if 'mutual_info_regression' in choices:
-        #    cond = NotEqualsCondition(mode, score_func, 'mutual_info_regression')
-        #    cs.add_condition(cond)
+        if 'mutual_info_regression' in choices:
+            cond = NotEqualsCondition(mode, score_func, 'mutual_info_regression')
+            cs.add_condition(cond)
 
         return cs
