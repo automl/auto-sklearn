@@ -247,11 +247,11 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    accracy:  0.972027972027972
+    accracy:  0.965034965034965
     auto-sklearn results:
-      Dataset name: db1d09f6ae4fa6d5c14286652b984315
+      Dataset name: 1f76a05c5ca53de5787036a140bce54f
       Metric: accuracy
-      Best validation score: 0.971631
+      Best validation score: 0.950355
       Number of target algorithm runs: 1
       Number of successful target algorithm runs: 1
       Number of crashed target algorithm runs: 0
