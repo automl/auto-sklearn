@@ -4,8 +4,8 @@ Multi-label Classification
 ==========================
 
 This examples shows how to format the targets for a multilabel classification
-problem. Details on multilabel classification can be found on
-`here https://scikit-learn.org/stable/modules/multiclass.html>`_).
+problem. Details on multilabel classification can be found
+`here <https://scikit-learn.org/stable/modules/multiclass.html>`_.
 """
 import numpy as np
 

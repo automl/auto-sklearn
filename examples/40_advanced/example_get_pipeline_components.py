@@ -50,12 +50,13 @@ print("Accuracy score:{}".format(
     sklearn.metrics.accuracy_score(y_test, predictions))
 )
 
-############################################################################
-# Report the model found by Auto-Sklearn
-# ======================================
 
+############################################################################
+# Report the models found by Auto-Sklearn
+# =======================================
+#
 # Auto-sklearn uses
-# `<https://www.cs.cornell.edu/~alexn/papers/shotgun.icml04.revised.rev2.pdf> Ensemble Selection`_
+# `Ensemble Selection <https://www.cs.cornell.edu/~alexn/papers/shotgun.icml04.revised.rev2.pdf>`_
 # to construct ensembles in a post-hoc fashion. The ensemble is a linear
 # weighting of all models constructed during the hyperparameter optimization.
 # This prints the final ensemble. It is a list of tuples, each tuple being
@@ -66,7 +67,7 @@ print(automl.show_models())
 ###########################################################################
 # Report statistics about the search
 # ==================================
-
+#
 # Print statistics about the auto-sklearn run such as number of
 # iterations, number of models failed with a time out etc.
 print(automl.sprint_statistics())
@@ -74,17 +75,19 @@ print(automl.sprint_statistics())
 ############################################################################
 # Detailed statistics about the search - part 1
 # =============================================
-
+#
 # Auto-sklearn also keeps detailed statistics of the hyperparameter
 # optimization procedurce, which are stored in a so-called
-# `<https://automl.github.io/SMAC3/master/apidoc/smac.runhistory.runhistory.html#smac.runhistory# .runhistory.RunHistory> run history`_.
+# `run history <https://automl.github.io/SMAC3/master/apidoc/smac.runhistory.runhistory.html#smac.runhistory# .runhistory.RunHistory>`_.
 
 print(automl._automl[0].runhistory_)
 
+############################################################################
 # Runs are stored inside an ``OrderedDict`` called ``data``:
 
 print(len(automl._automl[0].runhistory_.data))
 
+############################################################################
 # Let's iterative over all entries
 
 for run_key in automl._automl[0].runhistory_.data:
@@ -92,45 +95,65 @@ for run_key in automl._automl[0].runhistory_.data:
     print(run_key)
     print(automl._automl[0].runhistory_.data[run_key])
 
+############################################################################
 # and have a detailed look at one entry:
 
 run_key = list(automl._automl[0].runhistory_.data.keys())[0]
 run_value = automl._automl[0].runhistory_.data[run_key]
 
+############################################################################
 # The ``run_key`` contains all information describing a run:
 
-print(run_key.config_id)
-print(run_key.instance_id)
-print(run_key.seed)
-print(run_key.budget)
+print("Configuration ID:", run_key.config_id)
+print("Instance:", run_key.instance_id)
+print("Seed:", run_key.seed)
+print("Budget:", run_key.budget)
 
+############################################################################
 # and the configuration can be looked up in the run history as well:
 
 print(automl._automl[0].runhistory_.ids_config[run_key.config_id])
 
+############################################################################
+# The only other important entry is the budget in case you are using
+# auto-sklearn with
+# `successive halving <examples/60_search/example_successive_halving.py>`_.
+# The remaining parts of the key can be ignored for auto-sklearn and are
+# only there because the underlying optimizer, SMAC, can handle more general
+# problems, too.
+
+############################################################################
 # The ``run_value`` contains all output from running the configuration:
 
-print(run_value.cost)
-print(run_value.time)
-print(run_value.status)
-print(run_value.additional_info)
-print(run_value.starttime)
-print(run_value.endtime)
+print("Cost:", run_value.cost)
+print("Time:", run_value.time)
+print("Status:", run_value.status)
+print("Additional information:", run_value.additional_info)
+print("Start time:", run_value.starttime)
+print("End time", run_value.endtime)
+
+############################################################################
+# Cost is basically the same as a loss. In case the metric to optimize for
+# should be maximized, it is internally transformed into a minimization
+# metric. Additionally, the status type gives information on whether the run
+# was successful, while the additional information's most interesting entry
+# is the internal training loss. Furthermore, there is detailed information
+# on the runtime available.
 
 ############################################################################
 # Detailed statistics about the search - part 2
 # =============================================
-
+#
 # To maintain compatibility with scikit-learn, Auto-sklearn gives the
 # same data as
-# `<https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html> cv_results_`_.
+# `cv_results_ <https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html>`_.
 
 print(automl.cv_results_)
 
 ############################################################################
 # Inspect the components of the best model
 # ========================================
-
+#
 # Iterate over the components of the model and print
 # The explained variance ratio per stage
 for i, (weight, pipeline) in enumerate(automl.get_models_with_weights()):
