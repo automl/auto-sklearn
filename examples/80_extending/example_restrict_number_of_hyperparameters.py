@@ -114,7 +114,8 @@ X_train, X_test, y_train, y_test = train_test_split(X, y)
 clf = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=30,
     per_run_time_limit=10,
-    include_estimators=['CustomRandomForest'],
+    # Here we exclude auto-sklearn's default random forest component
+    exclude_estimators=['random_forest'],
     # Bellow two flags are provided to speed up calculations
     # Not recommended for a real implementation
     initial_configurations_via_metalearning=0,
@@ -123,9 +124,12 @@ clf = autosklearn.classification.AutoSklearnClassifier(
 clf.fit(X_train, y_train)
 
 ############################################################################
-# Print test accuracy and statistics
-# ==================================
+# Print the configuration space
+# =============================
 
-y_pred = clf.predict(X_test)
-print("accuracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
-print(clf.show_models())
+# Observe that this configuration space only contains our custom random
+# forest, but not auto-sklearn's ``random_forest``
+cs = clf.get_configuration_space(X_train, y_train)
+assert 'random_forest' not in str(cs)
+print(cs)
+

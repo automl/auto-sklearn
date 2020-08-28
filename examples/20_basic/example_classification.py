@@ -44,4 +44,4 @@ print(automl.show_models())
 # ===================================
 
 predictions = automl.predict(X_test)
-print("R2 score:", sklearn.metrics.r2_score(y_test, predictions))
+print("R2 score:", sklearn.metrics.accuracy_score(y_test, predictions))

@@ -1,7 +1,7 @@
 """
-=================================
+==========================
 Multi-label Classification
-=================================
+==========================
 
 This examples shows how to format the targets for a multilabel classification
 problem. Details on multilabel classification can be found on
