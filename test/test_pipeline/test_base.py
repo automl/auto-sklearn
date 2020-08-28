@@ -1,8 +1,10 @@
 import unittest
+import unittest.mock
 
 import ConfigSpace.configuration_space
 
 import autosklearn.pipeline.base
+import autosklearn.pipeline.components.base
 import autosklearn.pipeline.components.feature_preprocessing
 import autosklearn.pipeline.components.classification
 
@@ -99,3 +101,35 @@ class BaseTest(unittest.TestCase):
         # for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
         #    print(clause)
         self.assertEqual(359, len(cs.forbidden_clauses))
+
+    def test_init_params_handling(self):
+        """
+        Makes sure that init params is properly passed to nodes
+        """
+        cs = ConfigSpace.configuration_space.ConfigurationSpace()
+        base = BasePipelineMock()
+        base.dataset_properties = {}
+
+        # Make sure that component irrespective, we check the init params
+        for node_type in [
+            autosklearn.pipeline.components.base.AutoSklearnComponent,
+            autosklearn.pipeline.components.base.AutoSklearnChoice,
+            autosklearn.pipeline.base.BasePipeline,
+        ]:
+
+            # We have couple of posibilities
+            for init_params, expected_init_params in [
+                ({}, {}),
+                (None, None),
+                ({'M:key': 'value'}, {'key': 'value'}),
+                ({'N:key': 'value'}, {}),
+            ]:
+                node = unittest.mock.Mock(
+                    spec=autosklearn.pipeline.components.base.AutoSklearnComponent
+                )
+                node.get_hyperparameter_search_space.return_value = cs
+                base.steps = [('M', node)]
+                base.set_hyperparameters(cs.sample_configuration(), init_params=init_params)
+                self.assertEqual(node.set_hyperparameters.call_args[1]['init_params'],
+                                 expected_init_params)
+
