@@ -370,7 +370,12 @@ class AutoML(BaseEstimator):
         # Produce debug information to the logfile
         self._logger.debug('Starting to print environment information')
         self._logger.debug('  Python version: %s', sys.version.split('\n'))
-        self._logger.debug('  Distribution: %s', platform.dist())
+        try:
+            self._logger.debug('  Distribution: %s', platform.linux_distribution())
+        except AttributeError:
+            # platform.linux_distribution() was removed in Python3.8
+            # We should move to the distro package as soon as it supports Windows and OSX
+            pass
         self._logger.debug('  System: %s', platform.system())
         self._logger.debug('  Machine: %s', platform.machine())
         self._logger.debug('  Platform: %s', platform.platform())
