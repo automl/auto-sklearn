@@ -48,7 +48,9 @@ from autosklearn.pipeline.components.classification import ClassifierChoice
 from autosklearn.pipeline.components.regression import RegressorChoice
 from autosklearn.pipeline.components.feature_preprocessing import FeaturePreprocessorChoice
 from autosklearn.pipeline.components.data_preprocessing.categorical_encoding import OHEChoice
-from autosklearn.pipeline.components.data_preprocessing.minority_coalescense import CoalescenseChoice
+from autosklearn.pipeline.components.data_preprocessing.minority_coalescense import (
+    CoalescenseChoice
+)
 from autosklearn.pipeline.components.data_preprocessing.rescaling import RescalingChoice
 
 

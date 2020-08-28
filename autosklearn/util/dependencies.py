@@ -1,5 +1,4 @@
 import importlib
-import re
 from distutils.version import LooseVersion
 from typing import List, Optional, Union, no_type_check
 
