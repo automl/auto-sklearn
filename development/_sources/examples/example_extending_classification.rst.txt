@@ -250,11 +250,11 @@ Print test accuracy and statistics
 
  .. code-block:: none
 
-    accuracy:  0.965034965034965
+    accuracy:  0.993006993006993
     auto-sklearn results:
-      Dataset name: ed84e3f310f6e38a464342ded37f9895
+      Dataset name: d343fa9c7e1bacf77e0f9b6235df12c7
       Metric: accuracy
-      Best validation score: 0.985816
+      Best validation score: 0.950355
       Number of target algorithm runs: 1
       Number of successful target algorithm runs: 1
       Number of crashed target algorithm runs: 0
@@ -277,7 +277,7 @@ Print test accuracy and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  24.288 seconds)
+   **Total running time of the script:** ( 0 minutes  24.301 seconds)
 
 
 .. _sphx_glr_download_examples_example_extending_classification.py:
