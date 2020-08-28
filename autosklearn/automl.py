@@ -9,7 +9,7 @@ from typing import Optional, List, Union
 import unittest.mock
 import warnings
 
-from ConfigSpace.read_and_write import pcs
+from ConfigSpace.read_and_write import json as cs_json
 import numpy as np
 import numpy.ma as ma
 import pandas as pd
@@ -1093,7 +1093,7 @@ class AutoML(BaseEstimator):
         task_name = 'CreateConfigSpace'
 
         self._stopwatch.start_task(task_name)
-        configspace_path = os.path.join(tmp_dir, 'space.pcs')
+        configspace_path = os.path.join(tmp_dir, 'space.json')
         configuration_space = pipeline.get_configuration_space(
             datamanager.info,
             include_estimators=include_estimators,
@@ -1102,9 +1102,11 @@ class AutoML(BaseEstimator):
             exclude_preprocessors=exclude_preprocessors)
         configuration_space = self.configuration_space_created_hook(
             datamanager, configuration_space)
-        sp_string = pcs.write(configuration_space)
-        backend.write_txt_file(configspace_path, sp_string,
-                               'Configuration space')
+        backend.write_txt_file(
+            configspace_path,
+            cs_json.write(configuration_space),
+            'Configuration space'
+        )
         self._stopwatch.stop_task(task_name)
 
         return configuration_space, configspace_path
