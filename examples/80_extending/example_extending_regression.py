@@ -123,5 +123,4 @@ reg.fit(X_train, y_train)
 # =====================================
 y_pred = reg.predict(X_test)
 print("r2 score: ", sklearn.metrics.r2_score(y_pred, y_test))
-print(reg.sprint_statistics())
 print(reg.show_models())

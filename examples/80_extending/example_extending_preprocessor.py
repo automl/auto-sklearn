@@ -133,5 +133,4 @@ clf.fit(X_train, y_train)
 
 y_pred = clf.predict(X_test)
 print("accracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
-print(clf.sprint_statistics())
 print(clf.show_models())

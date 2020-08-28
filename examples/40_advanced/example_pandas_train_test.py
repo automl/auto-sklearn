@@ -44,6 +44,7 @@ def get_runhistory_models_performance(automl):
         if run_value.status != StatusType.SUCCESS:
             # Ignore crashed runs
             continue
+        # Alternatively, it is possible to also obtain the start time with ``run_value.starttime``
         endtime = pd.Timestamp(time.strftime('%Y-%m-%d %H:%M:%S',
                                              time.localtime(run_value.endtime)))
         val_score = metric._optimum - (metric._sign * run_value.cost)
@@ -100,7 +101,6 @@ print(X.dtypes)
 cls = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
     per_run_time_limit=30,
-    metric=accuracy,
 )
 cls.fit(X_train, y_train, X_test, y_test)
 
@@ -116,7 +116,9 @@ print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 # ===================================
 
 ensemble_performance_frame = pd.DataFrame(cls._automl[0].ensemble_performance_history)
+ensemble_performance_frame = ensemble_performance_frame.cummax()
 individual_performance_frame = get_runhistory_models_performance(cls)
+individual_performance_frame = individual_performance_frame.cummax()
 pd.merge(
     ensemble_performance_frame,
     individual_performance_frame,

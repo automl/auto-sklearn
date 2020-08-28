@@ -1,6 +1,6 @@
 """
 =================================
-example_multilabel_classification
+Multi-label Classification
 =================================
 
 This examples shows how to format the targets for a multilabel classification
@@ -9,7 +9,6 @@ problem. Details on multilabel classification can be found on
 """
 import numpy as np
 
-import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
 from sklearn.utils.multiclass import type_of_target
