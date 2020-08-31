@@ -606,8 +606,7 @@ class AutoSklearnEstimator(BaseEstimator):
         raise NotImplementedError()
 
     def get_configuration_space(self, X, y):
-        self._automl = self.build_automl()
-        return self._automl[0].fit(X, y, only_return_configuration_space=True)
+        return self._automl[0].configuration_space
 
 
 class AutoSklearnClassifier(AutoSklearnEstimator):

@@ -12,7 +12,6 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformIntegerHyperparameter, UniformFloatHyperparameter
 
 from sklearn.datasets import load_breast_cancer
-import sklearn.metrics
 from sklearn.model_selection import train_test_split
 
 import autosklearn.classification
@@ -95,6 +94,7 @@ class CustomRandomForest(AutoSklearnClassificationAlgorithm):
         cs.add_hyperparameters([max_features, n_estimators])
         return cs
 
+
 # Add custom random forest classifier component to auto-sklearn.
 autosklearn.pipeline.components.classification.add_classifier(CustomRandomForest)
 cs = CustomRandomForest.get_hyperparameter_search_space()
@@ -132,4 +132,3 @@ clf.fit(X_train, y_train)
 cs = clf.get_configuration_space(X_train, y_train)
 assert 'random_forest' not in str(cs)
 print(cs)
-

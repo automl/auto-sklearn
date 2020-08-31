@@ -78,7 +78,8 @@ print(automl.sprint_statistics())
 #
 # Auto-sklearn also keeps detailed statistics of the hyperparameter
 # optimization procedurce, which are stored in a so-called
-# `run history <https://automl.github.io/SMAC3/master/apidoc/smac.runhistory.runhistory.html#smac.runhistory# .runhistory.RunHistory>`_.
+# `run history <https://automl.github.io/SMAC3/master/apidoc/smac.
+# runhistory.runhistory.html#smac.runhistory# .runhistory.RunHistory>`_.
 
 print(automl._automl[0].runhistory_)
 
@@ -146,7 +147,8 @@ print("End time", run_value.endtime)
 #
 # To maintain compatibility with scikit-learn, Auto-sklearn gives the
 # same data as
-# `cv_results_ <https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html>`_.
+# `cv_results_ <https://scikit-learn.org/stable/modules/generated/sklearn.
+# model_selection.GridSearchCV.html>`_.
 
 print(automl.cv_results_)
 

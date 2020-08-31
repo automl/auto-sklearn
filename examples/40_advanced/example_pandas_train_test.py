@@ -33,7 +33,6 @@ import sklearn.metrics
 from smac.tae.execute_ta_run import StatusType
 
 import autosklearn.classification
-from autosklearn.metrics import accuracy
 
 
 def get_runhistory_models_performance(automl):
