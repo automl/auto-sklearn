@@ -9,9 +9,9 @@
     .. _sphx_glr_examples_40_advanced_example_resampling.py:
 
 
-=======
-Holdout
-=======
+=====================
+Resampling Strategies
+=====================
 
 In *auto-sklearn* it is possible to use different resampling strategies
 by specifying the arguments ``resampling_strategy`` and
@@ -206,8 +206,8 @@ final ensemble on the whole dataset.
 scikit-learn splitter objects
 =============================
 It is also possible to use
-`<https://scikit-learn.org/stable/modules/classes.html#splitter-classes> scikit-learn's
-splitter classes`_ to further customize the outputs.
+`scikit-learn's splitter classes <https://scikit-learn.org/stable/modules/classes.html#splitter
+-classes>`_ to further customize the outputs.
 
 
 .. code-block:: default
@@ -286,7 +286,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 6 minutes  5.024 seconds)
+   **Total running time of the script:** ( 6 minutes  2.626 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_resampling.py:

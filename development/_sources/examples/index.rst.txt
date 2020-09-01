@@ -4,8 +4,6 @@
 
 .. _sphx_glr_examples:
 
-:orphan:
-
 .. _examples:
 
 ========
@@ -165,7 +163,7 @@ procedure.
 .. only:: html
 
  .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_resampling_thumb.png
-     :alt: Holdout
+     :alt: Resampling Strategies
 
      :ref:`sphx_glr_examples_40_advanced_example_resampling.py`
 
