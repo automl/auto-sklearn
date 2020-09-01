@@ -1,7 +1,7 @@
 """
-=======
-Holdout
-=======
+=====================
+Resampling Strategies
+=====================
 
 In *auto-sklearn* it is possible to use different resampling strategies
 by specifying the arguments ``resampling_strategy`` and
@@ -88,8 +88,8 @@ print("Accuracy score CV", sklearn.metrics.accuracy_score(y_test, predictions))
 # scikit-learn splitter objects
 # =============================
 # It is also possible to use
-# `<https://scikit-learn.org/stable/modules/classes.html#splitter-classes> scikit-learn's
-# splitter classes`_ to further customize the outputs.
+# `scikit-learn's splitter classes <https://scikit-learn.org/stable/modules/classes.html#splitter
+# -classes>`_ to further customize the outputs.
 
 
 resampling_strategy = sklearn.model_selection.RepeatedStratifiedKFold
