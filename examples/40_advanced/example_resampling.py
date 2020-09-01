@@ -6,7 +6,7 @@ Holdout
 In *auto-sklearn* it is possible to use different resampling strategies
 by specifying the arguments ``resampling_strategy`` and
 ``resampling_strategy_arguments``. The following example shows common
-settings ``AutoSklearnClassifier``.
+settings for the ``AutoSklearnClassifier``.
 """
 
 import sklearn.model_selection

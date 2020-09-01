@@ -25,8 +25,8 @@ from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SP
 # Subclass auto-sklearn's random forest classifier
 # ================================================
 
-# This classifier only has one of the hyperparameter's that auto-sklearn's
-# default parametrization features (``max_features``). Instead, it also
+# This classifier only has one of the hyperparameter's of auto-sklearn's
+# default parametrization (``max_features``). Instead, it also
 # tunes the number of estimators (``n_estimators``).
 
 class CustomRandomForest(AutoSklearnClassificationAlgorithm):

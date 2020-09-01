@@ -4,4 +4,4 @@
 Search Examples
 ===============
 
-Examples on changing the search procedure of Auto-sklearn.
+Examples of changing the search procedure of Auto-sklearn.

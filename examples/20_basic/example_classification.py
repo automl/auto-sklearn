@@ -30,6 +30,7 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     per_run_time_limit=30,
     tmp_folder='/tmp/autosklearn_classification_example_tmp',
     output_folder='/tmp/autosklearn_classification_example_out',
+    ml_memory_limit=60,
 )
 automl.fit(X_train, y_train, dataset_name='breast_cancer')
 

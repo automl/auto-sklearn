@@ -4,4 +4,4 @@
 Extension Examples
 ==================
 
-Examples on extending Auto-sklearn with custom components.
+Examples of extending Auto-sklearn with custom components.
