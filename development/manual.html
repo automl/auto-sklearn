@@ -112,7 +112,7 @@
 <li><a class="reference internal" href="#turning-off-preprocessing">Turning off preprocessing</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#resampling-strategies">Resampling strategies</a></li>
+<li><a class="reference internal" href="#id2">Resampling strategies</a></li>
 <li><a class="reference internal" href="#supported-inputs">Supported Inputs</a></li>
 <li><a class="reference internal" href="#ensemble-building-process">Ensemble Building Process</a></li>
 <li><a class="reference internal" href="#inspecting-the-results">Inspecting the results</a></li>
@@ -136,22 +136,23 @@ references the examples where possible or explains certain configurations.</p>
 <p><em>auto-sklearn</em> comes with the following examples which demonstrate several
 aspects of its usage:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="examples/example_holdout.html">Holdout</a></p></li>
-<li><p><a class="reference external" href="examples/example_crossvalidation.html">Cross-validation</a></p></li>
-<li><p><a class="reference external" href="examples/example_parallel_n_jobs.html">Parallel usage (n_jobs)</a></p></li>
-<li><p><a class="reference external" href="examples/example_parallel_manual_spawning.html">Parallel usage (manual)</a></p></li>
-<li><p><a class="reference external" href="examples/example_sequential.html">Sequential usage</a></p></li>
-<li><p><a class="reference external" href="examples/example_regression.html">Regression</a></p></li>
-<li><p><a class="reference external" href="examples/example_feature_types.html">Continuous and categorical data</a></p></li>
-<li><p><a class="reference external" href="examples/example_metrics.html">Using custom metrics</a></p></li>
-<li><p><a class="reference external" href="examples/example_random_search.html">Random search</a></p></li>
-<li><p><a class="reference external" href="examples/example_eips.html">EIPS</a></p></li>
-<li><p><a class="reference external" href="examples/example_successive_halving.html">Successive Halving</a></p></li>
-<li><p><a class="reference external" href="examples/example_extending_classification.html">Extending with a new classifier</a></p></li>
-<li><p><a class="reference external" href="examples/example_extending_regression.html">Extending with a new regressor</a></p></li>
-<li><p><a class="reference external" href="examples/example_extending_preprocessor.html">Extending with a new preprocessor</a></p></li>
-<li><p><a class="reference external" href="examples/example_get_pipeline_components.html">Iterating over the models</a></p></li>
-<li><p><a class="reference external" href="examples/example_pandas_train_test.html">Pandas Train and Test inputs</a></p></li>
+<li><p><a class="reference external" href="examples/20_basic/example_classification.html">Classification</a></p></li>
+<li><p><a class="reference external" href="examples/20_basic/example_multilabel_classification.html">Multi-label Classification</a></p></li>
+<li><p><a class="reference external" href="examples/20_basic/example_regression.html">Regression</a></p></li>
+<li><p><a class="reference external" href="examples/40_advanced/example_feature_types.html">Continuous and categorical data</a></p></li>
+<li><p><a class="reference external" href="examples/40_advanced/example_get_pipeline_components.html">Iterating over the models</a></p></li>
+<li><p><a class="reference external" href="examples/40_advanced/example_metrics.html">Using custom metrics</a></p></li>
+<li><p><a class="reference external" href="examples/40_advanced/example_pandas_train_test.html">Pandas Train and Test inputs</a></p></li>
+<li><p><a class="reference external" href="examples/40_advanced/example_resampling.html">Resampling strategies</a></p></li>
+<li><p><a class="reference external" href="examples/60_search/example_parallel_manual_spawning.html">Parallel usage (manual)</a></p></li>
+<li><p><a class="reference external" href="examples/60_search/example_parallel_n_jobs.html">Parallel usage (n_jobs)</a></p></li>
+<li><p><a class="reference external" href="examples/60_search/example_random_search.html">Random search</a></p></li>
+<li><p><a class="reference external" href="examples/60_search/example_sequential.html">Sequential usage</a></p></li>
+<li><p><a class="reference external" href="examples/60_search/example_successive_halving.html">Successive Halving</a></p></li>
+<li><p><a class="reference external" href="examples/80_extending/example_extending_classification.html">Extending with a new classifier</a></p></li>
+<li><p><a class="reference external" href="examples/80_extending/example_extending_regression.html">Extending with a new regressor</a></p></li>
+<li><p><a class="reference external" href="examples/80_extending/example_extending_preprocessor.html">Extending with a new preprocessor</a></p></li>
+<li><p><a class="reference external" href="examples/80_extending/example_restrict_number_of_hyperparameters.html">Restrict hyperparameters for a component</a></p></li>
 </ul>
 </div>
 <div class="section" id="time-and-memory-limits">
@@ -206,8 +207,8 @@ This can be turned off by setting
 <code class="docutils literal notranslate"><span class="pre">include_preprocessors=[&quot;no_preprocessing&quot;]</span></code> as shown in the example above.</p>
 </div>
 </div>
-<div class="section" id="resampling-strategies">
-<h2>Resampling strategies<a class="headerlink" href="#resampling-strategies" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id2">
+<h2>Resampling strategies<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <p>Examples for using holdout and cross-validation can be found in <a class="reference external" href="examples/">auto-sklearn/examples/</a></p>
 </div>
 <div class="section" id="supported-inputs">
@@ -219,7 +220,7 @@ This can be turned off by setting
 * Regression
 * Multioutput Regression</p>
 <dl class="simple">
-<dt>You can provide feature and target training pairs (X_train/y_train) to <em>auto-sklearn</em> to fit an ensemble of pipelines as described in the next section. This X_train/y_train dataset must belong to one of the supported formats: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.</dt><dd><p>Optionally, you can measure the ability of this fitted model to generalize to unseen data by providing an optional testing pair (X_test/Y_test). For further details, please refer to the example <a class="reference external" href="examples/example_pandas_train_test.html">Pandas Train and Test inputs</a>. Supported formats for these training and testing pairs are: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.</p>
+<dt>You can provide feature and target training pairs (X_train/y_train) to <em>auto-sklearn</em> to fit an ensemble of pipelines as described in the next section. This X_train/y_train dataset must belong to one of the supported formats: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.</dt><dd><p>Optionally, you can measure the ability of this fitted model to generalize to unseen data by providing an optional testing pair (X_test/Y_test). For further details, please refer to the example <a class="reference external" href="examples/example_pandas_train_test.html">Train and Test inputs</a>. Supported formats for these training and testing pairs are: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.</p>
 </dd>
 </dl>
 <p>If your data contains categorical values (in the features or targets), autosklearn will automatically encode your data using a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html">sklearn.preprocessing.LabelEncoder</a> for unidimensional data and a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html">sklearn.preprocessing.OrdinalEncoder</a> for multidimensional data.</p>
