@@ -105,6 +105,8 @@ class BaseTest(unittest.TestCase):
     def test_init_params_handling(self):
         """
         Makes sure that init params is properly passed to nodes
+
+        Also, makes sure that _check_init_params_honored raises the expected exceptions
         """
         cs = ConfigSpace.configuration_space.ConfigurationSpace()
         base = BasePipelineMock()
@@ -122,14 +124,31 @@ class BaseTest(unittest.TestCase):
                 ({}, {}),
                 (None, None),
                 ({'M:key': 'value'}, {'key': 'value'}),
-                ({'N:key': 'value'}, {}),
             ]:
                 node = unittest.mock.Mock(
                     spec=autosklearn.pipeline.components.base.AutoSklearnComponent
                 )
                 node.get_hyperparameter_search_space.return_value = cs
+                node.key = 'value'
                 base.steps = [('M', node)]
                 base.set_hyperparameters(cs.sample_configuration(), init_params=init_params)
                 self.assertEqual(node.set_hyperparameters.call_args[1]['init_params'],
                                  expected_init_params)
 
+            # Check for proper exception raising
+            node = unittest.mock.Mock(
+                spec=autosklearn.pipeline.components.base.AutoSklearnComponent
+            )
+            node.get_hyperparameter_search_space.return_value = cs
+            base.steps = [('M', node)]
+            with self.assertRaisesRegex(ValueError, "Unsupported argument to init_params"):
+                base.set_hyperparameters(cs.sample_configuration(), init_params={'key': 'value'})
+
+            # An invalid node name is passed
+            with self.assertRaisesRegex(ValueError, "The current node name specified via key"):
+                base.set_hyperparameters(cs.sample_configuration(), init_params={'N:key': 'value'})
+
+            # The value was not properly set -- Here it happens because the
+            # object is a magic mock, calling the method doesn't set a new parameter
+            with self.assertRaisesRegex(ValueError, "Cannot properly set the pair"):
+                base.set_hyperparameters(cs.sample_configuration(), init_params={'M:key': 'value'})

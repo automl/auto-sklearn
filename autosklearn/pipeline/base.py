@@ -207,6 +207,10 @@ class BasePipeline(Pipeline):
             else:
                 raise NotImplementedError('Not supported yet!')
 
+        # In-code check to make sure init params
+        # is checked after pipeline creation
+        self._check_init_params_honored(init_params)
+
         return self
 
     def get_hyperparameter_search_space(self, dataset_properties=None):
@@ -344,6 +348,58 @@ class BasePipeline(Pipeline):
                 exclude=exclude)
 
         return cs
+
+    def _check_init_params_honored(self, init_params):
+        """
+        Makes sure that init params is honored at the implementation level
+        """
+        if init_params is None or len(init_params) < 1:
+            # None/empty dict, so no further check required
+            return
+
+        # There is the scenario, where instance is passed as an argument to the init_params
+        # 'instance': '{"task_id": "73543c4a360aa24498c0967fbc2f926b"}'}
+        # coming from smac instance. Remove this key to make the testing stricter
+        init_params.pop('instance', None)
+
+        for key, value in init_params.items():
+
+            if ':' not in key:
+                raise ValueError("Unsupported argument to init_params {}."
+                                 "When using init_params, a hierarchical format like "
+                                 "node_name:parameter must be provided.".format(key)
+                                 )
+            node_name = key.split(':', 1)[0]
+            if node_name not in self.named_steps.keys():
+                raise ValueError("The current node name specified via key={} of init_params "
+                                 "is not valid. Valid node names are {}".format(
+                                     key,
+                                     self.named_steps.keys()
+                                 )
+                                 )
+                continue
+            variable_name = key.split(':')[1]
+            node = self.named_steps[node_name]
+            if isinstance(node, BasePipeline):
+                # If dealing with a sub pipe,
+                # Call the child _check_init_params_honored with the updated config
+                node._check_init_params_honored(
+                    {
+                        key.replace('%s:' % node_name, '', 1): value
+                    }
+                )
+                continue
+
+            if isinstance(node, AutoSklearnComponent):
+                node_dict = vars(node)
+            elif isinstance(node, AutoSklearnChoice):
+                node_dict = vars(node.choice)
+            else:
+                raise ValueError("Unsupported node type {}".format(type(node)))
+
+            if variable_name not in node_dict or node_dict[variable_name] != value:
+                raise ValueError("Cannot properly set the pair {}->{} via init_params"
+                                 "".format(key, value))
 
     def __repr__(self):
         class_name = self.__class__.__name__
