@@ -1,25 +1,23 @@
 # -*- encoding: utf-8 -*-
 """
-==========
-Regression
-==========
+==============
+Classification
+==============
 
-The following example shows how to fit a simple regression model with
+The following example shows how to fit a simple classification model with
 *auto-sklearn*.
 """
-import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
 
-import autosklearn.regression
+import autosklearn.classification
 
 
 ############################################################################
 # Data Loading
 # ============
 
-X, y = sklearn.datasets.load_boston(return_X_y=True)
-feature_types = (['numerical'] * 3) + ['categorical'] + (['numerical'] * 9)
+X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
 X_train, X_test, y_train, y_test = \
     sklearn.model_selection.train_test_split(X, y, random_state=1)
 
@@ -27,14 +25,14 @@ X_train, X_test, y_train, y_test = \
 # Build and fit a regressor
 # =========================
 
-automl = autosklearn.regression.AutoSklearnRegressor(
+automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
     per_run_time_limit=30,
-    tmp_folder='/tmp/autosklearn_regression_example_tmp',
-    output_folder='/tmp/autosklearn_regression_example_out',
+    tmp_folder='/tmp/autosklearn_classification_example_tmp',
+    output_folder='/tmp/autosklearn_classification_example_out',
+    ml_memory_limit=60,
 )
-automl.fit(X_train, y_train, dataset_name='boston',
-           feat_type=feature_types)
+automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
 ############################################################################
 # Print the final ensemble constructed by auto-sklearn
@@ -47,4 +45,4 @@ print(automl.show_models())
 # ===================================
 
 predictions = automl.predict(X_test)
-print("R2 score:", sklearn.metrics.r2_score(y_test, predictions))
+print("R2 score:", sklearn.metrics.accuracy_score(y_test, predictions))

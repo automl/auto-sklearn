@@ -1,15 +1,14 @@
 """
-=================================
-example_multilabel_classification
-=================================
+==========================
+Multi-label Classification
+==========================
 
 This examples shows how to format the targets for a multilabel classification
-problem. Details on multilabel classification can be found on
-`here https://scikit-learn.org/stable/modules/multiclass.html>`_).
+problem. Details on multilabel classification can be found
+`here <https://scikit-learn.org/stable/modules/multiclass.html>`_.
 """
 import numpy as np
 
-import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
 from sklearn.utils.multiclass import type_of_target

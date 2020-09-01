@@ -44,7 +44,7 @@ feat_type = ['Categorical' if x.name == 'category' else 'Numerical' for x in bun
 # ==========================
 
 cls = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=60,
+    time_left_for_this_task=30,
     # Bellow two flags are provided to speed up calculations
     # Not recommended for a real implementation
     initial_configurations_via_metalearning=0,
