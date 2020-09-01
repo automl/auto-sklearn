@@ -118,7 +118,7 @@ print(automl._automl[0].runhistory_.ids_config[run_key.config_id])
 ############################################################################
 # The only other important entry is the budget in case you are using
 # auto-sklearn with
-# `successive halving <examples/60_search/example_successive_halving.py>`_.
+# `successive halving <../60_search/example_successive_halving.py>`_.
 # The remaining parts of the key can be ignored for auto-sklearn and are
 # only there because the underlying optimizer, SMAC, can handle more general
 # problems, too.

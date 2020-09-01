@@ -11,6 +11,37 @@
 Releases
 ========
 
+Version 0.9.0
+=============
+
+* ADD #157,#889: Improve handling of pandas dataframes, including the possibility to use pandas'
+  categorical column type.
+* ADD #375: New `SelectRates` feature preprocessing component for regression.
+* ADD #891: Improve the robustness of Auto-sklearn by using the single best model if no ensemble
+  is found.
+* ADD #902: Track performance of the ensemble over time.
+* ADD #914: Add an example on using pandas dataframes as input to Auto-sklearn.
+* ADD #919: Add an example for multilabel classification.
+* MAINT #909: Fix broken links in the documentation.
+* MAINT #907,#911: Add initial support for mypy.
+* MAINT #881,#927: Automatically build docker images on pushes to the master and development
+  branch and also push them to dockerhub and the github docker registry.
+* MAINT #918: Remove old dependencies from requirements.txt.
+* MAINT #931: Add information about the host system and installed packages to the log file.
+* MAINT #933: Reduce the number of warnings raised when building the documentation by sphinx.
+* MAINT #936: Completely restructure the examples section.
+* FIX #558: Provide better error message when the ensemble process fails due to a memory issue.
+* FIX #901: Allow custom resampling strategies again (was broken due to an upgrade of SMAC).
+* FIX #916: Fixes a bug where the data preprocessing configurations were ignored.
+* FIX #925: make internal data preprocessing objects clonable.
+
+Contributors v0.9.0
+*******************
+
+* Francisco Rivera
+* Matthias Feurer
+* felixleungsc
+
 Version 0.8
 ===========
 
