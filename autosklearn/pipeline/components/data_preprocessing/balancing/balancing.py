@@ -14,6 +14,7 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
         self.random_state = random_state
 
     def fit(self, X, y=None):
+        self.fitted_ = True
         return self
 
     def transform(self, X):

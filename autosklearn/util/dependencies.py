@@ -1,14 +1,13 @@
 import importlib
-import pkg_resources
-import re
 from distutils.version import LooseVersion
+from typing import List, Optional, Union, no_type_check
 
-SUBPATTERN = r'((?P<operation%d>==|>=|>|<)(?P<version%d>(\d+)?(\.[a-zA-Z0-9]+)?(\.\d+)?))'
-RE_PATTERN = re.compile(
-    r'^(?P<name>[\w\-]+)%s?(,%s)?$' % (SUBPATTERN % (1, 1), SUBPATTERN % (2, 2)))
+import pkg_resources
+
+from autosklearn.util import RE_PATTERN
 
 
-def verify_packages(packages):
+def verify_packages(packages: Optional[Union[str, List[str]]]) -> None:
     if not packages:
         return
     if isinstance(packages, str):
@@ -28,13 +27,15 @@ def verify_packages(packages):
             raise ValueError('Unable to read requirement: %s' % package)
 
 
-def _verify_package(name, operation, version):
+# Module has no attribute __version__ wa
+@no_type_check
+def _verify_package(name: str, operation: Optional[str], version: str) -> None:
     try:
-        module = pkg_resources.get_distribution(name)
-        installed_version = LooseVersion(module.version)
+        module_dist = pkg_resources.get_distribution(name)
+        installed_version = LooseVersion(module_dist.version)
     except pkg_resources.DistributionNotFound:
         try:
-            module = importlib.import_module(name)
+            module = importlib.import_module(name)  # type: ignore
             installed_version = LooseVersion(module.__version__)
         except ImportError:
             raise MissingPackageError(name)
@@ -48,6 +49,8 @@ def _verify_package(name, operation, version):
         check = required_version == installed_version
     elif operation == '>':
         check = installed_version > required_version
+    elif operation == '<':
+        check = installed_version < required_version
     elif operation == '>=':
         check = installed_version > required_version or \
                 installed_version == required_version
@@ -62,7 +65,7 @@ def _verify_package(name, operation, version):
 class MissingPackageError(Exception):
     error_message = 'Mandatory package \'{name}\' not found!'
 
-    def __init__(self, package_name):
+    def __init__(self, package_name: str):
         self.package_name = package_name
         super(MissingPackageError, self).__init__(
             self.error_message.format(name=package_name))
@@ -71,7 +74,12 @@ class MissingPackageError(Exception):
 class IncorrectPackageVersionError(Exception):
     error_message = "'{name} {installed_version}' version mismatch ({operation}{required_version})"
 
-    def __init__(self, package_name, installed_version, operation, required_version):
+    def __init__(self,
+                 package_name: str,
+                 installed_version: Union[str, LooseVersion],
+                 operation: Optional[str],
+                 required_version: Union[str, LooseVersion]
+                 ):
         self.package_name = package_name
         self.installed_version = installed_version
         self.operation = operation

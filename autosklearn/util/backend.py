@@ -1,14 +1,20 @@
 import glob
 import os
-import tempfile
-import time
-import lockfile
-import numpy as np
 import pickle
 import shutil
-from typing import Union
+import tempfile
+import time
 import uuid
+from typing import Dict, List, Optional, Tuple, Union
 
+import lockfile
+
+import numpy as np
+
+from sklearn.pipeline import Pipeline
+
+from autosklearn.data.abstract_data_manager import AbstractDataManager
+from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.util import logging_ as logging
 
 
@@ -17,11 +23,13 @@ __all__ = [
 ]
 
 
-def create(temporary_directory,
-           output_directory,
-           delete_tmp_folder_after_terminate=True,
-           delete_output_folder_after_terminate=True,
-           shared_mode=False):
+def create(
+    temporary_directory: str,
+    output_directory: str,
+    delete_tmp_folder_after_terminate: bool = True,
+    delete_output_folder_after_terminate: bool = True,
+    shared_mode: bool = False
+) -> 'Backend':
     context = BackendContext(temporary_directory, output_directory,
                              delete_tmp_folder_after_terminate,
                              delete_output_folder_after_terminate,
@@ -32,9 +40,9 @@ def create(temporary_directory,
 
 
 def get_randomized_directory_names(
-    temporary_directory=None,
-    output_directory=None,
-):
+    temporary_directory: Optional[str] = None,
+    output_directory: Optional[str] = None,
+) -> Tuple[str, str]:
     uuid_str = str(uuid.uuid1(clock_seq=os.getpid()))
 
     temporary_directory = (
@@ -65,11 +73,12 @@ def get_randomized_directory_names(
 class BackendContext(object):
 
     def __init__(self,
-                 temporary_directory,
-                 output_directory,
-                 delete_tmp_folder_after_terminate,
-                 delete_output_folder_after_terminate,
-                 shared_mode=False):
+                 temporary_directory: str,
+                 output_directory: str,
+                 delete_tmp_folder_after_terminate: bool,
+                 delete_output_folder_after_terminate: bool,
+                 shared_mode: bool = False
+                 ):
 
         # Check that the names of tmp_dir and output_dir is not the same.
         if temporary_directory == output_directory and temporary_directory is not None:
@@ -83,7 +92,7 @@ class BackendContext(object):
         self._tmp_dir_created = False
         self._output_dir_created = False
 
-        self.__temporary_directory, self.__output_directory = (
+        self._temporary_directory, self._output_directory = (
             get_randomized_directory_names(
                 temporary_directory=temporary_directory,
                 output_directory=output_directory,
@@ -93,16 +102,16 @@ class BackendContext(object):
         self.create_directories()
 
     @property
-    def output_directory(self):
+    def output_directory(self) -> str:
         # make sure that tilde does not appear on the path.
-        return os.path.expanduser(os.path.expandvars(self.__output_directory))
+        return os.path.expanduser(os.path.expandvars(self._output_directory))
 
     @property
-    def temporary_directory(self):
+    def temporary_directory(self) -> str:
         # make sure that tilde does not appear on the path.
-        return os.path.expanduser(os.path.expandvars(self.__temporary_directory))
+        return os.path.expanduser(os.path.expandvars(self._temporary_directory))
 
-    def create_directories(self):
+    def create_directories(self) -> None:
         if self.shared_mode:
             # If shared_mode == True, the tmp and output dir will be shared
             # by different instances of auto-sklearn.
@@ -124,10 +133,10 @@ class BackendContext(object):
             os.makedirs(self.output_directory)
             self._output_dir_created = True
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.delete_directories(force=False)
 
-    def delete_directories(self, force=True):
+    def delete_directories(self, force: bool = True) -> None:
         if self.delete_output_folder_after_terminate or force:
             if self._output_dir_created is False and self.shared_mode is False:
                 raise ValueError("Failed to delete output dir: %s because auto-sklearn did not "
@@ -167,7 +176,7 @@ class Backend(object):
     * true targets of the ensemble
     """
 
-    def __init__(self, context):
+    def __init__(self, context: BackendContext):
         self.logger = logging.get_logger(__name__)
         self.context = context
 
@@ -185,25 +194,26 @@ class Backend(object):
         self._make_internals_directory()
 
     @property
-    def output_directory(self):
+    def output_directory(self) -> str:
         return self.context.output_directory
 
     @property
-    def temporary_directory(self):
+    def temporary_directory(self) -> str:
         return self.context.temporary_directory
 
-    def _make_internals_directory(self):
+    def _make_internals_directory(self) -> None:
         try:
             os.makedirs(self.internals_directory)
         except Exception as e:
             self.logger.debug("_make_internals_directory: %s" % e)
             pass
 
-    def _get_start_time_filename(self, seed):
-        seed = int(seed)
+    def _get_start_time_filename(self, seed: Union[str, int]) -> str:
+        if isinstance(seed, str):
+            seed = int(seed)
         return os.path.join(self.internals_directory, "start_time_%d" % seed)
 
-    def save_start_time(self, seed):
+    def save_start_time(self, seed: str) -> str:
         self._make_internals_directory()
         start_time = time.time()
 
@@ -224,15 +234,15 @@ class Backend(object):
 
         return filepath
 
-    def load_start_time(self, seed):
+    def load_start_time(self, seed: int) -> float:
         with open(self._get_start_time_filename(seed), 'r') as fh:
             start_time = float(fh.read())
         return start_time
 
-    def get_smac_output_directory(self):
+    def get_smac_output_directory(self) -> str:
         return os.path.join(self.temporary_directory, 'smac3-output')
 
-    def get_smac_output_directory_for_run(self, seed):
+    def get_smac_output_directory_for_run(self, seed: int) -> str:
         return os.path.join(
             self.temporary_directory,
             'smac3-output',
@@ -246,11 +256,11 @@ class Backend(object):
             'run_%s' % str(smac_run_id),
         )
 
-    def _get_targets_ensemble_filename(self):
+    def _get_targets_ensemble_filename(self) -> str:
         return os.path.join(self.internals_directory,
                             "true_targets_ensemble.npy")
 
-    def save_targets_ensemble(self, targets):
+    def save_targets_ensemble(self, targets: np.ndarray) -> str:
         self._make_internals_directory()
         if not isinstance(targets, np.ndarray):
             raise ValueError('Targets must be of type np.ndarray, but is %s' %
@@ -259,7 +269,7 @@ class Backend(object):
         filepath = self._get_targets_ensemble_filename()
 
         # Try to open the file without locking it, this will reduce the
-        # number of times where we erronously keep a lock on the ensemble
+        # number of times where we erroneously keep a lock on the ensemble
         # targets file although the process already was killed
         try:
             existing_targets = np.load(filepath, allow_pickle=True)
@@ -281,15 +291,15 @@ class Backend(object):
                         return filepath
 
             with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
-                    filepath), delete=False) as fh:
-                np.save(fh, targets.astype(np.float32))
-                tempname = fh.name
+                    filepath), delete=False) as fh_w:
+                np.save(fh_w, targets.astype(np.float32))
+                tempname = fh_w.name
 
             os.rename(tempname, filepath)
 
         return filepath
 
-    def load_targets_ensemble(self):
+    def load_targets_ensemble(self) -> np.ndarray:
         filepath = self._get_targets_ensemble_filename()
 
         with lockfile.LockFile(filepath):
@@ -298,10 +308,10 @@ class Backend(object):
 
         return targets
 
-    def _get_datamanager_pickle_filename(self):
+    def _get_datamanager_pickle_filename(self) -> str:
         return os.path.join(self.internals_directory, 'datamanager.pkl')
 
-    def save_datamanager(self, datamanager):
+    def save_datamanager(self, datamanager: AbstractDataManager) -> str:
         self._make_internals_directory()
         filepath = self._get_datamanager_pickle_filename()
 
@@ -315,27 +325,27 @@ class Backend(object):
 
         return filepath
 
-    def load_datamanager(self):
+    def load_datamanager(self) -> AbstractDataManager:
         filepath = self._get_datamanager_pickle_filename()
         with lockfile.LockFile(filepath):
             with open(filepath, 'rb') as fh:
                 return pickle.load(fh)
 
-    def get_model_dir(self):
+    def get_model_dir(self) -> str:
         return os.path.join(self.internals_directory, 'models')
 
-    def get_cv_model_dir(self):
+    def get_cv_model_dir(self) -> str:
         return os.path.join(self.internals_directory, 'cv_models')
 
-    def get_model_path(self, seed, idx, budget):
+    def get_model_path(self, seed: int, idx: int, budget: float) -> str:
         return os.path.join(self.get_model_dir(),
                             '%s.%s.%s.model' % (seed, idx, budget))
 
-    def get_cv_model_path(self, seed, idx, budget):
+    def get_cv_model_path(self, seed: int, idx: int, budget: float) -> str:
         return os.path.join(self.get_cv_model_dir(),
                             '%s.%s.%s.model' % (seed, idx, budget))
 
-    def save_model(self, model, filepath):
+    def save_model(self, model: Pipeline, filepath: str) -> None:
         with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                 filepath), delete=False) as fh:
             pickle.dump(model, fh, -1)
@@ -343,7 +353,7 @@ class Backend(object):
 
         os.rename(tempname, filepath)
 
-    def list_all_models(self, seed):
+    def list_all_models(self, seed: int) -> List[str]:
         model_directory = self.get_model_dir()
         if seed >= 0:
             model_files = glob.glob(
@@ -356,12 +366,12 @@ class Backend(object):
 
         return model_files
 
-    def load_all_models(self, seed):
+    def load_all_models(self, seed: int) -> List:
         model_files = self.list_all_models(seed)
         models = self.load_models_by_file_names(model_files)
         return models
 
-    def load_models_by_file_names(self, model_file_names):
+    def load_models_by_file_names(self, model_file_names: List[str]) -> Pipeline:
         models = dict()
 
         for model_file in model_file_names:
@@ -384,7 +394,8 @@ class Backend(object):
 
         return models
 
-    def load_models_by_identifiers(self, identifiers):
+    def load_models_by_identifiers(self, identifiers: List[Tuple[int, int, float]]
+                                   ) -> Dict:
         models = dict()
 
         for identifier in identifiers:
@@ -394,7 +405,10 @@ class Backend(object):
 
         return models
 
-    def load_model_by_seed_and_id_and_budget(self, seed, idx, budget):
+    def load_model_by_seed_and_id_and_budget(self, seed: int,
+                                             idx: int,
+                                             budget: float
+                                             ) -> Pipeline:
         model_directory = self.get_model_dir()
 
         model_file_name = '%s.%s.%s.model' % (seed, idx, budget)
@@ -402,7 +416,8 @@ class Backend(object):
         with open(model_file_path, 'rb') as fh:
             return pickle.load(fh)
 
-    def load_cv_models_by_identifiers(self, identifiers):
+    def load_cv_models_by_identifiers(self, identifiers: List[Tuple[int, int, float]]
+                                      ) -> Dict:
         models = dict()
 
         for identifier in identifiers:
@@ -412,7 +427,11 @@ class Backend(object):
 
         return models
 
-    def load_cv_model_by_seed_and_id_and_budget(self, seed, idx, budget):
+    def load_cv_model_by_seed_and_id_and_budget(self,
+                                                seed: int,
+                                                idx: int,
+                                                budget: float
+                                                ) -> Pipeline:
         model_directory = self.get_cv_model_dir()
 
         model_file_name = '%s.%s.%s.model' % (seed, idx, budget)
@@ -420,10 +439,10 @@ class Backend(object):
         with open(model_file_path, 'rb') as fh:
             return pickle.load(fh)
 
-    def get_ensemble_dir(self):
+    def get_ensemble_dir(self) -> str:
         return os.path.join(self.internals_directory, 'ensembles')
 
-    def load_ensemble(self, seed):
+    def load_ensemble(self, seed: int) -> Optional[AbstractEnsemble]:
         ensemble_dir = self.get_ensemble_dir()
 
         if not os.path.exists(ensemble_dir):
@@ -445,7 +464,7 @@ class Backend(object):
 
         return ensemble_members_run_numbers
 
-    def save_ensemble(self, ensemble, idx, seed):
+    def save_ensemble(self, ensemble: AbstractEnsemble, idx: int, seed: int) -> None:
         try:
             os.makedirs(self.get_ensemble_dir())
         except Exception:
@@ -461,11 +480,15 @@ class Backend(object):
             tempname = fh.name
         os.rename(tempname, filepath)
 
-    def _get_prediction_output_dir(self, subset):
+    def _get_prediction_output_dir(self, subset: str) -> str:
         return os.path.join(self.internals_directory,
                             'predictions_%s' % subset)
 
-    def get_prediction_output_path(self, subset, automl_seed, idx, budget):
+    def get_prediction_output_path(self, subset: str,
+                                   automl_seed: Union[str, int],
+                                   idx: int,
+                                   budget: float
+                                   ) -> str:
         output_dir = self._get_prediction_output_dir(subset)
         # Make sure an output directory exists
         if not os.path.exists(output_dir):
@@ -474,14 +497,21 @@ class Backend(object):
         return os.path.join(output_dir, 'predictions_%s_%s_%s_%s.npy' %
                             (subset, automl_seed, idx, budget))
 
-    def save_predictions_as_npy(self, predictions, filepath):
+    def save_predictions_as_npy(self,
+                                predictions: np.ndarray,
+                                filepath: str
+                                ) -> None:
         with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                 filepath), delete=False) as fh:
             pickle.dump(predictions.astype(np.float32), fh, -1)
             tempname = fh.name
         os.rename(tempname, filepath)
 
-    def save_predictions_as_txt(self, predictions, subset, idx, precision, prefix=None):
+    def save_predictions_as_txt(self,
+                                predictions: np.ndarray,
+                                subset: str,
+                                idx: int, precision: int,
+                                prefix: Optional[str] = None) -> None:
         # Write prediction scores in prescribed format
         filepath = os.path.join(
             self.output_directory,
@@ -500,7 +530,7 @@ class Backend(object):
             tempname = output_file.name
         os.rename(tempname, filepath)
 
-    def write_txt_file(self, filepath, data, name):
+    def write_txt_file(self, filepath: str, data: str, name: str) -> None:
         with lockfile.LockFile(filepath):
             with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(
                     filepath), delete=False) as fh:

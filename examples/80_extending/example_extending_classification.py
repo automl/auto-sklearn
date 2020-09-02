@@ -133,6 +133,10 @@ clf = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=30,
     per_run_time_limit=10,
     include_estimators=['MLPClassifier'],
+    # Bellow two flags are provided to speed up calculations
+    # Not recommended for a real implementation
+    initial_configurations_via_metalearning=0,
+    smac_scenario_args={'runcount_limit': 1},
 )
 clf.fit(X_train, y_train)
 
@@ -142,5 +146,4 @@ clf.fit(X_train, y_train)
 
 y_pred = clf.predict(X_test)
 print("accuracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
-print(clf.sprint_statistics())
 print(clf.show_models())

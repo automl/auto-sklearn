@@ -2,7 +2,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformIntegerHyperparameter, \
     CategoricalHyperparameter
 
-from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, SIGNED_DATA, INPUT
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, SIGNED_DATA, SPARSE, INPUT
 from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_rescaling \
     import Rescaling
 from autosklearn.pipeline.components.base import \
@@ -33,7 +33,7 @@ class QuantileTransformerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm)
                 # TODO find out if this is right!
                 'handles_sparse': True,
                 'handles_dense': True,
-                'input': (DENSE, UNSIGNED_DATA),
+                'input': (SPARSE, DENSE, UNSIGNED_DATA),
                 'output': (INPUT, SIGNED_DATA),
                 'preferred_dtype': None}
 

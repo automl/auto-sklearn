@@ -7,6 +7,8 @@ import sys
 from sklearn.base import BaseEstimator
 from sklearn.utils import check_random_state
 
+from autosklearn.pipeline.constants import SPARSE
+
 
 def find_components(package, directory, base_class):
     components = OrderedDict()
@@ -376,7 +378,15 @@ class AutoSklearnChoice(object):
             elif exclude is not None and name in exclude:
                 continue
 
-            # TODO maybe check for sparse?
+            if 'sparse' in dataset_properties and dataset_properties['sparse']:
+                # In case the dataset is sparse, ignore
+                # components that do not handle sparse data
+                # Auto-sklearn uses SPARSE constant as a mechanism
+                # to indicate whether a component can handle sparse data.
+                # If SPARSE is not in the input properties of the component, it
+                # means SPARSE is not a valid input to this component, so filter it out
+                if SPARSE not in available_comp[name].get_properties()['input']:
+                    continue
 
             components_dict[name] = available_comp[name]
 

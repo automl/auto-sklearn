@@ -1,14 +1,19 @@
 # -*- encoding: utf-8 -*-
 import io
 import json
+import multiprocessing
+import platform
 import os
-from typing import Optional, List
+import sys
+from typing import Optional, List, Union
 import unittest.mock
 import warnings
 
-from ConfigSpace.read_and_write import pcs
+from ConfigSpace.read_and_write import json as cs_json
 import numpy as np
 import numpy.ma as ma
+import pandas as pd
+import pkg_resources
 import scipy.stats
 from sklearn.base import BaseEstimator
 from sklearn.model_selection._split import _RepeatedSplits, \
@@ -24,19 +29,29 @@ from sklearn.dummy import DummyClassifier, DummyRegressor
 
 from autosklearn.metrics import Scorer
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.evaluation import ExecuteTaFuncWithQueue
+from autosklearn.data.validation import InputValidator
+from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import _fit_with_budget
 from autosklearn.metrics import calculate_score
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import get_logger, setup_logger
-from autosklearn.util import pipeline
+from autosklearn.util import pipeline, RE_PATTERN
 from autosklearn.ensemble_builder import EnsembleBuilder
+from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix
 from autosklearn.metrics import f1_macro, accuracy, r2
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
     REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION
+from autosklearn.pipeline.components.classification import ClassifierChoice
+from autosklearn.pipeline.components.regression import RegressorChoice
+from autosklearn.pipeline.components.feature_preprocessing import FeaturePreprocessorChoice
+from autosklearn.pipeline.components.data_preprocessing.categorical_encoding import OHEChoice
+from autosklearn.pipeline.components.data_preprocessing.minority_coalescense import (
+    CoalescenseChoice
+)
+from autosklearn.pipeline.components.data_preprocessing.rescaling import RescalingChoice
 
 
 def _model_predict(model, X, batch_size, logger, task):
@@ -84,7 +99,7 @@ class AutoML(BaseEstimator):
                  ensemble_size=1,
                  ensemble_nbest=1,
                  max_models_on_disc=1,
-                 ensemble_memory_limit=1000,
+                 ensemble_memory_limit: Optional[int] = 1024,
                  seed=1,
                  ml_memory_limit=3072,
                  metadata_directory=None,
@@ -187,6 +202,12 @@ class AutoML(BaseEstimator):
 
         self._debug_mode = debug_mode
 
+        self.InputValidator = InputValidator()
+
+        # Place holder for the run history of the
+        # Ensemble building process
+        self.ensemble_performance_history = []
+
         if not isinstance(self._time_for_task, int):
             raise ValueError("time_left_for_this_task not of type integer, "
                              "but %s" % str(type(self._time_for_task)))
@@ -251,6 +272,8 @@ class AutoML(BaseEstimator):
                                     metric=self._metric,
                                     memory_limit=memory_limit,
                                     disable_file_output=self._disable_evaluator_output,
+                                    abort_on_first_run_crash=False,
+                                    cost_for_crash=get_cost_of_crash(self._metric),
                                     **self._resampling_strategy_arguments)
 
         status, cost, runtime, additional_info = \
@@ -278,6 +301,17 @@ class AutoML(BaseEstimator):
         only_return_configuration_space: Optional[bool] = False,
         load_models: bool = True,
     ):
+        # Make sure that input is valid
+        # Performs Ordinal one hot encoding to the target
+        # both for train and test data
+        X, y = self.InputValidator.validate(X, y)
+
+        if X_test is not None:
+            X_test, y_test = self.InputValidator.validate(X_test, y_test)
+            if len(y.shape) != len(y_test.shape):
+                raise ValueError('Target value shapes do not match: %s vs %s'
+                                 % (y.shape, y_test.shape))
+
         # Reset learnt stuff
         self.models_ = None
         self.cv_models_ = None
@@ -322,6 +356,90 @@ class AutoML(BaseEstimator):
                 if ft.lower() not in ['categorical', 'numerical']:
                     raise ValueError('Only `Categorical` and `Numerical` are '
                                      'valid feature types, you passed `%s`' % ft)
+
+        # Feature types dynamically understood from dataframe
+        if feat_type is not None and self.InputValidator.feature_types:
+            raise ValueError("feat_type cannot be provided when using pandas "
+                             "DataFrame as input. Auto-sklearn extracts the feature types "
+                             "automatically from the columns dtypes, so providing feat_type "
+                             "not only is not necessary, but not allowed."
+                             )
+        elif feat_type is None and self.InputValidator.feature_types:
+            feat_type = self.InputValidator.feature_types
+
+        # Produce debug information to the logfile
+        self._logger.debug('Starting to print environment information')
+        self._logger.debug('  Python version: %s', sys.version.split('\n'))
+        try:
+            self._logger.debug('  Distribution: %s', platform.linux_distribution())
+        except AttributeError:
+            # platform.linux_distribution() was removed in Python3.8
+            # We should move to the distro package as soon as it supports Windows and OSX
+            pass
+        self._logger.debug('  System: %s', platform.system())
+        self._logger.debug('  Machine: %s', platform.machine())
+        self._logger.debug('  Platform: %s', platform.platform())
+        # UNAME appears to leak sensible information
+        # self._logger.debug('  uname: %s', platform.uname())
+        self._logger.debug('  Version: %s', platform.version())
+        self._logger.debug('  Mac version: %s', platform.mac_ver())
+        requirements = pkg_resources.resource_string('autosklearn', 'requirements.txt')
+        requirements = requirements.decode('utf-8')
+        requirements = [requirement for requirement in requirements.split('\n')]
+        for requirement in requirements:
+            if not requirement:
+                continue
+            match = RE_PATTERN.match(requirement)
+            if match:
+                name = match.group('name')
+                module_dist = pkg_resources.get_distribution(name)
+                self._logger.debug('  %s', module_dist)
+            else:
+                raise ValueError('Unable to read requirement: %s' % requirement)
+        self._logger.debug('Done printing environment information')
+        self._logger.debug('Starting to print arguments to auto-sklearn')
+        self._logger.debug('  output_folder: %s', self._backend.context._output_directory)
+        self._logger.debug('  tmp_folder: %s', self._backend.context._temporary_directory)
+        self._logger.debug('  time_left_for_this_task: %f', self._time_for_task)
+        self._logger.debug('  per_run_time_limit: %f', self._per_run_time_limit)
+        self._logger.debug(
+            '  initial_configurations_via_metalearning: %d',
+            self._initial_configurations_via_metalearning,
+        )
+        self._logger.debug('  ensemble_size: %d', self._ensemble_size)
+        self._logger.debug('  ensemble_nbest: %f', self._ensemble_nbest)
+        self._logger.debug('  max_models_on_disc: %d', self._max_models_on_disc)
+        self._logger.debug('  ensemble_memory_limit: %d', self._ensemble_memory_limit)
+        self._logger.debug('  seed: %d', self._seed)
+        self._logger.debug('  ml_memory_limit: %d', self._ml_memory_limit)
+        self._logger.debug('  metadata_directory: %s', self._metadata_directory)
+        self._logger.debug('  debug_mode: %s', self._debug_mode)
+        self._logger.debug('  include_estimators: %s', str(self._include_estimators))
+        self._logger.debug('  exclude_estimators: %s', str(self._exclude_estimators))
+        self._logger.debug('  include_preprocessors: %s', str(self._include_preprocessors))
+        self._logger.debug('  exclude_preprocessors: %s', str(self._exclude_preprocessors))
+        self._logger.debug('  resampling_strategy: %s', str(self._resampling_strategy))
+        self._logger.debug('  resampling_strategy_arguments: %s',
+                           str(self._resampling_strategy_arguments))
+        self._logger.debug('  shared_mode: %s', str(self._shared_mode))
+        self._logger.debug('  precision: %s', str(self.precision))
+        self._logger.debug('  disable_evaluator_output: %s', str(self._disable_evaluator_output))
+        self._logger.debug('  get_smac_objective_callback: %s', str(self._get_smac_object_callback))
+        self._logger.debug('  smac_scenario_args: %s', str(self._smac_scenario_args))
+        self._logger.debug('  logging_config: %s', str(self.logging_config))
+        self._logger.debug('  metric: %s', str(self._metric))
+        self._logger.debug('Done printing arguments to auto-sklearn')
+        self._logger.debug('Starting to print available components')
+        for choice in (
+            ClassifierChoice, RegressorChoice, FeaturePreprocessorChoice,
+            OHEChoice, RescalingChoice, CoalescenseChoice,
+        ):
+            self._logger.debug(
+                '%s: %s',
+                choice.__name__,
+                choice.get_components(),
+            )
+        self._logger.debug('Done printing available components')
 
         datamanager = XYDataManager(
             X, y,
@@ -405,7 +523,19 @@ class AutoML(BaseEstimator):
         else:
             self._logger.info(
                 'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
-            self._proc_ensemble = self._get_ensemble_process(time_left_for_ensembles)
+
+            # Create a queue to communicate with the ensemble process
+            # And get the run history
+            # Use a Manager as a workaround to memory errors cause
+            # by three subprocesses (Automl-ensemble_builder-pynisher)
+            mgr = multiprocessing.Manager()
+            mgr.Namespace()
+            queue = mgr.Queue()
+
+            self._proc_ensemble = self._get_ensemble_process(
+                time_left_for_ensembles,
+                queue=queue,
+            )
             self._proc_ensemble.start()
 
         self._stopwatch.stop_task(ensemble_task_name)
@@ -499,14 +629,19 @@ class AutoML(BaseEstimator):
         # while the ensemble builder tries to access the data
         if self._proc_ensemble is not None and self._ensemble_size > 0:
             self._proc_ensemble.join()
+            self.ensemble_performance_history = self._proc_ensemble.get_ensemble_history()
 
         self._proc_ensemble = None
+
         if load_models:
             self._load_models()
 
         return self
 
     def refit(self, X, y):
+
+        # Make sure input data is valid
+        X, y = self.InputValidator.validate(X, y)
 
         if self.models_ is None or len(self.models_) == 0 or self.ensemble_ is None:
             self._load_models()
@@ -587,6 +722,9 @@ class AutoML(BaseEstimator):
             raise ValueError("Predict and predict_proba can only be called "
                              "if 'ensemble_size != 0'")
 
+        # Make sure that input is valid
+        X = self.InputValidator.validate_features(X)
+
         # Parallelize predictions across models with n_jobs processes.
         # Each process computes predictions in chunks of batch_size rows.
         try:
@@ -597,6 +735,11 @@ class AutoML(BaseEstimator):
                     check_is_fitted(tmp_model.steps[-1][-1])
             models = self.models_
         except sklearn.exceptions.NotFittedError:
+            # When training a cross validation model, self.cv_models_
+            # will contain the Voting classifier/regressor product of cv
+            # self.models_ in the case of cv, contains unfitted models
+            # Raising above exception is a mechanism to detect which
+            # attribute contains the relevant models for prediction
             try:
                 check_is_fitted(list(self.cv_models_.values())[0])
                 models = self.cv_models_
@@ -637,10 +780,14 @@ class AutoML(BaseEstimator):
         if self._logger is None:
             self._logger = self._get_logger(dataset_name)
 
+        # Make sure that input is valid
+        y = self.InputValidator.validate_target(y, is_classification=True)
+
         self._proc_ensemble = self._get_ensemble_process(
             1, task, precision, dataset_name, max_iterations=1,
             ensemble_nbest=ensemble_nbest, ensemble_size=ensemble_size)
         self._proc_ensemble.main()
+        self.ensemble_performance_history = self._proc_ensemble.get_ensemble_history()
         self._proc_ensemble = None
         self._load_models()
         return self
@@ -648,7 +795,7 @@ class AutoML(BaseEstimator):
     def _get_ensemble_process(self, time_left_for_ensembles,
                               task=None, precision=None,
                               dataset_name=None, max_iterations=None,
-                              ensemble_nbest=None, ensemble_size=None):
+                              ensemble_nbest=None, ensemble_size=None, queue=None):
 
         if task is None:
             task = self._task
@@ -691,6 +838,7 @@ class AutoML(BaseEstimator):
             read_at_most=np.inf,
             memory_limit=self._ensemble_memory_limit,
             random_state=self._seed,
+            queue=queue,
         )
 
     def _load_models(self):
@@ -700,6 +848,11 @@ class AutoML(BaseEstimator):
             seed = self._seed
 
         self.ensemble_ = self._backend.load_ensemble(seed)
+
+        # If no ensemble is loaded, try to get the best performing model
+        if not self.ensemble_:
+            self.ensemble_ = self._load_best_individual_model()
+
         if self.ensemble_:
             identifiers = self.ensemble_.get_selected_model_identifiers()
             self.models_ = self._backend.load_models_by_identifiers(identifiers)
@@ -732,10 +885,57 @@ class AutoML(BaseEstimator):
         else:
             self.models_ = []
 
+    def _load_best_individual_model(self):
+        """
+        In case of failure during ensemble building,
+        this method returns the single best model found
+        by AutoML.
+        This is a robust mechanism to be able to predict,
+        even though no ensemble was found by ensemble builder.
+        """
+
+        # We also require that the model is fit and a task is defined
+        # The ensemble size must also be greater than 1, else it means
+        # that the user intentionally does not want an ensemble
+        if not self._task or self._ensemble_size < 1:
+            return None
+
+        # SingleBest contains the best model found by AutoML
+        ensemble = SingleBest(
+            metric=self._metric,
+            random_state=self._seed,
+            run_history=self.runhistory_,
+        )
+        self._logger.warning(
+            "No valid ensemble was created. Please check the log"
+            "file for errors. Default to the best individual estimator:{}".format(
+                ensemble.identifiers_
+            )
+        )
+        return ensemble
+
     def score(self, X, y):
         # fix: Consider only index 1 of second dimension
         # Don't know if the reshaping should be done there or in calculate_score
+
+        # Predict has validate within it, so we
+        # call it before the upcoming validate call
+        # The reason is we do not want to trigger the
+        # check for changing input types on successive
+        # input validator calls
         prediction = self.predict(X)
+
+        # Make sure that input is valid
+        X, y = self.InputValidator.validate(X, y)
+
+        # Encode the prediction using the input validator
+        # We train autosklearn with a encoded version of y,
+        # which is decoded by predict().
+        # Above call to validate() encodes the y given for score()
+        # Below call encodes the prediction, so we compare in the
+        # same representation domain
+        prediction = self.InputValidator.encode_target(prediction)
+
         return calculate_score(solution=y,
                                prediction=prediction,
                                task_type=self._task,
@@ -893,7 +1093,7 @@ class AutoML(BaseEstimator):
         task_name = 'CreateConfigSpace'
 
         self._stopwatch.start_task(task_name)
-        configspace_path = os.path.join(tmp_dir, 'space.pcs')
+        configspace_path = os.path.join(tmp_dir, 'space.json')
         configuration_space = pipeline.get_configuration_space(
             datamanager.info,
             include_estimators=include_estimators,
@@ -902,9 +1102,11 @@ class AutoML(BaseEstimator):
             exclude_preprocessors=exclude_preprocessors)
         configuration_space = self.configuration_space_created_hook(
             datamanager, configuration_space)
-        sp_string = pcs.write(configuration_space)
-        backend.write_txt_file(configspace_path, sp_string,
-                               'Configuration space')
+        backend.write_txt_file(
+            configspace_path,
+            cs_json.write(configuration_space),
+            'Configuration space'
+        )
         self._stopwatch.stop_task(task_name)
 
         return configuration_space, configspace_path
@@ -913,67 +1115,7 @@ class AutoML(BaseEstimator):
         return configuration_space
 
 
-class BaseAutoML(AutoML):
-    """Base class for AutoML objects to hold abstract functions for both
-    regression and classification."""
-
-    def __init__(self, *args, **kwargs):
-        self._n_outputs = 1
-        super().__init__(*args, **kwargs)
-
-    def _perform_input_checks(self, X, y):
-        X = self._check_X(X)
-        if y is not None:
-            y = self._check_y(y)
-        return X, y
-
-    def _check_X(self, X):
-        X = sklearn.utils.check_array(X, accept_sparse="csr",
-                                      force_all_finite=False)
-        if scipy.sparse.issparse(X):
-            X.sort_indices()
-        return X
-
-    def _check_y(self, y):
-        y = sklearn.utils.check_array(y, ensure_2d=False)
-        y = np.atleast_1d(y)
-
-        if y.ndim == 1:
-            return y
-        elif y.ndim == 2 and y.shape[1] == 1:
-            warnings.warn("A column-vector y was passed when a 1d array was"
-                          " expected. Will change shape via np.ravel().",
-                          sklearn.utils.DataConversionWarning, stacklevel=2)
-            y = np.ravel(y)
-            return y
-
-        return y
-
-    def refit(self, X, y):
-        X, y = self._perform_input_checks(X, y)
-        _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
-        if self._n_outputs != _n_outputs:
-            raise ValueError('Number of outputs changed from %d to %d!' %
-                             (self._n_outputs, _n_outputs))
-
-        return super().refit(X, y)
-
-    def fit_ensemble(self, y, task=None, precision=32,
-                     dataset_name=None, ensemble_nbest=None,
-                     ensemble_size=None):
-        _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
-        if self._n_outputs != _n_outputs:
-            raise ValueError('Number of outputs changed from %d to %d!' %
-                             (self._n_outputs, _n_outputs))
-
-        return super().fit_ensemble(
-            y, task=task, precision=precision,
-            dataset_name=dataset_name, ensemble_nbest=ensemble_nbest,
-            ensemble_size=ensemble_size
-        )
-
-
-class AutoMLClassifier(BaseAutoML):
+class AutoMLClassifier(AutoML):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -983,23 +1125,24 @@ class AutoMLClassifier(BaseAutoML):
 
     def fit(
         self,
-        X: np.ndarray,
-        y: np.ndarray,
-        X_test: Optional[np.ndarray] = None,
-        y_test: Optional[np.ndarray] = None,
+        X: Union[np.ndarray, pd.DataFrame],
+        y: Union[np.ndarray, pd.DataFrame],
+        X_test: Optional[Union[np.ndarray, pd.DataFrame]] = None,
+        y_test: Optional[Union[np.ndarray, pd.DataFrame]] = None,
         feat_type: Optional[List[bool]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
     ):
-        X, y = self._perform_input_checks(X, y)
-        if X_test is not None:
-            X_test, y_test = self._perform_input_checks(X_test, y_test)
-            if len(y.shape) != len(y_test.shape):
-                raise ValueError('Target value shapes do not match: %s vs %s'
-                                 % (y.shape, y_test.shape))
 
-        y_task = type_of_target(y)
+        # We first validate the dtype of the target provided by the user
+        # In doing so, we also fit the internal encoder for classification
+        # In case y_test is provided, we proactively check their type
+        # and make sure the enconding accounts for both y_test/y_train classes
+        input_y = self.InputValidator.join_and_check(y, y_test) if y_test is not None else y
+        y_task = type_of_target(
+            self.InputValidator.validate_target(input_y, is_classification=True)
+        )
         task = self._task_mapping.get(y_task)
         if task is None:
             raise ValueError('Cannot work on data of type %s' % y_task)
@@ -1010,22 +1153,6 @@ class AutoMLClassifier(BaseAutoML):
             else:
                 self._metric = accuracy
 
-        y, self._classes, self._n_classes = self._process_target_classes(y)
-        if y_test is not None:
-            # Map test values to actual values - TODO: copy to all kinds of
-            # other parts in this code and test it!!!
-            y_test_new = []
-            for output_idx in range(len(self._classes)):
-                mapping = {self._classes[output_idx][idx]: idx
-                           for idx in range(len(self._classes[output_idx]))}
-                enumeration = y_test if len(self._classes) == 1 else y_test[output_idx]
-                y_test_new.append(
-                    np.array([mapping[value] for value in enumeration])
-                )
-            y_test = np.array(y_test_new)
-            if self._n_outputs == 1:
-                y_test = y_test.flatten()
-
         return super().fit(
             X, y,
             X_test=X_test,
@@ -1037,67 +1164,22 @@ class AutoMLClassifier(BaseAutoML):
             load_models=load_models,
         )
 
-    def fit_ensemble(self, y, task=None, precision=32,
-                     dataset_name=None, ensemble_nbest=None,
-                     ensemble_size=None):
-        y, _classes, _n_classes = self._process_target_classes(y)
-        if not hasattr(self, '_classes'):
-            self._classes = _classes
-        if not hasattr(self, '_n_classes'):
-            self._n_classes = _n_classes
-
-        return super().fit_ensemble(y, task, precision, dataset_name,
-                                    ensemble_nbest, ensemble_size)
-
-    def _process_target_classes(self, y):
-        y = super()._check_y(y)
-        self._n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
-
-        y = np.copy(y)
-
-        _classes = []
-        _n_classes = []
-
-        if self._n_outputs == 1:
-            classes_k, y = np.unique(y, return_inverse=True)
-            _classes.append(classes_k)
-            _n_classes.append(classes_k.shape[0])
-        else:
-            for k in range(self._n_outputs):
-                classes_k, y[:, k] = np.unique(y[:, k], return_inverse=True)
-                _classes.append(classes_k)
-                _n_classes.append(classes_k.shape[0])
-
-        _n_classes = np.array(_n_classes, dtype=np.int)
-
-        return y, _classes, _n_classes
-
     def predict(self, X, batch_size=None, n_jobs=1):
         predicted_probabilities = super().predict(X, batch_size=batch_size,
                                                   n_jobs=n_jobs)
 
-        if self._n_outputs == 1:
+        if self.InputValidator.is_single_column_target() == 1:
             predicted_indexes = np.argmax(predicted_probabilities, axis=1)
-            predicted_classes = self._classes[0].take(predicted_indexes)
-
-            return predicted_classes
         else:
-            predicted_indices = (predicted_probabilities > 0.5).astype(int)
-            n_samples = predicted_probabilities.shape[0]
-            predicted_classes = np.zeros((n_samples, self._n_outputs))
+            predicted_indexes = (predicted_probabilities > 0.5).astype(int)
 
-            for k in range(self._n_outputs):
-                output_predicted_indexes = predicted_indices[:, k].reshape(-1)
-                predicted_classes[:, k] = self._classes[k].take(
-                    output_predicted_indexes)
-
-            return predicted_classes
+        return self.InputValidator.decode_target(predicted_indexes)
 
     def predict_proba(self, X, batch_size=None, n_jobs=1):
         return super().predict(X, batch_size=batch_size, n_jobs=n_jobs)
 
 
-class AutoMLRegressor(BaseAutoML):
+class AutoMLRegressor(AutoML):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._task_mapping = {'continuous-multioutput': MULTIOUTPUT_REGRESSION,
@@ -1106,25 +1188,28 @@ class AutoMLRegressor(BaseAutoML):
 
     def fit(
         self,
-        X: np.ndarray,
-        y: np.ndarray,
-        X_test: Optional[np.ndarray] = None,
-        y_test: Optional[np.ndarray] = None,
+        X: Union[np.ndarray, pd.DataFrame],
+        y: Union[np.ndarray, pd.DataFrame],
+        X_test: Optional[Union[np.ndarray, pd.DataFrame]] = None,
+        y_test: Optional[Union[np.ndarray, pd.DataFrame]] = None,
         feat_type: Optional[List[bool]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
     ):
-        X, y = super()._perform_input_checks(X, y)
-        y_task = type_of_target(y)
+
+        # Check the data provided in y
+        # After the y data type is validated,
+        # check the task type
+        y_task = type_of_target(
+            self.InputValidator.validate_target(y)
+        )
         task = self._task_mapping.get(y_task)
         if task is None:
             raise ValueError('Cannot work on data of type %s' % y_task)
-
         if self._metric is None:
             self._metric = r2
 
-        self._n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
         return super().fit(
             X, y,
             X_test=X_test,
@@ -1135,10 +1220,3 @@ class AutoMLRegressor(BaseAutoML):
             only_return_configuration_space=only_return_configuration_space,
             load_models=load_models,
         )
-
-    def fit_ensemble(self, y, task=None, precision=32,
-                     dataset_name=None, ensemble_nbest=None,
-                     ensemble_size=None):
-        y = super()._check_y(y)
-        return super().fit_ensemble(y, task, precision, dataset_name,
-                                    ensemble_nbest, ensemble_size)

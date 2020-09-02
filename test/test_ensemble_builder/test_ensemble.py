@@ -1,11 +1,18 @@
 import os
 import sys
+import time
 import unittest.mock
 
-from autosklearn.metrics import roc_auc, accuracy
+import numpy as np
+
+import pandas as pd
+
+from smac.runhistory.runhistory import RunValue, RunKey, RunHistory
+
+from autosklearn.metrics import roc_auc, accuracy, log_loss
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensemble_builder import EnsembleBuilder, Y_VALID, Y_TEST
-import numpy as np
+from autosklearn.ensembles.singlebest_ensemble import SingleBest
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
@@ -20,6 +27,17 @@ class BackendMock(object):
         self.temporary_directory = os.path.join(
             this_directory, 'data',
         )
+
+    def load_datamanager(self):
+        manager = unittest.mock.Mock()
+        array = np.load(os.path.join(
+            this_directory, 'data',
+            '.auto-sklearn',
+            'predictions_test',
+            'predictions_test_0_3_100.0.npy'
+        ))
+        manager.data.get.return_value = array
+        return manager
 
     def load_targets_ensemble(self):
         with open(os.path.join(
@@ -364,7 +382,7 @@ class EnsembleTest(unittest.TestCase):
         ensbuilder = EnsembleBuilder(
             backend=self.backend,
             dataset_name="TEST",
-            task_type=1,  # Binary Classification
+            task_type=3,  # Multilabel Classification
             metric=roc_auc,
             limit=-1,  # not used,
             seed=0,  # important to find the test files
@@ -379,6 +397,23 @@ class EnsembleTest(unittest.TestCase):
         self.assertEqual(len(ensbuilder.read_preds), 3)
         self.assertIsNotNone(ensbuilder.last_hash)
         self.assertIsNotNone(ensbuilder.y_true_ensemble)
+
+        # Make sure the run history is ok
+        run_history = ensbuilder.get_ensemble_history()
+
+        # We expect 1 element to be the ensemble
+        self.assertEqual(len(run_history), 1)
+
+        # As the data loader loads the same val/train/test
+        # we expect 1.0 as score and all keys available
+        expected_performance = {
+            'ensemble_val_score': 1.0,
+            'ensemble_test_score': 1.0,
+            'ensemble_optimization_score': 1.0,
+        }
+        self.assertDictContainsSubset(expected_performance, run_history[0])
+        self.assertIn('Timestamp', run_history[0])
+        self.assertIsInstance(run_history[0]['Timestamp'], pd.Timestamp)
 
     def testLimit(self):
         ensbuilder = EnsembleBuilderMemMock(backend=self.backend,
@@ -414,6 +449,7 @@ class EnsembleSelectionTest(unittest.TestCase):
         # If none of the above is the case, predict() raises Error.
         ensemble = EnsembleSelection(ensemble_size=3,
                                      task_type=1,
+                                     random_state=np.random.RandomState(0),
                                      metric=accuracy,
                                      )
         # Test for case 1. Create (3, 2, 2) predictions.
@@ -463,3 +499,82 @@ class EnsembleSelectionTest(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             ensemble.predict(per_model_pred)
+
+
+class SingleBestTest(unittest.TestCase):
+    def setUp(self):
+        self.run_history = RunHistory()
+        self.run_history._add(
+            RunKey(
+                config_id=3,
+                instance_id='{"task_id": "breast_cancer"}',
+                seed=1,
+                budget=3.0
+            ),
+            RunValue(
+                cost=0.11347517730496459,
+                time=0.21858787536621094,
+                status=None,
+                starttime=time.time(),
+                endtime=time.time(),
+                additional_info={
+                    'duration': 0.20323538780212402,
+                    'num_run': 3,
+                    'configuration_origin': 'Random Search'}
+            ),
+            status=None,
+            origin=None,
+        )
+        self.run_history._add(
+            RunKey(
+                config_id=6,
+                instance_id='{"task_id": "breast_cancer"}',
+                seed=1,
+                budget=6.0
+            ),
+            RunValue(
+                cost=2*0.11347517730496459,
+                time=2*0.21858787536621094,
+                status=None,
+                starttime=time.time(),
+                endtime=time.time(),
+                additional_info={
+                    'duration': 0.20323538780212402,
+                    'num_run': 6,
+                    'configuration_origin': 'Random Search'}
+            ),
+            status=None,
+            origin=None,
+        )
+
+    def test_get_identifiers_from_run_history_accuracy(self):
+        ensemble = SingleBest(
+             metric=accuracy,
+             random_state=1,
+             run_history=self.run_history,
+        )
+
+        # Just one model
+        self.assertEqual(len(ensemble.identifiers_), 1)
+
+        # That model must be the best
+        seed, num_run, budget = ensemble.identifiers_[0]
+        self.assertEqual(num_run, 3)
+        self.assertEqual(seed, 1)
+        self.assertEqual(budget, 3.0)
+
+    def test_get_identifiers_from_run_history_log_loss(self):
+        ensemble = SingleBest(
+             metric=log_loss,
+             random_state=1,
+             run_history=self.run_history,
+        )
+
+        # Just one model
+        self.assertEqual(len(ensemble.identifiers_), 1)
+
+        # That model must be the best
+        seed, num_run, budget = ensemble.identifiers_[0]
+        self.assertEqual(num_run, 3)
+        self.assertEqual(seed, 1)
+        self.assertEqual(budget, 3.0)

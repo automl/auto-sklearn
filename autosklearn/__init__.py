@@ -1,21 +1,16 @@
 # -*- encoding: utf-8 -*-
 import os
+import pkg_resources
 import sys
 
 from autosklearn.util import dependencies
 from autosklearn.__version__ import __version__  # noqa (imported but unused)
 
 
-__MANDATORY_PACKAGES__ = '''
-numpy>=1.9
-scikit-learn>=0.22.0,<0.23
-lockfile>=0.10
-smac>=0.12
-pyrfr>=0.6.1,<0.8
-ConfigSpace>=0.4.0,<0.5
-'''
+requirements = pkg_resources.resource_string('autosklearn', 'requirements.txt')
+requirements = requirements.decode('utf-8')
 
-dependencies.verify_packages(__MANDATORY_PACKAGES__)
+dependencies.verify_packages(requirements)
 
 if os.name != 'posix':
     raise ValueError(

@@ -1,4 +1,5 @@
 import copy
+import itertools
 import os
 import resource
 import tempfile
@@ -15,6 +16,7 @@ import sklearn.decomposition
 import sklearn.model_selection
 import sklearn.ensemble
 import sklearn.svm
+from sklearn.utils.validation import check_is_fitted
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
@@ -22,6 +24,7 @@ from ConfigSpace.hyperparameters import CategoricalHyperparameter
 from autosklearn.pipeline.classification import SimpleClassificationPipeline
 from autosklearn.pipeline.components.base import \
     AutoSklearnClassificationAlgorithm, AutoSklearnPreprocessingAlgorithm
+from autosklearn.pipeline.components.base import AutoSklearnComponent, AutoSklearnChoice
 import autosklearn.pipeline.components.classification as classification_components
 import autosklearn.pipeline.components.feature_preprocessing as preprocessing_components
 from autosklearn.pipeline.util import get_dataset
@@ -62,6 +65,32 @@ class DummyPreprocessor(AutoSklearnPreprocessingAlgorithm):
                 'is_deterministic': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (INPUT,)}
+
+    @staticmethod
+    def get_hyperparameter_search_space(dataset_properties=None):
+        cs = ConfigurationSpace()
+        return cs
+
+
+class CrashPreprocessor(AutoSklearnPreprocessingAlgorithm):
+    def __init__(*args, **kwargs):
+        pass
+
+    @staticmethod
+    def get_properties(dataset_properties=None):
+        return {'shortname': 'AB',
+                'name': 'AdaBoost Classifier',
+                'handles_regression': False,
+                'handles_classification': True,
+                'handles_multiclass': True,
+                'handles_multilabel': True,
+                'handles_multioutput': False,
+                'is_deterministic': True,
+                'input': (DENSE, SPARSE, UNSIGNED_DATA),
+                'output': (INPUT,)}
+
+    def fit(self, X, y):
+        raise ValueError("Make sure fit is called")
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
@@ -306,8 +335,28 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                                                dataset_properties=dataset_properties,
                                                init_params=init_params_,)
             cls.set_hyperparameters(config, init_params=init_params_)
+
+            # First make sure that for this configuration, setting the parameters
+            # does not mistakenly set the estimator as fitted
+            for name, step in cls.named_steps.items():
+                with self.assertRaisesRegex(sklearn.exceptions.NotFittedError,
+                                            "instance is not fitted yet"):
+                    check_is_fitted(step)
+
             try:
                 cls.fit(X_train, Y_train)
+
+                # After fit, all components should be tagged as fitted
+                # by sklearn. Check is fitted raises an exception if that
+                # is not the case
+                try:
+                    for name, step in cls.named_steps.items():
+                        check_is_fitted(step)
+                except sklearn.exceptions.NotFittedError:
+                    self.fail("config={} raised NotFittedError unexpectedly!".format(
+                        config
+                    ))
+
                 cls.predict(X_test.copy())
                 cls.predict_proba(X_test)
             except MemoryError:
@@ -626,3 +675,171 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cs = SimpleClassificationPipeline().get_hyperparameter_search_space()
         self.assertIn('DummyPreprocessor', str(cs))
         del preprocessing_components._addons.components['DummyPreprocessor']
+
+    def _test_set_hyperparameter_choice(self, expected_key, implementation, config_dict):
+        """
+        Given a configuration in config, this procedure makes sure that
+        the given implementation, which should be a Choice component, honors
+        the type of the object, and any hyperparameter associated to it
+        """
+        keys_checked = [expected_key]
+        implementation_type = config_dict[expected_key]
+        expected_type = implementation.get_components()[implementation_type]
+        self.assertIsInstance(implementation.choice, expected_type)
+
+        # Are there further hyperparams?
+        # A choice component might have attribute requirements that we need to check
+        expected_sub_key = expected_key.replace(':__choice__', ':') + implementation_type
+        expected_attributes = {}
+        for key, value in config_dict.items():
+            if key != expected_key and expected_sub_key in key:
+                expected_attributes[key.split(':')[-1]] = value
+                keys_checked.append(key)
+        if expected_attributes:
+            attributes = vars(implementation.choice)
+            # Cannot check the whole dictionary, just names, as some
+            # classes map the text hyperparameter directly to a function!
+            for expected_attribute in expected_attributes.keys():
+                self.assertIn(expected_attribute, attributes.keys())
+        return keys_checked
+
+    def _test_set_hyperparameter_component(self, expected_key, implementation, config_dict):
+        """
+        Given a configuration in config, this procedure makes sure that
+        the given implementation, which should be a autosklearn component, honors
+        is created with the desired hyperparameters stated in config_dict
+        """
+        keys_checked = []
+        attributes = vars(implementation)
+        expected_attributes = {}
+        for key, value in config_dict.items():
+            if expected_key in key:
+                keys_checked.append(key)
+                key = key.replace(expected_key + ':', '')
+                if ':' in key:
+                    raise ValueError("This utility should only be called with a "
+                                     "matching string that produces leaf configurations, "
+                                     "that is no further colons are expected, yet key={}"
+                                     "".format(
+                                            key
+                                        )
+                                     )
+                expected_attributes[key] = value
+        # self.assertDictContainsSubset(expected_attributes, attributes)
+        # Cannot check the whole dictionary, just names, as some
+        # classes map the text hyperparameter directly to a function!
+        for expected_attribute in expected_attributes.keys():
+            self.assertIn(expected_attribute, attributes.keys())
+        return keys_checked
+
+    def test_set_hyperparameters_honors_configuration(self):
+        """Makes sure that a given configuration is honored in practice.
+
+        This method tests that the set hyperparameters actually create objects
+        that comply with the given configuration. It iterates trough the pipeline to
+        make sure we did not miss a step, but also checks at the end that every
+        configuration from Config was checked
+        """
+
+        all_combinations = list(itertools.product([True, False], repeat=4))
+        for sparse, multilabel, signed, multiclass, in all_combinations:
+            dataset_properties = {
+                'sparse': sparse,
+                'multilabel': multilabel,
+                'multiclass': multiclass,
+                'signed': signed,
+            }
+            cls = SimpleClassificationPipeline(
+                random_state=1,
+                dataset_properties=dataset_properties,
+            )
+            cs = cls.get_hyperparameter_search_space()
+            config = cs.sample_configuration()
+
+            # Set hyperparameters takes a given config and translate
+            # a config to an actual implementation
+            cls.set_hyperparameters(config)
+            config_dict = config.get_dictionary()
+
+            # keys to check is our mechanism to ensure that every
+            # every config key is checked
+            keys_checked = []
+
+            for name, step in cls.named_steps.items():
+                if name == 'data_preprocessing':
+                    # We have to check both the numerical and categorical
+                    to_check = {
+                        'numerical_transformer': step.numer_ppl.named_steps,
+                        'categorical_transformer': step.categ_ppl.named_steps,
+                    }
+
+                    for data_type, pipeline in to_check.items():
+                        for sub_name, sub_step in pipeline.items():
+                            # If it is a Choice, make sure it is the correct one!
+                            if isinstance(sub_step, AutoSklearnChoice):
+                                key = "data_preprocessing:{}:{}:__choice__".format(
+                                    data_type,
+                                    sub_name
+                                )
+                                keys_checked.extend(
+                                    self._test_set_hyperparameter_choice(
+                                        key, sub_step, config_dict
+                                    )
+                                )
+                            # If it is a component, make sure it has the correct hyperparams
+                            elif isinstance(sub_step, AutoSklearnComponent):
+                                keys_checked.extend(
+                                    self._test_set_hyperparameter_component(
+                                        "data_preprocessing:{}:{}".format(
+                                            data_type,
+                                            sub_name
+                                        ),
+                                        sub_step, config_dict
+                                    )
+                                )
+                            else:
+                                raise ValueError("New type of pipeline component!")
+                elif name == 'balancing':
+                    keys_checked.extend(
+                        self._test_set_hyperparameter_component(
+                            'balancing',
+                            step, config_dict
+                        )
+                    )
+                elif name == 'feature_preprocessor':
+                    keys_checked.extend(
+                        self._test_set_hyperparameter_choice(
+                            'feature_preprocessor:__choice__', step, config_dict
+                        )
+                    )
+                elif name == 'classifier':
+                    keys_checked.extend(
+                        self._test_set_hyperparameter_choice(
+                            'classifier:__choice__', step, config_dict
+                        )
+                    )
+                else:
+                    raise ValueError("Found another type of step! Need to update this check")
+
+            # Make sure we checked the whole configuration
+            self.assertSetEqual(set(config_dict.keys()), set(keys_checked))
+
+    def test_fit_instantiates_component(self):
+        """Make sure that if a preprocessor is added, it's fit
+        method is called"""
+        preprocessing_components.add_preprocessor(CrashPreprocessor)
+        cls = SimpleClassificationPipeline()
+        cs = cls.get_hyperparameter_search_space()
+        self.assertIn('CrashPreprocessor', str(cs))
+        config = cs.sample_configuration()
+        config['feature_preprocessor:__choice__'] = 'CrashPreprocessor'
+        cls.set_hyperparameters(config)
+        with self.assertRaisesRegex(
+            ValueError,
+            "Make sure fit is called"
+        ):
+            cls.fit(
+                X=np.array([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]),
+                y=np.array([1, 0, 1, 1])
+            )
+        del preprocessing_components._addons.components['CrashPreprocessor']

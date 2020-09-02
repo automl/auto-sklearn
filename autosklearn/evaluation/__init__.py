@@ -66,11 +66,12 @@ def get_cost_of_crash(metric):
 class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
     def __init__(self, backend, autosklearn_seed, resampling_strategy, metric,
-                 logger, initial_num_run=1, stats=None, runhistory=None,
+                 logger, cost_for_crash, abort_on_first_run_crash,
+                 initial_num_run=1, stats=None, runhistory=None,
                  run_obj='quality', par_factor=1, all_scoring_functions=False,
                  output_y_hat_optimization=True, include=None, exclude=None,
                  memory_limit=None, disable_file_output=False, init_params=None,
-                 budget_type=None, **resampling_strategy_args):
+                 budget_type=None, ta=False, **resampling_strategy_args):
 
         if resampling_strategy == 'holdout':
             eval_function = autosklearn.evaluation.train_evaluator.eval_holdout
@@ -97,7 +98,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             raise ValueError('Unknown resampling strategy %s' %
                              resampling_strategy)
 
-        self.worst_possible_result = get_cost_of_crash(metric)
+        self.worst_possible_result = cost_for_crash
 
         eval_function = functools.partial(
             fit_predict_try_except_decorator,
@@ -112,6 +113,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             run_obj=run_obj,
             par_factor=par_factor,
             cost_for_crash=self.worst_possible_result,
+            abort_on_first_run_crash=abort_on_first_run_crash,
         )
 
         self.backend = backend

@@ -25,6 +25,8 @@ matrix:
   - os: linux
     env: DISTRIB="conda" RUN_FLAKE8="true" SKIP_TESTS="true"
   - os: linux
+    env: DISTRIB="conda" RUN_MYPY="true" SKIP_TESTS="true"
+  - os: linux
     env: DISTRIB="conda" PYTHON="3.5"
   - os: linux
     env: DISTRIB="conda" COVERAGE="true" PYTHON="3.6"

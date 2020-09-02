@@ -2,7 +2,7 @@ recursive-include autosklearn/metalearning/files *.arff
 recursive-include autosklearn/metalearning/files *.csv
 recursive-include autosklearn/metalearning/files *.txt
 include autosklearn/util/logging.yaml
-recursive-include autosklearn *.pyx
 include requirements.txt
+include autosklearn/requirements.txt
 recursive-include autosklearn/experimental/askl2_portfolios *.json
 include autosklearn/experimental/askl2_training_data.json

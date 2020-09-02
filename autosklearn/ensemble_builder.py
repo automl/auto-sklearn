@@ -11,6 +11,7 @@ import traceback
 from typing import Optional, Union
 
 import numpy as np
+import pandas as pd
 import pynisher
 import lockfile
 from sklearn.utils.validation import check_random_state
@@ -42,11 +43,12 @@ class EnsembleBuilder(multiprocessing.Process):
             seed: int = 1,
             shared_mode: bool = False,
             max_iterations: int = None,
-            precision: str = 32,
+            precision: int = 32,
             sleep_duration: int = 2,
-            memory_limit: int = 1000,
+            memory_limit: Optional[int] = 1024,
             read_at_most: int = 5,
             random_state: Optional[Union[int, np.random.RandomState]] = None,
+            queue: multiprocessing.Queue = None
     ):
         """
             Constructor
@@ -98,8 +100,8 @@ class EnsembleBuilder(multiprocessing.Process):
                 precision of floats to read the predictions
             sleep_duration: int
                 duration of sleeping time between two iterations of this script (in sec)
-            memory_limit: int
-                memory limit in mb
+            memory_limit: Optional[int]
+                memory limit in mb. If ``None``, no memory limit is enforced.
             read_at_most: int
                 read at most n new prediction files in each iteration
         """
@@ -204,6 +206,28 @@ class EnsembleBuilder(multiprocessing.Process):
 
         self.validation_performance_ = np.inf
 
+        # Track the ensemble performance
+        self.datamanager = self.backend.load_datamanager()
+        self.y_valid = self.datamanager.data.get('Y_valid')
+        self.y_test = self.datamanager.data.get('Y_test')
+
+        # Support for tracking the performance across time
+        # A Queue is needed to handle multiprocessing, not only
+        # internally for pynisher calls, but to return data
+        # to the main process
+        # Hence, because we are using three different processes,
+        # the below strategy prevents MemoryErrors. That is,
+        # without clearly isolating the queue with a manger,
+        # we run into a threading MemoryError
+        if queue is None:
+            mgr = multiprocessing.Manager()
+            mgr.Namespace()
+            self.queue = mgr.Queue()
+        else:
+            self.queue = queue
+        self.queue.put([])
+        self.queue.get()
+
     def run(self):
         buffer_time = 5  # TODO: Buffer time should also be used in main!?
         while True:
@@ -219,8 +243,12 @@ class EnsembleBuilder(multiprocessing.Process):
                 # reduce nbest to reduce memory consumption and try it again
                 if isinstance(self.ensemble_nbest, numbers.Integral) and \
                         self.ensemble_nbest == 1:
-                    self.logger.critical("Memory Exception --"
-                                         " Unable to escape from memory exception")
+                    self.logger.critical(
+                        "Memory Exception -- Unable to further reduce the number of ensemble "
+                        "members -- please restart Auto-sklearn with a higher value for the "
+                        "argument 'ensemble_memory_limit' (current limit is {} MB)."
+                        "".format(self.memory_limit)
+                    )
                 else:
                     if isinstance(self.ensemble_nbest, numbers.Integral):
                         self.ensemble_nbest = int(self.ensemble_nbest / 2)
@@ -314,6 +342,11 @@ class EnsembleBuilder(multiprocessing.Process):
             # train ensemble
             ensemble = self.fit_ensemble(selected_keys=candidate_models)
             if ensemble is not None:
+                train_pred = self.predict(set_="train",
+                                          ensemble=ensemble,
+                                          selected_keys=candidate_models,
+                                          n_preds=len(candidate_models),
+                                          index_run=iteration)
                 # We can't use candidate_models here, as n_sel_* might be empty
                 valid_pred = self.predict(set_="valid",
                                           ensemble=ensemble,
@@ -327,8 +360,16 @@ class EnsembleBuilder(multiprocessing.Process):
                                          selected_keys=n_sel_test,
                                          n_preds=len(candidate_models),
                                          index_run=iteration)
+
+                # Add a score to run history to see ensemble progress
+                self._add_ensemble_trajectory(
+                    train_pred,
+                    valid_pred,
+                    test_pred
+                )
             else:
                 time.sleep(self.sleep_duration)
+
         if return_pred:
             return valid_pred, test_pred
 
@@ -857,8 +898,14 @@ class EnsembleBuilder(multiprocessing.Process):
         if self.SAVE2DISC:
             self.backend.save_ensemble(ensemble, index_run, self.seed)
 
+        if set_ == 'valid':
+            pred_set = Y_VALID
+        elif set_ == 'test':
+            pred_set = Y_TEST
+        else:
+            pred_set = Y_ENSEMBLE
         predictions = np.array([
-            self.read_preds[k][Y_VALID if set_ == 'valid' else Y_TEST]
+            self.read_preds[k][pred_set]
             for k in selected_keys
         ])
 
@@ -885,6 +932,70 @@ class EnsembleBuilder(multiprocessing.Process):
             )
             return None
         # TODO: ADD saving of predictions on "ensemble data"
+
+    def get_ensemble_history(self):
+        """
+        Getter method to obtain the performance of the ensemble
+        building process across time
+
+        Return
+        ----------
+        dict that tracks the performance of the ensemble
+        building process on testing/training sets
+
+        """
+        ensemble_history = []
+        while(self.queue.qsize()):
+            ensemble_history.append(self.queue.get())
+        return ensemble_history
+
+    def _add_ensemble_trajectory(self, train_pred, valid_pred, test_pred):
+        """
+        Records a snapshot of how the performance look at a given training
+        time.
+
+        Parameters
+        ----------
+        ensemble: EnsembleSelection
+            The ensemble selection object to record
+        valid_pred: np.ndarray
+            The predictions on the validation set using ensemble
+        test_pred: np.ndarray
+            The predictions on the test set using ensemble
+
+        """
+        performance_stamp = {
+            'Timestamp': pd.Timestamp.now(),
+            'ensemble_optimization_score': calculate_score(
+                solution=self.y_true_ensemble,
+                prediction=train_pred,
+                task_type=self.task_type,
+                metric=self.metric,
+                all_scoring_functions=False
+            )
+        }
+        if valid_pred is not None:
+            # TODO: valid_pred are a legacy from competition manager
+            # and this if never happens. Re-evaluate Y_valid support
+            performance_stamp['ensemble_val_score'] = calculate_score(
+                solution=self.y_valid,
+                prediction=valid_pred,
+                task_type=self.task_type,
+                metric=self.metric,
+                all_scoring_functions=False
+            )
+
+        # In case test_pred was provided
+        if test_pred is not None:
+            performance_stamp['ensemble_test_score'] = calculate_score(
+                solution=self.y_test,
+                prediction=test_pred,
+                task_type=self.task_type,
+                metric=self.metric,
+                all_scoring_functions=False
+            )
+
+        self.queue.put(performance_stamp)
 
     def _get_list_of_sorted_preds(self):
         """

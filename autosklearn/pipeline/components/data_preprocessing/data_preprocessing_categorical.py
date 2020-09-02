@@ -83,18 +83,20 @@ class CategoricalPreprocessingPipeline(BasePipeline):
             cs=cs, dataset_properties=dataset_properties,
             exclude=exclude, include=include, pipeline=self.steps)
 
-        self.configuration_space_ = cs
-        self.dataset_properties_ = dataset_properties
         return cs
 
-    def _get_pipeline_steps(self):
+    def _get_pipeline_steps(self, dataset_properties=None):
         steps = []
+
+        default_dataset_properties = {}
+        if dataset_properties is not None and isinstance(dataset_properties, dict):
+            default_dataset_properties.update(dataset_properties)
 
         steps.extend([
             ["category_shift", CategoryShift()],
             ["imputation", CategoricalImputation()],
-            ["category_coalescence", CoalescenseChoice(self.dataset_properties)],
-            ["categorical_encoding", OHEChoice(self.dataset_properties)],
+            ["category_coalescence", CoalescenseChoice(default_dataset_properties)],
+            ["categorical_encoding", OHEChoice(default_dataset_properties)],
             ])
 
         return steps

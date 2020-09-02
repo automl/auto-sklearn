@@ -1,6 +1,4 @@
 setuptools
-pytest>=4.6
-Cython
 
 numpy>=1.9.0
 scipy>=0.14.1
@@ -9,12 +7,10 @@ scikit-learn>=0.22.0,<0.23
 
 lockfile
 joblib
-psutil
 pyyaml
-liac-arff
 pandas<1.0
 
 ConfigSpace>=0.4.0,<0.5
 pynisher>=0.4.2
 pyrfr>=0.7,<0.9
-smac>=0.12
+smac>=0.12.3

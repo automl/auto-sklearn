@@ -107,3 +107,30 @@ Possible other solutions (not tested):
 
 * virtual machine
 * docker image
+
+Docker Image
+=========================
+A Docker image is also provided as a github package. The user must authenticate following the instructions from `GitHub Packages <https://help.github.com/en/packages/using-github-packages-with-your-projects-ecosystem/configuring-docker-for-use-with-github-packages>`_ . Then, the image can be downloaded as follows:
+
+.. code:: bash
+
+    docker pull docker.pkg.github.com/automl/auto-sklearn/auto-sklearn:latest
+
+You can also verify that the images are downloaded via:
+
+.. code:: bash
+
+    docker images  # Verify that the image was downloaded
+
+This image can be used to start an interactive session as follows:
+
+.. code:: bash
+
+    docker run -it docker.pkg.github.com/automl/auto-sklearn/auto-sklearn:latest
+
+To start a Jupyter notebook, you could instead run e.g.:
+
+.. code:: bash
+
+    docker run -it -v $PWD:/opt/nb -p 8888:8888 docker.pkg.github.com/automl/auto-sklearn/auto-sklearn:latest /bin/bash -c "mkdir -p /opt/nb && jupyter notebook --notebook-dir=/opt/nb --ip='0.0.0.0' --port=8888 --no-browser --allow-root"
+

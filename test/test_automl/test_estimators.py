@@ -8,16 +8,18 @@ import joblib
 from joblib import cpu_count
 import numpy as np
 import numpy.ma as npma
+import pandas as pd
 import sklearn
 import sklearn.dummy
+import sklearn.datasets
 
 import autosklearn.pipeline.util as putil
 import autosklearn.estimators  # noqa F401
 from autosklearn.estimators import AutoSklearnEstimator
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
-from autosklearn.metrics import accuracy, f1_macro, mean_squared_error
-from autosklearn.automl import AutoMLClassifier, AutoML
+from autosklearn.metrics import accuracy, f1_macro, mean_squared_error, r2
+from autosklearn.automl import AutoMLClassifier
 from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier
@@ -143,7 +145,7 @@ class EstimatorTest(Base, unittest.TestCase):
         # Illegal target types for classification: continuous,
         # multiclass-multioutput, continuous-multioutput.
         self.assertRaisesRegex(ValueError,
-                               "classification with data of type"
+                               "Classification with data of type"
                                " multiclass-multioutput is not supported",
                                cls.fit,
                                X=X,
@@ -151,7 +153,7 @@ class EstimatorTest(Base, unittest.TestCase):
                                )
 
         self.assertRaisesRegex(ValueError,
-                               "classification with data of type"
+                               "Classification with data of type"
                                " continuous is not supported",
                                cls.fit,
                                X=X,
@@ -159,7 +161,7 @@ class EstimatorTest(Base, unittest.TestCase):
                                )
 
         self.assertRaisesRegex(ValueError,
-                               "classification with data of type"
+                               "Classification with data of type"
                                " continuous-multioutput is not supported",
                                cls.fit,
                                X=X,
@@ -192,7 +194,7 @@ class EstimatorTest(Base, unittest.TestCase):
         # multiclass-multioutput
         self.assertRaisesRegex(
             ValueError,
-            "regression with data of type"
+            "Regression with data of type"
             " multilabel-indicator is not supported",
             reg.fit,
             X=X,
@@ -201,7 +203,7 @@ class EstimatorTest(Base, unittest.TestCase):
 
         self.assertRaisesRegex(
             ValueError,
-            "regression with data of type"
+            "Regression with data of type"
             " multiclass-multioutput is not supported",
             reg.fit,
             X=X,
@@ -514,7 +516,6 @@ class EstimatorTest(Base, unittest.TestCase):
 class AutoMLClassifierTest(Base, unittest.TestCase):
     @unittest.mock.patch('autosklearn.automl.AutoML.predict')
     def test_multiclass_prediction(self, predict_mock):
-        classes = [['a', 'b', 'c']]
         predicted_probabilities = [[0, 0, 0.99], [0, 0.99, 0], [0.99, 0, 0],
                                    [0, 0.99, 0], [0, 0, 0.99]]
         predicted_indexes = [2, 1, 0, 1, 2]
@@ -527,9 +528,10 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
             per_run_time_limit=1,
             backend=None,
         )
-        classifier._classes = [np.array(classes)]
-        classifier._n_outputs = 1
-        classifier._n_classes = np.array([3])
+        classifier.InputValidator.validate_target(
+            pd.DataFrame(expected_result, dtype='category'),
+            is_classification=True,
+        )
 
         actual_result = classifier.predict([None] * len(predicted_indexes))
 
@@ -537,7 +539,6 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
     @unittest.mock.patch('autosklearn.automl.AutoML.predict')
     def test_multilabel_prediction(self, predict_mock):
-        classes = [[1, 2], [13, 17]]
         predicted_probabilities = [[0.99, 0],
                                    [0.99, 0],
                                    [0, 0.99],
@@ -553,9 +554,10 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
             per_run_time_limit=1,
             backend=None,
         )
-        classifier._classes = list(map(np.array, classes))
-        classifier._n_outputs = 2
-        classifier._n_classes = np.array([3, 2])
+        classifier.InputValidator.validate_target(
+            pd.DataFrame(expected_result, dtype='int64'),
+            is_classification=True,
+        )
 
         actual_result = classifier.predict([None] * len(predicted_indexes))
 
@@ -653,24 +655,40 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         output_files = os.listdir(output)
         self.assertIn('binary_test_dataset_test_1.predict', output_files)
 
-    @unittest.mock.patch.object(AutoML, 'fit')
-    @unittest.mock.patch.object(AutoML, 'refit')
-    @unittest.mock.patch.object(AutoML, 'fit_ensemble')
-    def test_conversion_of_list_to_np(self, fit_ensemble, refit, fit):
-        automl = AutoSklearnClassifier()
-        X = [[1], [2], [3]]
-        y = [1, 2, 3]
+    def test_classification_pandas_support(self):
+        X, y = sklearn.datasets.fetch_openml(
+            data_id=2,  # cat/num dataset
+            return_X_y=True,
+            as_frame=True,
+        )
+
+        # Drop NAN!!
+        X = X.dropna('columns')
+
+        # This test only make sense if input is dataframe
+        self.assertTrue(isinstance(X, pd.DataFrame))
+        self.assertTrue(isinstance(y, pd.Series))
+        automl = AutoSklearnClassifier(
+            time_left_for_this_task=30,
+            per_run_time_limit=5,
+            exclude_estimators=['libsvm_svc'],
+            seed=5,
+        )
+
         automl.fit(X, y)
-        self.assertEqual(fit.call_count, 1)
-        self.assertIsInstance(fit.call_args[0][0], np.ndarray)
-        self.assertIsInstance(fit.call_args[0][1], np.ndarray)
+
+        # Make sure that at least better than random.
+        # We use same X_train==X_test to test code quality
+        self.assertTrue(automl.score(X, y) > 0.555)
+
         automl.refit(X, y)
-        self.assertEqual(refit.call_count, 1)
-        self.assertIsInstance(refit.call_args[0][0], np.ndarray)
-        self.assertIsInstance(refit.call_args[0][1], np.ndarray)
-        automl.fit_ensemble(y)
-        self.assertEqual(fit_ensemble.call_count, 1)
-        self.assertIsInstance(fit_ensemble.call_args[0][0], np.ndarray)
+
+        # Make sure that at least better than random.
+        # accuracy in sklearn needs valid data
+        # It should be 0.555 as the dataset is unbalanced.
+        y = automl._automl[0].InputValidator.encode_target(y)
+        prediction = automl._automl[0].InputValidator.encode_target(automl.predict(X))
+        self.assertTrue(accuracy(y, prediction) > 0.555)
 
 
 class AutoMLRegressorTest(Base, unittest.TestCase):
@@ -691,26 +709,64 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         self.assertEqual(predictions.shape, (356,))
         score = mean_squared_error(Y_test, predictions)
         # On average np.sqrt(30) away from the target -> ~5.5 on average
-        self.assertGreaterEqual(score, -30)
+        # Results with select rates drops avg score to a range of -32.40 to -37, on 30 seconds
+        # constraint. With more time_left_for_this_task this is no longer an issue
+        self.assertGreaterEqual(score, -37)
 
-    @unittest.mock.patch.object(AutoML, 'fit')
-    @unittest.mock.patch.object(AutoML, 'refit')
-    @unittest.mock.patch.object(AutoML, 'fit_ensemble')
-    def test_conversion_of_list_to_np(self, fit_ensemble, refit, fit):
-        automl = AutoSklearnRegressor()
-        X = [[1], [2], [3]]
-        y = [1, 2, 3]
+    def test_cv_regression(self):
+        """
+        Makes sure that when using a cv strategy, we are able to fit
+        a regressor
+        """
+        tmp = os.path.join(self.test_dir, '..', '.tmp_regression_fit')
+        output = os.path.join(self.test_dir, '..', '.out_regression_fit')
+        self._setUp(tmp)
+        self._setUp(output)
+
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('boston')
+        automl = AutoSklearnRegressor(time_left_for_this_task=30,
+                                      per_run_time_limit=5,
+                                      resampling_strategy='cv',
+                                      tmp_folder=tmp,
+                                      output_folder=output)
+
+        automl.fit(X_train, Y_train)
+        predictions = automl.predict(X_test)
+        self.assertEqual(predictions.shape, (356,))
+        score = mean_squared_error(Y_test, predictions)
+        # On average np.sqrt(30) away from the target -> ~5.5 on average
+        # Results with select rates drops avg score to a range of -32.40 to -37, on 30 seconds
+        # constraint. With more time_left_for_this_task this is no longer an issue
+        self.assertGreaterEqual(score, -37)
+
+        self._tearDown(tmp)
+        self._tearDown(output)
+
+    def test_regression_pandas_support(self):
+        X, y = sklearn.datasets.fetch_openml(
+            data_id=41514,  # diabetes
+            return_X_y=True,
+            as_frame=True,
+        )
+        # This test only make sense if input is dataframe
+        self.assertTrue(isinstance(X, pd.DataFrame))
+        self.assertTrue(isinstance(y, pd.Series))
+        automl = AutoSklearnRegressor(
+            time_left_for_this_task=30,
+            per_run_time_limit=5,
+        )
+
+        # Make sure we error out because y is not encoded
         automl.fit(X, y)
-        self.assertEqual(fit.call_count, 1)
-        self.assertIsInstance(fit.call_args[0][0], np.ndarray)
-        self.assertIsInstance(fit.call_args[0][1], np.ndarray)
+
+        # Make sure that at least better than random.
+        # We use same X_train==X_test to test code quality
+        self.assertTrue(automl.score(X, y) > 0.5)
+
         automl.refit(X, y)
-        self.assertEqual(refit.call_count, 1)
-        self.assertIsInstance(refit.call_args[0][0], np.ndarray)
-        self.assertIsInstance(refit.call_args[0][1], np.ndarray)
-        automl.fit_ensemble(y)
-        self.assertEqual(fit_ensemble.call_count, 1)
-        self.assertIsInstance(fit_ensemble.call_args[0][0], np.ndarray)
+
+        # Make sure that at least better than random.
+        self.assertTrue(r2(y, automl.predict(X)) > 0.5)
 
 
 class AutoSklearnClassifierTest(unittest.TestCase):

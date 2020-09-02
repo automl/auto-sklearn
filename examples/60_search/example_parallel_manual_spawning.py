@@ -8,7 +8,7 @@ Parallel Usage with manual process spawning
 the training models. A variant of *SMAC*, called *pSMAC* (parallel SMAC),
 provides a means of running several instances of *auto-sklearn* in a parallel
 mode using several computational resources (detailed information of *pSMAC*
-can be found `here <https://automl.github.io/SMAC3/stable/psmac.html>`_).
+can be found `here <https://automl.github.io/SMAC3/master/psmac.html>`_).
 
 This example shows how to spawn multiple instances of *Auto-sklearn* which
 share the same output directory and thereby run in parallel. Use this example

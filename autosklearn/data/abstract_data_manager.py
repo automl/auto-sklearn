@@ -1,4 +1,8 @@
 import abc
+from typing import Any, Dict, List, Tuple
+
+import numpy as np
+
 import scipy.sparse
 
 from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
@@ -6,7 +10,11 @@ from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
 from autosklearn.util.data import predict_RAM_usage
 
 
-def perform_one_hot_encoding(sparse, categorical, data):
+def perform_one_hot_encoding(
+    sparse: bool,
+    categorical: List[bool],
+    data: List
+) -> Tuple[List, bool]:
     predicted_RAM_usage = float(
         predict_RAM_usage(data[0], categorical)) / 1024 / 1024
 
@@ -33,41 +41,41 @@ def perform_one_hot_encoding(sparse, categorical, data):
 class AbstractDataManager():
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, name):
+    def __init__(self, name: str):
 
-        self._data = dict()
-        self._info = dict()
+        self._data = dict()  # type: Dict
+        self._info = dict()  # type: Dict
         self._name = name
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @property
-    def data(self):
+    def data(self) -> Dict[str, np.ndarray]:
         return self._data
 
     @property
-    def info(self):
+    def info(self) -> Dict[str, Any]:
         return self._info
 
     @property
-    def feat_type(self):
+    def feat_type(self) -> List[str]:
         return self._feat_type
 
     @feat_type.setter
-    def feat_type(self, value):
+    def feat_type(self, value: List[str]) -> None:
         self._feat_type = value
 
     @property
-    def encoder(self):
+    def encoder(self) -> DataPreprocessor:
         return self._encoder
 
     @encoder.setter
-    def encoder(self, value):
+    def encoder(self, value: DataPreprocessor) -> DataPreprocessor:
         self._encoder = value
 
-    def perform1HotEncoding(self):
+    def perform1HotEncoding(self) -> None:
         sparse = True if self.info['is_sparse'] == 1 else False
         has_missing = True if self.info['has_missing'] else False
         to_encode = ['categorical']
@@ -95,10 +103,10 @@ class AbstractDataManager():
         elif 'X_test' in self.data:
             self.data['X_test'] = data[1]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'DataManager : ' + self.name
 
-    def __str__(self):
+    def __str__(self) -> str:
         val = 'DataManager : ' + self.name + '\ninfo:\n'
         for item in self.info:
             val = val + '\t' + item + ' = ' + str(self.info[item]) + '\n'

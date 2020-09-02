@@ -28,7 +28,7 @@ class BasePipeline(Pipeline):
             dataset_properties is not None else {}
 
         if steps is None:
-            self.steps = self._get_pipeline_steps()
+            self.steps = self._get_pipeline_steps(dataset_properties=dataset_properties)
         else:
             self.steps = steps
 
@@ -173,7 +173,7 @@ class BasePipeline(Pipeline):
                 return y
 
     def set_hyperparameters(self, configuration, init_params=None):
-        self.configuration = configuration
+        self.config = configuration
 
         for node_idx, n_ in enumerate(self.steps):
             node_name, node = n_
@@ -385,7 +385,7 @@ class BasePipeline(Pipeline):
 
         return rval
 
-    def _get_pipeline_steps(self):
+    def _get_pipeline_steps(self, dataset_properties):
         raise NotImplementedError()
 
     def _get_estimator_hyperparameter_name(self):

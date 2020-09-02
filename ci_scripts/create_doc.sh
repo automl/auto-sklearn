@@ -8,7 +8,7 @@ if ! [[ -z ${DOCPUSH+x} ]]; then
     if [[ "$DOCPUSH" == "true" ]]; then
 
         # install documentation building dependencies
-        pip install --upgrade matplotlib seaborn setuptools pytest coverage sphinx pillow sphinx-gallery sphinx_bootstrap_theme cython numpydoc nbformat nbconvert mock
+        pip install --upgrade matplotlib seaborn setuptools pytest mypy coverage sphinx pillow sphinx-gallery sphinx_bootstrap_theme cython numpydoc nbformat nbconvert mock
 
         # $1 is the branch name
         # $2 is the global variable where we set the script status

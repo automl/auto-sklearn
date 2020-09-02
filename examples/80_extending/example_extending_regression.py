@@ -111,6 +111,10 @@ reg = autosklearn.regression.AutoSklearnRegressor(
     time_left_for_this_task=30,
     per_run_time_limit=10,
     include_estimators=['KernelRidgeRegression'],
+    # Bellow two flags are provided to speed up calculations
+    # Not recommended for a real implementation
+    initial_configurations_via_metalearning=0,
+    smac_scenario_args={'runcount_limit': 1},
 )
 reg.fit(X_train, y_train)
 
@@ -119,5 +123,4 @@ reg.fit(X_train, y_train)
 # =====================================
 y_pred = reg.predict(X_test)
 print("r2 score: ", sklearn.metrics.r2_score(y_pred, y_test))
-print(reg.sprint_statistics())
 print(reg.show_models())

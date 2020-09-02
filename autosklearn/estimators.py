@@ -8,7 +8,7 @@ from sklearn.base import BaseEstimator
 from sklearn.utils.multiclass import type_of_target
 import joblib
 
-from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, BaseAutoML
+from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, AutoML
 from autosklearn.util.backend import create, get_randomized_directory_names
 
 
@@ -26,7 +26,7 @@ class AutoSklearnEstimator(BaseEstimator):
         ensemble_size: int = 50,
         ensemble_nbest=50,
         max_models_on_disc=50,
-        ensemble_memory_limit=1024,
+        ensemble_memory_limit: Optional[int] = 1024,
         seed=1,
         ml_memory_limit=3072,
         include_estimators=None,
@@ -90,6 +90,7 @@ class AutoSklearnEstimator(BaseEstimator):
             Memory limit in MB for the ensemble building process.
             `auto-sklearn` will reduce the number of considered models
             (``ensemble_nbest``) if the memory limit is reached.
+            If ``None``, no memory limit is enforced.
 
         seed : int, optional (default=1)
             Used to seed SMAC. Will determine the output file names.
@@ -203,16 +204,16 @@ class AutoSklearnEstimator(BaseEstimator):
 
         smac_scenario_args : dict, optional (None)
             Additional arguments inserted into the scenario of SMAC. See the
-            `SMAC documentation <https://automl.github.io/SMAC3/stable/options.html?highlight=scenario#scenario>`_
+            `SMAC documentation <https://automl.github.io/SMAC3/master/options.html?highlight=scenario#scenario>`_
             for a list of available arguments.
 
         get_smac_object_callback : callable
             Callback function to create an object of class
-            `smac.optimizer.smbo.SMBO <https://automl.github.io/SMAC3/stable/apidoc/smac.optimizer.smbo.html>`_.
+            `smac.optimizer.smbo.SMBO <https://automl.github.io/SMAC3/master/apidoc/smac.optimizer.smbo.html>`_.
             The function must accept the arguments ``scenario_dict``,
             ``instances``, ``num_params``, ``runhistory``, ``seed`` and ``ta``.
             This is an advanced feature. Use only if you are familiar with
-            `SMAC <https://automl.github.io/SMAC3/stable/index.html>`_.
+            `SMAC <https://automl.github.io/SMAC3/master/index.html>`_.
 
         logging_config : dict, optional (None)
             dictionary object specifying the logger configuration. If None,
@@ -271,7 +272,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.metadata_directory = metadata_directory
         self._metric = metric
 
-        self._automl = None  # type: Optional[List[BaseAutoML]]
+        self._automl = None  # type: Optional[List[AutoML]]
         # n_jobs after conversion to a number (b/c default is None)
         self._n_jobs = None
         super().__init__()
@@ -438,7 +439,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
         return self
 
-    def fit_ensemble(self, y, task=None, precision='32',
+    def fit_ensemble(self, y, task=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
         """Fit an ensemble to models trained during an optimization process.
@@ -605,8 +606,7 @@ class AutoSklearnEstimator(BaseEstimator):
         raise NotImplementedError()
 
     def get_configuration_space(self, X, y):
-        self._automl = self.build_automl()
-        return self._automl[0].fit(X, y, only_return_configuration_space=True)
+        return self._automl[0].configuration_space
 
 
 class AutoSklearnClassifier(AutoSklearnEstimator):
@@ -665,13 +665,18 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         # type of data is compatible with auto-sklearn. Legal target
         # types are: binary, multiclass, multilabel-indicator.
         target_type = type_of_target(y)
-        if target_type in ['multiclass-multioutput',
-                           'continuous',
-                           'continuous-multioutput',
-                           'unknown',
-                           ]:
-            raise ValueError("classification with data of type %s is"
-                             " not supported" % target_type)
+        supported_types = ['binary', 'multiclass', 'multilabel-indicator']
+        if target_type not in supported_types:
+            raise ValueError("Classification with data of type {} is "
+                             "not supported. Supported types are {}. "
+                             "You can find more information about scikit-learn "
+                             "data types in: "
+                             "https://scikit-learn.org/stable/modules/multiclass.html"
+                             "".format(
+                                    target_type,
+                                    supported_types
+                                )
+                             )
 
         # remember target type for using in predict_proba later.
         self.target_type = target_type
@@ -795,14 +800,22 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         """
         # Before running anything else, first check that the
         # type of data is compatible with auto-sklearn. Legal target
-        # types are: continuous, binary, multiclass.
+        # types are: continuous, continuous-multioutput, and the special cases:
+        # multiclass : because [3.0, 1.0, 5.0] is considered as multiclass
+        # binary: because [1.0, 0.0] is considered multiclass
         target_type = type_of_target(y)
-        if target_type in ['multiclass-multioutput',
-                           'multilabel-indicator',
-                           'unknown',
-                           ]:
-            raise ValueError("regression with data of type %s is not"
-                             " supported" % target_type)
+        supported_types = ['continuous', 'binary', 'multiclass', 'continuous-multioutput']
+        if target_type not in supported_types:
+            raise ValueError("Regression with data of type {} is "
+                             "not supported. Supported types are {}. "
+                             "You can find more information about scikit-learn "
+                             "data types in: "
+                             "https://scikit-learn.org/stable/modules/multiclass.html"
+                             "".format(
+                                    target_type,
+                                    supported_types
+                                )
+                             )
 
         # Fit is supposed to be idempotent!
         # But not if we use share_mode.
