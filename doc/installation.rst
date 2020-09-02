@@ -110,13 +110,14 @@ Possible other solutions (not tested):
 
 Docker Image
 =========================
-A Docker image is also provided as a github package. The user must authenticate following the instructions from `GitHub Packages <https://help.github.com/en/packages/using-github-packages-with-your-projects-ecosystem/configuring-docker-for-use-with-github-packages>`_ . Then, the image can be downloaded as follows:
+A Docker image is also provided on dockerhub. To download from dockerhub,
+use:
 
 .. code:: bash
 
-    docker pull docker.pkg.github.com/automl/auto-sklearn/auto-sklearn:latest
+    docker pull mfeurer/auto-sklearn:master
 
-You can also verify that the images are downloaded via:
+You can also verify that the image was downloaded via:
 
 .. code:: bash
 
@@ -126,11 +127,13 @@ This image can be used to start an interactive session as follows:
 
 .. code:: bash
 
-    docker run -it docker.pkg.github.com/automl/auto-sklearn/auto-sklearn:latest
+    docker run -it mfeurer/auto-sklearn:master
 
 To start a Jupyter notebook, you could instead run e.g.:
 
 .. code:: bash
 
-    docker run -it -v $PWD:/opt/nb -p 8888:8888 docker.pkg.github.com/automl/auto-sklearn/auto-sklearn:latest /bin/bash -c "mkdir -p /opt/nb && jupyter notebook --notebook-dir=/opt/nb --ip='0.0.0.0' --port=8888 --no-browser --allow-root"
+    docker run -it -v $PWD:/opt/nb -p 8888:8888 mfeurer/auto-sklearn:master /bin/bash -c "mkdir -p /opt/nb && jupyter notebook --notebook-dir=/opt/nb --ip='0.0.0.0' --port=8888 --no-browser --allow-root"
 
+Alternatively, it is possible to use the development version of auto-sklearn by replacing all
+occurences of ``master`` by ``development``.
