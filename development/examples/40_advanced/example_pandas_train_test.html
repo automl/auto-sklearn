@@ -166,10 +166,12 @@ list or numpy arrays as there is no per-column dtype (further details in the exa
                                              <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">run_value</span><span class="o">.</span><span class="n">endtime</span><span class="p">)))</span>
         <span class="n">val_score</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">_optimum</span> <span class="o">-</span> <span class="p">(</span><span class="n">metric</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="n">run_value</span><span class="o">.</span><span class="n">cost</span><span class="p">)</span>
         <span class="n">test_score</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">_optimum</span> <span class="o">-</span> <span class="p">(</span><span class="n">metric</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="n">run_value</span><span class="o">.</span><span class="n">additional_info</span><span class="p">[</span><span class="s1">&#39;test_loss&#39;</span><span class="p">])</span>
+        <span class="n">train_score</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">_optimum</span> <span class="o">-</span> <span class="p">(</span><span class="n">metric</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="n">run_value</span><span class="o">.</span><span class="n">additional_info</span><span class="p">[</span><span class="s1">&#39;train_loss&#39;</span><span class="p">])</span>
         <span class="n">performance_list</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
             <span class="s1">&#39;Timestamp&#39;</span><span class="p">:</span> <span class="n">endtime</span><span class="p">,</span>
             <span class="s1">&#39;single_best_optimization_score&#39;</span><span class="p">:</span> <span class="n">val_score</span><span class="p">,</span>
             <span class="s1">&#39;single_best_test_score&#39;</span><span class="p">:</span> <span class="n">test_score</span><span class="p">,</span>
+            <span class="s1">&#39;single_best_train_score&#39;</span><span class="p">:</span> <span class="n">train_score</span><span class="p">,</span>
         <span class="p">})</span>
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">performance_list</span><span class="p">)</span>
 </pre></div>
@@ -264,7 +266,7 @@ dtype: object
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score 0.8666666666666667
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score 0.8724637681159421
 </pre></div>
 </div>
 </div>
@@ -289,7 +291,7 @@ dtype: object
 </pre></div>
 </div>
 <img alt="Auto-sklearn accuracy over time" class="sphx-glr-single-img" src="../../_images/sphx_glr_example_pandas_train_test_001.png" />
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  56.100 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  56.393 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-pandas-train-test-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/5a889c221f400053efc3d433ea6ac72b/example_pandas_train_test.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_pandas_train_test.py</span></code></a></p>
