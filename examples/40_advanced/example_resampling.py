@@ -96,9 +96,9 @@ print("Accuracy score CV", sklearn.metrics.accuracy_score(y_test, predictions))
 # sklearn.model_selection.PredefinedSplit.html>`_.
 
 ############################################################################
-# Exemplary use of a predefined split. We split the training data by the first
-# feature. In practice, one would use a splitting according to the use case
-# at hand.
+# Below is an example of using a predefined split. We split the training
+# data by the first feature. In practice, one would use a splitting according
+# to the use case at hand.
 
 resampling_strategy = sklearn.model_selection.PredefinedSplit
 resampling_strategy_arguments = {'test_fold': np.where(X_train[:, 0] < np.mean(X_train[:, 0]))[0]}
@@ -115,7 +115,8 @@ automl = autosklearn.classification.AutoSklearnClassifier(
 automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
 ############################################################################
-# For unknown resampling strategies it is necessary to perform a refit
+# For custom resampling strategies (i.e. resampling strategies that are not
+# defined as strings by Auto-sklearn) it is necessary to perform a refit:
 automl.refit(X_train, y_train)
 
 ############################################################################
