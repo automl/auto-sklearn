@@ -48,10 +48,12 @@ def get_runhistory_models_performance(automl):
                                              time.localtime(run_value.endtime)))
         val_score = metric._optimum - (metric._sign * run_value.cost)
         test_score = metric._optimum - (metric._sign * run_value.additional_info['test_loss'])
+        train_score = metric._optimum - (metric._sign * run_value.additional_info['train_loss'])
         performance_list.append({
             'Timestamp': endtime,
             'single_best_optimization_score': val_score,
             'single_best_test_score': test_score,
+            'single_best_train_score': train_score,
         })
     return pd.DataFrame(performance_list)
 
