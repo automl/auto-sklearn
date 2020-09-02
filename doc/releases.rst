@@ -41,6 +41,7 @@ Contributors v0.9.0
 * Francisco Rivera
 * Matthias Feurer
 * felixleungsc
+* Vladislav Skripniuk
 
 Version 0.8
 ===========
