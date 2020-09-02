@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>autosklearn.pipeline.components.feature_preprocessing &#8212; AutoSklearn 0.8.0 documentation</title>
+    <title>autosklearn.pipeline.components.feature_preprocessing &#8212; AutoSklearn 0.9.0 documentation</title>
     <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.8.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.9.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -131,7 +131,8 @@
 
 <span class="k">class</span> <span class="nc">FeaturePreprocessorChoice</span><span class="p">(</span><span class="n">AutoSklearnChoice</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">get_components</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_components</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="n">components</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
         <span class="n">components</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_preprocessors</span><span class="p">)</span>
         <span class="n">components</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_addons</span><span class="o">.</span><span class="n">components</span><span class="p">)</span>
@@ -233,8 +234,6 @@
             <span class="n">cs</span><span class="o">.</span><span class="n">add_configuration_space</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">preprocessor_configuration_space</span><span class="p">,</span>
                                        <span class="n">parent_hyperparameter</span><span class="o">=</span><span class="n">parent_hyperparameter</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">configuration_space_</span> <span class="o">=</span> <span class="n">cs</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_properties_</span> <span class="o">=</span> <span class="n">dataset_properties</span>
         <span class="k">return</span> <span class="n">cs</span>
 
     <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>

@@ -11,14 +11,46 @@
 Releases
 ========
 
+Version 0.9.0
+=============
+
+* ADD #157,#889: Improve handling of pandas dataframes, including the possibility to use pandas'
+  categorical column type.
+* ADD #375: New `SelectRates` feature preprocessing component for regression.
+* ADD #891: Improve the robustness of Auto-sklearn by using the single best model if no ensemble
+  is found.
+* ADD #902: Track performance of the ensemble over time.
+* ADD #914: Add an example on using pandas dataframes as input to Auto-sklearn.
+* ADD #919: Add an example for multilabel classification.
+* MAINT #909: Fix broken links in the documentation.
+* MAINT #907,#911: Add initial support for mypy.
+* MAINT #881,#927: Automatically build docker images on pushes to the master and development
+  branch and also push them to dockerhub and the github docker registry.
+* MAINT #918: Remove old dependencies from requirements.txt.
+* MAINT #931: Add information about the host system and installed packages to the log file.
+* MAINT #933: Reduce the number of warnings raised when building the documentation by sphinx.
+* MAINT #936: Completely restructure the examples section.
+* FIX #558: Provide better error message when the ensemble process fails due to a memory issue.
+* FIX #901: Allow custom resampling strategies again (was broken due to an upgrade of SMAC).
+* FIX #916: Fixes a bug where the data preprocessing configurations were ignored.
+* FIX #925: make internal data preprocessing objects clonable.
+
+Contributors v0.9.0
+*******************
+
+* Francisco Rivera
+* Matthias Feurer
+* felixleungsc
+* Vladislav Skripniuk
+
 Version 0.8
 ===========
 
 * ADD #803: multi-output regression
 * ADD #893: new Auto-sklearn mode Auto-sklearn 2.0
 
-Contributors
-************
+Contributors v0.8.0
+*******************
 
 * Chu-Cheng Fu
 * Matthias Feurer
@@ -43,8 +75,8 @@ Version 0.7.1
 * FIX #876: allow Auto-sklearn model to be cloned
 * FIX #879: allow 1-D binary predictions
 
-Contributors
-************
+Contributors v0.7.1
+*******************
 
 * Matthias Feurer
 * Xiaodong DENG
@@ -67,8 +99,8 @@ Version 0.7.0
 * FIX #778: support for python 3.8
 * FIX #781: support for pandas 1.x
 
-Contributors
-************
+Contributors v0.7.0
+*******************
 
 * Andrew Nader
 * Gui Miotto
@@ -88,8 +120,8 @@ Version 0.6.0
 * FIX #680: Remove unnecessary print statement
 * FIX #600: Remove unnecessary warning
 
-Contributors
-************
+Contributors v0.6.0
+*******************
 
 * Guilherme Miotto
 * Matthias Feurer
@@ -103,8 +135,8 @@ Version 0.5.2
 * ADD #676: Allow brackets [ ] inside the temporary and output directory paths.
 * ADD #424: (Experimental) scripts to reproduce the results from the original Auto-sklearn paper.
 
-Contributors
-************
+Contributors v0.5.2
+*******************
 
 * Jin Woo Ahn
 * Herilalaina Rakotoarison
@@ -123,8 +155,8 @@ Version 0.5.1
 * FIX #626: Fixes an issue where losses were not minimized, but maximized.
 * MAINT #646: Do no longer restrict the numpy version to be less than 1.14.5.
 
-Contributors
-************
+Contributors v0.5.1
+*******************
 
 * Jin Woo Ahn
 * Taneli Mielikäinen
@@ -141,8 +173,8 @@ Version 0.5.0
 * TEST #614: Test installation with clean Ubuntu on travis-ci.
 * MAINT: Fixed broken link and typo in the documentation.
 
-Contributors
-************
+Contributors v0.5.0
+*******************
 
 * Mohd Shahril
 * Adrian
@@ -168,8 +200,8 @@ Version 0.4.2
 * MAINT: remove dependency on the six package
 * MAINT: upgrade to XGBoost 0.80
 
-Contributors
-************
+Contributors v0.4.2
+*******************
 
 * Taneli Mielikäinen
 * Matthias Feurer
@@ -201,8 +233,8 @@ Version 0.4.1
 * Travis-ci now runs flake8 to enforce pep8 style guide, and uses travis-ci instead of circle-ci
   for deployment.
 
-Contributors
-************
+Contributors v0.4.1
+*******************
 
 * Matthias Feurer
 * Manuel Streuhofer
@@ -249,8 +281,8 @@ Version 0.4.0
 * Safeguard Auto-sklearn against deleting directories it did not create (Issue
   `#317 <https://github.com/automl/auto-sklearn/issues/317>`_.
 
-Contributors
-************
+Contributors v0.4.0
+*******************
 
 * Matthias Feurer
 * kaa
@@ -278,8 +310,8 @@ Version 0.3.0
 * Allow passing an SMBO object into the ``AutoSklearnClassifier`` and
   ``AutoSklearnRegressor``.
 
-Contributors
-************
+Contributors v0.3.0
+*******************
 
 * Matthias Feurer
 * Jesper van Engelen
@@ -297,8 +329,8 @@ Version 0.2.1
 * Typo fixes in print statements.
 * New method to retrieve the models used in the final ensemble.
 
-Contributors
-************
+Contributors v0.2.1
+*******************
 
 * Matthias Feurer
 * Katharina Eggensperger
@@ -321,8 +353,8 @@ Version 0.2.0
 * *auto-sklearn* can use multiprocessing in calls to ``predict()`` and
   ``predict_proba``. By `Laurent Sorber <https://github.com/lsorber>`_.
 
-Contributors
-************
+Contributors v0.2.0
+*******************
 
 * Matthias Feurer
 * Katharina Eggensperger
@@ -334,8 +366,8 @@ Version 0.1.x
 
 There are no release notes for auto-sklearn prior to version 0.2.0.
 
-Contributors
-************
+Contributors v0.1.x
+*******************
 
 * Matthias Feurer
 * Katharina Eggensperger

@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>autosklearn.estimators &#8212; AutoSklearn 0.8.0 documentation</title>
+    <title>autosklearn.estimators &#8212; AutoSklearn 0.9.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.8.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.9.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -120,7 +120,7 @@
 <span class="kn">from</span> <span class="nn">sklearn.utils.multiclass</span> <span class="kn">import</span> <span class="n">type_of_target</span>
 <span class="kn">import</span> <span class="nn">joblib</span>
 
-<span class="kn">from</span> <span class="nn">autosklearn.automl</span> <span class="kn">import</span> <span class="n">AutoMLClassifier</span><span class="p">,</span> <span class="n">AutoMLRegressor</span><span class="p">,</span> <span class="n">BaseAutoML</span>
+<span class="kn">from</span> <span class="nn">autosklearn.automl</span> <span class="kn">import</span> <span class="n">AutoMLClassifier</span><span class="p">,</span> <span class="n">AutoMLRegressor</span><span class="p">,</span> <span class="n">AutoML</span>
 <span class="kn">from</span> <span class="nn">autosklearn.util.backend</span> <span class="kn">import</span> <span class="n">create</span><span class="p">,</span> <span class="n">get_randomized_directory_names</span>
 
 
@@ -138,7 +138,7 @@
         <span class="n">ensemble_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
         <span class="n">ensemble_nbest</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
         <span class="n">max_models_on_disc</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-        <span class="n">ensemble_memory_limit</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span>
+        <span class="n">ensemble_memory_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">,</span>
         <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">ml_memory_limit</span><span class="o">=</span><span class="mi">3072</span><span class="p">,</span>
         <span class="n">include_estimators</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -202,6 +202,7 @@
 <span class="sd">            Memory limit in MB for the ensemble building process.</span>
 <span class="sd">            `auto-sklearn` will reduce the number of considered models</span>
 <span class="sd">            (``ensemble_nbest``) if the memory limit is reached.</span>
+<span class="sd">            If ``None``, no memory limit is enforced.</span>
 
 <span class="sd">        seed : int, optional (default=1)</span>
 <span class="sd">            Used to seed SMAC. Will determine the output file names.</span>
@@ -315,16 +316,16 @@
 
 <span class="sd">        smac_scenario_args : dict, optional (None)</span>
 <span class="sd">            Additional arguments inserted into the scenario of SMAC. See the</span>
-<span class="sd">            `SMAC documentation &lt;https://automl.github.io/SMAC3/stable/options.html?highlight=scenario#scenario&gt;`_</span>
+<span class="sd">            `SMAC documentation &lt;https://automl.github.io/SMAC3/master/options.html?highlight=scenario#scenario&gt;`_</span>
 <span class="sd">            for a list of available arguments.</span>
 
 <span class="sd">        get_smac_object_callback : callable</span>
 <span class="sd">            Callback function to create an object of class</span>
-<span class="sd">            `smac.optimizer.smbo.SMBO &lt;https://automl.github.io/SMAC3/stable/apidoc/smac.optimizer.smbo.html&gt;`_.</span>
+<span class="sd">            `smac.optimizer.smbo.SMBO &lt;https://automl.github.io/SMAC3/master/apidoc/smac.optimizer.smbo.html&gt;`_.</span>
 <span class="sd">            The function must accept the arguments ``scenario_dict``,</span>
 <span class="sd">            ``instances``, ``num_params``, ``runhistory``, ``seed`` and ``ta``.</span>
 <span class="sd">            This is an advanced feature. Use only if you are familiar with</span>
-<span class="sd">            `SMAC &lt;https://automl.github.io/SMAC3/stable/index.html&gt;`_.</span>
+<span class="sd">            `SMAC &lt;https://automl.github.io/SMAC3/master/index.html&gt;`_.</span>
 
 <span class="sd">        logging_config : dict, optional (None)</span>
 <span class="sd">            dictionary object specifying the logger configuration. If None,</span>
@@ -383,7 +384,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata_directory</span> <span class="o">=</span> <span class="n">metadata_directory</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span> <span class="o">=</span> <span class="n">metric</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[List[BaseAutoML]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[List[AutoML]]</span>
         <span class="c1"># n_jobs after conversion to a number (b/c default is None)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -550,7 +551,7 @@
 
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span> <span class="nf">fit_ensemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="s1">&#39;32&#39;</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">fit_ensemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
                      <span class="n">dataset_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ensemble_nbest</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                      <span class="n">ensemble_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Fit an ensemble to models trained during an optimization process.</span>
@@ -717,8 +718,7 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">get_configuration_space</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_automl</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">only_return_configuration_space</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">configuration_space</span>
 
 
 <div class="viewcode-block" id="AutoSklearnClassifier"><a class="viewcode-back" href="../../api.html#autosklearn.classification.AutoSklearnClassifier">[docs]</a><span class="k">class</span> <span class="nc">AutoSklearnClassifier</span><span class="p">(</span><span class="n">AutoSklearnEstimator</span><span class="p">):</span>
@@ -777,13 +777,18 @@
         <span class="c1"># type of data is compatible with auto-sklearn. Legal target</span>
         <span class="c1"># types are: binary, multiclass, multilabel-indicator.</span>
         <span class="n">target_type</span> <span class="o">=</span> <span class="n">type_of_target</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">target_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;multiclass-multioutput&#39;</span><span class="p">,</span>
-                           <span class="s1">&#39;continuous&#39;</span><span class="p">,</span>
-                           <span class="s1">&#39;continuous-multioutput&#39;</span><span class="p">,</span>
-                           <span class="s1">&#39;unknown&#39;</span><span class="p">,</span>
-                           <span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;classification with data of type </span><span class="si">%s</span><span class="s2"> is&quot;</span>
-                             <span class="s2">&quot; not supported&quot;</span> <span class="o">%</span> <span class="n">target_type</span><span class="p">)</span>
+        <span class="n">supported_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;binary&#39;</span><span class="p">,</span> <span class="s1">&#39;multiclass&#39;</span><span class="p">,</span> <span class="s1">&#39;multilabel-indicator&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">target_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_types</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Classification with data of type </span><span class="si">{}</span><span class="s2"> is &quot;</span>
+                             <span class="s2">&quot;not supported. Supported types are </span><span class="si">{}</span><span class="s2">. &quot;</span>
+                             <span class="s2">&quot;You can find more information about scikit-learn &quot;</span>
+                             <span class="s2">&quot;data types in: &quot;</span>
+                             <span class="s2">&quot;https://scikit-learn.org/stable/modules/multiclass.html&quot;</span>
+                             <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                    <span class="n">target_type</span><span class="p">,</span>
+                                    <span class="n">supported_types</span>
+                                <span class="p">)</span>
+                             <span class="p">)</span>
 
         <span class="c1"># remember target type for using in predict_proba later.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_type</span> <span class="o">=</span> <span class="n">target_type</span>
@@ -907,14 +912,22 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Before running anything else, first check that the</span>
         <span class="c1"># type of data is compatible with auto-sklearn. Legal target</span>
-        <span class="c1"># types are: continuous, binary, multiclass.</span>
+        <span class="c1"># types are: continuous, continuous-multioutput, and the special cases:</span>
+        <span class="c1"># multiclass : because [3.0, 1.0, 5.0] is considered as multiclass</span>
+        <span class="c1"># binary: because [1.0, 0.0] is considered multiclass</span>
         <span class="n">target_type</span> <span class="o">=</span> <span class="n">type_of_target</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">target_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;multiclass-multioutput&#39;</span><span class="p">,</span>
-                           <span class="s1">&#39;multilabel-indicator&#39;</span><span class="p">,</span>
-                           <span class="s1">&#39;unknown&#39;</span><span class="p">,</span>
-                           <span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;regression with data of type </span><span class="si">%s</span><span class="s2"> is not&quot;</span>
-                             <span class="s2">&quot; supported&quot;</span> <span class="o">%</span> <span class="n">target_type</span><span class="p">)</span>
+        <span class="n">supported_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;continuous&#39;</span><span class="p">,</span> <span class="s1">&#39;binary&#39;</span><span class="p">,</span> <span class="s1">&#39;multiclass&#39;</span><span class="p">,</span> <span class="s1">&#39;continuous-multioutput&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">target_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_types</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Regression with data of type </span><span class="si">{}</span><span class="s2"> is &quot;</span>
+                             <span class="s2">&quot;not supported. Supported types are </span><span class="si">{}</span><span class="s2">. &quot;</span>
+                             <span class="s2">&quot;You can find more information about scikit-learn &quot;</span>
+                             <span class="s2">&quot;data types in: &quot;</span>
+                             <span class="s2">&quot;https://scikit-learn.org/stable/modules/multiclass.html&quot;</span>
+                             <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                    <span class="n">target_type</span><span class="p">,</span>
+                                    <span class="n">supported_types</span>
+                                <span class="p">)</span>
+                             <span class="p">)</span>
 
         <span class="c1"># Fit is supposed to be idempotent!</span>
         <span class="c1"># But not if we use share_mode.</span>

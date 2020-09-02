@@ -15,21 +15,23 @@ Examples
 *auto-sklearn* comes with the following examples which demonstrate several
 aspects of its usage:
 
-* `Holdout <examples/example_holdout.html>`_
-* `Cross-validation <examples/example_crossvalidation.html>`_
-* `Parallel usage (n_jobs) <examples/example_parallel_n_jobs.html>`_
-* `Parallel usage (manual) <examples/example_parallel_manual_spawning.html>`_
-* `Sequential usage <examples/example_sequential.html>`_
-* `Regression <examples/example_regression.html>`_
-* `Continuous and categorical data <examples/example_feature_types.html>`_
-* `Using custom metrics <examples/example_metrics.html>`_
-* `Random search <examples/example_random_search.html>`_
-* `EIPS <examples/example_eips.html>`_
-* `Successive Halving <examples/example_successive_halving.html>`_
-* `Extending with a new classifier <examples/example_extending_classification.html>`_
-* `Extending with a new regressor <examples/example_extending_regression.html>`_
-* `Extending with a new preprocessor <examples/example_extending_preprocessor.html>`_
-* `Iterating over the models <examples/example_get_pipeline_components.html>`_
+* `Classification <examples/20_basic/example_classification.html>`_
+* `Multi-label Classification <examples/20_basic/example_multilabel_classification.html>`_
+* `Regression <examples/20_basic/example_regression.html>`_
+* `Continuous and categorical data <examples/40_advanced/example_feature_types.html>`_
+* `Iterating over the models <examples/40_advanced/example_get_pipeline_components.html>`_
+* `Using custom metrics <examples/40_advanced/example_metrics.html>`_
+* `Pandas Train and Test inputs <examples/40_advanced/example_pandas_train_test.html>`_
+* `Resampling strategies <examples/40_advanced/example_resampling.html>`_
+* `Parallel usage (manual) <examples/60_search/example_parallel_manual_spawning.html>`_
+* `Parallel usage (n_jobs) <examples/60_search/example_parallel_n_jobs.html>`_
+* `Random search <examples/60_search/example_random_search.html>`_
+* `Sequential usage <examples/60_search/example_sequential.html>`_
+* `Successive Halving <examples/60_search/example_successive_halving.html>`_
+* `Extending with a new classifier <examples/80_extending/example_extending_classification.html>`_
+* `Extending with a new regressor <examples/80_extending/example_extending_regression.html>`_
+* `Extending with a new preprocessor <examples/80_extending/example_extending_preprocessor.html>`_
+* `Restrict hyperparameters for a component <examples/80_extending/example_restrict_number_of_hyperparameters.html>`_
 
 
 Time and memory limits
@@ -92,15 +94,35 @@ Resampling strategies
 
 Examples for using holdout and cross-validation can be found in `auto-sklearn/examples/ <examples/>`_
 
-Ensemble Building Process
-======================
+Supported Inputs
+================
+*auto-sklearn* can accept targets for the following tasks (more details on `Sklearn algorithms <https://scikit-learn.org/stable/modules/multiclass.html>`_):
+* Binary Classification
+* Multiclass Classification
+* Multilabel Classification
+* Regression
+* Multioutput Regression
 
-*auto-sklearn* uses ensemble selection by `Caruana et al. (2004) <https://dl.acm.org/doi/pdf/10.1145/1015330.1015432>`_ 
+You can provide feature and target training pairs (X_train/y_train) to *auto-sklearn* to fit an ensemble of pipelines as described in the next section. This X_train/y_train dataset must belong to one of the supported formats: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.
+ Optionally, you can measure the ability of this fitted model to generalize to unseen data by providing an optional testing pair (X_test/Y_test). For further details, please refer to the example `Train and Test inputs <examples/example_pandas_train_test.html>`_. Supported formats for these training and testing pairs are: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.
+
+If your data contains categorical values (in the features or targets), autosklearn will automatically encode your data using a `sklearn.preprocessing.LabelEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_ for unidimensional data and a `sklearn.preprocessing.OrdinalEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html>`_ for multidimensional data.
+
+Regarding the features, there are two methods to guide *auto-sklearn* to properly encode categorical columns:
+* Providing a X_train/X_test numpy array with the optional flag feat_type. For further details, you can check the example `Feature Types <examples/example_feature_types.html>`_.
+* You can provide a pandas DataFrame, with properly formatted columns. If a column has numerical dtype, *auto-sklearn* will not encode it and it will be passed directly to scikit-learn. If the column has a categorical/boolean class, it will be encoded. If the column is of any other type (Object or Timeseries), an error will be raised. For further details on how to properly encode your data, you can check the example `Working with categorical data <https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html>`_). If you are working with time series, it is recommended that you follow this approach `Working with time data <https://stats.stackexchange.com/questions/311494/>`_.
+
+Regarding the targets (y_train/y_test), if the task involves a classification problem, such features will be automatically encoded. It is recommended to provide both y_train and y_test during fit, so that a common encoding is created between these splits (if only y_train is provided during fit, the categorical encoder will not be able to handle new classes that are exclusive to y_test). If the task is regression, no encoding happens on the targets.
+
+Ensemble Building Process
+=========================
+
+*auto-sklearn* uses ensemble selection by `Caruana et al. (2004) <https://dl.acm.org/doi/pdf/10.1145/1015330.1015432>`_
 to build an ensemble based on the models’ prediction for the validation set. The following hyperparameters control how the ensemble is constructed:
 
 * ``ensemble_size`` determines the maximal size of the ensemble. If it is set to zero, no ensemble will be constructed.
 * ``ensemble_nbest`` allows the user to directly specify the number of models considered for the ensemble.  This hyperparameter can be an integer *n*, such that only the best *n* models are used in the final ensemble. If a float between 0.0 and 1.0 is provided, ``ensemble_nbest`` would be interpreted as a fraction suggesting the percentage of models to use in the ensemble building process (namely, if ensemble_nbest is a float, library pruning is implemented as described in `Caruana et al. (2006) <https://dl.acm.org/doi/10.1109/ICDM.2006.76>`_).
- * ``max_models_on_disc`` defines the maximum number of models that are kept on the disc, as a mechanism to control the amount of disc space consumed by *auto-sklearn*. Throughout the automl process, different individual models are optimized, and their predictions (and other metadata) is stored on disc. The user can set the upper bound on how many models are acceptable to keep on disc, yet this variable takes priority in the definition of the number of models used by the ensemble builder (that is, the minimum of ``ensemble_size``, ``ensemble_nbest`` and ``max_models_on_disc`` determines the maximal amount of models used in the ensemble). If set to None, this feature is disabled. 
+* ``max_models_on_disc`` defines the maximum number of models that are kept on the disc, as a mechanism to control the amount of disc space consumed by *auto-sklearn*. Throughout the automl process, different individual models are optimized, and their predictions (and other metadata) is stored on disc. The user can set the upper bound on how many models are acceptable to keep on disc, yet this variable takes priority in the definition of the number of models used by the ensemble builder (that is, the minimum of ``ensemble_size``, ``ensemble_nbest`` and ``max_models_on_disc`` determines the maximal amount of models used in the ensemble). If set to None, this feature is disabled.
 
 Inspecting the results
 ======================
@@ -120,7 +142,7 @@ statistics can be printed for the inspection.
 obtained by running *auto-sklearn*. It additionally prints the number of both successful and unsuccessful
 algorithm runs.
 
-The results obtained from the final ensemble can be printed by calling ``show_models()``. *auto-sklearn* ensemble is composed of scikit-learn models that can be inspected as exemplified by  
+The results obtained from the final ensemble can be printed by calling ``show_models()``. *auto-sklearn* ensemble is composed of scikit-learn models that can be inspected as exemplified by
 `model inspection example <examples/example_get_pipeline_components.html>`_
 .
 

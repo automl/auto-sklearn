@@ -1,0 +1,294 @@
+.. only:: html
+
+    .. note::
+        :class: sphx-glr-download-link-note
+
+        Click :ref:`here <sphx_glr_download_examples_80_extending_example_extending_preprocessor.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_examples_80_extending_example_extending_preprocessor.py:
+
+
+==================================================
+Extending Auto-Sklearn with Preprocessor Component
+==================================================
+
+The following example demonstrates how to create a wrapper around the linear
+discriminant analysis (LDA) algorithm from sklearn and use it as a preprocessor
+in auto-sklearn.
+
+
+.. code-block:: default
+
+
+    from ConfigSpace.configuration_space import ConfigurationSpace
+    from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
+        UniformIntegerHyperparameter, CategoricalHyperparameter
+    from ConfigSpace.conditions import InCondition
+
+    import sklearn.metrics
+    import autosklearn.classification
+    import autosklearn.pipeline.components.feature_preprocessing
+    from autosklearn.pipeline.components.base \
+        import AutoSklearnPreprocessingAlgorithm
+    from autosklearn.pipeline.constants import DENSE, SIGNED_DATA, \
+        UNSIGNED_DATA
+    from autosklearn.util.common import check_none
+
+    from sklearn.datasets import load_breast_cancer
+    from sklearn.model_selection import train_test_split
+
+
+
+
+
+
+
+
+
+Create LDA component for auto-sklearn
+=====================================
+
+
+.. code-block:: default
+
+    class LDA(AutoSklearnPreprocessingAlgorithm):
+        def __init__(self, solver, n_components, tol, shrinkage=None, random_state=None):
+            self.solver = solver
+            self.shrinkage = shrinkage
+            self.n_components = n_components
+            self.tol = tol
+            self.random_state = random_state
+            self.preprocessor = None
+
+        def fit(self, X, y=None):
+            if check_none(self.shrinkage):
+                self.shrinkage = None
+            else:
+                self.shrinkage = float(self.shrinkage)
+            self.n_components = int(self.n_components)
+            self.tol = float(self.tol)
+
+            import sklearn.discriminant_analysis
+            self.preprocessor = \
+                sklearn.discriminant_analysis.LinearDiscriminantAnalysis(
+                    shrinkage=self.shrinkage,
+                    solver=self.solver,
+                    n_components=self.n_components,
+                    tol=self.tol,
+                )
+            self.preprocessor.fit(X, y)
+            return self
+
+        def transform(self, X):
+            if self.preprocessor is None:
+                raise NotImplementedError()
+            return self.preprocessor.transform(X)
+
+        @staticmethod
+        def get_properties(dataset_properties=None):
+            return {'shortname': 'LDA',
+                    'name': 'Linear Discriminant Analysis',
+                    'handles_regression': False,
+                    'handles_classification': True,
+                    'handles_multiclass': False,
+                    'handles_multilabel': False,
+                    'handles_multioutput': False,
+                    'is_deterministic': True,
+                    'input': (DENSE, UNSIGNED_DATA, SIGNED_DATA),
+                    'output': (DENSE, UNSIGNED_DATA, SIGNED_DATA)}
+
+        @staticmethod
+        def get_hyperparameter_search_space(dataset_properties=None):
+            cs = ConfigurationSpace()
+            solver = CategoricalHyperparameter(
+                name="solver", choices=['svd', 'lsqr', 'eigen'], default_value='svd'
+            )
+            shrinkage = UniformFloatHyperparameter(
+                name="shrinkage", lower=0.0, upper=1.0, default_value=0.5
+            )
+            n_components = UniformIntegerHyperparameter(
+                name="n_components", lower=1, upper=29, default_value=10
+            )
+            tol = UniformFloatHyperparameter(
+                name="tol", lower=0.0001, upper=1, default_value=0.0001
+            )
+            cs.add_hyperparameters([solver, shrinkage, n_components, tol])
+            shrinkage_condition = InCondition(shrinkage, solver, ['lsqr', 'eigen'])
+            cs.add_condition(shrinkage_condition)
+            return cs
+
+
+    # Add LDA component to auto-sklearn.
+    autosklearn.pipeline.components.feature_preprocessing.add_preprocessor(LDA)
+
+
+
+
+
+
+
+
+Create dataset
+==============
+
+
+.. code-block:: default
+
+
+    X, y = load_breast_cancer(return_X_y=True)
+    X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+
+
+
+
+
+
+
+Configuration space
+===================
+
+
+.. code-block:: default
+
+
+    cs = LDA.get_hyperparameter_search_space()
+    print(cs)
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Configuration space object:
+      Hyperparameters:
+        n_components, Type: UniformInteger, Range: [1, 29], Default: 10
+        shrinkage, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.5
+        solver, Type: Categorical, Choices: {svd, lsqr, eigen}, Default: svd
+        tol, Type: UniformFloat, Range: [0.0001, 1.0], Default: 0.0001
+      Conditions:
+        shrinkage | solver in {'lsqr', 'eigen'}
+
+
+
+
+
+Fit the model using LDA as preprocessor
+=======================================
+
+
+.. code-block:: default
+
+
+    clf = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=30,
+        include_preprocessors=['LDA'],
+        # Bellow two flags are provided to speed up calculations
+        # Not recommended for a real implementation
+        initial_configurations_via_metalearning=0,
+        smac_scenario_args={'runcount_limit': 1},
+    )
+    clf.fit(X_train, y_train)
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    AutoSklearnClassifier(delete_output_folder_after_terminate=True,
+                          delete_tmp_folder_after_terminate=True,
+                          disable_evaluator_output=False,
+                          ensemble_memory_limit=1024, ensemble_nbest=50,
+                          ensemble_size=50, exclude_estimators=None,
+                          exclude_preprocessors=None, get_smac_object_callback=None,
+                          include_estimators=None, include_preprocessors=['LDA'],
+                          initial_configurations_via_metalearning=0,
+                          logging_config=None, max_models_on_disc=50,
+                          metadata_directory=None, metric=None,
+                          ml_memory_limit=3072, n_jobs=None, output_folder=None,
+                          per_run_time_limit=3, resampling_strategy='holdout',
+                          resampling_strategy_arguments=None, seed=1,
+                          shared_mode=False,
+                          smac_scenario_args={'runcount_limit': 1},
+                          time_left_for_this_task=30, tmp_folder=None)
+
+
+
+Print prediction score and statistics
+=====================================
+
+
+.. code-block:: default
+
+
+    y_pred = clf.predict(X_test)
+    print("accracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
+    print(clf.show_models())
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    accracy:  0.958041958041958
+    [(1.000000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'LDA', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'feature_preprocessor:LDA:n_components': 10, 'feature_preprocessor:LDA:solver': 'svd', 'feature_preprocessor:LDA:tol': 0.0001},
+    dataset_properties={
+      'task': 1,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'classification',
+      'signed': False})),
+    ]
+
+
+
+
+
+.. rst-class:: sphx-glr-timing
+
+   **Total running time of the script:** ( 0 minutes  24.357 seconds)
+
+
+.. _sphx_glr_download_examples_80_extending_example_extending_preprocessor.py:
+
+
+.. only :: html
+
+ .. container:: sphx-glr-footer
+    :class: sphx-glr-footer-example
+
+
+
+  .. container:: sphx-glr-download sphx-glr-download-python
+
+     :download:`Download Python source code: example_extending_preprocessor.py <example_extending_preprocessor.py>`
+
+
+
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+     :download:`Download Jupyter notebook: example_extending_preprocessor.ipynb <example_extending_preprocessor.ipynb>`
+
+
+.. only:: html
+
+ .. rst-class:: sphx-glr-signature
+
+    `Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_

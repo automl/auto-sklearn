@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Manual &#8212; AutoSklearn 0.8.0 documentation</title>
+    <title>Manual &#8212; AutoSklearn 0.9.0 documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.8.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.9.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -112,7 +112,8 @@
 <li><a class="reference internal" href="#turning-off-preprocessing">Turning off preprocessing</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#resampling-strategies">Resampling strategies</a></li>
+<li><a class="reference internal" href="#id2">Resampling strategies</a></li>
+<li><a class="reference internal" href="#supported-inputs">Supported Inputs</a></li>
 <li><a class="reference internal" href="#ensemble-building-process">Ensemble Building Process</a></li>
 <li><a class="reference internal" href="#inspecting-the-results">Inspecting the results</a></li>
 <li><a class="reference internal" href="#parallel-computation">Parallel computation</a></li>
@@ -135,21 +136,23 @@ references the examples where possible or explains certain configurations.</p>
 <p><em>auto-sklearn</em> comes with the following examples which demonstrate several
 aspects of its usage:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="examples/example_holdout.html">Holdout</a></p></li>
-<li><p><a class="reference external" href="examples/example_crossvalidation.html">Cross-validation</a></p></li>
-<li><p><a class="reference external" href="examples/example_parallel_n_jobs.html">Parallel usage (n_jobs)</a></p></li>
-<li><p><a class="reference external" href="examples/example_parallel_manual_spawning.html">Parallel usage (manual)</a></p></li>
-<li><p><a class="reference external" href="examples/example_sequential.html">Sequential usage</a></p></li>
-<li><p><a class="reference external" href="examples/example_regression.html">Regression</a></p></li>
-<li><p><a class="reference external" href="examples/example_feature_types.html">Continuous and categorical data</a></p></li>
-<li><p><a class="reference external" href="examples/example_metrics.html">Using custom metrics</a></p></li>
-<li><p><a class="reference external" href="examples/example_random_search.html">Random search</a></p></li>
-<li><p><a class="reference external" href="examples/example_eips.html">EIPS</a></p></li>
-<li><p><a class="reference external" href="examples/example_successive_halving.html">Successive Halving</a></p></li>
-<li><p><a class="reference external" href="examples/example_extending_classification.html">Extending with a new classifier</a></p></li>
-<li><p><a class="reference external" href="examples/example_extending_regression.html">Extending with a new regressor</a></p></li>
-<li><p><a class="reference external" href="examples/example_extending_preprocessor.html">Extending with a new preprocessor</a></p></li>
-<li><p><a class="reference external" href="examples/example_get_pipeline_components.html">Iterating over the models</a></p></li>
+<li><p><a class="reference external" href="examples/20_basic/example_classification.html">Classification</a></p></li>
+<li><p><a class="reference external" href="examples/20_basic/example_multilabel_classification.html">Multi-label Classification</a></p></li>
+<li><p><a class="reference external" href="examples/20_basic/example_regression.html">Regression</a></p></li>
+<li><p><a class="reference external" href="examples/40_advanced/example_feature_types.html">Continuous and categorical data</a></p></li>
+<li><p><a class="reference external" href="examples/40_advanced/example_get_pipeline_components.html">Iterating over the models</a></p></li>
+<li><p><a class="reference external" href="examples/40_advanced/example_metrics.html">Using custom metrics</a></p></li>
+<li><p><a class="reference external" href="examples/40_advanced/example_pandas_train_test.html">Pandas Train and Test inputs</a></p></li>
+<li><p><a class="reference external" href="examples/40_advanced/example_resampling.html">Resampling strategies</a></p></li>
+<li><p><a class="reference external" href="examples/60_search/example_parallel_manual_spawning.html">Parallel usage (manual)</a></p></li>
+<li><p><a class="reference external" href="examples/60_search/example_parallel_n_jobs.html">Parallel usage (n_jobs)</a></p></li>
+<li><p><a class="reference external" href="examples/60_search/example_random_search.html">Random search</a></p></li>
+<li><p><a class="reference external" href="examples/60_search/example_sequential.html">Sequential usage</a></p></li>
+<li><p><a class="reference external" href="examples/60_search/example_successive_halving.html">Successive Halving</a></p></li>
+<li><p><a class="reference external" href="examples/80_extending/example_extending_classification.html">Extending with a new classifier</a></p></li>
+<li><p><a class="reference external" href="examples/80_extending/example_extending_regression.html">Extending with a new regressor</a></p></li>
+<li><p><a class="reference external" href="examples/80_extending/example_extending_preprocessor.html">Extending with a new preprocessor</a></p></li>
+<li><p><a class="reference external" href="examples/80_extending/example_restrict_number_of_hyperparameters.html">Restrict hyperparameters for a component</a></p></li>
 </ul>
 </div>
 <div class="section" id="time-and-memory-limits">
@@ -204,9 +207,27 @@ This can be turned off by setting
 <code class="docutils literal notranslate"><span class="pre">include_preprocessors=[&quot;no_preprocessing&quot;]</span></code> as shown in the example above.</p>
 </div>
 </div>
-<div class="section" id="resampling-strategies">
-<h2>Resampling strategies<a class="headerlink" href="#resampling-strategies" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id2">
+<h2>Resampling strategies<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <p>Examples for using holdout and cross-validation can be found in <a class="reference external" href="examples/">auto-sklearn/examples/</a></p>
+</div>
+<div class="section" id="supported-inputs">
+<h2>Supported Inputs<a class="headerlink" href="#supported-inputs" title="Permalink to this headline">¶</a></h2>
+<p><em>auto-sklearn</em> can accept targets for the following tasks (more details on <a class="reference external" href="https://scikit-learn.org/stable/modules/multiclass.html">Sklearn algorithms</a>):
+* Binary Classification
+* Multiclass Classification
+* Multilabel Classification
+* Regression
+* Multioutput Regression</p>
+<dl class="simple">
+<dt>You can provide feature and target training pairs (X_train/y_train) to <em>auto-sklearn</em> to fit an ensemble of pipelines as described in the next section. This X_train/y_train dataset must belong to one of the supported formats: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.</dt><dd><p>Optionally, you can measure the ability of this fitted model to generalize to unseen data by providing an optional testing pair (X_test/Y_test). For further details, please refer to the example <a class="reference external" href="examples/example_pandas_train_test.html">Train and Test inputs</a>. Supported formats for these training and testing pairs are: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.</p>
+</dd>
+</dl>
+<p>If your data contains categorical values (in the features or targets), autosklearn will automatically encode your data using a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html">sklearn.preprocessing.LabelEncoder</a> for unidimensional data and a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html">sklearn.preprocessing.OrdinalEncoder</a> for multidimensional data.</p>
+<p>Regarding the features, there are two methods to guide <em>auto-sklearn</em> to properly encode categorical columns:
+* Providing a X_train/X_test numpy array with the optional flag feat_type. For further details, you can check the example <a class="reference external" href="examples/example_feature_types.html">Feature Types</a>.
+* You can provide a pandas DataFrame, with properly formatted columns. If a column has numerical dtype, <em>auto-sklearn</em> will not encode it and it will be passed directly to scikit-learn. If the column has a categorical/boolean class, it will be encoded. If the column is of any other type (Object or Timeseries), an error will be raised. For further details on how to properly encode your data, you can check the example <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html">Working with categorical data</a>). If you are working with time series, it is recommended that you follow this approach <a class="reference external" href="https://stats.stackexchange.com/questions/311494/">Working with time data</a>.</p>
+<p>Regarding the targets (y_train/y_test), if the task involves a classification problem, such features will be automatically encoded. It is recommended to provide both y_train and y_test during fit, so that a common encoding is created between these splits (if only y_train is provided during fit, the categorical encoder will not be able to handle new classes that are exclusive to y_test). If the task is regression, no encoding happens on the targets.</p>
 </div>
 <div class="section" id="ensemble-building-process">
 <h2>Ensemble Building Process<a class="headerlink" href="#ensemble-building-process" title="Permalink to this headline">¶</a></h2>
@@ -215,12 +236,8 @@ to build an ensemble based on the models’ prediction for the validation set. T
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ensemble_size</span></code> determines the maximal size of the ensemble. If it is set to zero, no ensemble will be constructed.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> allows the user to directly specify the number of models considered for the ensemble.  This hyperparameter can be an integer <em>n</em>, such that only the best <em>n</em> models are used in the final ensemble. If a float between 0.0 and 1.0 is provided, <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> would be interpreted as a fraction suggesting the percentage of models to use in the ensemble building process (namely, if ensemble_nbest is a float, library pruning is implemented as described in <a class="reference external" href="https://dl.acm.org/doi/10.1109/ICDM.2006.76">Caruana et al. (2006)</a>).</p></li>
-</ul>
-<blockquote>
-<div><ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">max_models_on_disc</span></code> defines the maximum number of models that are kept on the disc, as a mechanism to control the amount of disc space consumed by <em>auto-sklearn</em>. Throughout the automl process, different individual models are optimized, and their predictions (and other metadata) is stored on disc. The user can set the upper bound on how many models are acceptable to keep on disc, yet this variable takes priority in the definition of the number of models used by the ensemble builder (that is, the minimum of <code class="docutils literal notranslate"><span class="pre">ensemble_size</span></code>, <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> and <code class="docutils literal notranslate"><span class="pre">max_models_on_disc</span></code> determines the maximal amount of models used in the ensemble). If set to None, this feature is disabled.</p></li>
 </ul>
-</div></blockquote>
 </div>
 <div class="section" id="inspecting-the-results">
 <h2>Inspecting the results<a class="headerlink" href="#inspecting-the-results" title="Permalink to this headline">¶</a></h2>

@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; AutoSklearn 0.8.0 documentation</title>
+    <title>Index &#8212; AutoSklearn 0.9.0 documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.8.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.9.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -136,10 +136,12 @@
 </li>
       <li><a href="extending.html#autosklearn.pipeline.components.regression.add_regressor">add_regressor() (in module autosklearn.pipeline.components.regression)</a>
 </li>
-      <li><a href="api.html#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm">AutoSklearnClassificationAlgorithm (class in autosklearn.pipeline.components.base)</a>
+      <li><a href="api.html#autosklearn.experimental.askl2.AutoSklearn2Classifier">AutoSklearn2Classifier (class in autosklearn.experimental.askl2)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm">AutoSklearnClassificationAlgorithm (class in autosklearn.pipeline.components.base)</a>
+</li>
       <li><a href="api.html#autosklearn.classification.AutoSklearnClassifier">AutoSklearnClassifier (class in autosklearn.classification)</a>
 </li>
       <li><a href="api.html#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm">AutoSklearnPreprocessingAlgorithm (class in autosklearn.pipeline.components.base)</a>
@@ -172,19 +174,23 @@
 </li>
       <li><a href="api.html#autosklearn.metrics.f1_samples">f1_samples (in module autosklearn.metrics)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#autosklearn.metrics.f1_weighted">f1_weighted (in module autosklearn.metrics)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#autosklearn.classification.AutoSklearnClassifier.fit">fit() (autosklearn.classification.AutoSklearnClassifier method)</a>
 
       <ul>
+        <li><a href="api.html#autosklearn.experimental.askl2.AutoSklearn2Classifier.fit">(autosklearn.experimental.askl2.AutoSklearn2Classifier method)</a>
+</li>
         <li><a href="api.html#autosklearn.regression.AutoSklearnRegressor.fit">(autosklearn.regression.AutoSklearnRegressor method)</a>
 </li>
       </ul></li>
       <li><a href="api.html#autosklearn.classification.AutoSklearnClassifier.fit_ensemble">fit_ensemble() (autosklearn.classification.AutoSklearnClassifier method)</a>
 
       <ul>
+        <li><a href="api.html#autosklearn.experimental.askl2.AutoSklearn2Classifier.fit_ensemble">(autosklearn.experimental.askl2.AutoSklearn2Classifier method)</a>
+</li>
         <li><a href="api.html#autosklearn.regression.AutoSklearnRegressor.fit_ensemble">(autosklearn.regression.AutoSklearnRegressor method)</a>
 </li>
       </ul></li>
@@ -203,6 +209,8 @@
       <li><a href="api.html#autosklearn.classification.AutoSklearnClassifier.get_models_with_weights">get_models_with_weights() (autosklearn.classification.AutoSklearnClassifier method)</a>
 
       <ul>
+        <li><a href="api.html#autosklearn.experimental.askl2.AutoSklearn2Classifier.get_models_with_weights">(autosklearn.experimental.askl2.AutoSklearn2Classifier method)</a>
+</li>
         <li><a href="api.html#autosklearn.regression.AutoSklearnRegressor.get_models_with_weights">(autosklearn.regression.AutoSklearnRegressor method)</a>
 </li>
       </ul></li>
@@ -211,6 +219,8 @@
       <li><a href="api.html#autosklearn.classification.AutoSklearnClassifier.get_params">get_params() (autosklearn.classification.AutoSklearnClassifier method)</a>
 
       <ul>
+        <li><a href="api.html#autosklearn.experimental.askl2.AutoSklearn2Classifier.get_params">(autosklearn.experimental.askl2.AutoSklearn2Classifier method)</a>
+</li>
         <li><a href="api.html#autosklearn.regression.AutoSklearnRegressor.get_params">(autosklearn.regression.AutoSklearnRegressor method)</a>
 </li>
       </ul></li>
@@ -256,11 +266,11 @@
 </li>
       <li><a href="api.html#autosklearn.metrics.precision_weighted">precision_weighted (in module autosklearn.metrics)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#autosklearn.classification.AutoSklearnClassifier.predict">predict() (autosklearn.classification.AutoSklearnClassifier method)</a>
 
       <ul>
+        <li><a href="api.html#autosklearn.experimental.askl2.AutoSklearn2Classifier.predict">(autosklearn.experimental.askl2.AutoSklearn2Classifier method)</a>
+</li>
         <li><a href="api.html#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict">(autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm method)</a>
 </li>
         <li><a href="api.html#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.predict">(autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm method)</a>
@@ -268,9 +278,13 @@
         <li><a href="api.html#autosklearn.regression.AutoSklearnRegressor.predict">(autosklearn.regression.AutoSklearnRegressor method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#autosklearn.classification.AutoSklearnClassifier.predict_proba">predict_proba() (autosklearn.classification.AutoSklearnClassifier method)</a>
 
       <ul>
+        <li><a href="api.html#autosklearn.experimental.askl2.AutoSklearn2Classifier.predict_proba">(autosklearn.experimental.askl2.AutoSklearn2Classifier method)</a>
+</li>
         <li><a href="api.html#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict_proba">(autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm method)</a>
 </li>
       </ul></li>
@@ -288,15 +302,17 @@
 </li>
       <li><a href="api.html#autosklearn.metrics.recall_micro">recall_micro (in module autosklearn.metrics)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#autosklearn.metrics.recall_samples">recall_samples (in module autosklearn.metrics)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#autosklearn.metrics.recall_weighted">recall_weighted (in module autosklearn.metrics)</a>
 </li>
       <li><a href="api.html#autosklearn.classification.AutoSklearnClassifier.refit">refit() (autosklearn.classification.AutoSklearnClassifier method)</a>
 
       <ul>
+        <li><a href="api.html#autosklearn.experimental.askl2.AutoSklearn2Classifier.refit">(autosklearn.experimental.askl2.AutoSklearn2Classifier method)</a>
+</li>
         <li><a href="api.html#autosklearn.regression.AutoSklearnRegressor.refit">(autosklearn.regression.AutoSklearnRegressor method)</a>
 </li>
       </ul></li>
@@ -311,12 +327,16 @@
       <li><a href="api.html#autosklearn.classification.AutoSklearnClassifier.set_params">set_params() (autosklearn.classification.AutoSklearnClassifier method)</a>
 
       <ul>
+        <li><a href="api.html#autosklearn.experimental.askl2.AutoSklearn2Classifier.set_params">(autosklearn.experimental.askl2.AutoSklearn2Classifier method)</a>
+</li>
         <li><a href="api.html#autosklearn.regression.AutoSklearnRegressor.set_params">(autosklearn.regression.AutoSklearnRegressor method)</a>
 </li>
       </ul></li>
       <li><a href="api.html#autosklearn.classification.AutoSklearnClassifier.show_models">show_models() (autosklearn.classification.AutoSklearnClassifier method)</a>
 
       <ul>
+        <li><a href="api.html#autosklearn.experimental.askl2.AutoSklearn2Classifier.show_models">(autosklearn.experimental.askl2.AutoSklearn2Classifier method)</a>
+</li>
         <li><a href="api.html#autosklearn.regression.AutoSklearnRegressor.show_models">(autosklearn.regression.AutoSklearnRegressor method)</a>
 </li>
       </ul></li>
@@ -325,6 +345,8 @@
       <li><a href="api.html#autosklearn.classification.AutoSklearnClassifier.sprint_statistics">sprint_statistics() (autosklearn.classification.AutoSklearnClassifier method)</a>
 
       <ul>
+        <li><a href="api.html#autosklearn.experimental.askl2.AutoSklearn2Classifier.sprint_statistics">(autosklearn.experimental.askl2.AutoSklearn2Classifier method)</a>
+</li>
         <li><a href="api.html#autosklearn.regression.AutoSklearnRegressor.sprint_statistics">(autosklearn.regression.AutoSklearnRegressor method)</a>
 </li>
       </ul></li>
