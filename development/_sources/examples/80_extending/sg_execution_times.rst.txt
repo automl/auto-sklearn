@@ -8,11 +8,11 @@ Computation times
 **01:37.282** total execution time for **examples_80_extending** files:
 
 +-----------------------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_80_extending_example_restrict_number_of_hyperparameters.py` (``example_restrict_number_of_hyperparameters.py``) | 00:24.381 | 0.0 MB |
+| :ref:`sphx_glr_examples_80_extending_example_restrict_number_of_hyperparameters.py` (``example_restrict_number_of_hyperparameters.py``) | 00:24.388 | 0.0 MB |
 +-----------------------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_80_extending_example_extending_preprocessor.py` (``example_extending_preprocessor.py``)                         | 00:24.353 | 0.0 MB |
+| :ref:`sphx_glr_examples_80_extending_example_extending_preprocessor.py` (``example_extending_preprocessor.py``)                         | 00:24.361 | 0.0 MB |
 +-----------------------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_80_extending_example_extending_classification.py` (``example_extending_classification.py``)                     | 00:24.292 | 0.0 MB |
+| :ref:`sphx_glr_examples_80_extending_example_extending_classification.py` (``example_extending_classification.py``)                     | 00:24.281 | 0.0 MB |
 +-----------------------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_80_extending_example_extending_regression.py` (``example_extending_regression.py``)                             | 00:24.256 | 0.0 MB |
+| :ref:`sphx_glr_examples_80_extending_example_extending_regression.py` (``example_extending_regression.py``)                             | 00:24.251 | 0.0 MB |
 +-----------------------------------------------------------------------------------------------------------------------------------------+-----------+--------+
