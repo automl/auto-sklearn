@@ -1,4 +1,5 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.hyperparameters import UniformFloatHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
@@ -7,13 +8,14 @@ import sklearn.feature_selection
 
 
 class VarianceThreshold(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, random_state=None):
+    def __init__(self, threshold=0.0001, random_state=None):
         # VarianceThreshold does not support fit_transform (as of 0.19.1)!
+        self.threshold = threshold
         self.random_state = random_state
 
     def fit(self, X, y=None):
         self.preprocessor = sklearn.feature_selection.VarianceThreshold(
-            threshold=0.0
+            threshold=self.threshold
         )
         self.preprocessor = self.preprocessor.fit(X)
         return self
@@ -42,5 +44,7 @@ class VarianceThreshold(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
+        threshold = UniformFloatHyperparameter("threshold", 0.0001, 0.2, default_value=0.0001)
         cs = ConfigurationSpace()
+        cs.add_hyperparameter(threshold)
         return cs

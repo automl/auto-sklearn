@@ -163,7 +163,7 @@ class SGD(
             "alpha", 1e-7, 1e-1, log=True, default_value=0.0001)
         l1_ratio = UniformFloatHyperparameter(
             "l1_ratio", 1e-9, 1,  log=True, default_value=0.15)
-        fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
+        fit_intercept = CategoricalHyperparameter("fit_intercept", ["True", "False"], default_value="True")
         tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, log=True,
                                          default_value=1e-4)
         epsilon = UniformFloatHyperparameter(

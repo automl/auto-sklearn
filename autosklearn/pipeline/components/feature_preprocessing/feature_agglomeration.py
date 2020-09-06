@@ -46,7 +46,7 @@ class FeatureAgglomeration(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'Feature Agglomeration',
+        return {'shortname': 'FeatureAgglomeration',
                 'name': 'Feature Agglomeration',
                 'handles_regression': True,
                 'handles_classification': True,

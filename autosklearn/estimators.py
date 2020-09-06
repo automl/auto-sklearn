@@ -243,6 +243,16 @@ class AutoSklearnEstimator(BaseEstimator):
         if time_left_for_this_task < 30:
             raise ValueError("Time left for this task must be at least "
                              "30 seconds. ")
+
+        if include_preprocessors is None:
+            include_preprocessors = ['bernoulli_rbm', 'binarizer', 'factor_analysis', 'fast_ica',
+                                     'feature_agglomeration', 'generic_univariate_select', 'kbin_discretizer',
+                                     'kernel_pca', 'missing_indicator', 'pca', 'polynomial', 'random_trees_embedding',
+                                     'select_k_best', 'select_percentile_classification', 'truncatedSVD']
+        if include_estimators is None:
+            include_estimators = ['adaboost', 'bernoulli_nb', 'decision_tree', 'gradient_boosting', 'libsvm_svc', 'lda',
+                                  'multinomial_nb', 'random_forest', 'sgd']
+
         self.time_left_for_this_task = time_left_for_this_task
         self.per_run_time_limit = per_run_time_limit
         self.initial_configurations_via_metalearning = initial_configurations_via_metalearning
