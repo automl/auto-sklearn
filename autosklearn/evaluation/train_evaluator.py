@@ -14,8 +14,6 @@ from autosklearn.evaluation.abstract_evaluator import (
 from autosklearn.constants import (
     CLASSIFICATION_TASKS,
     MULTILABEL_CLASSIFICATION,
-    REGRESSION_TASKS,
-    MULTIOUTPUT_REGRESSION
 )
 
 
@@ -912,10 +910,8 @@ class TrainEvaluator(AbstractEvaluator):
                 ref_arg_dict = __baseCrossValidator_defaults__[class_name]
 
                 y = D.data['Y_train']
-                if (D.info['task'] in CLASSIFICATION_TASKS and \
-                   D.info['task'] != MULTILABEL_CLASSIFICATION) or \
-                   (D.info['task'] in REGRESSION_TASKS and \
-                   D.info['task'] != MULTIOUTPUT_REGRESSION):
+                if D.info['task'] in CLASSIFICATION_TASKS and \
+                   D.info['task'] != MULTILABEL_CLASSIFICATION:
 
                     y = y.ravel()
                 if class_name == 'PredefinedSplit':
