@@ -912,9 +912,9 @@ class TrainEvaluator(AbstractEvaluator):
                 ref_arg_dict = __baseCrossValidator_defaults__[class_name]
 
                 y = D.data['Y_train']
-                if (D.info['task'] in CLASSIFICATION_TASKS and \
+                if (D.info['task'] in CLASSIFICATION_TASKS and
                    D.info['task'] != MULTILABEL_CLASSIFICATION) or \
-                   (D.info['task'] in REGRESSION_TASKS and \
+                   (D.info['task'] in REGRESSION_TASKS and
                    D.info['task'] != MULTIOUTPUT_REGRESSION):
 
                     y = y.ravel()
