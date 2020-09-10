@@ -7,7 +7,6 @@ import unittest
 import unittest.mock
 
 import numpy as np
-
 import pynisher
 from smac.tae.execute_ta_run import StatusType, BudgetExhaustedException
 from smac.stats.stats import Stats
@@ -146,7 +145,11 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[1], 1.0)
         self.assertIsInstance(info[2], float)
         self.assertEqual(info[3], {'configuration_origin': 'UNKNOWN',
-                                   'error': "Result queue is empty"})
+                                   'error': "Result queue is empty",
+                                   'exit_status': 0,
+                                   'exitcode': 0,
+                                   'subprocess_stdout': '',
+                                   'subprocess_stderr': ''})
 
         self.stats.ta_runs += 1
         info = ta.start(config=None, instance=None, cutoff=30)
@@ -154,7 +157,13 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[1], 1.0)
         self.assertIsInstance(info[2], float)
         self.assertEqual(info[3], {'configuration_origin': 'UNKNOWN',
-                                   'error': "Result queue is empty"})
+                                   'error': "Result queue is empty",
+                                   'exit_status': 0,
+                                   'exitcode': 0,
+                                   'subprocess_stdout': '',
+                                   'subprocess_stderr': ''
+                                   })
+        self.assertEqual(info[3]['exitcode'], 0)
 
     @unittest.mock.patch('autosklearn.evaluation.train_evaluator.eval_holdout')
     def test_eval_with_limits_holdout_fail_memory_error(self, pynisher_mock):
@@ -175,6 +184,7 @@ class EvaluationTest(unittest.TestCase):
         worst_possible_result = MAXINT
         self.assertEqual(info[1], worst_possible_result)
         self.assertIsInstance(info[2], float)
+        self.assertNotIn('exitcode', info[3])
 
     @unittest.mock.patch('pynisher.enforce_limits')
     def test_eval_with_limits_holdout_fail_timeout(self, pynisher_mock):
@@ -197,6 +207,7 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[0], StatusType.TIMEOUT)
         self.assertEqual(info[1], 1.0)
         self.assertIsInstance(info[2], float)
+        self.assertNotIn('exitcode', info[3])
 
     @unittest.mock.patch('pynisher.enforce_limits')
     def test_eval_with_limits_holdout_timeout_with_results_in_queue(self, pynisher_mock):
@@ -227,6 +238,7 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[0], StatusType.SUCCESS)
         self.assertEqual(info[1], 0.5)
         self.assertIsInstance(info[2], float)
+        self.assertNotIn('exitcode', info[3])
 
         # And a crashed run which is in the queue
         def side_effect(**kwargs):
@@ -248,6 +260,7 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[0], StatusType.CRASHED)
         self.assertEqual(info[1], 1.0)
         self.assertIsInstance(info[2], float)
+        self.assertNotIn('exitcode', info[3])
 
     @unittest.mock.patch('autosklearn.evaluation.train_evaluator.eval_holdout')
     def test_eval_with_limits_holdout_2(self, eval_houldout_mock):
@@ -292,3 +305,27 @@ class EvaluationTest(unittest.TestCase):
         self.assertIsInstance(info[2], float)
         self.assertEqual(info[3]['error'], 'ValueError()')
         self.assertIn('traceback', info[3])
+        self.assertNotIn('exitcode', info[3])
+
+    def test_silent_exception_in_target_function(self):
+        backend_mock = BackendMock()
+        ta = ExecuteTaFuncWithQueue(backend=backend_mock,
+                                    autosklearn_seed=1,
+                                    resampling_strategy='holdout',
+                                    logger=self.logger,
+                                    stats=self.stats,
+                                    memory_limit=100,
+                                    metric=accuracy,
+                                    cost_for_crash=get_cost_of_crash(accuracy),
+                                    abort_on_first_run_crash=False,
+                                    )
+        ta.pynisher_logger = unittest.mock.Mock()
+        self.stats.ta_runs += 1
+        info = ta.start(None, instance=None, cutoff=3000)
+        self.assertEqual(info[0], StatusType.CRASHED)
+        self.assertEqual(info[1], 1.0)
+        self.assertIsInstance(info[2], float)
+        self.assertEqual(info[3]['error'], 'Result queue is empty')
+        self.assertEqual(info[3]['exitcode'], -6)
+        self.assertEqual(info[3]['exit_status'], pynisher.AnythingException)
+        self.assertNotIn('traceback', info[3])

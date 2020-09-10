@@ -281,11 +281,35 @@ class AutoML(BaseEstimator):
         if status == StatusType.SUCCESS:
             self._logger.info("Finished creating dummy predictions.")
         else:
-            self._logger.error('Error creating dummy predictions: %s ',
-                               str(additional_info))
-            # Fail if dummy prediction fails.
-            raise ValueError("Dummy prediction failed with run state %s and additional output: %s."
-                             % (str(status), str(additional_info)))
+            if additional_info.get('exitcode') == -6:
+                self._logger.error(
+                    "Dummy prediction failed with run state %s. "
+                    "The error suggests that the provided memory limits were too tight. Please "
+                    "increase the 'ml_memory_limit' and try again. If this does not solve your "
+                    "problem, please open an issue and paste the additional output. "
+                    "Additional output: %s.",
+                    str(status), str(additional_info),
+                )
+                # Fail if dummy prediction fails.
+                raise ValueError(
+                    "Dummy prediction failed with run state %s. "
+                    "The error suggests that the provided memory limits were too tight. Please "
+                    "increase the 'ml_memory_limit' and try again. If this does not solve your "
+                    "problem, please open an issue and paste the additional output. "
+                    "Additional output: %s." %
+                    (str(status), str(additional_info)),
+                )
+
+            else:
+                self._logger.error(
+                    "Dummy prediction failed with run state %s and additional output: %s.",
+                    str(status), str(additional_info),
+                )
+                # Fail if dummy prediction fails.
+                raise ValueError(
+                    "Dummy prediction failed with run state %s and additional output: %s."
+                    % (str(status), str(additional_info))
+                )
 
         return ta.num_run
 

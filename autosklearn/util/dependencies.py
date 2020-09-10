@@ -72,7 +72,8 @@ class MissingPackageError(Exception):
 
 
 class IncorrectPackageVersionError(Exception):
-    error_message = "'{name} {installed_version}' version mismatch ({operation}{required_version})"
+    error_message = "found '{name}' version {installed_version} but requires {name} version " \
+                    "{operation}{required_version}"
 
     def __init__(self,
                  package_name: str,
