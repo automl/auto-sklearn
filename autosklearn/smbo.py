@@ -10,6 +10,7 @@ import pynisher
 
 from smac.facade.smac_ac_facade import SMAC4AC
 from smac.intensification.simple_intensifier import SimpleIntensifier
+from smac.intensification.intensification import Intensifier
 from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
 from smac.scenario.scenario import Scenario
 from smac.tae.serial_runner import SerialRunner
@@ -164,6 +165,11 @@ def get_smac_object(
     scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob(
         smac_run_id=seed if not scenario_dict['shared-model'] else '*',
     )
+    if len(scenario_dict['instances']) > 1:
+        intensifier = Intensifier
+    else:
+        intensifier = SimpleIntensifier
+
     scenario = Scenario(scenario_dict)
     if len(metalearning_configurations) > 0:
         default_config = scenario.cs.get_default_configuration()
@@ -179,7 +185,7 @@ def get_smac_object(
         tae_runner_kwargs=ta_kwargs,
         initial_configurations=initial_configurations,
         run_id=seed,
-        intensifier=SimpleIntensifier,
+        intensifier=intensifier,
     )
 
 
@@ -500,7 +506,6 @@ class AutoMLSMBO(object):
         self.trajectory = smac.solver.intensifier.traj_logger.trajectory
         if isinstance(smac.solver.tae_runner, DaskParallelRunner):
             self._budget_type = smac.solver.tae_runner.single_worker.budget_type
-            print(smac.solver.tae_runner.client.get_worker_logs())
         elif isinstance(smac.solver.tae_runner, SerialRunner):
             self._budget_type = smac.solver.tae_runner.budget_type
         else:

@@ -134,7 +134,6 @@ automl = AutoSklearnClassifier(
 automl.fit_ensemble(
     y_train,
     task=MULTICLASS_CLASSIFICATION,
-    precision='32',
     dataset_name='digits',
     ensemble_size=20,
     ensemble_nbest=50,
