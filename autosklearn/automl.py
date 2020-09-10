@@ -111,6 +111,7 @@ class AutoML(BaseEstimator):
                  resampling_strategy='holdout-iterative-fit',
                  resampling_strategy_arguments=None,
                  shared_mode=False,
+                 n_jobs=None,
                  precision=32,
                  disable_evaluator_output=False,
                  get_smac_object_callback=None,
@@ -168,6 +169,7 @@ class AutoML(BaseEstimator):
            and 'folds' not in self._resampling_strategy_arguments:
             self._resampling_strategy_arguments['folds'] = 5
         self._shared_mode = shared_mode
+        self._n_jobs = n_jobs
         self.precision = precision
         self._disable_evaluator_output = disable_evaluator_output
         # Check arguments prior to doing anything!
@@ -384,16 +386,16 @@ class AutoML(BaseEstimator):
         requirements = pkg_resources.resource_string('autosklearn', 'requirements.txt')
         requirements = requirements.decode('utf-8')
         requirements = [requirement for requirement in requirements.split('\n')]
-        for requirement in requirements:
-            if not requirement:
-                continue
-            match = RE_PATTERN.match(requirement)
-            if match:
-                name = match.group('name')
-                module_dist = pkg_resources.get_distribution(name)
-                self._logger.debug('  %s', module_dist)
-            else:
-                raise ValueError('Unable to read requirement: %s' % requirement)
+        # for requirement in requirements:
+        #     if not requirement:
+        #         continue
+        #     match = RE_PATTERN.match(requirement)
+        #     if match:
+        #         name = match.group('name')
+        #         module_dist = pkg_resources.get_distribution(name)
+        #         self._logger.debug('  %s', module_dist)
+        #     else:
+        #         raise ValueError('Unable to read requirement: %s' % requirement)
         self._logger.debug('Done printing environment information')
         self._logger.debug('Starting to print arguments to auto-sklearn')
         self._logger.debug('  output_folder: %s', self._backend.context._output_directory)
@@ -420,6 +422,7 @@ class AutoML(BaseEstimator):
         self._logger.debug('  resampling_strategy_arguments: %s',
                            str(self._resampling_strategy_arguments))
         self._logger.debug('  shared_mode: %s', str(self._shared_mode))
+        self._logger.debug('  n_jobs: %s', str(self._n_jobs))
         self._logger.debug('  precision: %s', str(self.precision))
         self._logger.debug('  disable_evaluator_output: %s', str(self._disable_evaluator_output))
         self._logger.debug('  get_smac_objective_callback: %s', str(self._get_smac_object_callback))
@@ -589,6 +592,7 @@ class AutoML(BaseEstimator):
                 memory_limit=self._ml_memory_limit,
                 data_memory_limit=self._data_memory_limit,
                 watcher=self._stopwatch,
+                n_jobs=self._n_jobs,
                 start_num_run=num_run,
                 num_metalearning_cfgs=self._initial_configurations_via_metalearning,
                 config_file=configspace_path,

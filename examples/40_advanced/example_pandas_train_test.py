@@ -36,8 +36,8 @@ import autosklearn.classification
 
 
 def get_runhistory_models_performance(automl):
-    metric = cls._automl[0]._metric
-    data = automl._automl[0].runhistory_.data
+    metric = cls.automl_._metric
+    data = automl.automl_.runhistory_.data
     performance_list = []
     for run_key, run_value in data.items():
         if run_value.status != StatusType.SUCCESS:
@@ -116,7 +116,7 @@ print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 # Plot the ensemble performance
 # ===================================
 
-ensemble_performance_frame = pd.DataFrame(cls._automl[0].ensemble_performance_history)
+ensemble_performance_frame = pd.DataFrame(cls.automl_.ensemble_performance_history)
 ensemble_performance_frame = ensemble_performance_frame.cummax()
 individual_performance_frame = get_runhistory_models_performance(cls)
 individual_performance_frame = individual_performance_frame.cummax()

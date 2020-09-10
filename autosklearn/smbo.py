@@ -191,7 +191,9 @@ class AutoMLSMBO(object):
                  func_eval_time_limit,
                  memory_limit,
                  metric,
-                 watcher, start_num_run=1,
+                 watcher,
+                 n_jobs,
+                 start_num_run=1,
                  data_memory_limit=None,
                  num_metalearning_cfgs=25,
                  config_file=None,
@@ -217,6 +219,9 @@ class AutoMLSMBO(object):
 
         # the configuration space
         self.config_space = config_space
+
+        # the number of parallel workers/jobs
+        self.n_jobs = n_jobs
 
         # Evaluation
         self.resampling_strategy = resampling_strategy
@@ -417,7 +422,7 @@ class AutoMLSMBO(object):
             metric=self.metric,
             memory_limit=self.memory_limit,
             disable_file_output=self.disable_file_output,
-            n_workers=4,
+            n_workers=self.n_jobs,
             **self.resampling_strategy_args
         )
         ta = ExecuteTaFuncWithQueue
