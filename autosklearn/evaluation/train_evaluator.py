@@ -2,7 +2,7 @@ import copy
 import json
 
 import numpy as np
-from smac.tae.execute_ta_run import TAEAbortException, StatusType
+from smac.tae import TAEAbortException, StatusType
 from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit, KFold, \
     StratifiedKFold, train_test_split, BaseCrossValidator, PredefinedSplit
 from sklearn.model_selection._split import _RepeatedSplits, BaseShuffleSplit

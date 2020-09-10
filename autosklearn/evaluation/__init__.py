@@ -9,8 +9,7 @@ from typing import Optional
 
 import numpy as np
 import pynisher
-from smac.tae.execute_ta_run import StatusType, BudgetExhaustedException, \
-    TAEAbortException
+from smac.tae import StatusType, BudgetExhaustedException, TAEAbortException
 from smac.tae.execute_func import AbstractTAFunc
 
 from ConfigSpace import Configuration
@@ -67,7 +66,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
     def __init__(self, backend, autosklearn_seed, resampling_strategy, metric,
                  logger, cost_for_crash, abort_on_first_run_crash,
-                 initial_num_run=1, stats=None, runhistory=None,
+                 initial_num_run=1, stats=None,
                  run_obj='quality', par_factor=1, all_scoring_functions=False,
                  output_y_hat_optimization=True, include=None, exclude=None,
                  memory_limit=None, disable_file_output=False, init_params=None,
@@ -109,7 +108,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         super().__init__(
             ta=eval_function,
             stats=stats,
-            runhistory=runhistory,
             run_obj=run_obj,
             par_factor=par_factor,
             cost_for_crash=self.worst_possible_result,
@@ -119,7 +117,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.backend = backend
         self.autosklearn_seed = autosklearn_seed
         self.resampling_strategy = resampling_strategy
-        self.num_run = initial_num_run
+        self.initial_num_run = initial_num_run
         self.metric = metric
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_args = resampling_strategy_args
@@ -233,13 +231,19 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             wall_time_in_s=cutoff,
             mem_in_mb=self.memory_limit,
         )
+
+        if isinstance(config, int):
+            num_run = self.initial_num_run
+        else:
+            num_run = config.config_id + self.initial_num_run
+
         obj_kwargs = dict(
             queue=queue,
             config=config,
             backend=self.backend,
             metric=self.metric,
             seed=self.autosklearn_seed,
-            num_run=self.num_run,
+            num_run=num_run,
             all_scoring_functions=self.all_scoring_functions,
             output_y_hat_optimization=self.output_y_hat_optimization,
             include=self.include,
@@ -378,7 +382,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         additional_run_info['configuration_origin'] = origin
 
         runtime = float(obj.wall_clock_time)
-        self.num_run += 1
 
         autosklearn.evaluation.util.empty_queue(queue)
 

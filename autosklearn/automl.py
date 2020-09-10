@@ -18,7 +18,7 @@ import scipy.stats
 from sklearn.base import BaseEstimator
 from sklearn.model_selection._split import _RepeatedSplits, \
     BaseShuffleSplit, BaseCrossValidator
-from smac.tae.execute_ta_run import StatusType
+from smac.tae import StatusType
 from smac.stats.stats import Stats
 import joblib
 import sklearn.utils
@@ -287,8 +287,6 @@ class AutoML(BaseEstimator):
             raise ValueError("Dummy prediction failed with run state %s and additional output: %s."
                              % (str(status), str(additional_info)))
 
-        return ta.num_run
-
     def fit(
         self,
         X: np.ndarray,
@@ -479,8 +477,7 @@ class AutoML(BaseEstimator):
 
         # == Perform dummy predictions
         num_run = 1
-        # if self._resampling_strategy in ['holdout', 'holdout-iterative-fit']:
-        num_run = self._do_dummy_prediction(datamanager, num_run)
+        self._do_dummy_prediction(datamanager, num_run)
 
         # = Create a searchspace
         # Do this before One Hot Encoding to make sure that it creates a
@@ -1004,6 +1001,10 @@ class AutoML(BaseEstimator):
                 status.append('Abort')
             elif s == StatusType.MEMOUT:
                 status.append('Memout')
+            elif s == StatusType.RUNNING:
+                status.append('Running')
+            elif s == StatusType.BUDGETEXHAUSTED:
+                status.append('Budget exhausted')
             else:
                 raise NotImplementedError(s)
 
