@@ -986,12 +986,6 @@ class AutoML(BaseEstimator):
             config_id = run_key.config_id
             config = self.runhistory_.ids_config[config_id]
 
-            param_dict = config.get_dictionary()
-            params.append(param_dict)
-            mean_test_score.append(self._metric._optimum - (self._metric._sign * run_value.cost))
-            mean_fit_time.append(run_value.time)
-            budgets.append(run_key.budget)
-
             s = run_value.status
             if s == StatusType.SUCCESS:
                 status.append('Success')
@@ -1006,11 +1000,17 @@ class AutoML(BaseEstimator):
             elif s == StatusType.MEMOUT:
                 status.append('Memout')
             elif s == StatusType.RUNNING:
-                status.append('Running')
+                continue
             elif s == StatusType.BUDGETEXHAUSTED:
-                status.append('Budget exhausted')
+                continue
             else:
                 raise NotImplementedError(s)
+
+            param_dict = config.get_dictionary()
+            params.append(param_dict)
+            mean_test_score.append(self._metric._optimum - (self._metric._sign * run_value.cost))
+            mean_fit_time.append(run_value.time)
+            budgets.append(run_key.budget)
 
             for hp_name in hp_names:
                 if hp_name in param_dict:

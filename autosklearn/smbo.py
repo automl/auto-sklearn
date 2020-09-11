@@ -161,6 +161,7 @@ def get_smac_object(
     ta_kwargs,
     backend,
     metalearning_configurations,
+    n_jobs,
 ):
     scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob(
         smac_run_id=seed if not scenario_dict['shared-model'] else '*',
@@ -186,6 +187,8 @@ def get_smac_object(
         initial_configurations=initial_configurations,
         run_id=seed,
         intensifier=intensifier,
+        use_dask_backend=True,
+        n_jobs=n_jobs,
     )
 
 
@@ -428,7 +431,6 @@ class AutoMLSMBO(object):
             metric=self.metric,
             memory_limit=self.memory_limit,
             disable_file_output=self.disable_file_output,
-            n_workers=self.n_jobs,
             **self.resampling_strategy_args
         )
         ta = ExecuteTaFuncWithQueue
@@ -484,6 +486,7 @@ class AutoMLSMBO(object):
             'ta_kwargs': ta_kwargs,
             'backend': self.backend,
             'metalearning_configurations': metalearning_configurations,
+            'n_jobs': self.n_jobs,
         }
         if self.get_smac_object_callback is not None:
             smac = self.get_smac_object_callback(**smac_args)

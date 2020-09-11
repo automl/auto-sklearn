@@ -14,4 +14,4 @@ liac-arff
 ConfigSpace>=0.4.14,<0.5
 pynisher>=0.4.2
 pyrfr>=0.7,<0.9
-git+https://github.com/automl/smac3@add_config_id
+git+https://github.com/automl/smac3@change_dask_interface

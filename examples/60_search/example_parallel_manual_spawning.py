@@ -10,85 +10,30 @@ provides a means of running several instances of *auto-sklearn* in a parallel
 mode using several computational resources (detailed information of *pSMAC*
 can be found `here <https://automl.github.io/SMAC3/master/psmac.html>`_).
 
-This example shows how to spawn multiple instances of *Auto-sklearn* which
-share the same output directory and thereby run in parallel. Use this example
-as a starting point to parallelize *Auto-sklearn* across multiple machines.
-To run *Auto-sklearn* on a single machine check out the example
+This example shows how to spawn workers for *Auto-sklearn* manually.
+Use this example as a starting point to parallelize *Auto-sklearn*
+across multiple machines. To run *Auto-sklearn* in parallel
+on a single machine check out the example
 `Parallel Usage on a single machine <example_parallel_n_jobs.html>`_.
 """
 
+import json
 import multiprocessing
-import shutil
+import os
+import time
 
 import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
 
-from autosklearn.metrics import accuracy
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.constants import MULTICLASS_CLASSIFICATION
 
+import dask
+from dask.distributed import Nanny
+
 tmp_folder = '/tmp/autosklearn_parallel_2_example_tmp'
 output_folder = '/tmp/autosklearn_parallel_2_example_out'
-
-
-for dir_ in [tmp_folder, output_folder]:
-    try:
-        shutil.rmtree(dir_)
-    except OSError:
-        pass
-
-
-############################################################################
-# Define utility function for multiprocessing
-# ===========================================
-
-def get_spawn_classifier(X_train, y_train):
-    def spawn_classifier(seed, dataset_name):
-        """Spawn a subprocess.
-
-        auto-sklearn does not take care of spawning worker processes. This
-        function, which is called several times in the main block is a new
-        process which runs one instance of auto-sklearn.
-        """
-
-        # Use the initial configurations from meta-learning only in one out of
-        # the four processes spawned. This prevents auto-sklearn from evaluating
-        # the same configurations in four processes.
-        if seed == 0:
-            initial_configurations_via_metalearning = 25
-            smac_scenario_args = {}
-        else:
-            initial_configurations_via_metalearning = 0
-            smac_scenario_args = {'initial_incumbent': 'RANDOM'}
-
-        # Arguments which are different to other runs of auto-sklearn:
-        # 1. all classifiers write to the same output directory
-        # 2. shared_mode is set to True, this enables sharing of data between
-        # models.
-        # 3. all instances of the AutoSklearnClassifier must have a different seed!
-        automl = AutoSklearnClassifier(
-            time_left_for_this_task=60,
-            # sec., how long should this seed fit process run
-            per_run_time_limit=15,
-            # sec., each model may only take this long before it's killed
-            ml_memory_limit=1024,
-            # MB, memory limit imposed on each call to a ML algorithm
-            shared_mode=True,  # tmp folder will be shared between seeds
-            tmp_folder=tmp_folder,
-            output_folder=output_folder,
-            delete_tmp_folder_after_terminate=False,
-            ensemble_size=0,
-            # ensembles will be built when all optimization runs are finished
-            initial_configurations_via_metalearning=(
-                initial_configurations_via_metalearning
-            ),
-            seed=seed,
-            smac_scenario_args=smac_scenario_args,
-        )
-        automl.fit(X_train, y_train, dataset_name=dataset_name)
-    return spawn_classifier
-
 
 ############################################################################
 # Data Loading
@@ -99,50 +44,84 @@ X_train, X_test, y_train, y_test = \
     sklearn.model_selection.train_test_split(X, y, random_state=1)
 
 ############################################################################
-# Build and fit the classifier
-# ============================
+# Define helper functions
+# =======================
+#
+# For this example we need to start Auto-sklearn in a separate process
+# first. You can think of this as starting Auto-sklearn on machine 1.
+# Auto-sklearn then spawns a dask server locally. Next, we create
+# a worker and connect to that server in the main process. You can think
+# of this as starting the worker on machine 2. All further processing
+# like predicting needs to be done in the process running Auto-sklearn.
 
-processes = []
-spawn_classifier = get_spawn_classifier(X_train, y_train)
-for i in range(4):  # set this at roughly half of your cores
-    p = multiprocessing.Process(
-        target=spawn_classifier,
-        args=(i, 'breast_cancer'),
+def run_autosklearn(X_train, y_train, X_test, y_test, tmp_folder, output_folder):
+    automl = AutoSklearnClassifier(
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        ml_memory_limit=1024,
+        tmp_folder=tmp_folder,
+        output_folder=output_folder,
+        seed=777,
+        # n_jobs needs to be set to 1
+        n_jobs=1,
     )
-    p.start()
-    processes.append(p)
-for p in processes:
-    p.join()
+    automl.fit(X_train, y_train)
 
-print('Starting to build an ensemble!')
-automl = AutoSklearnClassifier(
-    time_left_for_this_task=30,
-    per_run_time_limit=15,
-    ml_memory_limit=1024,
-    shared_mode=True,
-    ensemble_size=50,
-    ensemble_nbest=200,
-    tmp_folder=tmp_folder,
-    output_folder=output_folder,
-    initial_configurations_via_metalearning=0,
-    seed=1,
-    metric=accuracy,
-)
+    automl.fit_ensemble(
+        y_train,
+        task=MULTICLASS_CLASSIFICATION,
+        dataset_name='digits',
+        ensemble_size=20,
+        ensemble_nbest=50,
+    )
 
-# Both the ensemble_size and ensemble_nbest parameters can be changed now if
-# necessary
-automl.fit_ensemble(
-    y_train,
-    task=MULTICLASS_CLASSIFICATION,
-    dataset_name='digits',
-    ensemble_size=20,
-    ensemble_nbest=50,
-)
+    predictions = automl.predict(X_test)
+    print(automl.sprint_statistics())
+    print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 
 ############################################################################
-# Report the score of the final ensemble
-# ======================================
+# Start Auto-sklearn on "Machine 1"
+# =================================
+#
+# To use ``n_jobs_`` we must guard the code
+if __name__ == '__main__':
+    process = multiprocessing.Process(
+        target=run_autosklearn,
+        args=(X_train, y_train, X_test, y_test, tmp_folder, output_folder),
+    )
+    process.start()
 
-predictions = automl.predict(X_test)
-print(automl.show_models())
-print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+############################################################################
+# Start a worker on "Machine 2"
+# =============================
+#
+# To do so, we first need to obtain information on how to connect to the
+# server. This is stored in a subdirectory of the temporary directory given
+# above.
+
+    dask_scheduler_file = os.path.join(tmp_folder, 'smac3-output', 'run_777', '.dask_scheduler_file')
+    # The "777" is the seed given above
+    while True:
+        try:
+            with open(dask_scheduler_file) as fh:
+                dask_configuration = json.load(fh)
+            break
+        except:
+            time.sleep(0.1)
+
+    # Auto-sklearn requires dask workers to not run in the daemon setting
+    dask.config.set({'distributed.worker.daemon': False})
+
+    # Starting a dask worker in python is a bit cumbersome and should ideally
+    # be done from the command line (we do it here only to keep the example
+    # to a single script). Check the dask docs at
+    # https://docs.dask.org/en/latest/setup/python-advanced.html for further
+    # information
+    import asyncio
+    async def do_work():
+        async with Nanny(scheduler_file=dask_scheduler_file, nthreads=1, ncores=3) as worker:
+            await worker.finished()
+
+    asyncio.get_event_loop().run_until_complete(do_work())
+
+    process.join()
