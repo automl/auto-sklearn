@@ -225,8 +225,11 @@ class EnsembleBuilder(multiprocessing.Process):
 
     def run(self):
         buffer_time = 5  # TODO: Buffer time should also be used in main!?
+        process_start_time = time.time()
         while True:
-            time_left = self.time_limit - buffer_time
+            time_elapsed = time.time() - process_start_time
+            time_left = self.time_limit - buffer_time - time_elapsed
+            self.time_left = time_left
             safe_ensemble_script = pynisher.enforce_limits(
                 wall_time_in_s=int(time_left),
                 mem_in_mb=self.memory_limit,
@@ -281,7 +284,7 @@ class EnsembleBuilder(multiprocessing.Process):
             self.logger.debug(
                 'Starting iteration %d, time left: %f',
                 iteration,
-                self.time_limit - used_time,
+                self.time_left - used_time,
             )
 
             # populates self.read_preds
