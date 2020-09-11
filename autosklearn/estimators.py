@@ -35,8 +35,8 @@ class AutoSklearnEstimator(BaseEstimator):
         output_folder=None,
         delete_tmp_folder_after_terminate=True,
         delete_output_folder_after_terminate=True,
-        shared_mode=False,
         n_jobs: Optional[int] = None,
+        start_dask_backend: bool = False,
         disable_evaluator_output=False,
         get_smac_object_callback=None,
         smac_scenario_args=None,
@@ -169,22 +169,21 @@ class AutoSklearnEstimator(BaseEstimator):
             remove output_folder, when finished. If output_folder is None
             output_dir will always be deleted
 
-        shared_mode : bool, optional (False)
-            Run smac in shared-model-node. This only works if arguments
-            ``tmp_folder`` and ``output_folder`` are given and both
-            ``delete_tmp_folder_after_terminate`` and
-            ``delete_output_folder_after_terminate`` are set to False. Cannot
-            be used together with ``n_jobs``.
-
         n_jobs : int, optional, experimental
-            The number of jobs to run in parallel for ``fit()``. Cannot be
-            used together with ``shared_mode``. ``-1`` means using all
-            processors. By default, Auto-sklearn uses a single core for
-            fitting the machine learning model and a single core for fitting
+            The number of jobs to run in parallel for ``fit()``. ``-1`` means 
+            using all processors. By default, Auto-sklearn uses a single core 
+            for fitting the machine learning model and a single core for fitting
             an ensemble. Ensemble building is not affected by ``n_jobs`` but
             can be controlled by the number of models in the ensemble. In
             contrast to most scikit-learn models, ``n_jobs`` given in the
             constructor is not applied to the ``predict()`` method.
+            
+        start_dask_backend : bool
+            Whether to create a dask backend for evaluating configurations in 
+            parallel. This will be automatically done if ``n_jobs > 1``. Setting
+            this to true requires to guard the auto-sklearn code with 
+            `if __name__ == '__main__'` and allows adding additional workers
+            from other processes or scripts.
 
         disable_evaluator_output: bool or list, optional (False)
             If True, disable model and prediction output. Cannot be used
@@ -259,8 +258,8 @@ class AutoSklearnEstimator(BaseEstimator):
         self.output_folder = output_folder
         self.delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
         self.delete_output_folder_after_terminate = delete_output_folder_after_terminate
-        self.shared_mode = shared_mode
         self.n_jobs = n_jobs
+        self.start_dask_backend = start_dask_backend
         self.disable_evaluator_output = disable_evaluator_output
         self.get_smac_object_callback = get_smac_object_callback
         self.smac_scenario_args = smac_scenario_args
@@ -271,12 +270,12 @@ class AutoSklearnEstimator(BaseEstimator):
         self.automl_ = None  # type: Optional[AutoML]
         # n_jobs after conversion to a number (b/c default is None)
         self._n_jobs = None
+        self._start_dask_backend = start_dask_backend
         super().__init__()
 
     def build_automl(
         self,
         seed: int,
-        shared_mode: bool,
         ensemble_size: int,
         initial_configurations_via_metalearning: int,
         tmp_folder: str,
@@ -284,22 +283,11 @@ class AutoSklearnEstimator(BaseEstimator):
         smac_scenario_args: Optional[Dict] = None,
     ):
 
-        if shared_mode:
-            self.delete_output_folder_after_terminate = False
-            self.delete_tmp_folder_after_terminate = False
-            if tmp_folder is None:
-                raise ValueError("If shared_mode == True tmp_folder must not "
-                                 "be None.")
-            if output_folder is None:
-                raise ValueError("If shared_mode == True output_folder must "
-                                 "not be None.")
-
         backend = create(
             temporary_directory=tmp_folder,
             output_directory=output_folder,
             delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
             delete_output_folder_after_terminate=self.delete_output_folder_after_terminate,
-            shared_mode=shared_mode,
             )
 
         if smac_scenario_args is None:
@@ -322,8 +310,8 @@ class AutoSklearnEstimator(BaseEstimator):
             exclude_preprocessors=self.exclude_preprocessors,
             resampling_strategy=self.resampling_strategy,
             resampling_strategy_arguments=self.resampling_strategy_arguments,
-            shared_mode=shared_mode,
             n_jobs=self._n_jobs,
+            start_dask_backend=self._start_dask_backend,
             get_smac_object_callback=self.get_smac_object_callback,
             disable_evaluator_output=self.disable_evaluator_output,
             smac_scenario_args=smac_scenario_args,
@@ -335,11 +323,6 @@ class AutoSklearnEstimator(BaseEstimator):
         return automl
 
     def fit(self, **kwargs):
-        if self.shared_mode and self.n_jobs:
-            raise ValueError(
-                'Cannot enable both shared_model and n_jobs. Please specify '
-                'only one of them.'
-            )
 
         # Handle the number of jobs and the time for them
         if self.n_jobs is None or self.n_jobs == 1:
@@ -353,11 +336,9 @@ class AutoSklearnEstimator(BaseEstimator):
         if self.per_run_time_limit is None:
             self.per_run_time_limit = self._n_jobs * self.time_left_for_this_task // 10
 
-        shared_mode = self.shared_mode
         seed = self.seed
         self.automl_ = self.build_automl(
             seed=seed,
-            shared_mode=shared_mode,
             ensemble_size=self.ensemble_size,
             initial_configurations_via_metalearning=(
                 self.initial_configurations_via_metalearning
@@ -411,14 +392,9 @@ class AutoSklearnEstimator(BaseEstimator):
 
         """
         if self.automl_ is None:
-            if self.n_jobs is None or self.n_jobs == 1:
-                shared_mode = self.shared_mode
-            else:
-                shared_mode = True
             # Build a dummy automl object to call fit_ensemble
             self.automl_ = self.build_automl(
                 seed=self.seed,
-                shared_mode=shared_mode,
                 ensemble_size=(
                     ensemble_size
                     if ensemble_size is not None else

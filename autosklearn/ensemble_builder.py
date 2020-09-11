@@ -41,7 +41,6 @@ class EnsembleBuilder(multiprocessing.Process):
             max_models_on_disc: int = 100,
             performance_range_threshold: float = 0,
             seed: int = 1,
-            shared_mode: bool = False,
             max_iterations: int = None,
             precision: int = 32,
             sleep_duration: int = 2,
@@ -90,9 +89,6 @@ class EnsembleBuilder(multiprocessing.Process):
                 and max_models_on_disc. Might return less
             seed: int
                 random seed
-                if set to -1, read files with any seed (e.g., for shared model mode)
-            shared_model: bool
-                auto-sklearn used shared model mode (aka pSMAC)
             max_iterations: int
                 maximal number of iterations to run this script
                 (default None --> deactivated)
@@ -139,7 +135,6 @@ class EnsembleBuilder(multiprocessing.Process):
         self.max_resident_models = None
 
         self.seed = seed
-        self.shared_mode = shared_mode  # pSMAC?
         self.max_iterations = max_iterations
         self.precision = precision
         self.sleep_duration = sleep_duration
@@ -428,17 +423,10 @@ class EnsembleBuilder(multiprocessing.Process):
             self.logger.debug("No ensemble dataset prediction directory found")
             return False
 
-        if self.shared_mode is False:
-            pred_path = os.path.join(
-                glob.escape(self.dir_ensemble),
-                'predictions_ensemble_%s_*_*.npy*' % self.seed,
-            )
-        # pSMAC
-        else:
-            pred_path = os.path.join(
-                glob.escape(self.dir_ensemble),
-                'predictions_ensemble_*_*_*.npy*',
-            )
+        pred_path = os.path.join(
+            glob.escape(self.dir_ensemble),
+            'predictions_ensemble_%s_*_*.npy*' % self.seed,
+        )
 
         y_ens_files = glob.glob(pred_path)
         y_ens_files = [y_ens_file for y_ens_file in y_ens_files

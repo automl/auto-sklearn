@@ -110,8 +110,8 @@ class AutoML(BaseEstimator):
                  exclude_preprocessors=None,
                  resampling_strategy='holdout-iterative-fit',
                  resampling_strategy_arguments=None,
-                 shared_mode=False,
                  n_jobs=None,
+                 start_dask_backend=False,
                  precision=32,
                  disable_evaluator_output=False,
                  get_smac_object_callback=None,
@@ -168,8 +168,8 @@ class AutoML(BaseEstimator):
                                          ]\
            and 'folds' not in self._resampling_strategy_arguments:
             self._resampling_strategy_arguments['folds'] = 5
-        self._shared_mode = shared_mode
         self._n_jobs = n_jobs
+        self._start_dask_backend = start_dask_backend
         self.precision = precision
         self._disable_evaluator_output = disable_evaluator_output
         # Check arguments prior to doing anything!
@@ -325,14 +325,6 @@ class AutoML(BaseEstimator):
         if not isinstance(self._metric, Scorer):
             raise ValueError('Metric must be instance of '
                              'autosklearn.metrics.Scorer.')
-        if self._shared_mode:
-            # If this fails, it's likely that this is the first call to get
-            # the data manager
-            try:
-                D = self._backend.load_datamanager()
-                dataset_name = D.name
-            except IOError:
-                pass
 
         if dataset_name is None:
             dataset_name = hash_array_or_matrix(X)
@@ -421,8 +413,8 @@ class AutoML(BaseEstimator):
         self._logger.debug('  resampling_strategy: %s', str(self._resampling_strategy))
         self._logger.debug('  resampling_strategy_arguments: %s',
                            str(self._resampling_strategy_arguments))
-        self._logger.debug('  shared_mode: %s', str(self._shared_mode))
         self._logger.debug('  n_jobs: %s', str(self._n_jobs))
+        self._logger.debug('  start_dask_backend: %s', str(self._start_dask_backend))
         self._logger.debug('  precision: %s', str(self.precision))
         self._logger.debug('  disable_evaluator_output: %s', str(self._disable_evaluator_output))
         self._logger.debug('  get_smac_objective_callback: %s', str(self._get_smac_object_callback))
@@ -455,13 +447,11 @@ class AutoML(BaseEstimator):
         try:
             os.makedirs(self._backend.get_model_dir())
         except (OSError, FileExistsError):
-            if not self._shared_mode:
-                raise
+            raise
         try:
             os.makedirs(self._backend.get_cv_model_dir())
         except (OSError, FileExistsError):
-            if not self._shared_mode:
-                raise
+            raise
 
         self._task = datamanager.info['task']
         self._label_num = datamanager.info['label_num']
@@ -593,6 +583,7 @@ class AutoML(BaseEstimator):
                 data_memory_limit=self._data_memory_limit,
                 watcher=self._stopwatch,
                 n_jobs=self._n_jobs,
+                start_dask_backend=self._start_dask_backend,
                 start_num_run=num_run,
                 num_metalearning_cfgs=self._initial_configurations_via_metalearning,
                 config_file=configspace_path,
@@ -601,7 +592,6 @@ class AutoML(BaseEstimator):
                 metric=self._metric,
                 resampling_strategy=self._resampling_strategy,
                 resampling_strategy_args=self._resampling_strategy_arguments,
-                shared_mode=self._shared_mode,
                 include_estimators=self._include_estimators,
                 exclude_estimators=self._exclude_estimators,
                 include_preprocessors=self._include_preprocessors,
@@ -833,7 +823,6 @@ class AutoML(BaseEstimator):
             ensemble_nbest=ensemble_nbest,
             max_models_on_disc=self._max_models_on_disc,
             seed=self._seed,
-            shared_mode=self._shared_mode,
             precision=precision,
             max_iterations=max_iterations,
             read_at_most=np.inf,
@@ -843,12 +832,7 @@ class AutoML(BaseEstimator):
         )
 
     def _load_models(self):
-        if self._shared_mode:
-            seed = -1
-        else:
-            seed = self._seed
-
-        self.ensemble_ = self._backend.load_ensemble(seed)
+        self.ensemble_ = self._backend.load_ensemble(self._seed)
 
         # If no ensemble is loaded, try to get the best performing model
         if not self.ensemble_:

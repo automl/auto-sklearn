@@ -159,13 +159,10 @@ def get_smac_object(
     seed,
     ta,
     ta_kwargs,
-    backend,
     metalearning_configurations,
     n_jobs,
+    start_dask_backend,
 ):
-    scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob(
-        smac_run_id=seed if not scenario_dict['shared-model'] else '*',
-    )
     if len(scenario_dict['instances']) > 1:
         intensifier = Intensifier
     else:
@@ -187,7 +184,7 @@ def get_smac_object(
         initial_configurations=initial_configurations,
         run_id=seed,
         intensifier=intensifier,
-        use_dask_backend=True,
+        start_dask_backend=start_dask_backend,
         n_jobs=n_jobs,
     )
 
@@ -202,6 +199,7 @@ class AutoMLSMBO(object):
                  metric,
                  watcher,
                  n_jobs,
+                 start_dask_backend,
                  start_num_run=1,
                  data_memory_limit=None,
                  num_metalearning_cfgs=25,
@@ -210,7 +208,6 @@ class AutoMLSMBO(object):
                  metadata_directory=None,
                  resampling_strategy='holdout',
                  resampling_strategy_args=None,
-                 shared_mode=False,
                  include_estimators=None,
                  exclude_estimators=None,
                  include_preprocessors=None,
@@ -231,6 +228,7 @@ class AutoMLSMBO(object):
 
         # the number of parallel workers/jobs
         self.n_jobs = n_jobs
+        self.start_dask_backend = start_dask_backend
 
         # Evaluation
         self.resampling_strategy = resampling_strategy
@@ -250,7 +248,6 @@ class AutoMLSMBO(object):
         self.seed = seed
         self.metadata_directory = metadata_directory
         self.start_num_run = start_num_run
-        self.shared_mode = shared_mode
         self.include_estimators = include_estimators
         self.exclude_estimators = exclude_estimators
         self.include_preprocessors = include_preprocessors
@@ -446,7 +443,6 @@ class AutoMLSMBO(object):
             'memory_limit': self.memory_limit,
             'output-dir': self.backend.get_smac_output_directory(),
             'run_obj': 'quality',
-            'shared-model': self.shared_mode,
             'wallclock_limit': total_walltime_limit,
             'cost_for_crash': self.worst_possible_result,
         }
@@ -484,9 +480,9 @@ class AutoMLSMBO(object):
             'seed': seed,
             'ta': ta,
             'ta_kwargs': ta_kwargs,
-            'backend': self.backend,
             'metalearning_configurations': metalearning_configurations,
             'n_jobs': self.n_jobs,
+            'start_dask_backend': self.start_dask_backend,
         }
         if self.get_smac_object_callback is not None:
             smac = self.get_smac_object_callback(**smac_args)
@@ -494,16 +490,6 @@ class AutoMLSMBO(object):
             smac = get_smac_object(**smac_args)
 
         smac.optimize()
-
-        # Patch SMAC to read in data from parallel runs after the last
-        # function evaluation
-        if self.shared_mode:
-            pSMAC.read(
-                run_history=smac.solver.runhistory,
-                output_dirs=smac.solver.scenario.input_psmac_dirs,
-                configuration_space=smac.solver.config_space,
-                logger=smac.solver.logger,
-            )
 
         self.runhistory = smac.solver.runhistory
         self.trajectory = smac.solver.intensifier.traj_logger.trajectory

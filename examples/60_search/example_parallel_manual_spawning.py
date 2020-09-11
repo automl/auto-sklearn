@@ -62,8 +62,12 @@ def run_autosklearn(X_train, y_train, X_test, y_test, tmp_folder, output_folder)
         tmp_folder=tmp_folder,
         output_folder=output_folder,
         seed=777,
-        # n_jobs needs to be set to 1
+        # n_jobs is set to 1 for this example, but can also be set to a higher
+        # value to start more workers in the main process.
         n_jobs=1,
+        # ask auto-sklearn to start the dask backend which allows connecting
+        # further workers.
+        start_dask_backend=True,
     )
     automl.fit(X_train, y_train)
 
@@ -99,7 +103,8 @@ if __name__ == '__main__':
 # server. This is stored in a subdirectory of the temporary directory given
 # above.
 
-    dask_scheduler_file = os.path.join(tmp_folder, 'smac3-output', 'run_777', '.dask_scheduler_file')
+    smac_working_directory = os.path.join(tmp_folder, 'smac3-output', 'run_777')
+    dask_scheduler_file = os.path.join(smac_working_directory, '.dask_scheduler_file')
     # The "777" is the seed given above
     while True:
         try:
@@ -119,7 +124,10 @@ if __name__ == '__main__':
     # information
     import asyncio
     async def do_work():
-        async with Nanny(scheduler_file=dask_scheduler_file, nthreads=1, ncores=3) as worker:
+        async with Nanny(
+            scheduler_file=dask_scheduler_file, nthreads=1, ncores=3,
+            local_directory=smac_working_directory,
+        ) as worker:
             await worker.finished()
 
     asyncio.get_event_loop().run_until_complete(do_work())
