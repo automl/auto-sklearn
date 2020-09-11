@@ -5,6 +5,7 @@ import time
 import traceback
 import warnings
 
+import dask.distributed
 import numpy as np
 import pynisher
 
@@ -161,7 +162,7 @@ def get_smac_object(
     ta_kwargs,
     metalearning_configurations,
     n_jobs,
-    start_dask_backend,
+    dask_client,
 ):
     if len(scenario_dict['instances']) > 1:
         intensifier = Intensifier
@@ -184,7 +185,7 @@ def get_smac_object(
         initial_configurations=initial_configurations,
         run_id=seed,
         intensifier=intensifier,
-        start_dask_backend=start_dask_backend,
+        dask_client=dask_client,
         n_jobs=n_jobs,
     )
 
@@ -199,7 +200,7 @@ class AutoMLSMBO(object):
                  metric,
                  watcher,
                  n_jobs,
-                 start_dask_backend,
+                 dask_client: dask.distributed.Client,
                  start_num_run=1,
                  data_memory_limit=None,
                  num_metalearning_cfgs=25,
@@ -228,7 +229,7 @@ class AutoMLSMBO(object):
 
         # the number of parallel workers/jobs
         self.n_jobs = n_jobs
-        self.start_dask_backend = start_dask_backend
+        self.dask_client = dask_client
 
         # Evaluation
         self.resampling_strategy = resampling_strategy
@@ -482,7 +483,7 @@ class AutoMLSMBO(object):
             'ta_kwargs': ta_kwargs,
             'metalearning_configurations': metalearning_configurations,
             'n_jobs': self.n_jobs,
-            'start_dask_backend': self.start_dask_backend,
+            'dask_client': self.dask_client,
         }
         if self.get_smac_object_callback is not None:
             smac = self.get_smac_object_callback(**smac_args)

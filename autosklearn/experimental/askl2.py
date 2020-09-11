@@ -46,7 +46,7 @@ def get_smac_object_callback(portfolio):
         ta_kwargs,
         metalearning_configurations,
         n_jobs,
-        start_dask_backend,
+        dask_client,
     ):
         from smac.facade.smac_ac_facade import SMAC4AC
         from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
@@ -68,7 +68,7 @@ def get_smac_object_callback(portfolio):
             initial_configurations=initial_configurations,
             run_id=seed,
             n_jobs=n_jobs,
-            start_dask_backend=start_dask_backend,
+            dask_client=dask_client,
         )
     return get_smac_object
 
@@ -81,7 +81,7 @@ def get_sh_object_callback(budget_type, eta, initial_budget, portfolio):
         ta_kwargs,
         metalearning_configurations,
         n_jobs,
-        start_dask_backend,
+        dask_client,
     ):
         from smac.facade.smac_ac_facade import SMAC4AC
         from smac.intensification.parallel_successive_halving import ParallelSuccessiveHalving
@@ -111,7 +111,7 @@ def get_sh_object_callback(budget_type, eta, initial_budget, portfolio):
                 'eta': eta,
                 'min_chall': 1,
             },
-            start_dask_backend=start_dask_backend,
+            dask_client=dask_client,
             n_jobs=n_jobs,
         )
         smac4ac.solver.epm_chooser.min_samples_model = int(

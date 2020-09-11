@@ -1,15 +1,15 @@
 # -*- encoding: utf-8 -*-
-import copy
-import multiprocessing
-from typing import Optional, List, Dict
 
+from typing import Optional, Dict
+
+import dask.distributed
+import joblib
 import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.utils.multiclass import type_of_target
-import joblib
 
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, AutoML
-from autosklearn.util.backend import create, get_randomized_directory_names
+from autosklearn.util.backend import create
 
 
 class AutoSklearnEstimator(BaseEstimator):
@@ -36,7 +36,7 @@ class AutoSklearnEstimator(BaseEstimator):
         delete_tmp_folder_after_terminate=True,
         delete_output_folder_after_terminate=True,
         n_jobs: Optional[int] = None,
-        start_dask_backend: bool = False,
+        dask_client: Optional[dask.distributed.Client] = None,
         disable_evaluator_output=False,
         get_smac_object_callback=None,
         smac_scenario_args=None,
@@ -176,14 +176,12 @@ class AutoSklearnEstimator(BaseEstimator):
             an ensemble. Ensemble building is not affected by ``n_jobs`` but
             can be controlled by the number of models in the ensemble. In
             contrast to most scikit-learn models, ``n_jobs`` given in the
-            constructor is not applied to the ``predict()`` method.
+            constructor is not applied to the ``predict()`` method. If 
+            ``dask_client`` is None, a new dask client is created.
             
-        start_dask_backend : bool
-            Whether to create a dask backend for evaluating configurations in 
-            parallel. This will be automatically done if ``n_jobs > 1``. Setting
-            this to true requires to guard the auto-sklearn code with 
-            `if __name__ == '__main__'` and allows adding additional workers
-            from other processes or scripts.
+        dask_client : dask.distributed.Client, optional
+            User-created dask client, can be used to start a dask cluster and then 
+            attach auto-sklearn to it.
 
         disable_evaluator_output: bool or list, optional (False)
             If True, disable model and prediction output. Cannot be used
@@ -259,7 +257,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
         self.delete_output_folder_after_terminate = delete_output_folder_after_terminate
         self.n_jobs = n_jobs
-        self.start_dask_backend = start_dask_backend
+        self.dask_client = dask_client
         self.disable_evaluator_output = disable_evaluator_output
         self.get_smac_object_callback = get_smac_object_callback
         self.smac_scenario_args = smac_scenario_args
@@ -270,7 +268,6 @@ class AutoSklearnEstimator(BaseEstimator):
         self.automl_ = None  # type: Optional[AutoML]
         # n_jobs after conversion to a number (b/c default is None)
         self._n_jobs = None
-        self._start_dask_backend = start_dask_backend
         super().__init__()
 
     def build_automl(
@@ -311,7 +308,7 @@ class AutoSklearnEstimator(BaseEstimator):
             resampling_strategy=self.resampling_strategy,
             resampling_strategy_arguments=self.resampling_strategy_arguments,
             n_jobs=self._n_jobs,
-            start_dask_backend=self._start_dask_backend,
+            dask_client=self.dask_client,
             get_smac_object_callback=self.get_smac_object_callback,
             disable_evaluator_output=self.disable_evaluator_output,
             smac_scenario_args=smac_scenario_args,

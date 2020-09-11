@@ -10,6 +10,7 @@ import unittest.mock
 import warnings
 
 from ConfigSpace.read_and_write import json as cs_json
+import dask.distributed
 import numpy as np
 import numpy.ma as ma
 import pandas as pd
@@ -111,7 +112,7 @@ class AutoML(BaseEstimator):
                  resampling_strategy='holdout-iterative-fit',
                  resampling_strategy_arguments=None,
                  n_jobs=None,
-                 start_dask_backend=False,
+                 dask_client: Optional[dask.distributed.Client] = None,
                  precision=32,
                  disable_evaluator_output=False,
                  get_smac_object_callback=None,
@@ -169,7 +170,7 @@ class AutoML(BaseEstimator):
            and 'folds' not in self._resampling_strategy_arguments:
             self._resampling_strategy_arguments['folds'] = 5
         self._n_jobs = n_jobs
-        self._start_dask_backend = start_dask_backend
+        self._dask_client = dask_client
         self.precision = precision
         self._disable_evaluator_output = disable_evaluator_output
         # Check arguments prior to doing anything!
@@ -414,7 +415,7 @@ class AutoML(BaseEstimator):
         self._logger.debug('  resampling_strategy_arguments: %s',
                            str(self._resampling_strategy_arguments))
         self._logger.debug('  n_jobs: %s', str(self._n_jobs))
-        self._logger.debug('  start_dask_backend: %s', str(self._start_dask_backend))
+        self._logger.debug('  dask_client: %s', str(self._dask_client))
         self._logger.debug('  precision: %s', str(self.precision))
         self._logger.debug('  disable_evaluator_output: %s', str(self._disable_evaluator_output))
         self._logger.debug('  get_smac_objective_callback: %s', str(self._get_smac_object_callback))
@@ -583,7 +584,7 @@ class AutoML(BaseEstimator):
                 data_memory_limit=self._data_memory_limit,
                 watcher=self._stopwatch,
                 n_jobs=self._n_jobs,
-                start_dask_backend=self._start_dask_backend,
+                dask_client=self._dask_client,
                 start_num_run=num_run,
                 num_metalearning_cfgs=self._initial_configurations_via_metalearning,
                 config_file=configspace_path,
