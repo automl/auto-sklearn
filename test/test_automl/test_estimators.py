@@ -453,8 +453,8 @@ class EstimatorTest(Base, unittest.TestCase):
         self.assertTrue(_fit_automl_patch.call_args[1]['load_models'])
 
     def test_fit_n_jobs_2(self):
-        tmp = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_pSMAC')
-        output = os.path.join(self.test_dir, '..', '.out_estimator_fit_pSMAC')
+        tmp = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_n_jobs_2')
+        output = os.path.join(self.test_dir, '..', '.out_estimator_fit_n_jobs_2')
         self._setUp(tmp)
         self._setUp(output)
 
@@ -475,6 +475,7 @@ class EstimatorTest(Base, unittest.TestCase):
             n_jobs=2,
             include_estimators=['sgd'],
             include_preprocessors=['no_preprocessing'],
+            max_models_on_disc=None,
         )
         automl.fit(X_train, Y_train)
         n_runs = len(automl.cv_results_['mean_test_score'])
@@ -500,6 +501,8 @@ class EstimatorTest(Base, unittest.TestCase):
             seeds.add(int(ensemble_file.split('.')[0].split('_')[0]))
 
         self.assertEqual(len(seeds), 1)
+        self._tearDown(tmp)
+        self._tearDown(output)
 
     @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.build_automl')
     def test_fit_n_jobs_negative(self, build_automl_patch):
