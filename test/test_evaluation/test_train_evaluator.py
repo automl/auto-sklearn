@@ -1490,7 +1490,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.resampling_strategy = LeaveOneOut
         evaluator.resampling_strategy_args = None
         cv = evaluator.get_splitter(D)
-        self.assertisinstance(cv, LeaveOneOut)
+        self.assertIsInstance(cv, LeaveOneOut)
         next(cv.split(D.data['Y_train'], D.data['Y_train'],
                       groups=evaluator.resampling_strategy_args['groups']))
 
@@ -1501,7 +1501,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.resampling_strategy = LeaveOneOut
         evaluator.resampling_strategy_args = None
         cv = evaluator.get_splitter(D)
-        self.assertisinstance(cv, LeaveOneOut)
+        self.assertIsInstance(cv, LeaveOneOut)
         next(cv.split(D.data['Y_train'], D.data['Y_train'],
                       groups=evaluator.resampling_strategy_args['groups']))
 
@@ -1513,7 +1513,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.resampling_strategy = LeaveOneOut
         evaluator.resampling_strategy_args = None
         cv = evaluator.get_splitter(D)
-        self.assertisinstance(cv, LeaveOneOut)
+        self.assertIsInstance(cv, LeaveOneOut)
         next(cv.split(D.data['Y_train'], D.data['Y_train'],
                       groups=evaluator.resampling_strategy_args['groups']))
 
