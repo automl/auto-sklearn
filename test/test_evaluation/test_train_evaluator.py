@@ -1486,35 +1486,35 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         # LeaveOneOut, classification
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
-        evaluator = trainevaluator()
+        evaluator = TrainEvaluator()
         evaluator.resampling_strategy = LeaveOneOut
-        evaluator.resampling_strategy_args = none
-        cv = evaluator.get_splitter(d)
+        evaluator.resampling_strategy_args = None
+        cv = evaluator.get_splitter(D)
         self.assertisinstance(cv, LeaveOneOut)
-        next(cv.split(d.data['y_train'], d.data['y_train'],
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
                       groups=evaluator.resampling_strategy_args['groups']))
 
         # LeaveOneOut, regression
         D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         D.info['task'] = REGRESSION
-        evaluator = trainevaluator()
+        evaluator = TrainEvaluator()
         evaluator.resampling_strategy = LeaveOneOut
-        evaluator.resampling_strategy_args = none
-        cv = evaluator.get_splitter(d)
+        evaluator.resampling_strategy_args = None
+        cv = evaluator.get_splitter(D)
         self.assertisinstance(cv, LeaveOneOut)
-        next(cv.split(d.data['y_train'], d.data['y_train'],
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
                       groups=evaluator.resampling_strategy_args['groups']))
 
         # LeaveOneOut, multi-output regression
         D.data['Y_train'] = np.array([[0.0, 0.1], [0.2, 0.3], [0.4, 0.5],
                                      [1.0, 1.1], [1.2, 1.3], [1.4, 1.5]])
-        D.info['task'] = multioutput_regression
-        evaluator = trainevaluator()
+        D.info['task'] = MULTIOUTPUT_REGRESSION
+        evaluator = TrainEvaluator()
         evaluator.resampling_strategy = LeaveOneOut
-        evaluator.resampling_strategy_args = none
-        cv = evaluator.get_splitter(d)
+        evaluator.resampling_strategy_args = None
+        cv = evaluator.get_splitter(D)
         self.assertisinstance(cv, LeaveOneOut)
-        next(cv.split(d.data['y_train'], d.data['y_train'],
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
                       groups=evaluator.resampling_strategy_args['groups']))
 
         # LeavePOut, classification with args
