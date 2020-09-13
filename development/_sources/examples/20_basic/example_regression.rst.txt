@@ -85,7 +85,7 @@ Build and fit a regressor
 
  .. code-block:: none
 
-    [WARNING] [2020-09-12 22:00:52,143:AutoMLSMBO(1)::boston] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.9.0-py3.7.egg/autosklearn/metalearning/files/r2_regression_dense
+    [WARNING] [2020-09-13 22:00:55,122:AutoMLSMBO(1)::boston] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.9.0-py3.7.egg/autosklearn/metalearning/files/r2_regression_dense
 
     AutoSklearnRegressor(delete_output_folder_after_terminate=True,
                          delete_tmp_folder_after_terminate=True,
@@ -126,28 +126,21 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    [(0.700000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'gradient_boosting', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.18948621141289435, 'feature_preprocessor:polynomial:degree': 2, 'feature_preprocessor:polynomial:include_bias': 'False', 'feature_preprocessor:polynomial:interaction_only': 'True', 'regressor:gradient_boosting:early_stop': 'train', 'regressor:gradient_boosting:l2_regularization': 4.13409848899288e-07, 'regressor:gradient_boosting:learning_rate': 0.2087626567239271, 'regressor:gradient_boosting:loss': 'least_squares', 'regressor:gradient_boosting:max_bins': 255, 'regressor:gradient_boosting:max_depth': 'None', 'regressor:gradient_boosting:max_iter': 476, 'regressor:gradient_boosting:max_leaf_nodes': 16, 'regressor:gradient_boosting:min_samples_leaf': 1, 'regressor:gradient_boosting:scoring': 'loss', 'regressor:gradient_boosting:tol': 1e-07, 'regressor:gradient_boosting:n_iter_no_change': 5},
+    [(0.480000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'gradient_boosting', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0008550752945309702, 'feature_preprocessor:polynomial:degree': 3, 'feature_preprocessor:polynomial:include_bias': 'True', 'feature_preprocessor:polynomial:interaction_only': 'False', 'regressor:gradient_boosting:early_stop': 'train', 'regressor:gradient_boosting:l2_regularization': 1e-10, 'regressor:gradient_boosting:learning_rate': 0.07121521893026382, 'regressor:gradient_boosting:loss': 'least_squares', 'regressor:gradient_boosting:max_bins': 255, 'regressor:gradient_boosting:max_depth': 'None', 'regressor:gradient_boosting:max_iter': 100, 'regressor:gradient_boosting:max_leaf_nodes': 33, 'regressor:gradient_boosting:min_samples_leaf': 19, 'regressor:gradient_boosting:scoring': 'loss', 'regressor:gradient_boosting:tol': 1e-07, 'regressor:gradient_boosting:n_iter_no_change': 10},
     dataset_properties={
       'task': 4,
       'sparse': False,
       'multioutput': False,
       'target_type': 'regression',
       'signed': False})),
-    (0.240000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'ard_regression', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.04421679216747543, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max': 0.902608800551879, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min': 0.043862599194051256, 'feature_preprocessor:polynomial:degree': 3, 'feature_preprocessor:polynomial:include_bias': 'True', 'feature_preprocessor:polynomial:interaction_only': 'False', 'regressor:ard_regression:alpha_1': 0.0004594313175821536, 'regressor:ard_regression:alpha_2': 6.218480903864204e-05, 'regressor:ard_regression:fit_intercept': 'True', 'regressor:ard_regression:lambda_1': 8.347798917498687e-09, 'regressor:ard_regression:lambda_2': 3.1847683757337924e-06, 'regressor:ard_regression:n_iter': 300, 'regressor:ard_regression:threshold_lambda': 11061.831137895519, 'regressor:ard_regression:tol': 0.048634872817506274},
+    (0.320000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'gradient_boosting', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.18948621141289435, 'feature_preprocessor:polynomial:degree': 2, 'feature_preprocessor:polynomial:include_bias': 'False', 'feature_preprocessor:polynomial:interaction_only': 'True', 'regressor:gradient_boosting:early_stop': 'train', 'regressor:gradient_boosting:l2_regularization': 4.13409848899288e-07, 'regressor:gradient_boosting:learning_rate': 0.2087626567239271, 'regressor:gradient_boosting:loss': 'least_squares', 'regressor:gradient_boosting:max_bins': 255, 'regressor:gradient_boosting:max_depth': 'None', 'regressor:gradient_boosting:max_iter': 476, 'regressor:gradient_boosting:max_leaf_nodes': 16, 'regressor:gradient_boosting:min_samples_leaf': 1, 'regressor:gradient_boosting:scoring': 'loss', 'regressor:gradient_boosting:tol': 1e-07, 'regressor:gradient_boosting:n_iter_no_change': 5},
     dataset_properties={
       'task': 4,
       'sparse': False,
       'multioutput': False,
       'target_type': 'regression',
       'signed': False})),
-    (0.040000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'ard_regression', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.017912772558365757, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 1111, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'uniform', 'feature_preprocessor:polynomial:degree': 3, 'feature_preprocessor:polynomial:include_bias': 'True', 'feature_preprocessor:polynomial:interaction_only': 'False', 'regressor:ard_regression:alpha_1': 8.892503512852394e-05, 'regressor:ard_regression:alpha_2': 1.849101161206877e-08, 'regressor:ard_regression:fit_intercept': 'True', 'regressor:ard_regression:lambda_1': 9.139299182094915e-05, 'regressor:ard_regression:lambda_2': 9.264375359572305e-06, 'regressor:ard_regression:n_iter': 300, 'regressor:ard_regression:threshold_lambda': 68211.52454220322, 'regressor:ard_regression:tol': 0.00044044360037655516},
-    dataset_properties={
-      'task': 4,
-      'sparse': False,
-      'multioutput': False,
-      'target_type': 'regression',
-      'signed': False})),
-    (0.020000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'ard_regression', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0008753945170196778, 'feature_preprocessor:polynomial:degree': 2, 'feature_preprocessor:polynomial:include_bias': 'False', 'feature_preprocessor:polynomial:interaction_only': 'True', 'regressor:ard_regression:alpha_1': 0.0005101944943242209, 'regressor:ard_regression:alpha_2': 9.099757779663528e-07, 'regressor:ard_regression:fit_intercept': 'True', 'regressor:ard_regression:lambda_1': 9.694488787038285e-08, 'regressor:ard_regression:lambda_2': 3.8086717402170065e-06, 'regressor:ard_regression:n_iter': 300, 'regressor:ard_regression:threshold_lambda': 2432.0694582076353, 'regressor:ard_regression:tol': 0.003957061814636345},
+    (0.200000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'ard_regression', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.04421679216747543, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max': 0.902608800551879, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min': 0.043862599194051256, 'feature_preprocessor:polynomial:degree': 3, 'feature_preprocessor:polynomial:include_bias': 'True', 'feature_preprocessor:polynomial:interaction_only': 'False', 'regressor:ard_regression:alpha_1': 0.0004594313175821536, 'regressor:ard_regression:alpha_2': 6.218480903864204e-05, 'regressor:ard_regression:fit_intercept': 'True', 'regressor:ard_regression:lambda_1': 8.347798917498687e-09, 'regressor:ard_regression:lambda_2': 3.1847683757337924e-06, 'regressor:ard_regression:n_iter': 300, 'regressor:ard_regression:threshold_lambda': 11061.831137895519, 'regressor:ard_regression:tol': 0.048634872817506274},
     dataset_properties={
       'task': 4,
       'sparse': False,
@@ -178,7 +171,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.8774967358444163
+    R2 score: 0.896229465503816
 
 
 
@@ -186,7 +179,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  55.045 seconds)
+   **Total running time of the script:** ( 1 minutes  54.874 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_regression.py:
