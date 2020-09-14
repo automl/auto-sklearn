@@ -4,11 +4,9 @@
 Parallel Usage with manual process spawning
 ===========================================
 
-*Auto-sklearn* uses *SMAC* to automatically optimize the hyperparameters of
-the training models. A variant of *SMAC*, called *pSMAC* (parallel SMAC),
-provides a means of running several instances of *auto-sklearn* in a parallel
-mode using several computational resources (detailed information of *pSMAC*
-can be found `here <https://automl.github.io/SMAC3/master/psmac.html>`_).
+*Auto-sklearn* uses
+`dask.distributed <https://distributed.dask.org/en/latest/index.html`>_
+for parallel optimization.
 
 This example shows how to spawn workers for *Auto-sklearn* manually.
 Use this example as a starting point to parallelize *Auto-sklearn*
@@ -19,10 +17,11 @@ on a single machine check out the example
 
 import asyncio
 import multiprocessing
+import subprocess
+import time
 
 import dask
 import dask.distributed
-import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
 
@@ -32,102 +31,127 @@ from autosklearn.constants import MULTICLASS_CLASSIFICATION
 tmp_folder = '/tmp/autosklearn_parallel_2_example_tmp'
 output_folder = '/tmp/autosklearn_parallel_2_example_out'
 
-############################################################################
-# Data Loading
-# ============
-
-X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-X_train, X_test, y_train, y_test = \
-    sklearn.model_selection.train_test_split(X, y, random_state=1)
 
 ############################################################################
-# Define helper functions
-# =======================
+# Dask configuration
+# ==================
 #
-# For this example we need to start Auto-sklearn and the workers in separate
-# processes. We will first spawn Auto-sklearn in a new process to be able to
-# later on still spawn a worker in the main process. The function below
-# demonstrates how to create a dask client given a dask scheduler and pass it
-# to Auto-sklearn. All machine learning pipeline evaluations will go through
-# the dask scheduler, and workers connect to the scheduler, they will pick
-# up work and do pipeline evaluations in parallel. Note: the dask client does
-# not automatically start any workers as it is attached to an existing cluster!
+# Auto-sklearn requires dask workers to not run in the daemon setting
+dask.config.set({'distributed.worker.daemon': False})
 
 
-def run_autosklearn(
-    X_train, y_train, X_test, y_test, tmp_folder, output_folder, scheduler_address
-):
+############################################################################
+# Start worker - Python
+# =====================
+#
+# This function demonstrates how to start a dask worker from python. This
+# is a bit cumbersome and should ideally be done from the command line.
+# We do it here for illustrational purpose, butalso start one worker from
+# the command line below.
 
-    client = dask.distributed.Client(address=scheduler_address)
+# Check the dask docs at
+# https://docs.dask.org/en/latest/setup/python-advanced.html for further
+# information.
 
-    automl = AutoSklearnClassifier(
-        time_left_for_this_task=30,
-        per_run_time_limit=5,
-        ml_memory_limit=1024,
-        tmp_folder=tmp_folder,
-        output_folder=output_folder,
-        seed=777,
-        # n_jobs is ignored internally as we pass a dask client.
-        n_jobs=1,
-        # Pass a dask client which connects to the previously constructed cluster.
-        dask_client=client,
-    )
-    automl.fit(X_train, y_train)
 
-    automl.fit_ensemble(
-        y_train,
-        task=MULTICLASS_CLASSIFICATION,
-        dataset_name='digits',
-        ensemble_size=20,
-        ensemble_nbest=50,
-    )
+def start_python_worker(scheduler_address):
+    dask.config.set({'distributed.worker.daemon': False})
+    async def do_work():
+        async with dask.distributed.Nanny(
+                scheduler_ip=scheduler_address,
+                nthreads=1,
+                lifetime=35,  # automatically shut down the worker so this loop ends
+        ) as worker:
+            await worker.finished()
 
-    predictions = automl.predict(X_test)
-    print(automl.sprint_statistics())
-    print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+    asyncio.get_event_loop().run_until_complete(do_work())
+
+
+############################################################################
+# Start worker - CLI
+# ==================
+#
+# It is also possible to start dask workers from the command line (in fact,
+# one can also start a dask scheduler from the command line), see the
+# `dask cli docs <https://docs.dask.org/en/latest/setup/cli.html>`_ for
+# further information.
+#
+# Again, we need to make sure that we do not start the workers in a daemon
+# mode.
+
+def start_cli_worker(scheduler_address):
+    call_string = (
+        "DASK_DISTRIBUTED__WORKER__DAEMON=False "
+        "dask-worker %s --nthreads 1 --lifetime 35"
+    ) % scheduler_address
+    proc = subprocess.run(call_string, stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE, shell=True, check=True)
+    while proc.returncode is None:
+        time.sleep(1)
 
 
 ############################################################################
 # Start Auto-sklearn
 # ==================
 #
+# We are now ready to start *auto-sklearn.
+#
 # To use auto-sklearn in parallel we must guard the code with
 # ``if __name__ == '__main__'``. We then start a dask cluster as a context,
 # which means that it is automatically stopped one all computation is done.
 if __name__ == '__main__':
+    X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
+    X_train, X_test, y_train, y_test = \
+        sklearn.model_selection.train_test_split(X, y, random_state=1)
 
-    # Auto-sklearn requires dask workers to not run in the daemon setting
-    dask.config.set({'distributed.worker.daemon': False})
-
-    # Create a dask compute cluster
+    # Create a dask compute cluster and a client manually - the former can
+    # be done via command line, too.
     with dask.distributed.LocalCluster(
-        n_workers=1, processes=True, threads_per_worker=1
-    ) as cluster:
+        n_workers=0, processes=True, threads_per_worker=1,
+    ) as cluster, dask.distributed.Client(address=cluster.scheduler_address) as client:
 
-        process = multiprocessing.Process(
-            target=run_autosklearn,
-            args=(
-                X_train, y_train, X_test, y_test,
-                tmp_folder, output_folder, cluster.scheduler_address
-            ),
+        # now we start the two workers, one from within Python, the other
+        # via the command line.
+        process_python_worker = multiprocessing.Process(
+            target=start_python_worker,
+            args=(cluster.scheduler_address,),
         )
-        process.start()
+        process_python_worker.start()
+        process_cli_worker = multiprocessing.Process(
+            target=start_cli_worker,
+            args=(cluster.scheduler_address,),
+        )
+        process_cli_worker.start()
 
-        # Starting a dask worker in python is a bit cumbersome and should ideally
-        # be done from the command line (we do it here only to keep the example
-        # to a single script). Check the dask docs at
-        # https://docs.dask.org/en/latest/setup/python-advanced.html for further
-        # information.
+        # Wait a second for workers to become available
+        time.sleep(1)
 
-        async def do_work():
-            async with dask.distributed.Nanny(
-                scheduler_ip=cluster.scheduler_address,
-                nthreads=1,
-                ncores=3,  # This runs a total of three worker processes
-                lifetime=35,  # automatically shut down the worker so this loop ends
-            ) as worker:
-                await worker.finished()
+        automl = AutoSklearnClassifier(
+            time_left_for_this_task=30,
+            per_run_time_limit=10,
+            ml_memory_limit=1024,
+            tmp_folder=tmp_folder,
+            output_folder=output_folder,
+            seed=777,
+            # n_jobs is ignored internally as we pass a dask client.
+            n_jobs=1,
+            # Pass a dask client which connects to the previously constructed cluster.
+            dask_client=client,
+        )
+        automl.fit(X_train, y_train)
 
-        asyncio.get_event_loop().run_until_complete(do_work())
+        automl.fit_ensemble(
+            y_train,
+            task=MULTICLASS_CLASSIFICATION,
+            dataset_name='digits',
+            ensemble_size=20,
+            ensemble_nbest=50,
+        )
 
-        process.join()
+        predictions = automl.predict(X_test)
+        print(automl.sprint_statistics())
+        print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+
+        # Wait until all workers are closed
+        process_python_worker.join()
+        process_cli_worker.join()

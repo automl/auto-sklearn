@@ -4,14 +4,15 @@
 Parallel Usage  on a single machine
 ===================================
 
-*Auto-sklearn* uses *SMAC* to automatically optimize the hyperparameters of
-the training models. A variant of *SMAC*, called *pSMAC* (parallel SMAC),
-provides a means of running several instances of *auto-sklearn* in a parallel
-mode using several computational resources (detailed information of *pSMAC*
-can be found `here <https://automl.github.io/SMAC3/master/psmac.html>`_).
+*Auto-sklearn* uses
+`dask.distributed <https://distributed.dask.org/en/latest/index.html`>_
+for parallel optimization.
 
 This example shows how to start *Auto-sklearn* to use multiple cores on a
-single machine. To run *Auto-sklearn* on multiple machines check the example
+single machine. Using this mode, *Auto-sklearn* starts a dask cluster,
+manages the workers and takes care of shutting down the cluster once the
+computation is done.
+To run *Auto-sklearn* on multiple machines check the example
 `Parallel Usage with manual process spawning <example_parallel_manual_spawning.html>`_.
 """
 
