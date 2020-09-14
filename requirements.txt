@@ -3,10 +3,12 @@ setuptools
 numpy>=1.9.0
 scipy>=0.14.1
 
+joblib
 scikit-learn>=0.22.0,<0.23
 
+dask
+dask-distributed
 lockfile
-joblib
 pyyaml
 pandas<1.0
 liac-arff
