@@ -7,7 +7,7 @@ joblib
 scikit-learn>=0.22.0,<0.23
 
 dask
-dask-distributed
+distributed
 lockfile
 pyyaml
 pandas<1.0
