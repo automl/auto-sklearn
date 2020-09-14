@@ -53,7 +53,10 @@ X_train, X_test, y_train, y_test = \
 # up work and do pipeline evaluations in parallel. Note: the dask client does
 # not automatically start any workers as it is attached to an existing cluster!
 
-def run_autosklearn(X_train, y_train, X_test, y_test, tmp_folder, output_folder, scheduler_address):
+
+def run_autosklearn(
+    X_train, y_train, X_test, y_test, tmp_folder, output_folder, scheduler_address
+):
 
     client = dask.distributed.Client(address=scheduler_address)
 
@@ -83,6 +86,7 @@ def run_autosklearn(X_train, y_train, X_test, y_test, tmp_folder, output_folder,
     print(automl.sprint_statistics())
     print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 
+
 ############################################################################
 # Start Auto-sklearn
 # ==================
@@ -102,19 +106,18 @@ if __name__ == '__main__':
 
         process = multiprocessing.Process(
             target=run_autosklearn,
-            args=(X_train, y_train, X_test, y_test, tmp_folder, output_folder, cluster.scheduler_address),
+            args=(
+                X_train, y_train, X_test, y_test,
+                tmp_folder, output_folder, cluster.scheduler_address
+            ),
         )
         process.start()
 
-############################################################################
-# Start a worker
-# ==============
-#
-# Starting a dask worker in python is a bit cumbersome and should ideally
-# be done from the command line (we do it here only to keep the example
-# to a single script). Check the dask docs at
-# https://docs.dask.org/en/latest/setup/python-advanced.html for further
-# information.
+        # Starting a dask worker in python is a bit cumbersome and should ideally
+        # be done from the command line (we do it here only to keep the example
+        # to a single script). Check the dask docs at
+        # https://docs.dask.org/en/latest/setup/python-advanced.html for further
+        # information.
 
         async def do_work():
             async with dask.distributed.Nanny(

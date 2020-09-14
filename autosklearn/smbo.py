@@ -16,7 +16,6 @@ from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
 from smac.scenario.scenario import Scenario
 from smac.tae.serial_runner import SerialRunner
 from smac.tae.dask_runner import DaskParallelRunner
-from smac.optimizer import pSMAC
 
 
 import autosklearn.metalearning

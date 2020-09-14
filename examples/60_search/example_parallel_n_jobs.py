@@ -48,22 +48,6 @@ if __name__ == '__main__':
     )
     automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
-############################################################################
-# Print the final ensemble constructed by auto-sklearn
-# ====================================================
-    print(automl.show_models())
-
-############################################################################
-# Print statistics about the auto-sklearn run
-# ===========================================
-
-# Print statistics about the auto-sklearn run such as number of
-# iterations, number of models failed with a time out.
+    # Print statistics about the auto-sklearn run such as number of
+    # iterations, number of models failed with a time out.
     print(automl.sprint_statistics())
-
-############################################################################
-# Get the Score of the final ensemble
-# ===================================
-
-    predictions = automl.predict(X_test)
-    print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))

@@ -25,12 +25,13 @@ list or numpy arrays as there is no per-column dtype (further details in the exa
 import time
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
 
-from smac.tae.execute_ta_run import StatusType
+from smac.tae import StatusType
 
 import autosklearn.classification
 
@@ -117,9 +118,28 @@ print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 # ===================================
 
 ensemble_performance_frame = pd.DataFrame(cls.automl_.ensemble_performance_history)
-ensemble_performance_frame = ensemble_performance_frame.cummax()
+best_values = pd.Series({'ensemble_optimization_score': -np.inf,
+                         'ensemble_test_score': -np.inf})
+for idx in ensemble_performance_frame.index:
+    if (
+        ensemble_performance_frame.loc[idx, 'ensemble_optimization_score']
+        > best_values['ensemble_optimization_score']
+    ):
+        best_values = ensemble_performance_frame.loc[idx]
+    ensemble_performance_frame.loc[idx] = best_values
+
 individual_performance_frame = get_runhistory_models_performance(cls)
-individual_performance_frame = individual_performance_frame.cummax()
+best_values = pd.Series({'single_best_optimization_score': -np.inf,
+                         'single_best_test_score': -np.inf,
+                         'single_best_train_score': -np.inf})
+for idx in individual_performance_frame.index:
+    if (
+        individual_performance_frame.loc[idx, 'single_best_optimization_score']
+        > best_values['single_best_optimization_score']
+    ):
+        best_values = individual_performance_frame.loc[idx]
+    individual_performance_frame.loc[idx] = best_values
+
 pd.merge(
     ensemble_performance_frame,
     individual_performance_frame,

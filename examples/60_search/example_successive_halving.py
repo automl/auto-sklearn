@@ -30,14 +30,14 @@ def get_smac_object_callback(budget_type):
         ta_kwargs,
         metalearning_configurations,
         n_jobs,
-        start_dask_backend,
+        dask_client,
     ):
         from smac.facade.smac_ac_facade import SMAC4AC
         from smac.intensification.successive_halving import SuccessiveHalving
         from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
         from smac.scenario.scenario import Scenario
 
-        if n_jobs > 1 or start_dask_backend:
+        if n_jobs > 1 or dask_client:
             raise ValueError("Please make sure to guard the code invoking Auto-sklearn by "
                              "`if __name__ == '__main__'` and remove this exception.")
 
@@ -66,7 +66,7 @@ def get_smac_object_callback(budget_type):
                 'eta': 2,
                 'min_chall': 1},
             n_jobs=n_jobs,
-            start_dask_backend=start_dask_backend,
+            dask_client=dask_client,
         )
     return get_smac_object
 

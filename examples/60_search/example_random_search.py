@@ -41,11 +41,11 @@ def get_roar_object_callback(
     ta_kwargs,
     metalearning_configurations,
     n_jobs,
-    start_dask_backend,
+    dask_client,
 ):
     """Random online adaptive racing."""
 
-    if n_jobs > 1 or start_dask_backend:
+    if n_jobs > 1 or dask_client:
         raise ValueError("Please make sure to guard the code invoking Auto-sklearn by "
                          "`if __name__ == '__main__'` and remove this exception.")
 
@@ -56,7 +56,7 @@ def get_roar_object_callback(
         tae_runner=ta,
         tae_runner_kwargs=ta_kwargs,
         run_id=seed,
-        start_dask_backend=start_dask_backend,
+        dask_client=dask_client,
         n_jobs=n_jobs,
     )
 
@@ -91,11 +91,11 @@ def get_random_search_object_callback(
         ta_kwargs,
         metalearning_configurations,
         n_jobs,
-        start_dask_backend
+        dask_client
 ):
     """Random search."""
 
-    if n_jobs > 1 or start_dask_backend:
+    if n_jobs > 1 or dask_client:
         raise ValueError("Please make sure to guard the code invoking Auto-sklearn by "
                          "`if __name__ == '__main__'` and remove this exception.")
 
@@ -108,7 +108,7 @@ def get_random_search_object_callback(
         tae_runner=ta,
         tae_runner_kwargs=ta_kwargs,
         run_id=seed,
-        use_dask_backend=start_dask_backend,
+        dask_client=dask_client,
         n_jobs=n_jobs,
     )
 

@@ -109,8 +109,9 @@ class EnsembleBuilder(multiprocessing.Process):
         self.task_type = task_type
         self.metric = metric
         self.time_limit = limit  # time limit
-        self.time_left = limit  # define this here so that it is defined in case the ensemble
-                                # builder is called without starting a separate process
+        # define time_left here so that it is defined in case the ensemble builder is called
+        # without starting a separate process
+        self.time_left = limit
         self.ensemble_size = ensemble_size
         self.performance_range_threshold = performance_range_threshold
 

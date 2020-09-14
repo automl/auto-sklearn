@@ -860,7 +860,7 @@ class AutoML(BaseEstimator):
         elif self._disable_evaluator_output is False or \
                 (isinstance(self._disable_evaluator_output, list) and
                  'model' not in self._disable_evaluator_output):
-            model_names = self._backend.list_all_models(seed)
+            model_names = self._backend.list_all_models(self._seed)
 
             if len(model_names) == 0 and self._resampling_strategy not in \
                     ['partial-cv', 'partial-cv-iterative-fit']:
