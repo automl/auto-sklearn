@@ -21,7 +21,7 @@ from autosklearn.metrics import accuracy, log_loss, balanced_accuracy
 import autosklearn.pipeline.util as putil
 from autosklearn.util.logging_ import setup_logger, get_logger
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION, REGRESSION
-from smac.tae.execute_ta_run import StatusType
+from smac.tae import StatusType
 
 sys.path.append(os.path.dirname(__file__))
 from base import Base  # noqa (E402: module level import not at top of file)

@@ -4,6 +4,8 @@ import sys
 import unittest
 import unittest.mock
 
+import dask
+import dask.distributed
 import joblib
 from joblib import cpu_count
 import numpy as np
@@ -23,6 +25,7 @@ from autosklearn.automl import AutoMLClassifier
 from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier
+from autosklearn.smbo import get_smac_object
 
 sys.path.append(os.path.dirname(__file__))
 from base import Base  # noqa (E402: module level import not at top of file)
@@ -57,33 +60,6 @@ class EstimatorTest(Base, unittest.TestCase):
     #
     #     del automl
     #     self._tearDown(output)
-
-    def test_pSMAC_wrong_arguments(self):
-        X = np.zeros((100, 100))
-        y = np.zeros((100, ))
-        self.assertRaisesRegex(
-            ValueError,
-            "If shared_mode == True tmp_folder must not "
-            "be None.",
-            lambda shared_mode:
-            AutoSklearnClassifier(
-                shared_mode=shared_mode,
-            ).fit(X, y),
-            shared_mode=True
-        )
-
-        self.assertRaisesRegex(
-            ValueError,
-            "If shared_mode == True output_folder must not "
-            "be None.",
-            lambda shared_mode, tmp_folder:
-            AutoSklearnClassifier(
-                shared_mode=shared_mode,
-                tmp_folder=tmp_folder,
-            ).fit(X, y),
-            shared_mode=True,
-            tmp_folder='/tmp/duitaredxtvbedb'
-        )
 
     def test_feat_type_wrong_arguments(self):
         cls = AutoSklearnClassifier()
@@ -237,122 +213,6 @@ class EstimatorTest(Base, unittest.TestCase):
             self.fail("reg.fit() raised ValueError while fitting "
                       "binary targets")
 
-    def test_fit_pSMAC(self):
-        tmp = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_pSMAC')
-        output = os.path.join(self.test_dir, '..', '.out_estimator_fit_pSMAC')
-        self._setUp(tmp)
-        self._setUp(output)
-
-        X_train, Y_train, X_test, Y_test = putil.get_dataset('breast_cancer')
-
-        # test parallel Classifier to predict classes, not only indices
-        Y_train += 1
-        Y_test += 1
-
-        automl = AutoSklearnClassifier(
-            time_left_for_this_task=30,
-            per_run_time_limit=5,
-            output_folder=output,
-            tmp_folder=tmp,
-            shared_mode=True,
-            seed=1,
-            initial_configurations_via_metalearning=0,
-            ensemble_size=0,
-        )
-        automl.fit(X_train, Y_train)
-        n_models_fit = len(automl.cv_results_['mean_test_score'])
-        cv_results = automl.cv_results_['mean_test_score']
-
-        automl = AutoSklearnClassifier(
-            time_left_for_this_task=30,
-            per_run_time_limit=5,
-            output_folder=output,
-            tmp_folder=tmp,
-            shared_mode=True,
-            seed=2,
-            initial_configurations_via_metalearning=0,
-            ensemble_size=0,
-        )
-        automl.fit(X_train, Y_train)
-        n_models_fit_2 = len(automl.cv_results_['mean_test_score'])
-
-        # Check that the results from the first run were actually read by the
-        # second run
-        self.assertGreater(n_models_fit_2, n_models_fit)
-        for score in cv_results:
-            self.assertIn(
-                score,
-                automl.cv_results_['mean_test_score'],
-                msg=str((automl.cv_results_['mean_test_score'], cv_results)),
-            )
-
-        # Create a 'dummy model' for the first run, which has an accuracy of
-        # more than 99%; it should be in the final ensemble if the ensemble
-        # building of the second AutoSklearn classifier works correct
-        true_targets_ensemble_path = os.path.join(tmp, '.auto-sklearn',
-                                                  'true_targets_ensemble.npy')
-        with open(true_targets_ensemble_path, 'rb') as fh:
-            true_targets_ensemble = np.load(fh, allow_pickle=True)
-        true_targets_ensemble[-1] = 1 if true_targets_ensemble[-1] != 1 else 0
-        true_targets_ensemble = true_targets_ensemble.astype(int)
-        probas = np.zeros((len(true_targets_ensemble), 2), dtype=float)
-
-        for i, value in enumerate(true_targets_ensemble):
-            probas[i, value] = 1.0
-        dummy_predictions_path = os.path.join(
-            tmp,
-            '.auto-sklearn',
-            'predictions_ensemble',
-            'predictions_ensemble_0_999_0.0.npy',
-        )
-        with open(dummy_predictions_path, 'wb') as fh:
-            np.save(fh, probas)
-
-        probas_test = np.zeros((len(Y_test), 2), dtype=float)
-        for i, value in enumerate(Y_test):
-            probas_test[i, value - 1] = 1.0
-
-        dummy = ArrayReturningDummyPredictor(probas_test)
-        context = BackendContext(tmp, output, False, False, True)
-        backend = Backend(context)
-        model_path = backend.get_model_path(seed=0, idx=999, budget=0.0)
-        backend.save_model(model=dummy, filepath=model_path)
-        backend.note_numrun_as_done(seed=0, num_run=999)
-
-        automl = AutoSklearnClassifier(
-            time_left_for_this_task=30,
-            per_run_time_limit=5,
-            output_folder=output,
-            tmp_folder=tmp,
-            shared_mode=True,
-            seed=3,
-            initial_configurations_via_metalearning=0,
-            ensemble_size=0,
-            metric=accuracy,
-        )
-        automl.fit_ensemble(Y_train, task=BINARY_CLASSIFICATION,
-                            precision='32',
-                            dataset_name='breast_cancer',
-                            ensemble_size=20,
-                            ensemble_nbest=50,
-                            )
-
-        predictions = automl.predict(X_test)
-        score = sklearn.metrics.accuracy_score(Y_test, predictions)
-
-        self.assertEqual(len(os.listdir(os.path.join(tmp, '.auto-sklearn',
-                                                     'ensembles'))), 1)
-        self.assertGreaterEqual(score, 0.90)
-        self.assertEqual(automl._automl[0]._task, BINARY_CLASSIFICATION)
-
-        models = automl._automl[0].models_
-        classifier_types = [type(c) for c in models.values()]
-        self.assertIn(ArrayReturningDummyPredictor, classifier_types)
-
-        del automl
-        self._tearDown(tmp)
-        self._tearDown(output)
-
     def test_cv_results(self):
         # TODO restructure and actually use real SMAC output from a long run
         # to do this unittest!
@@ -366,7 +226,6 @@ class EstimatorTest(Base, unittest.TestCase):
                                     per_run_time_limit=5,
                                     output_folder=output,
                                     tmp_folder=tmp,
-                                    shared_mode=False,
                                     seed=1,
                                     initial_configurations_via_metalearning=0,
                                     ensemble_size=0)
@@ -383,79 +242,9 @@ class EstimatorTest(Base, unittest.TestCase):
         self._tearDown(tmp)
         self._tearDown(output)
 
-    @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.build_automl')
-    @unittest.mock.patch('multiprocessing.Process', autospec=True)
-    @unittest.mock.patch('autosklearn.estimators._fit_automl')
-    def test_fit_n_jobs(self, _fit_automl_patch, Process_patch, build_automl_patch):
-        # Return the process patch on call to __init__
-        Process_patch.return_value = Process_patch
-
-        cls = AutoSklearnEstimator()
-        cls.fit()
-        self.assertEqual(build_automl_patch.call_count, 1)
-        self.assertEqual(len(build_automl_patch.call_args[0]), 0)
-        self.assertEqual(
-            build_automl_patch.call_args[1],
-            {
-                'seed': 1,
-                'shared_mode': False,
-                'ensemble_size': 50,
-                'initial_configurations_via_metalearning': 25,
-                'output_folder': None,
-                'tmp_folder': None
-            },
-        )
-        self.assertEqual(Process_patch.call_count, 0)
-
-        cls = AutoSklearnEstimator(n_jobs=5)
-        cls.fit()
-        # Plus the one from the first call
-        self.assertEqual(build_automl_patch.call_count, 6)
-        self.assertEqual(len(cls._automl), 5)
-        for i in range(1, 6):
-            self.assertEqual(len(build_automl_patch.call_args_list[i][0]), 0)
-            self.assertEqual(len(build_automl_patch.call_args_list[i][1]), 7)
-            # Thee seed is a magic mock so there is nothing to compare here...
-            self.assertIn('seed', build_automl_patch.call_args_list[i][1])
-            self.assertEqual(
-                build_automl_patch.call_args_list[i][1]['shared_mode'],
-                True,
-            )
-            self.assertEqual(
-                build_automl_patch.call_args_list[i][1]['ensemble_size'],
-                50 if i == 1 else 0,
-            )
-            self.assertEqual(
-                build_automl_patch.call_args_list[i][1][
-                    'initial_configurations_via_metalearning'
-                ],
-                25 if i == 1 else 0,
-            )
-            if i > 1:
-                self.assertEqual(
-                    build_automl_patch.call_args_list[i][1][
-                        'smac_scenario_args']['initial_incumbent'],
-                    'RANDOM',
-                )
-
-        self.assertEqual(Process_patch.start.call_count, 4)
-        for i in range(2, 6):
-            self.assertEqual(
-                len(Process_patch.call_args_list[i - 2][1]['kwargs']), 3,
-            )
-            self.assertFalse(
-                Process_patch.call_args_list[i - 2][1]['kwargs']['load_models']
-            )
-        self.assertEqual(Process_patch.join.call_count, 4)
-
-        self.assertEqual(_fit_automl_patch.call_count, 1)
-        self.assertEqual(len(_fit_automl_patch.call_args[0]), 0)
-        self.assertEqual(len(_fit_automl_patch.call_args[1]), 3)
-        self.assertTrue(_fit_automl_patch.call_args[1]['load_models'])
-
-    def test_fit_n_jobs_2(self):
-        tmp = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_pSMAC')
-        output = os.path.join(self.test_dir, '..', '.out_estimator_fit_pSMAC')
+    def test_fit_n_jobs(self):
+        tmp = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_n_jobs')
+        output = os.path.join(self.test_dir, '..', '.out_estimator_fit_n_jobs')
         self._setUp(tmp)
         self._setUp(output)
 
@@ -464,6 +253,18 @@ class EstimatorTest(Base, unittest.TestCase):
         # test parallel Classifier to predict classes, not only indices
         Y_train += 1
         Y_test += 1
+
+        class get_smac_object_wrapper:
+
+            def __call__(self, *args, **kwargs):
+                self.n_jobs = kwargs['n_jobs']
+                smac = get_smac_object(*args, **kwargs)
+                self.dask_n_jobs = smac.solver.tae_runner.n_workers
+                self.dask_client_n_jobs = len(
+                    smac.solver.tae_runner.client.scheduler_info()['workers']
+                )
+                return smac
+        get_smac_object_wrapper_instance = get_smac_object_wrapper()
 
         automl = AutoSklearnClassifier(
             time_left_for_this_task=30,
@@ -476,38 +277,46 @@ class EstimatorTest(Base, unittest.TestCase):
             n_jobs=2,
             include_estimators=['sgd'],
             include_preprocessors=['no_preprocessing'],
+            get_smac_object_callback=get_smac_object_wrapper_instance
         )
         automl.fit(X_train, Y_train)
+
+        # Test that the argument is correctly passed to SMAC
+        self.assertEqual(getattr(get_smac_object_wrapper_instance, 'n_jobs'), 2)
+        self.assertEqual(getattr(get_smac_object_wrapper_instance, 'dask_n_jobs'), 2)
+        self.assertEqual(getattr(get_smac_object_wrapper_instance, 'dask_client_n_jobs'), 2)
+
         n_runs = len(automl.cv_results_['mean_test_score'])
 
-        predictions_dir = automl._automl[0]._backend._get_prediction_output_dir(
+        predictions_dir = automl.automl_._backend._get_prediction_output_dir(
             'ensemble'
         )
         predictions = os.listdir(predictions_dir)
-        # two instances of the dummy
-        self.assertEqual(n_runs, len(predictions) - 2, msg=str(predictions))
+        # one instances of the dummy
+        self.assertEqual(n_runs, len(predictions) - 1, msg=str(predictions))
 
         seeds = set()
         for predictions_file in predictions:
             seeds.add(int(predictions_file.split('.')[0].split('_')[2]))
+        self.assertEqual(len(seeds), 1)
 
-        self.assertEqual(len(seeds), 2)
-
-        ensemble_dir = automl._automl[0]._backend.get_ensemble_dir()
+        ensemble_dir = automl.automl_._backend.get_ensemble_dir()
         ensembles = os.listdir(ensemble_dir)
 
         seeds = set()
         for ensemble_file in ensembles:
             seeds.add(int(ensemble_file.split('.')[0].split('_')[0]))
-
         self.assertEqual(len(seeds), 1)
+
+        self._tearDown(tmp)
+        self._tearDown(output)
 
     @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.build_automl')
     def test_fit_n_jobs_negative(self, build_automl_patch):
         n_cores = cpu_count()
         cls = AutoSklearnEstimator(n_jobs=-1)
         cls.fit()
-        self.assertEqual(len(cls._automl), n_cores)
+        self.assertEqual(cls._n_jobs, n_cores)
 
     def test_get_number_of_available_cores(self):
         n_cores = cpu_count()
@@ -687,8 +496,8 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         # Make sure that at least better than random.
         # accuracy in sklearn needs valid data
         # It should be 0.555 as the dataset is unbalanced.
-        y = automl._automl[0].InputValidator.encode_target(y)
-        prediction = automl._automl[0].InputValidator.encode_target(automl.predict(X))
+        y = automl.automl_.InputValidator.encode_target(y)
+        prediction = automl.automl_.InputValidator.encode_target(automl.predict(X))
         self.assertTrue(accuracy(y, prediction) > 0.555)
 
 
