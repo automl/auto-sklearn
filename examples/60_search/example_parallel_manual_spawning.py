@@ -17,11 +17,10 @@ on a single machine check out the example
 `Parallel Usage on a single machine <example_parallel_n_jobs.html>`_.
 """
 
-import json
+import asyncio
 import multiprocessing
-import os
-import time
 
+import dask
 import dask.distributed
 import sklearn.model_selection
 import sklearn.datasets
@@ -29,9 +28,6 @@ import sklearn.metrics
 
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.constants import MULTICLASS_CLASSIFICATION
-
-import dask
-from dask.distributed import Nanny
 
 tmp_folder = '/tmp/autosklearn_parallel_2_example_tmp'
 output_folder = '/tmp/autosklearn_parallel_2_example_out'
@@ -48,12 +44,14 @@ X_train, X_test, y_train, y_test = \
 # Define helper functions
 # =======================
 #
-# For this example we need to start Auto-sklearn in a separate process
-# first. You can think of this as starting Auto-sklearn on machine 1.
-# Auto-sklearn then spawns a dask server locally. Next, we create
-# a worker and connect to that server in the main process. You can think
-# of this as starting the worker on machine 2. All further processing
-# like predicting needs to be done in the process running Auto-sklearn.
+# For this example we need to start Auto-sklearn and the workers in separate
+# processes. We will first spawn Auto-sklearn in a new process to be able to
+# later on still spawn a worker in the main process. The function below
+# demonstrates how to create a dask client given a dask scheduler and pass it
+# to Auto-sklearn. All machine learning pipeline evaluations will go through
+# the dask scheduler, and workers connect to the scheduler, they will pick
+# up work and do pipeline evaluations in parallel. Note: the dask client does
+# not automatically start any workers as it is attached to an existing cluster!
 
 def run_autosklearn(X_train, y_train, X_test, y_test, tmp_folder, output_folder, scheduler_address):
 
@@ -86,10 +84,12 @@ def run_autosklearn(X_train, y_train, X_test, y_test, tmp_folder, output_folder,
     print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 
 ############################################################################
-# Start Auto-sklearn on "Machine 1"
-# =================================
+# Start Auto-sklearn
+# ==================
 #
-# To use auto-sklearn in parallel we must guard the code
+# To use auto-sklearn in parallel we must guard the code with
+# ``if __name__ == '__main__'``. We then start a dask cluster as a context,
+# which means that it is automatically stopped one all computation is done.
 if __name__ == '__main__':
 
     # Auto-sklearn requires dask workers to not run in the daemon setting
@@ -107,21 +107,17 @@ if __name__ == '__main__':
         process.start()
 
 ############################################################################
-# Start a worker on "Machine 2"
-# =============================
+# Start a worker
+# ==============
 #
-# To do so, we first need to obtain information on how to connect to the
-# server. This is stored in a subdirectory of the temporary directory given
-# above.
+# Starting a dask worker in python is a bit cumbersome and should ideally
+# be done from the command line (we do it here only to keep the example
+# to a single script). Check the dask docs at
+# https://docs.dask.org/en/latest/setup/python-advanced.html for further
+# information.
 
-        # Starting a dask worker in python is a bit cumbersome and should ideally
-        # be done from the command line (we do it here only to keep the example
-        # to a single script). Check the dask docs at
-        # https://docs.dask.org/en/latest/setup/python-advanced.html for further
-        # information
-        import asyncio
         async def do_work():
-            async with Nanny(
+            async with dask.distributed.Nanny(
                 scheduler_ip=cluster.scheduler_address,
                 nthreads=1,
                 ncores=3,  # This runs a total of three worker processes
