@@ -1,7 +1,5 @@
 set -e
 
-python --version
-
 if [[ "$DISTRIB" == "conda" ]]; then
 
     wget $MINICONDA_URL -O miniconda.sh
