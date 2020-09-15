@@ -11,7 +11,7 @@ import numpy as np
 import pynisher
 from smac.runhistory.runhistory import RunInfo
 from smac.stats.stats import Stats
-from smac.tae import StatusType, BudgetExhaustedException
+from smac.tae import StatusType
 from smac.utils.constants import MAXINT
 
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
