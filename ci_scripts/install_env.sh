@@ -1,3 +1,5 @@
+set -e
+
 python --version
 
 if [[ "$DISTRIB" == "conda" ]]; then
@@ -12,7 +14,7 @@ if [[ "$DISTRIB" == "conda" ]]; then
 
 else
 
-    sudo apt install -y python-dev python-pip
+    sudo apt install -y python-dev
     pip install --upgrade setuptools
 
     # install linux packages
@@ -23,3 +25,8 @@ else
     sudo ln -s /usr/bin/swig3.0 /usr/bin/swig
 
 fi
+
+python -V
+which python
+pip --version
+which pip
