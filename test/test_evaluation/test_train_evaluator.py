@@ -15,7 +15,7 @@ from sklearn.model_selection import GroupKFold, GroupShuffleSplit, \
     PredefinedSplit, RepeatedKFold, RepeatedStratifiedKFold, ShuffleSplit, \
     StratifiedKFold, StratifiedShuffleSplit, TimeSeriesSplit
 import sklearn.model_selection
-from smac.tae.execute_ta_run import StatusType, TAEAbortException
+from smac.tae import StatusType, TAEAbortException
 
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.evaluation.util import read_queue

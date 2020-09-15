@@ -4,12 +4,14 @@ import logging
 import math
 import multiprocessing
 from queue import Empty
+import time
 import traceback
-from typing import Optional
+from typing import Tuple
 
 import numpy as np
 import pynisher
-from smac.tae import StatusType, BudgetExhaustedException, TAEAbortException
+from smac.runhistory.runhistory import RunInfo, RunValue
+from smac.tae import StatusType, TAEAbortException
 from smac.tae.execute_func import AbstractTAFunc
 
 from ConfigSpace import Configuration
@@ -145,55 +147,37 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         else:
             self._get_test_loss = False
 
-    def start(self, config: Configuration,
-              instance: Optional[str],
-              cutoff: float = None,
-              seed: int = 12345,
-              budget: float = 0.0,
-              instance_specific: Optional[str] = None,
-              capped: bool = False):
+    def run_wrapper(
+        self,
+        run_info: RunInfo,
+    ) -> Tuple[RunInfo, RunValue]:
         """
-        wrapper function for ExecuteTARun.start() to cap the target algorithm
+        wrapper function for ExecuteTARun.run_wrapper() to cap the target algorithm
         runtime if it would run over the total allowed runtime.
 
         Parameters
         ----------
-            config : Configuration
-                mainly a dictionary param -> value
-            instance : string
-                problem instance
-            cutoff : float
-                runtime cutoff
-            seed : int
-                random seed
-            budget : float
-                A positive, real-valued number representing an arbitrary limit to the target
-                algorithm. Handled by the target algorithm internally
-            instance_specific: str
-                instance specific information (e.g., domain file or solution)
-            capped: bool
-                if true and status is StatusType.TIMEOUT,
-                uses StatusType.CAPPED
+        run_info : RunInfo
+            Object that contains enough information to execute a configuration run in
+            isolation.
         Returns
         -------
-            status: enum of StatusType (int)
-                {SUCCESS, TIMEOUT, CRASHED, ABORT}
-            cost: float
-                cost/regret/quality (float) (None, if not returned by TA)
-            runtime: float
-                runtime (None if not returned by TA)
-            additional_info: dict
-                all further additional run information
+        RunInfo:
+            an object containing the configuration launched
+        RunValue:
+            Contains information about the status/performance of config
         """
         if self.budget_type is None:
-            if budget != 0:
-                raise ValueError('If budget_type is None, budget must be.0, but is %f' % budget)
+            if run_info.budget != 0:
+                raise ValueError(
+                    'If budget_type is None, budget must be.0, but is %f' % run_info.budget
+                )
         else:
-            if budget == 0:
-                budget = 100
-            elif budget <= 0 or budget > 100:
+            if run_info.budget == 0:
+                run_info = run_info._replace(budget=100)
+            elif run_info.budget <= 0 or run_info.budget > 100:
                 raise ValueError('Illegal value for budget, must be >0 and <=100, but is %f' %
-                                 budget)
+                                 run_info.budget)
             if self.budget_type not in ('subsample', 'iterations', 'mixed'):
                 raise ValueError("Illegal value for budget type, must be one of "
                                  "('subsample', 'iterations', 'mixed'), but is : %s" %
@@ -201,16 +185,25 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         remaining_time = self.stats.get_remaing_time_budget()
 
-        if remaining_time - 5 < cutoff:
-            cutoff = int(remaining_time - 5)
+        if remaining_time - 5 < run_info.cutoff:
+            run_info = run_info._replace(cutoff=int(remaining_time - 5))
 
-        if cutoff < 1.0:
-            raise BudgetExhaustedException()
-        cutoff = int(np.ceil(cutoff))
+        if run_info.cutoff < 1.0:
+            return run_info, RunValue(
+                status=StatusType.BUDGETEXHAUSTED,
+                cost=self.worst_possible_result,
+                time=0.0,
+                additional_info={},
+                starttime=time.time(),
+                endtime=time.time(),
+            )
+        elif (
+            run_info.cutoff != int(np.ceil(run_info.cutoff))
+            and not isinstance(run_info.cutoff, int)
+        ):
+            run_info = run_info._replace(cutoff=int(np.ceil(run_info.cutoff)))
 
-        return super().start(config=config, instance=instance, cutoff=cutoff,
-                             seed=seed, instance_specific=instance_specific,
-                             capped=capped, budget=budget)
+        return super().run_wrapper(run_info=run_info)
 
     def run(self, config, instance=None,
             cutoff=None,
