@@ -12,7 +12,7 @@ if [[ "$DISTRIB" == "conda" ]]; then
 
 else
 
-    sudo apt install -y python-dev
+    apt install -y python3-dev
     pip install --upgrade setuptools
 
     # install linux packages
