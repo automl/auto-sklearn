@@ -11,7 +11,7 @@ from autosklearn.metrics import r2, balanced_accuracy
 
 from smac.stats.stats import Stats
 from smac.scenario.scenario import Scenario
-from smac.tae.execute_ta_run import StatusType
+from smac.tae import StatusType
 
 sys.path.append('.')
 from update_metadata_util import load_task
