@@ -286,14 +286,21 @@ class EstimatorTest(Base, unittest.TestCase):
         self.assertEqual(getattr(get_smac_object_wrapper_instance, 'dask_n_jobs'), 2)
         self.assertEqual(getattr(get_smac_object_wrapper_instance, 'dask_client_n_jobs'), 2)
 
-        n_runs = len(automl.cv_results_['mean_test_score'])
-
+        available_num_runs = set()
+        for run_key, run_value in automl.automl_.runhistory_.data.items():
+            if run_value.additional_info is not None and 'num_run' in run_value.additional_info:
+                available_num_runs.add(run_value.additional_info['num_run'])
         predictions_dir = automl.automl_._backend._get_prediction_output_dir(
             'ensemble'
         )
+        available_predictions = set()
         predictions = os.listdir(predictions_dir)
-        # one instances of the dummy
-        self.assertEqual(n_runs, len(predictions) - 1, msg=str(predictions))
+        for prediction in predictions:
+            available_predictions.add(int(prediction.split('_')[3]))
+
+        # Remove the dummy prediction, it is not part of the runhistory
+        available_predictions.remove(1)
+        self.assertSetEqual(available_predictions, available_num_runs)
 
         seeds = set()
         for predictions_file in predictions:
