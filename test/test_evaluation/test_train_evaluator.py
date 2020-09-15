@@ -1218,8 +1218,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = GroupKFold
         evaluator.resampling_strategy_args = None
-        with self.assertRaises(ValueError):
-            evaluator.get_splitter(D)
+        self.assertRaisesRegex(
+            ValueError,
+            'Must provide parameter groups for chosen CrossValidator.',
+            evaluator.get_splitter,
+            D)
 
         # GroupKFold, regression with args
         D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
@@ -1239,8 +1242,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = GroupKFold
         evaluator.resampling_strategy_args = None
-        with self.assertRaises(ValueError):
-            evaluator.get_splitter(D)
+        self.assertRaisesRegex(
+            ValueError,
+            'Must provide parameter groups for chosen CrossValidator.',
+            evaluator.get_splitter,
+            D)
 
         # GroupKFold, multi-output regression with args
         D.data['Y_train'] = np.array([[0.0, 0.1], [0.2, 0.3], [0.4, 0.5],
@@ -1262,8 +1268,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = GroupKFold
         evaluator.resampling_strategy_args = None
-        with self.assertRaises(ValueError):
-            evaluator.get_splitter(D)
+        self.assertRaisesRegex(
+            ValueError,
+            'Must provide parameter groups for chosen CrossValidator.',
+            evaluator.get_splitter,
+            D)
 
         # KFold, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1275,7 +1284,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertIsInstance(cv, KFold)
         self.assertEqual(cv.get_n_splits(
             groups=evaluator.resampling_strategy_args['groups']), 4)
-        self.assertEqual(cv.shuffle, True)
+        self.assertTrue(cv.shuffle)
         self.assertEqual(cv.random_state, 5)
         next(cv.split(D.data['Y_train'], D.data['Y_train'],
                       groups=evaluator.resampling_strategy_args['groups']))
@@ -1289,7 +1298,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertIsInstance(cv, KFold)
         self.assertEqual(cv.get_n_splits(
             groups=evaluator.resampling_strategy_args['groups']), 3)
-        self.assertEqual(cv.shuffle, False)
+        self.assertFalse(cv.shuffle)
         self.assertIsNone(cv.random_state)
         next(cv.split(D.data['Y_train'], D.data['Y_train'],
                       groups=evaluator.resampling_strategy_args['groups']))
@@ -1305,7 +1314,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertIsInstance(cv, KFold)
         self.assertEqual(cv.get_n_splits(
             groups=evaluator.resampling_strategy_args['groups']), 4)
-        self.assertEqual(cv.shuffle, True)
+        self.assertTrue(cv.shuffle)
         self.assertEqual(cv.random_state, 5)
         next(cv.split(D.data['Y_train'], D.data['Y_train'],
                       groups=evaluator.resampling_strategy_args['groups']))
@@ -1320,7 +1329,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertIsInstance(cv, KFold)
         self.assertEqual(cv.get_n_splits(
             groups=evaluator.resampling_strategy_args['groups']), 3)
-        self.assertEqual(cv.shuffle, False)
+        self.assertFalse(cv.shuffle)
         self.assertIsNone(cv.random_state)
         next(cv.split(D.data['Y_train'], D.data['Y_train'],
                       groups=evaluator.resampling_strategy_args['groups']))
@@ -1337,7 +1346,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertIsInstance(cv, KFold)
         self.assertEqual(cv.get_n_splits(
             groups=evaluator.resampling_strategy_args['groups']), 4)
-        self.assertEqual(cv.shuffle, True)
+        self.assertTrue(cv.shuffle)
         self.assertEqual(cv.random_state, 5)
         next(cv.split(D.data['Y_train'], D.data['Y_train'],
                       groups=evaluator.resampling_strategy_args['groups']))
@@ -1353,7 +1362,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertIsInstance(cv, KFold)
         self.assertEqual(cv.get_n_splits(
             groups=evaluator.resampling_strategy_args['groups']), 3)
-        self.assertEqual(cv.shuffle, False)
+        self.assertFalse(cv.shuffle)
         self.assertIsNone(cv.random_state)
         next(cv.split(D.data['Y_train'], D.data['Y_train'],
                       groups=evaluator.resampling_strategy_args['groups']))
@@ -1373,8 +1382,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = LeaveOneGroupOut
         evaluator.resampling_strategy_args = None
-        with self.assertRaises(ValueError):
-            evaluator.get_splitter(D)
+        self.assertRaisesRegex(
+            ValueError,
+            'Must provide parameter groups for chosen CrossValidator.',
+            evaluator.get_splitter,
+            D)
 
         # LeaveOneGroupOut, regression with args
         D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
@@ -1393,8 +1405,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = LeaveOneGroupOut
         evaluator.resampling_strategy_args = None
-        with self.assertRaises(ValueError):
-            evaluator.get_splitter(D)
+        self.assertRaisesRegex(
+            ValueError,
+            'Must provide parameter groups for chosen CrossValidator.',
+            evaluator.get_splitter,
+            D)
 
         # LeaveOneGroupOut, multi-output regression with args
         D.data['Y_train'] = np.array([[0.0, 0.1], [0.2, 0.3], [0.4, 0.5],
@@ -1415,8 +1430,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = LeaveOneGroupOut
         evaluator.resampling_strategy_args = None
-        with self.assertRaises(ValueError):
-            evaluator.get_splitter(D)
+        self.assertRaisesRegex(
+            ValueError,
+            'Must provide parameter groups for chosen CrossValidator.',
+            evaluator.get_splitter,
+            D)
 
         # LeavePGroupsOut, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1435,8 +1453,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = LeavePGroupsOut
         evaluator.resampling_strategy_args = None
-        with self.assertRaises(ValueError):
-            evaluator.get_splitter(D)
+        self.assertRaisesRegex(
+            ValueError,
+            'Must provide parameter groups for chosen CrossValidator.',
+            evaluator.get_splitter,
+            D)
 
         # LeavePGroupsOut, regression with args
         D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
@@ -1457,8 +1478,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = LeavePGroupsOut
         evaluator.resampling_strategy_args = None
-        with self.assertRaises(ValueError):
-            evaluator.get_splitter(D)
+        self.assertRaisesRegex(
+            ValueError,
+            'Must provide parameter groups for chosen CrossValidator.',
+            evaluator.get_splitter,
+            D)
 
         # LeavePGroupsOut, multi-output regression with args
         D.data['Y_train'] = np.array([[0.0, 0.1], [0.2, 0.3], [0.4, 0.5],
@@ -1481,8 +1505,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = LeavePGroupsOut
         evaluator.resampling_strategy_args = None
-        with self.assertRaises(ValueError):
-            evaluator.get_splitter(D)
+        self.assertRaisesRegex(
+            ValueError,
+            'Must provide parameter groups for chosen CrossValidator.',
+            evaluator.get_splitter,
+            D)
 
         # LeaveOneOut, classification
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1603,8 +1630,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = PredefinedSplit
         evaluator.resampling_strategy_args = None
-        with self.assertRaises(ValueError):
-            evaluator.get_splitter(D)
+        self.assertRaisesRegex(
+            ValueError,
+            'Must provide parameter test_fold for class PredefinedSplit.',
+            evaluator.get_splitter,
+            D)
 
         # PredefinedSplit, regression with args
         D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
@@ -1623,8 +1653,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = PredefinedSplit
         evaluator.resampling_strategy_args = None
-        with self.assertRaises(ValueError):
-            evaluator.get_splitter(D)
+        self.assertRaisesRegex(
+            ValueError,
+            'Must provide parameter test_fold for class PredefinedSplit.',
+            evaluator.get_splitter,
+            D)
 
         # PredefinedSplit, multi-output regression with args
         D.data['Y_train'] = np.array([[0.0, 0.1], [0.2, 0.3], [0.4, 0.5],
@@ -1645,8 +1678,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = PredefinedSplit
         evaluator.resampling_strategy_args = None
-        with self.assertRaises(ValueError):
-            evaluator.get_splitter(D)
+        self.assertRaisesRegex(
+            ValueError,
+            'Must provide parameter test_fold for class PredefinedSplit.',
+            evaluator.get_splitter,
+            D)
 
         # RepeatedKFold, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1780,7 +1816,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertIsInstance(cv, StratifiedKFold)
         self.assertEqual(cv.get_n_splits(
             groups=evaluator.resampling_strategy_args['groups']), 2)
-        self.assertEqual(cv.shuffle, True)
+        self.assertTrue(cv.shuffle)
         self.assertEqual(cv.random_state, 5)
         next(cv.split(D.data['Y_train'], D.data['Y_train'],
                       groups=evaluator.resampling_strategy_args['groups']))
@@ -1794,7 +1830,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertIsInstance(cv, StratifiedKFold)
         self.assertEqual(cv.get_n_splits(
             groups=evaluator.resampling_strategy_args['groups']), 3)
-        self.assertEqual(cv.shuffle, False)
+        self.assertFalse(cv.shuffle)
         self.assertIsNone(cv.random_state)
         next(cv.split(D.data['Y_train'], D.data['Y_train'],
                       groups=evaluator.resampling_strategy_args['groups']))
@@ -1866,7 +1902,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertIsInstance(cv, StratifiedKFold)
         self.assertEqual(cv.get_n_splits(
             groups=evaluator.resampling_strategy_args['groups']), 3)
-        self.assertEqual(cv.shuffle, False)
+        self.assertFalse(cv.shuffle)
         self.assertIsNone(cv.random_state)
         next(cv.split(D.data['Y_train'], D.data['Y_train'],
                       groups=evaluator.resampling_strategy_args['groups']))
@@ -1892,8 +1928,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = GroupShuffleSplit
         evaluator.resampling_strategy_args = None
-        with self.assertRaises(ValueError):
-            evaluator.get_splitter(D)
+        self.assertRaisesRegex(
+            ValueError,
+            'Must provide parameter groups for chosen CrossValidator.',
+            evaluator.get_splitter,
+            D)
 
         # GroupShuffleSplit, regression with args
         D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
@@ -1918,8 +1957,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = GroupShuffleSplit
         evaluator.resampling_strategy_args = None
-        with self.assertRaises(ValueError):
-            evaluator.get_splitter(D)
+        self.assertRaisesRegex(
+            ValueError,
+            'Must provide parameter groups for chosen CrossValidator.',
+            evaluator.get_splitter,
+            D)
 
         # GroupShuffleSplit, multi-output regression with args
         D.data['Y_train'] = np.array([[0.0, 0.1], [0.2, 0.3], [0.4, 0.5],
@@ -1946,8 +1988,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = GroupShuffleSplit
         evaluator.resampling_strategy_args = None
-        with self.assertRaises(ValueError):
-            evaluator.get_splitter(D)
+        self.assertRaisesRegex(
+            ValueError,
+            'Must provide parameter groups for chosen CrossValidator.',
+            evaluator.get_splitter,
+            D)
 
         # StratifiedShuffleSplit, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
