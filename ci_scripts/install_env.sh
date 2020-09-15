@@ -26,5 +26,5 @@ fi
 
 python -V
 which python
-pip --version
-which pip
+pip3 --version
+which pip3
