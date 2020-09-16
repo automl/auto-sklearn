@@ -142,6 +142,22 @@ print("End time", run_value.endtime)
 # on the runtime available.
 
 ############################################################################
+# As an example, let's find the best configuration evaluated. As
+# Auto-sklearn solves a minimization problem internally, we need to look
+# for the entry with the lowest loss:
+
+losses_and_configurations = [
+    (run_value.cost, run_key.config_id)
+    for run_key, run_value in automl._automl[0].runhistory_.data.items()
+]
+losses_and_configurations.sort()
+print("Lowest loss:", losses_and_configurations[0][0])
+print(
+    "Best configuration:",
+    automl._automl[0].runhistory_.ids_config[losses_and_configurations[0][1]]
+)
+
+############################################################################
 # Detailed statistics about the search - part 2
 # =============================================
 #
