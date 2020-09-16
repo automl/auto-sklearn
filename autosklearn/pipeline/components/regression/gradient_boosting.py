@@ -114,8 +114,10 @@ class GradientBoosting(
 
         self.estimator.fit(X, y)
 
-        if self.estimator.max_iter >= self.max_iter \
-            or self.estimator.max_iter > self.estimator.n_iter_:
+        if (
+            self.estimator.max_iter >= self.max_iter
+            or self.estimator.max_iter > self.estimator.n_iter_
+        ):
             self.fully_fit_ = True
 
         return self

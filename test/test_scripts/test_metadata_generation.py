@@ -99,8 +99,7 @@ class TestMetadataGeneration(unittest.TestCase):
 
         # 5. Get the test performance of these configurations
         script_filename = os.path.join(scripts_directory, '02_retrieve_metadata.py')
-        cmd = 'python3 %s --working-directory %s --task-type %s' % (
-            script_filename, self.working_directory, task_type)
+        cmd = 'python3 %s --working-directory %s ' % (script_filename, self.working_directory)
         print('COMMAND: %s' % cmd)
         rval = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
@@ -122,8 +121,8 @@ class TestMetadataGeneration(unittest.TestCase):
         # 6. Calculate metafeatures
         script_filename = os.path.join(scripts_directory, '03_calculate_metafeatures.py')
         cmd = (
-            'python3 %s --working-directory %s --task-type %s --test-mode '
-            % (script_filename, self.working_directory, task_type)
+            'python3 %s --working-directory %s --test-mode '
+            % (script_filename, self.working_directory)
         )
         rval = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
@@ -137,8 +136,8 @@ class TestMetadataGeneration(unittest.TestCase):
 
         # 7. Create aslib files
         script_filename = os.path.join(scripts_directory, '04_create_aslib_files.py')
-        cmd = 'python3 %s --working-directory %s --task-type %s ' % (
-            script_filename, self.working_directory, task_type)
+        cmd = 'python3 %s --working-directory %s ' % (
+            script_filename, self.working_directory)
         rval = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         self.assertEqual(rval.returncode, 0, msg=str(rval))
@@ -248,8 +247,7 @@ class TestMetadataGeneration(unittest.TestCase):
 
         # 5. Get the test performance of these configurations
         script_filename = os.path.join(scripts_directory, '02_retrieve_metadata.py')
-        cmd = 'python3 %s --working-directory %s --task-type %s' % (
-            script_filename, self.working_directory, task_type)
+        cmd = 'python3 %s --working-directory %s ' % (script_filename, self.working_directory)
         print('COMMAND: %s' % cmd)
         rval = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
@@ -273,8 +271,8 @@ class TestMetadataGeneration(unittest.TestCase):
         # 6. Calculate metafeatures
         script_filename = os.path.join(scripts_directory, '03_calculate_metafeatures.py')
         cmd = (
-            'python3 %s --working-directory %s --task-type %s --test-mode '
-            % (script_filename, self.working_directory, task_type)
+            'python3 %s --working-directory %s --test-mode '
+            % (script_filename, self.working_directory)
         )
         rval = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
@@ -288,8 +286,8 @@ class TestMetadataGeneration(unittest.TestCase):
 
         # 7. Create aslib files
         script_filename = os.path.join(scripts_directory, '04_create_aslib_files.py')
-        cmd = 'python3 %s --working-directory %s --task-type %s ' % (
-            script_filename, self.working_directory, task_type)
+        cmd = 'python3 %s --working-directory %s  ' % (
+            script_filename, self.working_directory)
         rval = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         self.assertEqual(rval.returncode, 0, msg=str(rval))

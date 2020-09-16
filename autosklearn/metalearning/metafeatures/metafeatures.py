@@ -8,7 +8,6 @@ import scipy.sparse
 # TODO use balanced accuracy!
 from sklearn.utils import check_array
 from sklearn.multiclass import OneVsRestClassifier
-from sklearn.utils.multiclass import type_of_target
 
 from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
     import DataPreprocessor

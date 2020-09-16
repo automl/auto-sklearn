@@ -27,7 +27,10 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
     configurations = dict()
     configurations_to_ids = dict()
 
-    possible_experiment_directories = os.listdir(validation_directory)
+    try:
+        possible_experiment_directories = os.listdir(validation_directory)
+    except FileNotFoundError:
+        return {}, {}
 
     for ped in possible_experiment_directories:
         task_name = None
@@ -154,63 +157,61 @@ def main():
     parser = ArgumentParser()
 
     parser.add_argument("--working-directory", type=str, required=True)
-    parser.add_argument("--task-type", required=True,
-                        choices=['classification', 'regression'])
     parser.add_argument("--cutoff", type=int, default=-1)
     parser.add_argument("--only-best", type=bool, default=True)
 
     args = parser.parse_args()
     working_directory = args.working_directory
-    task_type = args.task_type
     cutoff = args.cutoff
     only_best = args.only_best
 
-    if task_type == 'classification':
-        metadata_sets = itertools.product(
-            [0, 1], [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION],
-            CLASSIFICATION_METRICS)
-        input_directory = os.path.join(working_directory, 'configuration',
-                                       'classification')
-    elif task_type == 'regression':
-        metadata_sets = itertools.product(
-            [0, 1], [REGRESSION], REGRESSION_METRICS)
-        input_directory = os.path.join(working_directory, 'configuration',
-                                       'regression')
-    else:
-        raise ValueError(task_type)
+    for task_type in ('classification', 'regression'):
+        if task_type == 'classification':
+            metadata_sets = itertools.product(
+                [0, 1], [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION],
+                CLASSIFICATION_METRICS)
+            input_directory = os.path.join(working_directory, 'configuration',
+                                           'classification')
+        elif task_type == 'regression':
+            metadata_sets = itertools.product(
+                [0, 1], [REGRESSION], REGRESSION_METRICS)
+            input_directory = os.path.join(working_directory, 'configuration',
+                                           'regression')
+        else:
+            raise ValueError(task_type)
 
-    output_dir = os.path.join(working_directory, 'configuration_results')
+        output_dir = os.path.join(working_directory, 'configuration_results')
 
-    for sparse, task, metric in metadata_sets:
-        print(TASK_TYPES_TO_STRING[task], metric, sparse)
+        for sparse, task, metric in metadata_sets:
+            print(TASK_TYPES_TO_STRING[task], metric, sparse)
 
-        output_dir_ = os.path.join(output_dir, '%s_%s_%s' % (
-            metric, TASK_TYPES_TO_STRING[task],
-            'sparse' if sparse else 'dense'))
+            output_dir_ = os.path.join(output_dir, '%s_%s_%s' % (
+                metric, TASK_TYPES_TO_STRING[task],
+                'sparse' if sparse else 'dense'))
 
-        configuration_space = pipeline.get_configuration_space(
-            {'is_sparse': sparse, 'task': task})
+            configuration_space = pipeline.get_configuration_space(
+                {'is_sparse': sparse, 'task': task})
 
-        outputs, configurations = retrieve_matadata(
-            validation_directory=input_directory,
-            metric=metric,
-            cutoff=cutoff,
-            configuration_space=configuration_space,
-            only_best=only_best)
+            outputs, configurations = retrieve_matadata(
+                validation_directory=input_directory,
+                metric=metric,
+                cutoff=cutoff,
+                configuration_space=configuration_space,
+                only_best=only_best)
 
-        if len(outputs) == 0:
-            print("No output found for %s, %s, %s" %
-                  (metric, TASK_TYPES_TO_STRING[task],
-                   'sparse' if sparse else 'dense'))
-            continue
+            if len(outputs) == 0:
+                print("No output found for %s, %s, %s" %
+                      (metric, TASK_TYPES_TO_STRING[task],
+                       'sparse' if sparse else 'dense'))
+                continue
 
-        try:
-            os.makedirs(output_dir_)
-        except:
-            pass
+            try:
+                os.makedirs(output_dir_)
+            except:
+                pass
 
-        write_output(outputs, configurations, output_dir_,
-                     configuration_space, metric)
+            write_output(outputs, configurations, output_dir_,
+                         configuration_space, metric)
 
 
 if __name__ == "__main__":
