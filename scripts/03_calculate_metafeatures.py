@@ -14,19 +14,20 @@ import scipy.sparse
 
 from autosklearn.data.abstract_data_manager import perform_one_hot_encoding
 from autosklearn.metalearning.metafeatures import metafeatures, metafeature
+from autosklearn.smbo import EXCLUDE_META_FEATURES_CLASSIFICATION, EXCLUDE_META_FEATURES_REGRESSION
 
 sys.path.append('.')
 from update_metadata_util import load_task, classification_tasks, \
     regression_tasks
 
 
-def calculate_metafeatures(task_id):
+def calculate_metafeatures(task_id, exclude):
     print(task_id)
-    X_train, y_train, X_test, y_test, cat = load_task(task_id)
+    X_train, y_train, X_test, y_test, cat, _ = load_task(task_id)
     categorical = [True if 'categorical' == c else False for c in cat]
 
     _metafeatures_labels = metafeatures.calculate_all_metafeatures_with_labels(
-        X_train, y_train, [False] * X_train.shape[1], task_id)
+        X_train, y_train, [False] * X_train.shape[1], task_id, dont_calculate=exclude)
 
     X_train, sparse = perform_one_hot_encoding(scipy.sparse.issparse(X_train),
                                                categorical, [X_train])
@@ -37,7 +38,7 @@ def calculate_metafeatures(task_id):
     obj = pynisher.enforce_limits(mem_in_mb=3072)(
         metafeatures.calculate_all_metafeatures_encoded_labels)
     _metafeatures_encoded_labels = obj(X_train, y_train,
-                                       categorical, task_id)
+                                       categorical, task_id, dont_calculate=exclude)
     end_time = time.time()
 
     if obj.exit_status == pynisher.MemorylimitException:
@@ -74,7 +75,7 @@ if __name__ == "__main__":
     parser.add_argument("--n-jobs",
                         help="Compute metafeatures in parallel if possible.",
                         type=int, default=1)
-    parser.add_argument("--test-mode", type=bool, default=False)
+    parser.add_argument("--test-mode", action='store_true')
 
     args = parser.parse_args()
     working_directory = args.working_directory
@@ -99,6 +100,9 @@ if __name__ == "__main__":
     if test_mode:
         tasks = [tasks[0]]
 
+    EXCLUDE_META_FEATURES = EXCLUDE_META_FEATURES_CLASSIFICATION \
+        if task_type == 'classification' else EXCLUDE_META_FEATURES_REGRESSION
+
     tasks = copy.deepcopy(tasks)
     np.random.shuffle(tasks)
 
@@ -106,10 +110,10 @@ if __name__ == "__main__":
         for task_id in tasks:
             yield task_id
 
-    memory = joblib.Memory(cachedir='/tmp/joblib', verbose=10)
+    memory = joblib.Memory(location='/tmp/joblib', verbose=10)
     cached_calculate_metafeatures = memory.cache(calculate_metafeatures)
     mfs = joblib.Parallel(n_jobs=args.n_jobs) \
-        (joblib.delayed(cached_calculate_metafeatures)(task_id)
+        (joblib.delayed(cached_calculate_metafeatures)(task_id, EXCLUDE_META_FEATURES)
          for task_id in producer())
 
     for mf in mfs:
@@ -168,6 +172,10 @@ if __name__ == "__main__":
     feature_steps = defaultdict(list)
     metafeature_names = list()
     for metafeature_name in metafeatures.metafeatures.functions:
+
+        if metafeature_name in EXCLUDE_META_FEATURES:
+            continue
+
         dependency = metafeatures.metafeatures.get_dependency(metafeature_name)
         if dependency is not None:
             feature_steps[dependency].append(metafeature_name)

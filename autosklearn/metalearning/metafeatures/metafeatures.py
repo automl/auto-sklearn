@@ -8,6 +8,7 @@ import scipy.sparse
 # TODO use balanced accuracy!
 from sklearn.utils import check_array
 from sklearn.multiclass import OneVsRestClassifier
+from sklearn.utils.multiclass import type_of_target
 
 from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
     import DataPreprocessor
@@ -654,7 +655,7 @@ class ClassEntropy(MetaFeature):
 class LandmarkLDA(MetaFeature):
     def _calculate(self, X, y, categorical):
         import sklearn.discriminant_analysis
-        if len(y.shape) == 1 or y.shape[1] == 1:
+        if type(y) in ('binary', 'multiclass'):
             kf = sklearn.model_selection.StratifiedKFold(n_splits=5)
         else:
             kf = sklearn.model_selection.KFold(n_splits=5)
@@ -690,7 +691,7 @@ class LandmarkNaiveBayes(MetaFeature):
     def _calculate(self, X, y, categorical):
         import sklearn.naive_bayes
 
-        if len(y.shape) == 1 or y.shape[1] == 1:
+        if type(y) in ('binary', 'multiclass'):
             kf = sklearn.model_selection.StratifiedKFold(n_splits=5)
         else:
             kf = sklearn.model_selection.KFold(n_splits=5)
@@ -719,7 +720,7 @@ class LandmarkDecisionTree(MetaFeature):
     def _calculate(self, X, y, categorical):
         import sklearn.tree
 
-        if len(y.shape) == 1 or y.shape[1] == 1:
+        if type(y) in ('binary', 'multiclass'):
             kf = sklearn.model_selection.StratifiedKFold(n_splits=5)
         else:
             kf = sklearn.model_selection.KFold(n_splits=5)
@@ -755,7 +756,7 @@ class LandmarkDecisionNodeLearner(MetaFeature):
     def _calculate(self, X, y, categorical):
         import sklearn.tree
 
-        if len(y.shape) == 1 or y.shape[1] == 1:
+        if type(y) in ('binary', 'multiclass'):
             kf = sklearn.model_selection.StratifiedKFold(n_splits=5)
         else:
             kf = sklearn.model_selection.KFold(n_splits=5)
@@ -784,7 +785,7 @@ class LandmarkRandomNodeLearner(MetaFeature):
     def _calculate(self, X, y, categorical):
         import sklearn.tree
 
-        if len(y.shape) == 1 or y.shape[1] == 1:
+        if type(y) in ('binary', 'multiclass'):
             kf = sklearn.model_selection.StratifiedKFold(n_splits=5)
         else:
             kf = sklearn.model_selection.KFold(n_splits=5)
@@ -836,7 +837,7 @@ class Landmark1NN(MetaFeature):
     def _calculate(self, X, y, categorical):
         import sklearn.neighbors
 
-        if len(y.shape) == 1 or y.shape[1] == 1:
+        if type(y) in ('binary', 'multiclass'):
             kf = sklearn.model_selection.StratifiedKFold(n_splits=5)
         else:
             kf = sklearn.model_selection.KFold(n_splits=5)

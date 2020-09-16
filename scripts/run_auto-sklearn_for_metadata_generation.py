@@ -22,8 +22,6 @@ parser.add_argument('--working-directory', type=str, required=True)
 parser.add_argument('--time-limit', type=int, required=True)
 parser.add_argument('--per-run-time-limit', type=int, required=True)
 parser.add_argument('--task-id', type=int, required=True)
-parser.add_argument('--task-type', choices=['classification', 'regression'],
-                    required=True)
 parser.add_argument('-s', '--seed', type=int, required=True)
 parser.add_argument('--unittest', action='store_true')
 args = parser.parse_args()
@@ -32,9 +30,10 @@ working_directory = args.working_directory
 time_limit = args.time_limit
 per_run_time_limit = args.per_run_time_limit
 task_id = args.task_id
-task_type = args.task_type
 seed = args.seed
 is_test = args.unittest
+
+X_train, y_train, X_test, y_test, cat, task_type = load_task(task_id)
 
 configuration_output_dir = os.path.join(working_directory, 'configuration',
                                         task_type)
@@ -59,14 +58,19 @@ automl_arguments = {
 }
 
 if is_test:
-    automl_arguments['include_estimators'] = ['sgd']
-    automl_arguments['resampling_strategy_arguments'] = {'folds': 3}
-    include = {'classifier': ['sgd']}
+    automl_arguments['resampling_strategy_arguments'] = {'folds': 2}
+    if task_type == 'classification':
+        automl_arguments['include_estimators'] = ['sgd']
+        include = {'classifier': ['sgd']}
+    elif task_type == 'regression':
+        automl_arguments['include_estimators'] = ['extra_trees']
+        automl_arguments['include_preprocessors'] = ['no_preprocessing']
+        include = {'regressor': ['extra_trees'], 'feature_preprocessor': ['no_preprocessing']}
+    else:
+        raise ValueError('Unsupported task type: %s' % str(task_type))
 else:
     automl_arguments['resampling_strategy_arguments'] = {'folds': 10}
     include = None
-
-X_train, y_train, X_test, y_test, cat = load_task(task_id)
 
 if task_type == 'classification':
     automl_arguments['metric'] = balanced_accuracy
