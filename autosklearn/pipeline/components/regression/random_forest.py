@@ -36,6 +36,9 @@ class RandomForest(
     def get_max_iter():
         return 512
 
+    def get_current_iter(self):
+        return self.estimator.n_estimators
+
     def iterative_fit(self, X, y, n_iter=1, refit=False):
         from sklearn.ensemble import RandomForestRegressor
 
@@ -48,18 +51,23 @@ class RandomForest(
                 self.max_depth = None
             else:
                 self.max_depth = int(self.max_depth)
+
             self.min_samples_split = int(self.min_samples_split)
             self.min_samples_leaf = int(self.min_samples_leaf)
+
             self.max_features = float(self.max_features)
+
             self.bootstrap = check_for_bool(self.bootstrap)
+
             if check_none(self.max_leaf_nodes):
                 self.max_leaf_nodes = None
             else:
                 self.max_leaf_nodes = int(self.max_leaf_nodes)
+
             self.min_impurity_decrease = float(self.min_impurity_decrease)
 
             self.estimator = RandomForestRegressor(
-                n_estimators=0,
+                n_estimators=n_iter,
                 criterion=self.criterion,
                 max_features=self.max_features,
                 max_depth=self.max_depth,
@@ -72,9 +80,10 @@ class RandomForest(
                 random_state=self.random_state,
                 n_jobs=self.n_jobs,
                 warm_start=True)
-        self.estimator.n_estimators += n_iter
-        self.estimator.n_estimators = min(self.estimator.n_estimators,
-                                          self.n_estimators)
+        else:
+            self.estimator.n_estimators += n_iter
+            self.estimator.n_estimators = min(self.estimator.n_estimators,
+                                              self.n_estimators)
 
         self.estimator.fit(X, y)
         return self
@@ -109,8 +118,12 @@ class RandomForest(
         cs = ConfigurationSpace()
         criterion = CategoricalHyperparameter("criterion",
                                               ['mse', 'friedman_mse', 'mae'])
+
+        # In contrast to the random forest classifier we want to use more max_features
+        # and therefore have this not on a sqrt scale
         max_features = UniformFloatHyperparameter(
             "max_features", 0.1, 1.0, default_value=1.0)
+
         max_depth = UnParametrizedHyperparameter("max_depth", "None")
         min_samples_split = UniformIntegerHyperparameter(
             "min_samples_split", 2, 20, default_value=2)

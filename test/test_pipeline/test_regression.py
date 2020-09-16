@@ -234,6 +234,13 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                     print(config)
                     traceback.print_tb(sys.exc_info()[2])
                     raise e
+            except UnboundLocalError as e:
+                if "local variable 'raw_predictions_val' referenced before assignment" in e.args[0]:
+                    continue
+                else:
+                    print(traceback.format_exc())
+                    print(config)
+                    raise e
             except Exception as e:
                 if "Multiple input features cannot have the same target value" in e.args[0]:
                     continue
@@ -275,7 +282,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(143, len(hyperparameters))
+        self.assertEqual(140, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 6, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
@@ -338,7 +345,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             "Cannot find a legal default configuration",
             SimpleRegressionPipeline,
             include={
-                'regressor': ['ridge_regression'],
+                'regressor': ['extra_trees'],
                 'feature_preprocessor': ['densifier']
             },
             dataset_properties={'sparse': True}

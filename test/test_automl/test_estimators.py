@@ -718,26 +718,25 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         Makes sure that when using a cv strategy, we are able to fit
         a regressor
         """
-        tmp = os.path.join(self.test_dir, '..', '.tmp_regression_fit')
-        output = os.path.join(self.test_dir, '..', '.out_regression_fit')
+        tmp = os.path.join(self.test_dir, '..', '.tmp_regression_fit_cv')
+        output = os.path.join(self.test_dir, '..', '.out_regression_fit_cv')
         self._setUp(tmp)
         self._setUp(output)
 
-        X_train, Y_train, X_test, Y_test = putil.get_dataset('boston')
-        automl = AutoSklearnRegressor(time_left_for_this_task=30,
-                                      per_run_time_limit=5,
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('boston', train_size_maximum=300)
+        automl = AutoSklearnRegressor(time_left_for_this_task=60,
+                                      per_run_time_limit=10,
                                       resampling_strategy='cv',
                                       tmp_folder=tmp,
                                       output_folder=output)
 
         automl.fit(X_train, Y_train)
         predictions = automl.predict(X_test)
-        self.assertEqual(predictions.shape, (356,))
-        score = mean_squared_error(Y_test, predictions)
-        # On average np.sqrt(30) away from the target -> ~5.5 on average
-        # Results with select rates drops avg score to a range of -32.40 to -37, on 30 seconds
-        # constraint. With more time_left_for_this_task this is no longer an issue
-        self.assertGreaterEqual(score, -37)
+        self.assertEqual(predictions.shape, (206,))
+        score = r2(Y_test, predictions)
+        print(Y_test)
+        print(predictions)
+        self.assertGreaterEqual(score, 0.1)
 
         self._tearDown(tmp)
         self._tearDown(output)
