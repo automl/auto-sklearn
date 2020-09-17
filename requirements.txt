@@ -9,6 +9,7 @@ lockfile
 joblib
 pyyaml
 pandas<1.0
+liac-arff
 
 ConfigSpace>=0.4.0,<0.5
 pynisher>=0.4.2
