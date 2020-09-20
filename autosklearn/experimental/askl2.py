@@ -14,7 +14,7 @@ from autosklearn.metrics import Scorer
 
 
 CALLBACK_COUNTER = multiprocessing.Value('i', 0)
-
+LOCK = None
 
 this_directory = os.path.abspath(os.path.dirname(__file__))
 selector_file = os.path.join(this_directory, 'selector.pkl')
@@ -43,7 +43,7 @@ if not os.path.exists(selector_file):
         pickle.dump(selector, fh)
 
 
-def get_smac_object_callback(portfolio, lock):
+def get_smac_object_callback(portfolio):
     def get_smac_object(
         scenario_dict,
         seed,
@@ -61,9 +61,9 @@ def get_smac_object_callback(portfolio, lock):
         )
         scenario = Scenario(scenario_dict)
 
-        lock.acquire()
+        global LOCK, CALLBACK_COUNTER
+        LOCK.acquire()
         try:
-            global CALLBACK_COUNTER
             print(CALLBACK_COUNTER.value, flush=True)
             if CALLBACK_COUNTER.value == 0:
                 initial_configurations = [
@@ -73,7 +73,7 @@ def get_smac_object_callback(portfolio, lock):
                 initial_configurations = [scenario.cs.sample_configuration(size=1)]
             CALLBACK_COUNTER.value += 1
         finally:
-            lock.release()
+            LOCK.release()
 
         rh2EPM = RunHistory2EPM4LogCost
         return SMAC4AC(
@@ -88,8 +88,7 @@ def get_smac_object_callback(portfolio, lock):
     return get_smac_object
 
 
-def get_sh_or_hb_object_callback(budget_type, bandit_strategy, eta, initial_budget, portfolio,
-                                 lock):
+def get_sh_or_hb_object_callback(budget_type, bandit_strategy, eta, initial_budget, portfolio):
     def get_smac_object(
         scenario_dict,
         seed,
@@ -109,9 +108,9 @@ def get_sh_or_hb_object_callback(budget_type, bandit_strategy, eta, initial_budg
         )
         scenario = Scenario(scenario_dict)
 
-        lock.acquire()
+        global LOCK, CALLBACK_COUNTER
+        LOCK.acquire()
         try:
-            global CALLBACK_COUNTER
             if CALLBACK_COUNTER.value == 0:
                 initial_configurations = [
                     Configuration(configuration_space=scenario.cs, values=member)
@@ -120,7 +119,7 @@ def get_sh_or_hb_object_callback(budget_type, bandit_strategy, eta, initial_budg
                 initial_configurations = [scenario.cs.sample_configuration(size=1)]
             CALLBACK_COUNTER.value += 1
         finally:
-            lock.release()
+            LOCK.release()
 
         rh2EPM = RunHistory2EPM4LogCost
 
@@ -277,12 +276,12 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             portfolio_json = json.load(fh)
         portfolio = portfolio_json['portfolio']
 
-        lock = multiprocessing.Lock()
+        global LOCK
+        LOCK = multiprocessing.Lock()
         if setting['fidelity'] == 'SH':
-            smac_callback = get_sh_or_hb_object_callback('iterations', 'sh', 4, 5.0, portfolio,
-                                                         lock)
+            smac_callback = get_sh_or_hb_object_callback('iterations', 'sh', 4, 5.0, portfolio)
         else:
-            smac_callback = get_smac_object_callback(portfolio, lock)
+            smac_callback = get_smac_object_callback(portfolio)
 
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_arguments = resampling_strategy_kwargs
