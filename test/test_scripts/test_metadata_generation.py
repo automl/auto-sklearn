@@ -49,6 +49,10 @@ class TestMetadataGeneration(unittest.TestCase):
         self.assertTrue(os.path.exists(commands_output_file))
 
         with open(commands_output_file) as fh:
+            cmds = fh.read().split('\n')
+            self.assertEqual(len(cmds), 604)
+
+        with open(commands_output_file) as fh:
             while True:
                 cmd = fh.readline()
                 if 'task-id 75222' in cmd:
@@ -72,11 +76,9 @@ class TestMetadataGeneration(unittest.TestCase):
         expected_output_directory = os.path.join(self.working_directory,
                                                  'configuration',
                                                  task_type,
-                                                 '75222')
+                                                 '75222', 'accuracy')
         self.assertTrue(os.path.exists(expected_output_directory))
-        smac_log = os.path.join(self.working_directory,
-                                'configuration', task_type, '75222',
-                                'AutoML(1):75222.log')
+        smac_log = os.path.join(expected_output_directory, 'AutoML(1):75222.log')
         with open(smac_log) as fh:
             smac_output = fh.read()
         self.assertEqual(rval.returncode, 0, msg=str(rval) + '\n' + smac_output)
@@ -197,6 +199,10 @@ class TestMetadataGeneration(unittest.TestCase):
         self.assertTrue(os.path.exists(commands_output_file))
 
         with open(commands_output_file) as fh:
+            cmds = fh.read().split('\n')
+            self.assertEqual(len(cmds), 604)
+
+        with open(commands_output_file) as fh:
             while True:
                 cmd = fh.readline()
                 if 'task-id 5022' in cmd:
@@ -220,11 +226,9 @@ class TestMetadataGeneration(unittest.TestCase):
         expected_output_directory = os.path.join(self.working_directory,
                                                  'configuration',
                                                  task_type,
-                                                 '5022')
+                                                 '5022', 'r2')
         self.assertTrue(os.path.exists(expected_output_directory))
-        smac_log = os.path.join(self.working_directory,
-                                'configuration', task_type, '5022',
-                                'AutoML(1):5022.log')
+        smac_log = os.path.join(expected_output_directory, 'AutoML(1):5022.log')
         with open(smac_log) as fh:
             smac_output = fh.read()
         self.assertEqual(rval.returncode, 0, msg=str(rval) + '\n' + smac_output)

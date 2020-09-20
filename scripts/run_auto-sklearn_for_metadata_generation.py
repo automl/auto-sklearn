@@ -7,7 +7,8 @@ import sys
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
-from autosklearn.metrics import r2, balanced_accuracy
+from autosklearn.metrics import accuracy, balanced_accuracy, roc_auc, log_loss, r2, \
+    mean_squared_error, mean_absolute_error, root_mean_squared_error
 
 from smac.stats.stats import Stats
 from smac.scenario.scenario import Scenario
@@ -22,6 +23,7 @@ parser.add_argument('--working-directory', type=str, required=True)
 parser.add_argument('--time-limit', type=int, required=True)
 parser.add_argument('--per-run-time-limit', type=int, required=True)
 parser.add_argument('--task-id', type=int, required=True)
+parser.add_argument('--metric', type=str, required=True)
 parser.add_argument('-s', '--seed', type=int, required=True)
 parser.add_argument('--unittest', action='store_true')
 args = parser.parse_args()
@@ -31,6 +33,7 @@ time_limit = args.time_limit
 per_run_time_limit = args.per_run_time_limit
 task_id = args.task_id
 seed = args.seed
+metric = args.metric
 is_test = args.unittest
 
 X_train, y_train, X_test, y_test, cat, task_type = load_task(task_id)
@@ -41,7 +44,7 @@ try:
     os.makedirs(configuration_output_dir)
 except:
     pass
-tmp_dir = os.path.join(configuration_output_dir, str(task_id))
+tmp_dir = os.path.join(configuration_output_dir, str(task_id), metric)
 
 automl_arguments = {
     'time_left_for_this_task': time_limit,
@@ -72,11 +75,21 @@ else:
     automl_arguments['resampling_strategy_arguments'] = {'folds': 10}
     include = None
 
+metric = {
+    'accuracy': accuracy,
+    'balanced_accuracy': balanced_accuracy,
+    'roc_auc': roc_auc,
+    'logloss': log_loss,
+    'r2': r2,
+    'mean_squared_error': mean_squared_error,
+    'root_mean_squared_error': root_mean_squared_error,
+    'mean_absolute_error': mean_absolute_error,
+}[metric]
+automl_arguments['metric'] = metric
+
 if task_type == 'classification':
-    automl_arguments['metric'] = balanced_accuracy
     automl = AutoSklearnClassifier(**automl_arguments)
 elif task_type == 'regression':
-    automl_arguments['metric'] = r2
     automl = AutoSklearnRegressor(**automl_arguments)
 else:
     raise ValueError(task_type)

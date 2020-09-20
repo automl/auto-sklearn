@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from collections import defaultdict
 import csv
+import glob
 import itertools
 import json
 import os
@@ -28,7 +29,9 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
     configurations_to_ids = dict()
 
     try:
-        possible_experiment_directories = os.listdir(validation_directory)
+        possible_experiment_directories = glob.glob(os.path.join(
+            validation_directory, '*', '*'
+        ))
     except FileNotFoundError:
         return {}, {}
 
@@ -50,6 +53,7 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
 
         best_value = np.inf
         best_configuration = None
+        best_configuration_dir = None
         for entry in validation_trajectory:
             # There's no reason to keep the default configuration
             # (even if it's better) because it is run anyway
@@ -65,7 +69,8 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
                     best_configuration = Configuration(
                         configuration_space=configuration_space, values=config)
                     best_value = score
-                except:
+                    best_configuration_dir = ped
+                except Exception as e:
                     pass
 
         if task_name is None:
@@ -78,6 +83,7 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
         elif best_configuration in configurations_to_ids:
             config_id = configurations_to_ids[best_configuration]
         else:
+            print('Found configuration in', best_configuration_dir)
             config_id = len(configurations_to_ids)
             configurations_to_ids[config_id] = best_configuration
             configurations[config_id] = best_configuration
