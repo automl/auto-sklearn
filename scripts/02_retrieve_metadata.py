@@ -54,17 +54,26 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
         best_value = np.inf
         best_configuration = None
         best_configuration_dir = None
+
+        n_configs = 0
+        n_better = 0
+        n_broken = 0
+
         for entry in validation_trajectory:
             # There's no reason to keep the default configuration
             # (even if it's better) because it is run anyway
             if validation_trajectory[0][2] == entry[2]:
                 continue
 
+            n_configs += 1
+
             config = entry[2]
             task_name = entry[-2]
             score = entry[-1].get(str(metric), np.inf)
 
             if np.isinf(score) and np.isinf(best_value) or score < best_value:
+                n_better += 1
+
                 try:
                     best_configuration = Configuration(
                         configuration_space=configuration_space, values=config)
@@ -72,15 +81,18 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
                     best_configuration_dir = ped
                 except Exception as e:
                     print(e)
+                    n_broken += 1
 
         if task_name is None:
             print('Could not find any configuration better than the default configuration!')
             continue
 
         if best_configuration is None:
-            print('Could not find a valid configuration')
+            print('Could not find a valid configuration; total %d, better %d, broken %d'
+                  % (n_configs, n_better, n_broken))
             continue
         elif best_configuration in configurations_to_ids:
+            print('Found configuration in', best_configuration_dir)
             config_id = configurations_to_ids[best_configuration]
         else:
             print('Found configuration in', best_configuration_dir)
