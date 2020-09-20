@@ -71,7 +71,7 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
                     best_value = score
                     best_configuration_dir = ped
                 except Exception as e:
-                    pass
+                    print(e)
 
         if task_name is None:
             print('Could not find any configuration better than the default configuration!')
