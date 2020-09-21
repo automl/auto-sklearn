@@ -317,6 +317,7 @@ class EstimatorTest(Base, unittest.TestCase):
         backend = Backend(context)
         model_path = backend.get_model_path(seed=0, idx=999, budget=0.0)
         backend.save_model(model=dummy, filepath=model_path)
+        backend.note_numrun_as_done(seed=0, num_run=999)
 
         automl = AutoSklearnClassifier(
             time_left_for_this_task=30,

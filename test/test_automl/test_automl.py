@@ -302,7 +302,7 @@ class AutoMLTest(Base, unittest.TestCase):
         fixture = ['cv_models', 'true_targets_ensemble.npy',
                    'start_time_100', 'datamanager.pkl',
                    'predictions_ensemble',
-                   'ensembles', 'predictions_test', 'models']
+                   'done', 'ensembles', 'predictions_test', 'models']
         self.assertEqual(sorted(os.listdir(os.path.join(backend_api.temporary_directory,
                                                         '.auto-sklearn'))),
                          sorted(fixture))

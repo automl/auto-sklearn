@@ -450,6 +450,17 @@ class EnsembleBuilder(multiprocessing.Process):
                               " %s" % pred_path)
             return False
 
+        if self.shared_mode:
+            done_path = os.path.join(
+                glob.escape(self.backend.get_done_directory()), '*_*'
+            )
+        else:
+            done_path = os.path.join(
+                glob.escape(self.backend.get_done_directory()), '%s_*' % self.seed
+            )
+        done = glob.glob(done_path)
+        done = [os.path.split(d)[1] for d in done]
+
         # First sort files chronologically
         to_read = []
         for y_ens_fn in self.y_ens_files:
@@ -457,7 +468,9 @@ class EnsembleBuilder(multiprocessing.Process):
             _seed = int(match.group(1))
             _num_run = int(match.group(2))
             _budget = float(match.group(3))
-            to_read.append([y_ens_fn, match, _seed, _num_run, _budget])
+
+            if '%s_%s' % (_seed, _num_run) in done:
+                to_read.append([y_ens_fn, match, _seed, _num_run, _budget])
 
         n_read_files = 0
         # Now read file wrt to num_run
