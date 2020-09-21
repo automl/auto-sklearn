@@ -24,7 +24,7 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
         raise NotImplementedError()
 
     # Mapping from task id to a list of (config, score) tuples
-    outputs = defaultdict(list)
+    outputs = dict()
     configurations = dict()
     configurations_to_ids = dict()
 
@@ -100,7 +100,14 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
             configurations_to_ids[config_id] = best_configuration
             configurations[config_id] = best_configuration
 
-        outputs[task_name].append((config_id, best_value))
+        # We could keep multiple configurations per task (and actually did so before), but
+        # there is really no reason to already filter them here and only keep the best
+        # (this is less confusing when looking at the raw data later on).
+        if task_name not in outputs:
+            outputs[task_name] = (config_id, best_value)
+        else:
+            if best_value < outputs[task_name][1]:
+                outputs[task_name] = (config_id, best_value)
 
     return outputs, configurations
 
@@ -119,17 +126,19 @@ def write_output(outputs, configurations, output_dir, configuration_space,
     arff_object['description'] = ""
 
     data = []
-    for dataset in outputs:
-        for configuration_id, value in outputs[dataset]:
+    keep_configurations = set()
+    for dataset, (configuration_id, value) in outputs.items():
 
-            if not np.isfinite(value):
-                runstatus = 'not_applicable'
-                value = None
-            else:
-                runstatus = 'ok'
+        if not np.isfinite(value):
+            runstatus = 'not_applicable'
+            value = None
+        else:
+            runstatus = 'ok'
 
-            line = [dataset, 1, configuration_id + 1, value, runstatus]
-            data.append(line)
+        line = [dataset, 1, configuration_id + 1, value, runstatus]
+        data.append(line)
+        keep_configurations.add(configuration_id)
+
     arff_object['data'] = data
 
     with open(os.path.join(output_dir, "algorithm_runs.arff"), "w") as fh:
@@ -137,6 +146,8 @@ def write_output(outputs, configurations, output_dir, configuration_space,
 
     hyperparameters = []
     for idx in configurations:
+        if idx not in keep_configurations:
+            continue
         configuration = configurations[idx]
         line = {'idx': idx + 1}
         for hp_name in configuration:
