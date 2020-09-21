@@ -40,7 +40,7 @@ class TestMetadataGeneration(unittest.TestCase):
 
         # 3. create configuration commands
         script_filename = os.path.join(scripts_directory, '01_create_commands.py')
-        cmd = 'python3 %s --working-directory %s' % (script_filename, self.working_directory)
+        cmd = 'python3 %s --working-directory %s --test' % (script_filename, self.working_directory)
         rval = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.assertEqual(rval.returncode, 0, msg=str(rval))
 
@@ -50,7 +50,8 @@ class TestMetadataGeneration(unittest.TestCase):
 
         with open(commands_output_file) as fh:
             cmds = fh.read().split('\n')
-            self.assertEqual(len(cmds), 604)
+            # 6 regression, 12 classification, 1 empty line
+            self.assertEqual(len(cmds), 19)
 
         with open(commands_output_file) as fh:
             while True:
@@ -190,7 +191,7 @@ class TestMetadataGeneration(unittest.TestCase):
 
         # 3. create configuration commands
         script_filename = os.path.join(scripts_directory, '01_create_commands.py')
-        cmd = 'python3 %s --working-directory %s' % (script_filename, self.working_directory)
+        cmd = 'python3 %s --working-directory %s --test' % (script_filename, self.working_directory)
         rval = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.assertEqual(rval.returncode, 0, msg=str(rval))
 
@@ -200,7 +201,7 @@ class TestMetadataGeneration(unittest.TestCase):
 
         with open(commands_output_file) as fh:
             cmds = fh.read().split('\n')
-            self.assertEqual(len(cmds), 604)
+            self.assertEqual(len(cmds), 19)
 
         with open(commands_output_file) as fh:
             while True:

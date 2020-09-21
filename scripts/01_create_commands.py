@@ -9,8 +9,10 @@ from update_metadata_util import classification_tasks, regression_tasks
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--working-directory', type=str, required=True)
+parser.add_argument('--test', action='store_true')
 args = parser.parse_args()
 working_directory = args.working_directory
+test = args.test
 
 command_file_name = os.path.join(working_directory, 'metadata_commands.txt')
 
@@ -19,13 +21,13 @@ script_name = 'run_auto-sklearn_for_metadata_generation.py'
 absolute_script_name = os.path.join(this_directory, script_name)
 
 commands = []
-for task_id in classification_tasks:
+for task_id in (classification_tasks if not test else (75222, 233, 236)):
     for metric in ('accuracy', 'balanced_accuracy', 'roc_auc', 'logloss'):
         command = ('python3 %s --working-directory %s --time-limit 86400 '
                    '--per-run-time-limit 1800 --task-id %d -s 1 --metric %s' %
                    (absolute_script_name, working_directory, task_id, metric))
         commands.append(command)
-for task_id in regression_tasks:
+for task_id in (regression_tasks if not test else (2280, 5022)):
     for metric in ('r2', 'root_mean_squared_error', 'mean_absolute_error'):
         command = ('python3 %s --working-directory %s --time-limit 86400 '
                    '--per-run-time-limit 1800 --task-id %d -s 1 --metric %s' %
