@@ -450,9 +450,14 @@ class EnsembleBuilder(multiprocessing.Process):
                               " %s" % pred_path)
             return False
 
-        done_path = os.path.join(
-            glob.escape(self.backend.get_done_directory()), '%s_*' % self.seed
-        )
+        if self.shared_mode:
+            done_path = os.path.join(
+                glob.escape(self.backend.get_done_directory()), '*_*'
+            )
+        else:
+            done_path = os.path.join(
+                glob.escape(self.backend.get_done_directory()), '%s_*' % self.seed
+            )
         done = glob.glob(done_path)
         done = [os.path.split(d)[1] for d in done]
 
