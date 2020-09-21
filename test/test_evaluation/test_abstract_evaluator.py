@@ -196,10 +196,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
         self.assertEqual(self.backend_mock.save_model.call_count, 1)
 
     def test_file_output(self):
-        try:
-            shutil.rmtree(self.working_directory)
-        except:
-            pass
+        shutil.rmtree(self.working_directory, ignore_errors=True)
         os.mkdir(self.working_directory)
 
         queue_mock = unittest.mock.Mock()
@@ -238,7 +235,4 @@ class AbstractEvaluatorTest(unittest.TestCase):
             self.assertTrue(os.path.exists(os.path.join(self.working_directory, 'tmp',
                                                         '.auto-sklearn', 'done', '1_0')))
 
-            try:
-                shutil.rmtree(self.working_directory)
-            except:
-                pass
+            shutil.rmtree(self.working_directory, ignore_errors=True)
