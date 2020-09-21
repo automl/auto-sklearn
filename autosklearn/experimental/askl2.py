@@ -84,7 +84,7 @@ def get_sh_object_callback(budget_type, eta, initial_budget, portfolio):
         dask_client,
     ):
         from smac.facade.smac_ac_facade import SMAC4AC
-        from smac.intensification.parallel_successive_halving import ParallelSuccessiveHalving
+        from smac.intensification.successive_halving import SuccessiveHalving
         from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
         from smac.scenario.scenario import Scenario
 
@@ -104,7 +104,7 @@ def get_sh_object_callback(budget_type, eta, initial_budget, portfolio):
             tae_runner_kwargs=ta_kwargs,
             initial_configurations=initial_configurations,
             run_id=seed,
-            intensifier=ParallelSuccessiveHalving,
+            intensifier=SuccessiveHalving,
             intensifier_kwargs={
                 'initial_budget': initial_budget,
                 'max_budget': 100,

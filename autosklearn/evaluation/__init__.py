@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 import functools
-import logging
 import math
 import multiprocessing
 from queue import Empty
@@ -22,6 +21,7 @@ from autosklearn.metrics import Scorer
 import autosklearn.evaluation.train_evaluator
 import autosklearn.evaluation.test_evaluator
 import autosklearn.evaluation.util
+import autosklearn.util.logging_
 
 
 def fit_predict_try_except_decorator(ta, queue, cost_for_crash, **kwargs):
@@ -220,7 +220,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             init_params.update(self.init_params)
 
         arguments = dict(
-            logger=logging.getLogger("pynisher"),
+            logger=autosklearn.util.logging_.get_logger("pynisher"),
             wall_time_in_s=cutoff,
             mem_in_mb=self.memory_limit,
         )

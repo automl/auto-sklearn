@@ -41,7 +41,6 @@ class AutoMLTest(Base, unittest.TestCase):
 
         self.automl = AutoMLStub()
 
-        self.automl._shared_mode = False
         self.automl._seed = 42
         self.automl._backend = unittest.mock.Mock(spec=Backend)
         self.automl._delete_output_directories = lambda: 0
