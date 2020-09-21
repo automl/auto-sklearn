@@ -500,6 +500,8 @@ class AbstractEvaluator(object):
         for wt in write_tasks:
             wt.lock.release()
 
+        self.backend.note_numrun_as_done(self.seed, self.num_run)
+
         return None, {}
 
     def _predict_proba(self, X, model, task_type, Y_train):
