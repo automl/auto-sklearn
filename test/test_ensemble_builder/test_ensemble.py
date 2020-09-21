@@ -49,6 +49,9 @@ class BackendMock(object):
             y = np.load(fp, allow_pickle=True)
         return y
 
+    def get_done_directory(self):
+        return os.path.join(this_directory, 'data', '.auto-sklearn', 'done')
+
 
 class EnsembleBuilderMemMock(EnsembleBuilder):
 
@@ -309,6 +312,17 @@ class EnsembleTest(unittest.TestCase):
         sel_keys = ensbuilder.get_n_best_preds()
         self.assertEqual(len(sel_keys), 1)
         ensbuilder.get_valid_test_preds(selected_keys=sel_keys)
+
+        # Number of read files should be three and
+        # predictions_ensemble_0_4_0.0.npy must not be in there
+        self.assertEqual(len(ensbuilder.read_preds), 3)
+        self.assertNotIn(
+            os.path.join(
+                self.backend.temporary_directory,
+                ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_4_0.0.npy"
+            ),
+            ensbuilder.read_preds
+        )
 
         # not selected --> should still be None
         self.assertIsNone(ensbuilder.read_preds[d1][Y_VALID])

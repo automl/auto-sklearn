@@ -331,10 +331,10 @@ class Backend(object):
             with open(filepath, 'rb') as fh:
                 return pickle.load(fh)
 
-    def get_done_directory(self):
+    def get_done_directory(self) -> str:
         return os.path.join(self.internals_directory, 'done')
 
-    def note_numrun_as_done(self, seed, num_run):
+    def note_numrun_as_done(self, seed: int, num_run: int) -> None:
         done_directory = self.get_done_directory()
         os.makedirs(done_directory, exist_ok=True)
         done_path = os.path.join(done_directory, '%d_%d' % (seed, num_run))
