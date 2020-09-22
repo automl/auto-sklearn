@@ -136,6 +136,7 @@ class AutoMLTest(Base, unittest.TestCase):
         )
         score = automl.score(X_test, Y_test)
         self.assertGreaterEqual(score, 0.8)
+        self.assertGreater(self._count_succeses(automl.cv_results_), 0)
         self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
 
         del automl
@@ -225,6 +226,7 @@ class AutoMLTest(Base, unittest.TestCase):
         )
         score = automl.score(X_test, Y_test)
         self.assertGreaterEqual(score, 0.8)
+        self.assertGreater(self._count_succeses(automl.cv_results_), 0)
         self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
 
         del automl

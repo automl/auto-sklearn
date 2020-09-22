@@ -315,6 +315,8 @@ class EstimatorTest(Base, unittest.TestCase):
             seeds.add(int(ensemble_file.split('.')[0].split('_')[0]))
         self.assertEqual(len(seeds), 1)
 
+        self.assertGreater(self._count_succeses(automl.cv_results_), 0)
+
         self._tearDown(tmp)
         self._tearDown(output)
 
@@ -397,6 +399,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         initial_accuracy = sklearn.metrics.accuracy_score(Y_test,
                                                           initial_predictions)
         self.assertGreaterEqual(initial_accuracy, 0.75)
+        self.assertGreater(self._count_succeses(automl.cv_results_), 0)
 
         # Test pickle
         dump_file = os.path.join(output, 'automl.dump.pkl')
@@ -444,6 +447,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         automl.fit(X_train, Y_train)
         predictions = automl.predict(X_test)
         self.assertEqual(predictions.shape, (50, 3))
+        self.assertGreater(self._count_succeses(automl.cv_results_), 0)
         score = f1_macro(Y_test, predictions)
         self.assertGreaterEqual(score, 0.9)
         probs = automl.predict_proba(X_train)
@@ -468,6 +472,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         self.assertEqual(predictions.shape, (50, ))
         score = accuracy(Y_test, predictions)
         self.assertGreaterEqual(score, 0.9)
+        self.assertGreater(self._count_succeses(automl.cv_results_), 0)
 
         output_files = os.listdir(output)
         self.assertIn('binary_test_dataset_test_1.predict', output_files)
@@ -506,6 +511,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         y = automl.automl_.InputValidator.encode_target(y)
         prediction = automl.automl_.InputValidator.encode_target(automl.predict(X))
         self.assertTrue(accuracy(y, prediction) > 0.555)
+        self.assertGreater(self._count_succeses(automl.cv_results_), 0)
 
 
 class AutoMLRegressorTest(Base, unittest.TestCase):
@@ -529,6 +535,10 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         # Results with select rates drops avg score to a range of -32.40 to -37, on 30 seconds
         # constraint. With more time_left_for_this_task this is no longer an issue
         self.assertGreaterEqual(score, -37)
+        self.assertGreater(self._count_succeses(automl.cv_results_), 0)
+
+        self._tearDown(tmp)
+        self._tearDown(output)
 
     def test_cv_regression(self):
         """
@@ -554,6 +564,7 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         print(Y_test)
         print(predictions)
         self.assertGreaterEqual(score, 0.1)
+        self.assertGreater(self._count_succeses(automl.cv_results_), 0)
 
         self._tearDown(tmp)
         self._tearDown(output)
@@ -583,6 +594,7 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
 
         # Make sure that at least better than random.
         self.assertTrue(r2(y, automl.predict(X)) > 0.5)
+        self.assertGreater(self._count_succeses(automl.cv_results_), 0)
 
 
 class AutoSklearnClassifierTest(unittest.TestCase):
