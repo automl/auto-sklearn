@@ -2,7 +2,9 @@ import argparse
 import json
 import logging
 import os
+import shutil
 import sys
+import tempfile
 
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
@@ -46,6 +48,9 @@ except:
     pass
 tmp_dir = os.path.join(configuration_output_dir, str(task_id), metric)
 
+tempdir = tempfile.mkdtemp()
+autosklearn_directory = os.path.join(tempdir, "dir")
+
 automl_arguments = {
     'time_left_for_this_task': time_limit,
     'per_run_time_limit': per_run_time_limit,
@@ -56,7 +61,7 @@ automl_arguments = {
     'ml_memory_limit': 3072,
     'resampling_strategy': 'partial-cv',
     'delete_tmp_folder_after_terminate': False,
-    'tmp_folder': tmp_dir,
+    'tmp_folder': autosklearn_directory,
     'disable_evaluator_output': True,
 }
 
@@ -156,9 +161,15 @@ for entry in trajectory:
 
 validated_trajectory = [entry[:2] + [entry[2].get_dictionary()] + entry[3:]
                         for entry in validated_trajectory]
-validated_trajectory_file = os.path.join(tmp_dir,
+validated_trajectory_file = os.path.join(autosklearn_directory,
                                          'smac3-output',
                                          'run_%d' % seed,
                                          'validation_trajectory.json')
 with open(validated_trajectory_file, 'w') as fh:
     json.dump(validated_trajectory, fh, indent=4)
+
+shutil.copytree(autosklearn_directory, tmp_dir)
+try:
+    shutil.rmtree(tempdir)
+except:
+    pass
