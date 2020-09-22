@@ -115,7 +115,7 @@ class EvaluationTest(unittest.TestCase):
                                     abort_on_first_run_crash=False,
                                     )
         self.scenario.wallclock_limit = 5
-        self.stats.ta_runs += 1
+        self.stats.submitted_ta_runs += 1
         run_info, run_value = ta.run_wrapper(RunInfo(config=config, cutoff=9, instance=None,
                                              instance_specific=None, seed=1, capped=False))
         self.assertEqual(run_value.status, StatusType.BUDGETEXHAUSTED)
@@ -163,7 +163,7 @@ class EvaluationTest(unittest.TestCase):
         self.assertIn('configuration_origin', info[1].additional_info)
         self.assertEqual(info[1].additional_info['error'], "Result queue is empty")
 
-        self.stats.ta_runs += 1
+        self.stats.submitted_ta_runs += 1
         info = ta.run_wrapper(RunInfo(config=config, cutoff=30, instance=None,
                                       instance_specific=None, seed=1, capped=False))
         self.assertEqual(info[1].status, StatusType.CRASHED)
@@ -322,7 +322,7 @@ class EvaluationTest(unittest.TestCase):
                                     cost_for_crash=get_cost_of_crash(accuracy),
                                     abort_on_first_run_crash=False,
                                     )
-        self.stats.ta_runs += 1
+        self.stats.submitted_ta_runs += 1
         info = ta.run_wrapper(RunInfo(config=config, cutoff=30, instance=None,
                                       instance_specific=None, seed=1, capped=False))
         self.assertEqual(info[1].status, StatusType.CRASHED)
