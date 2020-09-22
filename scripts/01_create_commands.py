@@ -21,7 +21,7 @@ script_name = 'run_auto-sklearn_for_metadata_generation.py'
 absolute_script_name = os.path.join(this_directory, script_name)
 
 commands = []
-for task_id in (classification_tasks if not test else (75222, 233, 236)):
+for task_id in (classification_tasks if not test else (75222, 233, 258)):
     for metric in ('accuracy', 'balanced_accuracy', 'roc_auc', 'logloss'):
         command = ('python3 %s --working-directory %s --time-limit 86400 '
                    '--per-run-time-limit 1800 --task-id %d -s 1 --metric %s' %
