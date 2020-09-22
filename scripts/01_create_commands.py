@@ -27,7 +27,7 @@ for task_id in (classification_tasks if not test else (75222, 233, 258)):
                    '--per-run-time-limit 1800 --task-id %d -s 1 --metric %s' %
                    (absolute_script_name, working_directory, task_id, metric))
         commands.append(command)
-for task_id in (regression_tasks if not test else (2280, 5024)):
+for task_id in (regression_tasks if not test else (5022, 5024)):
     for metric in ('r2', 'root_mean_squared_error', 'mean_absolute_error'):
         command = ('python3 %s --working-directory %s --time-limit 86400 '
                    '--per-run-time-limit 1800 --task-id %d -s 1 --metric %s' %
