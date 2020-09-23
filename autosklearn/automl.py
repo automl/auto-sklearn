@@ -102,7 +102,6 @@ class AutoML(BaseEstimator):
                  ensemble_size=1,
                  ensemble_nbest=1,
                  max_models_on_disc=1,
-                 ensemble_memory_limit: Optional[int] = 1024,
                  seed=1,
                  ml_memory_limit=3072,
                  metadata_directory=None,
@@ -133,7 +132,6 @@ class AutoML(BaseEstimator):
         self._ensemble_size = ensemble_size
         self._ensemble_nbest = ensemble_nbest
         self._max_models_on_disc = max_models_on_disc
-        self._ensemble_memory_limit = ensemble_memory_limit
         self._seed = seed
         self._ml_memory_limit = ml_memory_limit
         self._data_memory_limit = None
@@ -430,7 +428,6 @@ class AutoML(BaseEstimator):
         self._logger.debug('  ensemble_size: %d', self._ensemble_size)
         self._logger.debug('  ensemble_nbest: %f', self._ensemble_nbest)
         self._logger.debug('  max_models_on_disc: %s', str(self._max_models_on_disc))
-        self._logger.debug('  ensemble_memory_limit: %d', self._ensemble_memory_limit)
         self._logger.debug('  seed: %d', self._seed)
         self._logger.debug('  ml_memory_limit: %s', str(self._ml_memory_limit))
         self._logger.debug('  metadata_directory: %s', self._metadata_directory)
@@ -559,7 +556,7 @@ class AutoML(BaseEstimator):
                 self.precision,  # The precision of the np arrays
                 None,  # Maximum number of iterations for the ensemble
                 np.inf,  # read_at_most -- maximum number of files to read for memory
-                self._ensemble_memory_limit,  # pynisher memory limit
+                self._ml_memory_limit,  # pynisher memory limit
                 self._seed,  # random state
             )
 
@@ -568,9 +565,6 @@ class AutoML(BaseEstimator):
             # provide an event signal that stops the process before the next iteration
             # of ensemble builder process
             self.ensemble_event_killer = dask.distributed.Event(self.ensemble_event_killer)
-
-        # make sure that the workers honor the logging
-        self._dask_client.run(setup_logger)
 
         self._stopwatch.stop_task(ensemble_task_name)
 
@@ -850,7 +844,7 @@ class AutoML(BaseEstimator):
             precision if precision else self.precision,  # The precision of the np arrays
             1,  # Maximum number of iterations for the ensemble
             np.inf,  # read_at_most -- maximum number of files to read for memory
-            self._ensemble_memory_limit,  # pynisher memory limit
+            self._ml_memory_limit,  # pynisher memory limit
             self._seed,  # random state
         )
 
