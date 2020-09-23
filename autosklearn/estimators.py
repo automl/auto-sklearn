@@ -23,7 +23,7 @@ class AutoSklearnEstimator(BaseEstimator):
         ensemble_nbest=50,
         max_models_on_disc=50,
         seed=1,
-        ml_memory_limit=3072,
+        memory_limit=3072,
         include_estimators=None,
         exclude_estimators=None,
         include_preprocessors=None,
@@ -84,12 +84,12 @@ class AutoSklearnEstimator(BaseEstimator):
         seed : int, optional (default=1)
             Used to seed SMAC. Will determine the output file names.
 
-        ml_memory_limit : int, optional (3072)
+        memory_limit : int, optional (3072)
             Memory limit in MB for the machine learning algorithm.
             `auto-sklearn` will stop fitting the machine learning algorithm if
-            it tries to allocate more than `ml_memory_limit` MB.
+            it tries to allocate more than `memory_limit` MB.
             If None is provided, no memory limit is set.
-            In case of multi-processing, `ml_memory_limit` will be per job.
+            In case of multi-processing, `memory_limit` will be per job.
             This memory limit also applies to the ensemble creation process.
 
         include_estimators : list, optional (None)
@@ -238,7 +238,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.ensemble_nbest = ensemble_nbest
         self.max_models_on_disc = max_models_on_disc
         self.seed = seed
-        self.ml_memory_limit = ml_memory_limit
+        self.memory_limit = memory_limit
         self.include_estimators = include_estimators
         self.exclude_estimators = exclude_estimators
         self.include_preprocessors = include_preprocessors
@@ -292,7 +292,7 @@ class AutoSklearnEstimator(BaseEstimator):
             ensemble_nbest=self.ensemble_nbest,
             max_models_on_disc=self.max_models_on_disc,
             seed=seed,
-            ml_memory_limit=self.ml_memory_limit,
+            memory_limit=self.memory_limit,
             include_estimators=self.include_estimators,
             exclude_estimators=self.exclude_estimators,
             include_preprocessors=self.include_preprocessors,

@@ -614,31 +614,38 @@ class EnsembleProcessBuilderTest(unittest.TestCase):
         # Set the event so the run does not even start
         event.set()
 
-        with warnings.catch_warnings(record=True) as w:
-            ensemble = ensemble_builder_process(
-                start_time=time.time(),
-                time_left_for_ensembles=1000,
-                sleep_duration=2,
-                event='None',
-                backend=self.backend,
-                dataset_name='Test',
-                task=1,
-                metric=roc_auc,
-                ensemble_size=50,
-                ensemble_nbest=10,
-                max_models_on_disc=None,
-                seed=0,
-                precision=32,
-                max_iterations=1,
-                read_at_most=np.inf,
-                ensemble_memory_limit=10,
-                random_state=0,
-            )
-            self.assertIn(
-                'Terminating ensemble building as SMAC process is done', str(w[-1].message))
+        ensemble = ensemble_builder_process(
+            start_time=time.time(),
+            time_left_for_ensembles=1000,
+            sleep_duration=2,
+            event='None',
+            backend=self.backend,
+            dataset_name='Test',
+            task=1,
+            metric=roc_auc,
+            ensemble_size=50,
+            ensemble_nbest=10,
+            max_models_on_disc=None,
+            seed=0,
+            precision=32,
+            max_iterations=1,
+            read_at_most=np.inf,
+            ensemble_memory_limit=10,
+            random_state=0,
+        )
 
-            # Also makes sure the ensemble does not return any history
-            self.assertEqual(ensemble, [])
+        # make sure message is in log file
+        msg = 'Terminating ensemble building as SMAC process is done'
+        logger_name = 'autosklearn.ensemble_builder'
+        logfile = os.path.join(
+            self.backend.temporary_directory,
+            '%s.log' % str(logger_name)
+        )
+        with open(logfile) as f:
+            self.assertIn(msg,  f.read())
+
+        # Also makes sure the ensemble does not return any history
+        self.assertEqual(ensemble, [])
         client.close()
 
     def test_ensemble_builder_process_realrun(self):

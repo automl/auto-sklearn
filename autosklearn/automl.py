@@ -103,7 +103,7 @@ class AutoML(BaseEstimator):
                  ensemble_nbest=1,
                  max_models_on_disc=1,
                  seed=1,
-                 ml_memory_limit=3072,
+                 memory_limit=3072,
                  metadata_directory=None,
                  debug_mode=False,
                  include_estimators=None,
@@ -133,7 +133,7 @@ class AutoML(BaseEstimator):
         self._ensemble_nbest = ensemble_nbest
         self._max_models_on_disc = max_models_on_disc
         self._seed = seed
-        self._ml_memory_limit = ml_memory_limit
+        self._memory_limit = memory_limit
         self._data_memory_limit = None
         self._metadata_directory = metadata_directory
         self._include_estimators = include_estimators
@@ -174,7 +174,9 @@ class AutoML(BaseEstimator):
 
         # If no dask client was provided, we create one, so that we can
         # start a ensemble process in parallel to smbo optimize
+        self._is_dask_client_internally_created = False
         if self._dask_client is None:
+            self._is_dask_client_internally_created = True
             processes = False
             if self._n_jobs is not None and self._n_jobs > 1:
                 processes = True
@@ -282,7 +284,7 @@ class AutoML(BaseEstimator):
 
         self._logger.info("Starting to create dummy predictions.")
 
-        memory_limit = self._ml_memory_limit
+        memory_limit = self._memory_limit
         if memory_limit is not None:
             memory_limit = int(memory_limit)
 
@@ -429,7 +431,7 @@ class AutoML(BaseEstimator):
         self._logger.debug('  ensemble_nbest: %f', self._ensemble_nbest)
         self._logger.debug('  max_models_on_disc: %s', str(self._max_models_on_disc))
         self._logger.debug('  seed: %d', self._seed)
-        self._logger.debug('  ml_memory_limit: %s', str(self._ml_memory_limit))
+        self._logger.debug('  memory_limit: %s', str(self._memory_limit))
         self._logger.debug('  metadata_directory: %s', self._metadata_directory)
         self._logger.debug('  debug_mode: %s', self._debug_mode)
         self._logger.debug('  include_estimators: %s', str(self._include_estimators))
@@ -556,7 +558,7 @@ class AutoML(BaseEstimator):
                 self.precision,  # The precision of the np arrays
                 None,  # Maximum number of iterations for the ensemble
                 np.inf,  # read_at_most -- maximum number of files to read for memory
-                self._ml_memory_limit,  # pynisher memory limit
+                self._memory_limit,  # pynisher memory limit
                 self._seed,  # random state
             )
 
@@ -617,7 +619,7 @@ class AutoML(BaseEstimator):
                 backend=self._backend,
                 total_walltime_limit=time_left_for_smac,
                 func_eval_time_limit=per_run_time_limit,
-                memory_limit=self._ml_memory_limit,
+                memory_limit=self._memory_limit,
                 data_memory_limit=self._data_memory_limit,
                 watcher=self._stopwatch,
                 n_jobs=self._n_jobs,
@@ -844,7 +846,7 @@ class AutoML(BaseEstimator):
             precision if precision else self.precision,  # The precision of the np arrays
             1,  # Maximum number of iterations for the ensemble
             np.inf,  # read_at_most -- maximum number of files to read for memory
-            self._ml_memory_limit,  # pynisher memory limit
+            self._memory_limit,  # pynisher memory limit
             self._seed,  # random state
         )
 
@@ -1133,7 +1135,7 @@ class AutoML(BaseEstimator):
 
         # Make sure the client closes, so we don't leave
         # the tcp connection open
-        if self._dask_client:
+        if self._is_dask_client_internally_created:
             self._dask_client.close()
 
         # When a multiprocessing work is done, the

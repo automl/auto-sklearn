@@ -8,7 +8,6 @@ import re
 import time
 import traceback
 from typing import List, Optional, Tuple, Union
-import warnings
 
 import dask.distributed
 
@@ -135,22 +134,24 @@ def ensemble_builder_process(
 
     history = []
 
+    logger = EnsembleBuilder._get_ensemble_logger(backend.temporary_directory)
+
     while True:
 
         # First test for termination conditions
         if time_left_for_ensembles < elapsed_time:
-            warnings.warn(
+            logger.info(
                 "Terminate ensemble building as not time is left (run for {}s)".format(
                     elapsed_time
                 ),
             )
             break
         if event is not None and event.is_set():
-            warnings.warn(
+            logger.info(
                 "Terminating ensemble building as SMAC process is done...")
             break
         if max_iterations is not None and max_iterations <= iteration:
-            warnings.warn(
+            logger.info(
                 "Terminate ensemble building because of max iterations: {} of {}".format(
                     max_iterations,
                     iteration
@@ -326,7 +327,7 @@ class EnsembleBuilder(object):
         )
 
         # Setup the logger
-        self.logger = self._get_ensemble_logger()
+        self.logger = self._get_ensemble_logger(self.backend.temporary_directory)
 
         if ensemble_nbest == 1:
             self.logger.debug("Behaviour depends on int/float: %s, %s (ensemble_nbest, type)" %
@@ -367,7 +368,8 @@ class EnsembleBuilder(object):
         self.y_test = self.datamanager.data.get('Y_test')
         self.ensemble_history = []
 
-    def _get_ensemble_logger(self):
+    @classmethod
+    def _get_ensemble_logger(self, dirname):
         """
         Returns the logger of for the ensemble process.
         A subprocess will require to set this up, for instance,
@@ -376,7 +378,7 @@ class EnsembleBuilder(object):
         logger_name = 'autosklearn.ensemble_builder'
         setup_logger(
             os.path.join(
-                self.backend.temporary_directory,
+                dirname,
                 '%s.log' % str(logger_name)
             ),
         )
@@ -427,7 +429,7 @@ class EnsembleBuilder(object):
         # Pynisher jobs inside dask 'forget'
         # the logger configuration. So we have to set it up
         # accordingly
-        self.logger = self._get_ensemble_logger()
+        self.logger = self._get_ensemble_logger(self.backend.temporary_directory)
 
         self.start_time = time.time()
         valid_pred, test_pred = None, None
