@@ -44,3 +44,7 @@ loggers:
   smac.optimizer.smbo.SMBO:
     level: INFO
     handlers: [file_handler, console]
+
+  autosklearn.ensemble_builder:
+    level: INFO
+    handlers: [file_handler, console]

@@ -31,6 +31,10 @@ class AutoMLStub(AutoML):
     def __init__(self):
         self.__class__ = AutoML
         self._task = None
+        self._dask_client = None
+
+    def __del__(self):
+        pass
 
 
 class AutoMLTest(Base, unittest.TestCase):
@@ -43,6 +47,7 @@ class AutoMLTest(Base, unittest.TestCase):
 
         self.automl._seed = 42
         self.automl._backend = unittest.mock.Mock(spec=Backend)
+        self.automl._backend.context = unittest.mock.Mock()
         self.automl._delete_output_directories = lambda: 0
 
     def test_refit_shuffle_on_fail(self):
@@ -151,7 +156,7 @@ class AutoMLTest(Base, unittest.TestCase):
         X, Y, _, _ = putil.get_dataset('iris')
         automl = autosklearn.automl.AutoML(
             backend_api,
-            time_left_for_this_task=30,
+            time_left_for_this_task=40,
             per_run_time_limit=5,
             ensemble_nbest=3,
             seed=seed,
@@ -168,7 +173,7 @@ class AutoMLTest(Base, unittest.TestCase):
         # Assert at least one model file has been deleted and that there were no
         # deletion errors
         log_file_path = glob.glob(os.path.join(
-            backend_api.temporary_directory, 'AutoML(' + str(seed) + '):*.log'))
+            backend_api.temporary_directory, 'autosklearn.ensemble_builder.log'))
         with open(log_file_path[0]) as log_file:
             log_content = log_file.read()
             self.assertIn('Deleted files of non-candidate model', log_content)
@@ -520,7 +525,7 @@ class AutoMLTest(Base, unittest.TestCase):
             )
 
             with unittest.mock.patch(
-                'autosklearn.ensemble_builder.EnsembleBuilder.run'
+                'autosklearn.ensemble_builder.EnsembleBuilder.main'
             ) as mock_ensemble_run:
                 mock_ensemble_run.side_effect = MemoryError
                 automl.fit(

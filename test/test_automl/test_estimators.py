@@ -339,10 +339,12 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
         predict_mock.return_value = np.array(predicted_probabilities)
 
+        backend_mock = unittest.mock.Mock()
+        backend_mock.temporary_directory = '/tmp'
         classifier = AutoMLClassifier(
             time_left_for_this_task=1,
             per_run_time_limit=1,
-            backend=None,
+            backend=backend_mock,
         )
         classifier.InputValidator.validate_target(
             pd.DataFrame(expected_result, dtype='category'),
@@ -365,10 +367,12 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
         predict_mock.return_value = np.array(predicted_probabilities)
 
+        backend_mock = unittest.mock.Mock()
+        backend_mock.temporary_directory = '/tmp'
         classifier = AutoMLClassifier(
             time_left_for_this_task=1,
             per_run_time_limit=1,
-            backend=None,
+            backend=backend_mock,
         )
         classifier.InputValidator.validate_target(
             pd.DataFrame(expected_result, dtype='int64'),

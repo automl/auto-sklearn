@@ -117,9 +117,6 @@ class BackendContext(object):
         os.makedirs(self.output_directory)
         self._output_dir_created = True
 
-    def __del__(self) -> None:
-        self.delete_directories(force=False)
-
     def delete_directories(self, force: bool = True) -> None:
         if self.delete_output_folder_after_terminate or force:
             if self._output_dir_created is False:

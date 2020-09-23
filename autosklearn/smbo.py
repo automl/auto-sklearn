@@ -414,11 +414,8 @@ class AutoMLSMBO(object):
             else:
                 raise ValueError(self.task)
 
-        backend_copy = copy.deepcopy(self.backend)
-        backend_copy.context.delete_output_folder_after_terminate = False
-        backend_copy.context.delete_tmp_folder_after_terminate = False
         ta_kwargs = dict(
-            backend=backend_copy,
+            backend=copy.deepcopy(self.backend),
             autosklearn_seed=seed,
             resampling_strategy=self.resampling_strategy,
             initial_num_run=num_run,
