@@ -118,7 +118,7 @@ class EvaluationTest(unittest.TestCase):
         self.stats.submitted_ta_runs += 1
         run_info, run_value = ta.run_wrapper(RunInfo(config=config, cutoff=9, instance=None,
                                              instance_specific=None, seed=1, capped=False))
-        self.assertEqual(run_value.status, StatusType.BUDGETEXHAUSTED)
+        self.assertEqual(run_value.status, StatusType.STOP)
 
     @unittest.mock.patch('pynisher.enforce_limits')
     def test_cutoff_lower_than_remaining_time(self, pynisher_mock):
