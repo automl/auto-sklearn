@@ -59,7 +59,7 @@ automl_arguments = {
     'ensemble_size': 0,
     'ensemble_nbest': 0,
     'seed': seed,
-    'ml_memory_limit': 3072,
+    'memory_limit': 3072,
     'resampling_strategy': 'partial-cv',
     'delete_tmp_folder_after_terminate': False,
     'tmp_folder': autosklearn_directory,
@@ -137,7 +137,7 @@ for entry in trajectory:
         # To avoid the output "first run crashed"...
         stats.submitted_ta_runs += 1
         stats.finished_ta_runs += 1
-        memory_lim = memory_limit_factor * automl_arguments['ml_memory_limit']
+        memory_lim = memory_limit_factor * automl_arguments['memory_limit']
         ta = ExecuteTaFuncWithQueue(backend=automl.automl_._backend,
                                     autosklearn_seed=seed,
                                     resampling_strategy='test',

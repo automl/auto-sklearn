@@ -913,6 +913,7 @@ class AutoML(BaseEstimator):
             metric=self._metric,
             random_state=self._seed,
             run_history=self.runhistory_,
+            model_dir=self._backend.get_model_dir(),
         )
         self._logger.warning(
             "No valid ensemble was created. Please check the log"
@@ -1134,8 +1135,9 @@ class AutoML(BaseEstimator):
     def __del__(self):
 
         # Make sure the client closes, so we don't leave
-        # the tcp connection open
-        if self._is_dask_client_internally_created:
+        # the tcp connection open. Also ask for None to facilitate
+        # unit testing
+        if self._is_dask_client_internally_created and self._dask_client:
             self._dask_client.close()
 
         # When a multiprocessing work is done, the

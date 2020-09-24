@@ -2,7 +2,6 @@ import os
 import sys
 import time
 import unittest.mock
-import warnings
 
 import dask.distributed
 
@@ -564,11 +563,14 @@ class SingleBestTest(unittest.TestCase):
             origin=None,
         )
 
-    def test_get_identifiers_from_run_history_accuracy(self):
+    @unittest.mock.patch('os.path.exists')
+    def test_get_identifiers_from_run_history_accuracy(self, exists):
+        exists.return_value = True
         ensemble = SingleBest(
              metric=accuracy,
              random_state=1,
              run_history=self.run_history,
+             model_dir='/tmp',
         )
 
         # Just one model
@@ -580,11 +582,14 @@ class SingleBestTest(unittest.TestCase):
         self.assertEqual(seed, 1)
         self.assertEqual(budget, 3.0)
 
-    def test_get_identifiers_from_run_history_log_loss(self):
+    @unittest.mock.patch('os.path.exists')
+    def test_get_identifiers_from_run_history_log_loss(self, exists):
+        exists.return_value = True
         ensemble = SingleBest(
              metric=log_loss,
              random_state=1,
              run_history=self.run_history,
+             model_dir='/tmp',
         )
 
         # Just one model

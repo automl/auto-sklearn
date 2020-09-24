@@ -432,6 +432,9 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
         self.assertEqual(initial_accuracy, restored_accuracy)
 
+        self._tearDown(tmp)
+        self._tearDown(output)
+
     def test_multilabel(self):
         tmp = os.path.join(self.test_dir, '..', '.tmp_multilabel_fit')
         output = os.path.join(self.test_dir, '..', '.out_multilabel_fit')

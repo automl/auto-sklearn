@@ -7,6 +7,9 @@ import glob
 import unittest
 import unittest.mock
 
+import dask
+import dask.distributed
+
 import numpy as np
 import pandas as pd
 import sklearn.datasets
@@ -32,6 +35,7 @@ class AutoMLStub(AutoML):
         self.__class__ = AutoML
         self._task = None
         self._dask_client = None
+        self._is_dask_client_internally_created = False
 
     def __del__(self):
         pass
@@ -49,6 +53,14 @@ class AutoMLTest(Base, unittest.TestCase):
         self.automl._backend = unittest.mock.Mock(spec=Backend)
         self.automl._backend.context = unittest.mock.Mock()
         self.automl._delete_output_directories = lambda: 0
+        dask.config.set({'distributed.worker.daemon': False})
+        self.client = dask.distributed.Client(
+            dask.distributed.LocalCluster(
+                n_workers=2,
+                processes=True,
+                threads_per_worker=1,
+            )
+        )
 
     def test_refit_shuffle_on_fail(self):
         backend_api = self._create_backend('test_refit_shuffle_on_fail')
@@ -135,6 +147,7 @@ class AutoMLTest(Base, unittest.TestCase):
             time_left_for_this_task=20,
             per_run_time_limit=5,
             metric=accuracy,
+            dask_client=self.client,
         )
         automl.fit(
             X_train, Y_train, task=MULTICLASS_CLASSIFICATION,
@@ -165,6 +178,7 @@ class AutoMLTest(Base, unittest.TestCase):
             include_estimators=['sgd'],
             include_preprocessors=['no_preprocessing'],
             metric=accuracy,
+            dask_client=self.client,
         )
 
         automl.fit(X, Y, task=MULTICLASS_CLASSIFICATION,
@@ -223,6 +237,7 @@ class AutoMLTest(Base, unittest.TestCase):
             initial_configurations_via_metalearning=0,
             get_smac_object_callback=get_roar_object_callback,
             metric=accuracy,
+            dask_client=self.client,
         )
         setup_logger()
         automl._logger = get_logger('test_fit_roar')
@@ -258,6 +273,7 @@ class AutoMLTest(Base, unittest.TestCase):
             include_estimators=['sgd'],
             include_preprocessors=['no_preprocessing'],
             metric=accuracy,
+            dask_client=self.client,
         )
         automl.fit(X_train, Y_train, task=BINARY_CLASSIFICATION)
         self.assertEqual(automl._task, BINARY_CLASSIFICATION)
@@ -287,6 +303,7 @@ class AutoMLTest(Base, unittest.TestCase):
             initial_configurations_via_metalearning=0,
             seed=100,
             metric=accuracy,
+            dask_client=self.client,
         )
         setup_logger()
         auto._logger = get_logger('test_automl_outputs')
@@ -361,6 +378,7 @@ class AutoMLTest(Base, unittest.TestCase):
                 backend_api, 20, 5,
                 initial_configurations_via_metalearning=25,
                 metric=accuracy,
+                dask_client=self.client,
             )
             setup_logger()
             auto._logger = get_logger('test_do_dummy_predictions')
@@ -404,6 +422,7 @@ class AutoMLTest(Base, unittest.TestCase):
                                          per_run_time,
                                          initial_configurations_via_metalearning=25,
                                          metric=accuracy,
+                                         dask_client=self.client,
                                          )
         setup_logger()
         auto._logger = get_logger('test_fail_if_dummy_prediction_fails')
@@ -480,6 +499,7 @@ class AutoMLTest(Base, unittest.TestCase):
             20,
             5,
             metric=accuracy,
+            dask_client=self.client,
         )
 
         output_file = 'test_exceptions_inside_log.log'
@@ -513,26 +533,27 @@ class AutoMLTest(Base, unittest.TestCase):
 
     def test_load_best_individual_model(self):
 
-        backend_api = self._create_backend('test_fit')
-
         for metric in [log_loss, balanced_accuracy]:
+            backend_api = self._create_backend('test_fit')
             X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
             automl = autosklearn.automl.AutoML(
                 backend=backend_api,
                 time_left_for_this_task=20,
                 per_run_time_limit=5,
                 metric=metric,
+                dask_client=self.client,
             )
 
-            with unittest.mock.patch(
-                'autosklearn.ensemble_builder.EnsembleBuilder.main'
-            ) as mock_ensemble_run:
-                mock_ensemble_run.side_effect = MemoryError
-                automl.fit(
-                    X_train, Y_train, task=MULTICLASS_CLASSIFICATION,
-                )
+            # We cannot easily mock a function sent to dask
+            # so for this test we create the whole set of models/ensembles
+            # but prevent it to be loaded
+            automl.fit(
+                X_train, Y_train, task=MULTICLASS_CLASSIFICATION,
+            )
+            automl._backend.load_ensemble = unittest.mock.MagicMock(return_value=None)
 
             # A memory error occurs in the ensemble construction
+            print(automl._backend.load_ensemble(automl._seed))
             self.assertIsNone(automl._backend.load_ensemble(automl._seed))
 
             # The load model is robust to this and loads the best model
@@ -564,6 +585,7 @@ class AutoMLTest(Base, unittest.TestCase):
             time_left_for_this_task=20,
             per_run_time_limit=5,
             metric=accuracy,
+            dask_client=self.client,
         )
 
         X_train = pd.DataFrame({'a': [1, 1], 'c': [1, 2]})
@@ -588,6 +610,7 @@ class AutoMLTest(Base, unittest.TestCase):
             time_left_for_this_task=20,
             per_run_time_limit=5,
             metric=accuracy,
+            dask_client=self.client,
         )
 
         X_train = pd.DataFrame({'a': [1, 1], 'c': [1, 2]})
