@@ -190,7 +190,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         if run_info.cutoff < 1.0:
             return run_info, RunValue(
-                status=StatusType.BUDGETEXHAUSTED,
+                status=StatusType.STOP,
                 cost=self.worst_possible_result,
                 time=0.0,
                 additional_info={},
