@@ -37,7 +37,7 @@ def get_smac_object_callback(budget_type):
         from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
         from smac.scenario.scenario import Scenario
 
-        if n_jobs > 1 or dask_client:
+        if n_jobs > 1 or (dask_client and len(dask_client.nthreads()) > 1):
             raise ValueError("Please make sure to guard the code invoking Auto-sklearn by "
                              "`if __name__ == '__main__'` and remove this exception.")
 

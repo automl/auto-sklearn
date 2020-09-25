@@ -58,7 +58,6 @@ class EstimatorTest(Base, unittest.TestCase):
     def tearDownClass(self):
         self.client.close()
 
-
     # def test_fit_partial_cv(self):
     #
     #     output = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_partial_cv')
@@ -78,7 +77,7 @@ class EstimatorTest(Base, unittest.TestCase):
     #     self._tearDown(output)
 
     def test_feat_type_wrong_arguments(self):
-        cls = AutoSklearnClassifier()
+        cls = AutoSklearnClassifier(dask_client=self.client)
         X = np.zeros((100, 100))
         y = np.zeros((100, ))
         self.assertRaisesRegex(
@@ -133,7 +132,7 @@ class EstimatorTest(Base, unittest.TestCase):
                                              [5.5, 3.9],
                                              ])
 
-        cls = AutoSklearnClassifier()
+        cls = AutoSklearnClassifier(dask_client=self.client)
         # Illegal target types for classification: continuous,
         # multiclass-multioutput, continuous-multioutput.
         self.assertRaisesRegex(ValueError,
@@ -181,7 +180,7 @@ class EstimatorTest(Base, unittest.TestCase):
                       "multilabel-indicator targets")
 
         # Test that regressor raises error for illegal target types.
-        reg = AutoSklearnRegressor()
+        reg = AutoSklearnRegressor(dask_client=self.client)
         # Illegal target types for regression: multilabel-indicator
         # multiclass-multioutput
         self.assertRaisesRegex(

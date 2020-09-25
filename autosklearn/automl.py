@@ -10,6 +10,7 @@ from typing import Any, Dict, Optional, List, Union
 import unittest.mock
 import warnings
 import uuid
+import tempfile
 
 from ConfigSpace.read_and_write import json as cs_json
 import dask.distributed
@@ -186,8 +187,13 @@ class AutoML(BaseEstimator):
                     n_workers=self._n_jobs,
                     processes=processes,
                     threads_per_worker=1,
-                    local_directory=self._backend.temporary_directory,
-
+                    # We use the temporal directory to save the
+                    # dask workers, because deleting workers
+                    # more time than deleting backend directories
+                    # This prevent an error saying that the worker
+                    # file was deleted, so the client could not close
+                    # the worker properly
+                    local_directory=tempfile.gettempdir(),
                 )
             )
 
@@ -1136,7 +1142,6 @@ class AutoML(BaseEstimator):
         return self.__dict__
 
     def __del__(self):
-
         # Make sure the client closes, so we don't leave
         # the tcp connection open. Also ask for None to facilitate
         # unit testing

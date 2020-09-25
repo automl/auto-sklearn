@@ -166,28 +166,40 @@ def ensemble_builder_process(
         # Also, notice how ensemble nbest is returned, so we don't waste
         # iterations testing if the deterministic predictions size can
         # be fitted in memory
-        result, ensemble_nbest = EnsembleBuilder(
-            backend=backend,
-            dataset_name=dataset_name,
-            task_type=task,
-            metric=metric,
-            ensemble_size=ensemble_size,
-            ensemble_nbest=ensemble_nbest,
-            max_models_on_disc=max_models_on_disc,
-            seed=seed,
-            precision=precision,
-            memory_limit=ensemble_memory_limit,
-            read_at_most=read_at_most,
-            random_state=seed,
-        ).run(
-            time_left=time_left_for_ensembles-elapsed_time,
-            iteration=iteration,
-        )
+        try:
+            result = EnsembleBuilder(
+                backend=backend,
+                dataset_name=dataset_name,
+                task_type=task,
+                metric=metric,
+                ensemble_size=ensemble_size,
+                ensemble_nbest=ensemble_nbest,
+                max_models_on_disc=max_models_on_disc,
+                seed=seed,
+                precision=precision,
+                memory_limit=ensemble_memory_limit,
+                read_at_most=read_at_most,
+                random_state=seed,
+            ).run(
+                time_left=time_left_for_ensembles-elapsed_time,
+                iteration=iteration,
+            )
+        except Exception as e:
+            exception_traceback = traceback.format_exc()
+            error_message = repr(e)
+            logger.critical(exception_traceback)
+            logger.critical(error_message)
 
         # If pynisher kills a run, the result
         # might be None -- so no new timestamp info
         if result:
-            history.extend(result)
+            ensemble_history, ensemble_nbest = result
+            logger.debug("iteration={} @ elapsed_time={} has history={}".format(
+                iteration,
+                elapsed_time,
+                ensemble_history,
+            ))
+            history.extend(ensemble_history)
 
         # Don;t take resources while waiting
         dask.distributed.secede()
@@ -416,7 +428,10 @@ class EnsembleBuilder(object):
                     # ATTENTION: main will start from scratch;
                     # all data structures are empty again
                     continue
-            return safe_ensemble_script.result
+            if safe_ensemble_script:
+                return safe_ensemble_script.result
+            else:
+                return []
 
     def main(self, time_left, iteration):
         """

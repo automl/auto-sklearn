@@ -78,7 +78,7 @@ class AutoMLTest(Base, unittest.TestCase):
             ValueError(), ValueError(), (None, {})]
         failing_model.get_max_iter.return_value = 100
 
-        auto = AutoML(backend_api, 20, 5)
+        auto = AutoML(backend_api, 20, 5, dask_client=self.client)
         ensemble_mock = unittest.mock.Mock()
         ensemble_mock.get_selected_model_identifiers.return_value = [(1, 1, 50.0)]
         auto.ensemble_ = ensemble_mock
