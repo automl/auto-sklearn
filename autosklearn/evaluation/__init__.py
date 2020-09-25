@@ -377,5 +377,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         runtime = float(obj.wall_clock_time)
 
         autosklearn.evaluation.util.empty_queue(queue)
-
+        self.logger.debug(
+            'Finished function evaluation. Status: %s, Cost: %f, Runtime: %f, Additional %s',
+            status, cost, runtime, additional_run_info,
+        )
         return status, cost, runtime, additional_run_info

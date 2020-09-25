@@ -379,16 +379,16 @@ class AutoML(BaseEstimator):
         requirements = pkg_resources.resource_string('autosklearn', 'requirements.txt')
         requirements = requirements.decode('utf-8')
         requirements = [requirement for requirement in requirements.split('\n')]
-        # for requirement in requirements:
-        #     if not requirement:
-        #         continue
-        #     match = RE_PATTERN.match(requirement)
-        #     if match:
-        #         name = match.group('name')
-        #         module_dist = pkg_resources.get_distribution(name)
-        #         self._logger.debug('  %s', module_dist)
-        #     else:
-        #         raise ValueError('Unable to read requirement: %s' % requirement)
+        for requirement in requirements:
+            if not requirement:
+                continue
+            match = RE_PATTERN.match(requirement)
+            if match:
+                name = match.group('name')
+                module_dist = pkg_resources.get_distribution(name)
+                self._logger.debug('  %s', module_dist)
+            else:
+                raise ValueError('Unable to read requirement: %s' % requirement)
         self._logger.debug('Done printing environment information')
         self._logger.debug('Starting to print arguments to auto-sklearn')
         self._logger.debug('  output_folder: %s', self._backend.context._output_directory)
