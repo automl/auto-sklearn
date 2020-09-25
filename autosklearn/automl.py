@@ -176,26 +176,8 @@ class AutoML(BaseEstimator):
         # If no dask client was provided, we create one, so that we can
         # start a ensemble process in parallel to smbo optimize
         self._is_dask_client_internally_created = False
-        if self._dask_client is None:
-            self._is_dask_client_internally_created = True
-            processes = False
-            if self._n_jobs is not None and self._n_jobs > 1:
-                processes = True
-                dask.config.set({'distributed.worker.daemon': False})
-            self._dask_client = dask.distributed.Client(
-                dask.distributed.LocalCluster(
-                    n_workers=self._n_jobs,
-                    processes=processes,
-                    threads_per_worker=1,
-                    # We use the temporal directory to save the
-                    # dask workers, because deleting workers
-                    # more time than deleting backend directories
-                    # This prevent an error saying that the worker
-                    # file was deleted, so the client could not close
-                    # the worker properly
-                    local_directory=tempfile.gettempdir(),
-                )
-            )
+        if self._dask_client is None and self._ensemble_size > 0:
+            self._create_dask_client()
 
         # For the ensemble building process
 
@@ -257,6 +239,27 @@ class AutoML(BaseEstimator):
 
         # After assigning and checking variables...
         # self._backend = Backend(self._output_dir, self._tmp_dir)
+
+    def _create_dask_client(self):
+        self._is_dask_client_internally_created = True
+        processes = False
+        if self._n_jobs is not None and self._n_jobs > 1:
+            processes = True
+            dask.config.set({'distributed.worker.daemon': False})
+        self._dask_client = dask.distributed.Client(
+            dask.distributed.LocalCluster(
+                n_workers=self._n_jobs,
+                processes=processes,
+                threads_per_worker=1,
+                # We use the temporal directory to save the
+                # dask workers, because deleting workers
+                # more time than deleting backend directories
+                # This prevent an error saying that the worker
+                # file was deleted, so the client could not close
+                # the worker properly
+                local_directory=tempfile.gettempdir(),
+            )
+        )
 
     def _get_logger(self, name):
         logger_name = 'AutoML(%d):%s' % (self._seed, name)
@@ -833,6 +836,10 @@ class AutoML(BaseEstimator):
 
         # Make sure that input is valid
         y = self.InputValidator.validate_target(y, is_classification=True)
+
+        # Create a client if needed
+        if self._dask_client is None:
+            self._create_dask_client()
 
         # Submit the ensemble run to a dask process
         proc_ensemble = self._dask_client.submit(

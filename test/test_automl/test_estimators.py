@@ -48,9 +48,9 @@ class EstimatorTest(Base, unittest.TestCase):
         dask.config.set({'distributed.worker.daemon': False})
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
-                n_workers=2,
-                processes=True,
-                threads_per_worker=1,
+                n_workers=1,
+                processes=False,
+                threads_per_worker=2,
             )
         )
 
@@ -102,6 +102,7 @@ class EstimatorTest(Base, unittest.TestCase):
             cls.fit,
             X=X, y=y, feat_type=['Car']*100
         )
+        del cls
 
     # Mock AutoSklearnEstimator.fit so the test doesn't actually run fit().
     @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.fit')
@@ -228,6 +229,10 @@ class EstimatorTest(Base, unittest.TestCase):
             self.fail("reg.fit() raised ValueError while fitting "
                       "binary targets")
 
+        # Cleanup
+        del cls
+        del reg
+
     def test_cv_results(self):
         # TODO restructure and actually use real SMAC output from a long run
         # to do this unittest!
@@ -334,6 +339,13 @@ class EstimatorTest(Base, unittest.TestCase):
 
         self.assertGreater(self._count_succeses(automl.cv_results_), 0)
 
+        # Accelerate closing the dask client.
+        # Dask close should be sufficient, but
+        # it seems to take to much time and generate
+        # warnings of: Restarting worker
+        # Not needed when outside pytest
+        automl.automl_._dask_client.shutdown()
+        del automl
         self._tearDown(tmp)
         self._tearDown(output)
 
@@ -343,6 +355,7 @@ class EstimatorTest(Base, unittest.TestCase):
         cls = AutoSklearnEstimator(n_jobs=-1)
         cls.fit()
         self.assertEqual(cls._n_jobs, n_cores)
+        del cls
 
     def test_get_number_of_available_cores(self):
         n_cores = cpu_count()
@@ -356,9 +369,9 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         dask.config.set({'distributed.worker.daemon': False})
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
-                n_workers=2,
-                processes=True,
-                threads_per_worker=1,
+                n_workers=1,
+                processes=False,
+                threads_per_worker=2,
             )
         )
 
@@ -381,6 +394,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
             time_left_for_this_task=1,
             per_run_time_limit=1,
             backend=backend_mock,
+            dask_client=self.client,
         )
         classifier.InputValidator.validate_target(
             pd.DataFrame(expected_result, dtype='category'),
@@ -409,6 +423,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
             time_left_for_this_task=1,
             per_run_time_limit=1,
             backend=backend_mock,
+            dask_client=self.client,
         )
         classifier.InputValidator.validate_target(
             pd.DataFrame(expected_result, dtype='int64'),
@@ -565,9 +580,9 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         dask.config.set({'distributed.worker.daemon': False})
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
-                n_workers=2,
-                processes=True,
-                threads_per_worker=1,
+                n_workers=1,
+                processes=False,
+                threads_per_worker=2,
             )
         )
 
@@ -661,6 +676,22 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
 
 
 class AutoSklearnClassifierTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(self):
+        self.client = dask.distributed.Client(
+            dask.distributed.LocalCluster(
+                n_workers=1,
+                processes=False,
+                threads_per_worker=2,
+            )
+        )
+
+    @classmethod
+    def tearDownClass(self):
+        self.client.close()
+
+    # Currently this class only tests that the methods of AutoSklearnRegressor
+
     # Currently this class only tests that the methods of AutoSklearnClassifier
     # which should return self actually return self.
     def test_classification_methods_returns_self(self):
@@ -668,6 +699,7 @@ class AutoSklearnClassifierTest(unittest.TestCase):
         automl = AutoSklearnClassifier(time_left_for_this_task=60,
                                        per_run_time_limit=10,
                                        ensemble_size=0,
+                                       dask_client=self.client,
                                        exclude_preprocessors=['fast_ica'])
 
         automl_fitted = automl.fit(X_train, y_train)
@@ -678,15 +710,31 @@ class AutoSklearnClassifierTest(unittest.TestCase):
 
         automl_refitted = automl.refit(X_train.copy(), y_train.copy())
         self.assertIs(automl, automl_refitted)
+        del automl
 
 
 class AutoSklearnRegressorTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(self):
+        self.client = dask.distributed.Client(
+            dask.distributed.LocalCluster(
+                n_workers=1,
+                processes=False,
+                threads_per_worker=2,
+            )
+        )
+
+    @classmethod
+    def tearDownClass(self):
+        self.client.close()
+
     # Currently this class only tests that the methods of AutoSklearnRegressor
     # that should return self actually return self.
     def test_regression_methods_returns_self(self):
         X_train, y_train, X_test, y_test = putil.get_dataset('boston')
         automl = AutoSklearnRegressor(time_left_for_this_task=30,
                                       per_run_time_limit=5,
+                                      dask_client=self.client,
                                       ensemble_size=0)
 
         automl_fitted = automl.fit(X_train, y_train)
@@ -697,14 +745,16 @@ class AutoSklearnRegressorTest(unittest.TestCase):
 
         automl_refitted = automl.refit(X_train.copy(), y_train.copy())
         self.assertIs(automl, automl_refitted)
+        del automl
 
 
 class AutoSklearn2ClassifierTest(unittest.TestCase):
+
     # Currently this class only tests that the methods of AutoSklearnClassifier
     # which should return self actually return self.
     def test_classification_methods_returns_self(self):
         X_train, y_train, X_test, y_test = putil.get_dataset('iris')
-        automl = AutoSklearn2Classifier(time_left_for_this_task=60, ensemble_size=0,)
+        automl = AutoSklearn2Classifier(time_left_for_this_task=60, ensemble_size=0)
 
         automl_fitted = automl.fit(X_train, y_train)
         self.assertIs(automl, automl_fitted)
@@ -714,6 +764,7 @@ class AutoSklearn2ClassifierTest(unittest.TestCase):
 
         automl_refitted = automl.refit(X_train.copy(), y_train.copy())
         self.assertIs(automl, automl_refitted)
+        del automl
 
 
 if __name__ == "__main__":
