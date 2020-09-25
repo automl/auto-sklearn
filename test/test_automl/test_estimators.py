@@ -293,7 +293,11 @@ class EstimatorTest(Base, unittest.TestCase):
         available_predictions = set()
         predictions = os.listdir(predictions_dir)
         for prediction in predictions:
-            available_predictions.add(int(prediction.split('_')[3]))
+            try:
+                available_predictions.add(int(prediction.split('_')[3]))
+            except IndexError:
+                print(prediction, flush=True)
+                raise
 
         # Remove the dummy prediction, it is not part of the runhistory
         available_predictions.remove(1)
