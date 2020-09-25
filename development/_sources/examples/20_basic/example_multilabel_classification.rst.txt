@@ -106,7 +106,7 @@ Building the classifier
 
  .. code-block:: none
 
-    [WARNING] [2020-09-25 19:33:30,232:AutoML(1):reuters] Capping the per_run_time_limit to 29.0 to have time for a least 2 models in each process.
+    [WARNING] [2020-09-25 22:10:03,394:AutoML(1):reuters] Capping the per_run_time_limit to 29.0 to have time for a least 2 models in each process.
 
     AutoSklearnClassifier(dask_client=None,
                           delete_output_folder_after_terminate=True,
@@ -221,7 +221,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  56.841 seconds)
+   **Total running time of the script:** ( 0 minutes  56.924 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multilabel_classification.py:
