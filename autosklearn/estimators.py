@@ -1,19 +1,15 @@
 # -*- encoding: utf-8 -*-
-import copy
-import multiprocessing
-from typing import Optional, List, Dict
 
+from typing import Optional, Dict
+
+import dask.distributed
+import joblib
 import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.utils.multiclass import type_of_target
-import joblib
 
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, AutoML
-from autosklearn.util.backend import create, get_randomized_directory_names
-
-
-def _fit_automl(automl, kwargs, load_models):
-    return automl.fit(load_models=load_models, **kwargs)
+from autosklearn.util.backend import create
 
 
 class AutoSklearnEstimator(BaseEstimator):
@@ -39,8 +35,8 @@ class AutoSklearnEstimator(BaseEstimator):
         output_folder=None,
         delete_tmp_folder_after_terminate=True,
         delete_output_folder_after_terminate=True,
-        shared_mode=False,
         n_jobs: Optional[int] = None,
+        dask_client: Optional[dask.distributed.Client] = None,
         disable_evaluator_output=False,
         get_smac_object_callback=None,
         smac_scenario_args=None,
@@ -173,22 +169,19 @@ class AutoSklearnEstimator(BaseEstimator):
             remove output_folder, when finished. If output_folder is None
             output_dir will always be deleted
 
-        shared_mode : bool, optional (False)
-            Run smac in shared-model-node. This only works if arguments
-            ``tmp_folder`` and ``output_folder`` are given and both
-            ``delete_tmp_folder_after_terminate`` and
-            ``delete_output_folder_after_terminate`` are set to False. Cannot
-            be used together with ``n_jobs``.
-
         n_jobs : int, optional, experimental
-            The number of jobs to run in parallel for ``fit()``. Cannot be
-            used together with ``shared_mode``. ``-1`` means using all
-            processors. By default, Auto-sklearn uses a single core for
-            fitting the machine learning model and a single core for fitting
+            The number of jobs to run in parallel for ``fit()``. ``-1`` means 
+            using all processors. By default, Auto-sklearn uses a single core 
+            for fitting the machine learning model and a single core for fitting
             an ensemble. Ensemble building is not affected by ``n_jobs`` but
             can be controlled by the number of models in the ensemble. In
             contrast to most scikit-learn models, ``n_jobs`` given in the
-            constructor is not applied to the ``predict()`` method.
+            constructor is not applied to the ``predict()`` method. If 
+            ``dask_client`` is None, a new dask client is created.
+            
+        dask_client : dask.distributed.Client, optional
+            User-created dask client, can be used to start a dask cluster and then 
+            attach auto-sklearn to it.
 
         disable_evaluator_output: bool or list, optional (False)
             If True, disable model and prediction output. Cannot be used
@@ -263,8 +256,8 @@ class AutoSklearnEstimator(BaseEstimator):
         self.output_folder = output_folder
         self.delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
         self.delete_output_folder_after_terminate = delete_output_folder_after_terminate
-        self.shared_mode = shared_mode
         self.n_jobs = n_jobs
+        self.dask_client = dask_client
         self.disable_evaluator_output = disable_evaluator_output
         self.get_smac_object_callback = get_smac_object_callback
         self.smac_scenario_args = smac_scenario_args
@@ -272,7 +265,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.metadata_directory = metadata_directory
         self._metric = metric
 
-        self._automl = None  # type: Optional[List[AutoML]]
+        self.automl_ = None  # type: Optional[AutoML]
         # n_jobs after conversion to a number (b/c default is None)
         self._n_jobs = None
         super().__init__()
@@ -280,7 +273,6 @@ class AutoSklearnEstimator(BaseEstimator):
     def build_automl(
         self,
         seed: int,
-        shared_mode: bool,
         ensemble_size: int,
         initial_configurations_via_metalearning: int,
         tmp_folder: str,
@@ -288,22 +280,11 @@ class AutoSklearnEstimator(BaseEstimator):
         smac_scenario_args: Optional[Dict] = None,
     ):
 
-        if shared_mode:
-            self.delete_output_folder_after_terminate = False
-            self.delete_tmp_folder_after_terminate = False
-            if tmp_folder is None:
-                raise ValueError("If shared_mode == True tmp_folder must not "
-                                 "be None.")
-            if output_folder is None:
-                raise ValueError("If shared_mode == True output_folder must "
-                                 "not be None.")
-
         backend = create(
             temporary_directory=tmp_folder,
             output_directory=output_folder,
             delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
             delete_output_folder_after_terminate=self.delete_output_folder_after_terminate,
-            shared_mode=shared_mode,
             )
 
         if smac_scenario_args is None:
@@ -326,7 +307,8 @@ class AutoSklearnEstimator(BaseEstimator):
             exclude_preprocessors=self.exclude_preprocessors,
             resampling_strategy=self.resampling_strategy,
             resampling_strategy_arguments=self.resampling_strategy_arguments,
-            shared_mode=shared_mode,
+            n_jobs=self._n_jobs,
+            dask_client=self.dask_client,
             get_smac_object_callback=self.get_smac_object_callback,
             disable_evaluator_output=self.disable_evaluator_output,
             smac_scenario_args=smac_scenario_args,
@@ -338,12 +320,6 @@ class AutoSklearnEstimator(BaseEstimator):
         return automl
 
     def fit(self, **kwargs):
-        self._automl = []
-        if self.shared_mode and self.n_jobs:
-            raise ValueError(
-                'Cannot enable both shared_model and n_jobs. Please specify '
-                'only one of them.'
-            )
 
         # Handle the number of jobs and the time for them
         if self.n_jobs is None or self.n_jobs == 1:
@@ -357,85 +333,17 @@ class AutoSklearnEstimator(BaseEstimator):
         if self.per_run_time_limit is None:
             self.per_run_time_limit = self._n_jobs * self.time_left_for_this_task // 10
 
-        if self.n_jobs is None or self.n_jobs == 1:
-            shared_mode = self.shared_mode
-            seed = self.seed
-            automl = self.build_automl(
-                seed=seed,
-                shared_mode=shared_mode,
-                ensemble_size=self.ensemble_size,
-                initial_configurations_via_metalearning=(
-                    self.initial_configurations_via_metalearning
-                ),
-                tmp_folder=self.tmp_folder,
-                output_folder=self.output_folder,
-            )
-            self._automl.append(automl)
-            self._automl[0].fit(**kwargs)
-        else:
-            tmp_folder, output_folder = get_randomized_directory_names(
-                temporary_directory=self.tmp_folder,
-                output_directory=self.output_folder,
-            )
-
-            shared_mode = True
-            seeds = set()
-            for i in range(self._n_jobs):
-                rs = np.random.RandomState(self.seed + i)
-                while True:
-                    seed = int(rs.randint(0, 2 ** 32))
-                    if seed in seeds:
-                        continue
-                    else:
-                        break
-
-                if i != 0:
-                    smac_scenario_args = copy.deepcopy(self.smac_scenario_args)
-                    if smac_scenario_args is None:
-                        smac_scenario_args = dict()
-                    if 'initial_incumbent' not in smac_scenario_args:
-                        smac_scenario_args['initial_incumbent'] = 'RANDOM'
-                else:
-                    smac_scenario_args = self.smac_scenario_args
-
-                automl = self.build_automl(
-                    seed=seed,
-                    shared_mode=shared_mode,
-                    # Start the ensemble process only for the first AutoML
-                    # process (the first AutoML will be executed in the
-                    # current process, too)
-                    ensemble_size=self.ensemble_size if i == 0 else 0,
-                    initial_configurations_via_metalearning=(
-                        self.initial_configurations_via_metalearning
-                        if i == 0
-                        else 0
-                    ),
-                    tmp_folder=tmp_folder,
-                    output_folder=output_folder,
-                    smac_scenario_args=smac_scenario_args,
-                )
-                self._automl.append(automl)
-            # Start all except for the first instances of Auto-sklearn in a
-            # new process!
-            processes = []
-            for i in range(1, self._n_jobs):
-                p = multiprocessing.Process(
-                    target=_fit_automl,
-                    kwargs=dict(
-                        automl=self._automl[i],
-                        kwargs=kwargs,
-                        load_models=False,
-                    ),
-                )
-                processes.append(p)
-                p.start()
-            _fit_automl(
-                automl=self._automl[0],
-                kwargs=kwargs,
-                load_models=True,
-            )
-            for p in processes:
-                p.join()
+        seed = self.seed
+        self.automl_ = self.build_automl(
+            seed=seed,
+            ensemble_size=self.ensemble_size,
+            initial_configurations_via_metalearning=(
+                self.initial_configurations_via_metalearning
+            ),
+            tmp_folder=self.tmp_folder,
+            output_folder=self.output_folder,
+        )
+        self.automl_.fit(load_models=True, **kwargs)
 
         return self
 
@@ -480,27 +388,20 @@ class AutoSklearnEstimator(BaseEstimator):
         self
 
         """
-        if self._automl is None:
-            if self.n_jobs is None or self.n_jobs == 1:
-                shared_mode = self.shared_mode
-            else:
-                shared_mode = True
+        if self.automl_ is None:
             # Build a dummy automl object to call fit_ensemble
-            self._automl = [
-                self.build_automl(
-                    seed=self.seed,
-                    shared_mode=shared_mode,
-                    ensemble_size=(
-                        ensemble_size
-                        if ensemble_size is not None else
-                        self.ensemble_size
-                    ),
-                    initial_configurations_via_metalearning=0,
-                    tmp_folder=self.tmp_folder,
-                    output_folder=self.output_folder,
-                )
-            ]
-        self._automl[0].fit_ensemble(
+            self.automl_ = self.build_automl(
+                seed=self.seed,
+                ensemble_size=(
+                    ensemble_size
+                    if ensemble_size is not None else
+                    self.ensemble_size
+                ),
+                initial_configurations_via_metalearning=0,
+                tmp_folder=self.tmp_folder,
+                output_folder=self.output_folder,
+            )
+        self.automl_.fit_ensemble(
             y=y,
             task=task,
             precision=precision,
@@ -535,18 +436,18 @@ class AutoSklearnEstimator(BaseEstimator):
         self
 
         """
-        self._automl[0].refit(X, y)
+        self.automl_.refit(X, y)
         return self
 
     def predict(self, X, batch_size=None, n_jobs=1):
-        return self._automl[0].predict(X, batch_size=batch_size, n_jobs=n_jobs)
+        return self.automl_.predict(X, batch_size=batch_size, n_jobs=n_jobs)
 
     def predict_proba(self, X, batch_size=None, n_jobs=1):
-        return self._automl[0].predict_proba(
+        return self.automl_.predict_proba(
              X, batch_size=batch_size, n_jobs=n_jobs)
 
     def score(self, X, y):
-        return self._automl[0].score(X, y)
+        return self.automl_.score(X, y)
 
     def show_models(self):
         """Return a representation of the final ensemble found by auto-sklearn.
@@ -556,7 +457,7 @@ class AutoSklearnEstimator(BaseEstimator):
         str
 
         """
-        return self._automl[0].show_models()
+        return self.automl_.show_models()
 
     def get_models_with_weights(self):
         """Return a list of the final ensemble found by auto-sklearn.
@@ -566,23 +467,19 @@ class AutoSklearnEstimator(BaseEstimator):
         [(weight_1, model_1), ..., (weight_n, model_n)]
 
         """
-        return self._automl[0].get_models_with_weights()
+        return self.automl_.get_models_with_weights()
 
     @property
     def cv_results_(self):
-        return self._automl[0].cv_results_
+        return self.automl_.cv_results_
 
     @property
     def trajectory_(self):
-        if len(self._automl) > 1:
-            raise NotImplementedError()
-        return self._automl[0].trajectory_
+        return self.automl_.trajectory_
 
     @property
     def fANOVA_input_(self):
-        if len(self._automl) > 1:
-            raise NotImplementedError()
-        return self._automl[0].fANOVA_input_
+        return self.automl_.fANOVA_input_
 
     def sprint_statistics(self):
         """Return the following statistics of the training result:
@@ -600,13 +497,13 @@ class AutoSklearnEstimator(BaseEstimator):
         -------
         str
         """
-        return self._automl[0].sprint_statistics()
+        return self.automl_.sprint_statistics()
 
     def _get_automl_class(self):
         raise NotImplementedError()
 
     def get_configuration_space(self, X, y):
-        return self._automl[0].configuration_space
+        return self.automl_.configuration_space
 
 
 class AutoSklearnClassifier(AutoSklearnEstimator):

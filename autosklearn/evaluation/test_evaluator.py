@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-from smac.tae.execute_ta_run import StatusType
+from smac.tae import StatusType
 
 from autosklearn.evaluation.abstract_evaluator import (
     AbstractEvaluator,

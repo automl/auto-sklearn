@@ -24,7 +24,7 @@ else
 
 fi
 
-python -V
+python3 -V
 which python
-pip --version
-which pip
+pip3 --version
+which pip3

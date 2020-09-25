@@ -1,19 +1,18 @@
 # -*- encoding: utf-8 -*-
 import functools
-import logging
 import math
 import multiprocessing
 from queue import Empty
+import time
 import traceback
-from typing import Optional
+from typing import Tuple
 
 import numpy as np
 import pynisher
-from smac.tae.execute_ta_run import StatusType, BudgetExhaustedException, \
-    TAEAbortException
+from smac.runhistory.runhistory import RunInfo, RunValue
+from smac.tae import StatusType, TAEAbortException
 from smac.tae.execute_func import AbstractTAFunc
 
-from ConfigSpace import Configuration
 from sklearn.model_selection._split import _RepeatedSplits, BaseShuffleSplit,\
     BaseCrossValidator
 from autosklearn.metrics import Scorer
@@ -21,6 +20,7 @@ from autosklearn.metrics import Scorer
 import autosklearn.evaluation.train_evaluator
 import autosklearn.evaluation.test_evaluator
 import autosklearn.evaluation.util
+import autosklearn.util.logging_
 
 
 def fit_predict_try_except_decorator(ta, queue, cost_for_crash, **kwargs):
@@ -67,7 +67,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
     def __init__(self, backend, autosklearn_seed, resampling_strategy, metric,
                  logger, cost_for_crash, abort_on_first_run_crash,
-                 initial_num_run=1, stats=None, runhistory=None,
+                 initial_num_run=1, stats=None,
                  run_obj='quality', par_factor=1, all_scoring_functions=False,
                  output_y_hat_optimization=True, include=None, exclude=None,
                  memory_limit=None, disable_file_output=False, init_params=None,
@@ -109,7 +109,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         super().__init__(
             ta=eval_function,
             stats=stats,
-            runhistory=runhistory,
             run_obj=run_obj,
             par_factor=par_factor,
             cost_for_crash=self.worst_possible_result,
@@ -119,7 +118,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.backend = backend
         self.autosklearn_seed = autosklearn_seed
         self.resampling_strategy = resampling_strategy
-        self.num_run = initial_num_run
+        self.initial_num_run = initial_num_run
         self.metric = metric
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_args = resampling_strategy_args
@@ -147,55 +146,37 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         else:
             self._get_test_loss = False
 
-    def start(self, config: Configuration,
-              instance: Optional[str],
-              cutoff: float = None,
-              seed: int = 12345,
-              budget: float = 0.0,
-              instance_specific: Optional[str] = None,
-              capped: bool = False):
+    def run_wrapper(
+        self,
+        run_info: RunInfo,
+    ) -> Tuple[RunInfo, RunValue]:
         """
-        wrapper function for ExecuteTARun.start() to cap the target algorithm
+        wrapper function for ExecuteTARun.run_wrapper() to cap the target algorithm
         runtime if it would run over the total allowed runtime.
 
         Parameters
         ----------
-            config : Configuration
-                mainly a dictionary param -> value
-            instance : string
-                problem instance
-            cutoff : float
-                runtime cutoff
-            seed : int
-                random seed
-            budget : float
-                A positive, real-valued number representing an arbitrary limit to the target
-                algorithm. Handled by the target algorithm internally
-            instance_specific: str
-                instance specific information (e.g., domain file or solution)
-            capped: bool
-                if true and status is StatusType.TIMEOUT,
-                uses StatusType.CAPPED
+        run_info : RunInfo
+            Object that contains enough information to execute a configuration run in
+            isolation.
         Returns
         -------
-            status: enum of StatusType (int)
-                {SUCCESS, TIMEOUT, CRASHED, ABORT}
-            cost: float
-                cost/regret/quality (float) (None, if not returned by TA)
-            runtime: float
-                runtime (None if not returned by TA)
-            additional_info: dict
-                all further additional run information
+        RunInfo:
+            an object containing the configuration launched
+        RunValue:
+            Contains information about the status/performance of config
         """
         if self.budget_type is None:
-            if budget != 0:
-                raise ValueError('If budget_type is None, budget must be.0, but is %f' % budget)
+            if run_info.budget != 0:
+                raise ValueError(
+                    'If budget_type is None, budget must be.0, but is %f' % run_info.budget
+                )
         else:
-            if budget == 0:
-                budget = 100
-            elif budget <= 0 or budget > 100:
+            if run_info.budget == 0:
+                run_info = run_info._replace(budget=100)
+            elif run_info.budget <= 0 or run_info.budget > 100:
                 raise ValueError('Illegal value for budget, must be >0 and <=100, but is %f' %
-                                 budget)
+                                 run_info.budget)
             if self.budget_type not in ('subsample', 'iterations', 'mixed'):
                 raise ValueError("Illegal value for budget type, must be one of "
                                  "('subsample', 'iterations', 'mixed'), but is : %s" %
@@ -203,16 +184,25 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         remaining_time = self.stats.get_remaing_time_budget()
 
-        if remaining_time - 5 < cutoff:
-            cutoff = int(remaining_time - 5)
+        if remaining_time - 5 < run_info.cutoff:
+            run_info = run_info._replace(cutoff=int(remaining_time - 5))
 
-        if cutoff < 1.0:
-            raise BudgetExhaustedException()
-        cutoff = int(np.ceil(cutoff))
+        if run_info.cutoff < 1.0:
+            return run_info, RunValue(
+                status=StatusType.STOP,
+                cost=self.worst_possible_result,
+                time=0.0,
+                additional_info={},
+                starttime=time.time(),
+                endtime=time.time(),
+            )
+        elif (
+            run_info.cutoff != int(np.ceil(run_info.cutoff))
+            and not isinstance(run_info.cutoff, int)
+        ):
+            run_info = run_info._replace(cutoff=int(np.ceil(run_info.cutoff)))
 
-        return super().start(config=config, instance=instance, cutoff=cutoff,
-                             seed=seed, instance_specific=instance_specific,
-                             capped=capped, budget=budget)
+        return super().run_wrapper(run_info=run_info)
 
     def run(self, config, instance=None,
             cutoff=None,
@@ -229,17 +219,23 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             init_params.update(self.init_params)
 
         arguments = dict(
-            logger=logging.getLogger("pynisher"),
+            logger=autosklearn.util.logging_.get_logger("pynisher"),
             wall_time_in_s=cutoff,
             mem_in_mb=self.memory_limit,
         )
+
+        if isinstance(config, int):
+            num_run = self.initial_num_run
+        else:
+            num_run = config.config_id + self.initial_num_run
+
         obj_kwargs = dict(
             queue=queue,
             config=config,
             backend=self.backend,
             metric=self.metric,
             seed=self.autosklearn_seed,
-            num_run=self.num_run,
+            num_run=num_run,
             all_scoring_functions=self.all_scoring_functions,
             output_y_hat_optimization=self.output_y_hat_optimization,
             include=self.include,
@@ -378,8 +374,10 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         additional_run_info['configuration_origin'] = origin
 
         runtime = float(obj.wall_clock_time)
-        self.num_run += 1
 
         autosklearn.evaluation.util.empty_queue(queue)
-
+        self.logger.debug(
+            'Finished function evaluation. Status: %s, Cost: %f, Runtime: %f, Additional %s',
+            status, cost, runtime, additional_run_info,
+        )
         return status, cost, runtime, additional_run_info

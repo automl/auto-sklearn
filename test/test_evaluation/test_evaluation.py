@@ -9,8 +9,9 @@ import unittest.mock
 import numpy as np
 
 import pynisher
-from smac.tae.execute_ta_run import StatusType, BudgetExhaustedException
+from smac.runhistory.runhistory import RunInfo
 from smac.stats.stats import Stats
+from smac.tae import StatusType
 from smac.utils.constants import MAXINT
 
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
@@ -79,10 +80,12 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(safe_eval.exit_status, pynisher.TimeoutException)
 
     ############################################################################
-    # Test ExecuteTaFuncWithQueue.start()
+    # Test ExecuteTaFuncWithQueue.run_wrapper()
     @unittest.mock.patch('autosklearn.evaluation.train_evaluator.eval_holdout')
     def test_eval_with_limits_holdout(self, pynisher_mock):
         pynisher_mock.side_effect = safe_eval_success_mock
+        config = unittest.mock.Mock()
+        config.config_id = 198
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
                                     logger=self.logger,
@@ -92,13 +95,17 @@ class EvaluationTest(unittest.TestCase):
                                     cost_for_crash=get_cost_of_crash(accuracy),
                                     abort_on_first_run_crash=False,
                                     )
-        info = ta.start(None, instance=None, cutoff=30)
-        self.assertEqual(info[0], StatusType.SUCCESS)
-        self.assertEqual(info[1], 0.5)
-        self.assertIsInstance(info[2], float)
+        info = ta.run_wrapper(RunInfo(config=config, cutoff=30, instance=None,
+                                      instance_specific=None, seed=1, capped=False))
+        self.assertEqual(info[0].config.config_id, 198)
+        self.assertEqual(info[1].status, StatusType.SUCCESS)
+        self.assertEqual(info[1].cost, 0.5)
+        self.assertIsInstance(info[1].time, float)
 
     @unittest.mock.patch('pynisher.enforce_limits')
     def test_zero_or_negative_cutoff(self, pynisher_mock):
+        config = unittest.mock.Mock()
+        config.config_id = 198
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
                                     logger=self.logger,
@@ -108,12 +115,15 @@ class EvaluationTest(unittest.TestCase):
                                     abort_on_first_run_crash=False,
                                     )
         self.scenario.wallclock_limit = 5
-        self.stats.ta_runs += 1
-        self.assertRaises(BudgetExhaustedException, ta.start, None,
-                          instance=None, cutoff=9)
+        self.stats.submitted_ta_runs += 1
+        run_info, run_value = ta.run_wrapper(RunInfo(config=config, cutoff=9, instance=None,
+                                             instance_specific=None, seed=1, capped=False))
+        self.assertEqual(run_value.status, StatusType.STOP)
 
     @unittest.mock.patch('pynisher.enforce_limits')
     def test_cutoff_lower_than_remaining_time(self, pynisher_mock):
+        config = unittest.mock.Mock()
+        config.config_id = 198
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
                                     logger=self.logger,
@@ -123,13 +133,16 @@ class EvaluationTest(unittest.TestCase):
                                     abort_on_first_run_crash=False,
                                     )
         self.stats.ta_runs = 1
-        ta.start(None, cutoff=30, instance=None)
+        ta.run_wrapper(RunInfo(config=config, cutoff=30, instance=None, instance_specific=None,
+                               seed=1, capped=False))
         self.assertEqual(pynisher_mock.call_args[1]['wall_time_in_s'], 4)
         self.assertIsInstance(pynisher_mock.call_args[1]['wall_time_in_s'], int)
 
     @unittest.mock.patch('autosklearn.evaluation.train_evaluator.eval_holdout')
     def test_eval_with_limits_holdout_fail_silent(self, pynisher_mock):
         pynisher_mock.return_value = None
+        config = unittest.mock.Mock()
+        config.config_id = 198
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
                                     logger=self.logger,
@@ -141,24 +154,30 @@ class EvaluationTest(unittest.TestCase):
                                     )
 
         # The following should not fail because abort on first config crashed is false
-        info = ta.start(config=None, instance=None, cutoff=60)
-        self.assertEqual(info[0], StatusType.CRASHED)
-        self.assertEqual(info[1], 1.0)
-        self.assertIsInstance(info[2], float)
-        self.assertEqual(info[3], {'configuration_origin': 'UNKNOWN',
-                                   'error': "Result queue is empty"})
+        info = ta.run_wrapper(RunInfo(config=config, cutoff=60, instance=None,
+                                      instance_specific=None, seed=1, capped=False))
+        self.assertEqual(info[1].status, StatusType.CRASHED)
+        self.assertEqual(info[1].cost, 1.0)
+        self.assertIsInstance(info[1].time, float)
+        self.assertEqual(len(info[1].additional_info), 2)
+        self.assertIn('configuration_origin', info[1].additional_info)
+        self.assertEqual(info[1].additional_info['error'], "Result queue is empty")
 
-        self.stats.ta_runs += 1
-        info = ta.start(config=None, instance=None, cutoff=30)
-        self.assertEqual(info[0], StatusType.CRASHED)
-        self.assertEqual(info[1], 1.0)
-        self.assertIsInstance(info[2], float)
-        self.assertEqual(info[3], {'configuration_origin': 'UNKNOWN',
-                                   'error': "Result queue is empty"})
+        self.stats.submitted_ta_runs += 1
+        info = ta.run_wrapper(RunInfo(config=config, cutoff=30, instance=None,
+                                      instance_specific=None, seed=1, capped=False))
+        self.assertEqual(info[1].status, StatusType.CRASHED)
+        self.assertEqual(info[1].cost, 1.0)
+        self.assertIsInstance(info[1].time, float)
+        self.assertEqual(len(info[1].additional_info), 2)
+        self.assertIn('configuration_origin', info[1].additional_info)
+        self.assertEqual(info[1].additional_info['error'], "Result queue is empty")
 
     @unittest.mock.patch('autosklearn.evaluation.train_evaluator.eval_holdout')
     def test_eval_with_limits_holdout_fail_memory_error(self, pynisher_mock):
         pynisher_mock.side_effect = MemoryError
+        config = unittest.mock.Mock()
+        config.config_id = 198
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
                                     logger=self.logger,
@@ -168,16 +187,20 @@ class EvaluationTest(unittest.TestCase):
                                     cost_for_crash=get_cost_of_crash(log_loss),
                                     abort_on_first_run_crash=False,
                                     )
-        info = ta.start(None, instance=None, cutoff=30)
-        self.assertEqual(info[0], StatusType.MEMOUT)
+        info = ta.run_wrapper(RunInfo(config=config, cutoff=30, instance=None,
+                                      instance_specific=None, seed=1, capped=False))
+        self.assertEqual(info[1].status, StatusType.MEMOUT)
 
         # For logloss, worst possible result is MAXINT
         worst_possible_result = MAXINT
-        self.assertEqual(info[1], worst_possible_result)
-        self.assertIsInstance(info[2], float)
+        self.assertEqual(info[1].cost, worst_possible_result)
+        self.assertIsInstance(info[1].time, float)
 
     @unittest.mock.patch('pynisher.enforce_limits')
     def test_eval_with_limits_holdout_fail_timeout(self, pynisher_mock):
+        config = unittest.mock.Mock()
+        config.config_id = 198
+
         m1 = unittest.mock.Mock()
         m2 = unittest.mock.Mock()
         m1.return_value = m2
@@ -193,13 +216,17 @@ class EvaluationTest(unittest.TestCase):
                                     cost_for_crash=get_cost_of_crash(accuracy),
                                     abort_on_first_run_crash=False,
                                     )
-        info = ta.start(config=None, instance=None, cutoff=30)
-        self.assertEqual(info[0], StatusType.TIMEOUT)
-        self.assertEqual(info[1], 1.0)
-        self.assertIsInstance(info[2], float)
+        info = ta.run_wrapper(RunInfo(config=config, cutoff=30, instance=None,
+                                      instance_specific=None, seed=1, capped=False))
+        self.assertEqual(info[1].status, StatusType.TIMEOUT)
+        self.assertEqual(info[1].cost, 1.0)
+        self.assertIsInstance(info[1].time, float)
 
     @unittest.mock.patch('pynisher.enforce_limits')
     def test_eval_with_limits_holdout_timeout_with_results_in_queue(self, pynisher_mock):
+        config = unittest.mock.Mock()
+        config.config_id = 198
+
         def side_effect(**kwargs):
             queue = kwargs['queue']
             queue.put({'status': StatusType.SUCCESS,
@@ -223,10 +250,11 @@ class EvaluationTest(unittest.TestCase):
                                     cost_for_crash=get_cost_of_crash(accuracy),
                                     abort_on_first_run_crash=False,
                                     )
-        info = ta.start(None, instance=None, cutoff=30)
-        self.assertEqual(info[0], StatusType.SUCCESS)
-        self.assertEqual(info[1], 0.5)
-        self.assertIsInstance(info[2], float)
+        info = ta.run_wrapper(RunInfo(config=config, cutoff=30, instance=None,
+                                      instance_specific=None, seed=1, capped=False))
+        self.assertEqual(info[1].status, StatusType.SUCCESS)
+        self.assertEqual(info[1].cost, 0.5)
+        self.assertIsInstance(info[1].time, float)
 
         # And a crashed run which is in the queue
         def side_effect(**kwargs):
@@ -244,13 +272,17 @@ class EvaluationTest(unittest.TestCase):
                                     cost_for_crash=get_cost_of_crash(accuracy),
                                     abort_on_first_run_crash=False,
                                     )
-        info = ta.start(None, instance=None, cutoff=30)
-        self.assertEqual(info[0], StatusType.CRASHED)
-        self.assertEqual(info[1], 1.0)
-        self.assertIsInstance(info[2], float)
+        info = ta.run_wrapper(RunInfo(config=config, cutoff=30, instance=None,
+                                      instance_specific=None, seed=1, capped=False))
+        self.assertEqual(info[1].status, StatusType.CRASHED)
+        self.assertEqual(info[1].cost, 1.0)
+        self.assertIsInstance(info[1].time, float)
 
     @unittest.mock.patch('autosklearn.evaluation.train_evaluator.eval_holdout')
     def test_eval_with_limits_holdout_2(self, eval_houldout_mock):
+        config = unittest.mock.Mock()
+        config.config_id = 198
+
         def side_effect(*args, **kwargs):
             queue = kwargs['queue']
             queue.put({'status': StatusType.SUCCESS,
@@ -268,13 +300,18 @@ class EvaluationTest(unittest.TestCase):
                                     )
         self.scenario.wallclock_limit = 180
         instance = "{'subsample': 30}"
-        info = ta.start(None, cutoff=30, instance=instance)
-        self.assertEqual(info[0], StatusType.SUCCESS)
-        self.assertEqual(info[-1], {'message': "{'subsample': 30}",
-                                    'configuration_origin': 'UNKNOWN'})
+        info = ta.run_wrapper(RunInfo(config=config, cutoff=30, instance=instance,
+                                      instance_specific=None, seed=1, capped=False))
+        self.assertEqual(info[1].status, StatusType.SUCCESS)
+        self.assertEqual(len(info[1].additional_info), 2)
+        self.assertIn('configuration_origin', info[1].additional_info)
+        self.assertEqual(info[1].additional_info['message'], "{'subsample': 30}")
 
     @unittest.mock.patch('autosklearn.evaluation.train_evaluator.eval_holdout')
     def test_exception_in_target_function(self, eval_holdout_mock):
+        config = unittest.mock.Mock()
+        config.config_id = 198
+
         eval_holdout_mock.side_effect = ValueError
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
@@ -285,10 +322,11 @@ class EvaluationTest(unittest.TestCase):
                                     cost_for_crash=get_cost_of_crash(accuracy),
                                     abort_on_first_run_crash=False,
                                     )
-        self.stats.ta_runs += 1
-        info = ta.start(None, instance=None, cutoff=30)
-        self.assertEqual(info[0], StatusType.CRASHED)
-        self.assertEqual(info[1], 1.0)
-        self.assertIsInstance(info[2], float)
-        self.assertEqual(info[3]['error'], 'ValueError()')
-        self.assertIn('traceback', info[3])
+        self.stats.submitted_ta_runs += 1
+        info = ta.run_wrapper(RunInfo(config=config, cutoff=30, instance=None,
+                                      instance_specific=None, seed=1, capped=False))
+        self.assertEqual(info[1].status, StatusType.CRASHED)
+        self.assertEqual(info[1].cost, 1.0)
+        self.assertIsInstance(info[1].time, float)
+        self.assertEqual(info[1].additional_info['error'], 'ValueError()')
+        self.assertIn('traceback', info[1].additional_info)

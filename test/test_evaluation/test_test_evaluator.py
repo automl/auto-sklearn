@@ -9,7 +9,7 @@ import unittest
 import unittest.mock
 
 import numpy as np
-from smac.tae.execute_ta_run import StatusType
+from smac.tae import StatusType
 
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, BINARY_CLASSIFICATION, \
     MULTICLASS_CLASSIFICATION, REGRESSION

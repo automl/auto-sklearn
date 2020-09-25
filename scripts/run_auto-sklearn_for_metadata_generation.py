@@ -12,9 +12,10 @@ from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.metrics import accuracy, balanced_accuracy, roc_auc, log_loss, r2, \
     mean_squared_error, mean_absolute_error, root_mean_squared_error
 
-from smac.stats.stats import Stats
+from smac.runhistory.runhistory import RunInfo
 from smac.scenario.scenario import Scenario
-from smac.tae.execute_ta_run import StatusType
+from smac.stats.stats import Stats
+from smac.tae import StatusType
 
 sys.path.append('.')
 from update_metadata_util import load_task
@@ -101,13 +102,13 @@ else:
 
 automl.fit(X_train, y_train, dataset_name=str(task_id),
            feat_type=cat)
-data = automl._automl[0]._backend.load_datamanager()
+data = automl.automl_._backend.load_datamanager()
 # Data manager can't be replaced with save_datamanager, it has to be deleted
 # first
-os.remove(automl._automl[0]._backend._get_datamanager_pickle_filename())
+os.remove(automl.automl_._backend._get_datamanager_pickle_filename())
 data.data['X_test'] = X_test
 data.data['Y_test'] = y_test
-automl._automl[0]._backend.save_datamanager(data)
+automl.automl_._backend.save_datamanager(data)
 trajectory = automl.trajectory_
 
 incumbent_id_to_model = {}
@@ -134,9 +135,10 @@ for entry in trajectory:
         )
         stats.start_timing()
         # To avoid the output "first run crashed"...
-        stats.ta_runs += 1
+        stats.submitted_ta_runs += 1
+        stats.finished_ta_runs += 1
         memory_lim = memory_limit_factor * automl_arguments['ml_memory_limit']
-        ta = ExecuteTaFuncWithQueue(backend=automl._automl[0]._backend,
+        ta = ExecuteTaFuncWithQueue(backend=automl.automl_._backend,
                                     autosklearn_seed=seed,
                                     resampling_strategy='test',
                                     memory_limit=memory_lim,
@@ -148,16 +150,24 @@ for entry in trajectory:
                                     metric=automl_arguments['metric'],
                                     cost_for_crash=get_cost_of_crash(automl_arguments['metric']),
                                     abort_on_first_run_crash=False,)
-        status, cost, runtime, additional_run_info = ta.start(
-            config=config, instance=None, cutoff=per_run_time_limit*3)
+        run_info, run_value = ta.run_wrapper(
+            RunInfo(
+                config=config,
+                instance=None,
+                instance_specific=None,
+                seed=1,
+                cutoff=per_run_time_limit*3,
+                capped=False,
+            )
+        )
 
-        if status == StatusType.SUCCESS:
-            assert len(additional_run_info) > 1, additional_run_info
+        if run_value.status == StatusType.SUCCESS:
+            assert len(run_value.additional_info) > 1, run_value.additional_info
 
         # print(additional_run_info)
 
         validated_trajectory.append(list(entry) + [task_id] +
-                                    [additional_run_info])
+                                    [run_value.additional_info])
 
 validated_trajectory = [entry[:2] + [entry[2].get_dictionary()] + entry[3:]
                         for entry in validated_trajectory]

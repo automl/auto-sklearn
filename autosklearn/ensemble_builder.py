@@ -27,6 +27,8 @@ Y_ENSEMBLE = 0
 Y_VALID = 1
 Y_TEST = 2
 
+MODEL_FN_RE = r'_([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*)\.npy'
+
 
 class EnsembleBuilder(multiprocessing.Process):
     def __init__(
@@ -41,7 +43,6 @@ class EnsembleBuilder(multiprocessing.Process):
             max_models_on_disc: int = 100,
             performance_range_threshold: float = 0,
             seed: int = 1,
-            shared_mode: bool = False,
             max_iterations: int = None,
             precision: int = 32,
             sleep_duration: int = 2,
@@ -90,9 +91,6 @@ class EnsembleBuilder(multiprocessing.Process):
                 and max_models_on_disc. Might return less
             seed: int
                 random seed
-                if set to -1, read files with any seed (e.g., for shared model mode)
-            shared_model: bool
-                auto-sklearn used shared model mode (aka pSMAC)
             max_iterations: int
                 maximal number of iterations to run this script
                 (default None --> deactivated)
@@ -113,6 +111,9 @@ class EnsembleBuilder(multiprocessing.Process):
         self.task_type = task_type
         self.metric = metric
         self.time_limit = limit  # time limit
+        # define time_left here so that it is defined in case the ensemble builder is called
+        # without starting a separate process
+        self.time_left = limit
         self.ensemble_size = ensemble_size
         self.performance_range_threshold = performance_range_threshold
 
@@ -139,7 +140,6 @@ class EnsembleBuilder(multiprocessing.Process):
         self.max_resident_models = None
 
         self.seed = seed
-        self.shared_mode = shared_mode  # pSMAC?
         self.max_iterations = max_iterations
         self.precision = precision
         self.sleep_duration = sleep_duration
@@ -178,7 +178,7 @@ class EnsembleBuilder(multiprocessing.Process):
                               (ensemble_nbest, type(ensemble_nbest)))
 
         self.start_time = 0
-        self.model_fn_re = re.compile(r'_([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*)\.npy')
+        self.model_fn_re = re.compile(MODEL_FN_RE)
 
         # already read prediction files
         # {"file name": {
@@ -230,8 +230,11 @@ class EnsembleBuilder(multiprocessing.Process):
 
     def run(self):
         buffer_time = 5  # TODO: Buffer time should also be used in main!?
+        process_start_time = time.time()
         while True:
-            time_left = self.time_limit - buffer_time
+            time_elapsed = time.time() - process_start_time
+            time_left = self.time_limit - buffer_time - time_elapsed
+            self.time_left = time_left
             safe_ensemble_script = pynisher.enforce_limits(
                 wall_time_in_s=int(time_left),
                 mem_in_mb=self.memory_limit,
@@ -286,7 +289,7 @@ class EnsembleBuilder(multiprocessing.Process):
             self.logger.debug(
                 'Starting iteration %d, time left: %f',
                 iteration,
-                self.time_limit - used_time,
+                self.time_left - used_time,
             )
 
             # populates self.read_preds
@@ -430,17 +433,10 @@ class EnsembleBuilder(multiprocessing.Process):
             self.logger.debug("No ensemble dataset prediction directory found")
             return False
 
-        if self.shared_mode is False:
-            pred_path = os.path.join(
-                glob.escape(self.dir_ensemble),
-                'predictions_ensemble_%s_*_*.npy*' % self.seed,
-            )
-        # pSMAC
-        else:
-            pred_path = os.path.join(
-                glob.escape(self.dir_ensemble),
-                'predictions_ensemble_*_*_*.npy*',
-            )
+        pred_path = os.path.join(
+            glob.escape(self.dir_ensemble),
+            'predictions_ensemble_%s_*_*.npy*' % self.seed,
+        )
 
         y_ens_files = glob.glob(pred_path)
         y_ens_files = [y_ens_file for y_ens_file in y_ens_files
@@ -452,14 +448,9 @@ class EnsembleBuilder(multiprocessing.Process):
                               " %s" % pred_path)
             return False
 
-        if self.shared_mode:
-            done_path = os.path.join(
-                glob.escape(self.backend.get_done_directory()), '*_*'
-            )
-        else:
-            done_path = os.path.join(
-                glob.escape(self.backend.get_done_directory()), '%s_*' % self.seed
-            )
+        done_path = os.path.join(
+            glob.escape(self.backend.get_done_directory()), '%s_*' % self.seed
+        )
         done = glob.glob(done_path)
         done = [os.path.split(d)[1] for d in done]
 
