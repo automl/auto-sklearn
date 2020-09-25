@@ -2,12 +2,15 @@ import argparse
 import json
 import logging
 import os
+import shutil
 import sys
+import tempfile
 
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
-from autosklearn.metrics import r2, balanced_accuracy
+from autosklearn.metrics import accuracy, balanced_accuracy, roc_auc, log_loss, r2, \
+    mean_squared_error, mean_absolute_error, root_mean_squared_error
 
 from smac.runhistory.runhistory import RunInfo
 from smac.scenario.scenario import Scenario
@@ -23,6 +26,7 @@ parser.add_argument('--working-directory', type=str, required=True)
 parser.add_argument('--time-limit', type=int, required=True)
 parser.add_argument('--per-run-time-limit', type=int, required=True)
 parser.add_argument('--task-id', type=int, required=True)
+parser.add_argument('--metric', type=str, required=True)
 parser.add_argument('-s', '--seed', type=int, required=True)
 parser.add_argument('--unittest', action='store_true')
 args = parser.parse_args()
@@ -32,6 +36,7 @@ time_limit = args.time_limit
 per_run_time_limit = args.per_run_time_limit
 task_id = args.task_id
 seed = args.seed
+metric = args.metric
 is_test = args.unittest
 
 X_train, y_train, X_test, y_test, cat, task_type = load_task(task_id)
@@ -42,7 +47,10 @@ try:
     os.makedirs(configuration_output_dir)
 except:
     pass
-tmp_dir = os.path.join(configuration_output_dir, str(task_id))
+tmp_dir = os.path.join(configuration_output_dir, str(task_id), metric)
+
+tempdir = tempfile.mkdtemp()
+autosklearn_directory = os.path.join(tempdir, "dir")
 
 automl_arguments = {
     'time_left_for_this_task': time_limit,
@@ -54,7 +62,7 @@ automl_arguments = {
     'ml_memory_limit': 3072,
     'resampling_strategy': 'partial-cv',
     'delete_tmp_folder_after_terminate': False,
-    'tmp_folder': tmp_dir,
+    'tmp_folder': autosklearn_directory,
     'disable_evaluator_output': True,
 }
 
@@ -73,11 +81,21 @@ else:
     automl_arguments['resampling_strategy_arguments'] = {'folds': 10}
     include = None
 
+metric = {
+    'accuracy': accuracy,
+    'balanced_accuracy': balanced_accuracy,
+    'roc_auc': roc_auc,
+    'logloss': log_loss,
+    'r2': r2,
+    'mean_squared_error': mean_squared_error,
+    'root_mean_squared_error': root_mean_squared_error,
+    'mean_absolute_error': mean_absolute_error,
+}[metric]
+automl_arguments['metric'] = metric
+
 if task_type == 'classification':
-    automl_arguments['metric'] = balanced_accuracy
     automl = AutoSklearnClassifier(**automl_arguments)
 elif task_type == 'regression':
-    automl_arguments['metric'] = r2
     automl = AutoSklearnRegressor(**automl_arguments)
 else:
     raise ValueError(task_type)
@@ -153,9 +171,15 @@ for entry in trajectory:
 
 validated_trajectory = [entry[:2] + [entry[2].get_dictionary()] + entry[3:]
                         for entry in validated_trajectory]
-validated_trajectory_file = os.path.join(tmp_dir,
+validated_trajectory_file = os.path.join(autosklearn_directory,
                                          'smac3-output',
                                          'run_%d' % seed,
                                          'validation_trajectory.json')
 with open(validated_trajectory_file, 'w') as fh:
     json.dump(validated_trajectory, fh, indent=4)
+
+shutil.copytree(autosklearn_directory, tmp_dir)
+try:
+    shutil.rmtree(tempdir)
+except:
+    pass

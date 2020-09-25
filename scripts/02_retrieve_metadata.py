@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from collections import defaultdict
 import csv
+import glob
 import itertools
 import json
 import os
@@ -23,12 +24,14 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
         raise NotImplementedError()
 
     # Mapping from task id to a list of (config, score) tuples
-    outputs = defaultdict(list)
+    outputs = dict()
     configurations = dict()
     configurations_to_ids = dict()
 
     try:
-        possible_experiment_directories = os.listdir(validation_directory)
+        possible_experiment_directories = glob.glob(os.path.join(
+            validation_directory, '*', '*'
+        ))
     except FileNotFoundError:
         return {}, {}
 
@@ -50,39 +53,61 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
 
         best_value = np.inf
         best_configuration = None
+        best_configuration_dir = None
+
+        n_configs = 0
+        n_better = 0
+        n_broken = 0
+
         for entry in validation_trajectory:
             # There's no reason to keep the default configuration
             # (even if it's better) because it is run anyway
             if validation_trajectory[0][2] == entry[2]:
                 continue
 
+            n_configs += 1
+
             config = entry[2]
             task_name = entry[-2]
             score = entry[-1].get(str(metric), np.inf)
 
             if np.isinf(score) and np.isinf(best_value) or score < best_value:
+                n_better += 1
+
                 try:
                     best_configuration = Configuration(
                         configuration_space=configuration_space, values=config)
                     best_value = score
-                except:
-                    pass
+                    best_configuration_dir = ped
+                except Exception as e:
+                    print(e)
+                    n_broken += 1
 
         if task_name is None:
             print('Could not find any configuration better than the default configuration!')
             continue
 
         if best_configuration is None:
-            print('Could not find a valid configuration')
+            print('Could not find a valid configuration; total %d, better %d, broken %d'
+                  % (n_configs, n_better, n_broken))
             continue
         elif best_configuration in configurations_to_ids:
+            print('Found configuration in', best_configuration_dir)
             config_id = configurations_to_ids[best_configuration]
         else:
+            print('Found configuration in', best_configuration_dir)
             config_id = len(configurations_to_ids)
             configurations_to_ids[config_id] = best_configuration
             configurations[config_id] = best_configuration
 
-        outputs[task_name].append((config_id, best_value))
+        # We could keep multiple configurations per task (and actually did so before), but
+        # there is really no reason to already filter them here and only keep the best
+        # (this is less confusing when looking at the raw data later on).
+        if task_name not in outputs:
+            outputs[task_name] = (config_id, best_value)
+        else:
+            if best_value < outputs[task_name][1]:
+                outputs[task_name] = (config_id, best_value)
 
     return outputs, configurations
 
@@ -101,17 +126,19 @@ def write_output(outputs, configurations, output_dir, configuration_space,
     arff_object['description'] = ""
 
     data = []
-    for dataset in outputs:
-        for configuration_id, value in outputs[dataset]:
+    keep_configurations = set()
+    for dataset, (configuration_id, value) in outputs.items():
 
-            if not np.isfinite(value):
-                runstatus = 'not_applicable'
-                value = None
-            else:
-                runstatus = 'ok'
+        if not np.isfinite(value):
+            runstatus = 'not_applicable'
+            value = None
+        else:
+            runstatus = 'ok'
 
-            line = [dataset, 1, configuration_id + 1, value, runstatus]
-            data.append(line)
+        line = [dataset, 1, configuration_id + 1, value, runstatus]
+        data.append(line)
+        keep_configurations.add(configuration_id)
+
     arff_object['data'] = data
 
     with open(os.path.join(output_dir, "algorithm_runs.arff"), "w") as fh:
@@ -119,6 +146,8 @@ def write_output(outputs, configurations, output_dir, configuration_space,
 
     hyperparameters = []
     for idx in configurations:
+        if idx not in keep_configurations:
+            continue
         configuration = configurations[idx]
         line = {'idx': idx + 1}
         for hp_name in configuration:

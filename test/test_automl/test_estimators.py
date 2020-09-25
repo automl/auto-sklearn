@@ -277,7 +277,8 @@ class EstimatorTest(Base, unittest.TestCase):
             n_jobs=2,
             include_estimators=['sgd'],
             include_preprocessors=['no_preprocessing'],
-            get_smac_object_callback=get_smac_object_wrapper_instance
+            get_smac_object_callback=get_smac_object_wrapper_instance,
+            max_models_on_disc=None,
         )
         automl.fit(X_train, Y_train)
 

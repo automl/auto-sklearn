@@ -401,7 +401,7 @@ class AutoML(BaseEstimator):
         )
         self._logger.debug('  ensemble_size: %d', self._ensemble_size)
         self._logger.debug('  ensemble_nbest: %f', self._ensemble_nbest)
-        self._logger.debug('  max_models_on_disc: %d', self._max_models_on_disc)
+        self._logger.debug('  max_models_on_disc: %s', str(self._max_models_on_disc))
         self._logger.debug('  ensemble_memory_limit: %d', self._ensemble_memory_limit)
         self._logger.debug('  seed: %d', self._seed)
         self._logger.debug('  ml_memory_limit: %d', self._ml_memory_limit)
