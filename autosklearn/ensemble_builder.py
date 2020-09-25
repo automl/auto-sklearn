@@ -395,7 +395,9 @@ class EnsembleBuilder(multiprocessing.Process):
         pred_test_name = 'predictions_test' + _full_name
         pred_test_path = os.path.join(self.dir_test, pred_test_name)
 
-        paths = [model_path, pred_path]
+        paths = [pred_path]
+        if os.path.exists(model_path):
+            paths.append(model_path)
         if os.path.exists(pred_valid_path):
             paths.append(pred_valid_path)
         if os.path.exists(pred_test_path):
@@ -1087,7 +1089,9 @@ class EnsembleBuilder(multiprocessing.Process):
             pred_test_name = 'predictions_test' + _full_name
             pred_test_path = os.path.join(self.dir_test, pred_test_name)
 
-            paths = [model_path, pred_path]
+            paths = [pred_path]
+            if os.path.exists(model_path):
+                paths.append(model_path)
             if os.path.exists(pred_valid_path):
                 paths.append(pred_valid_path)
             if os.path.exists(pred_test_path):

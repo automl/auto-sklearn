@@ -87,9 +87,8 @@ if __name__ == "__main__":
     except:
         pass
 
-    all_metafeatures = {}
-
     for task_type in ('classification', 'regression'):
+        all_metafeatures = {}
 
         if task_type == 'classification':
             tasks = classification_tasks

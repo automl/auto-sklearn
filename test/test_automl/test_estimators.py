@@ -476,6 +476,7 @@ class EstimatorTest(Base, unittest.TestCase):
             n_jobs=2,
             include_estimators=['sgd'],
             include_preprocessors=['no_preprocessing'],
+            max_models_on_disc=None,
         )
         automl.fit(X_train, Y_train)
         n_runs = len(automl.cv_results_['mean_test_score'])

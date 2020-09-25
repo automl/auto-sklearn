@@ -40,13 +40,18 @@ class TestMetadataGeneration(unittest.TestCase):
 
         # 3. create configuration commands
         script_filename = os.path.join(scripts_directory, '01_create_commands.py')
-        cmd = 'python3 %s --working-directory %s' % (script_filename, self.working_directory)
+        cmd = 'python3 %s --working-directory %s --test' % (script_filename, self.working_directory)
         rval = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.assertEqual(rval.returncode, 0, msg=str(rval))
 
         # 4. run one of the commands to get some data
         commands_output_file = os.path.join(self.working_directory, 'metadata_commands.txt')
         self.assertTrue(os.path.exists(commands_output_file))
+
+        with open(commands_output_file) as fh:
+            cmds = fh.read().split('\n')
+            # 6 regression, 12 classification, 1 empty line
+            self.assertEqual(len(cmds), 19)
 
         with open(commands_output_file) as fh:
             while True:
@@ -72,11 +77,9 @@ class TestMetadataGeneration(unittest.TestCase):
         expected_output_directory = os.path.join(self.working_directory,
                                                  'configuration',
                                                  task_type,
-                                                 '75222')
+                                                 '75222', 'accuracy')
         self.assertTrue(os.path.exists(expected_output_directory))
-        smac_log = os.path.join(self.working_directory,
-                                'configuration', task_type, '75222',
-                                'AutoML(1):75222.log')
+        smac_log = os.path.join(expected_output_directory, 'AutoML(1):75222.log')
         with open(smac_log) as fh:
             smac_output = fh.read()
         self.assertEqual(rval.returncode, 0, msg=str(rval) + '\n' + smac_output)
@@ -188,13 +191,17 @@ class TestMetadataGeneration(unittest.TestCase):
 
         # 3. create configuration commands
         script_filename = os.path.join(scripts_directory, '01_create_commands.py')
-        cmd = 'python3 %s --working-directory %s' % (script_filename, self.working_directory)
+        cmd = 'python3 %s --working-directory %s --test' % (script_filename, self.working_directory)
         rval = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.assertEqual(rval.returncode, 0, msg=str(rval))
 
         # 4. run one of the commands to get some data
         commands_output_file = os.path.join(self.working_directory, 'metadata_commands.txt')
         self.assertTrue(os.path.exists(commands_output_file))
+
+        with open(commands_output_file) as fh:
+            cmds = fh.read().split('\n')
+            self.assertEqual(len(cmds), 19)
 
         with open(commands_output_file) as fh:
             while True:
@@ -220,11 +227,9 @@ class TestMetadataGeneration(unittest.TestCase):
         expected_output_directory = os.path.join(self.working_directory,
                                                  'configuration',
                                                  task_type,
-                                                 '5022')
+                                                 '5022', 'r2')
         self.assertTrue(os.path.exists(expected_output_directory))
-        smac_log = os.path.join(self.working_directory,
-                                'configuration', task_type, '5022',
-                                'AutoML(1):5022.log')
+        smac_log = os.path.join(expected_output_directory, 'AutoML(1):5022.log')
         with open(smac_log) as fh:
             smac_output = fh.read()
         self.assertEqual(rval.returncode, 0, msg=str(rval) + '\n' + smac_output)
