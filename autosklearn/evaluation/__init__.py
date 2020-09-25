@@ -13,7 +13,6 @@ from smac.runhistory.runhistory import RunInfo, RunValue
 from smac.tae import StatusType, TAEAbortException
 from smac.tae.execute_func import AbstractTAFunc
 
-from ConfigSpace import Configuration
 from sklearn.model_selection._split import _RepeatedSplits, BaseShuffleSplit,\
     BaseCrossValidator
 from autosklearn.metrics import Scorer

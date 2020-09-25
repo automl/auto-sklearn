@@ -56,6 +56,7 @@ dask.config.set({'distributed.worker.daemon': False})
 
 def start_python_worker(scheduler_address):
     dask.config.set({'distributed.worker.daemon': False})
+
     async def do_work():
         async with dask.distributed.Nanny(
                 scheduler_ip=scheduler_address,

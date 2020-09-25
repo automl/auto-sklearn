@@ -4,8 +4,6 @@ import sys
 import unittest
 import unittest.mock
 
-import dask
-import dask.distributed
 import joblib
 from joblib import cpu_count
 import numpy as np
@@ -22,8 +20,6 @@ from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
 from autosklearn.metrics import accuracy, f1_macro, mean_squared_error, r2
 from autosklearn.automl import AutoMLClassifier
-from autosklearn.util.backend import Backend, BackendContext
-from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 from autosklearn.smbo import get_smac_object
 
