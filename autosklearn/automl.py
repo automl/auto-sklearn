@@ -182,10 +182,13 @@ class AutoML(BaseEstimator):
                 processes = True
                 dask.config.set({'distributed.worker.daemon': False})
             self._dask_client = dask.distributed.Client(
-                n_workers=self._n_jobs,
-                processes=processes,
-                threads_per_worker=1,
-                local_directory=self._backend.temporary_directory,
+                dask.distributed.LocalCluster(
+                    n_workers=self._n_jobs,
+                    processes=processes,
+                    threads_per_worker=1,
+                    local_directory=self._backend.temporary_directory,
+
+                )
             )
 
         # For the ensemble building process

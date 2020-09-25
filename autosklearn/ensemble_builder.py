@@ -416,7 +416,7 @@ class EnsembleBuilder(object):
                     # ATTENTION: main will start from scratch;
                     # all data structures are empty again
                     continue
-            return safe_ensemble_script.result, self.ensemble_nbest
+            return safe_ensemble_script.result
 
     def main(self, time_left, iteration):
         """

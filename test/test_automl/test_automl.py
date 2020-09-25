@@ -53,6 +53,9 @@ class AutoMLTest(Base, unittest.TestCase):
         self.automl._backend = unittest.mock.Mock(spec=Backend)
         self.automl._backend.context = unittest.mock.Mock()
         self.automl._delete_output_directories = lambda: 0
+
+    @classmethod
+    def setUpClass(self):
         dask.config.set({'distributed.worker.daemon': False})
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
@@ -61,6 +64,10 @@ class AutoMLTest(Base, unittest.TestCase):
                 threads_per_worker=1,
             )
         )
+
+    @classmethod
+    def tearDownClass(self):
+        self.client.close()
 
     def test_refit_shuffle_on_fail(self):
         backend_api = self._create_backend('test_refit_shuffle_on_fail')

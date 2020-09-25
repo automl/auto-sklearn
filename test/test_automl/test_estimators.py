@@ -13,6 +13,9 @@ import sklearn
 import sklearn.dummy
 import sklearn.datasets
 
+import dask
+import dask.distributed
+
 import autosklearn.pipeline.util as putil
 import autosklearn.estimators  # noqa F401
 from autosklearn.estimators import AutoSklearnEstimator
@@ -37,7 +40,24 @@ class ArrayReturningDummyPredictor(sklearn.dummy.DummyClassifier):
 
 
 class EstimatorTest(Base, unittest.TestCase):
+
     _multiprocess_can_split_ = True
+
+    @classmethod
+    def setUpClass(self):
+        dask.config.set({'distributed.worker.daemon': False})
+        self.client = dask.distributed.Client(
+            dask.distributed.LocalCluster(
+                n_workers=2,
+                processes=True,
+                threads_per_worker=1,
+            )
+        )
+
+    @classmethod
+    def tearDownClass(self):
+        self.client.close()
+
 
     # def test_fit_partial_cv(self):
     #
@@ -224,6 +244,7 @@ class EstimatorTest(Base, unittest.TestCase):
                                     tmp_folder=tmp,
                                     seed=1,
                                     initial_configurations_via_metalearning=0,
+                                    dask_client=self.client,
                                     ensemble_size=0)
         cls.fit(X_train, Y_train)
         cv_results = cls.cv_results_
@@ -330,6 +351,22 @@ class EstimatorTest(Base, unittest.TestCase):
 
 
 class AutoMLClassifierTest(Base, unittest.TestCase):
+
+    @classmethod
+    def setUpClass(self):
+        dask.config.set({'distributed.worker.daemon': False})
+        self.client = dask.distributed.Client(
+            dask.distributed.LocalCluster(
+                n_workers=2,
+                processes=True,
+                threads_per_worker=1,
+            )
+        )
+
+    @classmethod
+    def tearDownClass(self):
+        self.client.close()
+
     @unittest.mock.patch('autosklearn.automl.AutoML.predict')
     def test_multiclass_prediction(self, predict_mock):
         predicted_probabilities = [[0, 0, 0.99], [0, 0.99, 0], [0.99, 0, 0],
@@ -393,6 +430,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         automl = AutoSklearnClassifier(time_left_for_this_task=30,
                                        per_run_time_limit=5,
                                        tmp_folder=tmp,
+                                       dask_client=self.client,
                                        output_folder=output)
         automl.fit(X_train, Y_train)
 
@@ -446,6 +484,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         automl = AutoSklearnClassifier(time_left_for_this_task=30,
                                        per_run_time_limit=5,
                                        tmp_folder=tmp,
+                                       dask_client=self.client,
                                        output_folder=output)
 
         automl.fit(X_train, Y_train)
@@ -468,6 +507,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         automl = AutoSklearnClassifier(time_left_for_this_task=30,
                                        per_run_time_limit=5,
                                        tmp_folder=tmp,
+                                       dask_client=self.client,
                                        output_folder=output)
 
         automl.fit(X_train, Y_train, X_test=X_test, y_test=Y_test,
@@ -498,6 +538,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
             time_left_for_this_task=30,
             per_run_time_limit=5,
             exclude_estimators=['libsvm_svc'],
+            dask_client=self.client,
             seed=5,
         )
 
@@ -519,6 +560,22 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
 
 class AutoMLRegressorTest(Base, unittest.TestCase):
+
+    @classmethod
+    def setUpClass(self):
+        dask.config.set({'distributed.worker.daemon': False})
+        self.client = dask.distributed.Client(
+            dask.distributed.LocalCluster(
+                n_workers=2,
+                processes=True,
+                threads_per_worker=1,
+            )
+        )
+
+    @classmethod
+    def tearDownClass(self):
+        self.client.close()
+
     def test_regression(self):
         tmp = os.path.join(self.test_dir, '..', '.tmp_regression_fit')
         output = os.path.join(self.test_dir, '..', '.out_regression_fit')
@@ -529,6 +586,7 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         automl = AutoSklearnRegressor(time_left_for_this_task=30,
                                       per_run_time_limit=5,
                                       tmp_folder=tmp,
+                                      dask_client=self.client,
                                       output_folder=output)
 
         automl.fit(X_train, Y_train)
@@ -559,6 +617,7 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
                                       per_run_time_limit=10,
                                       resampling_strategy='cv',
                                       tmp_folder=tmp,
+                                      dask_client=self.client,
                                       output_folder=output)
 
         automl.fit(X_train, Y_train)
@@ -585,6 +644,7 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         automl = AutoSklearnRegressor(
             time_left_for_this_task=30,
             per_run_time_limit=5,
+            dask_client=self.client,
         )
 
         # Make sure we error out because y is not encoded

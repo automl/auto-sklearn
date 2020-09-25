@@ -263,6 +263,11 @@ class AutoSklearnEstimator(BaseEstimator):
         self._n_jobs = None
         super().__init__()
 
+    def __getstate__(self):
+        # Cannot serialize a client!
+        self.dask_client = None
+        return self.__dict__
+
     def build_automl(
         self,
         seed: int,
