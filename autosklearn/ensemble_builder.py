@@ -27,6 +27,8 @@ Y_ENSEMBLE = 0
 Y_VALID = 1
 Y_TEST = 2
 
+MODEL_FN_RE = r'_([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*)\.npy'
+
 
 class EnsembleBuilder(multiprocessing.Process):
     def __init__(
@@ -176,7 +178,7 @@ class EnsembleBuilder(multiprocessing.Process):
                               (ensemble_nbest, type(ensemble_nbest)))
 
         self.start_time = 0
-        self.model_fn_re = re.compile(r'_([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*)\.npy')
+        self.model_fn_re = re.compile(MODEL_FN_RE)
 
         # already read prediction files
         # {"file name": {

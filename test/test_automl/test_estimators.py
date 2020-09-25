@@ -1,5 +1,6 @@
 import os
 import pickle
+import re
 import sys
 import unittest
 import unittest.mock
@@ -14,6 +15,7 @@ import sklearn.dummy
 import sklearn.datasets
 
 import autosklearn.pipeline.util as putil
+from autosklearn.ensemble_builder import MODEL_FN_RE
 import autosklearn.estimators  # noqa F401
 from autosklearn.estimators import AutoSklearnEstimator
 from autosklearn.classification import AutoSklearnClassifier
@@ -292,20 +294,20 @@ class EstimatorTest(Base, unittest.TestCase):
         )
         available_predictions = set()
         predictions = os.listdir(predictions_dir)
+        seeds = set()
         for prediction in predictions:
-            try:
-                available_predictions.add(int(prediction.split('_')[3]))
-            except IndexError:
-                print(prediction, flush=True)
-                raise
+            match = re.match(MODEL_FN_RE, prediction.replace("predictions_ensemble", ""))
+            print(prediction, match)
+            if match:
+                num_run = int(match.group(2))
+                available_predictions.add(num_run)
+                seed = int(match.group(1))
+                seeds.add(seed)
 
         # Remove the dummy prediction, it is not part of the runhistory
         available_predictions.remove(1)
         self.assertSetEqual(available_predictions, available_num_runs)
 
-        seeds = set()
-        for predictions_file in predictions:
-            seeds.add(int(predictions_file.split('.')[0].split('_')[2]))
         self.assertEqual(len(seeds), 1)
 
         ensemble_dir = automl.automl_._backend.get_ensemble_dir()
