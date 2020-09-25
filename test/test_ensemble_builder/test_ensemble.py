@@ -676,8 +676,7 @@ class EnsembleProcessBuilderTest(unittest.TestCase):
             ensemble_memory_limit=None,
             random_state=0,
         )
-        history, ensemble_nbest = ensemble.result()
-        print(f"history={history}")
+        history = ensemble.result()
 
         self.assertIn('ensemble_optimization_score', history[0])
         self.assertEqual(history[0]['ensemble_optimization_score'], 0.9)
