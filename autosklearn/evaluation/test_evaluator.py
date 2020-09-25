@@ -5,7 +5,7 @@ from autosklearn.evaluation.abstract_evaluator import (
     AbstractEvaluator,
     _fit_and_suppress_warnings,
 )
-from autosklearn.metrics import calculate_score
+from autosklearn.metrics import calculate_score, CLASSIFICATION_METRICS
 
 
 __all__ = [
@@ -85,9 +85,10 @@ class TestEvaluator(AbstractEvaluator):
                 all_scoring_functions=self.all_scoring_functions)
 
         if hasattr(score, '__len__'):
-            err = {key: 1 - score[key] for key in score}
+            err = {key: metric._optimum - score[key] for key, metric in
+                   CLASSIFICATION_METRICS.items() if key in score}
         else:
-            err = 1 - score
+            err = self.metric._optimum - score
 
         return err, Y_pred, None, None
 

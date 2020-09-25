@@ -234,13 +234,6 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                     print(config)
                     traceback.print_tb(sys.exc_info()[2])
                     raise e
-            except UnboundLocalError as e:
-                if "local variable 'raw_predictions_val' referenced before assignment" in e.args[0]:
-                    continue
-                else:
-                    print(traceback.format_exc())
-                    print(config)
-                    raise e
             except Exception as e:
                 if "Multiple input features cannot have the same target value" in e.args[0]:
                     continue
