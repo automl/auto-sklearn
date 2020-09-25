@@ -346,23 +346,35 @@
 
 
 <span class="c1"># Standard regression scores</span>
-<span class="n">r2</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;r2&#39;</span><span class="p">,</span>
-                 <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">)</span>
-<span class="n">mean_squared_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span>
-                                 <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">mean_squared_error</span><span class="p">,</span>
-                                 <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                 <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
-                                 <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">mean_absolute_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;mean_absolute_error&#39;</span><span class="p">,</span>
                                   <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">mean_absolute_error</span><span class="p">,</span>
                                   <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                   <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
                                   <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">mean_squared_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span>
+                                 <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">mean_squared_error</span><span class="p">,</span>
+                                 <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                 <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
+                                 <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                 <span class="n">squared</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">root_mean_squared_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;root_mean_squared_error&#39;</span><span class="p">,</span>
+                                      <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">mean_squared_error</span><span class="p">,</span>
+                                      <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                      <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
+                                      <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                      <span class="n">squared</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">mean_squared_log_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;mean_squared_log_error&#39;</span><span class="p">,</span>
+                                     <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">mean_squared_log_error</span><span class="p">,</span>
+                                     <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                     <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
+                                     <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">,)</span>
 <span class="n">median_absolute_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;median_absolute_error&#39;</span><span class="p">,</span>
                                     <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">median_absolute_error</span><span class="p">,</span>
                                     <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                     <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
                                     <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">r2</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;r2&#39;</span><span class="p">,</span>
+                 <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">)</span>
 
 <span class="c1"># Standard Classification Scores</span>
 <span class="n">accuracy</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span>
@@ -396,8 +408,8 @@
 
 
 <span class="n">REGRESSION_METRICS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-<span class="k">for</span> <span class="n">scorer</span> <span class="ow">in</span> <span class="p">[</span><span class="n">r2</span><span class="p">,</span> <span class="n">mean_squared_error</span><span class="p">,</span> <span class="n">mean_absolute_error</span><span class="p">,</span>
-               <span class="n">median_absolute_error</span><span class="p">]:</span>
+<span class="k">for</span> <span class="n">scorer</span> <span class="ow">in</span> <span class="p">[</span><span class="n">mean_absolute_error</span><span class="p">,</span> <span class="n">mean_squared_error</span><span class="p">,</span> <span class="n">root_mean_squared_error</span><span class="p">,</span>
+               <span class="n">mean_squared_log_error</span><span class="p">,</span> <span class="n">median_absolute_error</span><span class="p">,</span> <span class="n">r2</span><span class="p">]:</span>
     <span class="n">REGRESSION_METRICS</span><span class="p">[</span><span class="n">scorer</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">scorer</span>
 
 <span class="n">CLASSIFICATION_METRICS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
