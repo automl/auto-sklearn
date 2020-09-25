@@ -111,7 +111,6 @@
       
   <h1>Source code for autosklearn.experimental.askl2</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">multiprocessing</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
@@ -123,10 +122,6 @@
 <span class="kn">from</span> <span class="nn">autosklearn.classification</span> <span class="kn">import</span> <span class="n">AutoSklearnClassifier</span>
 <span class="kn">import</span> <span class="nn">autosklearn.experimental.selector</span>
 <span class="kn">from</span> <span class="nn">autosklearn.metrics</span> <span class="kn">import</span> <span class="n">Scorer</span>
-
-
-<span class="n">CALLBACK_COUNTER</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-
 
 <span class="n">this_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
 <span class="n">selector_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">this_directory</span><span class="p">,</span> <span class="s1">&#39;selector.pkl&#39;</span><span class="p">)</span>
@@ -155,37 +150,25 @@
         <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">fh</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">get_smac_object_callback</span><span class="p">(</span><span class="n">portfolio</span><span class="p">,</span> <span class="n">lock</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">get_smac_object_callback</span><span class="p">(</span><span class="n">portfolio</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">get_smac_object</span><span class="p">(</span>
         <span class="n">scenario_dict</span><span class="p">,</span>
         <span class="n">seed</span><span class="p">,</span>
         <span class="n">ta</span><span class="p">,</span>
         <span class="n">ta_kwargs</span><span class="p">,</span>
-        <span class="n">backend</span><span class="p">,</span>
         <span class="n">metalearning_configurations</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="p">,</span>
+        <span class="n">dask_client</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="kn">from</span> <span class="nn">smac.facade.smac_ac_facade</span> <span class="kn">import</span> <span class="n">SMAC4AC</span>
         <span class="kn">from</span> <span class="nn">smac.runhistory.runhistory2epm</span> <span class="kn">import</span> <span class="n">RunHistory2EPM4LogCost</span>
         <span class="kn">from</span> <span class="nn">smac.scenario.scenario</span> <span class="kn">import</span> <span class="n">Scenario</span>
 
-        <span class="n">scenario_dict</span><span class="p">[</span><span class="s1">&#39;input_psmac_dirs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">get_smac_output_glob</span><span class="p">(</span>
-            <span class="n">smac_run_id</span><span class="o">=</span><span class="n">seed</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">scenario_dict</span><span class="p">[</span><span class="s1">&#39;shared-model&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span>
-        <span class="p">)</span>
         <span class="n">scenario</span> <span class="o">=</span> <span class="n">Scenario</span><span class="p">(</span><span class="n">scenario_dict</span><span class="p">)</span>
 
-        <span class="n">lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">global</span> <span class="n">CALLBACK_COUNTER</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">CALLBACK_COUNTER</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">CALLBACK_COUNTER</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">initial_configurations</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="n">Configuration</span><span class="p">(</span><span class="n">configuration_space</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">member</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">portfolio</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">initial_configurations</span> <span class="o">=</span> <span class="p">[</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="o">.</span><span class="n">sample_configuration</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
-            <span class="n">CALLBACK_COUNTER</span><span class="o">.</span><span class="n">value</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="n">lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+        <span class="n">initial_configurations</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">Configuration</span><span class="p">(</span><span class="n">configuration_space</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">member</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">portfolio</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
 
         <span class="n">rh2EPM</span> <span class="o">=</span> <span class="n">RunHistory2EPM4LogCost</span>
         <span class="k">return</span> <span class="n">SMAC4AC</span><span class="p">(</span>
@@ -196,54 +179,34 @@
             <span class="n">tae_runner_kwargs</span><span class="o">=</span><span class="n">ta_kwargs</span><span class="p">,</span>
             <span class="n">initial_configurations</span><span class="o">=</span><span class="n">initial_configurations</span><span class="p">,</span>
             <span class="n">run_id</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+            <span class="n">dask_client</span><span class="o">=</span><span class="n">dask_client</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">get_smac_object</span>
 
 
-<span class="k">def</span> <span class="nf">get_sh_or_hb_object_callback</span><span class="p">(</span><span class="n">budget_type</span><span class="p">,</span> <span class="n">bandit_strategy</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span> <span class="n">initial_budget</span><span class="p">,</span> <span class="n">portfolio</span><span class="p">,</span>
-                                 <span class="n">lock</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">get_sh_object_callback</span><span class="p">(</span><span class="n">budget_type</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span> <span class="n">initial_budget</span><span class="p">,</span> <span class="n">portfolio</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">get_smac_object</span><span class="p">(</span>
         <span class="n">scenario_dict</span><span class="p">,</span>
         <span class="n">seed</span><span class="p">,</span>
         <span class="n">ta</span><span class="p">,</span>
         <span class="n">ta_kwargs</span><span class="p">,</span>
-        <span class="n">backend</span><span class="p">,</span>
         <span class="n">metalearning_configurations</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="p">,</span>
+        <span class="n">dask_client</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="kn">from</span> <span class="nn">smac.facade.smac_ac_facade</span> <span class="kn">import</span> <span class="n">SMAC4AC</span>
         <span class="kn">from</span> <span class="nn">smac.intensification.successive_halving</span> <span class="kn">import</span> <span class="n">SuccessiveHalving</span>
-        <span class="kn">from</span> <span class="nn">smac.intensification.hyperband</span> <span class="kn">import</span> <span class="n">Hyperband</span>
         <span class="kn">from</span> <span class="nn">smac.runhistory.runhistory2epm</span> <span class="kn">import</span> <span class="n">RunHistory2EPM4LogCost</span>
         <span class="kn">from</span> <span class="nn">smac.scenario.scenario</span> <span class="kn">import</span> <span class="n">Scenario</span>
 
-        <span class="n">scenario_dict</span><span class="p">[</span><span class="s1">&#39;input_psmac_dirs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">get_smac_output_glob</span><span class="p">(</span>
-            <span class="n">smac_run_id</span><span class="o">=</span><span class="n">seed</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">scenario_dict</span><span class="p">[</span><span class="s1">&#39;shared-model&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span>
-        <span class="p">)</span>
         <span class="n">scenario</span> <span class="o">=</span> <span class="n">Scenario</span><span class="p">(</span><span class="n">scenario_dict</span><span class="p">)</span>
-
-        <span class="n">lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">global</span> <span class="n">CALLBACK_COUNTER</span>
-            <span class="k">if</span> <span class="n">CALLBACK_COUNTER</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">initial_configurations</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="n">Configuration</span><span class="p">(</span><span class="n">configuration_space</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">member</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">portfolio</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">initial_configurations</span> <span class="o">=</span> <span class="p">[</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="o">.</span><span class="n">sample_configuration</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
-            <span class="n">CALLBACK_COUNTER</span><span class="o">.</span><span class="n">value</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="n">lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+        <span class="n">initial_configurations</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">Configuration</span><span class="p">(</span><span class="n">configuration_space</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">member</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">portfolio</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
 
         <span class="n">rh2EPM</span> <span class="o">=</span> <span class="n">RunHistory2EPM4LogCost</span>
-
         <span class="n">ta_kwargs</span><span class="p">[</span><span class="s1">&#39;budget_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">budget_type</span>
-
-        <span class="k">if</span> <span class="n">bandit_strategy</span> <span class="o">==</span> <span class="s1">&#39;sh&#39;</span><span class="p">:</span>
-            <span class="n">bandit</span> <span class="o">=</span> <span class="n">SuccessiveHalving</span>
-        <span class="k">elif</span> <span class="n">bandit_strategy</span> <span class="o">==</span> <span class="s1">&#39;hb&#39;</span><span class="p">:</span>
-            <span class="n">bandit</span> <span class="o">=</span> <span class="n">Hyperband</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">bandit_strategy</span><span class="p">)</span>
 
         <span class="n">smac4ac</span> <span class="o">=</span> <span class="n">SMAC4AC</span><span class="p">(</span>
             <span class="n">scenario</span><span class="o">=</span><span class="n">scenario</span><span class="p">,</span>
@@ -253,13 +216,16 @@
             <span class="n">tae_runner_kwargs</span><span class="o">=</span><span class="n">ta_kwargs</span><span class="p">,</span>
             <span class="n">initial_configurations</span><span class="o">=</span><span class="n">initial_configurations</span><span class="p">,</span>
             <span class="n">run_id</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
-            <span class="n">intensifier</span><span class="o">=</span><span class="n">bandit</span><span class="p">,</span>
+            <span class="n">intensifier</span><span class="o">=</span><span class="n">SuccessiveHalving</span><span class="p">,</span>
             <span class="n">intensifier_kwargs</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">&#39;initial_budget&#39;</span><span class="p">:</span> <span class="n">initial_budget</span><span class="p">,</span>
                 <span class="s1">&#39;max_budget&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
                 <span class="s1">&#39;eta&#39;</span><span class="p">:</span> <span class="n">eta</span><span class="p">,</span>
-                <span class="s1">&#39;min_chall&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-            <span class="p">)</span>
+                <span class="s1">&#39;min_chall&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="n">dask_client</span><span class="o">=</span><span class="n">dask_client</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="n">smac4ac</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">epm_chooser</span><span class="o">.</span><span class="n">min_samples_model</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
             <span class="nb">len</span><span class="p">(</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="o">.</span><span class="n">get_hyperparameters</span><span class="p">())</span> <span class="o">/</span> <span class="mi">2</span>
         <span class="p">)</span>
@@ -282,7 +248,6 @@
         <span class="n">output_folder</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">delete_tmp_folder_after_terminate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">delete_output_folder_after_terminate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">shared_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">n_jobs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">disable_evaluator_output</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">smac_scenario_args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -313,7 +278,6 @@
             <span class="n">output_folder</span><span class="o">=</span><span class="n">output_folder</span><span class="p">,</span>
             <span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="n">delete_tmp_folder_after_terminate</span><span class="p">,</span>
             <span class="n">delete_output_folder_after_terminate</span><span class="o">=</span><span class="n">delete_output_folder_after_terminate</span><span class="p">,</span>
-            <span class="n">shared_mode</span><span class="o">=</span><span class="n">shared_mode</span><span class="p">,</span>
             <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
             <span class="n">disable_evaluator_output</span><span class="o">=</span><span class="n">disable_evaluator_output</span><span class="p">,</span>
             <span class="n">get_smac_object_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -389,12 +353,10 @@
             <span class="n">portfolio_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
         <span class="n">portfolio</span> <span class="o">=</span> <span class="n">portfolio_json</span><span class="p">[</span><span class="s1">&#39;portfolio&#39;</span><span class="p">]</span>
 
-        <span class="n">lock</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">setting</span><span class="p">[</span><span class="s1">&#39;fidelity&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SH&#39;</span><span class="p">:</span>
-            <span class="n">smac_callback</span> <span class="o">=</span> <span class="n">get_sh_or_hb_object_callback</span><span class="p">(</span><span class="s1">&#39;iterations&#39;</span><span class="p">,</span> <span class="s1">&#39;sh&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="n">portfolio</span><span class="p">,</span>
-                                                         <span class="n">lock</span><span class="p">)</span>
+            <span class="n">smac_callback</span> <span class="o">=</span> <span class="n">get_sh_object_callback</span><span class="p">(</span><span class="s1">&#39;iterations&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="n">portfolio</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">smac_callback</span> <span class="o">=</span> <span class="n">get_smac_object_callback</span><span class="p">(</span><span class="n">portfolio</span><span class="p">,</span> <span class="n">lock</span><span class="p">)</span>
+            <span class="n">smac_callback</span> <span class="o">=</span> <span class="n">get_smac_object_callback</span><span class="p">(</span><span class="n">portfolio</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">resampling_strategy</span> <span class="o">=</span> <span class="n">resampling_strategy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">resampling_strategy_arguments</span> <span class="o">=</span> <span class="n">resampling_strategy_kwargs</span>

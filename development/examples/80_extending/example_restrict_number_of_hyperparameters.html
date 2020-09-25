@@ -249,20 +249,20 @@ but with different hyperparameters .</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(delete_output_folder_after_terminate=True,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(dask_client=None,
+                      delete_output_folder_after_terminate=True,
                       delete_tmp_folder_after_terminate=True,
                       disable_evaluator_output=False,
                       ensemble_memory_limit=1024, ensemble_nbest=50,
                       ensemble_size=50, exclude_estimators=[&#39;random_forest&#39;],
                       exclude_preprocessors=None, get_smac_object_callback=None,
-                      include_estimators=None, include_preprocessors=None,
-                      initial_c...tions_via_metalearning=0,
+                      include_estimators=None, include_preprocesso...,
+                      initial_configurations_via_metalearning=0,
                       logging_config=None, max_models_on_disc=50,
                       metadata_directory=None, metric=None,
                       ml_memory_limit=3072, n_jobs=None, output_folder=None,
                       per_run_time_limit=10, resampling_strategy=&#39;holdout&#39;,
                       resampling_strategy_arguments=None, seed=1,
-                      shared_mode=False,
                       smac_scenario_args={&#39;runcount_limit&#39;: 1},
                       time_left_for_this_task=30, tmp_folder=None)
 </pre></div>
@@ -627,7 +627,7 @@ but with different hyperparameters .</p>
     (Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  24.383 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  24.432 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-restrict-number-of-hyperparameters-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/3188e6424499bf3242cdcdfc032bf614/example_restrict_number_of_hyperparameters.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_restrict_number_of_hyperparameters.py</span></code></a></p>

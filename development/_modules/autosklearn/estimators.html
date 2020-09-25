@@ -111,21 +111,17 @@
       
   <h1>Source code for autosklearn.estimators</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- encoding: utf-8 -*-</span>
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">multiprocessing</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span>
 
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span>
+
+<span class="kn">import</span> <span class="nn">dask.distributed</span>
+<span class="kn">import</span> <span class="nn">joblib</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span>
 <span class="kn">from</span> <span class="nn">sklearn.utils.multiclass</span> <span class="kn">import</span> <span class="n">type_of_target</span>
-<span class="kn">import</span> <span class="nn">joblib</span>
 
 <span class="kn">from</span> <span class="nn">autosklearn.automl</span> <span class="kn">import</span> <span class="n">AutoMLClassifier</span><span class="p">,</span> <span class="n">AutoMLRegressor</span><span class="p">,</span> <span class="n">AutoML</span>
-<span class="kn">from</span> <span class="nn">autosklearn.util.backend</span> <span class="kn">import</span> <span class="n">create</span><span class="p">,</span> <span class="n">get_randomized_directory_names</span>
-
-
-<span class="k">def</span> <span class="nf">_fit_automl</span><span class="p">(</span><span class="n">automl</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">load_models</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">load_models</span><span class="o">=</span><span class="n">load_models</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">autosklearn.util.backend</span> <span class="kn">import</span> <span class="n">create</span>
 
 
 <span class="k">class</span> <span class="nc">AutoSklearnEstimator</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">):</span>
@@ -151,8 +147,8 @@
         <span class="n">output_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">delete_output_folder_after_terminate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">shared_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">n_jobs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dask_client</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">dask</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">Client</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">disable_evaluator_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">get_smac_object_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">smac_scenario_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -285,22 +281,19 @@
 <span class="sd">            remove output_folder, when finished. If output_folder is None</span>
 <span class="sd">            output_dir will always be deleted</span>
 
-<span class="sd">        shared_mode : bool, optional (False)</span>
-<span class="sd">            Run smac in shared-model-node. This only works if arguments</span>
-<span class="sd">            ``tmp_folder`` and ``output_folder`` are given and both</span>
-<span class="sd">            ``delete_tmp_folder_after_terminate`` and</span>
-<span class="sd">            ``delete_output_folder_after_terminate`` are set to False. Cannot</span>
-<span class="sd">            be used together with ``n_jobs``.</span>
-
 <span class="sd">        n_jobs : int, optional, experimental</span>
-<span class="sd">            The number of jobs to run in parallel for ``fit()``. Cannot be</span>
-<span class="sd">            used together with ``shared_mode``. ``-1`` means using all</span>
-<span class="sd">            processors. By default, Auto-sklearn uses a single core for</span>
-<span class="sd">            fitting the machine learning model and a single core for fitting</span>
+<span class="sd">            The number of jobs to run in parallel for ``fit()``. ``-1`` means </span>
+<span class="sd">            using all processors. By default, Auto-sklearn uses a single core </span>
+<span class="sd">            for fitting the machine learning model and a single core for fitting</span>
 <span class="sd">            an ensemble. Ensemble building is not affected by ``n_jobs`` but</span>
 <span class="sd">            can be controlled by the number of models in the ensemble. In</span>
 <span class="sd">            contrast to most scikit-learn models, ``n_jobs`` given in the</span>
-<span class="sd">            constructor is not applied to the ``predict()`` method.</span>
+<span class="sd">            constructor is not applied to the ``predict()`` method. If </span>
+<span class="sd">            ``dask_client`` is None, a new dask client is created.</span>
+<span class="sd">            </span>
+<span class="sd">        dask_client : dask.distributed.Client, optional</span>
+<span class="sd">            User-created dask client, can be used to start a dask cluster and then </span>
+<span class="sd">            attach auto-sklearn to it.</span>
 
 <span class="sd">        disable_evaluator_output: bool or list, optional (False)</span>
 <span class="sd">            If True, disable model and prediction output. Cannot be used</span>
@@ -375,8 +368,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">output_folder</span> <span class="o">=</span> <span class="n">output_folder</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">delete_tmp_folder_after_terminate</span> <span class="o">=</span> <span class="n">delete_tmp_folder_after_terminate</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">delete_output_folder_after_terminate</span> <span class="o">=</span> <span class="n">delete_output_folder_after_terminate</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">shared_mode</span> <span class="o">=</span> <span class="n">shared_mode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">=</span> <span class="n">n_jobs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dask_client</span> <span class="o">=</span> <span class="n">dask_client</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">disable_evaluator_output</span> <span class="o">=</span> <span class="n">disable_evaluator_output</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_smac_object_callback</span> <span class="o">=</span> <span class="n">get_smac_object_callback</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">smac_scenario_args</span> <span class="o">=</span> <span class="n">smac_scenario_args</span>
@@ -384,7 +377,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata_directory</span> <span class="o">=</span> <span class="n">metadata_directory</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span> <span class="o">=</span> <span class="n">metric</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[List[AutoML]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[AutoML]</span>
         <span class="c1"># n_jobs after conversion to a number (b/c default is None)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -392,7 +385,6 @@
     <span class="k">def</span> <span class="nf">build_automl</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">shared_mode</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">ensemble_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">initial_configurations_via_metalearning</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">tmp_folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -400,22 +392,11 @@
         <span class="n">smac_scenario_args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 
-        <span class="k">if</span> <span class="n">shared_mode</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">delete_output_folder_after_terminate</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">delete_tmp_folder_after_terminate</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">if</span> <span class="n">tmp_folder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If shared_mode == True tmp_folder must not &quot;</span>
-                                 <span class="s2">&quot;be None.&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">output_folder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If shared_mode == True output_folder must &quot;</span>
-                                 <span class="s2">&quot;not be None.&quot;</span><span class="p">)</span>
-
         <span class="n">backend</span> <span class="o">=</span> <span class="n">create</span><span class="p">(</span>
             <span class="n">temporary_directory</span><span class="o">=</span><span class="n">tmp_folder</span><span class="p">,</span>
             <span class="n">output_directory</span><span class="o">=</span><span class="n">output_folder</span><span class="p">,</span>
             <span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">delete_tmp_folder_after_terminate</span><span class="p">,</span>
             <span class="n">delete_output_folder_after_terminate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">delete_output_folder_after_terminate</span><span class="p">,</span>
-            <span class="n">shared_mode</span><span class="o">=</span><span class="n">shared_mode</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">smac_scenario_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -438,7 +419,8 @@
             <span class="n">exclude_preprocessors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exclude_preprocessors</span><span class="p">,</span>
             <span class="n">resampling_strategy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resampling_strategy</span><span class="p">,</span>
             <span class="n">resampling_strategy_arguments</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resampling_strategy_arguments</span><span class="p">,</span>
-            <span class="n">shared_mode</span><span class="o">=</span><span class="n">shared_mode</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span><span class="p">,</span>
+            <span class="n">dask_client</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dask_client</span><span class="p">,</span>
             <span class="n">get_smac_object_callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_smac_object_callback</span><span class="p">,</span>
             <span class="n">disable_evaluator_output</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">disable_evaluator_output</span><span class="p">,</span>
             <span class="n">smac_scenario_args</span><span class="o">=</span><span class="n">smac_scenario_args</span><span class="p">,</span>
@@ -450,12 +432,6 @@
         <span class="k">return</span> <span class="n">automl</span>
 
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_mode</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;Cannot enable both shared_model and n_jobs. Please specify &#39;</span>
-                <span class="s1">&#39;only one of them.&#39;</span>
-            <span class="p">)</span>
 
         <span class="c1"># Handle the number of jobs and the time for them</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -469,85 +445,17 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">per_run_time_limit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">per_run_time_limit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_left_for_this_task</span> <span class="o">//</span> <span class="mi">10</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">shared_mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_mode</span>
-            <span class="n">seed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span>
-            <span class="n">automl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_automl</span><span class="p">(</span>
-                <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
-                <span class="n">shared_mode</span><span class="o">=</span><span class="n">shared_mode</span><span class="p">,</span>
-                <span class="n">ensemble_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ensemble_size</span><span class="p">,</span>
-                <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">initial_configurations_via_metalearning</span>
-                <span class="p">),</span>
-                <span class="n">tmp_folder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tmp_folder</span><span class="p">,</span>
-                <span class="n">output_folder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_folder</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">automl</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">tmp_folder</span><span class="p">,</span> <span class="n">output_folder</span> <span class="o">=</span> <span class="n">get_randomized_directory_names</span><span class="p">(</span>
-                <span class="n">temporary_directory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tmp_folder</span><span class="p">,</span>
-                <span class="n">output_directory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_folder</span><span class="p">,</span>
-            <span class="p">)</span>
-
-            <span class="n">shared_mode</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">seeds</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span><span class="p">):</span>
-                <span class="n">rs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span>
-                <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-                    <span class="n">seed</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rs</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">32</span><span class="p">))</span>
-                    <span class="k">if</span> <span class="n">seed</span> <span class="ow">in</span> <span class="n">seeds</span><span class="p">:</span>
-                        <span class="k">continue</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="k">break</span>
-
-                <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">smac_scenario_args</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smac_scenario_args</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">smac_scenario_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="n">smac_scenario_args</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-                    <span class="k">if</span> <span class="s1">&#39;initial_incumbent&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">smac_scenario_args</span><span class="p">:</span>
-                        <span class="n">smac_scenario_args</span><span class="p">[</span><span class="s1">&#39;initial_incumbent&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;RANDOM&#39;</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">smac_scenario_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">smac_scenario_args</span>
-
-                <span class="n">automl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_automl</span><span class="p">(</span>
-                    <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
-                    <span class="n">shared_mode</span><span class="o">=</span><span class="n">shared_mode</span><span class="p">,</span>
-                    <span class="c1"># Start the ensemble process only for the first AutoML</span>
-                    <span class="c1"># process (the first AutoML will be executed in the</span>
-                    <span class="c1"># current process, too)</span>
-                    <span class="n">ensemble_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ensemble_size</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
-                    <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">initial_configurations_via_metalearning</span>
-                        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span>
-                        <span class="k">else</span> <span class="mi">0</span>
-                    <span class="p">),</span>
-                    <span class="n">tmp_folder</span><span class="o">=</span><span class="n">tmp_folder</span><span class="p">,</span>
-                    <span class="n">output_folder</span><span class="o">=</span><span class="n">output_folder</span><span class="p">,</span>
-                    <span class="n">smac_scenario_args</span><span class="o">=</span><span class="n">smac_scenario_args</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">automl</span><span class="p">)</span>
-            <span class="c1"># Start all except for the first instances of Auto-sklearn in a</span>
-            <span class="c1"># new process!</span>
-            <span class="n">processes</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span><span class="p">):</span>
-                <span class="n">p</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span>
-                    <span class="n">target</span><span class="o">=</span><span class="n">_fit_automl</span><span class="p">,</span>
-                    <span class="n">kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-                        <span class="n">automl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                        <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
-                        <span class="n">load_models</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                    <span class="p">),</span>
-                <span class="p">)</span>
-                <span class="n">processes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-                <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-            <span class="n">_fit_automl</span><span class="p">(</span>
-                <span class="n">automl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
-                <span class="n">load_models</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">processes</span><span class="p">:</span>
-                <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+        <span class="n">seed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_automl</span><span class="p">(</span>
+            <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+            <span class="n">ensemble_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ensemble_size</span><span class="p">,</span>
+            <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">initial_configurations_via_metalearning</span>
+            <span class="p">),</span>
+            <span class="n">tmp_folder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tmp_folder</span><span class="p">,</span>
+            <span class="n">output_folder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_folder</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">load_models</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span>
 
@@ -592,27 +500,20 @@
 <span class="sd">        self</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">shared_mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_mode</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">shared_mode</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Build a dummy automl object to call fit_ensemble</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">build_automl</span><span class="p">(</span>
-                    <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
-                    <span class="n">shared_mode</span><span class="o">=</span><span class="n">shared_mode</span><span class="p">,</span>
-                    <span class="n">ensemble_size</span><span class="o">=</span><span class="p">(</span>
-                        <span class="n">ensemble_size</span>
-                        <span class="k">if</span> <span class="n">ensemble_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">ensemble_size</span>
-                    <span class="p">),</span>
-                    <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                    <span class="n">tmp_folder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tmp_folder</span><span class="p">,</span>
-                    <span class="n">output_folder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_folder</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">fit_ensemble</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_automl</span><span class="p">(</span>
+                <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
+                <span class="n">ensemble_size</span><span class="o">=</span><span class="p">(</span>
+                    <span class="n">ensemble_size</span>
+                    <span class="k">if</span> <span class="n">ensemble_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ensemble_size</span>
+                <span class="p">),</span>
+                <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">tmp_folder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tmp_folder</span><span class="p">,</span>
+                <span class="n">output_folder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_folder</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">fit_ensemble</span><span class="p">(</span>
             <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
             <span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span>
             <span class="n">precision</span><span class="o">=</span><span class="n">precision</span><span class="p">,</span>
@@ -647,18 +548,18 @@
 <span class="sd">        self</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">refit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">refit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span>
              <span class="n">X</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">show_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a representation of the final ensemble found by auto-sklearn.</span>
@@ -668,7 +569,7 @@
 <span class="sd">        str</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">show_models</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">show_models</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">get_models_with_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a list of the final ensemble found by auto-sklearn.</span>
@@ -678,23 +579,19 @@
 <span class="sd">        [(weight_1, model_1), ..., (weight_n, model_n)]</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_models_with_weights</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">get_models_with_weights</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">cv_results_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cv_results_</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">cv_results_</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">trajectory_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">trajectory_</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">trajectory_</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">fANOVA_input_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">fANOVA_input_</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">fANOVA_input_</span>
 
     <span class="k">def</span> <span class="nf">sprint_statistics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the following statistics of the training result:</span>
@@ -712,13 +609,13 @@
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sprint_statistics</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">sprint_statistics</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_get_automl_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">get_configuration_space</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_automl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">configuration_space</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">configuration_space</span>
 
 
 <div class="viewcode-block" id="AutoSklearnClassifier"><a class="viewcode-back" href="../../api.html#autosklearn.classification.AutoSklearnClassifier">[docs]</a><span class="k">class</span> <span class="nc">AutoSklearnClassifier</span><span class="p">(</span><span class="n">AutoSklearnEstimator</span><span class="p">):</span>

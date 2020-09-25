@@ -81,26 +81,26 @@ print(automl.sprint_statistics())
 # `run history <https://automl.github.io/SMAC3/master/apidoc/smac.
 # runhistory.runhistory.html#smac.runhistory# .runhistory.RunHistory>`_.
 
-print(automl._automl[0].runhistory_)
+print(automl.automl_.runhistory_)
 
 ############################################################################
 # Runs are stored inside an ``OrderedDict`` called ``data``:
 
-print(len(automl._automl[0].runhistory_.data))
+print(len(automl.automl_.runhistory_.data))
 
 ############################################################################
 # Let's iterative over all entries
 
-for run_key in automl._automl[0].runhistory_.data:
+for run_key in automl.automl_.runhistory_.data:
     print('#########')
     print(run_key)
-    print(automl._automl[0].runhistory_.data[run_key])
+    print(automl.automl_.runhistory_.data[run_key])
 
 ############################################################################
 # and have a detailed look at one entry:
 
-run_key = list(automl._automl[0].runhistory_.data.keys())[0]
-run_value = automl._automl[0].runhistory_.data[run_key]
+run_key = list(automl.automl_.runhistory_.data.keys())[0]
+run_value = automl.automl_.runhistory_.data[run_key]
 
 ############################################################################
 # The ``run_key`` contains all information describing a run:
@@ -113,7 +113,7 @@ print("Budget:", run_key.budget)
 ############################################################################
 # and the configuration can be looked up in the run history as well:
 
-print(automl._automl[0].runhistory_.ids_config[run_key.config_id])
+print(automl.automl_.runhistory_.ids_config[run_key.config_id])
 
 ############################################################################
 # The only other important entry is the budget in case you are using
@@ -148,13 +148,13 @@ print("End time", run_value.endtime)
 
 losses_and_configurations = [
     (run_value.cost, run_key.config_id)
-    for run_key, run_value in automl._automl[0].runhistory_.data.items()
+    for run_key, run_value in automl.automl_.runhistory_.data.items()
 ]
 losses_and_configurations.sort()
 print("Lowest loss:", losses_and_configurations[0][0])
 print(
     "Best configuration:",
-    automl._automl[0].runhistory_.ids_config[losses_and_configurations[0][1]]
+    automl.automl_.runhistory_.ids_config[losses_and_configurations[0][1]]
 )
 
 ############################################################################
