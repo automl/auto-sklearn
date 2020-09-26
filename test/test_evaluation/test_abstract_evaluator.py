@@ -1,14 +1,17 @@
 # -*- encoding: utf-8 -*-
 import os
+import shutil
 import sys
 import unittest
 import unittest.mock
 
 import numpy as np
+import sklearn.dummy
 
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 from autosklearn.metrics import accuracy
-from smac.tae.execute_ta_run import StatusType
+from autosklearn.util.backend import Backend, BackendContext
+from smac.tae import StatusType
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
@@ -35,6 +38,8 @@ class AbstractEvaluatorTest(unittest.TestCase):
         D = get_multiclass_classification_datamanager()
         backend_mock.load_datamanager.return_value = D
         self.backend_mock = backend_mock
+
+        self.working_directory = os.path.join(this_directory, '.tmp_%s' % self.id())
 
     def tearDown(self):
         if os.path.exists(self.ev_path):
@@ -189,3 +194,45 @@ class AbstractEvaluatorTest(unittest.TestCase):
         # This function is not guarded by an if statement
         self.assertEqual(self.backend_mock.save_predictions_as_npy.call_count, 5)
         self.assertEqual(self.backend_mock.save_model.call_count, 1)
+
+    def test_file_output(self):
+        shutil.rmtree(self.working_directory, ignore_errors=True)
+        os.mkdir(self.working_directory)
+
+        queue_mock = unittest.mock.Mock()
+
+        context = BackendContext(
+            temporary_directory=os.path.join(self.working_directory, 'tmp'),
+            output_directory=os.path.join(self.working_directory, 'out'),
+            delete_tmp_folder_after_terminate=True,
+            delete_output_folder_after_terminate=True,
+        )
+        with unittest.mock.patch.object(Backend, 'load_datamanager') as load_datamanager_mock:
+            load_datamanager_mock.return_value = get_multiclass_classification_datamanager()
+
+            backend = Backend(context)
+
+            ae = AbstractEvaluator(
+                backend=backend,
+                output_y_hat_optimization=False,
+                queue=queue_mock,
+                metric=accuracy,
+            )
+            ae.model = sklearn.dummy.DummyClassifier()
+
+            rs = np.random.RandomState()
+            ae.Y_optimization = rs.rand(33, 3)
+            predictions_ensemble = rs.rand(33, 3)
+            predictions_test = rs.rand(25, 3)
+            predictions_valid = rs.rand(25, 3)
+
+            ae.file_output(
+                Y_optimization_pred=predictions_ensemble,
+                Y_valid_pred=predictions_valid,
+                Y_test_pred=predictions_test,
+            )
+
+            self.assertTrue(os.path.exists(os.path.join(self.working_directory, 'tmp',
+                                                        '.auto-sklearn', 'done', '1_0')))
+
+            shutil.rmtree(self.working_directory, ignore_errors=True)

@@ -94,7 +94,10 @@ class AlgorithmSelectionProblem(object):
             # repetition = data[1]
             algorithm = str(data[2])
             perf_list = data[3:-1]
-            # status = data[-1]
+            status = data[-1]
+
+            if status != 'ok':
+                continue
 
             for i, performance_measure in enumerate(performance_measures):
                 measure_instance_algorithm_triples[performance_measure][

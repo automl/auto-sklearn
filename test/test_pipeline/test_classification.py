@@ -255,7 +255,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 'X_test': X_test, 'Y_test': Y_test}
 
         init_params = {
-            'categorical_encoding:one_hot_encoding:categorical_features':
+            'data_preprocessing:categorical_features':
                 categorical
         }
 
@@ -265,23 +265,28 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
     @unittest.mock.patch('autosklearn.pipeline.components.data_preprocessing'
                          '.data_preprocessing.DataPreprocessor.set_hyperparameters')
     def test_categorical_passed_to_one_hot_encoder(self, ohe_mock):
-        cls = SimpleClassificationPipeline(
-            init_params={'data_preprocessing:categorical_features': [True, False]}
-        )
 
-        self.assertEqual(
-            ohe_mock.call_args[1]['init_params'],
-            {'categorical_features': [True, False]}
-        )
-        default = cls.get_hyperparameter_search_space().get_default_configuration()
-        cls.set_hyperparameters(
-            configuration=default,
-            init_params={'data_preprocessing:categorical_features': [True, True, False]},
-        )
-        self.assertEqual(
-            ohe_mock.call_args[1]['init_params'],
-            {'categorical_features': [True, True, False]}
-        )
+        # Mock the _check_init_params_honored as there is no object created,
+        # _check_init_params_honored will fail as a datapreprocessor was never created
+        with unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline'
+                                 '._check_init_params_honored'):
+            cls = SimpleClassificationPipeline(
+                init_params={'data_preprocessing:categorical_features': [True, False]}
+            )
+
+            self.assertEqual(
+                ohe_mock.call_args[1]['init_params'],
+                {'categorical_features': [True, False]}
+            )
+            default = cls.get_hyperparameter_search_space().get_default_configuration()
+            cls.set_hyperparameters(
+                configuration=default,
+                init_params={'data_preprocessing:categorical_features': [True, True, False]},
+            )
+            self.assertEqual(
+                ohe_mock.call_args[1]['init_params'],
+                {'categorical_features': [True, True, False]}
+            )
 
     def _test_configurations(self, configurations_space, make_sparse=False,
                              data=None, init_params=None,
@@ -399,13 +404,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     raise e
             except UserWarning as e:
                 if "FastICA did not converge" in e.args[0]:
-                    continue
-                else:
-                    print(traceback.format_exc())
-                    print(config)
-                    raise e
-            except UnboundLocalError as e:
-                if "local variable 'raw_predictions_val' referenced before assignment" in e.args[0]:
                     continue
                 else:
                     print(traceback.format_exc())

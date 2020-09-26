@@ -3,14 +3,17 @@ setuptools
 numpy>=1.9.0
 scipy>=0.14.1
 
+joblib
 scikit-learn>=0.22.0,<0.23
 
+dask
+distributed
 lockfile
-joblib
 pyyaml
 pandas<1.0
+liac-arff
 
-ConfigSpace>=0.4.0,<0.5
+ConfigSpace>=0.4.14,<0.5
 pynisher>=0.4.2
 pyrfr>=0.7,<0.9
-smac>=0.12.3
+smac>=0.13,<0.14

@@ -39,6 +39,9 @@ class SGD(
     def get_max_iter():
         return 1024
 
+    def get_current_iter(self):
+        return self.n_iter_
+
     def iterative_fit(self, X, y, n_iter=2, refit=False):
         from sklearn.linear_model import SGDRegressor
         import sklearn.preprocessing
@@ -56,10 +59,9 @@ class SGD(
             self.scaler = None
 
         if self.estimator is None:
+            self.fully_fit_ = False
 
             self.alpha = float(self.alpha)
-            self.fit_intercept = check_for_bool(self.fit_intercept)
-            self.tol = float(self.tol)
             self.l1_ratio = float(
                 self.l1_ratio) if self.l1_ratio is not None else 0.15
             self.epsilon = float(
@@ -68,6 +70,9 @@ class SGD(
             self.power_t = float(
                 self.power_t) if self.power_t is not None else 0.25
             self.average = check_for_bool(self.average)
+            self.fit_intercept = check_for_bool(self.fit_intercept)
+            self.tol = float(self.tol)
+
             self.estimator = SGDRegressor(loss=self.loss,
                                           penalty=self.penalty,
                                           alpha=self.alpha,
@@ -88,6 +93,7 @@ class SGD(
             self.scaler.fit(y.reshape((-1, 1)))
             Y_scaled = self.scaler.transform(y.reshape((-1, 1))).ravel()
             self.estimator.fit(X, Y_scaled)
+            self.n_iter_ = self.estimator.n_iter_
         else:
             self.estimator.max_iter += n_iter
             self.estimator.max_iter = min(self.estimator.max_iter, self.max_iter)
@@ -104,8 +110,9 @@ class SGD(
                 coef_init=None,
                 intercept_init=None
             )
+            self.n_iter_ += self.estimator.n_iter_
 
-        if self.estimator.max_iter >= self.max_iter or n_iter > self.estimator.n_iter_:
+        if self.estimator.max_iter >= self.max_iter or self.estimator.max_iter > self.n_iter_:
             self.fully_fit_ = True
 
         return self

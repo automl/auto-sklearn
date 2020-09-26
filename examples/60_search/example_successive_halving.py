@@ -28,17 +28,19 @@ def get_smac_object_callback(budget_type):
         seed,
         ta,
         ta_kwargs,
-        backend,
         metalearning_configurations,
+        n_jobs,
+        dask_client,
     ):
         from smac.facade.smac_ac_facade import SMAC4AC
         from smac.intensification.successive_halving import SuccessiveHalving
         from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
         from smac.scenario.scenario import Scenario
 
-        scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob(
-            smac_run_id=seed if not scenario_dict['shared-model'] else '*',
-        )
+        if n_jobs > 1 or dask_client:
+            raise ValueError("Please make sure to guard the code invoking Auto-sklearn by "
+                             "`if __name__ == '__main__'` and remove this exception.")
+
         scenario = Scenario(scenario_dict)
         if len(metalearning_configurations) > 0:
             default_config = scenario.cs.get_default_configuration()
@@ -63,7 +65,9 @@ def get_smac_object_callback(budget_type):
                 'max_budget': 100,
                 'eta': 2,
                 'min_chall': 1},
-            )
+            n_jobs=n_jobs,
+            dask_client=dask_client,
+        )
     return get_smac_object
 
 

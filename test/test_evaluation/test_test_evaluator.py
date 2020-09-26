@@ -9,7 +9,7 @@ import unittest
 import unittest.mock
 
 import numpy as np
-from smac.tae.execute_ta_run import StatusType
+from smac.tae import StatusType
 
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, BINARY_CLASSIFICATION, \
     MULTICLASS_CLASSIFICATION, REGRESSION
@@ -131,7 +131,7 @@ class FunctionsTest(unittest.TestCase):
                    'f1_macro': 0.0341005967604433,
                    'f1_micro': 0.040000000000000036,
                    'f1_weighted': 0.039693094629155934,
-                   'log_loss': 1.148586485311389,
+                   'log_loss': 0.148586485311389,
                    'precision_macro': 0.03703703703703709,
                    'precision_micro': 0.040000000000000036,
                    'precision_weighted': 0.03555555555555556,

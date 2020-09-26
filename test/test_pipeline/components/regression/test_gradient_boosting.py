@@ -11,14 +11,14 @@ class GradientBoostingComponentTest(BaseRegressionComponentTest):
     __test__ = True
 
     res = dict()
-    res["default_boston"] = 0.7677915076432977
+    res["default_boston"] = 0.7491382574462079
+    res["default_boston_iterative"] = 0.7491382574462079
     res["default_boston_sparse"] = None
-    res["default_diabetes"] = 0.3657740311481247
+    res["boston_n_calls"] = 9
+    res["default_diabetes"] = 0.2872735632261877
+    res["default_diabetes_iterative"] = 0.2872735632261877
     res["default_diabetes_sparse"] = None
+    res["diabetes_n_call"] = 11
 
     sk_mod = sklearn.ensemble.GradientBoostingRegressor
     module = GradientBoosting
-    step_hyperparameter = {
-        'name': 'n_estimators',
-        'value': 100,
-    }

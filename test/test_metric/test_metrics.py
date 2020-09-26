@@ -273,6 +273,11 @@ class TestMetricsDoNotAlterInput(unittest.TestCase):
         for metric, scorer in autosklearn.metrics.REGRESSION_METRICS.items():
             y_true = np.random.random(100).reshape((-1, 1))
             y_pred = y_true.copy() + np.random.randn(100, 1) * 0.1
+
+            if metric == 'mean_squared_log_error':
+                y_true = np.abs(y_true)
+                y_pred = np.abs(y_pred)
+
             y_true_2 = y_true.copy()
             y_pred_2 = y_pred.copy()
             self.assertTrue(np.isfinite(scorer(y_true_2, y_pred_2)))
@@ -318,6 +323,9 @@ class TestMetric(unittest.TestCase):
             y_pred = np.array([3, 4, 5, 6])
             current_score = scorer(y_true, y_pred)
             self.assertLess(current_score, previous_score)
+
+            if scorer.name == 'mean_squared_log_error':
+                continue
 
             y_pred = np.array([-1, 0, -1, 0])
             previous_score = current_score

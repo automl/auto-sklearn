@@ -1,5 +1,4 @@
 import json
-import multiprocessing
 import os
 import pickle
 from typing import Any, Dict, Optional, Union
@@ -11,10 +10,6 @@ import pandas as pd
 from autosklearn.classification import AutoSklearnClassifier
 import autosklearn.experimental.selector
 from autosklearn.metrics import Scorer
-
-
-CALLBACK_COUNTER = multiprocessing.Value('i', 0)
-
 
 this_directory = os.path.abspath(os.path.dirname(__file__))
 selector_file = os.path.join(this_directory, 'selector.pkl')
@@ -43,37 +38,25 @@ if not os.path.exists(selector_file):
         pickle.dump(selector, fh)
 
 
-def get_smac_object_callback(portfolio, lock):
+def get_smac_object_callback(portfolio):
     def get_smac_object(
         scenario_dict,
         seed,
         ta,
         ta_kwargs,
-        backend,
         metalearning_configurations,
+        n_jobs,
+        dask_client,
     ):
         from smac.facade.smac_ac_facade import SMAC4AC
         from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
         from smac.scenario.scenario import Scenario
 
-        scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob(
-            smac_run_id=seed if not scenario_dict['shared-model'] else '*',
-        )
         scenario = Scenario(scenario_dict)
 
-        lock.acquire()
-        try:
-            global CALLBACK_COUNTER
-            print(CALLBACK_COUNTER.value, flush=True)
-            if CALLBACK_COUNTER.value == 0:
-                initial_configurations = [
-                    Configuration(configuration_space=scenario.cs, values=member)
-                    for member in portfolio.values()]
-            else:
-                initial_configurations = [scenario.cs.sample_configuration(size=1)]
-            CALLBACK_COUNTER.value += 1
-        finally:
-            lock.release()
+        initial_configurations = [
+            Configuration(configuration_space=scenario.cs, values=member)
+            for member in portfolio.values()]
 
         rh2EPM = RunHistory2EPM4LogCost
         return SMAC4AC(
@@ -84,54 +67,34 @@ def get_smac_object_callback(portfolio, lock):
             tae_runner_kwargs=ta_kwargs,
             initial_configurations=initial_configurations,
             run_id=seed,
+            n_jobs=n_jobs,
+            dask_client=dask_client,
         )
     return get_smac_object
 
 
-def get_sh_or_hb_object_callback(budget_type, bandit_strategy, eta, initial_budget, portfolio,
-                                 lock):
+def get_sh_object_callback(budget_type, eta, initial_budget, portfolio):
     def get_smac_object(
         scenario_dict,
         seed,
         ta,
         ta_kwargs,
-        backend,
         metalearning_configurations,
+        n_jobs,
+        dask_client,
     ):
         from smac.facade.smac_ac_facade import SMAC4AC
         from smac.intensification.successive_halving import SuccessiveHalving
-        from smac.intensification.hyperband import Hyperband
         from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
         from smac.scenario.scenario import Scenario
 
-        scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob(
-            smac_run_id=seed if not scenario_dict['shared-model'] else '*',
-        )
         scenario = Scenario(scenario_dict)
-
-        lock.acquire()
-        try:
-            global CALLBACK_COUNTER
-            if CALLBACK_COUNTER.value == 0:
-                initial_configurations = [
-                    Configuration(configuration_space=scenario.cs, values=member)
-                    for member in portfolio.values()]
-            else:
-                initial_configurations = [scenario.cs.sample_configuration(size=1)]
-            CALLBACK_COUNTER.value += 1
-        finally:
-            lock.release()
+        initial_configurations = [
+            Configuration(configuration_space=scenario.cs, values=member)
+            for member in portfolio.values()]
 
         rh2EPM = RunHistory2EPM4LogCost
-
         ta_kwargs['budget_type'] = budget_type
-
-        if bandit_strategy == 'sh':
-            bandit = SuccessiveHalving
-        elif bandit_strategy == 'hb':
-            bandit = Hyperband
-        else:
-            raise ValueError(bandit_strategy)
 
         smac4ac = SMAC4AC(
             scenario=scenario,
@@ -141,13 +104,16 @@ def get_sh_or_hb_object_callback(budget_type, bandit_strategy, eta, initial_budg
             tae_runner_kwargs=ta_kwargs,
             initial_configurations=initial_configurations,
             run_id=seed,
-            intensifier=bandit,
+            intensifier=SuccessiveHalving,
             intensifier_kwargs={
                 'initial_budget': initial_budget,
                 'max_budget': 100,
                 'eta': eta,
-                'min_chall': 1},
-            )
+                'min_chall': 1,
+            },
+            dask_client=dask_client,
+            n_jobs=n_jobs,
+        )
         smac4ac.solver.epm_chooser.min_samples_model = int(
             len(scenario.cs.get_hyperparameters()) / 2
         )
@@ -170,7 +136,6 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         output_folder: Optional[str] = None,
         delete_tmp_folder_after_terminate: bool = True,
         delete_output_folder_after_terminate: bool = True,
-        shared_mode: bool = False,
         n_jobs: Optional[int] = None,
         disable_evaluator_output: bool = False,
         smac_scenario_args: Optional[Dict[str, Any]] = None,
@@ -201,7 +166,6 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             output_folder=output_folder,
             delete_tmp_folder_after_terminate=delete_tmp_folder_after_terminate,
             delete_output_folder_after_terminate=delete_output_folder_after_terminate,
-            shared_mode=shared_mode,
             n_jobs=n_jobs,
             disable_evaluator_output=disable_evaluator_output,
             get_smac_object_callback=None,
@@ -277,12 +241,10 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             portfolio_json = json.load(fh)
         portfolio = portfolio_json['portfolio']
 
-        lock = multiprocessing.Lock()
         if setting['fidelity'] == 'SH':
-            smac_callback = get_sh_or_hb_object_callback('iterations', 'sh', 4, 5.0, portfolio,
-                                                         lock)
+            smac_callback = get_sh_object_callback('iterations', 4, 5.0, portfolio)
         else:
-            smac_callback = get_smac_object_callback(portfolio, lock)
+            smac_callback = get_smac_object_callback(portfolio)
 
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_arguments = resampling_strategy_kwargs

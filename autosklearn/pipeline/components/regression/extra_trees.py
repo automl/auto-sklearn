@@ -16,18 +16,19 @@ class ExtraTreesRegressor(
 ):
     def __init__(self, criterion, min_samples_leaf,
                  min_samples_split, max_features, bootstrap, max_leaf_nodes,
-                 max_depth, min_impurity_decrease, oob_score=False, n_jobs=1,
-                 random_state=None, verbose=0):
+                 max_depth, min_weight_fraction_leaf, min_impurity_decrease,
+                 oob_score=False, n_jobs=1, random_state=None, verbose=0):
 
         self.n_estimators = self.get_max_iter()
         self.criterion = criterion
-        self.max_depth = max_depth
         self.max_leaf_nodes = max_leaf_nodes
         self.min_samples_leaf = min_samples_leaf
         self.min_samples_split = min_samples_split
         self.max_features = max_features
-        self.min_impurity_decrease = min_impurity_decrease
         self.bootstrap = bootstrap
+        self.max_depth = max_depth
+        self.min_weight_fraction_leaf = min_weight_fraction_leaf
+        self.min_impurity_decrease = min_impurity_decrease
         self.oob_score = oob_score
         self.n_jobs = n_jobs
         self.random_state = random_state
@@ -38,6 +39,9 @@ class ExtraTreesRegressor(
     def get_max_iter():
         return 512
 
+    def get_current_iter(self):
+        return self.estimator.n_estimators
+
     def iterative_fit(self, X, y, n_iter=1, refit=False):
         from sklearn.ensemble import ExtraTreesRegressor as ETR
 
@@ -45,7 +49,6 @@ class ExtraTreesRegressor(
             self.estimator = None
 
         if self.estimator is None:
-
             self.n_estimators = int(self.n_estimators)
             if self.criterion not in ("mse", "friedman_mse", "mae"):
                 raise ValueError(
@@ -66,6 +69,8 @@ class ExtraTreesRegressor(
             self.min_samples_split = int(self.min_samples_split)
             self.max_features = float(self.max_features)
             self.min_impurity_decrease = float(self.min_impurity_decrease)
+            self.min_weight_fraction_leaf = float(self.min_weight_fraction_leaf)
+            self.oob_score = check_for_bool(self.oob_score)
             self.bootstrap = check_for_bool(self.bootstrap)
             self.n_jobs = int(self.n_jobs)
             self.verbose = int(self.verbose)
@@ -78,6 +83,7 @@ class ExtraTreesRegressor(
                                  bootstrap=self.bootstrap,
                                  max_features=self.max_features,
                                  max_leaf_nodes=self.max_leaf_nodes,
+                                 min_weight_fraction_leaf=self.min_weight_fraction_leaf,
                                  min_impurity_decrease=self.min_impurity_decrease,
                                  oob_score=self.oob_score,
                                  n_jobs=self.n_jobs,
@@ -103,11 +109,6 @@ class ExtraTreesRegressor(
             raise NotImplementedError
         return self.estimator.predict(X)
 
-    def predict_proba(self, X):
-        if self.estimator is None:
-            raise NotImplementedError()
-        return self.estimator.predict_proba(X)
-
     @staticmethod
     def get_properties(dataset_properties=None):
         return {'shortname': 'ET',
@@ -131,6 +132,7 @@ class ExtraTreesRegressor(
             "max_features", 0.1, 1.0, default_value=1)
 
         max_depth = UnParametrizedHyperparameter(name="max_depth", value="None")
+        min_weight_fraction_leaf = UnParametrizedHyperparameter('min_weight_fraction_leaf', 0.)
         max_leaf_nodes = UnParametrizedHyperparameter("max_leaf_nodes", "None")
 
         min_samples_split = UniformIntegerHyperparameter(
@@ -146,7 +148,7 @@ class ExtraTreesRegressor(
 
         cs.add_hyperparameters([criterion, max_features,
                                 max_depth, max_leaf_nodes, min_samples_split,
-                                min_samples_leaf, min_impurity_decrease,
+                                min_samples_leaf, min_impurity_decrease, min_weight_fraction_leaf,
                                 bootstrap])
 
         return cs
