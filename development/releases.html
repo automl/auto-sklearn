@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Releases &#8212; AutoSklearn 0.10.0dev documentation</title>
+    <title>Releases &#8212; AutoSklearn 0.10.0 documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.10.0dev</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.10.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -106,6 +106,10 @@
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
 <li><a class="reference internal" href="#">Releases</a><ul>
+<li><a class="reference internal" href="#version-0-10-0">Version 0.10.0</a><ul>
+<li><a class="reference internal" href="#contributors-v0-10-0">Contributors v0.10.0</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#version-0-9-0">Version 0.9.0</a><ul>
 <li><a class="reference internal" href="#contributors-v0-9-0">Contributors v0.9.0</a></li>
 </ul>
@@ -176,6 +180,45 @@
       
   <span class="target" id="releases"></span><div class="section" id="id1">
 <h1>Releases<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="version-0-10-0">
+<h2>Version 0.10.0<a class="headerlink" href="#version-0-10-0" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ADD #325: Allow to separately optimize metrics for metadata generation.</p></li>
+<li><p>ADD #946: New dask backend for parallel Auto-sklearn.</p></li>
+<li><p>BREAKING #947: Drop Python3.5 support.</p></li>
+<li><p>BREAKING #946: Remove shared model mode for parallel Auto-sklearn.</p></li>
+<li><p>FIX #351: No longer pass un-picklable logger instances to the target function.</p></li>
+<li><p>FIX #840: Fixes a bug which prevented computing metadata for regression datasets. Also
+adds a unit test for regression metadata computation.</p></li>
+<li><p>FIX #897: Allow custom splitters to be used with multi-ouput regression.</p></li>
+<li><p>FIX #951: Fixes a lot of bugs in the regression pipeline that caused bad performance for
+regression datasets.</p></li>
+<li><p>FIX #953: Re-add <cite>liac-arff</cite> as a dependency.</p></li>
+<li><p>FIX #956: Fixes a bug which could cause Auto-sklearn not to find a model on disk which
+is part of the ensemble.</p></li>
+<li><p>FIX #961: Fixes a bug which caused Auto-sklearn to load bad meta-data for metrics which cannot
+be computed on multiclass datasets (especially ROC_AUC).</p></li>
+<li><p>DOC #498: Improve the example on resampling strategies by showing how to pass scikit-learn’s
+splitter objects to Auto-sklearn.</p></li>
+<li><p>DOC #670: Demonstrate how to give access to training accuracy.</p></li>
+<li><p>DOC #872: Improve an example on how obtain the best model.</p></li>
+<li><p>DOC #940: Improve documentation of the docker image.</p></li>
+<li><p>MAINT: Improve the docker file by setting environment variable that restrict BLAS and OMP to only
+use a single core.</p></li>
+<li><p>MAINT #949: Replace <cite>pip</cite> by <cite>pip3</cite> in the installation guidelines.</p></li>
+<li><p>MAINT #280, #535, #956: Update meta-data and include regression meta-data again.</p></li>
+</ul>
+<div class="section" id="contributors-v0-10-0">
+<h3>Contributors v0.10.0<a class="headerlink" href="#contributors-v0-10-0" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Francisco Rivera</p></li>
+<li><p>Matthias Feurer</p></li>
+<li><p>felixleungsc</p></li>
+<li><p>Chu-Cheng Fu</p></li>
+<li><p>Francois Berenger</p></li>
+</ul>
+</div>
+</div>
 <div class="section" id="version-0-9-0">
 <h2>Version 0.9.0<a class="headerlink" href="#version-0-9-0" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
