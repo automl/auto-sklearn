@@ -409,13 +409,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     print(traceback.format_exc())
                     print(config)
                     raise e
-            except UnboundLocalError as e:
-                if "local variable 'raw_predictions_val' referenced before assignment" in e.args[0]:
-                    continue
-                else:
-                    print(traceback.format_exc())
-                    print(config)
-                    raise e
 
     def test_get_hyperparameter_search_space(self):
         cs = SimpleClassificationPipeline().get_hyperparameter_search_space()

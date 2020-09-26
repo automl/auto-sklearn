@@ -319,10 +319,10 @@ class TestMetadataGeneration(unittest.TestCase):
                               ('runstatus',
                                ['ok', 'timeout', 'memout', 'not_applicable',
                                 'crash', 'other'])])
-            self.assertEqual(len(algorithm_runs['data']), 1)
-            self.assertEqual(len(algorithm_runs['data'][0]), 5)
-            self.assertLess(algorithm_runs['data'][0][3], 0.9)
-            self.assertEqual(algorithm_runs['data'][0][4], 'ok')
+            self.assertEqual(len(algorithm_runs['data']), 1, algorithm_runs)
+            self.assertEqual(len(algorithm_runs['data'][0]), 5, algorithm_runs)
+            self.assertLess(algorithm_runs['data'][0][3], 0.9, algorithm_runs)
+            self.assertEqual(algorithm_runs['data'][0][4], 'ok', algorithm_runs)
 
     def tearDown(self):
         for i in range(5):
