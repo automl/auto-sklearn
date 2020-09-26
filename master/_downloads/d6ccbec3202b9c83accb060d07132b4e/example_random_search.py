@@ -39,11 +39,16 @@ def get_roar_object_callback(
     seed,
     ta,
     ta_kwargs,
-    backend,
     metalearning_configurations,
+    n_jobs,
+    dask_client,
 ):
     """Random online adaptive racing."""
-    scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob()
+
+    if n_jobs > 1 or dask_client:
+        raise ValueError("Please make sure to guard the code invoking Auto-sklearn by "
+                         "`if __name__ == '__main__'` and remove this exception.")
+
     scenario = Scenario(scenario_dict)
     return ROAR(
         scenario=scenario,
@@ -51,11 +56,13 @@ def get_roar_object_callback(
         tae_runner=ta,
         tae_runner_kwargs=ta_kwargs,
         run_id=seed,
+        dask_client=dask_client,
+        n_jobs=n_jobs,
     )
 
 
 automl = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=120, per_run_time_limit=30,
+    time_left_for_this_task=60, per_run_time_limit=15,
     tmp_folder='/tmp/autosklearn_random_search_example_tmp',
     output_folder='/tmp/autosklearn_random_search_example_out',
     get_smac_object_callback=get_roar_object_callback,
@@ -82,11 +89,16 @@ def get_random_search_object_callback(
         seed,
         ta,
         ta_kwargs,
-        backend,
         metalearning_configurations,
+        n_jobs,
+        dask_client
 ):
     """Random search."""
-    scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob()
+
+    if n_jobs > 1 or dask_client:
+        raise ValueError("Please make sure to guard the code invoking Auto-sklearn by "
+                         "`if __name__ == '__main__'` and remove this exception.")
+
     scenario_dict['minR'] = len(scenario_dict['instances'])
     scenario_dict['initial_incumbent'] = 'RANDOM'
     scenario = Scenario(scenario_dict)
@@ -96,12 +108,14 @@ def get_random_search_object_callback(
         tae_runner=ta,
         tae_runner_kwargs=ta_kwargs,
         run_id=seed,
+        dask_client=dask_client,
+        n_jobs=n_jobs,
     )
 
 
 automl = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=120,
-    per_run_time_limit=30,
+    time_left_for_this_task=60,
+    per_run_time_limit=15,
     tmp_folder='/tmp/autosklearn_random_search_example_tmp',
     output_folder='/tmp/autosklearn_random_search_example_out',
     get_smac_object_callback=get_random_search_object_callback,

@@ -9,6 +9,7 @@ by specifying the arguments ``resampling_strategy`` and
 settings for the ``AutoSklearnClassifier``.
 """
 
+import numpy as np
 import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
@@ -89,11 +90,18 @@ print("Accuracy score CV", sklearn.metrics.accuracy_score(y_test, predictions))
 # =============================
 # It is also possible to use
 # `scikit-learn's splitter classes <https://scikit-learn.org/stable/modules/classes.html#splitter
-# -classes>`_ to further customize the outputs.
+# -classes>`_ to further customize the outputs. In case one needs to have 100% control over the
+# splitting, it is possible to use
+# `scikit-learn's PredefinedSplit <https://scikit-learn.org/stable/modules/generated/
+# sklearn.model_selection.PredefinedSplit.html>`_.
 
+############################################################################
+# Below is an example of using a predefined split. We split the training
+# data by the first feature. In practice, one would use a splitting according
+# to the use case at hand.
 
-resampling_strategy = sklearn.model_selection.RepeatedStratifiedKFold
-resampling_strategy_arguments = {'folds': 3}
+resampling_strategy = sklearn.model_selection.PredefinedSplit
+resampling_strategy_arguments = {'test_fold': np.where(X_train[:, 0] < np.mean(X_train[:, 0]))[0]}
 
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
@@ -101,14 +109,21 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     tmp_folder='/tmp/autosklearn_resampling_example_tmp',
     output_folder='/tmp/autosklearn_resampling_example_out',
     disable_evaluator_output=False,
-    resampling_strategy='cv',
-    resampling_strategy_arguments={'folds': 5},
+    resampling_strategy=resampling_strategy,
+    resampling_strategy_arguments=resampling_strategy_arguments,
 )
 automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
 ############################################################################
-# Get the Score of the final ensemble
-# ===================================
+# For custom resampling strategies (i.e. resampling strategies that are not
+# defined as strings by Auto-sklearn) it is necessary to perform a refit:
+automl.refit(X_train, y_train)
 
+############################################################################
+# Get the Score of the final ensemble (again)
+# ===========================================
+#
+# Obviously, this score is pretty bad as we "destroyed" the dataset by
+# splitting it on the first feature.
 predictions = automl.predict(X_test)
-print("Accuracy score repeated CV", sklearn.metrics.accuracy_score(y_test, predictions))
+print("Accuracy score custom split", sklearn.metrics.accuracy_score(y_test, predictions))

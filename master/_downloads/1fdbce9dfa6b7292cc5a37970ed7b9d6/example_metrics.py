@@ -82,7 +82,7 @@ cls.fit(X_train, y_train)
 predictions = cls.predict(X_test)
 print("Accuracy score {:g} using {:s}".
       format(sklearn.metrics.accuracy_score(y_test, predictions),
-             cls._automl[0]._metric.name))
+             cls.automl_._metric.name))
 
 ############################################################################
 # Second example: Use own accuracy metric
@@ -109,7 +109,7 @@ cls.fit(X_train, y_train)
 predictions = cls.predict(X_test)
 print("Accuracy score {:g} using {:s}".
       format(sklearn.metrics.accuracy_score(y_test, predictions),
-             cls._automl[0]._metric.name))
+             cls.automl_._metric.name))
 
 print("#"*80)
 print("Use self defined error metric")
@@ -132,7 +132,7 @@ cls.fit(X_train, y_train)
 cls.predictions = cls.predict(X_test)
 print("Error rate {:g} using {:s}".
       format(error_rate(y_test, predictions),
-             cls._automl[0]._metric.name))
+             cls.automl_._metric.name))
 
 ############################################################################
 # Third example: Use own accuracy metric with additional argument
@@ -161,7 +161,7 @@ predictions = cls.predict(X_test)
 print(
     "Accuracy score {:g} using {:s}".format(
         sklearn.metrics.accuracy_score(y_test, predictions),
-        cls._automl[0]._metric.name
+        cls.automl_._metric.name
     )
 )
 
@@ -188,6 +188,6 @@ predictions = cls.predict(X_test)
 print(
     "Error rate {:g} using {:s}".format(
         error_rate(y_test, predictions),
-        cls._automl[0]._metric.name
+        cls.automl_._metric.name
     )
 )

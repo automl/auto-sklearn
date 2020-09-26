@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Test and Train data with Pandas &#8212; AutoSklearn 0.9.0 documentation</title>
+    <title>Test and Train data with Pandas &#8212; AutoSklearn 0.10.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.9.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.10.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -143,19 +143,20 @@ list or numpy arrays as there is no per-column dtype (further details in the exa
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">sklearn.model_selection</span>
 <span class="kn">import</span> <span class="nn">sklearn.datasets</span>
 <span class="kn">import</span> <span class="nn">sklearn.metrics</span>
 
-<span class="kn">from</span> <span class="nn">smac.tae.execute_ta_run</span> <span class="kn">import</span> <span class="n">StatusType</span>
+<span class="kn">from</span> <span class="nn">smac.tae</span> <span class="kn">import</span> <span class="n">StatusType</span>
 
 <span class="kn">import</span> <span class="nn">autosklearn.classification</span>
 
 
 <span class="k">def</span> <span class="nf">get_runhistory_models_performance</span><span class="p">(</span><span class="n">automl</span><span class="p">):</span>
-    <span class="n">metric</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_automl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_metric</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">_automl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">runhistory_</span><span class="o">.</span><span class="n">data</span>
+    <span class="n">metric</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">_metric</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">runhistory_</span><span class="o">.</span><span class="n">data</span>
     <span class="n">performance_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">run_key</span><span class="p">,</span> <span class="n">run_value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">run_value</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="n">StatusType</span><span class="o">.</span><span class="n">SUCCESS</span><span class="p">:</span>
@@ -166,10 +167,12 @@ list or numpy arrays as there is no per-column dtype (further details in the exa
                                              <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">run_value</span><span class="o">.</span><span class="n">endtime</span><span class="p">)))</span>
         <span class="n">val_score</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">_optimum</span> <span class="o">-</span> <span class="p">(</span><span class="n">metric</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="n">run_value</span><span class="o">.</span><span class="n">cost</span><span class="p">)</span>
         <span class="n">test_score</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">_optimum</span> <span class="o">-</span> <span class="p">(</span><span class="n">metric</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="n">run_value</span><span class="o">.</span><span class="n">additional_info</span><span class="p">[</span><span class="s1">&#39;test_loss&#39;</span><span class="p">])</span>
+        <span class="n">train_score</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">_optimum</span> <span class="o">-</span> <span class="p">(</span><span class="n">metric</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="n">run_value</span><span class="o">.</span><span class="n">additional_info</span><span class="p">[</span><span class="s1">&#39;train_loss&#39;</span><span class="p">])</span>
         <span class="n">performance_list</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
             <span class="s1">&#39;Timestamp&#39;</span><span class="p">:</span> <span class="n">endtime</span><span class="p">,</span>
             <span class="s1">&#39;single_best_optimization_score&#39;</span><span class="p">:</span> <span class="n">val_score</span><span class="p">,</span>
             <span class="s1">&#39;single_best_test_score&#39;</span><span class="p">:</span> <span class="n">test_score</span><span class="p">,</span>
+            <span class="s1">&#39;single_best_train_score&#39;</span><span class="p">:</span> <span class="n">train_score</span><span class="p">,</span>
         <span class="p">})</span>
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">performance_list</span><span class="p">)</span>
 </pre></div>
@@ -239,7 +242,8 @@ dtype: object
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(delete_output_folder_after_terminate=True,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(dask_client=None,
+                      delete_output_folder_after_terminate=True,
                       delete_tmp_folder_after_terminate=True,
                       disable_evaluator_output=False,
                       ensemble_memory_limit=1024, ensemble_nbest=50,
@@ -252,8 +256,8 @@ dtype: object
                       ml_memory_limit=3072, n_jobs=None, output_folder=None,
                       per_run_time_limit=30, resampling_strategy=&#39;holdout&#39;,
                       resampling_strategy_arguments=None, seed=1,
-                      shared_mode=False, smac_scenario_args=None,
-                      time_left_for_this_task=120, tmp_folder=None)
+                      smac_scenario_args=None, time_left_for_this_task=120,
+                      tmp_folder=None)
 </pre></div>
 </div>
 </div>
@@ -264,16 +268,35 @@ dtype: object
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score 0.8608695652173913
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score 0.8753623188405797
 </pre></div>
 </div>
 </div>
 <div class="section" id="plot-the-ensemble-performance">
 <h2>Plot the ensemble performance<a class="headerlink" href="#plot-the-ensemble-performance" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ensemble_performance_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_automl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ensemble_performance_history</span><span class="p">)</span>
-<span class="n">ensemble_performance_frame</span> <span class="o">=</span> <span class="n">ensemble_performance_frame</span><span class="o">.</span><span class="n">cummax</span><span class="p">()</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ensemble_performance_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">ensemble_performance_history</span><span class="p">)</span>
+<span class="n">best_values</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="s1">&#39;ensemble_optimization_score&#39;</span><span class="p">:</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
+                         <span class="s1">&#39;ensemble_test_score&#39;</span><span class="p">:</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">})</span>
+<span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">ensemble_performance_frame</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">ensemble_performance_frame</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s1">&#39;ensemble_optimization_score&#39;</span><span class="p">]</span>
+        <span class="o">&gt;</span> <span class="n">best_values</span><span class="p">[</span><span class="s1">&#39;ensemble_optimization_score&#39;</span><span class="p">]</span>
+    <span class="p">):</span>
+        <span class="n">best_values</span> <span class="o">=</span> <span class="n">ensemble_performance_frame</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+    <span class="n">ensemble_performance_frame</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_values</span>
+
 <span class="n">individual_performance_frame</span> <span class="o">=</span> <span class="n">get_runhistory_models_performance</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-<span class="n">individual_performance_frame</span> <span class="o">=</span> <span class="n">individual_performance_frame</span><span class="o">.</span><span class="n">cummax</span><span class="p">()</span>
+<span class="n">best_values</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="s1">&#39;single_best_optimization_score&#39;</span><span class="p">:</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
+                         <span class="s1">&#39;single_best_test_score&#39;</span><span class="p">:</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
+                         <span class="s1">&#39;single_best_train_score&#39;</span><span class="p">:</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">})</span>
+<span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">individual_performance_frame</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">individual_performance_frame</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s1">&#39;single_best_optimization_score&#39;</span><span class="p">]</span>
+        <span class="o">&gt;</span> <span class="n">best_values</span><span class="p">[</span><span class="s1">&#39;single_best_optimization_score&#39;</span><span class="p">]</span>
+    <span class="p">):</span>
+        <span class="n">best_values</span> <span class="o">=</span> <span class="n">individual_performance_frame</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+    <span class="n">individual_performance_frame</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_values</span>
+
 <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
     <span class="n">ensemble_performance_frame</span><span class="p">,</span>
     <span class="n">individual_performance_frame</span><span class="p">,</span>
@@ -289,7 +312,7 @@ dtype: object
 </pre></div>
 </div>
 <img alt="Auto-sklearn accuracy over time" class="sphx-glr-single-img" src="../../_images/sphx_glr_example_pandas_train_test_001.png" />
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  56.582 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  55.405 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-pandas-train-test-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/5a889c221f400053efc3d433ea6ac72b/example_pandas_train_test.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_pandas_train_test.py</span></code></a></p>

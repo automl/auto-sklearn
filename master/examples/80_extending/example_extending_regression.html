@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Extending Auto-Sklearn with Regression Component &#8212; AutoSklearn 0.9.0 documentation</title>
+    <title>Extending Auto-Sklearn with Regression Component &#8212; AutoSklearn 0.10.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.9.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.10.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -246,21 +246,21 @@ component for using in auto-sklearn.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnRegressor(delete_output_folder_after_terminate=True,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnRegressor(dask_client=None,
+                     delete_output_folder_after_terminate=True,
                      delete_tmp_folder_after_terminate=True,
                      disable_evaluator_output=False, ensemble_memory_limit=1024,
                      ensemble_nbest=50, ensemble_size=50,
                      exclude_estimators=None, exclude_preprocessors=None,
                      get_smac_object_callback=None,
                      include_estimators=[&#39;KernelRidgeRegression&#39;],
-                     include_preprocessors=None,
-                     in...tions_via_metalearning=0,
+                     include_prep...,
+                     initial_configurations_via_metalearning=0,
                      logging_config=None, max_models_on_disc=50,
                      metadata_directory=None, metric=None, ml_memory_limit=3072,
                      n_jobs=None, output_folder=None, per_run_time_limit=10,
                      resampling_strategy=&#39;holdout&#39;,
                      resampling_strategy_arguments=None, seed=1,
-                     shared_mode=False,
                      smac_scenario_args={&#39;runcount_limit&#39;: 1},
                      time_left_for_this_task=30, tmp_folder=None)
 </pre></div>
@@ -281,7 +281,7 @@ component for using in auto-sklearn.</p>
 ]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  24.287 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  24.260 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-extending-regression-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/23ae4950352edc8dd9ea5443ba77886b/example_extending_regression.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_extending_regression.py</span></code></a></p>

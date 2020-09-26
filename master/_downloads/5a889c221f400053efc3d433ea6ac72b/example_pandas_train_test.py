@@ -25,19 +25,20 @@ list or numpy arrays as there is no per-column dtype (further details in the exa
 import time
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
 
-from smac.tae.execute_ta_run import StatusType
+from smac.tae import StatusType
 
 import autosklearn.classification
 
 
 def get_runhistory_models_performance(automl):
-    metric = cls._automl[0]._metric
-    data = automl._automl[0].runhistory_.data
+    metric = cls.automl_._metric
+    data = automl.automl_.runhistory_.data
     performance_list = []
     for run_key, run_value in data.items():
         if run_value.status != StatusType.SUCCESS:
@@ -48,10 +49,12 @@ def get_runhistory_models_performance(automl):
                                              time.localtime(run_value.endtime)))
         val_score = metric._optimum - (metric._sign * run_value.cost)
         test_score = metric._optimum - (metric._sign * run_value.additional_info['test_loss'])
+        train_score = metric._optimum - (metric._sign * run_value.additional_info['train_loss'])
         performance_list.append({
             'Timestamp': endtime,
             'single_best_optimization_score': val_score,
             'single_best_test_score': test_score,
+            'single_best_train_score': train_score,
         })
     return pd.DataFrame(performance_list)
 
@@ -114,10 +117,29 @@ print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 # Plot the ensemble performance
 # ===================================
 
-ensemble_performance_frame = pd.DataFrame(cls._automl[0].ensemble_performance_history)
-ensemble_performance_frame = ensemble_performance_frame.cummax()
+ensemble_performance_frame = pd.DataFrame(cls.automl_.ensemble_performance_history)
+best_values = pd.Series({'ensemble_optimization_score': -np.inf,
+                         'ensemble_test_score': -np.inf})
+for idx in ensemble_performance_frame.index:
+    if (
+        ensemble_performance_frame.loc[idx, 'ensemble_optimization_score']
+        > best_values['ensemble_optimization_score']
+    ):
+        best_values = ensemble_performance_frame.loc[idx]
+    ensemble_performance_frame.loc[idx] = best_values
+
 individual_performance_frame = get_runhistory_models_performance(cls)
-individual_performance_frame = individual_performance_frame.cummax()
+best_values = pd.Series({'single_best_optimization_score': -np.inf,
+                         'single_best_test_score': -np.inf,
+                         'single_best_train_score': -np.inf})
+for idx in individual_performance_frame.index:
+    if (
+        individual_performance_frame.loc[idx, 'single_best_optimization_score']
+        > best_values['single_best_optimization_score']
+    ):
+        best_values = individual_performance_frame.loc[idx]
+    individual_performance_frame.loc[idx] = best_values
+
 pd.merge(
     ensemble_performance_frame,
     individual_performance_frame,

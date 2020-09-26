@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Installation &#8212; AutoSklearn 0.9.0 documentation</title>
+    <title>Installation &#8212; AutoSklearn 0.10.0 documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.9.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.10.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -131,7 +131,7 @@
 <p>auto-sklearn has the following system requirements:</p>
 <ul class="simple">
 <li><p>Linux operating system (for example Ubuntu) <a class="reference external" href="https://www.wikihow.com/Install-Linux">(get Linux here)</a>,</p></li>
-<li><p>Python (&gt;=3.5) <a class="reference external" href="https://www.python.org/downloads/">(get Python here)</a>.</p></li>
+<li><p>Python (&gt;=3.6) <a class="reference external" href="https://www.python.org/downloads/">(get Python here)</a>.</p></li>
 <li><p>C++ compiler (with C++11 supports) <a class="reference external" href="https://www.tutorialspoint.com/How-to-Install-Cplusplus-Compiler-on-Linux">(get GCC here)</a> and</p></li>
 <li><p>SWIG (version 3.0.* is required; &gt;=4.0.0 is not supported) <a class="reference external" href="http://www.swig.org/survey.html">(get SWIG here)</a>.</p></li>
 </ul>
@@ -141,18 +141,18 @@ check the Section <a class="reference internal" href="#windows-osx-compatibility
 <div class="section" id="installing-auto-sklearn">
 <h2>Installing auto-sklearn<a class="headerlink" href="#installing-auto-sklearn" title="Permalink to this headline">¶</a></h2>
 <p>Please install all dependencies manually with:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl https://raw.githubusercontent.com/automl/auto-sklearn/master/requirements.txt <span class="p">|</span> xargs -n <span class="m">1</span> -L <span class="m">1</span> pip install
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl https://raw.githubusercontent.com/automl/auto-sklearn/master/requirements.txt <span class="p">|</span> xargs -n <span class="m">1</span> -L <span class="m">1</span> pip3 install
 </pre></div>
 </div>
 <p>Then install <em>auto-sklearn</em>:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install auto-sklearn
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3 install auto-sklearn
 </pre></div>
 </div>
 <p>We recommend installing <em>auto-sklearn</em> into a
 <a class="reference external" href="http://docs.python-guide.org/en/latest/dev/virtualenvs/">virtual environment</a>
 or an
 <a class="reference external" href="https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">Anaconda environment</a>.</p>
-<p>If the <code class="docutils literal notranslate"><span class="pre">pip</span></code> installation command fails, make sure you have the <a class="reference internal" href="#system-requirements">System requirements</a> installed correctly.</p>
+<p>If the <code class="docutils literal notranslate"><span class="pre">pip3</span></code> installation command fails, make sure you have the <a class="reference internal" href="#system-requirements">System requirements</a> installed correctly.</p>
 </div>
 <div class="section" id="ubuntu-installation">
 <h2>Ubuntu installation<a class="headerlink" href="#ubuntu-installation" title="Permalink to this headline">¶</a></h2>
@@ -214,22 +214,25 @@ and <a class="reference external" href="https://github.com/automl/ConfigSpace">C
 </div>
 <div class="section" id="docker-image">
 <h2>Docker Image<a class="headerlink" href="#docker-image" title="Permalink to this headline">¶</a></h2>
-<p>A Docker image is also provided as a github package. The user must authenticate following the instructions from <a class="reference external" href="https://help.github.com/en/packages/using-github-packages-with-your-projects-ecosystem/configuring-docker-for-use-with-github-packages">GitHub Packages</a> . Then, the image can be downloaded as follows:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker pull docker.pkg.github.com/automl/auto-sklearn/auto-sklearn:latest
+<p>A Docker image is also provided on dockerhub. To download from dockerhub,
+use:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker pull mfeurer/auto-sklearn:master
 </pre></div>
 </div>
-<p>You can also verify that the images are downloaded via:</p>
+<p>You can also verify that the image was downloaded via:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker images  <span class="c1"># Verify that the image was downloaded</span>
 </pre></div>
 </div>
 <p>This image can be used to start an interactive session as follows:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker run -it docker.pkg.github.com/automl/auto-sklearn/auto-sklearn:latest
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker run -it mfeurer/auto-sklearn:master
 </pre></div>
 </div>
 <p>To start a Jupyter notebook, you could instead run e.g.:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker run -it -v <span class="nv">$PWD</span>:/opt/nb -p <span class="m">8888</span>:8888 docker.pkg.github.com/automl/auto-sklearn/auto-sklearn:latest /bin/bash -c <span class="s2">&quot;mkdir -p /opt/nb &amp;&amp; jupyter notebook --notebook-dir=/opt/nb --ip=&#39;0.0.0.0&#39; --port=8888 --no-browser --allow-root&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker run -it -v <span class="nv">$PWD</span>:/opt/nb -p <span class="m">8888</span>:8888 mfeurer/auto-sklearn:master /bin/bash -c <span class="s2">&quot;mkdir -p /opt/nb &amp;&amp; jupyter notebook --notebook-dir=/opt/nb --ip=&#39;0.0.0.0&#39; --port=8888 --no-browser --allow-root&quot;</span>
 </pre></div>
 </div>
+<p>Alternatively, it is possible to use the development version of auto-sklearn by replacing all
+occurences of <code class="docutils literal notranslate"><span class="pre">master</span></code> by <code class="docutils literal notranslate"><span class="pre">development</span></code>.</p>
 </div>
 </div>
 

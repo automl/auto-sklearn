@@ -179,27 +179,6 @@ procedure.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="*auto-sklearn* can automatically encode categorical columns using a label/ordinal encoder. This...">
-
-.. only:: html
-
- .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_pandas_train_test_thumb.png
-     :alt: Test and Train data with Pandas
-
-     :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/40_advanced/example_pandas_train_test
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="*Auto-sklearn* supports various built-in metrics, which can be found in the metrics section in ...">
 
 .. only:: html
@@ -218,6 +197,27 @@ procedure.
    :hidden:
 
    /examples/40_advanced/example_metrics
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="*auto-sklearn* can automatically encode categorical columns using a label/ordinal encoder. This...">
+
+.. only:: html
+
+ .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_pandas_train_test_thumb.png
+     :alt: Test and Train data with Pandas
+
+     :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/40_advanced/example_pandas_train_test
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>
@@ -235,6 +235,27 @@ Search Examples
 Examples of changing the search procedure of Auto-sklearn.
 
 
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="*Auto-sklearn* uses dask.distributed &lt;https://distributed.dask.org/en/latest/index.html&gt;_ for p...">
+
+.. only:: html
+
+ .. figure:: /examples/60_search/images/thumb/sphx_glr_example_parallel_n_jobs_thumb.png
+     :alt: Parallel Usage  on a single machine
+
+     :ref:`sphx_glr_examples_60_search_example_parallel_n_jobs.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/60_search/example_parallel_n_jobs
 
 .. raw:: html
 
@@ -259,27 +280,6 @@ Examples of changing the search procedure of Auto-sklearn.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="*Auto-sklearn* uses *SMAC* to automatically optimize the hyperparameters of the training models...">
-
-.. only:: html
-
- .. figure:: /examples/60_search/images/thumb/sphx_glr_example_parallel_n_jobs_thumb.png
-     :alt: Parallel Usage  on a single machine
-
-     :ref:`sphx_glr_examples_60_search_example_parallel_n_jobs.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/60_search/example_parallel_n_jobs
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="A crucial feature of *auto-sklearn* is automatically optimizing the hyperparameters through SMA...">
 
 .. only:: html
@@ -301,7 +301,7 @@ Examples of changing the search procedure of Auto-sklearn.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="*Auto-sklearn* uses *SMAC* to automatically optimize the hyperparameters of the training models...">
+    <div class="sphx-glr-thumbcontainer" tooltip="*Auto-sklearn* uses dask.distributed &lt;https://distributed.dask.org/en/latest/index.html&gt;_ for p...">
 
 .. only:: html
 

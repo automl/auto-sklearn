@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Resampling Strategies &#8212; AutoSklearn 0.9.0 documentation</title>
+    <title>Resampling Strategies &#8212; AutoSklearn 0.10.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.9.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.10.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -112,7 +112,7 @@
 <li><a class="reference internal" href="#cross-validation">Cross-validation</a></li>
 <li><a class="reference internal" href="#perform-a-refit">Perform a refit</a></li>
 <li><a class="reference internal" href="#scikit-learn-splitter-objects">scikit-learn splitter objects</a></li>
-<li><a class="reference internal" href="#id1">Get the Score of the final ensemble</a></li>
+<li><a class="reference internal" href="#get-the-score-of-the-final-ensemble-again">Get the Score of the final ensemble (again)</a></li>
 </ul>
 </li>
 </ul>
@@ -131,7 +131,8 @@
 by specifying the arguments <code class="docutils literal notranslate"><span class="pre">resampling_strategy</span></code> and
 <code class="docutils literal notranslate"><span class="pre">resampling_strategy_arguments</span></code>. The following example shows common
 settings for the <code class="docutils literal notranslate"><span class="pre">AutoSklearnClassifier</span></code>.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sklearn.model_selection</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sklearn.model_selection</span>
 <span class="kn">import</span> <span class="nn">sklearn.datasets</span>
 <span class="kn">import</span> <span class="nn">sklearn.metrics</span>
 
@@ -164,20 +165,22 @@ settings for the <code class="docutils literal notranslate"><span class="pre">Au
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(delete_output_folder_after_terminate=True,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(dask_client=None,
+                      delete_output_folder_after_terminate=True,
                       delete_tmp_folder_after_terminate=True,
                       disable_evaluator_output=False,
                       ensemble_memory_limit=1024, ensemble_nbest=50,
                       ensemble_size=50, exclude_estimators=None,
                       exclude_preprocessors=None, get_smac_object_callback=None,
                       include_estimators=None, include_preprocessors=None,
-                      initial_configurations...
+                      initi...
+                      logging_config=None, max_models_on_disc=50,
                       metadata_directory=None, metric=None,
                       ml_memory_limit=3072, n_jobs=None,
                       output_folder=&#39;/tmp/autosklearn_resampling_example_out&#39;,
                       per_run_time_limit=30, resampling_strategy=&#39;holdout&#39;,
                       resampling_strategy_arguments={&#39;train_size&#39;: 0.67},
-                      seed=1, shared_mode=False, smac_scenario_args=None,
+                      seed=1, smac_scenario_args=None,
                       time_left_for_this_task=120,
                       tmp_folder=&#39;/tmp/autosklearn_resampling_example_tmp&#39;)
 </pre></div>
@@ -190,7 +193,7 @@ settings for the <code class="docutils literal notranslate"><span class="pre">Au
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score holdout:  0.958041958041958
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score holdout:  0.965034965034965
 </pre></div>
 </div>
 </div>
@@ -235,16 +238,21 @@ final ensemble on the whole dataset.</p>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>After re-fit
-Accuracy score CV 0.958041958041958
+Accuracy score CV 0.965034965034965
 </pre></div>
 </div>
 </div>
 <div class="section" id="scikit-learn-splitter-objects">
 <h2>scikit-learn splitter objects<a class="headerlink" href="#scikit-learn-splitter-objects" title="Permalink to this headline">¶</a></h2>
 <p>It is also possible to use
-<a class="reference external" href="https://scikit-learn.org/stable/modules/classes.html#splitter-classes">scikit-learn’s splitter classes</a> to further customize the outputs.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">resampling_strategy</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">RepeatedStratifiedKFold</span>
-<span class="n">resampling_strategy_arguments</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;folds&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+<a class="reference external" href="https://scikit-learn.org/stable/modules/classes.html#splitter-classes">scikit-learn’s splitter classes</a> to further customize the outputs. In case one needs to have 100% control over the
+splitting, it is possible to use
+<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.PredefinedSplit.html">scikit-learn’s PredefinedSplit</a>.</p>
+<p>Below is an example of using a predefined split. We split the training
+data by the first feature. In practice, one would use a splitting according
+to the use case at hand.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">resampling_strategy</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">PredefinedSplit</span>
+<span class="n">resampling_strategy_arguments</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;test_fold&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">X_train</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X_train</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]}</span>
 
 <span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
     <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
@@ -252,44 +260,73 @@ Accuracy score CV 0.958041958041958
     <span class="n">tmp_folder</span><span class="o">=</span><span class="s1">&#39;/tmp/autosklearn_resampling_example_tmp&#39;</span><span class="p">,</span>
     <span class="n">output_folder</span><span class="o">=</span><span class="s1">&#39;/tmp/autosklearn_resampling_example_out&#39;</span><span class="p">,</span>
     <span class="n">disable_evaluator_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">resampling_strategy</span><span class="o">=</span><span class="s1">&#39;cv&#39;</span><span class="p">,</span>
-    <span class="n">resampling_strategy_arguments</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;folds&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+    <span class="n">resampling_strategy</span><span class="o">=</span><span class="n">resampling_strategy</span><span class="p">,</span>
+    <span class="n">resampling_strategy_arguments</span><span class="o">=</span><span class="n">resampling_strategy_arguments</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">dataset_name</span><span class="o">=</span><span class="s1">&#39;breast_cancer&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(delete_output_folder_after_terminate=True,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(dask_client=None,
+                      delete_output_folder_after_terminate=True,
                       delete_tmp_folder_after_terminate=True,
                       disable_evaluator_output=False,
                       ensemble_memory_limit=1024, ensemble_nbest=50,
                       ensemble_size=50, exclude_estimators=None,
                       exclude_preprocessors=None, get_smac_object_callback=None,
                       include_estimators=None, include_preprocessors=None,
-                      initial_configurations...
-                      logging_config=None, max_models_on_disc=50,
-                      metadata_directory=None, metric=None,
-                      ml_memory_limit=3072, n_jobs=None,
-                      output_folder=&#39;/tmp/autosklearn_resampling_example_out&#39;,
-                      per_run_time_limit=30, resampling_strategy=&#39;cv&#39;,
-                      resampling_strategy_arguments={&#39;folds&#39;: 5}, seed=1,
-                      shared_mode=False, smac_scenario_args=None,
+                      initi...
+       325, 326, 327, 329, 332, 333, 334, 335, 337, 338, 339, 343, 345,
+       348, 349, 350, 351, 354, 355, 356, 357, 358, 361, 363, 364, 365,
+       366, 367, 370, 371, 372, 373, 374, 377, 378, 380, 381, 383, 384,
+       385, 387, 388, 389, 390, 391, 392, 393, 394, 395, 398, 400, 401,
+       402, 403, 407, 409, 410, 411, 414, 416, 417, 418, 419, 422, 424,
+       425])},
+                      seed=1, smac_scenario_args=None,
+                      time_left_for_this_task=120,
+                      tmp_folder=&#39;/tmp/autosklearn_resampling_example_tmp&#39;)
+</pre></div>
+</div>
+<p>For custom resampling strategies (i.e. resampling strategies that are not
+defined as strings by Auto-sklearn) it is necessary to perform a refit:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">automl</span><span class="o">.</span><span class="n">refit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(dask_client=None,
+                      delete_output_folder_after_terminate=True,
+                      delete_tmp_folder_after_terminate=True,
+                      disable_evaluator_output=False,
+                      ensemble_memory_limit=1024, ensemble_nbest=50,
+                      ensemble_size=50, exclude_estimators=None,
+                      exclude_preprocessors=None, get_smac_object_callback=None,
+                      include_estimators=None, include_preprocessors=None,
+                      initi...
+       325, 326, 327, 329, 332, 333, 334, 335, 337, 338, 339, 343, 345,
+       348, 349, 350, 351, 354, 355, 356, 357, 358, 361, 363, 364, 365,
+       366, 367, 370, 371, 372, 373, 374, 377, 378, 380, 381, 383, 384,
+       385, 387, 388, 389, 390, 391, 392, 393, 394, 395, 398, 400, 401,
+       402, 403, 407, 409, 410, 411, 414, 416, 417, 418, 419, 422, 424,
+       425])},
+                      seed=1, smac_scenario_args=None,
                       time_left_for_this_task=120,
                       tmp_folder=&#39;/tmp/autosklearn_resampling_example_tmp&#39;)
 </pre></div>
 </div>
 </div>
-<div class="section" id="id1">
-<h2>Get the Score of the final ensemble<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="get-the-score-of-the-final-ensemble-again">
+<h2>Get the Score of the final ensemble (again)<a class="headerlink" href="#get-the-score-of-the-final-ensemble-again" title="Permalink to this headline">¶</a></h2>
+<p>Obviously, this score is pretty bad as we “destroyed” the dataset by
+splitting it on the first feature.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score repeated CV&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score custom split&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score repeated CV 0.958041958041958
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score custom split 0.38461538461538464
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 6 minutes  3.576 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 5 minutes  48.664 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-resampling-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/c6beb850ad22be83885d2737cca63b33/example_resampling.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_resampling.py</span></code></a></p>

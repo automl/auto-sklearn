@@ -12,7 +12,7 @@ System requirements
 auto-sklearn has the following system requirements:
 
 * Linux operating system (for example Ubuntu) `(get Linux here) <https://www.wikihow.com/Install-Linux>`_,
-* Python (>=3.5) `(get Python here) <https://www.python.org/downloads/>`_.
+* Python (>=3.6) `(get Python here) <https://www.python.org/downloads/>`_.
 * C++ compiler (with C++11 supports) `(get GCC here) <https://www.tutorialspoint.com/How-to-Install-Cplusplus-Compiler-on-Linux>`_ and
 * SWIG (version 3.0.* is required; >=4.0.0 is not supported) `(get SWIG here) <http://www.swig.org/survey.html>`_.
 
@@ -26,20 +26,20 @@ Please install all dependencies manually with:
 
 .. code:: bash
 
-    curl https://raw.githubusercontent.com/automl/auto-sklearn/master/requirements.txt | xargs -n 1 -L 1 pip install
+    curl https://raw.githubusercontent.com/automl/auto-sklearn/master/requirements.txt | xargs -n 1 -L 1 pip3 install
 
 Then install *auto-sklearn*:
 
 .. code:: bash
 
-    pip install auto-sklearn
+    pip3 install auto-sklearn
 
 We recommend installing *auto-sklearn* into a
 `virtual environment <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_
 or an
 `Anaconda environment <https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_.
 
-If the ``pip`` installation command fails, make sure you have the `System requirements`_ installed correctly.
+If the ``pip3`` installation command fails, make sure you have the `System requirements`_ installed correctly.
 
 Ubuntu installation
 ===================
@@ -110,13 +110,14 @@ Possible other solutions (not tested):
 
 Docker Image
 =========================
-A Docker image is also provided as a github package. The user must authenticate following the instructions from `GitHub Packages <https://help.github.com/en/packages/using-github-packages-with-your-projects-ecosystem/configuring-docker-for-use-with-github-packages>`_ . Then, the image can be downloaded as follows:
+A Docker image is also provided on dockerhub. To download from dockerhub,
+use:
 
 .. code:: bash
 
-    docker pull docker.pkg.github.com/automl/auto-sklearn/auto-sklearn:latest
+    docker pull mfeurer/auto-sklearn:master
 
-You can also verify that the images are downloaded via:
+You can also verify that the image was downloaded via:
 
 .. code:: bash
 
@@ -126,11 +127,13 @@ This image can be used to start an interactive session as follows:
 
 .. code:: bash
 
-    docker run -it docker.pkg.github.com/automl/auto-sklearn/auto-sklearn:latest
+    docker run -it mfeurer/auto-sklearn:master
 
 To start a Jupyter notebook, you could instead run e.g.:
 
 .. code:: bash
 
-    docker run -it -v $PWD:/opt/nb -p 8888:8888 docker.pkg.github.com/automl/auto-sklearn/auto-sklearn:latest /bin/bash -c "mkdir -p /opt/nb && jupyter notebook --notebook-dir=/opt/nb --ip='0.0.0.0' --port=8888 --no-browser --allow-root"
+    docker run -it -v $PWD:/opt/nb -p 8888:8888 mfeurer/auto-sklearn:master /bin/bash -c "mkdir -p /opt/nb && jupyter notebook --notebook-dir=/opt/nb --ip='0.0.0.0' --port=8888 --no-browser --allow-root"
 
+Alternatively, it is possible to use the development version of auto-sklearn by replacing all
+occurences of ``master`` by ``development``.
