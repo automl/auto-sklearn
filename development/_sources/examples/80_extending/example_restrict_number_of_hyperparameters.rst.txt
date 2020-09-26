@@ -259,7 +259,7 @@ Print the configuration space
         classifier:extra_trees:min_samples_leaf, Type: UniformInteger, Range: [1, 20], Default: 1
         classifier:extra_trees:min_samples_split, Type: UniformInteger, Range: [2, 20], Default: 2
         classifier:extra_trees:min_weight_fraction_leaf, Type: Constant, Value: 0.0
-        classifier:gradient_boosting:early_stop, Type: Categorical, Choices: {off, train, valid}, Default: off
+        classifier:gradient_boosting:early_stop, Type: Categorical, Choices: {off, valid}, Default: off
         classifier:gradient_boosting:l2_regularization, Type: UniformFloat, Range: [1e-10, 1.0], Default: 1e-10, on log-scale
         classifier:gradient_boosting:learning_rate, Type: UniformFloat, Range: [0.01, 1.0], Default: 0.1, on log-scale
         classifier:gradient_boosting:loss, Type: Constant, Value: auto
@@ -416,7 +416,7 @@ Print the configuration space
         classifier:gradient_boosting:max_depth | classifier:__choice__ == 'gradient_boosting'
         classifier:gradient_boosting:max_leaf_nodes | classifier:__choice__ == 'gradient_boosting'
         classifier:gradient_boosting:min_samples_leaf | classifier:__choice__ == 'gradient_boosting'
-        classifier:gradient_boosting:n_iter_no_change | classifier:gradient_boosting:early_stop in {'valid', 'train'}
+        classifier:gradient_boosting:n_iter_no_change | classifier:gradient_boosting:early_stop in {'valid'}
         classifier:gradient_boosting:scoring | classifier:__choice__ == 'gradient_boosting'
         classifier:gradient_boosting:tol | classifier:__choice__ == 'gradient_boosting'
         classifier:gradient_boosting:validation_fraction | classifier:gradient_boosting:early_stop == 'valid'
@@ -585,7 +585,7 @@ Print the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  24.415 seconds)
+   **Total running time of the script:** ( 0 minutes  24.398 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_restrict_number_of_hyperparameters.py:

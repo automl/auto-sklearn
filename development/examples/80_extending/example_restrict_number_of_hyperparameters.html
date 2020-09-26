@@ -307,7 +307,7 @@ but with different hyperparameters .</p>
     classifier:extra_trees:min_samples_leaf, Type: UniformInteger, Range: [1, 20], Default: 1
     classifier:extra_trees:min_samples_split, Type: UniformInteger, Range: [2, 20], Default: 2
     classifier:extra_trees:min_weight_fraction_leaf, Type: Constant, Value: 0.0
-    classifier:gradient_boosting:early_stop, Type: Categorical, Choices: {off, train, valid}, Default: off
+    classifier:gradient_boosting:early_stop, Type: Categorical, Choices: {off, valid}, Default: off
     classifier:gradient_boosting:l2_regularization, Type: UniformFloat, Range: [1e-10, 1.0], Default: 1e-10, on log-scale
     classifier:gradient_boosting:learning_rate, Type: UniformFloat, Range: [0.01, 1.0], Default: 0.1, on log-scale
     classifier:gradient_boosting:loss, Type: Constant, Value: auto
@@ -464,7 +464,7 @@ but with different hyperparameters .</p>
     classifier:gradient_boosting:max_depth | classifier:__choice__ == &#39;gradient_boosting&#39;
     classifier:gradient_boosting:max_leaf_nodes | classifier:__choice__ == &#39;gradient_boosting&#39;
     classifier:gradient_boosting:min_samples_leaf | classifier:__choice__ == &#39;gradient_boosting&#39;
-    classifier:gradient_boosting:n_iter_no_change | classifier:gradient_boosting:early_stop in {&#39;valid&#39;, &#39;train&#39;}
+    classifier:gradient_boosting:n_iter_no_change | classifier:gradient_boosting:early_stop in {&#39;valid&#39;}
     classifier:gradient_boosting:scoring | classifier:__choice__ == &#39;gradient_boosting&#39;
     classifier:gradient_boosting:tol | classifier:__choice__ == &#39;gradient_boosting&#39;
     classifier:gradient_boosting:validation_fraction | classifier:gradient_boosting:early_stop == &#39;valid&#39;
@@ -627,7 +627,7 @@ but with different hyperparameters .</p>
     (Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  24.415 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  24.398 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-restrict-number-of-hyperparameters-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/3188e6424499bf3242cdcdfc032bf614/example_restrict_number_of_hyperparameters.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_restrict_number_of_hyperparameters.py</span></code></a></p>
