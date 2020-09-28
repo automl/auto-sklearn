@@ -512,7 +512,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset(
             'iris', make_multilabel=True)
-        automl = AutoSklearnClassifier(time_left_for_this_task=40,
+        automl = AutoSklearnClassifier(time_left_for_this_task=30,
                                        per_run_time_limit=5,
                                        tmp_folder=tmp,
                                        dask_client=self.client,
@@ -523,7 +523,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         self.assertEqual(predictions.shape, (50, 3))
         self.assertGreater(self._count_succeses(automl.cv_results_), 0)
         score = f1_macro(Y_test, predictions)
-        self.assertGreaterEqual(score, 0.9)
+        self.assertGreaterEqual(score, 0.9, automl.show_models())
         probs = automl.predict_proba(X_train)
         self.assertAlmostEqual(np.mean(probs), 0.33, places=1)
         del automl
@@ -661,7 +661,7 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         score = r2(Y_test, predictions)
         print(Y_test)
         print(predictions)
-        self.assertGreaterEqual(score, 0.1)
+        self.assertGreaterEqual(score, 0.1, automl.show_models())
         self.assertGreater(self._count_succeses(automl.cv_results_), 0)
 
         del automl
@@ -678,8 +678,8 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         self.assertTrue(isinstance(X, pd.DataFrame))
         self.assertTrue(isinstance(y, pd.Series))
         automl = AutoSklearnRegressor(
-            time_left_for_this_task=40,
-            per_run_time_limit=5,
+            time_left_for_this_task=60,
+            per_run_time_limit=10,
             dask_client=self.client,
         )
 
@@ -688,7 +688,7 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
 
         # Make sure that at least better than random.
         # We use same X_train==X_test to test code quality
-        self.assertTrue(automl.score(X, y) > 0.5)
+        self.assertGreaterEqual(automl.score(X, y), 0.5, automl.show_models())
 
         automl.refit(X, y)
 
