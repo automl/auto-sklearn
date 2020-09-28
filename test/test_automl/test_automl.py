@@ -551,7 +551,7 @@ class AutoMLTest(Base, unittest.TestCase):
     def test_load_best_individual_model(self):
 
         for metric in [log_loss, balanced_accuracy]:
-            backend_api = self._create_backend('test_fit')
+            backend_api = self._create_backend('test_fit' + metric)
             X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
             automl = autosklearn.automl.AutoML(
                 backend=backend_api,
