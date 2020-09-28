@@ -175,7 +175,22 @@ validated_trajectory_file = os.path.join(autosklearn_directory,
 with open(validated_trajectory_file, 'w') as fh:
     json.dump(validated_trajectory, fh, indent=4)
 
+
+for dirpath, dirnames, filenames in os.walk(autosklearn_directory, topdown=False):
+    print(dirpath, dirnames, filenames)
+    for filename in filenames:
+        if filename == 'datamanager.pkl':
+            os.remove(os.path.join(dirpath, filename))
+        elif filename == 'configspace.pcs':
+            os.remove(os.path.join(dirpath, filename))
+    for dirname in dirnames:
+        if dirname in ('models', 'cv_models'):
+            os.rmdir(os.path.join(dirpath, dirname))
+
+
+print('Going to copy the configuration directory')
 shutil.copytree(autosklearn_directory, tmp_dir)
+print('Finished copying the configuration directory')
 try:
     shutil.rmtree(tempdir)
 except:
