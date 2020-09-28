@@ -512,7 +512,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset(
             'iris', make_multilabel=True)
-        automl = AutoSklearnClassifier(time_left_for_this_task=30,
+        automl = AutoSklearnClassifier(time_left_for_this_task=40,
                                        per_run_time_limit=5,
                                        tmp_folder=tmp,
                                        dask_client=self.client,
@@ -568,7 +568,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         self.assertTrue(isinstance(X, pd.DataFrame))
         self.assertTrue(isinstance(y, pd.Series))
         automl = AutoSklearnClassifier(
-            time_left_for_this_task=30,
+            time_left_for_this_task=40,
             per_run_time_limit=5,
             exclude_estimators=['libsvm_svc'],
             dask_client=self.client,
@@ -678,7 +678,7 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         self.assertTrue(isinstance(X, pd.DataFrame))
         self.assertTrue(isinstance(y, pd.Series))
         automl = AutoSklearnRegressor(
-            time_left_for_this_task=30,
+            time_left_for_this_task=40,
             per_run_time_limit=5,
             dask_client=self.client,
         )
