@@ -37,7 +37,7 @@ def get_smac_object_callback(budget_type):
         from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
         from smac.scenario.scenario import Scenario
 
-        if n_jobs > 1 or dask_client:
+        if n_jobs > 1 or (dask_client and len(dask_client.nthreads()) > 1):
             raise ValueError("Please make sure to guard the code invoking Auto-sklearn by "
                              "`if __name__ == '__main__'` and remove this exception.")
 
@@ -148,8 +148,8 @@ X_train, X_test, y_train, y_test = \
     sklearn.model_selection.train_test_split(X, y, random_state=1, shuffle=True)
 
 automl = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=30,
-    per_run_time_limit=5,
+    time_left_for_this_task=40,
+    per_run_time_limit=10,
     tmp_folder='/tmp/autosklearn_sh_example_tmp',
     output_folder='/tmp/autosklearn_sh_example_out',
     disable_evaluator_output=False,

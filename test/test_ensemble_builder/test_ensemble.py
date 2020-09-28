@@ -3,19 +3,33 @@ import sys
 import time
 import unittest.mock
 
+import dask.distributed
+
 import numpy as np
 
 import pandas as pd
 
 from smac.runhistory.runhistory import RunValue, RunKey, RunHistory
 
-from autosklearn.metrics import roc_auc, accuracy, log_loss
+from autosklearn.metrics import make_scorer, roc_auc, accuracy, log_loss
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
-from autosklearn.ensemble_builder import EnsembleBuilder, Y_VALID, Y_TEST
+from autosklearn.ensemble_builder import (
+    EnsembleBuilder,
+    ensemble_builder_process,
+    Y_VALID,
+    Y_TEST,
+)
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
+
+
+def scorer_function(a, b):
+    return 0.9
+
+
+MockMetric = make_scorer('mock', scorer_function)
 
 
 class BackendMock(object):
@@ -30,6 +44,7 @@ class BackendMock(object):
 
     def load_datamanager(self):
         manager = unittest.mock.Mock()
+        manager.__reduce__ = lambda self: (unittest.mock.MagicMock, ())
         array = np.load(os.path.join(
             this_directory, 'data',
             '.auto-sklearn',
@@ -52,6 +67,12 @@ class BackendMock(object):
     def get_done_directory(self):
         return os.path.join(this_directory, 'data', '.auto-sklearn', 'done')
 
+    def save_ensemble(self, ensemble, index_run, seed):
+        return
+
+    def save_predictions_as_txt(self, predictions, subset, idx, prefix, precision):
+        return
+
 
 class EnsembleBuilderMemMock(EnsembleBuilder):
 
@@ -73,7 +94,6 @@ class EnsembleTest(unittest.TestCase):
             dataset_name="TEST",
             task_type=1,  # Binary Classification
             metric=roc_auc,
-            limit=-1,  # not used,
             seed=0,  # important to find the test files
         )
 
@@ -107,7 +127,6 @@ class EnsembleTest(unittest.TestCase):
                 dataset_name="TEST",
                 task_type=1,  # Binary Classification
                 metric=roc_auc,
-                limit=-1,  # not used,
                 seed=0,  # important to find the test files
                 ensemble_nbest=ensemble_nbest,
                 max_models_on_disc=models_on_disc,
@@ -145,7 +164,6 @@ class EnsembleTest(unittest.TestCase):
                 dataset_name="TEST",
                 task_type=1,  # Binary Classification
                 metric=roc_auc,
-                limit=-1,  # not used,
                 seed=0,  # important to find the test files
                 ensemble_nbest=ensemble_nbest,
                 max_models_on_disc=test_case,
@@ -164,7 +182,6 @@ class EnsembleTest(unittest.TestCase):
             dataset_name="TEST",
             task_type=1,  # Binary Classification
             metric=roc_auc,
-            limit=-1,  # not used,
             seed=0,  # important to find the test files
             ensemble_nbest=50,
             max_models_on_disc=10000.0,
@@ -196,7 +213,6 @@ class EnsembleTest(unittest.TestCase):
                 dataset_name="TEST",
                 task_type=1,  # Binary Classification
                 metric=roc_auc,
-                limit=-1,  # not used,
                 seed=0,  # important to find the test files
                 ensemble_nbest=100,
                 performance_range_threshold=performance_range_threshold
@@ -221,7 +237,6 @@ class EnsembleTest(unittest.TestCase):
                 dataset_name="TEST",
                 task_type=1,  # Binary Classification
                 metric=roc_auc,
-                limit=-1,  # not used,
                 seed=0,  # important to find the test files
                 ensemble_nbest=ensemble_nbest,
                 performance_range_threshold=performance_range_threshold,
@@ -244,7 +259,6 @@ class EnsembleTest(unittest.TestCase):
                                      dataset_name="TEST",
                                      task_type=1,  # Binary Classification
                                      metric=roc_auc,
-                                     limit=-1,  # not used,
                                      seed=0,  # important to find the test files
                                      ensemble_nbest=1
                                      )
@@ -284,7 +298,6 @@ class EnsembleTest(unittest.TestCase):
                                      dataset_name="TEST",
                                      task_type=1,  # Binary Classification
                                      metric=roc_auc,
-                                     limit=-1,  # not used,
                                      seed=0,  # important to find the test files
                                      ensemble_nbest=1
                                      )
@@ -336,7 +349,6 @@ class EnsembleTest(unittest.TestCase):
             dataset_name="TEST",
             task_type=1,  # Binary Classification
             metric=roc_auc,
-            limit=-1,  # not used,
             seed=0,  # important to find the test files
             ensemble_nbest=2,
         )
@@ -393,25 +405,22 @@ class EnsembleTest(unittest.TestCase):
             dataset_name="TEST",
             task_type=3,  # Multilabel Classification
             metric=roc_auc,
-            limit=-1,  # not used,
             seed=0,  # important to find the test files
             ensemble_nbest=2,
-            max_iterations=1,  # prevents infinite loop
             max_models_on_disc=None,
             )
         ensbuilder.SAVE2DISC = False
 
-        ensbuilder.main()
+        run_history, ensemble_nbest = ensbuilder.main(time_left=np.inf, iteration=1)
 
         self.assertEqual(len(ensbuilder.read_preds), 3)
         self.assertIsNotNone(ensbuilder.last_hash)
         self.assertIsNotNone(ensbuilder.y_true_ensemble)
 
         # Make sure the run history is ok
-        run_history = ensbuilder.get_ensemble_history()
 
-        # We expect 1 element to be the ensemble
-        self.assertEqual(len(run_history), 1)
+        # We expect at least 1 element to be in the ensemble
+        self.assertGreater(len(run_history), 0)
 
         # As the data loader loads the same val/train/test
         # we expect 1.0 as score and all keys available
@@ -429,16 +438,14 @@ class EnsembleTest(unittest.TestCase):
                                             dataset_name="TEST",
                                             task_type=1,  # Binary Classification
                                             metric=roc_auc,
-                                            limit=1000,  # not used,
                                             seed=0,  # important to find the test files
                                             ensemble_nbest=10,
-                                            max_iterations=1,  # prevents infinite loop
                                             # small to trigger MemoryException
                                             memory_limit=10
                                             )
         ensbuilder.SAVE2DISC = False
 
-        ensbuilder.run()
+        ensbuilder.run(time_left=1000, iteration=0)
 
         # it should try to reduce ensemble_nbest until it also failed at 2
         self.assertEqual(ensbuilder.ensemble_nbest, 1)
@@ -556,11 +563,14 @@ class SingleBestTest(unittest.TestCase):
             origin=None,
         )
 
-    def test_get_identifiers_from_run_history_accuracy(self):
+    @unittest.mock.patch('os.path.exists')
+    def test_get_identifiers_from_run_history_accuracy(self, exists):
+        exists.return_value = True
         ensemble = SingleBest(
              metric=accuracy,
              random_state=1,
              run_history=self.run_history,
+             model_dir='/tmp',
         )
 
         # Just one model
@@ -572,11 +582,14 @@ class SingleBestTest(unittest.TestCase):
         self.assertEqual(seed, 1)
         self.assertEqual(budget, 3.0)
 
-    def test_get_identifiers_from_run_history_log_loss(self):
+    @unittest.mock.patch('os.path.exists')
+    def test_get_identifiers_from_run_history_log_loss(self, exists):
+        exists.return_value = True
         ensemble = SingleBest(
              metric=log_loss,
              random_state=1,
              run_history=self.run_history,
+             model_dir='/tmp',
         )
 
         # Just one model
@@ -587,3 +600,92 @@ class SingleBestTest(unittest.TestCase):
         self.assertEqual(num_run, 3)
         self.assertEqual(seed, 1)
         self.assertEqual(budget, 3.0)
+
+
+class EnsembleProcessBuilderTest(unittest.TestCase):
+    def setUp(self):
+        self.backend = BackendMock()
+
+    def tearDown(self):
+        pass
+
+    def test_ensemble_builder_process_eventkiller(self):
+        """
+        Makes sure we can kill an ensemble process via a event
+        """
+        client = dask.distributed.Client(n_workers=1, processes=True)
+        event = dask.distributed.Event('None')
+
+        # Set the event so the run does not even start
+        event.set()
+
+        ensemble = ensemble_builder_process(
+            start_time=time.time(),
+            time_left_for_ensembles=1000,
+            sleep_duration=2,
+            event='None',
+            backend=self.backend,
+            dataset_name='Test',
+            task=1,
+            metric=roc_auc,
+            ensemble_size=50,
+            ensemble_nbest=10,
+            max_models_on_disc=None,
+            seed=0,
+            precision=32,
+            max_iterations=1,
+            read_at_most=np.inf,
+            ensemble_memory_limit=10,
+            random_state=0,
+        )
+
+        # make sure message is in log file
+        msg = 'Terminating ensemble building as SMAC process is done'
+        logger_name = 'autosklearn.ensemble_builder'
+        logfile = os.path.join(
+            self.backend.temporary_directory,
+            '%s.log' % str(logger_name)
+        )
+        with open(logfile) as f:
+            self.assertIn(msg,  f.read())
+
+        # Also makes sure the ensemble does not return any history
+        self.assertEqual(ensemble, [])
+        client.close()
+
+    def test_ensemble_builder_process_realrun(self):
+        dask.config.set({'distributed.worker.daemon': False})
+        client = dask.distributed.Client(n_workers=2, processes=True)
+        ensemble = client.submit(
+            ensemble_builder_process,
+            start_time=time.time(),
+            time_left_for_ensembles=1000,
+            sleep_duration=2,
+            event='None',
+            backend=self.backend,
+            dataset_name='Test',
+            task=1,
+            metric=MockMetric,
+            ensemble_size=50,
+            ensemble_nbest=10,
+            max_models_on_disc=None,
+            seed=0,
+            precision=32,
+            max_iterations=1,
+            read_at_most=np.inf,
+            ensemble_memory_limit=None,
+            random_state=0,
+        )
+        history = ensemble.result()
+
+        self.assertIn('ensemble_optimization_score', history[0])
+        self.assertEqual(history[0]['ensemble_optimization_score'], 0.9)
+        self.assertIn('ensemble_val_score', history[0])
+        self.assertEqual(history[0]['ensemble_val_score'], 0.9)
+        self.assertIn('ensemble_test_score', history[0])
+        self.assertEqual(history[0]['ensemble_test_score'], 0.9)
+        client.close()
+
+
+if __name__ == '__main__':
+    unittest.main()
