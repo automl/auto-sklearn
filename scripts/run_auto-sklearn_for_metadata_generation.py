@@ -101,14 +101,7 @@ else:
     raise ValueError(task_type)
 
 automl.fit(X_train, y_train, dataset_name=str(task_id),
-           feat_type=cat)
-data = automl.automl_._backend.load_datamanager()
-# Data manager can't be replaced with save_datamanager, it has to be deleted
-# first
-os.remove(automl.automl_._backend._get_datamanager_pickle_filename())
-data.data['X_test'] = X_test
-data.data['Y_test'] = y_test
-automl.automl_._backend.save_datamanager(data)
+           feat_type=cat, X_test=X_test, y_test=y_test)
 trajectory = automl.trajectory_
 
 incumbent_id_to_model = {}
