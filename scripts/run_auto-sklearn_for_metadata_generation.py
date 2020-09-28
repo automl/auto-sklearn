@@ -120,7 +120,9 @@ if is_test:
 else:
     memory_limit_factor = 2
 
-for entry in trajectory:
+print('Starting to validate configurations')
+for i, entry in enumerate(trajectory):
+    print('Starting to validate configuration %d/%d' % (i + 1, len(trajectory)))
     incumbent_id = entry.incumbent_id
     train_performance = entry.train_perf
     if incumbent_id not in incumbent_id_to_model:
@@ -168,7 +170,9 @@ for entry in trajectory:
 
         validated_trajectory.append(list(entry) + [task_id] +
                                     [run_value.additional_info])
+    print('Finished validating configuration %d/%d' % (i + 1, len(trajectory)))
 
+print('Starting to copy data to configuration directory')
 validated_trajectory = [entry[:2] + [entry[2].get_dictionary()] + entry[3:]
                         for entry in validated_trajectory]
 validated_trajectory_file = os.path.join(autosklearn_directory,
@@ -183,3 +187,4 @@ try:
     shutil.rmtree(tempdir)
 except:
     pass
+print('Finished configuring')
