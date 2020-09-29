@@ -18,6 +18,7 @@ import sklearn.ensemble
 import sklearn.svm
 from sklearn.utils.validation import check_is_fitted
 
+from ConfigSpace.exceptions import ForbiddenValueError
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
@@ -830,7 +831,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cs = cls.get_hyperparameter_search_space()
         self.assertIn('CrashPreprocessor', str(cs))
         config = cs.sample_configuration()
-        config['feature_preprocessor:__choice__'] = 'CrashPreprocessor'
+        while True:
+            try:
+                config['feature_preprocessor:__choice__'] = 'CrashPreprocessor'
+                break
+            except ForbiddenValueError:
+                continue
         cls.set_hyperparameters(config)
         with self.assertRaisesRegex(
             ValueError,
