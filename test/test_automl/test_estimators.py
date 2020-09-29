@@ -297,16 +297,26 @@ class EstimatorTest(Base, unittest.TestCase):
         seeds = set()
         for prediction in predictions:
             match = re.match(MODEL_FN_RE, prediction.replace("predictions_ensemble", ""))
-            print(prediction, match)
             if match:
                 num_run = int(match.group(2))
                 available_predictions.add(num_run)
                 seed = int(match.group(1))
                 seeds.add(seed)
 
+        done_dir = automl.automl_._backend.get_done_directory()
+        dones = os.listdir(done_dir)
+        available_dones = set()
+        for done in dones:
+            match = re.match(r'([0-9]*)_([0-9]*)', done)
+            if match:
+                num_run = int(match.group(2))
+                available_dones.add(num_run)
+
         # Remove the dummy prediction, it is not part of the runhistory
         available_predictions.remove(1)
-        self.assertSetEqual(available_predictions, available_num_runs)
+        self.assertTrue(available_num_runs.issubset(available_predictions))
+        available_dones.remove(1)
+        self.assertSetEqual(available_dones, available_num_runs)
 
         self.assertEqual(len(seeds), 1)
 
