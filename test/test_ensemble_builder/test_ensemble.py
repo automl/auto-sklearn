@@ -1,6 +1,7 @@
 import glob
 import os
 import sys
+import shutil
 import time
 import unittest.mock
 
@@ -606,8 +607,11 @@ class SingleBestTest(unittest.TestCase):
 class EnsembleProcessBuilderTest(unittest.TestCase):
     def setUp(self):
         self.backend = BackendMock()
+        self.backend.temporary_directory = '/tmp/ensemble_test'
+        os.makedirs(self.backend.temporary_directory, exist_ok=True)
 
     def tearDown(self):
+        shutil.rmtree(self.backend.temporary_directory)
         pass
 
     def test_ensemble_builder_process_termination_request(self):
@@ -643,13 +647,9 @@ class EnsembleProcessBuilderTest(unittest.TestCase):
 
         # make sure message is in log file
         msg = 'Terminating ensemble building as SMAC process is done'
-        logger_name = 'autosklearn.ensemble_builder'
-        logfile = os.path.join(
-            self.backend.temporary_directory,
-            '%s.log' % str(logger_name)
-        )
-        log_file_path = glob.glob(os.path.join(
+        logfile = glob.glob(os.path.join(
             self.backend.temporary_directory, '*.log'))[0]
+        print(f"logfile={logfile}")
         with open(logfile) as f:
             self.assertIn(msg,  f.read())
 
