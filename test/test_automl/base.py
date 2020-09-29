@@ -9,6 +9,27 @@ import numpy as np
 from autosklearn.util.backend import create
 
 
+def extract_msg_from_log(log_file):
+    include_messages = ['INFO', 'DEBUG', 'WARN',
+                        'CRITICAL', 'ERROR', 'FATAL']
+
+    # There is a lot of content in the log files. Only
+    # parsing the main message and ignore the metalearning
+    # messages
+    try:
+        with open(log_file) as logfile:
+            content = logfile.readlines()
+
+        # Get the messages to debug easier!
+        content = [x for x in content if any(
+            msg in x for msg in include_messages
+        ) and 'metalearning' not in x]
+
+    except Exception as e:
+        return str(e)
+    return os.linesep.join(content)
+
+
 class Base(unittest.TestCase):
     _multiprocess_can_split_ = True
     """All tests which are a subclass of this must define their own output

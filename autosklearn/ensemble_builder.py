@@ -49,6 +49,7 @@ def ensemble_builder_process(
     read_at_most: int,
     ensemble_memory_limit: Optional[int],
     random_state: int,
+    logger_name: str,
 ) -> List[Tuple[int, float, float, float]]:
     """ Persistent function that handles ensemble iteration
 
@@ -117,6 +118,8 @@ def ensemble_builder_process(
             memory limit in mb. If ``None``, no memory limit is enforced.
         read_at_most: int
             read at most n new prediction files in each iteration
+        logger_name: str
+            Name of the logger where we are gonna write information
 
     Returns
     -------
@@ -136,7 +139,7 @@ def ensemble_builder_process(
 
     history = []
 
-    logger = EnsembleBuilder._get_ensemble_logger(backend.temporary_directory)
+    logger = EnsembleBuilder._get_ensemble_logger(logger_name, backend.temporary_directory)
 
     while True:
 
@@ -169,6 +172,15 @@ def ensemble_builder_process(
         # iterations testing if the deterministic predictions size can
         # be fitted in memory
         try:
+            logger.info(
+                "{} Started Ensemble builder job at {} for iteration {}".format(
+                    # Log the client to make sure we
+                    # remain connected to the scheduler
+                    dask.distributed.get_client(),
+                    time.strftime("%Y.%m.%d-%H.%M.%S"),
+                    iteration
+                ),
+            )
             result = EnsembleBuilder(
                 backend=backend,
                 dataset_name=dataset_name,
@@ -182,6 +194,7 @@ def ensemble_builder_process(
                 memory_limit=ensemble_memory_limit,
                 read_at_most=read_at_most,
                 random_state=seed,
+                logger_name=logger_name,
             ).run(
                 time_left=time_left_for_ensembles-elapsed_time,
                 iteration=iteration,
@@ -231,6 +244,7 @@ class EnsembleBuilder(object):
             memory_limit: Optional[int] = 1024,
             read_at_most: int = 5,
             random_state: Optional[Union[int, np.random.RandomState]] = None,
+            logger_name: str = 'ensemble_builder',
     ):
         """
             Constructor
@@ -276,6 +290,8 @@ class EnsembleBuilder(object):
                 memory limit in mb. If ``None``, no memory limit is enforced.
             read_at_most: int
                 read at most n new prediction files in each iteration
+            logger_name: str
+                Name of the logger where we are gonna write information
         """
 
         super(EnsembleBuilder, self).__init__()
@@ -341,7 +357,9 @@ class EnsembleBuilder(object):
         )
 
         # Setup the logger
-        self.logger = self._get_ensemble_logger(self.backend.temporary_directory)
+        self.logger_name = logger_name
+        self.logger = self._get_ensemble_logger(
+            self.logger_name, self.backend.temporary_directory)
 
         if ensemble_nbest == 1:
             self.logger.debug("Behaviour depends on int/float: %s, %s (ensemble_nbest, type)" %
@@ -383,20 +401,20 @@ class EnsembleBuilder(object):
         self.ensemble_history = []
 
     @classmethod
-    def _get_ensemble_logger(self, dirname):
+    def _get_ensemble_logger(self, logger_name, dirname):
         """
         Returns the logger of for the ensemble process.
         A subprocess will require to set this up, for instance,
         pynisher forks
         """
-        logger_name = 'autosklearn.ensemble_builder'
         setup_logger(
             os.path.join(
                 dirname,
                 '%s.log' % str(logger_name)
             ),
         )
-        return get_logger(logger_name)
+
+        return get_logger('EnsembleBuilder')
 
     def run(self, time_left, iteration, time_buffer=5):
         process_start_time = time.time()
@@ -448,7 +466,8 @@ class EnsembleBuilder(object):
         # Pynisher jobs inside dask 'forget'
         # the logger configuration. So we have to set it up
         # accordingly
-        self.logger = self._get_ensemble_logger(self.backend.temporary_directory)
+        self.logger = self._get_ensemble_logger(
+            self.logger_name, self.backend.temporary_directory)
 
         self.start_time = time.time()
         valid_pred, test_pred = None, None

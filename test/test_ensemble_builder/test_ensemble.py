@@ -609,7 +609,7 @@ class EnsembleProcessBuilderTest(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_ensemble_builder_process_eventkiller(self):
+    def test_ensemble_builder_process_termination_request(self):
         """
         Makes sure we can kill an ensemble process via a event
         """
@@ -637,6 +637,7 @@ class EnsembleProcessBuilderTest(unittest.TestCase):
             read_at_most=np.inf,
             ensemble_memory_limit=10,
             random_state=0,
+            logger_name='Ensemblebuilder',
         )
 
         # make sure message is in log file
@@ -675,6 +676,7 @@ class EnsembleProcessBuilderTest(unittest.TestCase):
             read_at_most=np.inf,
             ensemble_memory_limit=None,
             random_state=0,
+            logger_name='Ensemblebuilder',
         )
         history = ensemble.result()
 
