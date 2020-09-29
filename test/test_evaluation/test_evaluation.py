@@ -171,12 +171,12 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[1].status, StatusType.CRASHED)
         self.assertEqual(info[1].cost, 1.0)
         self.assertIsInstance(info[1].time, float)
-        self.assertEqual(info[1].additional_info), {'configuration_origin': 'UNKNOWN',
-                                                    'error': "Result queue is empty",
-                                                    'exit_status': 0,
-                                                    'exitcode': 0,
-                                                    'subprocess_stdout': '',
-                                                    'subprocess_stderr': ''})
+        self.assertEqual(info[1].additional_info, {'configuration_origin': 'UNKNOWN',
+                                                   'error': "Result queue is empty",
+                                                   'exit_status': 0,
+                                                   'exitcode': 0,
+                                                   'subprocess_stdout': '',
+                                                   'subprocess_stderr': ''})
 
     @unittest.mock.patch('autosklearn.evaluation.train_evaluator.eval_holdout')
     def test_eval_with_limits_holdout_fail_memory_error(self, pynisher_mock):
@@ -363,4 +363,3 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[1].additional_info['exitcode'], -6)
         self.assertEqual(info[1].additional_info['exit_status'], pynisher.AnythingException)
         self.assertNotIn('traceback', info[1])
-    
