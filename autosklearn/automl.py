@@ -183,7 +183,8 @@ class AutoML(BaseEstimator):
 
         # How much patience to wait for the ensemble building process to finish by itself
         self.ensemble_timeout_patience = 10
-        self.ensemble_event_killer = 'EnsembleBuilderKiller' + str(uuid.uuid4().hex.upper())
+        self.ensemble_termination_request = 'EnsembleBuilderTerminationRequest' + str(
+            uuid.uuid4().hex.upper())
 
         self.precision = precision
         self._disable_evaluator_output = disable_evaluator_output
@@ -242,14 +243,13 @@ class AutoML(BaseEstimator):
 
     def _create_dask_client(self):
         self._is_dask_client_internally_created = True
-        processes = False
         if self._n_jobs is not None and self._n_jobs > 1:
-            processes = True
             dask.config.set({'distributed.worker.daemon': False})
         self._dask_client = dask.distributed.Client(
             dask.distributed.LocalCluster(
-                n_workers=self._n_jobs,
-                processes=processes,
+                # 2 workers -- 1 for ensemble / 1 for smac
+                n_workers=2 if self._n_jobs is None else self._n_jobs,
+                processes=True,
                 threads_per_worker=1,
                 # We use the temporal directory to save the
                 # dask workers, because deleting workers
@@ -581,7 +581,7 @@ class AutoML(BaseEstimator):
                 time.time(),  # Track when the ensemble builder processes was started
                 time_left_for_ensembles,  # This is the max time the process can take
                 self.ensemble_sleep_duration,  # How much time to wait between iterations
-                self.ensemble_event_killer,  # Setting this event forces termination
+                self.ensemble_termination_request,  # Setting this event forces termination
                 copy.deepcopy(self._backend),  # A backend object to access shared directories
                 dataset_name,  # Name of the dataset to load
                 task,  # type of the task
@@ -595,13 +595,16 @@ class AutoML(BaseEstimator):
                 np.inf,  # read_at_most -- maximum number of files to read for memory
                 self._memory_limit,  # pynisher memory limit
                 self._seed,  # random state
+                self._logger.name,
             )
 
             # We expect the ensemble process to be time driven, and honor the maximum
             # time provided via time_left_for_ensemble. As a safety measure, we also
             # provide an event signal that stops the process before the next iteration
             # of ensemble builder process
-            self.ensemble_event_killer = dask.distributed.Event(self.ensemble_event_killer)
+            self.ensemble_termination_request = dask.distributed.Event(
+                self.ensemble_termination_request
+            )
 
         self._stopwatch.stop_task(ensemble_task_name)
 
@@ -696,10 +699,10 @@ class AutoML(BaseEstimator):
         if proc_ensemble is not None:
             # Here we signal the ensemble process to finish
             # That is, no more iterations are allowed
-            self.ensemble_event_killer.set()
+            self.ensemble_termination_request.set()
 
             # We wait for self.ensemble_timeout_patience seconds for a job to finish
-            # Notice we provided a kill signal and also the maximum allowed time, so
+            # Notice we provided a termination signal and also the maximum allowed time, so
             # it is likely that the TimeoutError won't happen. In case it does, we notify
             # the user
             try:
@@ -887,6 +890,7 @@ class AutoML(BaseEstimator):
             np.inf,  # read_at_most -- maximum number of files to read for memory
             self._memory_limit,  # pynisher memory limit
             self._seed,  # random state
+            self._logger.name,
         )
 
         self.ensemble_performance_history = proc_ensemble.result()

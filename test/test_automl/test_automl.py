@@ -27,7 +27,7 @@ from autosklearn.constants import MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATI
 from smac.tae import StatusType
 
 sys.path.append(os.path.dirname(__file__))
-from base import Base  # noqa (E402: module level import not at top of file)
+from base import Base, extract_msg_from_log  # noqa (E402: module level import not at top of file)
 
 
 class AutoMLStub(AutoML):
@@ -59,9 +59,9 @@ class AutoMLTest(Base, unittest.TestCase):
         dask.config.set({'distributed.worker.daemon': False})
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
-                n_workers=1,
+                n_workers=2,
                 processes=False,
-                threads_per_worker=2,
+                threads_per_worker=1,
             )
         )
 
@@ -197,7 +197,7 @@ class AutoMLTest(Base, unittest.TestCase):
         # Assert at least one model file has been deleted and that there were no
         # deletion errors
         log_file_path = glob.glob(os.path.join(
-            backend_api.temporary_directory, 'autosklearn.ensemble_builder.log'))
+            backend_api.temporary_directory, 'AutoML(' + str(seed) + '):*.log'))
         with open(log_file_path[0]) as log_file:
             log_content = log_file.read()
             self.assertIn('Deleted files of non-candidate model', log_content)
@@ -326,6 +326,10 @@ class AutoMLTest(Base, unittest.TestCase):
             task=MULTICLASS_CLASSIFICATION,
         )
 
+        # Log file path
+        log_file_path = glob.glob(os.path.join(
+            backend_api.temporary_directory, 'AutoML*.log'))[0]
+
         # pickled data manager (without one hot encoding!)
         with open(data_manager_file, 'rb') as fh:
             D = pickle.load(fh)
@@ -359,7 +363,7 @@ class AutoMLTest(Base, unittest.TestCase):
                                             '.auto-sklearn', "start_time_100")
         with open(start_time_file_path, 'r') as fh:
             start_time = float(fh.read())
-        self.assertGreaterEqual(time.time() - start_time, 10)
+        self.assertGreaterEqual(time.time() - start_time, 10, extract_msg_from_log(log_file_path))
 
         del auto
         self._tearDown(backend_api.temporary_directory)
@@ -551,7 +555,7 @@ class AutoMLTest(Base, unittest.TestCase):
     def test_load_best_individual_model(self):
 
         for metric in [log_loss, balanced_accuracy]:
-            backend_api = self._create_backend('test_fit' + metric)
+            backend_api = self._create_backend('test_fit' + str(metric._score_func))
             X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
             automl = autosklearn.automl.AutoML(
                 backend=backend_api,

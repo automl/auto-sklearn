@@ -1,3 +1,4 @@
+import glob
 import os
 import pickle
 import re
@@ -29,7 +30,7 @@ from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 from autosklearn.smbo import get_smac_object
 
 sys.path.append(os.path.dirname(__file__))
-from base import Base  # noqa (E402: module level import not at top of file)
+from base import Base, extract_msg_from_log  # noqa (E402: module level import not at top of file)
 
 
 class ArrayReturningDummyPredictor(sklearn.dummy.DummyClassifier):
@@ -49,9 +50,9 @@ class EstimatorTest(Base, unittest.TestCase):
         dask.config.set({'distributed.worker.daemon': False})
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
-                n_workers=1,
-                processes=False,
-                threads_per_worker=2,
+                n_workers=2,
+                processes=True,
+                threads_per_worker=1,
             )
         )
 
@@ -385,9 +386,9 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         dask.config.set({'distributed.worker.daemon': False})
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
-                n_workers=1,
-                processes=False,
-                threads_per_worker=2,
+                n_workers=2,
+                processes=True,
+                threads_per_worker=1,
             )
         )
 
@@ -519,11 +520,14 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
                                        output_folder=output)
 
         automl.fit(X_train, Y_train)
+        # Log file path
+        log_file_path = glob.glob(os.path.join(
+            tmp, 'AutoML*.log'))[0]
         predictions = automl.predict(X_test)
         self.assertEqual(predictions.shape, (50, 3))
         self.assertGreater(self._count_succeses(automl.cv_results_), 0)
         score = f1_macro(Y_test, predictions)
-        self.assertGreaterEqual(score, 0.9, automl.show_models())
+        self.assertGreaterEqual(score, 0.9, extract_msg_from_log(log_file_path))
         probs = automl.predict_proba(X_train)
         self.assertAlmostEqual(np.mean(probs), 0.33, places=1)
         del automl
@@ -600,9 +604,9 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         dask.config.set({'distributed.worker.daemon': False})
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
-                n_workers=1,
-                processes=False,
-                threads_per_worker=2,
+                n_workers=2,
+                processes=True,
+                threads_per_worker=1,
             )
         )
 
@@ -656,12 +660,17 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
                                       output_folder=output)
 
         automl.fit(X_train, Y_train)
+
+        # Log file path
+        log_file_path = glob.glob(os.path.join(
+            tmp, 'AutoML*.log'))[0]
+
         predictions = automl.predict(X_test)
         self.assertEqual(predictions.shape, (148,))
         score = r2(Y_test, predictions)
         print(Y_test)
         print(predictions)
-        self.assertGreaterEqual(score, 0.1, automl.show_models())
+        self.assertGreaterEqual(score, 0.1, extract_msg_from_log(log_file_path))
         self.assertGreater(self._count_succeses(automl.cv_results_), 0)
 
         del automl
@@ -703,9 +712,9 @@ class AutoSklearnClassifierTest(unittest.TestCase):
     def setUpClass(self):
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
-                n_workers=1,
-                processes=False,
-                threads_per_worker=2,
+                n_workers=2,
+                processes=True,
+                threads_per_worker=1,
             )
         )
 
@@ -741,9 +750,9 @@ class AutoSklearnRegressorTest(unittest.TestCase):
     def setUpClass(self):
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
-                n_workers=1,
-                processes=False,
-                threads_per_worker=2,
+                n_workers=2,
+                processes=True,
+                threads_per_worker=1,
             )
         )
 
