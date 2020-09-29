@@ -18,7 +18,7 @@ classification_tasks = [
     75181, 75187, 75250, 75249, 75248, 75243, 75244, 75182]
 regression_tasks = [2280, 2288, 2289, 2292, 2300, 2306, 2307, 2309, 2313,
                     2315, 4768, 4769, 4772, 4774, 4779, 4790, 4796, 4835,
-                    4840, 4881, 4883, 4885, 4892, 4893, 5022, 5024, 7393]
+                    4881, 4883, 4885, 4892, 4893, 5022, 5024, ]
 
 
 def load_task(task_id):
@@ -35,9 +35,11 @@ def load_task(task_id):
     del dataset
     cat = ['categorical' if c else 'numerical' for c in cat]
 
-    unique = np.unique(y_train)
-    mapping = {unique_value: i for i, unique_value in enumerate(unique)}
-    y_train = np.array([mapping[value] for value in y_train])
-    y_test = np.array([mapping[value] for value in y_test])
+    if isinstance(task, openml.tasks.OpenMLClassificationTask):
+        task_type = 'classification'
+    elif isinstance(task, openml.tasks.OpenMLRegressionTask):
+        task_type = 'regression'
+    else:
+        raise ValueError('Unknown task type')
 
-    return X_train, y_train, X_test, y_test, cat
+    return X_train, y_train, X_test, y_test, cat, task_type

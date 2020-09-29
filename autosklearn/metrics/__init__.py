@@ -127,12 +127,28 @@ class _ProbaScorer(Scorer):
         score : float
             Score function applied to prediction of estimator on X.
         """
+
+        if self._score_func is sklearn.metrics.log_loss:
+            n_labels_pred = np.array(y_pred).shape[1]
+            n_labels_test = len(np.unique(y_true))
+            if n_labels_pred != n_labels_test:
+                labels = list(range(n_labels_pred))
+                if sample_weight is not None:
+                    return self._sign * self._score_func(y_true, y_pred,
+                                                         sample_weight=sample_weight,
+                                                         labels=labels,
+                                                         **self._kwargs)
+                else:
+                    return self._sign * self._score_func(y_true, y_pred,
+                                                         labels=labels, **self._kwargs)
+
         if sample_weight is not None:
             return self._sign * self._score_func(y_true, y_pred,
                                                  sample_weight=sample_weight,
                                                  **self._kwargs)
         else:
-            return self._sign * self._score_func(y_true, y_pred, **self._kwargs)
+            return self._sign * self._score_func(y_true, y_pred,
+                                                 **self._kwargs)
 
 
 class _ThresholdScorer(Scorer):
@@ -234,23 +250,35 @@ def make_scorer(
 
 
 # Standard regression scores
-r2 = make_scorer('r2',
-                 sklearn.metrics.r2_score)
-mean_squared_error = make_scorer('mean_squared_error',
-                                 sklearn.metrics.mean_squared_error,
-                                 optimum=0,
-                                 worst_possible_result=MAXINT,
-                                 greater_is_better=False)
 mean_absolute_error = make_scorer('mean_absolute_error',
                                   sklearn.metrics.mean_absolute_error,
                                   optimum=0,
                                   worst_possible_result=MAXINT,
                                   greater_is_better=False)
+mean_squared_error = make_scorer('mean_squared_error',
+                                 sklearn.metrics.mean_squared_error,
+                                 optimum=0,
+                                 worst_possible_result=MAXINT,
+                                 greater_is_better=False,
+                                 squared=True)
+root_mean_squared_error = make_scorer('root_mean_squared_error',
+                                      sklearn.metrics.mean_squared_error,
+                                      optimum=0,
+                                      worst_possible_result=MAXINT,
+                                      greater_is_better=False,
+                                      squared=False)
+mean_squared_log_error = make_scorer('mean_squared_log_error',
+                                     sklearn.metrics.mean_squared_log_error,
+                                     optimum=0,
+                                     worst_possible_result=MAXINT,
+                                     greater_is_better=False,)
 median_absolute_error = make_scorer('median_absolute_error',
                                     sklearn.metrics.median_absolute_error,
                                     optimum=0,
                                     worst_possible_result=MAXINT,
                                     greater_is_better=False)
+r2 = make_scorer('r2',
+                 sklearn.metrics.r2_score)
 
 # Standard Classification Scores
 accuracy = make_scorer('accuracy',
@@ -284,8 +312,8 @@ log_loss = make_scorer('log_loss',
 
 
 REGRESSION_METRICS = dict()
-for scorer in [r2, mean_squared_error, mean_absolute_error,
-               median_absolute_error]:
+for scorer in [mean_absolute_error, mean_squared_error, root_mean_squared_error,
+               mean_squared_log_error, median_absolute_error, r2]:
     REGRESSION_METRICS[scorer.name] = scorer
 
 CLASSIFICATION_METRICS = dict()
@@ -327,7 +355,15 @@ def calculate_score(
             metric_dict[metric.name] = metric
             for metric_ in REGRESSION_METRICS:
                 func = REGRESSION_METRICS[metric_]
-                score_dict[func.name] = func(solution, cprediction)
+                try:
+                    score_dict[func.name] = func(solution, cprediction)
+                except ValueError as e:
+                    print(e, e.args[0])
+                    if e.args[0] == "Mean Squared Logarithmic Error cannot be used when " \
+                                    "targets contain negative values.":
+                        continue
+                    else:
+                        raise e
 
         else:
             metric_dict = copy.copy(CLASSIFICATION_METRICS)

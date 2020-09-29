@@ -10,6 +10,7 @@ import unittest.mock
 import warnings
 
 from ConfigSpace.read_and_write import json as cs_json
+import dask.distributed
 import numpy as np
 import numpy.ma as ma
 import pandas as pd
@@ -18,7 +19,7 @@ import scipy.stats
 from sklearn.base import BaseEstimator
 from sklearn.model_selection._split import _RepeatedSplits, \
     BaseShuffleSplit, BaseCrossValidator
-from smac.tae.execute_ta_run import StatusType
+from smac.tae import StatusType
 from smac.stats.stats import Stats
 import joblib
 import sklearn.utils
@@ -110,7 +111,8 @@ class AutoML(BaseEstimator):
                  exclude_preprocessors=None,
                  resampling_strategy='holdout-iterative-fit',
                  resampling_strategy_arguments=None,
-                 shared_mode=False,
+                 n_jobs=None,
+                 dask_client: Optional[dask.distributed.Client] = None,
                  precision=32,
                  disable_evaluator_output=False,
                  get_smac_object_callback=None,
@@ -167,7 +169,8 @@ class AutoML(BaseEstimator):
                                          ]\
            and 'folds' not in self._resampling_strategy_arguments:
             self._resampling_strategy_arguments['folds'] = 5
-        self._shared_mode = shared_mode
+        self._n_jobs = n_jobs
+        self._dask_client = dask_client
         self.precision = precision
         self._disable_evaluator_output = disable_evaluator_output
         # Check arguments prior to doing anything!
@@ -311,8 +314,6 @@ class AutoML(BaseEstimator):
                     % (str(status), str(additional_info))
                 )
 
-        return ta.num_run
-
     def fit(
         self,
         X: np.ndarray,
@@ -349,14 +350,6 @@ class AutoML(BaseEstimator):
         if not isinstance(self._metric, Scorer):
             raise ValueError('Metric must be instance of '
                              'autosklearn.metrics.Scorer.')
-        if self._shared_mode:
-            # If this fails, it's likely that this is the first call to get
-            # the data manager
-            try:
-                D = self._backend.load_datamanager()
-                dataset_name = D.name
-            except IOError:
-                pass
 
         if dataset_name is None:
             dataset_name = hash_array_or_matrix(X)
@@ -432,7 +425,7 @@ class AutoML(BaseEstimator):
         )
         self._logger.debug('  ensemble_size: %d', self._ensemble_size)
         self._logger.debug('  ensemble_nbest: %f', self._ensemble_nbest)
-        self._logger.debug('  max_models_on_disc: %d', self._max_models_on_disc)
+        self._logger.debug('  max_models_on_disc: %s', str(self._max_models_on_disc))
         self._logger.debug('  ensemble_memory_limit: %d', self._ensemble_memory_limit)
         self._logger.debug('  seed: %d', self._seed)
         self._logger.debug('  ml_memory_limit: %d', self._ml_memory_limit)
@@ -445,7 +438,8 @@ class AutoML(BaseEstimator):
         self._logger.debug('  resampling_strategy: %s', str(self._resampling_strategy))
         self._logger.debug('  resampling_strategy_arguments: %s',
                            str(self._resampling_strategy_arguments))
-        self._logger.debug('  shared_mode: %s', str(self._shared_mode))
+        self._logger.debug('  n_jobs: %s', str(self._n_jobs))
+        self._logger.debug('  dask_client: %s', str(self._dask_client))
         self._logger.debug('  precision: %s', str(self.precision))
         self._logger.debug('  disable_evaluator_output: %s', str(self._disable_evaluator_output))
         self._logger.debug('  get_smac_objective_callback: %s', str(self._get_smac_object_callback))
@@ -478,13 +472,11 @@ class AutoML(BaseEstimator):
         try:
             os.makedirs(self._backend.get_model_dir())
         except (OSError, FileExistsError):
-            if not self._shared_mode:
-                raise
+            raise
         try:
             os.makedirs(self._backend.get_cv_model_dir())
         except (OSError, FileExistsError):
-            if not self._shared_mode:
-                raise
+            raise
 
         self._task = datamanager.info['task']
         self._label_num = datamanager.info['label_num']
@@ -503,8 +495,7 @@ class AutoML(BaseEstimator):
 
         # == Perform dummy predictions
         num_run = 1
-        # if self._resampling_strategy in ['holdout', 'holdout-iterative-fit']:
-        num_run = self._do_dummy_prediction(datamanager, num_run)
+        self._do_dummy_prediction(datamanager, num_run)
 
         # = Create a searchspace
         # Do this before One Hot Encoding to make sure that it creates a
@@ -616,6 +607,8 @@ class AutoML(BaseEstimator):
                 memory_limit=self._ml_memory_limit,
                 data_memory_limit=self._data_memory_limit,
                 watcher=self._stopwatch,
+                n_jobs=self._n_jobs,
+                dask_client=self._dask_client,
                 start_num_run=num_run,
                 num_metalearning_cfgs=self._initial_configurations_via_metalearning,
                 config_file=configspace_path,
@@ -624,7 +617,6 @@ class AutoML(BaseEstimator):
                 metric=self._metric,
                 resampling_strategy=self._resampling_strategy,
                 resampling_strategy_args=self._resampling_strategy_arguments,
-                shared_mode=self._shared_mode,
                 include_estimators=self._include_estimators,
                 exclude_estimators=self._exclude_estimators,
                 include_preprocessors=self._include_preprocessors,
@@ -856,7 +848,6 @@ class AutoML(BaseEstimator):
             ensemble_nbest=ensemble_nbest,
             max_models_on_disc=self._max_models_on_disc,
             seed=self._seed,
-            shared_mode=self._shared_mode,
             precision=precision,
             max_iterations=max_iterations,
             read_at_most=np.inf,
@@ -866,12 +857,7 @@ class AutoML(BaseEstimator):
         )
 
     def _load_models(self):
-        if self._shared_mode:
-            seed = -1
-        else:
-            seed = self._seed
-
-        self.ensemble_ = self._backend.load_ensemble(seed)
+        self.ensemble_ = self._backend.load_ensemble(self._seed)
 
         # If no ensemble is loaded, try to get the best performing model
         if not self.ensemble_:
@@ -898,7 +884,7 @@ class AutoML(BaseEstimator):
         elif self._disable_evaluator_output is False or \
                 (isinstance(self._disable_evaluator_output, list) and
                  'model' not in self._disable_evaluator_output):
-            model_names = self._backend.list_all_models(seed)
+            model_names = self._backend.list_all_models(self._seed)
 
             if len(model_names) == 0 and self._resampling_strategy not in \
                     ['partial-cv', 'partial-cv-iterative-fit']:
@@ -1009,12 +995,6 @@ class AutoML(BaseEstimator):
             config_id = run_key.config_id
             config = self.runhistory_.ids_config[config_id]
 
-            param_dict = config.get_dictionary()
-            params.append(param_dict)
-            mean_test_score.append(self._metric._optimum - (self._metric._sign * run_value.cost))
-            mean_fit_time.append(run_value.time)
-            budgets.append(run_key.budget)
-
             s = run_value.status
             if s == StatusType.SUCCESS:
                 status.append('Success')
@@ -1028,8 +1008,18 @@ class AutoML(BaseEstimator):
                 status.append('Abort')
             elif s == StatusType.MEMOUT:
                 status.append('Memout')
+            elif s == StatusType.RUNNING:
+                continue
+            elif s == StatusType.BUDGETEXHAUSTED:
+                continue
             else:
                 raise NotImplementedError(s)
+
+            param_dict = config.get_dictionary()
+            params.append(param_dict)
+            mean_test_score.append(self._metric._optimum - (self._metric._sign * run_value.cost))
+            mean_fit_time.append(run_value.time)
+            budgets.append(run_key.budget)
 
             for hp_name in hp_names:
                 if hp_name in param_dict:

@@ -21,7 +21,7 @@ from autosklearn.metrics import accuracy, log_loss, balanced_accuracy
 import autosklearn.pipeline.util as putil
 from autosklearn.util.logging_ import setup_logger, get_logger
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION, REGRESSION
-from smac.tae.execute_ta_run import StatusType
+from smac.tae import StatusType
 
 sys.path.append(os.path.dirname(__file__))
 from base import Base  # noqa (E402: module level import not at top of file)
@@ -41,7 +41,6 @@ class AutoMLTest(Base, unittest.TestCase):
 
         self.automl = AutoMLStub()
 
-        self.automl._shared_mode = False
         self.automl._seed = 42
         self.automl._backend = unittest.mock.Mock(spec=Backend)
         self.automl._delete_output_directories = lambda: 0
@@ -137,6 +136,7 @@ class AutoMLTest(Base, unittest.TestCase):
         )
         score = automl.score(X_test, Y_test)
         self.assertGreaterEqual(score, 0.8)
+        self.assertGreater(self._count_succeses(automl.cv_results_), 0)
         self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
 
         del automl
@@ -226,6 +226,7 @@ class AutoMLTest(Base, unittest.TestCase):
         )
         score = automl.score(X_test, Y_test)
         self.assertGreaterEqual(score, 0.8)
+        self.assertGreater(self._count_succeses(automl.cv_results_), 0)
         self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
 
         del automl
@@ -302,7 +303,7 @@ class AutoMLTest(Base, unittest.TestCase):
         fixture = ['cv_models', 'true_targets_ensemble.npy',
                    'start_time_100', 'datamanager.pkl',
                    'predictions_ensemble',
-                   'ensembles', 'predictions_test', 'models']
+                   'done', 'ensembles', 'predictions_test', 'models']
         self.assertEqual(sorted(os.listdir(os.path.join(backend_api.temporary_directory,
                                                         '.auto-sklearn'))),
                          sorted(fixture))

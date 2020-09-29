@@ -2,7 +2,7 @@ import copy
 import json
 
 import numpy as np
-from smac.tae.execute_ta_run import TAEAbortException, StatusType
+from smac.tae import TAEAbortException, StatusType
 from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit, KFold, \
     StratifiedKFold, train_test_split, BaseCrossValidator, PredefinedSplit
 from sklearn.model_selection._split import _RepeatedSplits, BaseShuffleSplit
@@ -14,6 +14,8 @@ from autosklearn.evaluation.abstract_evaluator import (
 from autosklearn.constants import (
     CLASSIFICATION_TASKS,
     MULTILABEL_CLASSIFICATION,
+    REGRESSION_TASKS,
+    MULTIOUTPUT_REGRESSION
 )
 
 
@@ -909,7 +911,13 @@ class TrainEvaluator(AbstractEvaluator):
                     raise ValueError('Unknown CrossValidator.')
                 ref_arg_dict = __baseCrossValidator_defaults__[class_name]
 
-                y = D.data['Y_train'].ravel()
+                y = D.data['Y_train']
+                if (D.info['task'] in CLASSIFICATION_TASKS and
+                   D.info['task'] != MULTILABEL_CLASSIFICATION) or \
+                   (D.info['task'] in REGRESSION_TASKS and
+                   D.info['task'] != MULTIOUTPUT_REGRESSION):
+
+                    y = y.ravel()
                 if class_name == 'PredefinedSplit':
                     if 'test_fold' not in self.resampling_strategy_args:
                         raise ValueError('Must provide parameter test_fold'
@@ -922,7 +930,7 @@ class TrainEvaluator(AbstractEvaluator):
                         raise ValueError('Must provide parameter groups '
                                          'for chosen CrossValidator.')
                     try:
-                        if self.resampling_strategy_args['groups'].shape != y.shape:
+                        if self.resampling_strategy_args['groups'].shape[0] != y.shape[0]:
                             raise ValueError('Groups must be array-like '
                                              'with shape (n_samples,).')
                     except Exception:
@@ -930,7 +938,7 @@ class TrainEvaluator(AbstractEvaluator):
                                          'with shape (n_samples,).')
                 else:
                     if 'groups' in self.resampling_strategy_args:
-                        if self.resampling_strategy_args['groups'].shape != y.shape:
+                        if self.resampling_strategy_args['groups'].shape[0] != y.shape[0]:
                             raise ValueError('Groups must be array-like'
                                              ' with shape (n_samples,).')
 

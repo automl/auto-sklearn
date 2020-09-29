@@ -28,12 +28,11 @@ def create(
     output_directory: str,
     delete_tmp_folder_after_terminate: bool = True,
     delete_output_folder_after_terminate: bool = True,
-    shared_mode: bool = False
 ) -> 'Backend':
     context = BackendContext(temporary_directory, output_directory,
                              delete_tmp_folder_after_terminate,
                              delete_output_folder_after_terminate,
-                             shared_mode)
+                             )
     backend = Backend(context)
 
     return backend
@@ -77,7 +76,6 @@ class BackendContext(object):
                  output_directory: str,
                  delete_tmp_folder_after_terminate: bool,
                  delete_output_folder_after_terminate: bool,
-                 shared_mode: bool = False
                  ):
 
         # Check that the names of tmp_dir and output_dir is not the same.
@@ -87,7 +85,6 @@ class BackendContext(object):
 
         self.delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
         self.delete_output_folder_after_terminate = delete_output_folder_after_terminate
-        self.shared_mode = shared_mode
         # attributes to check that directories were created by autosklearn.
         self._tmp_dir_created = False
         self._output_dir_created = False
@@ -112,33 +109,20 @@ class BackendContext(object):
         return os.path.expanduser(os.path.expandvars(self._temporary_directory))
 
     def create_directories(self) -> None:
-        if self.shared_mode:
-            # If shared_mode == True, the tmp and output dir will be shared
-            # by different instances of auto-sklearn.
-            try:
-                os.makedirs(self.temporary_directory)
-            except OSError:
-                pass
-            try:
-                os.makedirs(self.output_directory)
-            except OSError:
-                pass
+        # Exception is raised if self.temporary_directory already exists.
+        os.makedirs(self.temporary_directory)
+        self._tmp_dir_created = True
 
-        else:
-            # Exception is raised if self.temporary_directory already exists.
-            os.makedirs(self.temporary_directory)
-            self._tmp_dir_created = True
-
-            # Exception is raised if self.output_directory already exists.
-            os.makedirs(self.output_directory)
-            self._output_dir_created = True
+        # Exception is raised if self.output_directory already exists.
+        os.makedirs(self.output_directory)
+        self._output_dir_created = True
 
     def __del__(self) -> None:
         self.delete_directories(force=False)
 
     def delete_directories(self, force: bool = True) -> None:
         if self.delete_output_folder_after_terminate or force:
-            if self._output_dir_created is False and self.shared_mode is False:
+            if self._output_dir_created is False:
                 raise ValueError("Failed to delete output dir: %s because auto-sklearn did not "
                                  "create it. Please make sure that the specified output dir does "
                                  "not exist when instantiating auto-sklearn."
@@ -154,7 +138,7 @@ class BackendContext(object):
                           self.output_directory)
 
         if self.delete_tmp_folder_after_terminate or force:
-            if self._tmp_dir_created is False and self.shared_mode is False:
+            if self._tmp_dir_created is False:
                 raise ValueError("Failed to delete tmp dir: % s because auto-sklearn did not "
                                  "create it. Please make sure that the specified tmp dir does not "
                                  "exist when instantiating auto-sklearn."
@@ -330,6 +314,16 @@ class Backend(object):
         with lockfile.LockFile(filepath):
             with open(filepath, 'rb') as fh:
                 return pickle.load(fh)
+
+    def get_done_directory(self) -> str:
+        return os.path.join(self.internals_directory, 'done')
+
+    def note_numrun_as_done(self, seed: int, num_run: int) -> None:
+        done_directory = self.get_done_directory()
+        os.makedirs(done_directory, exist_ok=True)
+        done_path = os.path.join(done_directory, '%d_%d' % (seed, num_run))
+        with open(done_path, 'w'):
+            pass
 
     def get_model_dir(self) -> str:
         return os.path.join(self.internals_directory, 'models')

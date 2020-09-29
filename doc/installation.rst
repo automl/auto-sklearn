@@ -12,7 +12,7 @@ System requirements
 auto-sklearn has the following system requirements:
 
 * Linux operating system (for example Ubuntu) `(get Linux here) <https://www.wikihow.com/Install-Linux>`_,
-* Python (>=3.5) `(get Python here) <https://www.python.org/downloads/>`_.
+* Python (>=3.6) `(get Python here) <https://www.python.org/downloads/>`_.
 * C++ compiler (with C++11 supports) `(get GCC here) <https://www.tutorialspoint.com/How-to-Install-Cplusplus-Compiler-on-Linux>`_ and
 * SWIG (version 3.0.* is required; >=4.0.0 is not supported) `(get SWIG here) <http://www.swig.org/survey.html>`_.
 
@@ -26,20 +26,20 @@ Please install all dependencies manually with:
 
 .. code:: bash
 
-    curl https://raw.githubusercontent.com/automl/auto-sklearn/master/requirements.txt | xargs -n 1 -L 1 pip install
+    curl https://raw.githubusercontent.com/automl/auto-sklearn/master/requirements.txt | xargs -n 1 -L 1 pip3 install
 
 Then install *auto-sklearn*:
 
 .. code:: bash
 
-    pip install auto-sklearn
+    pip3 install auto-sklearn
 
 We recommend installing *auto-sklearn* into a
 `virtual environment <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_
 or an
 `Anaconda environment <https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_.
 
-If the ``pip`` installation command fails, make sure you have the `System requirements`_ installed correctly.
+If the ``pip3`` installation command fails, make sure you have the `System requirements`_ installed correctly.
 
 Ubuntu installation
 ===================

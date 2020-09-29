@@ -49,6 +49,9 @@ class BackendMock(object):
             y = np.load(fp, allow_pickle=True)
         return y
 
+    def get_done_directory(self):
+        return os.path.join(this_directory, 'data', '.auto-sklearn', 'done')
+
 
 class EnsembleBuilderMemMock(EnsembleBuilder):
 
@@ -90,7 +93,6 @@ class EnsembleTest(unittest.TestCase):
         )
         self.assertEqual(ensbuilder.read_preds[filename]["ens_score"], 1.0)
 
-    @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python > 3.5")
     def testNBest(self):
         for ensemble_nbest, models_on_disc, exp in (
                 (1, None, 1),
@@ -122,7 +124,6 @@ class EnsembleTest(unittest.TestCase):
             )
             self.assertEqual(sel_keys[0], fixture)
 
-    @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python > 3.5")
     def testMaxModelsOnDisc(self):
 
         ensemble_nbest = 4
@@ -186,7 +187,6 @@ class EnsembleTest(unittest.TestCase):
         sel_keys = ensbuilder.get_n_best_preds()
         self.assertListEqual(['pred49'], sel_keys)
 
-    @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python > 3.5")
     def testPerformanceRangeThreshold(self):
         to_test = ((0.0, 4), (0.1, 4), (0.3, 3), (0.5, 2), (0.6, 2), (0.8, 1),
                    (1.0, 1), (1, 1))
@@ -238,7 +238,6 @@ class EnsembleTest(unittest.TestCase):
 
             self.assertEqual(len(sel_keys), exp)
 
-    @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python > 3.5")
     def testFallBackNBest(self):
 
         ensbuilder = EnsembleBuilder(backend=self.backend,
@@ -279,7 +278,6 @@ class EnsembleTest(unittest.TestCase):
         self.assertEqual(len(sel_keys), 1)
         self.assertEqual(sel_keys[0], fixture)
 
-    @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python > 3.5")
     def testGetValidTestPreds(self):
 
         ensbuilder = EnsembleBuilder(backend=self.backend,
@@ -309,6 +307,17 @@ class EnsembleTest(unittest.TestCase):
         sel_keys = ensbuilder.get_n_best_preds()
         self.assertEqual(len(sel_keys), 1)
         ensbuilder.get_valid_test_preds(selected_keys=sel_keys)
+
+        # Number of read files should be three and
+        # predictions_ensemble_0_4_0.0.npy must not be in there
+        self.assertEqual(len(ensbuilder.read_preds), 3)
+        self.assertNotIn(
+            os.path.join(
+                self.backend.temporary_directory,
+                ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_4_0.0.npy"
+            ),
+            ensbuilder.read_preds
+        )
 
         # not selected --> should still be None
         self.assertIsNone(ensbuilder.read_preds[d1][Y_VALID])

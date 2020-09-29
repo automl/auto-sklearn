@@ -10,15 +10,12 @@ from autosklearn.metrics import CLASSIFICATION_METRICS, REGRESSION_METRICS
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--working-directory", type=str, required=True)
-    parser.add_argument("--task-type", required=True,
-                        choices=['classification', 'regression'])
     parser.add_argument("--scenario_id", type=str, default='auto-sklearn')
     parser.add_argument("--algorithm_cutoff_time", type=int, default=1800)
     parser.add_argument("--algorithm_cutoff_memory", type=int, default=3072)
 
     args = parser.parse_args()
     working_directory = args.working_directory
-    task_type = args.task_type
 
     output_dir = os.path.join(working_directory, 'metadata')
     results_dir = os.path.join(working_directory, 'configuration_results')
@@ -34,117 +31,117 @@ if __name__ == "__main__":
     except (OSError, IOError):
         pass
 
-    if task_type == 'classification':
-        metadata_sets = itertools.product(
-            [0, 1], [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION],
-            CLASSIFICATION_METRICS)
-        input_directory = os.path.join(working_directory, 'configuration',
-                                       'classification')
-    elif task_type == 'regression':
-        metadata_sets = itertools.product(
-            [0, 1], [REGRESSION], REGRESSION_METRICS)
-        input_directory = os.path.join(working_directory, 'configuration',
-                                       'regression')
-    else:
-        raise ValueError(task_type)
+    for task_type in ('classification', 'regression'):
+        if task_type == 'classification':
+            metadata_sets = itertools.product(
+                [0, 1], [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION],
+                CLASSIFICATION_METRICS)
+        elif task_type == 'regression':
+            metadata_sets = itertools.product(
+                [0, 1], [REGRESSION], REGRESSION_METRICS)
+        else:
+            raise ValueError(task_type)
 
-    for sparse, task, metric in metadata_sets:
-        print(TASK_TYPES_TO_STRING[task], metric, sparse)
+        input_directory = os.path.join(working_directory, 'configuration', task_type)
+        metafeatures_dir_for_task = os.path.join(metafeatures_dir, task_type)
 
-        dir_name = '%s_%s_%s' % (metric, TASK_TYPES_TO_STRING[task],
-                                 'sparse' if sparse else 'dense')
-        output_dir_ = os.path.join(output_dir, dir_name)
-        results_dir_ = os.path.join(results_dir, dir_name)
+        for sparse, task, metric in metadata_sets:
+            print(TASK_TYPES_TO_STRING[task], metric, sparse)
 
-        if not os.path.exists(results_dir_):
-            print("Results directory %s does not exist!" % results_dir_)
-            continue
+            dir_name = '%s_%s_%s' % (metric, TASK_TYPES_TO_STRING[task],
+                                     'sparse' if sparse else 'dense')
+            output_dir_ = os.path.join(output_dir, dir_name)
+            results_dir_ = os.path.join(results_dir, dir_name)
 
-        try:
-            os.makedirs(output_dir_)
-        except Exception:
-            pass
+            if not os.path.exists(results_dir_):
+                print("Results directory %s does not exist!" % results_dir_)
+                continue
 
-        # Create a readme.txt
-        with open(os.path.join(output_dir_, "readme.txt"), "w") as fh:
-            pass
+            try:
+                os.makedirs(output_dir_)
+            except Exception:
+                pass
 
-        # Create description.txt
-        with open(os.path.join(metafeatures_dir,
-                               "description.features.txt")) as fh:
-            description_metafeatures = fh.read()
+            # Create a readme.txt
+            with open(os.path.join(output_dir_, "readme.txt"), "w") as fh:
+                pass
 
-        with open(os.path.join(results_dir_,
-                               "description.results.txt")) as fh:
-            description_results = fh.read()
+            # Create description.txt
+            with open(os.path.join(metafeatures_dir_for_task,
+                                   "description.features.txt")) as fh:
+                description_metafeatures = fh.read()
 
-        description = [description_metafeatures, description_results]
-        description.append("scenario_id: %s" % scenario_id)
-        description.append("maximize: false")
-        description.append(
-            "algorithm_cutoff_time: %d" % algorithm_cutoff_time)
-        description.append(
-            "algorithm_cutoff_memory: %d" % algorithm_cutoff_memory)
+            with open(os.path.join(results_dir_,
+                                   "description.results.txt")) as fh:
+                description_results = fh.read()
 
-        with open(os.path.join(output_dir_, "description.txt"), "w") as fh:
-            for line in description:
-                fh.write(line)
-                fh.write("\n")
+            description = [description_metafeatures, description_results]
+            description.append("scenario_id: %s" % scenario_id)
+            description.append("maximize: false")
+            description.append(
+                "algorithm_cutoff_time: %d" % algorithm_cutoff_time)
+            description.append(
+                "algorithm_cutoff_memory: %d" % algorithm_cutoff_memory)
 
-        # Copy feature values and add instance id
-        with open(os.path.join(metafeatures_dir,
-                               "feature_values.arff")) as fh:
-            feature_values = arff.load(fh)
+            with open(os.path.join(output_dir_, "description.txt"), "w") as fh:
+                for line in description:
+                    fh.write(line)
+                    fh.write("\n")
 
-        feature_values['relation'] = scenario_id + "_" + feature_values[
-            'relation']
+            # Copy feature values and add instance id
+            with open(os.path.join(metafeatures_dir_for_task,
+                                   "feature_values.arff")) as fh:
+                feature_values = arff.load(fh)
 
-        with open(os.path.join(output_dir_, "feature_values.arff"),
-                  "w") as fh:
-            arff.dump(feature_values, fh)
+            feature_values['relation'] = scenario_id + "_" + feature_values[
+                'relation']
 
-        # Copy feature runstatus and add instance id
-        with open(os.path.join(metafeatures_dir,
-                               "feature_runstatus.arff")) as fh:
-            feature_runstatus = arff.load(fh)
+            with open(os.path.join(output_dir_, "feature_values.arff"),
+                      "w") as fh:
+                arff.dump(feature_values, fh)
 
-        feature_runstatus['relation'] = scenario_id + "_" + \
-                                        feature_runstatus['relation']
+            # Copy feature runstatus and add instance id
+            with open(os.path.join(metafeatures_dir_for_task,
+                                   "feature_runstatus.arff")) as fh:
+                feature_runstatus = arff.load(fh)
 
-        with open(os.path.join(output_dir_, "feature_runstatus.arff"), "w") \
-                as fh:
-            arff.dump(feature_runstatus, fh)
+            feature_runstatus['relation'] = scenario_id + "_" + \
+                                            feature_runstatus['relation']
 
-        # Copy feature runstatus and add instance id
-        with open(
-                os.path.join(metafeatures_dir, "feature_costs.arff")) as fh:
-            feature_costs = arff.load(fh)
+            with open(os.path.join(output_dir_, "feature_runstatus.arff"), "w") \
+                    as fh:
+                arff.dump(feature_runstatus, fh)
 
-        feature_costs['relation'] = scenario_id + "_" + feature_costs[
-            'relation']
-        for i in range(len(feature_costs['data'])):
-            for j in range(2, len(feature_costs['data'][i])):
-                feature_costs['data'][i][j] = \
-                    round(feature_costs['data'][i][j], 5)
+            # Copy feature runstatus and add instance id
+            with open(
+                    os.path.join(metafeatures_dir_for_task, "feature_costs.arff")) as fh:
+                feature_costs = arff.load(fh)
 
-        with open(os.path.join(output_dir_, "feature_costs.arff"), "w") \
-                as fh:
-            arff.dump(feature_costs, fh)
+            feature_costs['relation'] = scenario_id + "_" + feature_costs[
+                'relation']
+            for i in range(len(feature_costs['data'])):
+                for j in range(2, len(feature_costs['data'][i])):
+                    feature_costs['data'][i][j] = \
+                        round(feature_costs['data'][i][j], 5)
 
-        # Copy algorithm runs and add instance id
-        with open(os.path.join(results_dir_, "algorithm_runs.arff")) as fh:
-            algorithm_runs = arff.load(fh)
+            with open(os.path.join(output_dir_, "feature_costs.arff"), "w") \
+                    as fh:
+                arff.dump(feature_costs, fh)
 
-        algorithm_runs['relation'] = scenario_id + "_" + algorithm_runs[
-            'relation']
+            # Copy algorithm runs and add instance id
+            with open(os.path.join(results_dir_, "algorithm_runs.arff")) as fh:
+                algorithm_runs = arff.load(fh)
 
-        with open(os.path.join(output_dir_, "algorithm_runs.arff"), "w") \
-                as fh:
-            arff.dump(algorithm_runs, fh)
+            algorithm_runs['relation'] = scenario_id + "_" + algorithm_runs[
+                'relation']
 
-        # Copy configurations file
-        with open(os.path.join(results_dir_, "configurations.csv")) as fh:
-            algorithm_runs = fh.read()
-        with open(os.path.join(output_dir_, "configurations.csv"), "w") \
-                as fh:
-            fh.write(algorithm_runs)
+            with open(os.path.join(output_dir_, "algorithm_runs.arff"), "w") \
+                    as fh:
+                arff.dump(algorithm_runs, fh)
+
+            # Copy configurations file
+            with open(os.path.join(results_dir_, "configurations.csv")) as fh:
+                algorithm_runs = fh.read()
+            with open(os.path.join(output_dir_, "configurations.csv"), "w") \
+                    as fh:
+                fh.write(algorithm_runs)

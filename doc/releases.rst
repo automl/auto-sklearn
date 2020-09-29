@@ -11,6 +11,43 @@
 Releases
 ========
 
+Version 0.10.0
+==============
+
+* ADD #325: Allow to separately optimize metrics for metadata generation.
+* ADD #946: New dask backend for parallel Auto-sklearn.
+* BREAKING #947: Drop Python3.5 support.
+* BREAKING #946: Remove shared model mode for parallel Auto-sklearn.
+* FIX #351: No longer pass un-picklable logger instances to the target function.
+* FIX #840: Fixes a bug which prevented computing metadata for regression datasets. Also
+  adds a unit test for regression metadata computation.
+* FIX #897: Allow custom splitters to be used with multi-ouput regression.
+* FIX #951: Fixes a lot of bugs in the regression pipeline that caused bad performance for
+  regression datasets.
+* FIX #953: Re-add `liac-arff` as a dependency.
+* FIX #956: Fixes a bug which could cause Auto-sklearn not to find a model on disk which
+  is part of the ensemble.
+* FIX #961: Fixes a bug which caused Auto-sklearn to load bad meta-data for metrics which cannot
+  be computed on multiclass datasets (especially ROC_AUC).
+* DOC #498: Improve the example on resampling strategies by showing how to pass scikit-learn's
+  splitter objects to Auto-sklearn.
+* DOC #670: Demonstrate how to give access to training accuracy.
+* DOC #872: Improve an example on how obtain the best model.
+* DOC #940: Improve documentation of the docker image.
+* MAINT: Improve the docker file by setting environment variable that restrict BLAS and OMP to only
+  use a single core.
+* MAINT #949: Replace `pip` by `pip3` in the installation guidelines.
+* MAINT #280, #535, #956: Update meta-data and include regression meta-data again.
+
+Contributors v0.10.0
+********************
+
+* Francisco Rivera
+* Matthias Feurer
+* felixleungsc
+* Chu-Cheng Fu
+* Francois Berenger
+
 Version 0.9.0
 =============
 

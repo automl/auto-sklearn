@@ -1,16 +1,21 @@
+import copy
 import json
 import os
 import time
 import traceback
 import warnings
 
+import dask.distributed
 import numpy as np
 import pynisher
 
 from smac.facade.smac_ac_facade import SMAC4AC
+from smac.intensification.simple_intensifier import SimpleIntensifier
+from smac.intensification.intensification import Intensifier
 from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
 from smac.scenario.scenario import Scenario
-from smac.optimizer import pSMAC
+from smac.tae.serial_runner import SerialRunner
+from smac.tae.dask_runner import DaskParallelRunner
 
 
 import autosklearn.metalearning
@@ -154,12 +159,15 @@ def get_smac_object(
     seed,
     ta,
     ta_kwargs,
-    backend,
     metalearning_configurations,
+    n_jobs,
+    dask_client,
 ):
-    scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob(
-        smac_run_id=seed if not scenario_dict['shared-model'] else '*',
-    )
+    if len(scenario_dict['instances']) > 1:
+        intensifier = Intensifier
+    else:
+        intensifier = SimpleIntensifier
+
     scenario = Scenario(scenario_dict)
     if len(metalearning_configurations) > 0:
         default_config = scenario.cs.get_default_configuration()
@@ -175,6 +183,9 @@ def get_smac_object(
         tae_runner_kwargs=ta_kwargs,
         initial_configurations=initial_configurations,
         run_id=seed,
+        intensifier=intensifier,
+        dask_client=dask_client,
+        n_jobs=n_jobs,
     )
 
 
@@ -186,7 +197,10 @@ class AutoMLSMBO(object):
                  func_eval_time_limit,
                  memory_limit,
                  metric,
-                 watcher, start_num_run=1,
+                 watcher,
+                 n_jobs,
+                 dask_client: dask.distributed.Client,
+                 start_num_run=1,
                  data_memory_limit=None,
                  num_metalearning_cfgs=25,
                  config_file=None,
@@ -194,7 +208,6 @@ class AutoMLSMBO(object):
                  metadata_directory=None,
                  resampling_strategy='holdout',
                  resampling_strategy_args=None,
-                 shared_mode=False,
                  include_estimators=None,
                  exclude_estimators=None,
                  include_preprocessors=None,
@@ -212,6 +225,10 @@ class AutoMLSMBO(object):
 
         # the configuration space
         self.config_space = config_space
+
+        # the number of parallel workers/jobs
+        self.n_jobs = n_jobs
+        self.dask_client = dask_client
 
         # Evaluation
         self.resampling_strategy = resampling_strategy
@@ -231,7 +248,6 @@ class AutoMLSMBO(object):
         self.seed = seed
         self.metadata_directory = metadata_directory
         self.start_num_run = start_num_run
-        self.shared_mode = shared_mode
         self.include_estimators = include_estimators
         self.exclude_estimators = exclude_estimators
         self.include_preprocessors = include_preprocessors
@@ -398,9 +414,11 @@ class AutoMLSMBO(object):
             else:
                 raise ValueError(self.task)
 
-        ta = ExecuteTaFuncWithQueue
+        backend_copy = copy.deepcopy(self.backend)
+        backend_copy.context.delete_output_folder_after_terminate = False
+        backend_copy.context.delete_tmp_folder_after_terminate = False
         ta_kwargs = dict(
-            backend=self.backend,
+            backend=backend_copy,
             autosklearn_seed=seed,
             resampling_strategy=self.resampling_strategy,
             initial_num_run=num_run,
@@ -412,6 +430,7 @@ class AutoMLSMBO(object):
             disable_file_output=self.disable_file_output,
             **self.resampling_strategy_args
         )
+        ta = ExecuteTaFuncWithQueue
 
         startup_time = self.watcher.wall_elapsed(self.dataset_name)
         total_walltime_limit = self.total_walltime_limit - startup_time - 5
@@ -424,7 +443,6 @@ class AutoMLSMBO(object):
             'memory_limit': self.memory_limit,
             'output-dir': self.backend.get_smac_output_directory(),
             'run_obj': 'quality',
-            'shared-model': self.shared_mode,
             'wallclock_limit': total_walltime_limit,
             'cost_for_crash': self.worst_possible_result,
         }
@@ -462,8 +480,9 @@ class AutoMLSMBO(object):
             'seed': seed,
             'ta': ta,
             'ta_kwargs': ta_kwargs,
-            'backend': self.backend,
             'metalearning_configurations': metalearning_configurations,
+            'n_jobs': self.n_jobs,
+            'dask_client': self.dask_client,
         }
         if self.get_smac_object_callback is not None:
             smac = self.get_smac_object_callback(**smac_args)
@@ -472,19 +491,14 @@ class AutoMLSMBO(object):
 
         smac.optimize()
 
-        # Patch SMAC to read in data from parallel runs after the last
-        # function evaluation
-        if self.shared_mode:
-            pSMAC.read(
-                run_history=smac.solver.runhistory,
-                output_dirs=smac.solver.scenario.input_psmac_dirs,
-                configuration_space=smac.solver.config_space,
-                logger=smac.solver.logger,
-            )
-
         self.runhistory = smac.solver.runhistory
         self.trajectory = smac.solver.intensifier.traj_logger.trajectory
-        self._budget_type = smac.solver.intensifier.tae_runner.budget_type
+        if isinstance(smac.solver.tae_runner, DaskParallelRunner):
+            self._budget_type = smac.solver.tae_runner.single_worker.budget_type
+        elif isinstance(smac.solver.tae_runner, SerialRunner):
+            self._budget_type = smac.solver.tae_runner.budget_type
+        else:
+            raise NotImplementedError(type(smac.solver.tae_runner))
 
         return self.runhistory, self.trajectory, self._budget_type
 

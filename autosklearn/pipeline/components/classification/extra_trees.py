@@ -23,30 +23,19 @@ class ExtraTreesClassifier(
                  class_weight=None):
 
         self.n_estimators = self.get_max_iter()
-        if criterion not in ("gini", "entropy"):
-            raise ValueError("'criterion' is not in ('gini', 'entropy'): "
-                             "%s" % criterion)
         self.criterion = criterion
-
-        if check_none(max_depth):
-            self.max_depth = None
-        else:
-            self.max_depth = int(max_depth)
-        if check_none(max_leaf_nodes):
-            self.max_leaf_nodes = None
-        else:
-            self.max_leaf_nodes = int(max_leaf_nodes)
-
-        self.min_samples_leaf = int(min_samples_leaf)
-        self.min_samples_split = int(min_samples_split)
-        self.max_features = float(max_features)
-        self.bootstrap = check_for_bool(bootstrap)
-        self.min_weight_fraction_leaf = float(min_weight_fraction_leaf)
-        self.min_impurity_decrease = float(min_impurity_decrease)
+        self.max_depth = max_depth
+        self.max_leaf_nodes = max_leaf_nodes
+        self.min_samples_leaf = min_samples_leaf
+        self.min_samples_split = min_samples_split
+        self.max_features = max_features
+        self.bootstrap = bootstrap
+        self.min_weight_fraction_leaf = min_weight_fraction_leaf
+        self.min_impurity_decrease = min_impurity_decrease
         self.oob_score = oob_score
-        self.n_jobs = int(n_jobs)
+        self.n_jobs = n_jobs
         self.random_state = random_state
-        self.verbose = int(verbose)
+        self.verbose = verbose
         self.class_weight = class_weight
         self.estimator = None
 
@@ -65,6 +54,29 @@ class ExtraTreesClassifier(
 
         if self.estimator is None:
             max_features = int(X.shape[1] ** float(self.max_features))
+            if self.criterion not in ("gini", "entropy"):
+                raise ValueError("'criterion' is not in ('gini', 'entropy'): "
+                                 "%s" % self.criterion)
+
+            if check_none(self.max_depth):
+                self.max_depth = None
+            else:
+                self.max_depth = int(self.max_depth)
+            if check_none(self.max_leaf_nodes):
+                self.max_leaf_nodes = None
+            else:
+                self.max_leaf_nodes = int(self.max_leaf_nodes)
+
+            self.min_samples_leaf = int(self.min_samples_leaf)
+            self.min_samples_split = int(self.min_samples_split)
+            self.max_features = float(self.max_features)
+            self.min_impurity_decrease = float(self.min_impurity_decrease)
+            self.min_weight_fraction_leaf = float(self.min_weight_fraction_leaf)
+            self.oob_score = check_for_bool(self.oob_score)
+            self.bootstrap = check_for_bool(self.bootstrap)
+            self.n_jobs = int(self.n_jobs)
+            self.verbose = int(self.verbose)
+
             self.estimator = ETC(n_estimators=n_iter,
                                  criterion=self.criterion,
                                  max_depth=self.max_depth,
