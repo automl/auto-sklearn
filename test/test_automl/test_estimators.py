@@ -51,7 +51,7 @@ class EstimatorTest(Base, unittest.TestCase):
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
                 n_workers=2,
-                processes=True,
+                processes=False,
                 threads_per_worker=1,
             )
         )
@@ -387,7 +387,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
                 n_workers=2,
-                processes=True,
+                processes=False,
                 threads_per_worker=1,
             )
         )
@@ -524,13 +524,16 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         log_file_path = glob.glob(os.path.join(
             tmp, 'AutoML*.log'))[0]
         predictions = automl.predict(X_test)
-        self.assertEqual(predictions.shape, (50, 3))
-        self.assertGreater(self._count_succeses(automl.cv_results_), 0)
+        self.assertEqual(predictions.shape, (50, 3), extract_msg_from_log(log_file_path))
+        self.assertGreater(self._count_succeses(automl.cv_results_), 0,
+                           extract_msg_from_log(log_file_path))
         score = f1_macro(Y_test, predictions)
         self.assertGreaterEqual(score, 0.9, extract_msg_from_log(log_file_path))
         probs = automl.predict_proba(X_train)
         self.assertAlmostEqual(np.mean(probs), 0.33, places=1)
         del automl
+        self._tearDown(tmp)
+        self._tearDown(output)
 
     def test_binary(self):
         tmp = os.path.join(self.test_dir, '..', '.out_binary_fit')
@@ -548,17 +551,25 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
         automl.fit(X_train, Y_train, X_test=X_test, y_test=Y_test,
                    dataset_name='binary_test_dataset')
+        log_file_path = glob.glob(os.path.join(
+            tmp, 'AutoML*.log'))[0]
         predictions = automl.predict(X_test)
-        self.assertEqual(predictions.shape, (50, ))
+        self.assertEqual(predictions.shape, (50, ), extract_msg_from_log(log_file_path))
         score = accuracy(Y_test, predictions)
-        self.assertGreaterEqual(score, 0.9)
-        self.assertGreater(self._count_succeses(automl.cv_results_), 0)
+        self.assertGreaterEqual(score, 0.9, extract_msg_from_log(log_file_path))
+        self.assertGreater(self._count_succeses(automl.cv_results_), 0, extract_msg_from_log(log_file_path))
 
         output_files = os.listdir(output)
         self.assertIn('binary_test_dataset_test_1.predict', output_files)
         del automl
+        self._tearDown(tmp)
+        self._tearDown(output)
 
     def test_classification_pandas_support(self):
+        tmp = os.path.join(self.test_dir, '..', '.out_pd_class_fit')
+        output = os.path.join(self.test_dir, '..', '.tmp_pd_class_fit')
+        self._setUp(output)
+        self._setUp(tmp)
         X, y = sklearn.datasets.fetch_openml(
             data_id=2,  # cat/num dataset
             return_X_y=True,
@@ -577,13 +588,17 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
             exclude_estimators=['libsvm_svc'],
             dask_client=self.client,
             seed=5,
+            tmp_folder=tmp,
         )
 
         automl.fit(X, y)
 
+        log_file_path = glob.glob(os.path.join(
+            tmp, 'AutoML*.log'))[0]
+
         # Make sure that at least better than random.
         # We use same X_train==X_test to test code quality
-        self.assertTrue(automl.score(X, y) > 0.555)
+        self.assertTrue(automl.score(X, y) > 0.555, extract_msg_from_log(log_file_path))
 
         automl.refit(X, y)
 
@@ -595,6 +610,8 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         self.assertTrue(accuracy(y, prediction) > 0.555)
         self.assertGreater(self._count_succeses(automl.cv_results_), 0)
         del automl
+        self._tearDown(tmp)
+        self._tearDown(output)
 
 
 class AutoMLRegressorTest(Base, unittest.TestCase):
@@ -605,7 +622,7 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
                 n_workers=2,
-                processes=True,
+                processes=False,
                 threads_per_worker=1,
             )
         )
@@ -678,6 +695,10 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         self._tearDown(output)
 
     def test_regression_pandas_support(self):
+        tmp = os.path.join(self.test_dir, '..', '.tmp_pd_regression')
+        output = os.path.join(self.test_dir, '..', '.out_pd_regression')
+        self._setUp(tmp)
+        self._setUp(output)
         X, y = sklearn.datasets.fetch_openml(
             data_id=41514,  # diabetes
             return_X_y=True,
@@ -690,14 +711,18 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
             time_left_for_this_task=60,
             per_run_time_limit=10,
             dask_client=self.client,
+            tmp_folder=tmp,
         )
 
         # Make sure we error out because y is not encoded
         automl.fit(X, y)
 
+        log_file_path = glob.glob(os.path.join(
+            tmp, 'AutoML*.log'))[0]
+
         # Make sure that at least better than random.
         # We use same X_train==X_test to test code quality
-        self.assertGreaterEqual(automl.score(X, y), 0.5, automl.show_models())
+        self.assertGreaterEqual(automl.score(X, y), 0.5, extract_msg_from_log(log_file_path))
 
         automl.refit(X, y)
 
@@ -705,6 +730,8 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         self.assertTrue(r2(y, automl.predict(X)) > 0.5)
         self.assertGreater(self._count_succeses(automl.cv_results_), 0)
         del automl
+        self._tearDown(tmp)
+        self._tearDown(output)
 
 
 class AutoSklearnClassifierTest(unittest.TestCase):
@@ -713,7 +740,7 @@ class AutoSklearnClassifierTest(unittest.TestCase):
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
                 n_workers=2,
-                processes=True,
+                processes=False,
                 threads_per_worker=1,
             )
         )
@@ -751,7 +778,7 @@ class AutoSklearnRegressorTest(unittest.TestCase):
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
                 n_workers=2,
-                processes=True,
+                processes=False,
                 threads_per_worker=1,
             )
         )
