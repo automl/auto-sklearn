@@ -141,6 +141,7 @@ class EvaluationTest(unittest.TestCase):
     def test_eval_with_limits_holdout_fail_silent(self, pynisher_mock):
         pynisher_mock.return_value = None
         config = unittest.mock.Mock()
+        config.origin = 'MOCK'
         config.config_id = 198
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
@@ -158,7 +159,7 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[1].status, StatusType.CRASHED)
         self.assertEqual(info[1].cost, 1.0)
         self.assertIsInstance(info[1].time, float)
-        self.assertEqual(info[1].additional_info, {'configuration_origin': 'UNKNOWN',
+        self.assertEqual(info[1].additional_info, {'configuration_origin': 'MOCK',
                                                    'error': "Result queue is empty",
                                                    'exit_status': 0,
                                                    'exitcode': 0,
@@ -171,7 +172,7 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[1].status, StatusType.CRASHED)
         self.assertEqual(info[1].cost, 1.0)
         self.assertIsInstance(info[1].time, float)
-        self.assertEqual(info[1].additional_info, {'configuration_origin': 'UNKNOWN',
+        self.assertEqual(info[1].additional_info, {'configuration_origin': 'MOCK',
                                                    'error': "Result queue is empty",
                                                    'exit_status': 0,
                                                    'exitcode': 0,
@@ -342,24 +343,31 @@ class EvaluationTest(unittest.TestCase):
         self.assertNotIn('exitcode', info[1].additional_info)
 
     def test_silent_exception_in_target_function(self):
+        config = unittest.mock.Mock()
+        config.config_id = 198
+
         backend_mock = BackendMock()
         ta = ExecuteTaFuncWithQueue(backend=backend_mock,
                                     autosklearn_seed=1,
                                     resampling_strategy='holdout',
                                     logger=self.logger,
                                     stats=self.stats,
-                                    memory_limit=100,
+                                    memory_limit=3072,
                                     metric=accuracy,
                                     cost_for_crash=get_cost_of_crash(accuracy),
                                     abort_on_first_run_crash=False,
                                     )
         ta.pynisher_logger = unittest.mock.Mock()
-        self.stats.ta_runs += 1
-        info = ta.start(None, instance=None, cutoff=3000)
-        self.assertEqual(info[1].status, StatusType.CRASHED)
+        self.stats.submitted_ta_runs += 1
+        info = ta.run_wrapper(RunInfo(config=config, cutoff=3000, instance=None,
+                                      instance_specific=None, seed=1, capped=False))
+        self.assertEqual(info[1].status, StatusType.CRASHED, msg=str(info[1].additional_info))
         self.assertEqual(info[1].cost, 1.0)
         self.assertIsInstance(info[1].time, float)
-        self.assertEqual(info[1].additional_info['error'], 'Result queue is empty')
-        self.assertEqual(info[1].additional_info['exitcode'], -6)
-        self.assertEqual(info[1].additional_info['exit_status'], pynisher.AnythingException)
+        self.assertEqual(
+            info[1].additional_info['error'],
+            """AttributeError("'BackendMock' object has no attribute 'output_directory'")""",
+        )
+        self.assertNotIn('exitcode', info[1].additional_info)
+        self.assertNotIn('exit_status', info[1].additional_info)
         self.assertNotIn('traceback', info[1])

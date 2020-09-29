@@ -422,38 +422,45 @@ class AutoMLTest(Base, unittest.TestCase):
 
         # Case 2. Check that if statustype returned by ta.run() != success,
         # the function raises error.
-        ta_run_mock.return_value = StatusType.CRASHED, None, None, "test"
+        ta_run_mock.return_value = StatusType.CRASHED, None, None, {}
         self.assertRaisesRegex(ValueError,
                                'Dummy prediction failed with run state StatusType.CRASHED '
-                               'and additional output: test.',
+                               'and additional output: {}.',
                                auto._do_dummy_prediction,
                                datamanager, 1,
                                )
-        ta_run_mock.return_value = StatusType.ABORT, None, None, "test"
+        ta_run_mock.return_value = StatusType.ABORT, None, None, {}
         self.assertRaisesRegex(ValueError,
                                'Dummy prediction failed with run state StatusType.ABORT '
-                               'and additional output: test.',
+                               'and additional output: {}.',
                                auto._do_dummy_prediction,
                                datamanager, 1,
                                )
-        ta_run_mock.return_value = StatusType.TIMEOUT, None, None, "test"
+        ta_run_mock.return_value = StatusType.TIMEOUT, None, None, {}
         self.assertRaisesRegex(ValueError,
                                'Dummy prediction failed with run state StatusType.TIMEOUT '
-                               'and additional output: test.',
+                               'and additional output: {}.',
                                auto._do_dummy_prediction,
                                datamanager, 1,
                                )
-        ta_run_mock.return_value = StatusType.MEMOUT, None, None, "test"
+        ta_run_mock.return_value = StatusType.MEMOUT, None, None, {}
         self.assertRaisesRegex(ValueError,
                                'Dummy prediction failed with run state StatusType.MEMOUT '
-                               'and additional output: test.',
+                               'and additional output: {}.',
                                auto._do_dummy_prediction,
                                datamanager, 1,
                                )
-        ta_run_mock.return_value = StatusType.CAPPED, None, None, "test"
+        ta_run_mock.return_value = StatusType.CAPPED, None, None, {}
         self.assertRaisesRegex(ValueError,
                                'Dummy prediction failed with run state StatusType.CAPPED '
-                               'and additional output: test.',
+                               'and additional output: {}.',
+                               auto._do_dummy_prediction,
+                               datamanager, 1,
+                               )
+
+        ta_run_mock.return_value = StatusType.CRASHED, None, None, {'exitcode': -6}
+        self.assertRaisesRegex(ValueError,
+                               'The error suggests that the provided memory limits were too tight.',
                                auto._do_dummy_prediction,
                                datamanager, 1,
                                )

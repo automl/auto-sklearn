@@ -279,8 +279,7 @@ class AutoML(BaseEstimator):
                                     cost_for_crash=get_cost_of_crash(self._metric),
                                     **self._resampling_strategy_arguments)
 
-        status, cost, runtime, additional_info = \
-            ta.run(1, cutoff=self._time_for_task)
+        status, cost, runtime, additional_info = ta.run(1, cutoff=self._time_for_task)
         if status == StatusType.SUCCESS:
             self._logger.info("Finished creating dummy predictions.")
         else:
