@@ -407,6 +407,15 @@ class TestMetric(unittest.TestCase):
             current_score = scorer(y_true, y_pred)
             self.assertLess(current_score, previous_score)
 
+            # less labels in the targets than in the predictions
+            y_true = np.array([0.0, 0.0, 1.0, 1.0])
+            y_pred = np.array([
+                [1.0, 0.0, 0.0], [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+            )
+            score = scorer(y_true, y_pred)
+            self.assertTrue(np.isfinite(score))
+
     def test_classification_multilabel(self):
 
         for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():

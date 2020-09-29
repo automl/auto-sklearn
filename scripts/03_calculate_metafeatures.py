@@ -81,13 +81,13 @@ if __name__ == "__main__":
     n_jobs = args.n_jobs
     test_mode = args.test_mode
 
-    output_directory = os.path.join(working_directory, 'metafeatures')
-    try:
-        os.makedirs(output_directory)
-    except:
-        pass
-
     for task_type in ('classification', 'regression'):
+        output_directory = os.path.join(working_directory, 'metafeatures', task_type)
+        try:
+            os.makedirs(output_directory)
+        except:
+            pass
+
         all_metafeatures = {}
 
         if task_type == 'classification':

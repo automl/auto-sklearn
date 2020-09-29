@@ -101,14 +101,7 @@ else:
     raise ValueError(task_type)
 
 automl.fit(X_train, y_train, dataset_name=str(task_id),
-           feat_type=cat)
-data = automl.automl_._backend.load_datamanager()
-# Data manager can't be replaced with save_datamanager, it has to be deleted
-# first
-os.remove(automl.automl_._backend._get_datamanager_pickle_filename())
-data.data['X_test'] = X_test
-data.data['Y_test'] = y_test
-automl.automl_._backend.save_datamanager(data)
+           feat_type=cat, X_test=X_test, y_test=y_test)
 trajectory = automl.trajectory_
 
 incumbent_id_to_model = {}
@@ -120,7 +113,9 @@ if is_test:
 else:
     memory_limit_factor = 2
 
-for entry in trajectory:
+print('Starting to validate configurations')
+for i, entry in enumerate(trajectory):
+    print('Starting to validate configuration %d/%d' % (i + 1, len(trajectory)))
     incumbent_id = entry.incumbent_id
     train_performance = entry.train_perf
     if incumbent_id not in incumbent_id_to_model:
@@ -168,7 +163,9 @@ for entry in trajectory:
 
         validated_trajectory.append(list(entry) + [task_id] +
                                     [run_value.additional_info])
+    print('Finished validating configuration %d/%d' % (i + 1, len(trajectory)))
 
+print('Starting to copy data to configuration directory')
 validated_trajectory = [entry[:2] + [entry[2].get_dictionary()] + entry[3:]
                         for entry in validated_trajectory]
 validated_trajectory_file = os.path.join(autosklearn_directory,
@@ -178,8 +175,24 @@ validated_trajectory_file = os.path.join(autosklearn_directory,
 with open(validated_trajectory_file, 'w') as fh:
     json.dump(validated_trajectory, fh, indent=4)
 
+
+for dirpath, dirnames, filenames in os.walk(autosklearn_directory, topdown=False):
+    print(dirpath, dirnames, filenames)
+    for filename in filenames:
+        if filename == 'datamanager.pkl':
+            os.remove(os.path.join(dirpath, filename))
+        elif filename == 'configspace.pcs':
+            os.remove(os.path.join(dirpath, filename))
+    for dirname in dirnames:
+        if dirname in ('models', 'cv_models'):
+            os.rmdir(os.path.join(dirpath, dirname))
+
+
+print('Going to copy the configuration directory')
 shutil.copytree(autosklearn_directory, tmp_dir)
+print('Finished copying the configuration directory')
 try:
     shutil.rmtree(tempdir)
 except:
     pass
+print('Finished configuring')
