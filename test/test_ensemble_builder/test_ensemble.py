@@ -1,3 +1,4 @@
+import glob
 import os
 import sys
 import time
@@ -647,6 +648,8 @@ class EnsembleProcessBuilderTest(unittest.TestCase):
             self.backend.temporary_directory,
             '%s.log' % str(logger_name)
         )
+        log_file_path = glob.glob(os.path.join(
+            self.backend.temporary_directory, '*.log'))[0]
         with open(logfile) as f:
             self.assertIn(msg,  f.read())
 

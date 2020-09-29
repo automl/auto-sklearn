@@ -243,8 +243,7 @@ class AutoML(BaseEstimator):
 
     def _create_dask_client(self):
         self._is_dask_client_internally_created = True
-        if self._n_jobs is not None and self._n_jobs > 1:
-            dask.config.set({'distributed.worker.daemon': False})
+        dask.config.set({'distributed.worker.daemon': False})
         self._dask_client = dask.distributed.Client(
             dask.distributed.LocalCluster(
                 # 2 workers -- 1 for ensemble / 1 for smac

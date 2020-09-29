@@ -171,6 +171,7 @@ def ensemble_builder_process(
         # Also, notice how ensemble nbest is returned, so we don't waste
         # iterations testing if the deterministic predictions size can
         # be fitted in memory
+        result = None
         try:
             logger.info(
                 "{} Started Ensemble builder job at {} for iteration {}".format(
