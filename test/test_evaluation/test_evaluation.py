@@ -364,9 +364,12 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[1].status, StatusType.CRASHED, msg=str(info[1].additional_info))
         self.assertEqual(info[1].cost, 1.0)
         self.assertIsInstance(info[1].time, float)
-        self.assertEqual(
+        self.assertIn(
             info[1].additional_info['error'],
-            """AttributeError("'BackendMock' object has no attribute 'output_directory'")""",
+            (
+                """AttributeError("'BackendMock' object has no attribute 'output_directory'",)""",
+                """AttributeError("'BackendMock' object has no attribute 'output_directory'")""",
+            )
         )
         self.assertNotIn('exitcode', info[1].additional_info)
         self.assertNotIn('exit_status', info[1].additional_info)
