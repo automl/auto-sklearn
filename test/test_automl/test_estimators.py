@@ -50,9 +50,9 @@ class EstimatorTest(Base, unittest.TestCase):
         dask.config.set({'distributed.worker.daemon': False})
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
-                n_workers=2,
+                n_workers=1,
                 processes=False,
-                threads_per_worker=1,
+                threads_per_worker=2,
             )
         )
 
@@ -386,9 +386,9 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         dask.config.set({'distributed.worker.daemon': False})
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
-                n_workers=2,
+                n_workers=1,
                 processes=False,
-                threads_per_worker=1,
+                threads_per_worker=2,
             )
         )
 
@@ -557,7 +557,8 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         self.assertEqual(predictions.shape, (50, ), extract_msg_from_log(log_file_path))
         score = accuracy(Y_test, predictions)
         self.assertGreaterEqual(score, 0.9, extract_msg_from_log(log_file_path))
-        self.assertGreater(self._count_succeses(automl.cv_results_), 0, extract_msg_from_log(log_file_path))
+        self.assertGreater(self._count_succeses(automl.cv_results_), 0,
+                           extract_msg_from_log(log_file_path))
 
         output_files = os.listdir(output)
         self.assertIn('binary_test_dataset_test_1.predict', output_files)
@@ -621,9 +622,9 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         dask.config.set({'distributed.worker.daemon': False})
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
-                n_workers=2,
+                n_workers=1,
                 processes=False,
-                threads_per_worker=1,
+                threads_per_worker=2,
             )
         )
 
@@ -739,9 +740,9 @@ class AutoSklearnClassifierTest(unittest.TestCase):
     def setUpClass(self):
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
-                n_workers=2,
+                n_workers=1,
                 processes=False,
-                threads_per_worker=1,
+                threads_per_worker=2,
             )
         )
 
@@ -777,9 +778,9 @@ class AutoSklearnRegressorTest(unittest.TestCase):
     def setUpClass(self):
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
-                n_workers=2,
+                n_workers=1,
                 processes=False,
-                threads_per_worker=1,
+                threads_per_worker=2,
             )
         )
 

@@ -59,9 +59,9 @@ class AutoMLTest(Base, unittest.TestCase):
         dask.config.set({'distributed.worker.daemon': False})
         self.client = dask.distributed.Client(
             dask.distributed.LocalCluster(
-                n_workers=2,
+                n_workers=1,
                 processes=False,
-                threads_per_worker=1,
+                threads_per_worker=2,
             )
         )
 
