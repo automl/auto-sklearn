@@ -607,11 +607,12 @@ class SingleBestTest(unittest.TestCase):
 class EnsembleProcessBuilderTest(unittest.TestCase):
     def setUp(self):
         self.backend = BackendMock()
-        self.backend.temporary_directory = '/tmp/ensemble_test'
-        os.makedirs(self.backend.temporary_directory, exist_ok=True)
 
     def tearDown(self):
-        shutil.rmtree(self.backend.temporary_directory)
+        logfiles = glob.glob(os.path.join(
+            self.backend.temporary_directory, '*.log'))
+        for logfile in logfiles:
+            os.unlink(logfile)
         pass
 
     def test_ensemble_builder_process_termination_request(self):
@@ -649,7 +650,6 @@ class EnsembleProcessBuilderTest(unittest.TestCase):
         msg = 'Terminating ensemble building as SMAC process is done'
         logfile = glob.glob(os.path.join(
             self.backend.temporary_directory, '*.log'))[0]
-        print(f"logfile={logfile}")
         with open(logfile) as f:
             self.assertIn(msg,  f.read())
 
@@ -659,7 +659,8 @@ class EnsembleProcessBuilderTest(unittest.TestCase):
 
     def test_ensemble_builder_process_realrun(self):
         dask.config.set({'distributed.worker.daemon': False})
-        client = dask.distributed.Client(n_workers=2, processes=True)
+        client = dask.distributed.Client(n_workers=1, processes=False,
+                                         nthreads=2)
         ensemble = client.submit(
             ensemble_builder_process,
             start_time=time.time(),
