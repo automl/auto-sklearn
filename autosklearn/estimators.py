@@ -30,6 +30,7 @@ class AutoSklearnEstimator(BaseEstimator):
         include_preprocessors=None,
         exclude_preprocessors=None,
         resampling_strategy='holdout',
+        iterative: bool = True,
         resampling_strategy_arguments=None,
         tmp_folder=None,
         output_folder=None,
@@ -119,18 +120,19 @@ class AutoSklearnEstimator(BaseEstimator):
             how to to handle overfitting, might need 'resampling_strategy_arguments'
 
             * 'holdout': 67:33 (train:test) split
-            * 'holdout-iterative-fit':  67:33 (train:test) split, calls iterative
-              fit where possible
             * 'cv': crossvalidation, requires 'folds'
-            * 'cv-iterative-fit': crossvalidation, calls iterative fit where possible
-            * 'partial-cv': crossvalidation with intensification, requires
-              'folds'
+            * 'partial-cv': crossvalidation with intensification, requires 'folds'
             * BaseCrossValidator object: any BaseCrossValidator class found
                                         in scikit-learn model_selection module
             * _RepeatedSplits object: any _RepeatedSplits class found
                                       in scikit-learn model_selection module
             * BaseShuffleSplit object: any BaseShuffleSplit class found
                                       in scikit-learn model_selection module
+                                      
+        iterative : bool
+            Whether to iteratively train the models and store predictions to disk if possible. 
+            Can reduce the number of timeouts and memouts when working on large datasets or using 
+            memory-intensive preprocessing.
 
         resampling_strategy_arguments : dict, optional if 'holdout' (train_size default=0.67)
             Additional arguments for resampling_strategy:
@@ -143,9 +145,7 @@ class AutoSklearnEstimator(BaseEstimator):
             Available arguments:
 
             * 'holdout': {'train_size': float}
-            * 'holdout-iterative-fit':  {'train_size': float}
             * 'cv': {'folds': int}
-            * 'cv-iterative-fit': {'folds': int}
             * 'partial-cv': {'folds': int, 'shuffle': bool}
             * BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments
                 required by chosen class as specified in scikit-learn documentation.
@@ -251,6 +251,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.include_preprocessors = include_preprocessors
         self.exclude_preprocessors = exclude_preprocessors
         self.resampling_strategy = resampling_strategy
+        self.iterative = iterative
         self.resampling_strategy_arguments = resampling_strategy_arguments
         self.tmp_folder = tmp_folder
         self.output_folder = output_folder
@@ -306,6 +307,7 @@ class AutoSklearnEstimator(BaseEstimator):
             include_preprocessors=self.include_preprocessors,
             exclude_preprocessors=self.exclude_preprocessors,
             resampling_strategy=self.resampling_strategy,
+            iterative=self.iterative,
             resampling_strategy_arguments=self.resampling_strategy_arguments,
             n_jobs=self._n_jobs,
             dask_client=self.dask_client,

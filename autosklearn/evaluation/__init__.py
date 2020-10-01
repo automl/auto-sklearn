@@ -86,7 +86,7 @@ def get_cost_of_crash(metric):
 class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
     def __init__(self, backend, autosklearn_seed, resampling_strategy, metric,
-                 logger, cost_for_crash, abort_on_first_run_crash,
+                 logger, cost_for_crash, abort_on_first_run_crash, iterative,
                  initial_num_run=1, stats=None,
                  run_obj='quality', par_factor=1, all_scoring_functions=False,
                  output_y_hat_optimization=True, include=None, exclude=None,
@@ -95,10 +95,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         if resampling_strategy == 'holdout':
             eval_function = autosklearn.evaluation.train_evaluator.eval_holdout
-        elif resampling_strategy == 'holdout-iterative-fit':
-            eval_function = autosklearn.evaluation.train_evaluator.eval_iterative_holdout
-        elif resampling_strategy == 'cv-iterative-fit':
-            eval_function = autosklearn.evaluation.train_evaluator.eval_iterative_cv
         elif resampling_strategy == 'cv' or (
              isinstance(resampling_strategy, type) and (
                 issubclass(resampling_strategy, BaseCrossValidator) or
@@ -109,8 +105,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             eval_function = autosklearn.evaluation.train_evaluator.eval_cv
         elif resampling_strategy == 'partial-cv':
             eval_function = autosklearn.evaluation.train_evaluator.eval_partial_cv
-        elif resampling_strategy == 'partial-cv-iterative-fit':
-            eval_function = autosklearn.evaluation.train_evaluator.eval_partial_cv_iterative
         elif resampling_strategy == 'test':
             eval_function = autosklearn.evaluation.test_evaluator.eval_t
             output_y_hat_optimization = False
@@ -140,6 +134,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.resampling_strategy = resampling_strategy
         self.initial_num_run = initial_num_run
         self.metric = metric
+        self.iterative = iterative
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_args = resampling_strategy_args
         self.all_scoring_functions = all_scoring_functions
@@ -266,6 +261,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             init_params=init_params,
             budget=budget,
             budget_type=self.budget_type,
+            iterative=self.iterative,
         )
 
         if self.resampling_strategy != 'test':

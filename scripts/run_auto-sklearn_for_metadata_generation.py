@@ -139,6 +139,7 @@ for i, entry in enumerate(trajectory):
                                     logger=logger,
                                     stats=stats,
                                     all_scoring_functions=True,
+                                    iterative=True,
                                     include=include,
                                     metric=automl_arguments['metric'],
                                     cost_for_crash=get_cost_of_crash(automl_arguments['metric']),

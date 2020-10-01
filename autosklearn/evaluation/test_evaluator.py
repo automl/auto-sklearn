@@ -103,7 +103,7 @@ class TestEvaluator(AbstractEvaluator):
 def eval_t(queue, config, backend, metric, seed, num_run, instance,
            all_scoring_functions, output_y_hat_optimization, include,
            exclude, disable_file_output, init_params=None, budget_type=None,
-           budget=None):
+           budget=None, iterative=False):
     evaluator = TestEvaluator(configuration=config,
                               backend=backend, metric=metric, seed=seed,
                               queue=queue,

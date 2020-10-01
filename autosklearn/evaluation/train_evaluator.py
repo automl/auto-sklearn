@@ -19,8 +19,7 @@ from autosklearn.constants import (
 )
 
 
-__all__ = ['TrainEvaluator', 'eval_holdout', 'eval_iterative_holdout',
-           'eval_cv', 'eval_partial_cv', 'eval_partial_cv_iterative']
+__all__ = ['TrainEvaluator', 'eval_holdout', 'eval_cv', 'eval_partial_cv']
 
 __baseCrossValidator_defaults__ = {'GroupKFold': {'n_splits': 3},
                                    'KFold': {'n_splits': 3,
@@ -1075,47 +1074,6 @@ def eval_holdout(
     evaluator.fit_predict_and_loss(iterative=iterative)
 
 
-def eval_iterative_holdout(
-        queue,
-        config,
-        backend,
-        resampling_strategy,
-        resampling_strategy_args,
-        metric,
-        seed,
-        num_run,
-        instance,
-        all_scoring_functions,
-        output_y_hat_optimization,
-        include,
-        exclude,
-        disable_file_output,
-        init_params=None,
-        budget=100.0,
-        budget_type=None,
-):
-    return eval_holdout(
-        queue=queue,
-        config=config,
-        backend=backend,
-        metric=metric,
-        resampling_strategy=resampling_strategy,
-        resampling_strategy_args=resampling_strategy_args,
-        seed=seed,
-        num_run=num_run,
-        all_scoring_functions=all_scoring_functions,
-        output_y_hat_optimization=output_y_hat_optimization,
-        include=include,
-        exclude=exclude,
-        instance=instance,
-        disable_file_output=disable_file_output,
-        iterative=True,
-        init_params=init_params,
-        budget=budget,
-        budget_type=budget_type
-    )
-
-
 def eval_partial_cv(
         queue,
         config,
@@ -1163,47 +1121,6 @@ def eval_partial_cv(
     evaluator.partial_fit_predict_and_loss(fold=fold, iterative=iterative)
 
 
-def eval_partial_cv_iterative(
-        queue,
-        config,
-        backend,
-        resampling_strategy,
-        resampling_strategy_args,
-        metric,
-        seed,
-        num_run,
-        instance,
-        all_scoring_functions,
-        output_y_hat_optimization,
-        include,
-        exclude,
-        disable_file_output,
-        init_params=None,
-        budget=None,
-        budget_type=None
-):
-    if budget_type is not None:
-        raise NotImplementedError()
-    return eval_partial_cv(
-        queue=queue,
-        config=config,
-        backend=backend,
-        metric=metric,
-        resampling_strategy=resampling_strategy,
-        resampling_strategy_args=resampling_strategy_args,
-        seed=seed,
-        num_run=num_run,
-        instance=instance,
-        all_scoring_functions=all_scoring_functions,
-        output_y_hat_optimization=output_y_hat_optimization,
-        include=include,
-        exclude=exclude,
-        disable_file_output=disable_file_output,
-        iterative=True,
-        init_params=init_params,
-    )
-
-
 # create closure for evaluating an algorithm
 def eval_cv(
         queue,
@@ -1245,45 +1162,3 @@ def eval_cv(
     )
 
     evaluator.fit_predict_and_loss(iterative=iterative)
-
-
-def eval_iterative_cv(
-        queue,
-        config,
-        backend,
-        resampling_strategy,
-        resampling_strategy_args,
-        metric,
-        seed,
-        num_run,
-        instance,
-        all_scoring_functions,
-        output_y_hat_optimization,
-        include,
-        exclude,
-        disable_file_output,
-        init_params=None,
-        budget=None,
-        budget_type=None,
-        iterative=True,
-):
-    eval_cv(
-        backend=backend,
-        queue=queue,
-        metric=metric,
-        config=config,
-        seed=seed,
-        num_run=num_run,
-        resampling_strategy=resampling_strategy,
-        resampling_strategy_args=resampling_strategy_args,
-        all_scoring_functions=all_scoring_functions,
-        output_y_hat_optimization=output_y_hat_optimization,
-        include=include,
-        exclude=exclude,
-        disable_file_output=disable_file_output,
-        init_params=init_params,
-        budget=budget,
-        budget_type=budget_type,
-        iterative=iterative,
-        instance=instance,
-    )

@@ -189,6 +189,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             include_preprocessors=include_preprocessors,
             exclude_preprocessors=None,
             resampling_strategy=None,
+            iterative=True,
             resampling_strategy_arguments=None,
             tmp_folder=tmp_folder,
             output_folder=output_folder,
@@ -219,47 +220,47 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
 
         setting = {
             'RF_None_holdout_iterative_es_if': {
-                'resampling_strategy': 'holdout-iterative-fit',
+                'resampling_strategy': 'holdout',
                 'fidelity': None,
             },
             'RF_None_3CV_iterative_es_if': {
-                'resampling_strategy': 'cv-iterative-fit',
+                'resampling_strategy': 'cv',
                 'folds': 3,
                 'fidelity': None,
             },
             'RF_None_5CV_iterative_es_if': {
-                'resampling_strategy': 'cv-iterative-fit',
+                'resampling_strategy': 'cv',
                 'folds': 5,
                 'fidelity': None,
             },
             'RF_None_10CV_iterative_es_if': {
-                'resampling_strategy': 'cv-iterative-fit',
+                'resampling_strategy': 'cv',
                 'folds': 10,
                 'fidelity': None,
             },
             'RF_SH-eta4-i_holdout_iterative_es_if': {
-                'resampling_strategy': 'holdout-iterative-fit',
+                'resampling_strategy': 'holdout',
                 'fidelity': 'SH',
             },
             'RF_SH-eta4-i_3CV_iterative_es_if': {
-                'resampling_strategy': 'cv-iterative-fit',
+                'resampling_strategy': 'cv',
                 'folds': 3,
                 'fidelity': 'SH',
             },
             'RF_SH-eta4-i_5CV_iterative_es_if': {
-                'resampling_strategy': 'cv-iterative-fit',
+                'resampling_strategy': 'cv',
                 'folds': 5,
                 'fidelity': 'SH',
             },
             'RF_SH-eta4-i_10CV_iterative_es_if': {
-                'resampling_strategy': 'cv-iterative-fit',
+                'resampling_strategy': 'cv',
                 'folds': 10,
                 'fidelity': 'SH',
             }
         }[automl_policy]
 
         resampling_strategy = setting['resampling_strategy']
-        if resampling_strategy == 'cv-iterative-fit':
+        if resampling_strategy == 'cv':
             resampling_strategy_kwargs = {'folds': setting['folds']}
         else:
             resampling_strategy_kwargs = None

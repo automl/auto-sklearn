@@ -109,7 +109,8 @@ class AutoML(BaseEstimator):
                  exclude_estimators=None,
                  include_preprocessors=None,
                  exclude_preprocessors=None,
-                 resampling_strategy='holdout-iterative-fit',
+                 resampling_strategy='holdout',
+                 iterative=True,
                  resampling_strategy_arguments=None,
                  n_jobs=None,
                  dask_client: Optional[dask.distributed.Client] = None,
@@ -141,33 +142,25 @@ class AutoML(BaseEstimator):
         self._include_preprocessors = include_preprocessors
         self._exclude_preprocessors = exclude_preprocessors
         self._resampling_strategy = resampling_strategy
+        self._iterative = iterative
         self._resampling_strategy_arguments = resampling_strategy_arguments \
             if resampling_strategy_arguments is not None else {}
-        if self._resampling_strategy not in ['holdout',
-                                             'holdout-iterative-fit',
-                                             'cv',
-                                             'cv-iterative-fit',
-                                             'partial-cv',
-                                             'partial-cv-iterative-fit',
-                                             ] \
-           and not issubclass(self._resampling_strategy, BaseCrossValidator)\
-           and not issubclass(self._resampling_strategy, _RepeatedSplits)\
-           and not issubclass(self._resampling_strategy, BaseShuffleSplit):
+        if (
+            self._resampling_strategy not in ['holdout', 'cv', 'partial-cv']
+            and not issubclass(self._resampling_strategy, BaseCrossValidator)
+            and not issubclass(self._resampling_strategy, _RepeatedSplits)
+            and not issubclass(self._resampling_strategy, BaseShuffleSplit)
+        ):
             raise ValueError('Illegal resampling strategy: %s' %
                              self._resampling_strategy)
 
-        if self._resampling_strategy in ['partial-cv',
-                                         'partial-cv-iterative-fit',
-                                         ] \
-           and self._ensemble_size != 0:
+        if self._resampling_strategy == 'partial-cv' and self._ensemble_size != 0:
             raise ValueError("Resampling strategy %s cannot be used "
                              "together with ensembles." % self._resampling_strategy)
-        if self._resampling_strategy in ['partial-cv',
-                                         'cv',
-                                         'cv-iterative-fit',
-                                         'partial-cv-iterative-fit',
-                                         ]\
-           and 'folds' not in self._resampling_strategy_arguments:
+        if (
+            self._resampling_strategy in ['partial-cv', 'cv']
+            and 'folds' not in self._resampling_strategy_arguments
+        ):
             self._resampling_strategy_arguments['folds'] = 5
         self._n_jobs = n_jobs
         self._dask_client = dask_client
@@ -250,8 +243,7 @@ class AutoML(BaseEstimator):
     def _do_dummy_prediction(self, datamanager, num_run):
 
         # When using partial-cv it makes no sense to do dummy predictions
-        if self._resampling_strategy in ['partial-cv',
-                                         'partial-cv-iterative-fit']:
+        if self._resampling_strategy == 'partial-cv':
             return num_run
 
         self._logger.info("Starting to create dummy predictions.")
@@ -274,6 +266,7 @@ class AutoML(BaseEstimator):
                                     stats=stats,
                                     metric=self._metric,
                                     memory_limit=memory_limit,
+                                    iterative=False,
                                     disable_file_output=self._disable_evaluator_output,
                                     abort_on_first_run_crash=False,
                                     cost_for_crash=get_cost_of_crash(self._metric),
@@ -435,6 +428,7 @@ class AutoML(BaseEstimator):
         self._logger.debug('  include_preprocessors: %s', str(self._include_preprocessors))
         self._logger.debug('  exclude_preprocessors: %s', str(self._exclude_preprocessors))
         self._logger.debug('  resampling_strategy: %s', str(self._resampling_strategy))
+        self._logger.debug('  iterative: %s', str(self._iterative))
         self._logger.debug('  resampling_strategy_arguments: %s',
                            str(self._resampling_strategy_arguments))
         self._logger.debug('  n_jobs: %s', str(self._n_jobs))
@@ -614,6 +608,7 @@ class AutoML(BaseEstimator):
                 seed=self._seed,
                 metadata_directory=self._metadata_directory,
                 metric=self._metric,
+                iterative=self._iterative,
                 resampling_strategy=self._resampling_strategy,
                 resampling_strategy_args=self._resampling_strategy_arguments,
                 include_estimators=self._include_estimators,
@@ -719,8 +714,7 @@ class AutoML(BaseEstimator):
             processes.
         """
         if (
-            self._resampling_strategy not in (
-                'holdout', 'holdout-iterative-fit', 'cv', 'cv-iterative-fit')
+            self._resampling_strategy not in ('holdout', 'cv')
             and not self._can_predict
         ):
             raise NotImplementedError(
@@ -788,7 +782,7 @@ class AutoML(BaseEstimator):
     def fit_ensemble(self, y, task=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
-        if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit']:
+        if self._resampling_strategy in ['partial-cv']:
             raise ValueError('Cannot call fit_ensemble with resampling '
                              'strategy %s.' % self._resampling_strategy)
 
@@ -865,17 +859,17 @@ class AutoML(BaseEstimator):
         if self.ensemble_:
             identifiers = self.ensemble_.get_selected_model_identifiers()
             self.models_ = self._backend.load_models_by_identifiers(identifiers)
-            if self._resampling_strategy in ('cv', 'cv-iterative-fit'):
+            if self._resampling_strategy in ('cv', ):
                 self.cv_models_ = self._backend.load_cv_models_by_identifiers(identifiers)
             else:
                 self.cv_models_ = None
             if (
                 len(self.models_) == 0 and
-                self._resampling_strategy not in ['partial-cv', 'partial-cv-iterative-fit']
+                self._resampling_strategy not in ['partial-cv', ]
             ):
                 raise ValueError('No models fitted!')
             if (
-                self._resampling_strategy in ['cv', 'cv-iterative-fit']
+                self._resampling_strategy in ['cv', ]
                 and len(self.cv_models_) == 0
             ):
                 raise ValueError('No models fitted!')
@@ -885,8 +879,7 @@ class AutoML(BaseEstimator):
                  'model' not in self._disable_evaluator_output):
             model_names = self._backend.list_all_models(self._seed)
 
-            if len(model_names) == 0 and self._resampling_strategy not in \
-                    ['partial-cv', 'partial-cv-iterative-fit']:
+            if len(model_names) == 0 and self._resampling_strategy not in ['partial-cv', ]:
                 raise ValueError('No models fitted!')
 
             self.models_ = []
@@ -970,7 +963,7 @@ class AutoML(BaseEstimator):
         # TODO: add those arguments
 
         # TODO remove this restriction!
-        if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit']:
+        if self._resampling_strategy in ['partial-cv', ]:
             raise ValueError('Cannot call cv_results when using partial-cv!')
 
         parameter_dictionaries = dict()

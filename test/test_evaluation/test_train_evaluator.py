@@ -20,7 +20,7 @@ from smac.tae import StatusType, TAEAbortException
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.evaluation.util import read_queue
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, \
-    eval_holdout, eval_iterative_holdout, eval_cv, eval_partial_cv, subsample_indices
+    eval_holdout, eval_cv, eval_partial_cv, subsample_indices
 from autosklearn.util import backend
 from autosklearn.util.pipeline import get_configuration_space
 from autosklearn.constants import BINARY_CLASSIFICATION, \
@@ -2332,7 +2332,7 @@ class FunctionsTest(unittest.TestCase):
         self.assertEqual(rval[0]['status'], StatusType.SUCCESS)
 
     def test_eval_holdout_iterative_fit_no_timeout(self):
-        eval_iterative_holdout(
+        eval_holdout(
             queue=self.queue,
             config=self.configuration,
             backend=self.backend,
@@ -2347,6 +2347,7 @@ class FunctionsTest(unittest.TestCase):
             disable_file_output=False,
             instance=self.dataset_name,
             metric=accuracy,
+            iterative=True,
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 9)
