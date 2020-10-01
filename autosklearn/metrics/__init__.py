@@ -129,7 +129,7 @@ class _ProbaScorer(Scorer):
         """
 
         if self._score_func is sklearn.metrics.log_loss:
-            n_labels_pred = np.array(y_pred).shape[1]
+            n_labels_pred = np.array(y_pred).reshape((len(y_pred), -1)).shape[1]
             n_labels_test = len(np.unique(y_true))
             if n_labels_pred != n_labels_test:
                 labels = list(range(n_labels_pred))

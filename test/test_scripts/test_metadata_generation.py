@@ -7,6 +7,9 @@ import subprocess
 import unittest
 
 import arff
+import numpy as np
+
+from autosklearn.metrics import CLASSIFICATION_METRICS, REGRESSION_METRICS
 
 
 class TestMetadataGeneration(unittest.TestCase):
@@ -102,8 +105,22 @@ class TestMetadataGeneration(unittest.TestCase):
                     valid_traj = json.load(fh_validation)
                     print('Validation trajectory:')
                     print(valid_traj)
-                    self.assertGreater(len(traj), 0)
+                    self.assertGreater(len(traj), 2)
                     self.assertEqual(len(traj), len(valid_traj))
+                    for entry in valid_traj:
+                        if task_type == 'classification':
+                            for metric in CLASSIFICATION_METRICS:
+                                # This is a multilabel metric
+                                if metric in ('precision_samples', 'recall_samples', 'f1_samples'):
+                                    continue
+                                self.assertIn(metric, entry[-1])
+                                self.assertIsInstance(entry[-1][metric], float)
+                                self.assertTrue(np.isfinite(entry[-1][metric]), (metric, str(entry[-1][metric])))
+                        else:
+                            for metric in REGRESSION_METRICS:
+                                self.assertIn(metric, entry[-1])
+                                self.assertIsInstance(entry[-1][metric], float)
+                                self.assertTrue(np.isfinite(entry[-1][metric]), (metric, str(entry[-1][metric])))
 
         # 5. Get the test performance of these configurations
         script_filename = os.path.join(scripts_directory, '02_retrieve_metadata.py')

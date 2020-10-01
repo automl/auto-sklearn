@@ -234,6 +234,8 @@ class EnsembleBuilder(multiprocessing.Process):
         while True:
             time_elapsed = time.time() - process_start_time
             time_left = self.time_limit - buffer_time - time_elapsed
+            if time_left < 1:
+                break
             self.time_left = time_left
             safe_ensemble_script = pynisher.enforce_limits(
                 wall_time_in_s=int(time_left),
@@ -970,6 +972,20 @@ class EnsembleBuilder(multiprocessing.Process):
             The predictions on the test set using ensemble
 
         """
+        if self.task_type == BINARY_CLASSIFICATION:
+            if len(train_pred.shape) == 1 or train_pred.shape[1] == 1:
+                train_pred = np.vstack(
+                    ((1 - train_pred).reshape((1, -1)), train_pred.reshape((1, -1)))
+                ).transpose()
+            if valid_pred is not None and (len(valid_pred.shape) == 1 or valid_pred.shape[1] == 1):
+                valid_pred = np.vstack(
+                    ((1 - valid_pred).reshape((1, -1)), valid_pred.reshape((1, -1)))
+                ).transpose()
+            if test_pred is not None and (len(test_pred.shape) == 1 or test_pred.shape[1] == 1):
+                test_pred = np.vstack(
+                    ((1 - test_pred).reshape((1, -1)), test_pred.reshape((1, -1)))
+                ).transpose()
+
         performance_stamp = {
             'Timestamp': pd.Timestamp.now(),
             'ensemble_optimization_score': calculate_score(
