@@ -115,12 +115,14 @@ class TestMetadataGeneration(unittest.TestCase):
                                     continue
                                 self.assertIn(metric, entry[-1])
                                 self.assertIsInstance(entry[-1][metric], float)
-                                self.assertTrue(np.isfinite(entry[-1][metric]), (metric, str(entry[-1][metric])))
+                                self.assertTrue(np.isfinite(entry[-1][metric]),
+                                                (metric, str(entry[-1][metric])))
                         else:
                             for metric in REGRESSION_METRICS:
                                 self.assertIn(metric, entry[-1])
                                 self.assertIsInstance(entry[-1][metric], float)
-                                self.assertTrue(np.isfinite(entry[-1][metric]), (metric, str(entry[-1][metric])))
+                                self.assertTrue(np.isfinite(entry[-1][metric]),
+                                                (metric, str(entry[-1][metric])))
 
         # 5. Get the test performance of these configurations
         script_filename = os.path.join(scripts_directory, '02_retrieve_metadata.py')
