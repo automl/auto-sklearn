@@ -89,11 +89,6 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     tmp_folder='/tmp/autosklearn_sh_example_tmp',
     output_folder='/tmp/autosklearn_sh_example_out',
     disable_evaluator_output=False,
-    # 'holdout' with 'train_size'=0.67 is the default argument setting
-    # for AutoSklearnClassifier. It is explicitly specified in this example
-    # for demonstrational purpose.
-    resampling_strategy='holdout',
-    resampling_strategy_arguments={'train_size': 0.67},
     include_estimators=['extra_trees', 'gradient_boosting', 'random_forest', 'sgd',
                         'passive_aggressive'],
     include_preprocessors=['no_preprocessing'],
@@ -153,7 +148,7 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     tmp_folder='/tmp/autosklearn_sh_example_tmp',
     output_folder='/tmp/autosklearn_sh_example_out',
     disable_evaluator_output=False,
-    resampling_strategy='cv-iterative-fit',
+    resampling_strategy='cv',
     include_estimators=['extra_trees', 'gradient_boosting', 'random_forest', 'sgd',
                         'passive_aggressive'],
     include_preprocessors=['no_preprocessing'],
@@ -184,10 +179,6 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     tmp_folder='/tmp/autosklearn_sh_example_tmp',
     output_folder='/tmp/autosklearn_sh_example_out',
     disable_evaluator_output=False,
-    # 'holdout' with 'train_size'=0.67 is the default argument setting
-    # for AutoSklearnClassifier. It is explicitly specified in this example
-    # for demonstrational purpose.
-    resampling_strategy='holdout',
     resampling_strategy_arguments={'train_size': 0.67},
     get_smac_object_callback=get_smac_object_callback('subsample'),
 )
@@ -217,10 +208,6 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     tmp_folder='/tmp/autosklearn_sh_example_tmp',
     output_folder='/tmp/autosklearn_sh_example_out',
     disable_evaluator_output=False,
-    # 'holdout' with 'train_size'=0.67 is the default argument setting
-    # for AutoSklearnClassifier. It is explicitly specified in this example
-    # for demonstrational purpose.
-    resampling_strategy='holdout',
     resampling_strategy_arguments={'train_size': 0.67},
     include_estimators=['extra_trees', 'gradient_boosting', 'random_forest', 'sgd'],
     get_smac_object_callback=get_smac_object_callback('mixed'),
