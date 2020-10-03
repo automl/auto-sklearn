@@ -243,12 +243,14 @@ class AutoML(BaseEstimator):
 
     def _create_dask_client(self):
         self._is_dask_client_internally_created = True
-        dask.config.set({'distributed.worker.daemon': False})
+        processes = False
+        if self._n_jobs is not None and self._n_jobs > 1:
+            processes = True
+            dask.config.set({'distributed.worker.daemon': False})
         self._dask_client = dask.distributed.Client(
             dask.distributed.LocalCluster(
-                # 2 workers -- 1 for ensemble / 1 for smac
-                n_workers=2 if self._n_jobs is None else self._n_jobs,
-                processes=True,
+                n_workers=self._n_jobs,
+                processes=processes,
                 threads_per_worker=1,
                 # We use the temporal directory to save the
                 # dask workers, because deleting workers

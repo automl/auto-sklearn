@@ -1,9 +1,9 @@
 import glob
 import os
 import sys
-import shutil
 import time
 import unittest.mock
+import pickle
 
 import dask.distributed
 
@@ -85,8 +85,19 @@ class EnsembleBuilderMemMock(EnsembleBuilder):
 class EnsembleTest(unittest.TestCase):
     def setUp(self):
         self.backend = BackendMock()
+        self.ensemble_memory_file = os.path.join(
+            self.backend.temporary_directory,
+            'ensemble_read_preds.pkl'
+        )
+
+        # We make sure that every test starts without
+        # any memory file
+        if os.path.exists(self.ensemble_memory_file):
+            os.unlink(self.ensemble_memory_file)
 
     def tearDown(self):
+        if os.path.exists(self.ensemble_memory_file):
+            os.unlink(self.ensemble_memory_file)
         pass
 
     def testRead(self):
@@ -452,6 +463,74 @@ class EnsembleTest(unittest.TestCase):
         # it should try to reduce ensemble_nbest until it also failed at 2
         self.assertEqual(ensbuilder.ensemble_nbest, 1)
 
+    def _compare_read_preds(self, read_preds1, read_preds2):
+        """
+        compares read_preds attribute. An alternative to
+        assert Dict Equal as it contains np arrays, so we have
+        to use np testing utilities accordingly
+        """
+
+        # Both arrays should have the same splits
+        self.assertCountEqual(read_preds1.keys(), read_preds2.keys())
+
+        for k, v in read_preds1.items():
+
+            # Each split should have the same elements
+            self.assertCountEqual(read_preds1[k].keys(), read_preds2[k].keys())
+
+            # This level contains the scores/ensmebles/etc
+            for actual_k, actual_v in read_preds1[k].items():
+
+                # If it is a numpy array, make sure it is the same
+                if type(actual_v) is np.ndarray:
+                    np.testing.assert_array_equal(actual_v, read_preds2[k][actual_k])
+                else:
+                    self.assertEqual(actual_v, read_preds2[k][actual_k])
+
+    def test_read_pickle_read_preds(self):
+        """
+        This procedure test that we save the read predictions before
+        destroying the ensemble builder and that we are able to read
+        them safely after
+        """
+        ensbuilder = EnsembleBuilder(
+            backend=self.backend,
+            dataset_name="TEST",
+            task_type=3,  # Multilabel Classification
+            metric=roc_auc,
+            seed=0,  # important to find the test files
+            ensemble_nbest=2,
+            max_models_on_disc=None,
+            )
+        ensbuilder.SAVE2DISC = False
+
+        run_history, ensemble_nbest = ensbuilder.main(time_left=np.inf, iteration=1)
+
+        # Check that the memory was created
+        ensemble_memory_file = os.path.join(
+            self.backend.temporary_directory,
+            'ensemble_read_preds.pkl'
+        )
+        self.assertTrue(os.path.exists(ensemble_memory_file))
+
+        # Make sure we pickle the correct read preads
+        with (open(ensemble_memory_file, "rb")) as memory:
+            read_preds = pickle.load(memory)
+
+        self._compare_read_preds(read_preds, ensbuilder.read_preds)
+
+        # Then create a new instance, which should automatically read this file
+        ensbuilder2 = EnsembleBuilder(
+            backend=self.backend,
+            dataset_name="TEST",
+            task_type=3,  # Multilabel Classification
+            metric=roc_auc,
+            seed=0,  # important to find the test files
+            ensemble_nbest=2,
+            max_models_on_disc=None,
+            )
+        self._compare_read_preds(ensbuilder2.read_preds, ensbuilder.read_preds)
+
 
 class EnsembleSelectionTest(unittest.TestCase):
     def testPredict(self):
@@ -619,7 +698,7 @@ class EnsembleProcessBuilderTest(unittest.TestCase):
         """
         Makes sure we can kill an ensemble process via a event
         """
-        client = dask.distributed.Client(n_workers=1, processes=True)
+        client = dask.distributed.Client(n_workers=1, processes=False)
         event = dask.distributed.Event('None')
 
         # Set the event so the run does not even start

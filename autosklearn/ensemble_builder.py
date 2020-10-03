@@ -4,6 +4,7 @@ import numbers
 import glob
 import gzip
 import os
+import pickle
 import re
 import time
 import traceback
@@ -384,6 +385,33 @@ class EnsembleBuilder(object):
         #    }
         # }
         self.read_preds = {}
+
+        # Depending on the dataset dimensions,
+        # regenerating every iteration, the predictions
+        # scores for self.read_preds
+        # is too computationally expensive
+        # As the ensemble builder is stateless
+        # (every time the ensemble builder gets resources
+        # from dask, it builds this object from scratch)
+        # we save the state of this dictionary to memory
+        # and read it if available
+        self.ensemble_memory_file = os.path.join(
+            self.backend.temporary_directory,
+            'ensemble_read_preds.pkl'
+        )
+        if os.path.exists(self.ensemble_memory_file):
+            try:
+                with (open(self.ensemble_memory_file, "rb")) as memory:
+                    self.read_preds = pickle.load(memory)
+            except Exception as e:
+                self.logger.critical(
+                    "Could not load the previous iterations of ensemble_builder."
+                    "This might impact the quality of the run. Exception={} {}".format(
+                        e,
+                        traceback.format_exc(),
+                    )
+                )
+
         self.last_hash = None  # hash of ensemble training data
         self.y_true_ensemble = None
         self.SAVE2DISC = True
@@ -556,6 +584,10 @@ class EnsembleBuilder(object):
                 valid_pred,
                 test_pred
             )
+
+        # Save the read preds status for the next iteration
+        with (open(self.ensemble_memory_file, "wb")) as memory:
+            pickle.dump(self.read_preds, memory)
 
         return self.ensemble_history, self.ensemble_nbest
 

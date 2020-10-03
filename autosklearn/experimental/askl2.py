@@ -5,6 +5,8 @@ import pathlib
 import pickle
 from typing import Any, Dict, Optional, Union
 
+import dask.distributed
+
 from ConfigSpace import Configuration
 import numpy as np
 import pandas as pd
@@ -164,6 +166,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         delete_tmp_folder_after_terminate: bool = True,
         delete_output_folder_after_terminate: bool = True,
         n_jobs: Optional[int] = None,
+        dask_client: Optional[dask.distributed.Client] = None,
         disable_evaluator_output: bool = False,
         smac_scenario_args: Optional[Dict[str, Any]] = None,
         logging_config: Optional[Dict[str, Any]] = None,
@@ -193,6 +196,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             delete_tmp_folder_after_terminate=delete_tmp_folder_after_terminate,
             delete_output_folder_after_terminate=delete_output_folder_after_terminate,
             n_jobs=n_jobs,
+            dask_client=dask_client,
             disable_evaluator_output=disable_evaluator_output,
             get_smac_object_callback=None,
             smac_scenario_args=smac_scenario_args,

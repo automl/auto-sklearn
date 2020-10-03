@@ -56,18 +56,7 @@ class AutoMLTest(Base, unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
-        dask.config.set({'distributed.worker.daemon': False})
-        self.client = dask.distributed.Client(
-            dask.distributed.LocalCluster(
-                n_workers=1,
-                processes=False,
-                threads_per_worker=2,
-            )
-        )
-
-    @classmethod
-    def tearDownClass(self):
-        self.client.close()
+        self.client = dask.distributed.get_client('127.0.0.1:4567')
 
     def test_refit_shuffle_on_fail(self):
         backend_api = self._create_backend('test_refit_shuffle_on_fail')
@@ -78,7 +67,7 @@ class AutoMLTest(Base, unittest.TestCase):
             ValueError(), ValueError(), (None, {})]
         failing_model.get_max_iter.return_value = 100
 
-        auto = AutoML(backend_api, 20, 5, dask_client=self.client)
+        auto = AutoML(backend_api, 30, 5, dask_client=self.client)
         ensemble_mock = unittest.mock.Mock()
         ensemble_mock.get_selected_model_identifiers.return_value = [(1, 1, 50.0)]
         auto.ensemble_ = ensemble_mock
@@ -151,7 +140,7 @@ class AutoMLTest(Base, unittest.TestCase):
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
         automl = autosklearn.automl.AutoML(
             backend=backend_api,
-            time_left_for_this_task=20,
+            time_left_for_this_task=30,
             per_run_time_limit=5,
             metric=accuracy,
             dask_client=self.client,
@@ -242,7 +231,7 @@ class AutoMLTest(Base, unittest.TestCase):
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
         automl = autosklearn.automl.AutoML(
             backend=backend_api,
-            time_left_for_this_task=20,
+            time_left_for_this_task=30,
             per_run_time_limit=5,
             initial_configurations_via_metalearning=0,
             get_smac_object_callback=get_roar_object_callback,
@@ -309,7 +298,7 @@ class AutoMLTest(Base, unittest.TestCase):
         )
 
         auto = autosklearn.automl.AutoML(
-            backend_api, 20, 5,
+            backend_api, 30, 5,
             initial_configurations_via_metalearning=0,
             seed=100,
             metric=accuracy,
@@ -559,7 +548,7 @@ class AutoMLTest(Base, unittest.TestCase):
             X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
             automl = autosklearn.automl.AutoML(
                 backend=backend_api,
-                time_left_for_this_task=20,
+                time_left_for_this_task=30,
                 per_run_time_limit=5,
                 metric=metric,
                 dask_client=self.client,
@@ -602,7 +591,7 @@ class AutoMLTest(Base, unittest.TestCase):
         backend_api = self._create_backend('test_fail_feat_pandas')
         automl = autosklearn.automl.AutoML(
             backend=backend_api,
-            time_left_for_this_task=20,
+            time_left_for_this_task=30,
             per_run_time_limit=5,
             metric=accuracy,
             dask_client=self.client,
@@ -627,7 +616,7 @@ class AutoMLTest(Base, unittest.TestCase):
         backend_api = self._create_backend('test_fail_feat_typechange')
         automl = autosklearn.automl.AutoML(
             backend=backend_api,
-            time_left_for_this_task=20,
+            time_left_for_this_task=30,
             per_run_time_limit=5,
             metric=accuracy,
             dask_client=self.client,
