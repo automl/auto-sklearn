@@ -165,7 +165,7 @@ class AutoMLTest(Base, unittest.TestCase):
         X, Y, _, _ = putil.get_dataset('iris')
         automl = autosklearn.automl.AutoML(
             backend_api,
-            time_left_for_this_task=30,
+            time_left_for_this_task=45,
             per_run_time_limit=5,
             ensemble_nbest=3,
             seed=seed,
@@ -177,7 +177,7 @@ class AutoMLTest(Base, unittest.TestCase):
             dask_client=self.client,
             # Force model to be deleted. That is, from 50 which is the
             # default to 10 to make sure we delete models.
-            max_models_on_disc=10,
+            max_models_on_disc=8,
         )
 
         automl.fit(X, Y, task=MULTICLASS_CLASSIFICATION,
