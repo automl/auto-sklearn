@@ -84,17 +84,16 @@ class TestMetadataGeneration(unittest.TestCase):
             expected_output_directory = os.path.join(self.working_directory,
                                                      'configuration',
                                                      task_type,
-                                                     str(task_id), metric)
+                                                     str(task_id), metric,
+                                                     'auto-sklearn-output')
             self.assertTrue(os.path.exists(expected_output_directory),
                             msg=expected_output_directory)
             smac_log = os.path.join(expected_output_directory, 'AutoML(1):%d.log' % task_id)
             with open(smac_log) as fh:
                 smac_output = fh.read()
             self.assertEqual(rval.returncode, 0, msg=str(rval) + '\n' + smac_output)
-            expected_validation_output = os.path.join(expected_output_directory,
-                                                      'smac3-output',
-                                                      'run_1',
-                                                      'validation_trajectory.json')
+            expected_validation_output = os.path.join(expected_output_directory, '..',
+                                                      'validation_trajectory_1.json')
             self.assertTrue(os.path.exists(expected_validation_output))
             trajectory = os.path.join(expected_output_directory,
                                       'smac3-output', 'run_1', 'trajectory.json')
@@ -105,8 +104,8 @@ class TestMetadataGeneration(unittest.TestCase):
                     valid_traj = json.load(fh_validation)
                     print('Validation trajectory:')
                     print(valid_traj)
-                    self.assertGreater(len(traj), 2)
-                    self.assertEqual(len(traj), len(valid_traj))
+                    self.assertGreater(len(traj), 2, msg=str(valid_traj))
+                    self.assertEqual(len(traj), len(valid_traj), msg=str(valid_traj))
                     for entry in valid_traj:
                         if task_type == 'classification':
                             for metric in CLASSIFICATION_METRICS:
