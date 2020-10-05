@@ -109,11 +109,9 @@ def _calculate_metafeatures_encoded(data_feat_type, basename, x_train, y_train, 
     categorical = [True if feat_type.lower() in ['categorical'] else False
                    for feat_type in data_feat_type]
 
-    print('Starting to compute meta-features')
     result = calculate_all_metafeatures_encoded_labels(
         x_train, y_train, categorical=categorical,
         dataset_name=basename, dont_calculate=EXCLUDE_META_FEATURES)
-    print('Computed meta-features')
     for key in list(result.metafeature_values.keys()):
         if result.metafeature_values[key].type_ != 'METAFEATURE':
             del result.metafeature_values[key]
