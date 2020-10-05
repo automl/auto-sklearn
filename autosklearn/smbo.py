@@ -37,10 +37,11 @@ EXCLUDE_META_FEATURES_CLASSIFICATION = {
     'LandmarkDecisionTree',
     'LandmarkLDA',
     'LandmarkNaiveBayes',
+    'LandmarkRandomNodeLearner',
     'PCAFractionOfComponentsFor95PercentVariance',
     'PCAKurtosisFirstPC',
     'PCASkewnessFirstPC',
-    'PCA'
+    'PCA',
 }
 
 EXCLUDE_META_FEATURES_REGRESSION = {
@@ -98,16 +99,21 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
     return result
 
 
-def _calculate_metafeatures_encoded(basename, x_train, y_train, watcher,
+def _calculate_metafeatures_encoded(data_feat_type, basename, x_train, y_train, watcher,
                                     task, logger):
     EXCLUDE_META_FEATURES = EXCLUDE_META_FEATURES_CLASSIFICATION \
         if task in CLASSIFICATION_TASKS else EXCLUDE_META_FEATURES_REGRESSION
 
     task_name = 'CalculateMetafeaturesEncoded'
     watcher.start_task(task_name)
+    categorical = [True if feat_type.lower() in ['categorical'] else False
+                   for feat_type in data_feat_type]
+
+    print('Starting to compute meta-features')
     result = calculate_all_metafeatures_encoded_labels(
-        x_train, y_train, categorical=[False] * x_train.shape[1],
+        x_train, y_train, categorical=categorical,
         dataset_name=basename, dont_calculate=EXCLUDE_META_FEATURES)
+    print('Computed meta-features')
     for key in list(result.metafeature_values.keys()):
         if result.metafeature_values[key].type_ != 'METAFEATURE':
             del result.metafeature_values[key]
@@ -331,6 +337,7 @@ class AutoMLSMBO(object):
             warnings.showwarning = self._send_warnings_to_log
 
             meta_features_encoded = _calculate_metafeatures_encoded(
+                self.datamanager.feat_type,
                 self.dataset_name,
                 self.datamanager.data['X_train'],
                 self.datamanager.data['Y_train'],
@@ -581,7 +588,6 @@ class AutoMLSMBO(object):
                 else:
                     with warnings.catch_warnings():
                         warnings.showwarning = self._send_warnings_to_log
-                        self.datamanager.perform1HotEncoding()
                     meta_features_encoded = \
                         self._calculate_metafeatures_encoded_with_limits(
                             metafeature_calculation_time_limit)
