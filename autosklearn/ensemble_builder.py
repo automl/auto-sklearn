@@ -39,7 +39,9 @@ class EnsembleBuilder(multiprocessing.Process):
             metric: Scorer,
             limit: int,
             ensemble_size: int = 10,
-            ensemble_nbest: int = 100,
+            ensemble_nbest_abs: int = 100,
+            ensemble_nbest_frac: float = 1.0,
+            dropout: float = 0.0,
             max_models_on_disc: int = 100,
             performance_range_threshold: float = 0,
             seed: int = 1,
@@ -68,21 +70,27 @@ class EnsembleBuilder(multiprocessing.Process):
                 time limit in sec
             ensemble_size: int
                 maximal size of ensemble (passed to autosklearn.ensemble.ensemble_selection)
-            ensemble_nbest: int/float
-                if int: consider only the n best prediction
-                if float: consider only this fraction of the best models
-                Both wrt to validation predictions
-                If performance_range_threshold > 0, might return less models
+            ensemble_nbest_abs: int
+                consider only the n best models wrt to validation performance
+                **Note:** Will use minimum of ensemble_nbest_abs and ensemble_nbest_frac
+                **Note:** If performance_range_threshold > 0, might return less models
+            ensemble_nbest_frac: float
+                consider only this fraction of the best models wrt to validation performance
+                **Note:** Will use minimum of ensemble_nbest_abs and ensemble_nbest_frac
+                **Note:** If performance_range_threshold > 0, might return less models
+            dropout: float
+                For each iteration only consider a subset of this fraction of models for buildinb
+                the base ensemble (based on which to decide which model to add next)
             max_models_on_disc: int
-               Defines the maximum number of models that are kept in the disc.
-               If int, it must be greater or equal than 1, and dictates the max number of
-               models to keep.
-               If float, it will be interpreted as the max megabytes allowed of disc space. That
-               is, if the number of ensemble candidates require more disc space than this float
-               value, the worst models will be deleted to keep within this budget.
-               Models and predictions of the worst-performing models will be deleted then.
-               If None, the feature is disabled.
-               It defines an upper bound on the models that can be used in the ensemble.
+                Defines the maximum number of models that are kept in the disc.
+                If int, it must be greater or equal than 1, and dictates the max number of
+                models to keep.
+                If float, it will be interpreted as the max megabytes allowed of disc space. That
+                is, if the number of ensemble candidates require more disc space than this float
+                value, the worst models will be deleted to keep within this budget.
+                Models and predictions of the worst-performing models will be deleted then.
+                If None, the feature is disabled.
+                It defines an upper bound on the models that can be used in the ensemble.
             performance_range_threshold: float
                 Keep only models that are better than:
                     dummy + (best - dummy)*performance_range_threshold
@@ -117,16 +125,19 @@ class EnsembleBuilder(multiprocessing.Process):
         self.ensemble_size = ensemble_size
         self.performance_range_threshold = performance_range_threshold
 
-        if isinstance(ensemble_nbest, numbers.Integral) and ensemble_nbest < 1:
-            raise ValueError("Integer ensemble_nbest has to be larger 1: %s" %
-                             ensemble_nbest)
-        elif not isinstance(ensemble_nbest, numbers.Integral):
-            if ensemble_nbest < 0 or ensemble_nbest > 1:
-                raise ValueError(
-                    "Float ensemble_nbest best has to be >= 0 and <= 1: %s" %
-                    ensemble_nbest)
+        if ensemble_nbest_abs < 1:
+            raise ValueError("Integer ensemble_nbest_abs has to be larger 1: %g" %
+                             ensemble_nbest_abs)
+        elif 0 > ensemble_nbest_frac > 1.0:
+            raise ValueError("Float ensemble_nbest_frac best has to be >= 0 and <= 1: %g" %
+                             ensemble_nbest_frac)
 
-        self.ensemble_nbest = ensemble_nbest
+        self.ensemble_nbest_frac = ensemble_nbest_frac
+        self.ensemble_nbest_abs = ensemble_nbest_abs
+
+        if dropout < 0 or dropout >= 1:
+            raise ValueError("Dropout has to be in [0, 1): %g" % dropout)
+        self.dropout = dropout
 
         # max_models_on_disc can be a float, in such case we need to
         # remember the user specified Megabytes and translate this to
@@ -173,9 +184,6 @@ class EnsembleBuilder(multiprocessing.Process):
         )
         logger_name = 'EnsembleBuilder(%d):%s' % (self.seed, self.dataset_name)
         self.logger = get_logger(logger_name)
-        if ensemble_nbest == 1:
-            self.logger.debug("Behaviour depends on int/float: %s, %s (ensemble_nbest, type)" %
-                              (ensemble_nbest, type(ensemble_nbest)))
 
         self.start_time = 0
         self.model_fn_re = re.compile(MODEL_FN_RE)
@@ -207,9 +215,9 @@ class EnsembleBuilder(multiprocessing.Process):
         self.validation_performance_ = np.inf
 
         # Track the ensemble performance
-        self.datamanager = self.backend.load_datamanager()
-        self.y_valid = self.datamanager.data.get('Y_valid')
-        self.y_test = self.datamanager.data.get('Y_test')
+        #self.datamanager = self.backend.load_datamanager()
+        #self.y_valid = self.datamanager.data.get('Y_valid')
+        #self.y_test = self.datamanager.data.get('Y_test')
 
         # Support for tracking the performance across time
         # A Queue is needed to handle multiprocessing, not only
@@ -244,8 +252,7 @@ class EnsembleBuilder(multiprocessing.Process):
             if safe_ensemble_script.exit_status is pynisher.MemorylimitException:
                 # if ensemble script died because of memory error,
                 # reduce nbest to reduce memory consumption and try it again
-                if isinstance(self.ensemble_nbest, numbers.Integral) and \
-                        self.ensemble_nbest == 1:
+                if self.ensemble_nbest_abs == 1:
                     self.logger.critical(
                         "Memory Exception -- Unable to further reduce the number of ensemble "
                         "members -- please restart Auto-sklearn with a higher value for the "
@@ -253,12 +260,11 @@ class EnsembleBuilder(multiprocessing.Process):
                         "".format(self.memory_limit)
                     )
                 else:
-                    if isinstance(self.ensemble_nbest, numbers.Integral):
-                        self.ensemble_nbest = int(self.ensemble_nbest / 2)
-                    else:
-                        self.ensemble_nbest = self.ensemble_nbest / 2
+                    self.ensemble_nbest_abs = np.max(int(self.ensemble_nbest_abs / 2), 1)
+                    self.ensemble_nbest_frac = self.ensemble_nbest_frac / 2
                     self.logger.warning("Memory Exception -- restart with "
-                                        "less ensemble_nbest: %d" % self.ensemble_nbest)
+                                        "less ensemble_nbest_abs/frac: %f/%d" %
+                                        (self.ensemble_nbest_frac, self.ensemble_nbest_frac))
                     # ATTENTION: main will start from scratch;
                     # all data structures are empty again
                     continue
@@ -462,8 +468,8 @@ class EnsembleBuilder(multiprocessing.Process):
             _num_run = int(match.group(2))
             _budget = float(match.group(3))
 
-            if '%s_%s' % (_seed, _num_run) in done:
-                to_read.append([y_ens_fn, match, _seed, _num_run, _budget])
+            #if '%s_%s' % (_seed, _num_run) in done:
+            to_read.append([y_ens_fn, match, _seed, _num_run, _budget])
 
         n_read_files = 0
         # Now read file wrt to num_run
@@ -593,23 +599,19 @@ class EnsembleBuilder(multiprocessing.Process):
                 (k, v["ens_score"], v["num_run"]) for k, v in self.read_preds.items()
                 if v["seed"] == self.seed and v["num_run"] == 1
             ]
-        # reload predictions if scores changed over time and a model is
-        # considered to be in the top models again!
-        if not isinstance(self.ensemble_nbest, numbers.Integral):
-            # Transform to number of models to keep. Keep at least one
-            keep_nbest = max(1, min(len(sorted_keys),
-                                    int(len(sorted_keys) * self.ensemble_nbest)))
-            self.logger.debug(
-                "Library pruning: using only top %f percent of the models for ensemble "
-                "(%d out of %d)",
-                self.ensemble_nbest * 100, keep_nbest, len(sorted_keys)
-            )
-        else:
-            # Keep only at most ensemble_nbest
-            keep_nbest = min(self.ensemble_nbest, len(sorted_keys))
-            self.logger.debug("Library Pruning: using for ensemble only "
-                              " %d (out of %d) models" % (keep_nbest, len(sorted_keys)))
 
+        # Compute absolute number of candidates to keep based on min of ensemble_nbest_abs/frac
+        keep_nbest_frac = max(1, int(len(sorted_keys) * self.ensemble_nbest_frac))
+        keep_nbest_abs = self.ensemble_nbest_abs
+        keep_nbest = min(keep_nbest_abs, keep_nbest_frac)
+        self.logger.debug(
+                "Library pruning: using only top %f frac/top %d of the models for ensemble"
+                "(%d out of %d)",
+                self.ensemble_nbest_frac, self.ensemble_nbest_abs, keep_nbest, len(sorted_keys)
+        )
+
+        # Reload predictions if scores changed over time and a model is considered to be in the
+        # top models again!
         # If max_models_on_disc is None, do nothing
         # One can only read at most max_models_on_disc models
         if self.max_models_on_disc is not None:
@@ -836,6 +838,9 @@ class EnsembleBuilder(multiprocessing.Process):
             task_type=self.task_type,
             metric=self.metric,
             random_state=self.random_state,
+            bagging=False,
+            mode="fast",
+            dropout=self.dropout,
         )
 
         try:
@@ -980,26 +985,26 @@ class EnsembleBuilder(multiprocessing.Process):
                 all_scoring_functions=False
             )
         }
-        if valid_pred is not None:
-            # TODO: valid_pred are a legacy from competition manager
-            # and this if never happens. Re-evaluate Y_valid support
-            performance_stamp['ensemble_val_score'] = calculate_score(
-                solution=self.y_valid,
-                prediction=valid_pred,
-                task_type=self.task_type,
-                metric=self.metric,
-                all_scoring_functions=False
-            )
+        #if valid_pred is not None:
+        #    # TODO: valid_pred are a legacy from competition manager
+        #    # and this if never happens. Re-evaluate Y_valid support
+        #    performance_stamp['ensemble_val_score'] = calculate_score(
+        #        solution=self.y_valid,
+        #        prediction=valid_pred,
+        #        task_type=self.task_type,
+        #        metric=self.metric,
+        #        all_scoring_functions=False
+        #    )
 
         # In case test_pred was provided
-        if test_pred is not None:
-            performance_stamp['ensemble_test_score'] = calculate_score(
-                solution=self.y_test,
-                prediction=test_pred,
-                task_type=self.task_type,
-                metric=self.metric,
-                all_scoring_functions=False
-            )
+        #if test_pred is not None:
+        #    performance_stamp['ensemble_test_score'] = calculate_score(
+        #        solution=self.y_test,
+        #        prediction=test_pred,
+        #        task_type=self.task_type,
+        #        metric=self.metric,
+        #        all_scoring_functions=False
+        #    )
 
         self.queue.put(performance_stamp)
 

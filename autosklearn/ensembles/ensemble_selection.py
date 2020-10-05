@@ -19,12 +19,18 @@ class EnsembleSelection(AbstractEnsemble):
         random_state: np.random.RandomState,
         bagging: bool = False,
         mode: str = 'fast',
+        dropout: float = 0.0,
     ) -> None:
         self.ensemble_size = ensemble_size
         self.task_type = task_type
         self.metric = metric
         self.bagging = bagging
         self.mode = mode
+        self.dropout = dropout
+
+        if self.mode != "fast" and self.dropout != 0.0:
+            raise ValueError("Dropout is only implemented for mode %s" % self.mode)
+
         self.random_state = random_state
 
     def fit(
@@ -92,22 +98,24 @@ class EnsembleSelection(AbstractEnsemble):
             s = len(ensemble)
             if s == 0:
                 weighted_ensemble_prediction.fill(0.0)
+                dropout_s = 0
             else:
                 weighted_ensemble_prediction.fill(0.0)
-                for pred in ensemble:
+
+                # Apply dropout, if set to 0.0 mask is always True
+                mask = np.zeros(s, dtype=int)
+                mask[np.where(self.random_state.rand(s) > self.dropout)] = 1
+                for m, pred in zip(mask, ensemble):
                     np.add(
                         weighted_ensemble_prediction,
-                        pred,
+                        pred * m,
                         out=weighted_ensemble_prediction,
                     )
+                # We might have less than s samples in this round
+                dropout_s = np.sum(mask)
                 np.multiply(
                     weighted_ensemble_prediction,
-                    1/s,
-                    out=weighted_ensemble_prediction,
-                )
-                np.multiply(
-                    weighted_ensemble_prediction,
-                    (s / float(s + 1)),
+                    (1 / float(dropout_s + 1)),
                     out=weighted_ensemble_prediction,
                 )
 
@@ -123,7 +131,7 @@ class EnsembleSelection(AbstractEnsemble):
                 )
                 np.add(
                     fant_ensemble_prediction,
-                    (1. / float(s + 1)) * pred,
+                    (1. / float(dropout_s + 1)) * pred,
                     out=fant_ensemble_prediction
                 )
 
@@ -142,6 +150,8 @@ class EnsembleSelection(AbstractEnsemble):
                 scores[j] = self.metric._optimum - calculated_score
 
             all_best = np.argwhere(scores == np.nanmin(scores)).flatten()
+            # TODO: If len(all_best) > 1: Consider only members that are already in the ensemble
+            # to keep ensemble small
             best = self.random_state.choice(all_best)
             ensemble.append(predictions[best])
             trajectory.append(scores[best])
