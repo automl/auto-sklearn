@@ -327,7 +327,7 @@ class AutoMLTest(Base, unittest.TestCase):
         # Check that all directories are there
         fixture = ['cv_models', 'true_targets_ensemble.npy',
                    'start_time_100', 'datamanager.pkl',
-                   'predictions_ensemble',
+                   'predictions_ensemble', 'ensemble_read_preds.pkl',
                    'done', 'ensembles', 'predictions_test', 'models']
         self.assertEqual(sorted(os.listdir(os.path.join(backend_api.temporary_directory,
                                                         '.auto-sklearn'))),
