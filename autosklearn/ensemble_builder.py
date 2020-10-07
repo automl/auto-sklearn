@@ -396,7 +396,7 @@ class EnsembleBuilder(object):
         # we save the state of this dictionary to memory
         # and read it if available
         self.ensemble_memory_file = os.path.join(
-            self.backend.temporary_directory,
+            self.backend.internals_directory,
             'ensemble_read_preds.pkl'
         )
         if os.path.exists(self.ensemble_memory_file):
@@ -404,7 +404,7 @@ class EnsembleBuilder(object):
                 with (open(self.ensemble_memory_file, "rb")) as memory:
                     self.read_preds = pickle.load(memory)
             except Exception as e:
-                self.logger.critical(
+                self.logger.warning(
                     "Could not load the previous iterations of ensemble_builder."
                     "This might impact the quality of the run. Exception={} {}".format(
                         e,

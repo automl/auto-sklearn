@@ -13,6 +13,7 @@ import pandas as pd
 
 from smac.runhistory.runhistory import RunValue, RunKey, RunHistory
 
+from autosklearn.constants import MULTILABEL_CLASSIFICATION, BINARY_CLASSIFICATION
 from autosklearn.metrics import make_scorer, roc_auc, accuracy, log_loss
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensemble_builder import (
@@ -42,6 +43,9 @@ class BackendMock(object):
         )
         self.temporary_directory = os.path.join(
             this_directory, 'data',
+        )
+        self.internals_directory = os.path.join(
+            this_directory, 'data', '.auto-sklearn',
         )
 
     def load_datamanager(self):
@@ -86,7 +90,7 @@ class EnsembleTest(unittest.TestCase):
     def setUp(self):
         self.backend = BackendMock()
         self.ensemble_memory_file = os.path.join(
-            self.backend.temporary_directory,
+            self.backend.internals_directory,
             'ensemble_read_preds.pkl'
         )
 
@@ -105,7 +109,7 @@ class EnsembleTest(unittest.TestCase):
         ensbuilder = EnsembleBuilder(
             backend=self.backend,
             dataset_name="TEST",
-            task_type=1,  # Binary Classification
+            task_type=BINARY_CLASSIFICATION,
             metric=roc_auc,
             seed=0,  # important to find the test files
         )
@@ -138,7 +142,7 @@ class EnsembleTest(unittest.TestCase):
             ensbuilder = EnsembleBuilder(
                 backend=self.backend,
                 dataset_name="TEST",
-                task_type=1,  # Binary Classification
+                task_type=BINARY_CLASSIFICATION,
                 metric=roc_auc,
                 seed=0,  # important to find the test files
                 ensemble_nbest=ensemble_nbest,
@@ -175,7 +179,7 @@ class EnsembleTest(unittest.TestCase):
             ensbuilder = EnsembleBuilder(
                 backend=self.backend,
                 dataset_name="TEST",
-                task_type=1,  # Binary Classification
+                task_type=BINARY_CLASSIFICATION,
                 metric=roc_auc,
                 seed=0,  # important to find the test files
                 ensemble_nbest=ensemble_nbest,
@@ -193,7 +197,7 @@ class EnsembleTest(unittest.TestCase):
         ensbuilder = EnsembleBuilder(
             backend=self.backend,
             dataset_name="TEST",
-            task_type=1,  # Binary Classification
+            task_type=BINARY_CLASSIFICATION,
             metric=roc_auc,
             seed=0,  # important to find the test files
             ensemble_nbest=50,
@@ -224,7 +228,7 @@ class EnsembleTest(unittest.TestCase):
             ensbuilder = EnsembleBuilder(
                 backend=self.backend,
                 dataset_name="TEST",
-                task_type=1,  # Binary Classification
+                task_type=BINARY_CLASSIFICATION,
                 metric=roc_auc,
                 seed=0,  # important to find the test files
                 ensemble_nbest=100,
@@ -248,7 +252,7 @@ class EnsembleTest(unittest.TestCase):
             ensbuilder = EnsembleBuilder(
                 backend=self.backend,
                 dataset_name="TEST",
-                task_type=1,  # Binary Classification
+                task_type=BINARY_CLASSIFICATION,
                 metric=roc_auc,
                 seed=0,  # important to find the test files
                 ensemble_nbest=ensemble_nbest,
@@ -270,7 +274,7 @@ class EnsembleTest(unittest.TestCase):
 
         ensbuilder = EnsembleBuilder(backend=self.backend,
                                      dataset_name="TEST",
-                                     task_type=1,  # Binary Classification
+                                     task_type=BINARY_CLASSIFICATION,
                                      metric=roc_auc,
                                      seed=0,  # important to find the test files
                                      ensemble_nbest=1
@@ -309,7 +313,7 @@ class EnsembleTest(unittest.TestCase):
 
         ensbuilder = EnsembleBuilder(backend=self.backend,
                                      dataset_name="TEST",
-                                     task_type=1,  # Binary Classification
+                                     task_type=BINARY_CLASSIFICATION,
                                      metric=roc_auc,
                                      seed=0,  # important to find the test files
                                      ensemble_nbest=1
@@ -360,7 +364,7 @@ class EnsembleTest(unittest.TestCase):
         ensbuilder = EnsembleBuilder(
             backend=self.backend,
             dataset_name="TEST",
-            task_type=1,  # Binary Classification
+            task_type=BINARY_CLASSIFICATION,
             metric=roc_auc,
             seed=0,  # important to find the test files
             ensemble_nbest=2,
@@ -416,7 +420,7 @@ class EnsembleTest(unittest.TestCase):
         ensbuilder = EnsembleBuilder(
             backend=self.backend,
             dataset_name="TEST",
-            task_type=3,  # Multilabel Classification
+            task_type=MULTILABEL_CLASSIFICATION,  # Multilabel Classification
             metric=roc_auc,
             seed=0,  # important to find the test files
             ensemble_nbest=2,
@@ -449,7 +453,7 @@ class EnsembleTest(unittest.TestCase):
     def testLimit(self):
         ensbuilder = EnsembleBuilderMemMock(backend=self.backend,
                                             dataset_name="TEST",
-                                            task_type=1,  # Binary Classification
+                                            task_type=BINARY_CLASSIFICATION,
                                             metric=roc_auc,
                                             seed=0,  # important to find the test files
                                             ensemble_nbest=10,
@@ -496,7 +500,7 @@ class EnsembleTest(unittest.TestCase):
         ensbuilder = EnsembleBuilder(
             backend=self.backend,
             dataset_name="TEST",
-            task_type=3,  # Multilabel Classification
+            task_type=MULTILABEL_CLASSIFICATION,  # Multilabel Classification
             metric=roc_auc,
             seed=0,  # important to find the test files
             ensemble_nbest=2,
@@ -508,7 +512,7 @@ class EnsembleTest(unittest.TestCase):
 
         # Check that the memory was created
         ensemble_memory_file = os.path.join(
-            self.backend.temporary_directory,
+            self.backend.internals_directory,
             'ensemble_read_preds.pkl'
         )
         self.assertTrue(os.path.exists(ensemble_memory_file))
@@ -523,7 +527,7 @@ class EnsembleTest(unittest.TestCase):
         ensbuilder2 = EnsembleBuilder(
             backend=self.backend,
             dataset_name="TEST",
-            task_type=3,  # Multilabel Classification
+            task_type=MULTILABEL_CLASSIFICATION,  # Multilabel Classification
             metric=roc_auc,
             seed=0,  # important to find the test files
             ensemble_nbest=2,
@@ -545,7 +549,7 @@ class EnsembleSelectionTest(unittest.TestCase):
         # apply the weights.
         # If none of the above is the case, predict() raises Error.
         ensemble = EnsembleSelection(ensemble_size=3,
-                                     task_type=1,
+                                     task_type=BINARY_CLASSIFICATION,
                                      random_state=np.random.RandomState(0),
                                      metric=accuracy,
                                      )
@@ -688,6 +692,9 @@ class EnsembleProcessBuilderTest(unittest.TestCase):
         self.backend = BackendMock()
 
     def tearDown(self):
+        # We create logging information when calling the ensemble process
+        # to make sure we can go back to dask pool, after secede. We clean these
+        # files
         logfiles = glob.glob(os.path.join(
             self.backend.temporary_directory, '*.log'))
         for logfile in logfiles:
@@ -711,7 +718,7 @@ class EnsembleProcessBuilderTest(unittest.TestCase):
             event='None',
             backend=self.backend,
             dataset_name='Test',
-            task=1,
+            task=BINARY_CLASSIFICATION,
             metric=roc_auc,
             ensemble_size=50,
             ensemble_nbest=10,
@@ -748,7 +755,7 @@ class EnsembleProcessBuilderTest(unittest.TestCase):
             event='None',
             backend=self.backend,
             dataset_name='Test',
-            task=1,
+            task=BINARY_CLASSIFICATION,
             metric=MockMetric,
             ensemble_size=50,
             ensemble_nbest=10,
