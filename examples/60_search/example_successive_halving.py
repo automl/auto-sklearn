@@ -85,10 +85,11 @@ X_train, X_test, y_train, y_test = \
 
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=40,
-    per_run_time_limit=5,
+    per_run_time_limit=10,
     tmp_folder='/tmp/autosklearn_sh_example_tmp',
     output_folder='/tmp/autosklearn_sh_example_out',
     disable_evaluator_output=False,
+    delete_tmp_folder_after_terminate=False,
     # 'holdout' with 'train_size'=0.67 is the default argument setting
     # for AutoSklearnClassifier. It is explicitly specified in this example
     # for demonstrational purpose.
@@ -118,10 +119,11 @@ X_train, X_test, y_train, y_test = \
 
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=40,
-    per_run_time_limit=5,
-    tmp_folder='/tmp/autosklearn_sh_example_tmp',
-    output_folder='/tmp/autosklearn_sh_example_out',
+    per_run_time_limit=10,
+    tmp_folder='/tmp/autosklearn_sh_example_tmp_cv',
+    output_folder='/tmp/autosklearn_sh_example_out_cv',
     disable_evaluator_output=False,
+    delete_tmp_folder_after_terminate=False,
     resampling_strategy='cv',
     include_estimators=['extra_trees', 'gradient_boosting', 'random_forest', 'sgd',
                         'passive_aggressive'],
@@ -148,11 +150,12 @@ X_train, X_test, y_train, y_test = \
     sklearn.model_selection.train_test_split(X, y, random_state=1, shuffle=True)
 
 automl = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=50,
+    time_left_for_this_task=40,
     per_run_time_limit=10,
-    tmp_folder='/tmp/autosklearn_sh_example_tmp',
-    output_folder='/tmp/autosklearn_sh_example_out',
+    tmp_folder='/tmp/autosklearn_sh_example_tmp_cv_sh',
+    output_folder='/tmp/autosklearn_sh_example_out_cv_sh',
     disable_evaluator_output=False,
+    delete_tmp_folder_after_terminate=False,
     resampling_strategy='cv-iterative-fit',
     include_estimators=['extra_trees', 'gradient_boosting', 'random_forest', 'sgd',
                         'passive_aggressive'],
@@ -180,10 +183,11 @@ X_train, X_test, y_train, y_test = \
 
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=40,
-    per_run_time_limit=5,
-    tmp_folder='/tmp/autosklearn_sh_example_tmp',
-    output_folder='/tmp/autosklearn_sh_example_out',
+    per_run_time_limit=10,
+    tmp_folder='/tmp/autosklearn_sh_example_tmp_ss',
+    output_folder='/tmp/autosklearn_sh_example_out_ss',
     disable_evaluator_output=False,
+    delete_tmp_folder_after_terminate=False,
     # 'holdout' with 'train_size'=0.67 is the default argument setting
     # for AutoSklearnClassifier. It is explicitly specified in this example
     # for demonstrational purpose.
@@ -213,10 +217,11 @@ X_train, X_test, y_train, y_test = \
 
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=40,
-    per_run_time_limit=5,
-    tmp_folder='/tmp/autosklearn_sh_example_tmp',
-    output_folder='/tmp/autosklearn_sh_example_out',
+    per_run_time_limit=10,
+    tmp_folder='/tmp/autosklearn_sh_example_tmp_mb',
+    output_folder='/tmp/autosklearn_sh_example_out_mb',
     disable_evaluator_output=False,
+    delete_tmp_folder_after_terminate=False,
     # 'holdout' with 'train_size'=0.67 is the default argument setting
     # for AutoSklearnClassifier. It is explicitly specified in this example
     # for demonstrational purpose.
