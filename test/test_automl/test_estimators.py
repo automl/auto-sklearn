@@ -563,7 +563,7 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         self._setUp(tmp)
         self._setUp(output)
 
-        X_train, Y_train, X_test, Y_test = putil.get_dataset('boston', train_size_maximum=300)
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('diabetes', train_size_maximum=400)
         automl = AutoSklearnRegressor(time_left_for_this_task=60,
                                       per_run_time_limit=10,
                                       resampling_strategy='cv',
@@ -572,7 +572,7 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
 
         automl.fit(X_train, Y_train)
         predictions = automl.predict(X_test)
-        self.assertEqual(predictions.shape, (206,))
+        self.assertEqual(predictions.shape, (148,))
         score = r2(Y_test, predictions)
         print(Y_test)
         print(predictions)
