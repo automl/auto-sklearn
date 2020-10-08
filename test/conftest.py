@@ -1,8 +1,8 @@
 import pytest
 
 
-@pytest.fixture(scope="session", autouse=True)
-def session_run_at_beginning(request):
+@pytest.fixture(scope="function")
+def dask_client(request):
     """
     This fixture is meant to be called one per pytest session.
 
@@ -30,14 +30,18 @@ def session_run_at_beginning(request):
     from dask.distributed import Client, LocalCluster
     cluster = LocalCluster(
         n_workers=2,
-        scheduler_port=4567,
+        threads_per_worker=1,
     )
     client = Client(cluster)
     print("Started Dask client={}\n".format(client))
 
-    def session_run_at_end():
-        from dask.distributed import get_client
-        client = get_client('127.0.0.1:4567')
-        print("Closed Dask client={}\n".format(client))
-        client.shutdown()
-    request.addfinalizer(session_run_at_end)
+    def get_finalizer(address):
+        def session_run_at_end():
+            from dask.distributed import get_client
+            client = get_client(address)
+            print("Closed Dask client={}\n".format(client))
+            client.shutdown()
+        return session_run_at_end
+    request.addfinalizer(get_finalizer(cluster.scheduler_address))
+
+    return client
