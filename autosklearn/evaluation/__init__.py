@@ -35,13 +35,6 @@ def fit_predict_try_except_decorator(ta, queue, cost_for_crash, **kwargs):
         exception_traceback = traceback.format_exc()
         error_message = repr(e)
 
-        queue.put({'loss': cost_for_crash,
-                   'additional_run_info': {'traceback': exception_traceback,
-                                           'error': error_message},
-                   'status': StatusType.CRASHED,
-                   'final_queue_element': True}, block=True)
-        queue.close()
-
         # Printing stuff to stdout just in case the queue doesn't work, which happened with the
         # following traceback:
         #     File "auto-sklearn/autosklearn/evaluation/__init__.py", line 29, in fit_predict_try_except_decorator  # noqa E501
@@ -60,6 +53,13 @@ def fit_predict_try_except_decorator(ta, queue, cost_for_crash, **kwargs):
         #     RuntimeError: can't start new thread
         print("Exception handling in `fit_predict_try_except_decorator`: "
               "traceback: %s \nerror message: %s" % (exception_traceback, error_message))
+
+        queue.put({'loss': cost_for_crash,
+                   'additional_run_info': {'traceback': exception_traceback,
+                                           'error': error_message},
+                   'status': StatusType.CRASHED,
+                   'final_queue_element': True}, block=True)
+        queue.close()
 
 
 def get_cost_of_crash(metric):
