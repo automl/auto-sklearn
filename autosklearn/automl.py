@@ -90,6 +90,48 @@ def _model_predict(model, X, batch_size, logger, task):
     return prediction
 
 
+def get_real_n_jobs(_n_jobs):
+    # Handle the number of jobs and the time for them
+    if _n_jobs is None or _n_jobs == 1:
+        n_jobs = 1
+    elif _n_jobs == -1:
+        n_jobs = joblib.cpu_count()
+    else:
+        n_jobs = _n_jobs
+    return n_jobs
+
+
+def get_per_run_time_limit(_per_run_time_limit, n_jobs, time_left_for_smac, logger):
+    # Automatically set the cutoff time per task
+    total_time_all_workers = n_jobs * time_left_for_smac
+    if _per_run_time_limit is None:
+        per_run_time_limit = total_time_all_workers // 10
+        per_run_time_limit = max(5, per_run_time_limit)
+
+        num_total_models = total_time_all_workers / per_run_time_limit
+        if num_total_models < 20:
+            if per_run_time_limit >= 360:
+                for i in range(11, 26):
+                    if total_time_all_workers // i < 360:
+                        num_total_models = i - 1
+                        per_run_time_limit = total_time_all_workers // num_total_models
+                        break
+                    else:
+                        num_total_models = i
+                        per_run_time_limit = total_time_all_workers // num_total_models
+
+    elif _per_run_time_limit > time_left_for_smac:
+        logger.warning(
+            'Time limit for a single run is higher than total time '
+            'limit. Capping the limit for a single run to the total '
+            'time given to SMAC (%f)' % time_left_for_smac
+        )
+        per_run_time_limit = time_left_for_smac
+    else:
+        per_run_time_limit = _per_run_time_limit
+    return per_run_time_limit
+
+
 class AutoML(BaseEstimator):
 
     def __init__(self,
@@ -207,8 +249,8 @@ class AutoML(BaseEstimator):
         if not isinstance(self._time_for_task, int):
             raise ValueError("time_left_for_this_task not of type integer, "
                              "but %s" % str(type(self._time_for_task)))
-        if not isinstance(self._per_run_time_limit, int):
-            raise ValueError("per_run_time_limit not of type integer, but %s" %
+        if self._per_run_time_limit is not None and not isinstance(self._per_run_time_limit, int):
+            raise ValueError("per_run_time_limit must be either None or of type int, but is %s" %
                              str(type(self._per_run_time_limit)))
 
         # After assigning and checking variables...
@@ -410,7 +452,7 @@ class AutoML(BaseEstimator):
         self._logger.debug('  output_folder: %s', self._backend.context._output_directory)
         self._logger.debug('  tmp_folder: %s', self._backend.context._temporary_directory)
         self._logger.debug('  time_left_for_this_task: %f', self._time_for_task)
-        self._logger.debug('  per_run_time_limit: %f', self._per_run_time_limit)
+        self._logger.debug('  per_run_time_limit: %s', str(self._per_run_time_limit))
         self._logger.debug(
             '  initial_configurations_via_metalearning: %d',
             self._initial_configurations_via_metalearning,
@@ -569,21 +611,15 @@ class AutoML(BaseEstimator):
             _proc_smac = None
             self._budget_type = None
         else:
-            if self._per_run_time_limit is None or \
-                    self._per_run_time_limit > time_left_for_smac:
-                self._logger.warning(
-                    'Time limit for a single run is higher than total time '
-                    'limit. Capping the limit for a single run to the total '
-                    'time given to SMAC (%f)' % time_left_for_smac
-                )
-                per_run_time_limit = time_left_for_smac
-            else:
-                per_run_time_limit = self._per_run_time_limit
+
+            n_jobs = get_real_n_jobs(self._n_jobs)
+            per_run_time_limit = get_per_run_time_limit(
+                self._per_run_time_limit, n_jobs, time_left_for_smac, self._logger)
 
             # Make sure that at least 2 models are created for the ensemble process
             num_models = time_left_for_smac // per_run_time_limit
             if num_models < 2:
-                per_run_time_limit = time_left_for_smac//2
+                per_run_time_limit = time_left_for_smac // 2
                 self._logger.warning(
                     "Capping the per_run_time_limit to {} to have "
                     "time for a least 2 models in each process.".format(
@@ -600,7 +636,7 @@ class AutoML(BaseEstimator):
                 memory_limit=self._ml_memory_limit,
                 data_memory_limit=self._data_memory_limit,
                 watcher=self._stopwatch,
-                n_jobs=self._n_jobs,
+                n_jobs=n_jobs,
                 dask_client=self._dask_client,
                 start_num_run=num_run,
                 num_metalearning_cfgs=self._initial_configurations_via_metalearning,

@@ -6,7 +6,6 @@ import unittest
 import unittest.mock
 
 import joblib
-from joblib import cpu_count
 import numpy as np
 import numpy.ma as npma
 import pandas as pd
@@ -332,17 +331,6 @@ class EstimatorTest(Base, unittest.TestCase):
 
         self._tearDown(tmp)
         self._tearDown(output)
-
-    @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.build_automl')
-    def test_fit_n_jobs_negative(self, build_automl_patch):
-        n_cores = cpu_count()
-        cls = AutoSklearnEstimator(n_jobs=-1)
-        cls.fit()
-        self.assertEqual(cls._n_jobs, n_cores)
-
-    def test_get_number_of_available_cores(self):
-        n_cores = cpu_count()
-        self.assertGreaterEqual(n_cores, 1)
 
 
 class AutoMLClassifierTest(Base, unittest.TestCase):

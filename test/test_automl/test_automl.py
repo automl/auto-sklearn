@@ -7,6 +7,7 @@ import glob
 import unittest
 import unittest.mock
 
+from joblib import cpu_count
 import numpy as np
 import pandas as pd
 import sklearn.datasets
@@ -603,6 +604,97 @@ class AutoMLTest(Base, unittest.TestCase):
             )
         self._tearDown(backend_api.temporary_directory)
         self._tearDown(backend_api.output_directory)
+
+    def test_fit_n_jobs_negative(self):
+        n_cores = cpu_count()
+        n_jobs = autosklearn.automl.get_real_n_jobs(-1)
+        self.assertEqual(n_jobs, n_cores)
+
+    def test_get_number_of_available_cores(self):
+        n_cores = cpu_count()
+        self.assertGreaterEqual(n_cores, 1)
+
+    def test_get_per_runtime_limit(self):
+        logging_mock = unittest.mock.Mock()
+
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(None, 1, 40, logging_mock)
+        self.assertEqual(per_run_time_limit, 5)
+
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(None, 1, 60, logging_mock)
+        self.assertEqual(per_run_time_limit, 6)
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(None, 1, 59, logging_mock)
+        self.assertEqual(per_run_time_limit, 5)
+
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(None, 1, 3599, logging_mock)
+        self.assertEqual(per_run_time_limit, 359)
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(None, 1, 3600, logging_mock)
+        self.assertEqual(per_run_time_limit, 360)
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(None, 1, 3610, logging_mock)
+        self.assertEqual(per_run_time_limit, 361)
+
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(None, 1, 3959, logging_mock)
+        self.assertEqual(per_run_time_limit, 395)
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(None, 1, 3960, logging_mock)
+        self.assertEqual(per_run_time_limit, 360)
+
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(
+            None, 1, 20 * 360 - 1, logging_mock)
+        self.assertEqual(per_run_time_limit, 378)
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(
+            None, 1, 20 * 360, logging_mock)
+        self.assertEqual(per_run_time_limit, 360)
+
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(
+            None, 1, 25 * 360, logging_mock)
+        self.assertEqual(per_run_time_limit, 360)
+
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(
+            None, 1, 26 * 360, logging_mock)
+        self.assertEqual(per_run_time_limit, 374)
+
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(None, 2, 40, logging_mock)
+        self.assertEqual(per_run_time_limit, 8)
+
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(None, 2, 60, logging_mock)
+        self.assertEqual(per_run_time_limit, 12)
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(None, 2, 59, logging_mock)
+        self.assertEqual(per_run_time_limit, 11)
+
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(None, 2, 1799, logging_mock)
+        self.assertEqual(per_run_time_limit, 359)
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(None, 2, 1800, logging_mock)
+        self.assertEqual(per_run_time_limit, 360)
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(None, 2, 1805, logging_mock)
+        self.assertEqual(per_run_time_limit, 361)
+
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(None, 2, 1979, logging_mock)
+        self.assertEqual(per_run_time_limit, 395)
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(None, 2, 1980, logging_mock)
+        self.assertEqual(per_run_time_limit, 360)
+
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(
+            None, 2, 10 * 360 - 1, logging_mock)
+        self.assertEqual(per_run_time_limit, 378)
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(
+            None, 2, 10 * 360, logging_mock)
+        self.assertEqual(per_run_time_limit, 360)
+
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(
+            None, 2, 12.5 * 360, logging_mock)
+        self.assertEqual(per_run_time_limit, 360)
+
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(
+            None, 2, 13 * 360, logging_mock)
+        self.assertEqual(per_run_time_limit, 374)
+
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(
+            60, 1, 60, logging_mock)
+        self.assertEqual(per_run_time_limit, 60)
+
+        per_run_time_limit = autosklearn.automl.get_per_run_time_limit(
+            70, 1, 60, logging_mock)
+        self.assertEqual(per_run_time_limit, 60)
+        self.assertEqual(logging_mock.warning.call_count, 1)
 
 
 if __name__ == "__main__":

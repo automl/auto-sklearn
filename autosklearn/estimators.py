@@ -267,8 +267,6 @@ class AutoSklearnEstimator(BaseEstimator):
         self._metric = metric
 
         self.automl_ = None  # type: Optional[AutoML]
-        # n_jobs after conversion to a number (b/c default is None)
-        self._n_jobs = None
         super().__init__()
 
     def build_automl(
@@ -309,7 +307,7 @@ class AutoSklearnEstimator(BaseEstimator):
             resampling_strategy=self.resampling_strategy,
             iterative=self.iterative,
             resampling_strategy_arguments=self.resampling_strategy_arguments,
-            n_jobs=self._n_jobs,
+            n_jobs=self.n_jobs,
             dask_client=self.dask_client,
             get_smac_object_callback=self.get_smac_object_callback,
             disable_evaluator_output=self.disable_evaluator_output,
@@ -322,18 +320,6 @@ class AutoSklearnEstimator(BaseEstimator):
         return automl
 
     def fit(self, **kwargs):
-
-        # Handle the number of jobs and the time for them
-        if self.n_jobs is None or self.n_jobs == 1:
-            self._n_jobs = 1
-        elif self.n_jobs == -1:
-            self._n_jobs = joblib.cpu_count()
-        else:
-            self._n_jobs = self.n_jobs
-
-        # Automatically set the cutoff time per task
-        if self.per_run_time_limit is None:
-            self.per_run_time_limit = self._n_jobs * self.time_left_for_this_task // 10
 
         seed = self.seed
         self.automl_ = self.build_automl(
