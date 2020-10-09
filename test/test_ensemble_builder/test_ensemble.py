@@ -19,6 +19,7 @@ from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensemble_builder import (
     EnsembleBuilder,
     ensemble_builder_process,
+    fit_and_return_ensemble,
     Y_VALID,
     Y_TEST,
 )
@@ -688,24 +689,37 @@ class SingleBestTest(unittest.TestCase):
 
 
 class EnsembleProcessBuilderTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(self):
+        self.client = dask.distributed.get_client('127.0.0.1:4567')
+
     def setUp(self):
         self.backend = BackendMock()
 
     def tearDown(self):
-        # We create logging information when calling the ensemble process
-        # to make sure we can go back to dask pool, after secede. We clean these
-        # files
+        # The ensemble builder process ( ensemble_builder_process() )
+        # writes to a log file debug information.
+        # This file gets created in the ensemble builder
+        # mock-directory which is test/test_ensemble/data
+        # We clean this log that gets created on each test.
         logfiles = glob.glob(os.path.join(
             self.backend.temporary_directory, '*.log'))
         for logfile in logfiles:
             os.unlink(logfile)
+
+        # Clean the ensemble memory
+        ensemble_memory_file = os.path.join(
+            self.backend.internals_directory,
+            'ensemble_read_preds.pkl'
+        )
+        if os.path.exists(ensemble_memory_file):
+            os.unlink(ensemble_memory_file)
         pass
 
     def test_ensemble_builder_process_termination_request(self):
         """
         Makes sure we can kill an ensemble process via a event
         """
-        client = dask.distributed.Client(n_workers=1, processes=False)
         event = dask.distributed.Event('None')
 
         # Set the event so the run does not even start
@@ -741,13 +755,9 @@ class EnsembleProcessBuilderTest(unittest.TestCase):
 
         # Also makes sure the ensemble does not return any history
         self.assertEqual(ensemble, [])
-        client.close()
 
     def test_ensemble_builder_process_realrun(self):
-        dask.config.set({'distributed.worker.daemon': False})
-        client = dask.distributed.Client(n_workers=1, processes=False,
-                                         nthreads=2)
-        ensemble = client.submit(
+        ensemble = self.client.submit(
             ensemble_builder_process,
             start_time=time.time(),
             time_left_for_ensembles=1000,
@@ -776,7 +786,61 @@ class EnsembleProcessBuilderTest(unittest.TestCase):
         self.assertEqual(history[0]['ensemble_val_score'], 0.9)
         self.assertIn('ensemble_test_score', history[0])
         self.assertEqual(history[0]['ensemble_test_score'], 0.9)
-        client.close()
+
+
+class fit_and_return_ensembleTest(unittest.TestCase):
+    def setUp(self):
+        self.backend = BackendMock()
+        self.ensemble_memory_file = os.path.join(
+            self.backend.internals_directory,
+            'ensemble_read_preds.pkl'
+        )
+
+        # We make sure that every test starts without
+        # any memory file
+        if os.path.exists(self.ensemble_memory_file):
+            os.unlink(self.ensemble_memory_file)
+
+    def tearDown(self):
+        if os.path.exists(self.ensemble_memory_file):
+            os.unlink(self.ensemble_memory_file)
+        pass
+
+    @unittest.mock.patch('autosklearn.ensemble_builder.EnsembleBuilder.fit_ensemble')
+    def test_ensemble_builder_nbest_remembered(self, fit_ensemble):
+        """
+        Makes sure ensemble builder returns the size of the ensemble that pynisher allowed
+        This way, we can remember it and not waste more time trying big ensemble sizes
+        """
+
+        def register_ensemble_sizes_per_call(selected_keys):
+            var = [np.ones([2500, 2500]) for a in selected_keys]  # noqa: F841
+        fit_ensemble.side_effect = register_ensemble_sizes_per_call
+
+        fit_ensemble.return_value = None
+
+        ensemble_history, ensemble_nbest = fit_and_return_ensemble(
+            time_left=1000,
+            backend=self.backend,
+            dataset_name='Test',
+            task_type=MULTILABEL_CLASSIFICATION,
+            metric=roc_auc,
+            ensemble_size=50,
+            ensemble_nbest=10,
+            max_models_on_disc=None,
+            seed=0,
+            precision=32,
+            iteration=0,
+            read_at_most=np.inf,
+            memory_limit=1000,
+            random_state=0,
+            logger_name='Ensemblebuilder',
+        )
+
+        # The ensemble n size must be one, because in 1Gb
+        # it can only fit 1 out of the 2 models as each one
+        # involves an overhead of an array of 2500x2500
+        self.assertEqual(ensemble_nbest, 1)
 
 
 if __name__ == '__main__':
