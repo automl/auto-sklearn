@@ -163,6 +163,7 @@
         <span class="kn">from</span> <span class="nn">smac.facade.smac_ac_facade</span> <span class="kn">import</span> <span class="n">SMAC4AC</span>
         <span class="kn">from</span> <span class="nn">smac.runhistory.runhistory2epm</span> <span class="kn">import</span> <span class="n">RunHistory2EPM4LogCost</span>
         <span class="kn">from</span> <span class="nn">smac.scenario.scenario</span> <span class="kn">import</span> <span class="n">Scenario</span>
+        <span class="kn">from</span> <span class="nn">smac.intensification.simple_intensifier</span> <span class="kn">import</span> <span class="n">SimpleIntensifier</span>
 
         <span class="n">scenario</span> <span class="o">=</span> <span class="n">Scenario</span><span class="p">(</span><span class="n">scenario_dict</span><span class="p">)</span>
 
@@ -178,6 +179,7 @@
             <span class="n">tae_runner</span><span class="o">=</span><span class="n">ta</span><span class="p">,</span>
             <span class="n">tae_runner_kwargs</span><span class="o">=</span><span class="n">ta_kwargs</span><span class="p">,</span>
             <span class="n">initial_configurations</span><span class="o">=</span><span class="n">initial_configurations</span><span class="p">,</span>
+            <span class="n">intensifier</span><span class="o">=</span><span class="n">SimpleIntensifier</span><span class="p">,</span>
             <span class="n">run_id</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
             <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
             <span class="n">dask_client</span><span class="o">=</span><span class="n">dask_client</span><span class="p">,</span>
