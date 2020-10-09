@@ -6,7 +6,7 @@ run_tests() {
     mkdir -p $TEST_DIR
 
     cwd=`pwd`
-    test_dir=$cwd/test/
+    test_dir=$cwd/test/test_automl
 
     cd $TEST_DIR
 
@@ -17,7 +17,7 @@ run_tests() {
         test_params="--cov=$MODULE"
     fi
 
-    python -m pytest $test_dir -v $test_params
+    python -m pytest $test_dir -sv $test_params
 
     cd $cwd
 }
