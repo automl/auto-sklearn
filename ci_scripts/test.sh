@@ -6,7 +6,7 @@ run_tests() {
     mkdir -p $TEST_DIR
 
     cwd=`pwd`
-    test_dir=$cwd/test/test_automl
+    test_dir=$cwd/test/
 
     cd $TEST_DIR
 
