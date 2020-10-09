@@ -71,7 +71,9 @@ def ensemble_builder_process(
         + The ensemble builder is created in a memory efficient way. We do not
           use a dask actor as the object will always be in memory, limiting the
           resources for other task in the worker.
-          memory ONLY when needed and it
+        + ensemble_builder_process puts itself back into the workers pool, in other to launch
+          yet another task using fit_and_return_ensemble as another task. This gives the
+          flexibility to track the actual ensemble creation in the dask dashboard.
 
     Parameters
     ----------
@@ -140,6 +142,8 @@ def ensemble_builder_process(
 
     history = []
 
+    futures = []
+
     logger = EnsembleBuilder._get_ensemble_logger(logger_name, backend.temporary_directory)
 
     while True:
@@ -172,35 +176,44 @@ def ensemble_builder_process(
         # Also, notice how ensemble nbest is returned, so we don't waste
         # iterations testing if the deterministic predictions size can
         # be fitted in memory
-        result = None
         try:
-            logger.info(
-                "{} Started Ensemble builder job at {} for iteration {}".format(
-                    # Log the client to make sure we
-                    # remain connected to the scheduler
-                    dask.distributed.get_client(),
-                    time.strftime("%Y.%m.%d-%H.%M.%S"),
-                    iteration
-                ),
-            )
-            result = EnsembleBuilder(
-                backend=backend,
-                dataset_name=dataset_name,
-                task_type=task,
-                metric=metric,
-                ensemble_size=ensemble_size,
-                ensemble_nbest=ensemble_nbest,
-                max_models_on_disc=max_models_on_disc,
-                seed=seed,
-                precision=precision,
-                memory_limit=ensemble_memory_limit,
-                read_at_most=read_at_most,
-                random_state=seed,
-                logger_name=logger_name,
-            ).run(
-                time_left=time_left_for_ensembles-elapsed_time,
-                iteration=iteration,
-            )
+            with dask.distributed.worker_client() as client:
+
+                # Submit a Dask job from this job, to properly
+                # see it in the dask diagnostic dashboard
+                # Notice that the forked ensemble_builder_process will
+                # wait for the below function to be done
+                futures.append(
+                    client.submit(
+                        fit_and_return_ensemble,
+                        backend=backend,
+                        dataset_name=dataset_name,
+                        task_type=task,
+                        metric=metric,
+                        ensemble_size=ensemble_size,
+                        ensemble_nbest=ensemble_nbest,
+                        max_models_on_disc=max_models_on_disc,
+                        seed=seed,
+                        precision=precision,
+                        memory_limit=ensemble_memory_limit,
+                        read_at_most=read_at_most,
+                        random_state=seed,
+                        logger_name=logger_name,
+                        time_left=time_left_for_ensembles-elapsed_time,
+                        iteration=iteration,
+                    )
+                )
+                logger.info(
+                    "{} Started Ensemble builder job at {} for iteration {}. Future={}/{}".format(
+                        # Log the client to make sure we
+                        # remain connected to the scheduler
+                        client,
+                        time.strftime("%Y.%m.%d-%H.%M.%S"),
+                        iteration,
+                        futures[-1],
+                        len(futures),
+                    ),
+                )
         except Exception as e:
             exception_traceback = traceback.format_exc()
             error_message = repr(e)
@@ -209,14 +222,18 @@ def ensemble_builder_process(
 
         # If pynisher kills a run, the result
         # might be None -- so no new timestamp info
-        if result:
-            ensemble_history, ensemble_nbest = result
-            logger.debug("iteration={} @ elapsed_time={} has history={}".format(
-                iteration,
-                elapsed_time,
-                ensemble_history,
-            ))
-            history.extend(ensemble_history)
+        done_futures = [f for f in futures if f.done()]
+        for future in done_futures:
+            result = future.result()
+            if result:
+                ensemble_history, ensemble_nbest = result
+                logger.debug("iteration={} @ elapsed_time={} has history={}".format(
+                    iteration,
+                    elapsed_time,
+                    ensemble_history,
+                ))
+                history.extend(ensemble_history)
+            futures.remove(future)
 
         # Don;t take resources while waiting
         dask.distributed.secede()
@@ -227,7 +244,112 @@ def ensemble_builder_process(
         iteration += 1
         elapsed_time = time.time() - start_time
 
+    # Gather all futures if any when time is up!
+    for future in futures:
+        result = future.result()
+        if result:
+            ensemble_history, ensemble_nbest = result
+            logger.debug("iteration={} @ elapsed_time={} has history={}".format(
+                iteration,
+                elapsed_time,
+                ensemble_history,
+            ))
+            history.extend(ensemble_history)
+
     return history
+
+
+def fit_and_return_ensemble(
+    backend: Backend,
+    dataset_name: str,
+    task_type: str,
+    metric: Scorer,
+    ensemble_size: int,
+    ensemble_nbest: int,
+    max_models_on_disc: Union[float, int],
+    seed: int,
+    precision: int,
+    memory_limit: Optional[int],
+    read_at_most: int,
+    random_state: int,
+    logger_name: str,
+    time_left: float,
+    iteration: int,
+) -> Tuple[List[Tuple[int, float, float, float]], int]:
+    """
+
+    A short function to fit and create an ensemble. It is just a wrapper to easily send
+    a request to dask to create an ensemble and clean the memory when finished
+
+    Parameters
+    ----------
+        backend: util.backend.Backend
+            backend to write and read files
+        dataset_name: str
+            name of dataset
+        metric: str
+            name of metric to score predictions
+        task_type: int
+            type of ML task
+        ensemble_size: int
+            maximal size of ensemble (passed to autosklearn.ensemble.ensemble_selection)
+        ensemble_nbest: int/float
+            if int: consider only the n best prediction
+            if float: consider only this fraction of the best models
+            Both wrt to validation predictions
+            If performance_range_threshold > 0, might return less models
+        max_models_on_disc: int
+           Defines the maximum number of models that are kept in the disc.
+           If int, it must be greater or equal than 1, and dictates the max number of
+           models to keep.
+           If float, it will be interpreted as the max megabytes allowed of disc space. That
+           is, if the number of ensemble candidates require more disc space than this float
+           value, the worst models will be deleted to keep within this budget.
+           Models and predictions of the worst-performing models will be deleted then.
+           If None, the feature is disabled.
+           It defines an upper bound on the models that can be used in the ensemble.
+        seed: int
+            random seed
+        precision: [16,32,64,128]
+            precision of floats to read the predictions
+        memory_limit: Optional[int]
+            memory limit in mb. If ``None``, no memory limit is enforced.
+        read_at_most: int
+            read at most n new prediction files in each iteration
+        logger_name: str
+            Name of the logger where we are gonna write information
+        time_left: int
+            How much time is left for the task. Job should finish within this allocated time
+        iteration: int
+            The current iteration
+
+    Returns
+    -------
+        List[Tuple[int, float, float, float]]
+            A list with the performance history of this ensemble, of the form
+            [[pandas_timestamp, train_performance, val_performance, test_performance], ...]
+        int:
+            the size of the n best ensemble that fit in memory
+    """
+    result = EnsembleBuilder(
+        backend=backend,
+        dataset_name=dataset_name,
+        task_type=task_type,
+        metric=metric,
+        ensemble_size=ensemble_size,
+        ensemble_nbest=ensemble_nbest,
+        max_models_on_disc=max_models_on_disc,
+        seed=seed,
+        precision=precision,
+        memory_limit=memory_limit,
+        read_at_most=read_at_most,
+        random_state=random_state,
+        logger_name=logger_name,
+    ).run(
+        time_left=time_left,
+        iteration=iteration,
+    )
+    return result
 
 
 class EnsembleBuilder(object):
