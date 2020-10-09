@@ -43,7 +43,10 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
     def tearDown(self):
         if os.path.exists(self.ev_path):
-            os.rmdir(self.ev_path)
+            try:
+                os.rmdir(self.ev_path)
+            except:  # noqa E722
+                pass
 
     def test_finish_up_model_predicts_NaN(self):
         '''Tests by handing in predictions which contain NaNs'''

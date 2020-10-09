@@ -51,6 +51,7 @@ def get_smac_object_callback(portfolio):
         from smac.facade.smac_ac_facade import SMAC4AC
         from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
         from smac.scenario.scenario import Scenario
+        from smac.intensification.simple_intensifier import SimpleIntensifier
 
         scenario = Scenario(scenario_dict)
 
@@ -66,6 +67,7 @@ def get_smac_object_callback(portfolio):
             tae_runner=ta,
             tae_runner_kwargs=ta_kwargs,
             initial_configurations=initial_configurations,
+            intensifier=SimpleIntensifier,
             run_id=seed,
             n_jobs=n_jobs,
             dask_client=dask_client,
