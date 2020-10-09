@@ -2,6 +2,8 @@ import os
 import shutil
 import time
 
+import dask
+from dask.distributed import Client, get_client
 import pytest
 
 from autosklearn.util.backend import create
@@ -100,23 +102,17 @@ def dask_client(request):
     More info on this file can be found on:
     https://docs.pytest.org/en/stable/writing_plugins.html#conftest-py-plugins
     """
-    import dask
     dask.config.set({'distributed.worker.daemon': False})
-    from dask.distributed import Client, LocalCluster
-    cluster = LocalCluster(
-        n_workers=2,
-        threads_per_worker=1,
-    )
-    client = Client(cluster)
+
+    client = Client(n_workers=2, threads_per_worker=1, processes=False)
     print("Started Dask client={}\n".format(client))
 
     def get_finalizer(address):
         def session_run_at_end():
-            from dask.distributed import get_client
             client = get_client(address)
             print("Closed Dask client={}\n".format(client))
-            client.shutdown()
+            client.close()
         return session_run_at_end
-    request.addfinalizer(get_finalizer(cluster.scheduler_address))
+    request.addfinalizer(get_finalizer(client.scheduler_info()['address']))
 
     return client
