@@ -14,8 +14,10 @@ from autosklearn.util.backend import create
 def backend(request):
 
     test_dir = os.path.dirname(__file__)
-    tmp = os.path.join(test_dir, '.tmp_%s_%s' % (request.module, request.node.name))
-    output = os.path.join(test_dir, '.output_%s_%s' % (request.module, request.node.name))
+    tmp = os.path.join(test_dir, '.tmp__%s__%s' % (request.module.__name__, request.node.name))
+    output = os.path.join(
+        test_dir, '.output__%s__%s' % (request.module.__name__, request.node.name)
+    )
 
     for dir in (tmp, output):
         for i in range(10):
@@ -63,7 +65,9 @@ def output_dir(request):
 def _dir_fixture(dir_type, request):
 
     test_dir = os.path.dirname(__file__)
-    dir = os.path.join(test_dir, '.%s_%s_%s' % (dir_type, request.module, request.node.name))
+    dir = os.path.join(
+        test_dir, '.%s__%s__%s' % (dir_type, request.module.__name__, request.node.name)
+    )
 
     for i in range(10):
         if os.path.exists(dir):
