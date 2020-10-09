@@ -30,6 +30,13 @@ def extract_msg_from_log(log_file):
     return os.linesep.join(content)
 
 
+def count_succeses(cv_results):
+    return np.sum(
+        [status in ['Success', 'Success (but do not advance to higher budget)']
+         for status in cv_results['status']]
+    )
+
+
 class Base(unittest.TestCase):
     _multiprocess_can_split_ = True
     """All tests which are a subclass of this must define their own output
@@ -80,9 +87,3 @@ class Base(unittest.TestCase):
                     break
                 except OSError:
                     time.sleep(1)
-
-    def _count_succeses(self, cv_results):
-        return np.sum(
-            [status in ['Success', 'Success (but do not advance to higher budget)']
-             for status in cv_results['status']]
-        )

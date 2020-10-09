@@ -27,7 +27,7 @@ from autosklearn.constants import MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATI
 from smac.tae import StatusType
 
 sys.path.append(os.path.dirname(__file__))
-from base import Base, extract_msg_from_log  # noqa (E402: module level import not at top of file)
+from base import Base, extract_msg_from_log, count_succeses  # noqa (E402: module level import not at top of file)
 
 
 class AutoMLStub(AutoML):
@@ -41,18 +41,7 @@ class AutoMLStub(AutoML):
         pass
 
 
-from autosklearn.util.backend import create
-def test_fit(dask_client):
-    test_dir = os.path.dirname(__file__)
-    tmp = os.path.join(test_dir, '..', '.tmp._%s' % 'test_fit')
-    output = os.path.join(test_dir, '..', '.output._%s' % 'test_fit')
-    # Make sure the folders we wanna create do not already exist.
-    backend = create(
-        tmp,
-        output,
-        delete_tmp_folder_after_terminate=True,
-        delete_output_folder_after_terminate=True,
-    )
+def test_fit(dask_client, backend):
 
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
     automl = autosklearn.automl.AutoML(
@@ -67,13 +56,13 @@ def test_fit(dask_client):
     )
     score = automl.score(X_test, Y_test)
     assert score > 0.8
-    #assert _count_succeses(automl.cv_results_) > 0
+    assert count_succeses(automl.cv_results_) > 0
     assert automl._task == MULTICLASS_CLASSIFICATION
 
     del automl
 
 
-def test_fit_roar(dask_client):
+def test_fit_roar(dask_client, backend):
     def get_roar_object_callback(
             scenario_dict,
             seed,
@@ -92,17 +81,6 @@ def test_fit_roar(dask_client):
             tae_runner_kwargs=ta_kwargs,
         )
 
-    test_dir = os.path.dirname(__file__)
-    tmp = os.path.join(test_dir, '..', '.tmp._%s' % 'test_fit_2')
-    output = os.path.join(test_dir, '..', '.output._%s' % 'test_fit_2')
-    # Make sure the folders we wanna create do not already exist.
-    backend = create(
-        tmp,
-        output,
-        delete_tmp_folder_after_terminate=True,
-        delete_output_folder_after_terminate=True,
-    )
-
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
     automl = autosklearn.automl.AutoML(
         backend=backend,
@@ -120,12 +98,10 @@ def test_fit_roar(dask_client):
     )
     score = automl.score(X_test, Y_test)
     assert score > 0.8
-    #assert self._count_succeses(automl.cv_results_) > 0
+    assert count_succeses(automl.cv_results_) > 0
     assert automl._task == MULTICLASS_CLASSIFICATION
 
     del automl
-    #self._tearDown(backend_api.temporary_directory)
-    #self._tearDown(backend_api.output_directory)
 
 #
 # class AutoMLTest(Base, unittest.TestCase):

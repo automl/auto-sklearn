@@ -1,4 +1,72 @@
+import os
+import shutil
+import time
+
 import pytest
+
+from autosklearn.util.backend import create
+
+
+@pytest.fixture(scope="function")
+def backend(request):
+    test_name = request.node.name
+
+    test_dir = os.path.dirname(__file__)
+    tmp = os.path.join(test_dir, '..', '.tmp._%s' % test_name)
+    output = os.path.join(test_dir, '..', '.output._%s' % test_name)
+    # Make sure the folders we wanna create do not already exist.
+    backend = create(
+        tmp,
+        output,
+        delete_tmp_folder_after_terminate=True,
+        delete_output_folder_after_terminate=True,
+    )
+
+    def get_finalizer(tmp_dir, output_dir):
+        def session_run_at_end():
+            for dir in (tmp_dir, output_dir):
+                for i in range(10):
+                    if os.path.exists(dir):
+                        try:
+                            shutil.rmtree(dir)
+                            break
+                        except OSError:
+                            time.sleep(1)
+        return session_run_at_end
+    request.addfinalizer(get_finalizer(tmp, output))
+
+    return backend
+
+
+@pytest.fixture(scope="function")
+def tmp_dir(request):
+    return _dir_fixture('tmp', request)
+
+
+@pytest.fixture(scope="function")
+def output_dir(request):
+    return _dir_fixture('output', request)
+
+
+def _dir_fixture(dir_type, request):
+    test_name = request.node.name
+
+    test_dir = os.path.dirname(__file__)
+    dir = os.path.join(test_dir, '..', '.%s._%s' % (dir_type, test_name))
+
+    def get_finalizer(dir):
+        def session_run_at_end():
+            for i in range(10):
+                if os.path.exists(dir):
+                    try:
+                        shutil.rmtree(dir)
+                        break
+                    except OSError:
+                        time.sleep(1)
+
+        return session_run_at_end
+
+    request.addfinalizer(get_finalizer(dir))
 
 
 @pytest.fixture(scope="function")

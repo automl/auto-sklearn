@@ -1,36 +1,126 @@
-# import glob
-# import os
-# import pickle
-# import re
-# import sys
-# import unittest
-# import unittest.mock
-#
-# import joblib
-# from joblib import cpu_count
-# import numpy as np
-# import numpy.ma as npma
-# import pandas as pd
-# import sklearn
-# import sklearn.dummy
-# import sklearn.datasets
-#
-# import dask
-# import dask.distributed
-#
-# import autosklearn.pipeline.util as putil
-# from autosklearn.ensemble_builder import MODEL_FN_RE
-# import autosklearn.estimators  # noqa F401
-# from autosklearn.estimators import AutoSklearnEstimator
-# from autosklearn.classification import AutoSklearnClassifier
-# from autosklearn.regression import AutoSklearnRegressor
-# from autosklearn.metrics import accuracy, f1_macro, mean_squared_error, r2
-# from autosklearn.automl import AutoMLClassifier
-# from autosklearn.experimental.askl2 import AutoSklearn2Classifier
-# from autosklearn.smbo import get_smac_object
-#
-# sys.path.append(os.path.dirname(__file__))
-# from base import Base, extract_msg_from_log  # noqa (E402: module level import not at top of file)
+import glob
+import os
+import pickle
+import re
+import sys
+import unittest
+import unittest.mock
+
+import joblib
+from joblib import cpu_count
+import numpy as np
+import numpy.ma as npma
+import pandas as pd
+import sklearn
+import sklearn.dummy
+import sklearn.datasets
+
+import dask
+import dask.distributed
+
+import autosklearn.pipeline.util as putil
+from autosklearn.ensemble_builder import MODEL_FN_RE
+import autosklearn.estimators  # noqa F401
+from autosklearn.estimators import AutoSklearnEstimator
+from autosklearn.classification import AutoSklearnClassifier
+from autosklearn.regression import AutoSklearnRegressor
+from autosklearn.metrics import accuracy, f1_macro, mean_squared_error, r2
+from autosklearn.automl import AutoMLClassifier
+from autosklearn.experimental.askl2 import AutoSklearn2Classifier
+from autosklearn.smbo import get_smac_object
+
+sys.path.append(os.path.dirname(__file__))
+from base import Base, extract_msg_from_log, count_succeses  # noqa (E402: module level import not at top of file)
+
+
+def test_fit_n_jobs(tmp_dir, output_dir):
+
+    X_train, Y_train, X_test, Y_test = putil.get_dataset('breast_cancer')
+
+    # test parallel Classifier to predict classes, not only indices
+    Y_train += 1
+    Y_test += 1
+
+    class get_smac_object_wrapper:
+
+        def __call__(self, *args, **kwargs):
+            self.n_jobs = kwargs['n_jobs']
+            smac = get_smac_object(*args, **kwargs)
+            self.dask_n_jobs = smac.solver.tae_runner.n_workers
+            self.dask_client_n_jobs = len(
+                smac.solver.tae_runner.client.scheduler_info()['workers']
+            )
+            return smac
+    get_smac_object_wrapper_instance = get_smac_object_wrapper()
+
+    automl = AutoSklearnClassifier(
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        output_folder=output_dir,
+        tmp_folder=tmp_dir,
+        seed=1,
+        initial_configurations_via_metalearning=0,
+        ensemble_size=5,
+        n_jobs=2,
+        include_estimators=['sgd'],
+        include_preprocessors=['no_preprocessing'],
+        get_smac_object_callback=get_smac_object_wrapper_instance,
+        max_models_on_disc=None,
+    )
+    automl.fit(X_train, Y_train)
+
+    # Test that the argument is correctly passed to SMAC
+    assert getattr(get_smac_object_wrapper_instance, 'n_jobs') == 2
+    assert getattr(get_smac_object_wrapper_instance, 'dask_n_jobs') == 2
+    assert getattr(get_smac_object_wrapper_instance, 'dask_client_n_jobs') == 2
+
+    available_num_runs = set()
+    for run_key, run_value in automl.automl_.runhistory_.data.items():
+        if run_value.additional_info is not None and 'num_run' in run_value.additional_info:
+            available_num_runs.add(run_value.additional_info['num_run'])
+    predictions_dir = automl.automl_._backend._get_prediction_output_dir(
+        'ensemble'
+    )
+    available_predictions = set()
+    predictions = os.listdir(predictions_dir)
+    seeds = set()
+    for prediction in predictions:
+        match = re.match(MODEL_FN_RE, prediction.replace("predictions_ensemble", ""))
+        if match:
+            num_run = int(match.group(2))
+            available_predictions.add(num_run)
+            seed = int(match.group(1))
+            seeds.add(seed)
+
+    done_dir = automl.automl_._backend.get_done_directory()
+    dones = os.listdir(done_dir)
+    available_dones = set()
+    for done in dones:
+        match = re.match(r'([0-9]*)_([0-9]*)', done)
+        if match:
+            num_run = int(match.group(2))
+            available_dones.add(num_run)
+
+    # Remove the dummy prediction, it is not part of the runhistory
+    available_predictions.remove(1)
+    assert available_num_runs.issubset(available_predictions)
+    available_dones.remove(1)
+    assert available_dones == available_num_runs
+
+    assert len(seeds) == 1
+
+    ensemble_dir = automl.automl_._backend.get_ensemble_dir()
+    ensembles = os.listdir(ensemble_dir)
+
+    seeds = set()
+    for ensemble_file in ensembles:
+        seeds.add(int(ensemble_file.split('.')[0].split('_')[0]))
+    assert len(seeds) == 1
+
+    assert count_succeses(automl.cv_results_) > 0
+
+
+
 #
 #
 # class ArrayReturningDummyPredictor(sklearn.dummy.DummyClassifier):
