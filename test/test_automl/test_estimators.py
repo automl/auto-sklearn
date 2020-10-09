@@ -651,7 +651,7 @@ class AutoSklearnRegressorTest(unittest.TestCase):
 
 class AutoSklearn2ClassifierTest(unittest.TestCase):
     # Currently this class only tests that the methods of AutoSklearnClassifier
-    # which should return self actually return self.
+    # which should return self actually return self and can be pickled.
     def test_classification_methods_returns_self(self):
         X_train, y_train, X_test, y_test = putil.get_dataset('iris')
         automl = AutoSklearn2Classifier(time_left_for_this_task=60, ensemble_size=0,)
@@ -664,6 +664,11 @@ class AutoSklearn2ClassifierTest(unittest.TestCase):
 
         automl_refitted = automl.refit(X_train.copy(), y_train.copy())
         self.assertIs(automl, automl_refitted)
+
+        predictions = automl_fitted.predict(X_test)
+        self.assertGreaterEqual(sklearn.metrics.accuracy_score(y_test, predictions), 2 / 3)
+
+        pickle.dumps(automl_fitted)
 
 
 if __name__ == "__main__":
