@@ -130,4 +130,5 @@ def dask_client(request):
 
 def pytest_sessionfinish(session, exitstatus):
     proc = psutil.Process()
-    print(proc.children(recursive=True))
+    for child in proc.children(recursive=True):
+        print(child, child.cmdline())
