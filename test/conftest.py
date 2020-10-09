@@ -123,6 +123,7 @@ def dask_client(request):
             print("Closed Dask client={}\n".format(client))
             client.shutdown()
             client.close()
+            del client
         return session_run_at_end
     request.addfinalizer(get_finalizer(client.scheduler_info()['address']))
 
