@@ -118,7 +118,8 @@ def test_fit_n_jobs(tmp_dir, output_dir):
     assert len(seeds) == 1
 
     assert count_succeses(automl.cv_results_) > 0
-
+    # For travis-ci it is important that the client no longer exists
+    assert automl.automl_._dask_client is None
 
 
 #

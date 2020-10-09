@@ -173,12 +173,6 @@ class AutoML(BaseEstimator):
         self._n_jobs = n_jobs
         self._dask_client = dask_client
 
-        # If no dask client was provided, we create one, so that we can
-        # start a ensemble process in parallel to smbo optimize
-        self._is_dask_client_internally_created = False
-        if self._dask_client is None and self._ensemble_size > 0:
-            self._create_dask_client()
-
         # For the ensemble building process
 
         # How much patience to wait for the ensemble building process to finish by itself
@@ -261,6 +255,11 @@ class AutoML(BaseEstimator):
                 local_directory=tempfile.gettempdir(),
             )
         )
+
+    def _close_dask_client(self):
+        if self._is_dask_client_internally_created and self._dask_client:
+            self._dask_client.close()
+            self._dask_client = None
 
     def _get_logger(self, name):
         logger_name = 'AutoML(%d):%s' % (self._seed, name)
@@ -390,6 +389,16 @@ class AutoML(BaseEstimator):
         if not isinstance(self._metric, Scorer):
             raise ValueError('Metric must be instance of '
                              'autosklearn.metrics.Scorer.')
+
+        # If no dask client was provided, we create one, so that we can
+        # start a ensemble process in parallel to smbo optimize
+        if (
+            self._dask_client is None and
+            (self._ensemble_size > 0 or self._n_jobs is not None and self._n_jobs > 1)
+        ):
+            self._create_dask_client()
+        else:
+            self._is_dask_client_internally_created = False
 
         if dataset_name is None:
             dataset_name = hash_array_or_matrix(X)
@@ -552,6 +561,7 @@ class AutoML(BaseEstimator):
             include_preprocessors=self._include_preprocessors,
             exclude_preprocessors=self._exclude_preprocessors)
         if only_return_configuration_space:
+            self._close_dask_client()
             return self.configuration_space
 
         # == RUN ensemble builder
@@ -716,6 +726,7 @@ class AutoML(BaseEstimator):
 
         if load_models:
             self._load_models()
+        self._close_dask_client()
 
         return self
 
@@ -867,6 +878,8 @@ class AutoML(BaseEstimator):
         # Create a client if needed
         if self._dask_client is None:
             self._create_dask_client()
+        else:
+            self._is_dask_client_internally_created = False
 
         # Submit the ensemble run to a dask process
         proc_ensemble = self._dask_client.submit(
@@ -896,6 +909,7 @@ class AutoML(BaseEstimator):
 
         self.ensemble_performance_history = proc_ensemble.result()
         self._load_models()
+        self._close_dask_client()
         return self
 
     def _load_models(self):
@@ -1177,11 +1191,7 @@ class AutoML(BaseEstimator):
         return self.__dict__
 
     def __del__(self):
-        # Make sure the client closes, so we don't leave
-        # the tcp connection open. Also ask for None to facilitate
-        # unit testing
-        if self._is_dask_client_internally_created and self._dask_client:
-            self._dask_client.close()
+        self._close_dask_client()
 
         # When a multiprocessing work is done, the
         # objects are deleted. We don't want to delete run areas

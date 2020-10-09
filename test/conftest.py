@@ -49,10 +49,17 @@ def output_dir(request):
 
 
 def _dir_fixture(dir_type, request):
-    test_name = request.node.name
 
     test_dir = os.path.dirname(__file__)
-    dir = os.path.join(test_dir, '..', '.%s._%s' % (dir_type, test_name))
+    dir = os.path.join(test_dir, '.%s_%s_%s' % (dir_type, request.module, request.node.name))
+
+    for i in range(10):
+        if os.path.exists(dir):
+            try:
+                shutil.rmtree(dir)
+                break
+            except OSError:
+                pass
 
     def get_finalizer(dir):
         def session_run_at_end():
