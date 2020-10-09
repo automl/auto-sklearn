@@ -4,6 +4,7 @@ import time
 
 import dask
 from dask.distributed import Client, get_client
+import psutil
 import pytest
 
 from autosklearn.util.backend import create
@@ -11,11 +12,20 @@ from autosklearn.util.backend import create
 
 @pytest.fixture(scope="function")
 def backend(request):
-    test_name = request.node.name
 
     test_dir = os.path.dirname(__file__)
-    tmp = os.path.join(test_dir, '..', '.tmp._%s' % test_name)
-    output = os.path.join(test_dir, '..', '.output._%s' % test_name)
+    tmp = os.path.join(test_dir, '.tmp_%s_%s' % (request.module, request.node.name))
+    output = os.path.join(test_dir, '.output_%s_%s' % (request.module, request.node.name))
+
+    for dir in (tmp, output):
+        for i in range(10):
+            if os.path.exists(dir):
+                try:
+                    shutil.rmtree(dir)
+                    break
+                except OSError:
+                    time.sleep(1)
+
     # Make sure the folders we wanna create do not already exist.
     backend = create(
         tmp,
@@ -116,3 +126,8 @@ def dask_client(request):
     request.addfinalizer(get_finalizer(client.scheduler_info()['address']))
 
     return client
+
+
+def pytest_sessionfinish(session, exitstatus):
+    proc = psutil.Process()
+    print(proc.children(recursive=True))
