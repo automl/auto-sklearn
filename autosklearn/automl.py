@@ -259,6 +259,7 @@ class AutoML(BaseEstimator):
     def _close_dask_client(self):
         if self._is_dask_client_internally_created and self._dask_client:
             self._dask_client.shutdown()
+            self._dask_client.close()
             self._dask_client = None
 
     def _get_logger(self, name):
