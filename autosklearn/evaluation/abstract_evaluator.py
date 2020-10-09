@@ -53,7 +53,7 @@ class MyDummyClassifier(DummyClassifier):
     def fit_estimator(self, X, y, fit_params=None):
         return self.fit(X, y)
 
-    def predict_proba(self, X, batch_size=1000):
+    def predict_proba(self, X, batch_size=None):
         new_X = np.ones((X.shape[0], 1))
         probas = super(MyDummyClassifier, self).predict_proba(new_X)
         probas = convert_multioutput_multiclass_to_multilabel(probas).astype(
@@ -87,7 +87,7 @@ class MyDummyRegressor(DummyRegressor):
     def fit_estimator(self, X, y, fit_params=None):
         return self.fit(X, y)
 
-    def predict(self, X, batch_size=1000):
+    def predict(self, X, batch_size=None):
         new_X = np.ones((X.shape[0], 1))
         return super(MyDummyRegressor, self).predict(new_X).astype(np.float32)
 
@@ -516,7 +516,10 @@ class AbstractEvaluator(object):
 
         with warnings.catch_warnings():
             warnings.showwarning = send_warnings_to_log
-            Y_pred = model.predict_proba(X, batch_size=1000)
+            try:
+                Y_pred = model.predict_proba(X)
+            except MemoryError:
+                y_pred = model.predict_proba(X, batch_size=1000)
 
         Y_pred = self._ensure_prediction_array_sizes(Y_pred, Y_train)
         return Y_pred
