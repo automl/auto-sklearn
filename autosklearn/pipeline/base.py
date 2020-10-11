@@ -378,7 +378,7 @@ class BasePipeline(Pipeline):
                                  )
                                  )
                 continue
-            variable_name = key.split(':')[1]
+            variable_name = key.split(':')[-1]
             node = self.named_steps[node_name]
             if isinstance(node, BasePipeline):
                 # If dealing with a sub pipe,

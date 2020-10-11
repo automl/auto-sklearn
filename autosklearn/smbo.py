@@ -212,6 +212,8 @@ class AutoMLSMBO(object):
                  exclude_estimators=None,
                  include_preprocessors=None,
                  exclude_preprocessors=None,
+                 include_data_preprocessor=None,
+                 exclude_data_preprocessor=None,
                  disable_file_output=False,
                  smac_scenario_args=None,
                  get_smac_object_callback=None):
@@ -252,6 +254,8 @@ class AutoMLSMBO(object):
         self.exclude_estimators = exclude_estimators
         self.include_preprocessors = include_preprocessors
         self.exclude_preprocessors = exclude_preprocessors
+        self.include_data_preprocessor = include_data_preprocessor
+        self.exclude_data_preprocessor = exclude_data_preprocessor
         self.disable_file_output = disable_file_output
         self.smac_scenario_args = smac_scenario_args
         self.get_smac_object_callback = get_smac_object_callback
@@ -388,6 +392,17 @@ class AutoMLSMBO(object):
         # into a queue and querying them once the time is over
         exclude = dict()
         include = dict()
+        if self.include_data_preprocessor is not None and \
+                self.exclude_data_preprocessor is not None:
+            raise ValueError('Cannot specify include_preprocessors and '
+                             'exclude_preprocessors.')
+        elif self.include_data_preprocessor is not None:
+            include['data_preprocessor'] = self.include_data_preprocessor
+        elif self.exclude_data_preprocessor is not None:
+            exclude['data_preprocessor'] = self.exclude_data_preprocessor
+        else:
+            exclude['data_preprocessor'] = ['no_preprocessing']
+
         if self.include_preprocessors is not None and self.exclude_preprocessors is not None:
             raise ValueError('Cannot specify include_preprocessors and '
                              'exclude_preprocessors.')

@@ -6,8 +6,8 @@ from sklearn.base import RegressorMixin
 
 from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
-    import DataPreprocessor
+from autosklearn.pipeline.components.data_preprocessing import DataPreprocessorChoice
+
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from autosklearn.pipeline.components import regression as \
@@ -233,8 +233,8 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
             default_dataset_properties.update(dataset_properties)
 
         steps.extend([
-            ['data_preprocessing',
-                DataPreprocessor(dataset_properties=default_dataset_properties)],
+            ['data_preprocessor',
+                DataPreprocessorChoice(dataset_properties=default_dataset_properties)],
             ['feature_preprocessor',
                 feature_preprocessing_components.FeaturePreprocessorChoice(
                     default_dataset_properties)],

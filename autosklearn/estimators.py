@@ -29,6 +29,8 @@ class AutoSklearnEstimator(BaseEstimator):
         exclude_estimators=None,
         include_preprocessors=None,
         exclude_preprocessors=None,
+        include_data_preprocessor=None,
+        exclude_data_preprocessor=None,
         resampling_strategy='holdout',
         resampling_strategy_arguments=None,
         tmp_folder=None,
@@ -250,6 +252,8 @@ class AutoSklearnEstimator(BaseEstimator):
         self.exclude_estimators = exclude_estimators
         self.include_preprocessors = include_preprocessors
         self.exclude_preprocessors = exclude_preprocessors
+        self._include_data_preprocessor = include_data_preprocessor
+        self._exclude_data_preprocessor = exclude_data_preprocessor
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_arguments = resampling_strategy_arguments
         self.tmp_folder = tmp_folder
@@ -305,6 +309,8 @@ class AutoSklearnEstimator(BaseEstimator):
             exclude_estimators=self.exclude_estimators,
             include_preprocessors=self.include_preprocessors,
             exclude_preprocessors=self.exclude_preprocessors,
+            include_data_preprocessor=self._include_data_preprocessor,
+            exclude_data_preprocessor=self._exclude_data_preprocessor,
             resampling_strategy=self.resampling_strategy,
             resampling_strategy_arguments=self.resampling_strategy_arguments,
             n_jobs=self._n_jobs,

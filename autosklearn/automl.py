@@ -109,6 +109,8 @@ class AutoML(BaseEstimator):
                  exclude_estimators=None,
                  include_preprocessors=None,
                  exclude_preprocessors=None,
+                 include_data_preprocessor=None,
+                 exclude_data_preprocessor=None,
                  resampling_strategy='holdout-iterative-fit',
                  resampling_strategy_arguments=None,
                  n_jobs=None,
@@ -139,6 +141,8 @@ class AutoML(BaseEstimator):
         self._include_estimators = include_estimators
         self._exclude_estimators = exclude_estimators
         self._include_preprocessors = include_preprocessors
+        self._include_data_preprocessor = include_data_preprocessor
+        self._exclude_data_preprocessor = exclude_data_preprocessor
         self._exclude_preprocessors = exclude_preprocessors
         self._resampling_strategy = resampling_strategy
         self._resampling_strategy_arguments = resampling_strategy_arguments \
@@ -487,7 +491,10 @@ class AutoML(BaseEstimator):
             include_estimators=self._include_estimators,
             exclude_estimators=self._exclude_estimators,
             include_preprocessors=self._include_preprocessors,
-            exclude_preprocessors=self._exclude_preprocessors)
+            exclude_preprocessors=self._exclude_preprocessors,
+            include_data_preprocessor=self._include_data_preprocessor,
+            exclude_data_preprocessor=self._exclude_data_preprocessor,
+        )
         if only_return_configuration_space:
             return self.configuration_space
 
@@ -597,6 +604,8 @@ class AutoML(BaseEstimator):
                 exclude_estimators=self._exclude_estimators,
                 include_preprocessors=self._include_preprocessors,
                 exclude_preprocessors=self._exclude_preprocessors,
+                include_data_preprocessor=self._include_data_preprocessor,
+                exclude_data_preprocessor=self._exclude_data_preprocessor,
                 disable_file_output=self._disable_evaluator_output,
                 get_smac_object_callback=self._get_smac_object_callback,
                 smac_scenario_args=self._smac_scenario_args,
@@ -1079,7 +1088,10 @@ class AutoML(BaseEstimator):
                              include_estimators=None,
                              exclude_estimators=None,
                              include_preprocessors=None,
-                             exclude_preprocessors=None):
+                             exclude_preprocessors=None,
+                             include_data_preprocessor=None,
+                             exclude_data_preprocessor=None,
+                             ):
         task_name = 'CreateConfigSpace'
 
         self._stopwatch.start_task(task_name)
@@ -1089,7 +1101,10 @@ class AutoML(BaseEstimator):
             include_estimators=include_estimators,
             exclude_estimators=exclude_estimators,
             include_preprocessors=include_preprocessors,
-            exclude_preprocessors=exclude_preprocessors)
+            exclude_preprocessors=exclude_preprocessors,
+            include_data_preprocessor=include_data_preprocessor,
+            exclude_data_preprocessor=exclude_data_preprocessor
+        )
         configuration_space = self.configuration_space_created_hook(
             datamanager, configuration_space)
         backend.write_txt_file(

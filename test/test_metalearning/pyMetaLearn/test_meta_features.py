@@ -9,8 +9,8 @@ from joblib import Memory
 import numpy as np
 from sklearn.datasets import make_multilabel_classification
 
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
-    import DataPreprocessor
+from autosklearn.pipeline.components.data_preprocessing.feature_type \
+    import FeatTypeSplit
 from autosklearn.metalearning.metafeatures.metafeature import MetaFeatureValue
 import autosklearn.metalearning.metafeatures.metafeatures as meta_features
 
@@ -38,7 +38,7 @@ class MetaFeaturesTest(TestCase):
         X = data[:, :-1]
         y = data[:, -1].reshape((-1,))
 
-        DPP = DataPreprocessor(categorical_features=self.categorical)
+        DPP = FeatTypeSplit(categorical_features=self.categorical)
         X_transformed = DPP.fit_transform(X)
 
         # Transform the array which indicates the categorical metafeatures

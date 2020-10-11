@@ -255,7 +255,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 'X_test': X_test, 'Y_test': Y_test}
 
         init_params = {
-            'data_preprocessing:categorical_features':
+            'data_preprocessor:feature_type:categorical_features':
                 categorical
         }
 
@@ -263,7 +263,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                                   data=data, init_params=init_params)
 
     @unittest.mock.patch('autosklearn.pipeline.components.data_preprocessing'
-                         '.data_preprocessing.DataPreprocessor.set_hyperparameters')
+                         '.feature_type.FeatTypeSplit.set_hyperparameters')
     def test_categorical_passed_to_one_hot_encoder(self, ohe_mock):
 
         # Mock the _check_init_params_honored as there is no object created,
@@ -271,7 +271,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         with unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline'
                                  '._check_init_params_honored'):
             cls = SimpleClassificationPipeline(
-                init_params={'data_preprocessing:categorical_features': [True, False]}
+                init_params={'data_preprocessor:feature_type:categorical_features': [True, False]}
             )
 
             self.assertEqual(
@@ -281,7 +281,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             default = cls.get_hyperparameter_search_space().get_default_configuration()
             cls.set_hyperparameters(
                 configuration=default,
-                init_params={'data_preprocessing:categorical_features': [True, True, False]},
+                init_params={'data_preprocessor:feature_type:categorical_features': [True, True, False]},
             )
             self.assertEqual(
                 ohe_mock.call_args[1]['init_params'],

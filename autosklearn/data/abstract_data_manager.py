@@ -5,8 +5,8 @@ import numpy as np
 
 import scipy.sparse
 
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
-    import DataPreprocessor
+from autosklearn.pipeline.components.data_preprocessing.feature_type \
+    import FeatTypeSplit
 from autosklearn.util.data import predict_RAM_usage
 
 
@@ -23,7 +23,7 @@ def perform_one_hot_encoding(
 
     rvals = []
     if any(categorical):
-        encoder = DataPreprocessor(
+        encoder = FeatTypeSplit(
             categorical_features=categorical, force_sparse_output=sparse)
         rvals.append(encoder.fit_transform(data[0]))
         for d in data[1:]:
@@ -68,11 +68,11 @@ class AbstractDataManager():
         self._feat_type = value
 
     @property
-    def encoder(self) -> DataPreprocessor:
+    def encoder(self) -> FeatTypeSplit:
         return self._encoder
 
     @encoder.setter
-    def encoder(self, value: DataPreprocessor) -> DataPreprocessor:
+    def encoder(self, value: FeatTypeSplit) -> FeatTypeSplit:
         self._encoder = value
 
     def perform1HotEncoding(self) -> None:

@@ -9,8 +9,8 @@ from scipy import sparse
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
-    import DataPreprocessor
+from autosklearn.pipeline.components.data_preprocessing.feature_type \
+    import FeatTypeSplit
 import autosklearn.metalearning.metafeatures.metafeatures as meta_features
 
 # Make the super class importable
@@ -49,7 +49,7 @@ class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest,
         X_sparse[NaNs] = 0
         X_sparse = sparse.csr_matrix(X_sparse)
 
-        ohe = DataPreprocessor(categorical_features=self.categorical)
+        ohe = FeatTypeSplit(categorical_features=self.categorical)
         X_transformed = X_sparse.copy()
         X_transformed = ohe.fit_transform(X_transformed)
         imp = SimpleImputer(copy=False)

@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 from scipy import sparse
 
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_categorical \
+from autosklearn.pipeline.components.data_preprocessing.feature_type_categorical \
     import CategoricalPreprocessingPipeline
 
 

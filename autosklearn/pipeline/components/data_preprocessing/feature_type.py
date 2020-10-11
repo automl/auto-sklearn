@@ -7,15 +7,16 @@ from ConfigSpace import Configuration
 from ConfigSpace.configuration_space import ConfigurationSpace
 
 from autosklearn.pipeline.base import BasePipeline
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_categorical \
+from autosklearn.pipeline.components.data_preprocessing.feature_type_categorical \
     import CategoricalPreprocessingPipeline
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_numerical \
+from autosklearn.pipeline.components.data_preprocessing.feature_type_numerical \
     import NumericalPreprocessingPipeline
-from autosklearn.pipeline.components.base import AutoSklearnComponent, AutoSklearnChoice
+from autosklearn.pipeline.components.base import AutoSklearnComponent, AutoSklearnChoice, \
+    AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
 
-class DataPreprocessor(AutoSklearnComponent):
+class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
     """ This component is used to apply distinct transformations to categorical and
     numerical features of a dataset. It is built on top of sklearn's ColumnTransformer.
     """
@@ -26,7 +27,7 @@ class DataPreprocessor(AutoSklearnComponent):
                  column_transformer=None):
 
         if pipeline is not None:
-            raise ValueError("DataPreprocessor's argument 'pipeline' should be None")
+            raise ValueError("FeatTypeSplit's argument 'pipeline' should be None")
 
         if categorical_features is not None:
             categorical_features = np.array(categorical_features)
@@ -40,7 +41,9 @@ class DataPreprocessor(AutoSklearnComponent):
         self.exclude = exclude
         self.random_state = random_state
         self.init_params = init_params
-        self.categorical_features = categorical_features
+        self.categorical_features = None
+        if categorical_features is not None:
+            self.categorical_features = categorical_features.tolist()
         self.force_sparse_output = force_sparse_output
 
         # The pipeline that will be applied to the categorical features (i.e. columns)
@@ -48,23 +51,21 @@ class DataPreprocessor(AutoSklearnComponent):
         # Configuration of the data-preprocessor is different from the configuration of
         # the categorical pipeline. Hence, force to None
         # It is actually the call to set_hyperparameter who properly sets this argument
-        # TODO: Extract the child configuration space from the datapreprocessor to the
+        # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
         self.categ_ppl = CategoricalPreprocessingPipeline(
             config=None, steps=pipeline, dataset_properties=dataset_properties,
-            include=include, exclude=exclude, random_state=random_state,
-            init_params=init_params)
+            random_state=random_state, init_params=init_params)
         # The pipeline that will be applied to the numerical features (i.e. columns)
         # of the dataset
         # Configuration of the data-preprocessor is different from the configuration of
         # the numerical pipeline. Hence, force to None
         # It is actually the call to set_hyperparameter who properly sets this argument
-        # TODO: Extract the child configuration space from the datapreprocessor to the
+        # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
         self.numer_ppl = NumericalPreprocessingPipeline(
             config=None, steps=pipeline, dataset_properties=dataset_properties,
-            include=include, exclude=exclude, random_state=random_state,
-            init_params=init_params)
+            random_state=random_state, init_params=init_params)
         self._transformers = [
             ["categorical_transformer", self.categ_ppl],
             ["numerical_transformer", self.numer_ppl],
@@ -107,7 +108,7 @@ class DataPreprocessor(AutoSklearnComponent):
 
     def transform(self, X):
         if self.column_transformer is None:
-            raise ValueError("Cannot call transform on a Datapreprocessor that has not"
+            raise ValueError("Cannot call transform on a FeatTypeSplit that has not"
                              "yet been fit. Please check the log files for errors "
                              "while trying to fit the model."
                              )
@@ -172,7 +173,7 @@ class DataPreprocessor(AutoSklearnComponent):
     def get_hyperparameter_search_space(self, dataset_properties=None):
         self.dataset_properties = dataset_properties
         cs = ConfigurationSpace()
-        cs = DataPreprocessor._get_hyperparameter_search_space_recursevely(
+        cs = FeatTypeSplit._get_hyperparameter_search_space_recursevely(
             dataset_properties, cs, self._transformers)
         return cs
 
@@ -184,6 +185,6 @@ class DataPreprocessor(AutoSklearnComponent):
                     st_name,
                     st_operation.get_hyperparameter_search_space(dataset_properties))
             else:
-                return DataPreprocessor._get_hyperparameter_search_space_recursevely(
+                return FeatTypeSplit._get_hyperparameter_search_space_recursevely(
                     dataset_properties, cs, st_operation)
         return cs

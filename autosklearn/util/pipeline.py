@@ -28,10 +28,24 @@ def get_configuration_space(info: Dict[str, Any],
                             include_estimators: Optional[List[str]] = None,
                             exclude_estimators: Optional[List[str]] = None,
                             include_preprocessors: Optional[List[str]] = None,
-                            exclude_preprocessors: Optional[List[str]] = None
+                            exclude_preprocessors: Optional[List[str]] = None,
+                            include_data_preprocessor: Optional[List[str]] = None,
+                            exclude_data_preprocessor: Optional[List[str]] = None,
                             ) -> ConfigurationSpace:
     exclude = dict()
     include = dict()
+
+    if include_data_preprocessor is not None and \
+            exclude_data_preprocessor is not None:
+        raise ValueError('Cannot specify include_preprocessors and '
+                         'exclude_preprocessors.')
+    elif include_data_preprocessor is not None:
+        include['data_preprocessor'] = include_data_preprocessor
+    elif exclude_data_preprocessor is not None:
+        exclude['data_preprocessor'] = exclude_data_preprocessor
+    else:
+        exclude['data_preprocessor'] = ['no_preprocessing']
+
     if include_preprocessors is not None and \
             exclude_preprocessors is not None:
         raise ValueError('Cannot specify include_preprocessors and '

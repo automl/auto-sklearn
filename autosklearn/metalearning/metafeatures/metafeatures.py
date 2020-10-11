@@ -9,8 +9,8 @@ import scipy.sparse
 from sklearn.utils import check_array
 from sklearn.multiclass import OneVsRestClassifier
 
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
-    import DataPreprocessor
+from autosklearn.pipeline.components.data_preprocessing.feature_type \
+    import FeatTypeSplit
 from autosklearn.util.logging_ import get_logger
 from .metafeature import MetaFeature, HelperFunction, DatasetMetafeatures
 
@@ -1003,7 +1003,7 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name, calculate=None, 
                 # TODO make sure this is done as efficient as possible (no copy for
                 # sparse matrices because of wrong sparse format)
                 sparse = scipy.sparse.issparse(X)
-                DPP = DataPreprocessor(
+                DPP = FeatTypeSplit(
                     categorical_features=categorical, force_sparse_output=True)
                 X_transformed = DPP.fit_transform(X)
                 categorical_transformed = [False] * X_transformed.shape[1]
