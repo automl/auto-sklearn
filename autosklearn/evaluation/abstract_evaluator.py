@@ -519,7 +519,7 @@ class AbstractEvaluator(object):
             try:
                 Y_pred = model.predict_proba(X)
             except MemoryError:
-                y_pred = model.predict_proba(X, batch_size=1000)
+                Y_pred = model.predict_proba(X, batch_size=1000)
 
         Y_pred = self._ensure_prediction_array_sizes(Y_pred, Y_train)
         return Y_pred
