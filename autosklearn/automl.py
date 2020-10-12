@@ -257,11 +257,17 @@ class AutoML(BaseEstimator):
         )
 
     def _close_dask_client(self):
-        if self._is_dask_client_internally_created and self._dask_client:
+        if (
+            hasattr(self, '_is_dask_client_internally_created')
+            and self._is_dask_client_internally_created
+            and self._dask_client
+        ):
             self._dask_client.shutdown()
             self._dask_client.close()
             del self._dask_client
             self._dask_client = None
+            self._is_dask_client_internally_created = False
+            del self._is_dask_client_internally_created
 
     def _get_logger(self, name):
         logger_name = 'AutoML(%d):%s' % (self._seed, name)
