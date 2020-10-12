@@ -1,13 +1,36 @@
 import os
 import shutil
 import time
+import unittest.mock
 
 import dask
 from dask.distributed import Client, get_client
 import psutil
 import pytest
 
-from autosklearn.util.backend import create
+from autosklearn.util.backend import create, Backend
+from autosklearn.automl import AutoML
+
+
+class AutoMLStub(AutoML):
+    def __init__(self):
+        self.__class__ = AutoML
+        self._task = None
+        self._dask_client = None
+        self._is_dask_client_internally_created = False
+
+    def __del__(self):
+        pass
+
+
+@pytest.fixture(scope="function")
+def automl_stub(request):
+    automl = AutoMLStub()
+    automl._seed = 42
+    automl._backend = unittest.mock.Mock(spec=Backend)
+    automl._backend.context = unittest.mock.Mock()
+    automl._delete_output_directories = lambda: 0
+    return automl
 
 
 @pytest.fixture(scope="function")

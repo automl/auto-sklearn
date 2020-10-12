@@ -127,12 +127,14 @@ class BackendContext(object):
             try:
                 shutil.rmtree(self.output_directory)
             except Exception:
-                if self._logger is not None:
-                    self._logger.warning("Could not delete output dir: %s" %
-                                         self.output_directory)
-                else:
-                    print("Could not delete output dir: %s" %
-                          self.output_directory)
+                try:
+                    if self._logger is not None:
+                        self._logger.warning("Could not delete output dir: %s" %
+                                             self.output_directory)
+                    else:
+                        print("Could not delete output dir: %s" % self.output_directory)
+                except Exception:
+                    print("Could not delete output dir: %s" % self.output_directory)
 
         if self.delete_tmp_folder_after_terminate or force:
             if self._tmp_dir_created is False:
@@ -143,9 +145,12 @@ class BackendContext(object):
             try:
                 shutil.rmtree(self.temporary_directory)
             except Exception:
-                if self._logger is not None:
-                    self._logger.warning("Could not delete tmp dir: %s" % self.temporary_directory)
-                else:
+                try:
+                    if self._logger is not None:
+                        self._logger.warning("Could not delete tmp dir: %s" % self.temporary_directory)
+                    else:
+                        print("Could not delete tmp dir: %s" % self.temporary_directory)
+                except Exception:
                     print("Could not delete tmp dir: %s" % self.temporary_directory)
 
 
@@ -230,13 +235,6 @@ class Backend(object):
             'run_%d' % seed
         )
 
-    def get_smac_output_glob(self, smac_run_id: Union[str, int] = 1) -> str:
-        return os.path.join(
-            glob.escape(self.temporary_directory),
-            'smac3-output',
-            'run_%s' % str(smac_run_id),
-        )
-
     def _get_targets_ensemble_filename(self) -> str:
         return os.path.join(self.internals_directory,
                             "true_targets_ensemble.npy")
@@ -311,6 +309,9 @@ class Backend(object):
         with lockfile.LockFile(filepath):
             with open(filepath, 'rb') as fh:
                 return pickle.load(fh)
+
+    def get_numrun_directory(self, seed: int, num_run: int) -> str:
+        return os.path.join(self.internals_directory, 'runs', '%d_%d' % (seed, num_run))
 
     def get_done_directory(self) -> str:
         return os.path.join(self.internals_directory, 'done')
