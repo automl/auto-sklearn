@@ -18,9 +18,8 @@ class MLPClassifier(
     AutoSklearnClassificationAlgorithm
 ):
     def __init__(self, hidden_layer_depth, num_nodes_per_layer, activation, alpha,
-                 learning_rate_init, early_stopping, solver, batch_size,
-                 # n_iter_no_change, validation_fraction=None, tol,
-                 shuffle, beta_1, beta_2, epsilon,
+                 learning_rate_init, early_stopping, n_iter_no_change, solver, batch_size,
+                 shuffle, tol, beta_1, beta_2, epsilon, validation_fraction=None,
                  random_state=None, verbose=0):
         self.hidden_layer_depth = hidden_layer_depth
         self.num_nodes_per_layer = num_nodes_per_layer
@@ -29,12 +28,12 @@ class MLPClassifier(
         self.alpha = alpha
         self.learning_rate_init = learning_rate_init
         self.early_stopping = early_stopping
-        # self.n_iter_no_change = n_iter_no_change
-        # self.validation_fraction = validation_fraction
-        # self.tol = tol
+        self.n_iter_no_change = n_iter_no_change
+        self.validation_fraction = validation_fraction
         self.solver = solver
         self.batch_size = batch_size
         self.shuffle = shuffle
+        self.tol = tol
         self.beta_1 = beta_1
         self.beta_2 = beta_2
         self.epsilon = epsilon
@@ -43,6 +42,7 @@ class MLPClassifier(
         self.random_state = random_state
         self.verbose = verbose
         self.estimator = None
+        self.fully_fit_ = False
 
     @staticmethod
     def get_max_iter():
@@ -75,15 +75,21 @@ class MLPClassifier(
             self.early_stopping = str(self.early_stopping)
             if self.early_stopping == "off":
                 self.early_stopping_val = False
-                # self.validation_fraction = 0.0
-                # self.n_iter_no_change = int(self.n_iter_no_change)
-                # self.tol = float(self.tol)
-            else:
-                raise ValueError("Can't use early_stopping (set to %s)" % self.early_stopping)
-                # self.early_stopping_val = True
-                # self.validation_fraction = 0.0
-                # self.n_iter_no_change = self.max_iter
-                # self.tol = 0
+                self.validation_fraction = 0.0
+                self.n_iter_no_change = int(self.n_iter_no_change)
+                self.tol = float(self.tol)
+            elif self.early_stopping == "valid":
+                self.early_stopping_val = True
+                self.validation_fraction = float(self.validation_fraction)
+                self.n_iter_no_change = int(self.n_iter_no_change)
+                self.tol = float(self.tol)
+            elif self.early_stopping == "train":
+                raise ValueError("Can't set early_stopping to %s" % self.early_stopping)
+                # Currently not in use
+                self.early_stopping_val = False
+                self.validation_fraction = 0.0
+                self.n_iter_no_change = self.max_iter
+                self.tol = 0
             self.solver = self.solver
 
             try:
@@ -113,15 +119,15 @@ class MLPClassifier(
                 max_iter=n_iter,
                 shuffle=self.shuffle,
                 random_state=self.random_state,
+                tol=self.tol,
                 verbose=self.verbose,
                 warm_start=True,
                 early_stopping=self.early_stopping_val,
-                # validation_fraction=self.validation_fraction,
-                # n_iter_no_change=self.n_iter_no_change,
-                # tol=self.tol,
+                validation_fraction=self.validation_fraction,
                 beta_1=self.beta_2,
                 beta_2=self.beta_1,
                 epsilon=self.epsilon,
+                n_iter_no_change=self.n_iter_no_change,
                 # We do not use these, see comments below in search space
                 # momentum=self.momentum,
                 # nesterovs_momentum=self.nesterovs_momentum,
@@ -131,7 +137,7 @@ class MLPClassifier(
             )
             self.estimator.fit(X, y)
         else:
-            # **NOTE** From scikit-learn > 0.23.2 we don't need the while loop anymore
+
             new_max_iter = min(self.max_iter, self.estimator.n_iter_ + n_iter)
             # self.estimator.max_iter = new_max_iter
             while self.estimator.n_iter_ < new_max_iter:
