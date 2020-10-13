@@ -43,6 +43,7 @@ class MLPRegressor(
         self.random_state = random_state
         self.verbose = verbose
         self.estimator = None
+        self.fully_fit_ = False
 
     @staticmethod
     def get_max_iter():
