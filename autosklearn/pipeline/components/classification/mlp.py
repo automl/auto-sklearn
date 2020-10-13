@@ -4,7 +4,6 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, UnParametrizedHyperparameter, Constant, \
     CategoricalHyperparameter
-from ConfigSpace.conditions import InCondition
 
 from autosklearn.pipeline.components.base import (
     AutoSklearnClassificationAlgorithm,
@@ -19,8 +18,9 @@ class MLPClassifier(
     AutoSklearnClassificationAlgorithm
 ):
     def __init__(self, hidden_layer_depth, num_nodes_per_layer, activation, alpha,
-                 learning_rate_init, early_stopping, n_iter_no_change, solver, batch_size,
-                 shuffle, tol, beta_1, beta_2, epsilon, validation_fraction=None,
+                 learning_rate_init, early_stopping, solver, batch_size,
+                 # n_iter_no_change, validation_fraction=None, tol,
+                 shuffle, beta_1, beta_2, epsilon,
                  random_state=None, verbose=0):
         self.hidden_layer_depth = hidden_layer_depth
         self.num_nodes_per_layer = num_nodes_per_layer
@@ -29,12 +29,12 @@ class MLPClassifier(
         self.alpha = alpha
         self.learning_rate_init = learning_rate_init
         self.early_stopping = early_stopping
-        self.n_iter_no_change = n_iter_no_change
-        self.validation_fraction = validation_fraction
+        # self.n_iter_no_change = n_iter_no_change
+        # self.validation_fraction = validation_fraction
+        # self.tol = tol
         self.solver = solver
         self.batch_size = batch_size
         self.shuffle = shuffle
-        self.tol = tol
         self.beta_1 = beta_1
         self.beta_2 = beta_2
         self.epsilon = epsilon
@@ -68,28 +68,23 @@ class MLPClassifier(
             self.max_iter = int(self.max_iter)
             self.hidden_layer_depth = int(self.hidden_layer_depth)
             self.num_nodes_per_layer = int(self.num_nodes_per_layer)
-            self.hidden_layer_sizes = tuple(self.num_nodes_per_layer for i in range(self.hidden_layer_depth))
+            self.hidden_layer_sizes = tuple(self.num_nodes_per_layer
+                                            for i in range(self.hidden_layer_depth))
             self.activation = str(self.activation)
             self.alpha = float(self.alpha)
             self.learning_rate_init = float(self.learning_rate_init)
             self.early_stopping = str(self.early_stopping)
             if self.early_stopping == "off":
                 self.early_stopping_val = False
-                self.validation_fraction = 0.0
-                self.n_iter_no_change = int(self.n_iter_no_change)
-                self.tol = float(self.tol)
-            elif self.early_stopping == "valid":
-                self.early_stopping_val = True
-                self.validation_fraction = float(self.validation_fraction)
-                self.n_iter_no_change = int(self.n_iter_no_change)
-                self.tol = float(self.tol)
-            elif self.early_stopping == "train":
-                raise ValueError("Can't set early_stopping to %s" % self.early_stopping)
-                # Currently not in use
-                self.early_stopping_val = False
-                self.validation_fraction = 0.0
-                self.n_iter_no_change = self.max_iter
-                self.tol = 0
+                # self.validation_fraction = 0.0
+                # self.n_iter_no_change = int(self.n_iter_no_change)
+                # self.tol = float(self.tol)
+            else:
+                raise ValueError("Can't use early_stopping (set to %s)" % self.early_stopping)
+                # self.early_stopping_val = True
+                # self.validation_fraction = 0.0
+                # self.n_iter_no_change = self.max_iter
+                # self.tol = 0
             self.solver = self.solver
 
             try:
@@ -119,29 +114,27 @@ class MLPClassifier(
                 max_iter=n_iter,
                 shuffle=self.shuffle,
                 random_state=self.random_state,
-                tol=self.tol,
                 verbose=self.verbose,
                 warm_start=True,
                 early_stopping=self.early_stopping_val,
-                #validation_fraction=self.validation_fraction,
+                # validation_fraction=self.validation_fraction,
+                # n_iter_no_change=self.n_iter_no_change,
+                # tol=self.tol,
                 beta_1=self.beta_2,
                 beta_2=self.beta_1,
                 epsilon=self.epsilon,
-                n_iter_no_change=self.n_iter_no_change,
                 # We do not use these, see comments below in search space
-                #momentum=self.momentum,
-                #nesterovs_momentum=self.nesterovs_momentum,
-                #power_t=self.power_t,
-                #learning_rate=self.learning_rate,
-                #max_fun=self.max_fun
+                # momentum=self.momentum,
+                # nesterovs_momentum=self.nesterovs_momentum,
+                # power_t=self.power_t,
+                # learning_rate=self.learning_rate,
+                # max_fun=self.max_fun
             )
             self.estimator.fit(X, y)
         else:
             # **NOTE** This is fixed in scikit-learn > 0.23.2
             new_max_iter = min(self.max_iter, self.estimator.n_iter_ + n_iter)
-            print("kkhjkh")
-            print(self.estimator.early_stopping)
-            #self.estimator.max_iter = new_max_iter
+            # self.estimator.max_iter = new_max_iter
             while self.estimator.n_iter_ < new_max_iter:
                 self.estimator.fit(X, y)
 
@@ -197,12 +190,14 @@ class MLPClassifier(
         learning_rate_init = UniformFloatHyperparameter(name="learning_rate_init",
                                                         lower=1e-4, upper=0.5, default_value=1e-3,
                                                         log=True)
-        # Using early stopping + warm starting is not possible
-        early_stopping = CategoricalHyperparameter(name="early_stopping",
-                                                   choices=["off", ],  # "valid", "train"],
-                                                   default_value="off")
-        n_iter_no_change = Constant(name="n_iter_no_change", value=10)
-        validation_fraction = Constant(name="validation_fraction", value=0.0)
+        # *Note*: If "early_stopping" is set to true, we can't use warm_starting. This
+        # is fixed w/ scikit-learn>=0.24 and we can make this a categorical with off/train/valid
+        early_stopping = Constant(name="early_stopping", value="off")
+
+        # We don't need these since we turn off early_stopping
+        # n_iter_no_change = Constant(name="n_iter_no_change", value=10)
+        # validation_fraction = Constant(name="validation_fraction", value=0.0)
+        # tol = UnParametrizedHyperparameter(name="tol", value=1e-4)
 
         # Constants
         solver = Constant(name="solver", value='adam')
@@ -210,7 +205,6 @@ class MLPClassifier(
         # Relying on sklearn defaults for now
         batch_size = UnParametrizedHyperparameter(name="batch_size", value="auto")
         shuffle = UnParametrizedHyperparameter(name="shuffle", value="True")
-        tol = UnParametrizedHyperparameter(name="tol", value=1e-4)
         beta_1 = UnParametrizedHyperparameter(name="beta_1", value=0.9)
         beta_2 = UnParametrizedHyperparameter(name="beta_2", value=0.999)
         epsilon = UnParametrizedHyperparameter(name="epsilon", value=1e-8)
@@ -227,12 +221,12 @@ class MLPClassifier(
         cs.add_hyperparameters([hidden_layer_depth, num_nodes_per_layer,
                                 activation, alpha,
                                 learning_rate_init, early_stopping,
-                                n_iter_no_change, validation_fraction,
-                                solver, batch_size, shuffle, tol,
+                                # n_iter_no_change, validation_fraction, tol,
+                                solver, batch_size, shuffle,
                                 beta_1, beta_2, epsilon])
 
-        # *Note*: If "early_stopping" is set to true, we can't use warm_starting
-        #validation_fraction_cond = InCondition(validation_fraction, early_stopping, ["valid"])
-        #cs.add_conditions([validation_fraction_cond])
+        # We don't need these since we turn off early_stopping
+        # validation_fraction_cond = InCondition(validation_fraction, early_stopping, ["valid"])
+        # cs.add_conditions([validation_fraction_cond])
 
         return cs
