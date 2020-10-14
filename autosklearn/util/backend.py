@@ -147,7 +147,8 @@ class BackendContext(object):
             except Exception:
                 try:
                     if self._logger is not None:
-                        self._logger.warning("Could not delete tmp dir: %s" % self.temporary_directory)
+                        self._logger.warning(
+                            "Could not delete tmp dir: %s" % self.temporary_directory)
                     else:
                         print("Could not delete tmp dir: %s" % self.temporary_directory)
                 except Exception:

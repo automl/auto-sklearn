@@ -100,6 +100,7 @@ def test_fit_roar(dask_client, backend):
 
     del automl
 
+
 def test_refit_shuffle_on_fail(backend, dask_client):
 
     failing_model = unittest.mock.Mock()
@@ -223,6 +224,7 @@ def test_delete_non_candidate_models(backend, dask_client):
     assert ensemble_members_idx.issubset(model_files_idx)
 
     del automl
+
 
 def test_binary_score_and_include(backend, dask_client):
     """
@@ -371,6 +373,7 @@ def test_do_dummy_prediction(backend, dask_client):
 
         del auto
 
+
 @unittest.mock.patch('autosklearn.evaluation.ExecuteTaFuncWithQueue.run')
 def test_fail_if_dummy_prediction_fails(ta_run_mock, backend, dask_client):
 
@@ -417,9 +420,9 @@ def test_fail_if_dummy_prediction_fails(ta_run_mock, backend, dask_client):
     ta_run_mock.return_value = StatusType.CRASHED, None, None, "test"
     with pytest.raises(
         ValueError,
-        match='Dummy prediction failed with run state StatusType.CRASHED and additional output: test.'
+        match='Dummy prediction failed with run state StatusType.CRASHED and additional output: test.'  # noqa
     ):
-        auto._do_dummy_prediction( datamanager, 1)
+        auto._do_dummy_prediction(datamanager, 1)
 
     ta_run_mock.return_value = StatusType.ABORT, None, None, "test"
     with pytest.raises(

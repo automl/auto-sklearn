@@ -114,6 +114,8 @@ def _dir_fixture(dir_type, request):
 
     request.addfinalizer(get_finalizer(dir))
 
+    return dir
+
 
 @pytest.fixture(scope="function")
 def dask_client(request):
