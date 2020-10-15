@@ -401,13 +401,13 @@ def test_fail_if_dummy_prediction_fails(ta_run_mock, backend, dask_client):
     auto._backend.save_datamanager(datamanager)
 
     # First of all, check that ta.run() is actually called.
-    ta_run_mock.return_value = StatusType.SUCCESS, None, None, "test"
+    ta_run_mock.return_value = StatusType.SUCCESS, None, None, {}
     auto._do_dummy_prediction(datamanager, 1)
     ta_run_mock.assert_called_once_with(1, cutoff=time_for_this_task)
 
     # Case 1. Check that function raises no error when statustype == success.
     # ta.run() returns status, cost, runtime, and additional info.
-    ta_run_mock.return_value = StatusType.SUCCESS, None, None, "test"
+    ta_run_mock.return_value = StatusType.SUCCESS, None, None, {}
     raised = False
     try:
         auto._do_dummy_prediction(datamanager, 1)
@@ -431,7 +431,6 @@ def test_fail_if_dummy_prediction_fails(ta_run_mock, backend, dask_client):
               'and additional output: {}.',
     ):
         auto._do_dummy_prediction(datamanager, 1)
-
     ta_run_mock.return_value = StatusType.TIMEOUT, None, None, {}
     with pytest.raises(
         ValueError,
@@ -439,7 +438,6 @@ def test_fail_if_dummy_prediction_fails(ta_run_mock, backend, dask_client):
               'and additional output: {}.'
     ):
         auto._do_dummy_prediction(datamanager, 1)
-
     ta_run_mock.return_value = StatusType.MEMOUT, None, None, {}
     with pytest.raises(
         ValueError,
@@ -447,7 +445,6 @@ def test_fail_if_dummy_prediction_fails(ta_run_mock, backend, dask_client):
               'and additional output: {}.',
     ):
         auto._do_dummy_prediction(datamanager, 1)
-
     ta_run_mock.return_value = StatusType.CAPPED, None, None, {}
     with pytest.raises(
         ValueError,
