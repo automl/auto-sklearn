@@ -73,7 +73,7 @@ Auto-sklearn requires dask workers to not run in the daemon setting
  .. code-block:: none
 
 
-    <dask.config.set object at 0x7f6e771b1f90>
+    <dask.config.set object at 0x7fc5f79aab10>
 
 
 
