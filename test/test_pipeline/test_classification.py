@@ -421,7 +421,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual(len(cs.get_hyperparameter(
             'data_preprocessing:numerical_transformer:rescaling:__choice__').choices), 6)
         self.assertEqual(len(cs.get_hyperparameter(
-            'classifier:__choice__').choices), 15)
+            'classifier:__choice__').choices), 16)
         self.assertEqual(len(cs.get_hyperparameter(
             'feature_preprocessor:__choice__').choices), 13)
 
