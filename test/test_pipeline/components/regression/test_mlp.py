@@ -12,7 +12,7 @@ class MLPComponentTest(BaseRegressionComponentTest):
     res = dict()
     res["default_boston"] = 0.5572566941424424
     res["boston_n_calls"] = 9
-    res["default_boston_iterative"] = 0.4065338206433726
+    res["default_boston_iterative"] = 0.3991011585607287
     res["default_boston_sparse"] = -0.5023509031147615
     res["default_boston_iterative_sparse"] = -0.49785984132922323
     res["default_diabetes"] = 0.39632559079949414
