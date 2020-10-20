@@ -43,7 +43,6 @@ class MLPClassifier(
         self.random_state = random_state
         self.verbose = verbose
         self.estimator = None
-        self.fully_fit_ = False
 
     @staticmethod
     def get_max_iter():
@@ -132,7 +131,7 @@ class MLPClassifier(
             )
             self.estimator.fit(X, y)
         else:
-            # **NOTE** This is fixed in scikit-learn > 0.23.2
+            # **NOTE** From scikit-learn > 0.23.2 we don't need the while loop anymore
             new_max_iter = min(self.max_iter, self.estimator.n_iter_ + n_iter)
             # self.estimator.max_iter = new_max_iter
             while self.estimator.n_iter_ < new_max_iter:
@@ -184,7 +183,7 @@ class MLPClassifier(
                                                            log=True)
         activation = CategoricalHyperparameter(name="activation", choices=['tanh', 'relu'],
                                                default_value='relu')
-        alpha = UniformFloatHyperparameter(name="alpha", lower=1e-5, upper=1e-0, default_value=1e-4,
+        alpha = UniformFloatHyperparameter(name="alpha", lower=1e-7, upper=1e-1, default_value=1e-4,
                                            log=True)
 
         learning_rate_init = UniformFloatHyperparameter(name="learning_rate_init",
