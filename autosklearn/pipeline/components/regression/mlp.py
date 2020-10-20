@@ -43,7 +43,6 @@ class MLPRegressor(
         self.random_state = random_state
         self.verbose = verbose
         self.estimator = None
-        self.fully_fit_ = False
 
     @staticmethod
     def get_max_iter():
@@ -183,7 +182,7 @@ class MLPRegressor(
                                                            log=True)
         activation = CategoricalHyperparameter(name="activation", choices=['tanh', 'logistic'],
                                                default_value='tanh')
-        alpha = UniformFloatHyperparameter(name="alpha", lower=1e-5, upper=1e-0, default_value=1e-4,
+        alpha = UniformFloatHyperparameter(name="alpha", lower=1e-7, upper=1e-1, default_value=1e-4,
                                            log=True)
 
         learning_rate_init = UniformFloatHyperparameter(name="learning_rate_init",
