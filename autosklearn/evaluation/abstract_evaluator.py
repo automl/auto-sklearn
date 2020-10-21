@@ -1,7 +1,6 @@
 import os
 import time
 import warnings
-from collections import namedtuple
 
 import numpy as np
 from sklearn.dummy import DummyClassifier, DummyRegressor
