@@ -16,13 +16,13 @@ class MLPComponentTest(BaseClassificationComponentTest):
     res["default_iris_proba"] = 0.5615969597449075
     res["default_iris_sparse"] = 0.42
     res["default_digits"] = 0.461445051608986
-    res["default_digits_places"] = 2
+    res["default_digits_places"] = 1
     res["digits_n_calls"] = 9
     res["default_digits_iterative"] = 0.461445051608986
-    res["default_digits_iterative_places"] = 2
+    res["default_digits_iterative_places"] = 1
     res["default_digits_binary"] = 0.978749241044323
     res["default_digits_multilabel"] = 0.2637626340507736
-    res["default_digits_multilabel_places"] = 2
+    res["default_digits_multilabel_places"] = 1
     res["default_digits_multilabel_proba"] = 0.8792680626296924
 
     sk_mod = sklearn.neural_network.MLPClassifier
