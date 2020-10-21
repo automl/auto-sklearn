@@ -37,6 +37,7 @@ from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import _fit_with_budget
 from autosklearn.metrics import calculate_score
+from autosklearn.util.backend import Backend
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import get_logger, setup_logger
 from autosklearn.util import pipeline, RE_PATTERN
@@ -95,7 +96,7 @@ def _model_predict(model, X, batch_size, logger, task):
 class AutoML(BaseEstimator):
 
     def __init__(self,
-                 backend,
+                 backend: Backend,
                  time_left_for_this_task,
                  per_run_time_limit,
                  initial_configurations_via_metalearning=25,
@@ -512,11 +513,7 @@ class AutoML(BaseEstimator):
 
         self._backend._make_internals_directory()
         try:
-            os.makedirs(self._backend.get_model_dir())
-        except (OSError, FileExistsError):
-            raise
-        try:
-            os.makedirs(self._backend.get_cv_model_dir())
+            os.makedirs(self._backend.get_runs_directory())
         except (OSError, FileExistsError):
             raise
 
