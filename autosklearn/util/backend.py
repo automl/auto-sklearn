@@ -308,7 +308,7 @@ class Backend(object):
             with open(filepath, 'rb') as fh:
                 return pickle.load(fh)
 
-    def get_runs_directory(self):
+    def get_runs_directory(self) -> str:
         return os.path.join(self.internals_directory, 'runs')
 
     def get_numrun_directory(self, seed: int, num_run: int) -> str:
