@@ -6,14 +6,14 @@ import glob
 import gzip
 import os
 import re
+import shutil
 import time
 import traceback
-from typing import Optional, Union
+from typing import Optional, Union, List, Tuple
 
 import numpy as np
 import pandas as pd
 import pynisher
-import lockfile
 from sklearn.utils.validation import check_random_state
 
 from autosklearn.util.backend import Backend
@@ -147,30 +147,6 @@ class EnsembleBuilder(multiprocessing.Process):
         self.read_at_most = read_at_most
         self.random_state = check_random_state(random_state)
 
-        # part of the original training set
-        # used to build the ensemble
-        self.dir_ensemble = os.path.join(
-            self.backend.temporary_directory,
-            '.auto-sklearn',
-            'predictions_ensemble',
-        )
-        # validation set (public test set) -- y_true not known
-        self.dir_valid = os.path.join(
-            self.backend.temporary_directory,
-            '.auto-sklearn',
-            'predictions_valid',
-        )
-        # test set (private test set) -- y_true not known
-        self.dir_test = os.path.join(
-            self.backend.temporary_directory,
-            '.auto-sklearn',
-            'predictions_test',
-        )
-        self.dir_models = os.path.join(
-            self.backend.temporary_directory,
-            '.auto-sklearn',
-            'models',
-        )
         logger_name = 'EnsembleBuilder(%d):%s' % (self.seed, self.dataset_name)
         self.logger = get_logger(logger_name)
         if ensemble_nbest == 1:
@@ -386,28 +362,14 @@ class EnsembleBuilder(multiprocessing.Process):
         match = self.model_fn_re.search(pred_path)
         if not match:
             raise ValueError("Invalid path format %s" % pred_path)
-        _full_name = match.group(0)
-        _seed = match.group(1)
-        _num_run = match.group(2)
-        _budget = match.group(3)
+        _seed = int(match.group(1))
+        _num_run = int(match.group(2))
 
-        # Besides the prediction, we have to take care of three other files: model,
-        # validation and test.
-        model_name = '%s.%s.%s.model' % (_seed, _num_run, _budget)
-        model_path = os.path.join(self.dir_models, model_name)
-        pred_valid_name = 'predictions_valid' + _full_name
-        pred_valid_path = os.path.join(self.dir_valid, pred_valid_name)
-        pred_test_name = 'predictions_test' + _full_name
-        pred_test_path = os.path.join(self.dir_test, pred_test_name)
-
-        paths = [pred_path]
-        if os.path.exists(model_path):
-            paths.append(model_path)
-        if os.path.exists(pred_valid_path):
-            paths.append(pred_valid_path)
-        if os.path.exists(pred_test_path):
-            paths.append(pred_test_path)
-        this_model_cost = sum([os.path.getsize(path) for path in paths])
+        stored_files_for_run = os.listdir(self.backend.get_numrun_directory(_seed, _num_run))
+        stored_files_for_run = [
+            os.path.join(self.backend.get_numrun_directory(_seed, _num_run), file_name)
+            for file_name in stored_files_for_run]
+        this_model_cost = sum([os.path.getsize(path) for path in stored_files_for_run])
 
         # get the megabytes
         return round(this_model_cost / math.pow(1024, 2), 2)
@@ -430,16 +392,11 @@ class EnsembleBuilder(multiprocessing.Process):
                 )
                 return False
 
-        # no validation predictions so far -- no dir
-        if not os.path.isdir(self.dir_ensemble):
-            self.logger.debug("No ensemble dataset prediction directory found")
-            return False
-
         pred_path = os.path.join(
-            glob.escape(self.dir_ensemble),
+            glob.escape(self.backend.get_runs_directory()),
+            '%d_*' % self.seed,
             'predictions_ensemble_%s_*_*.npy*' % self.seed,
         )
-
         y_ens_files = glob.glob(pred_path)
         y_ens_files = [y_ens_file for y_ens_file in y_ens_files
                        if y_ens_file.endswith('.npy') or y_ens_file.endswith('.npy.gz')]
@@ -450,12 +407,6 @@ class EnsembleBuilder(multiprocessing.Process):
                               " %s" % pred_path)
             return False
 
-        done_path = os.path.join(
-            glob.escape(self.backend.get_done_directory()), '%s_*' % self.seed
-        )
-        done = glob.glob(done_path)
-        done = [os.path.split(d)[1] for d in done]
-
         # First sort files chronologically
         to_read = []
         for y_ens_fn in self.y_ens_files:
@@ -464,8 +415,7 @@ class EnsembleBuilder(multiprocessing.Process):
             _num_run = int(match.group(2))
             _budget = float(match.group(3))
 
-            if '%s_%s' % (_seed, _num_run) in done:
-                to_read.append([y_ens_fn, match, _seed, _num_run, _budget])
+            to_read.append([y_ens_fn, match, _seed, _num_run, _budget])
 
         n_read_files = 0
         # Now read file wrt to num_run
@@ -707,7 +657,7 @@ class EnsembleBuilder(multiprocessing.Process):
         # return best scored keys of self.read_preds
         return sorted_keys[:ensemble_n_best]
 
-    def get_valid_test_preds(self, selected_keys: list):
+    def get_valid_test_preds(self, selected_keys: List[str]) -> Tuple[List[str], List[str]]:
         """
         get valid and test predictions from disc
         and store them in self.read_preds
@@ -729,7 +679,8 @@ class EnsembleBuilder(multiprocessing.Process):
         for k in selected_keys:
             valid_fn = glob.glob(
                 os.path.join(
-                    glob.escape(self.dir_valid),
+                    glob.escape(self.backend.get_runs_directory()),
+                    '%d_%d' % (self.read_preds[k]["seed"], self.read_preds[k]["num_run"]),
                     'predictions_valid_%d_%d_%s.npy*' % (
                         self.read_preds[k]["seed"],
                         self.read_preds[k]["num_run"],
@@ -740,7 +691,8 @@ class EnsembleBuilder(multiprocessing.Process):
             valid_fn = [vfn for vfn in valid_fn if vfn.endswith('.npy') or vfn.endswith('.npy.gz')]
             test_fn = glob.glob(
                 os.path.join(
-                    glob.escape(self.dir_test),
+                    glob.escape(self.backend.get_runs_directory()),
+                    '%d_%d' % (self.read_preds[k]["seed"], self.read_preds[k]["num_run"]),
                     'predictions_test_%d_%d_%s.npy*' % (
                         self.read_preds[k]["seed"],
                         self.read_preds[k]["num_run"],
@@ -750,7 +702,6 @@ class EnsembleBuilder(multiprocessing.Process):
             )
             test_fn = [tfn for tfn in test_fn if tfn.endswith('.npy') or tfn.endswith('.npy.gz')]
 
-            # TODO don't read valid and test if not changed
             if len(valid_fn) == 0:
                 # self.logger.debug("Not found validation prediction file "
                 #                   "(although ensemble predictions available): "
@@ -1078,77 +1029,23 @@ class EnsembleBuilder(multiprocessing.Process):
                 continue
 
             match = self.model_fn_re.search(pred_path)
-            _full_name = match.group(0)
-            _seed = match.group(1)
-            _num_run = match.group(2)
-            _budget = match.group(3)
+            _seed = int(match.group(1))
+            _num_run = int(match.group(2))
 
             # Do not delete the dummy prediction
-            if int(_num_run) == 1:
+            if _num_run == 1:
                 continue
 
-            # Besides the prediction, we have to take care of three other files: model,
-            # validation and test.
-            model_name = '%s.%s.%s.model' % (_seed, _num_run, _budget)
-            model_path = os.path.join(self.dir_models, model_name)
-            pred_valid_name = 'predictions_valid' + _full_name
-            pred_valid_path = os.path.join(self.dir_valid, pred_valid_name)
-            pred_test_name = 'predictions_test' + _full_name
-            pred_test_path = os.path.join(self.dir_test, pred_test_name)
-
-            paths = [pred_path]
-            if os.path.exists(model_path):
-                paths.append(model_path)
-            if os.path.exists(pred_valid_path):
-                paths.append(pred_valid_path)
-            if os.path.exists(pred_test_path):
-                paths.append(pred_test_path)
-
-            # Lets lock all the files "at once" to avoid weird race conditions. Also,
-            # we either delete all files of a model (model, prediction, validation
-            # and test), or delete none. This makes it easier to keep track of which
-            # models have indeed been correctly removed.
-            locks = [lockfile.LockFile(path) for path in paths]
+            numrun_dir = self.backend.get_numrun_directory(_seed, _num_run)
             try:
-                for lock in locks:
-                    lock.acquire()
+                os.rename(numrun_dir, numrun_dir + '.old')
+                shutil.rmtree(numrun_dir + '.old')
+                self.logger.info("Deleted files of non-candidate model %s", pred_path)
             except Exception as e:
-                if isinstance(e, lockfile.AlreadyLocked):
-                    # If the file is already locked, we deal with it later. Not a big deal
-                    self.logger.info(
-                        'Model %s is already locked. Skipping it for now.', model_name)
-                else:
-                    # Other exceptions, however, should not occur.
-                    # The message bellow is asserted in test_delete_excess_models()
-                    self.logger.error(
-                        'Failed to lock model %s files due to error %s', model_name, e)
-                for lock in locks:
-                    if lock.i_am_locking():
-                        lock.release()
-                continue
-
-            # Delete files if model is not a candidate AND prediction is old. We check if
-            # the prediction is old to avoid deleting a model that hasn't been appreciated
-            # by self.get_n_best_preds() yet.
-            original_timestamp = self.read_preds[pred_path]['mtime_ens']
-            current_timestamp = os.path.getmtime(pred_path)
-            if current_timestamp == original_timestamp:
-                # The messages logged here are asserted in
-                # test_delete_excess_models(). Edit with care.
-                try:
-                    for path in paths:
-                        os.remove(path)
-                    self.logger.info(
-                        "Deleted files of non-candidate model %s", model_name)
-                except Exception as e:
-                    self.logger.error(
-                        "Failed to delete files of non-candidate model %s due"
-                        " to error %s", model_name, e)
-
-            # If we reached this point, all locks were done by this thread. So no need
-            # to check "lock.i_am_locking()" here.
-            for lock in locks:
-                lock.release()
+                self.logger.error(
+                    "Failed to delete files of non-candidate model %s due"
+                    " to error %s", pred_path, e
+                )
 
     def _read_np_fn(self, path):
 

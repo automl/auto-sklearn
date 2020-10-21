@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 import os
 import pickle
+import re
 import sys
 import time
 import glob
@@ -301,22 +302,22 @@ class AutoMLTest(Base, unittest.TestCase):
             self.assertTrue(np.allclose(D.data['X_train'], X_train))
 
         # Check that all directories are there
-        fixture = ['cv_models', 'true_targets_ensemble.npy',
-                   'start_time_100', 'datamanager.pkl',
-                   'predictions_ensemble',
-                   'done', 'ensembles', 'predictions_test', 'models']
+        fixture = ['true_targets_ensemble.npy', 'start_time_100', 'datamanager.pkl',
+                   'runs', 'ensembles']
         self.assertEqual(sorted(os.listdir(os.path.join(backend_api.temporary_directory,
                                                         '.auto-sklearn'))),
                          sorted(fixture))
 
-        # At least one ensemble, one validation, one test prediction and one
-        # model and one ensemble
+        # At least one runs directory
         fixture = os.listdir(os.path.join(backend_api.temporary_directory,
-                                          '.auto-sklearn', 'predictions_ensemble'))
+                                          '.auto-sklearn', 'runs'))
         self.assertGreater(len(fixture), 0)
+        for f in fixture:
+            match = re.match(r'100_([0-9]*)', f)
+            self.assertIsNotNone(match, (f))
 
         fixture = glob.glob(os.path.join(backend_api.temporary_directory, '.auto-sklearn',
-                                         'models', '100.*.model'))
+                                         'runs', '100_*', '100.*.model'))
         self.assertGreater(len(fixture), 0)
 
         fixture = os.listdir(os.path.join(backend_api.temporary_directory,
@@ -343,6 +344,7 @@ class AutoMLTest(Base, unittest.TestCase):
 
         for name, task in datasets.items():
             backend_api = self._create_backend('test_do_dummy_prediction')
+            os.makedirs(backend_api.get_runs_directory())
 
             X_train, Y_train, X_test, Y_test = putil.get_dataset(name)
             datamanager = XYDataManager(
@@ -373,7 +375,7 @@ class AutoMLTest(Base, unittest.TestCase):
             self.assertFalse(os.path.exists(os.path.join(os.getcwd(),
                                                          '.auto-sklearn')))
             self.assertTrue(os.path.exists(os.path.join(
-                backend_api.temporary_directory, '.auto-sklearn', 'predictions_ensemble',
+                backend_api.temporary_directory, '.auto-sklearn', 'runs', '1_1',
                 'predictions_ensemble_1_1_0.0.npy')))
 
             del auto

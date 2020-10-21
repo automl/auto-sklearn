@@ -33,7 +33,8 @@ class BackendMock(object):
         array = np.load(os.path.join(
             this_directory, 'data',
             '.auto-sklearn',
-            'predictions_test',
+            'runs',
+            '0_3',
             'predictions_test_0_3_100.0.npy'
         ))
         manager.data.get.return_value = array
@@ -43,14 +44,16 @@ class BackendMock(object):
         with open(os.path.join(
             self.temporary_directory,
             ".auto-sklearn",
-            "predictions_ensemble",
             "predictions_ensemble_true.npy"
         ), "rb") as fp:
             y = np.load(fp, allow_pickle=True)
         return y
 
-    def get_done_directory(self):
-        return os.path.join(this_directory, 'data', '.auto-sklearn', 'done')
+    def get_runs_directory(self):
+        return os.path.join(this_directory, 'data', '.auto-sklearn', 'runs')
+
+    def get_numrun_directory(self, seed, num_run):
+        return os.path.join(self.get_runs_directory(), '%d_%d' % (seed, num_run))
 
 
 class EnsembleBuilderMemMock(EnsembleBuilder):
@@ -83,13 +86,13 @@ class EnsembleTest(unittest.TestCase):
 
         filename = os.path.join(
             self.backend.temporary_directory,
-            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_1_0.0.npy"
+            ".auto-sklearn/runs/0_1/predictions_ensemble_0_1_0.0.npy"
         )
         self.assertEqual(ensbuilder.read_preds[filename]["ens_score"], 0.5)
 
         filename = os.path.join(
             self.backend.temporary_directory,
-            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_0.0.npy"
+            ".auto-sklearn/runs/0_2/predictions_ensemble_0_2_0.0.npy"
         )
         self.assertEqual(ensbuilder.read_preds[filename]["ens_score"], 1.0)
 
@@ -120,7 +123,7 @@ class EnsembleTest(unittest.TestCase):
 
             fixture = os.path.join(
                 self.backend.temporary_directory,
-                ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_0.0.npy"
+                ".auto-sklearn/runs/0_2/predictions_ensemble_0_2_0.0.npy"
             )
             self.assertEqual(sel_keys[0], fixture)
 
@@ -133,11 +136,11 @@ class EnsembleTest(unittest.TestCase):
                 # If Int, limit only on exceed
                 (4, 2),
                 (1, 1),
-                # If Float, translate float to # models.
-                # below, mock of each file is 100 Mb and
-                # 4 files .model and .npy (test/val/pred) exist
-                (700.0, 1),
-                (800.0, 2),
+                # If Float, this is the number of MBs
+                # The code now considers all files in a numrun directory
+                # 4 files for 0_1, 5 files for 0_2 and 5 files for 0_3, each files is 100MB
+                (900.0, 1),
+                (1000.0, 2),
                 (9999.0, 2),
         ]:
             ensbuilder = EnsembleBuilder(
@@ -155,7 +158,7 @@ class EnsembleTest(unittest.TestCase):
                 mock.return_value = 100*1024*1024
                 ensbuilder.score_ensemble_preds()
                 sel_keys = ensbuilder.get_n_best_preds()
-                self.assertEqual(len(sel_keys), exp)
+                self.assertEqual(len(sel_keys), exp, (test_case, exp))
 
         # Test for Extreme scenarios
         # Make sure that the best predictions are kept
@@ -253,19 +256,19 @@ class EnsembleTest(unittest.TestCase):
 
         filename = os.path.join(
             self.backend.temporary_directory,
-            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_0.0.npy"
+            ".auto-sklearn/runs/0_2/predictions_ensemble_0_2_0.0.npy"
         )
         ensbuilder.read_preds[filename]["ens_score"] = -1
 
         filename = os.path.join(
             self.backend.temporary_directory,
-            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_3_100.0.npy"
+            ".auto-sklearn/runs/0_3/predictions_ensemble_0_3_100.0.npy"
         )
         ensbuilder.read_preds[filename]["ens_score"] = -1
 
         filename = os.path.join(
             self.backend.temporary_directory,
-            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_1_0.0.npy"
+            ".auto-sklearn/runs/0_1/predictions_ensemble_0_1_0.0.npy"
         )
         ensbuilder.read_preds[filename]["ens_score"] = -1
 
@@ -273,7 +276,7 @@ class EnsembleTest(unittest.TestCase):
 
         fixture = os.path.join(
             self.backend.temporary_directory,
-            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_1_0.0.npy"
+            ".auto-sklearn/runs/0_1/predictions_ensemble_0_1_0.0.npy"
         )
         self.assertEqual(len(sel_keys), 1)
         self.assertEqual(sel_keys[0], fixture)
@@ -293,15 +296,15 @@ class EnsembleTest(unittest.TestCase):
 
         d1 = os.path.join(
             self.backend.temporary_directory,
-            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_1_0.0.npy"
+            ".auto-sklearn/runs/0_1/predictions_ensemble_0_1_0.0.npy"
         )
         d2 = os.path.join(
             self.backend.temporary_directory,
-            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_0.0.npy"
+            ".auto-sklearn/runs/0_2/predictions_ensemble_0_2_0.0.npy"
         )
         d3 = os.path.join(
             self.backend.temporary_directory,
-            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_3_100.0.npy"
+            ".auto-sklearn/runs/0_3/predictions_ensemble_0_3_100.0.npy"
         )
 
         sel_keys = ensbuilder.get_n_best_preds()
@@ -314,7 +317,7 @@ class EnsembleTest(unittest.TestCase):
         self.assertNotIn(
             os.path.join(
                 self.backend.temporary_directory,
-                ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_4_0.0.npy"
+                ".auto-sklearn/runs/0_4/predictions_ensemble_0_4_0.0.npy"
             ),
             ensbuilder.read_preds
         )
@@ -346,14 +349,13 @@ class EnsembleTest(unittest.TestCase):
 
         d2 = os.path.join(
             self.backend.temporary_directory,
-            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_0.0.npy"
+            ".auto-sklearn/runs/0_2/predictions_ensemble_0_2_0.0.npy"
         )
 
         sel_keys = ensbuilder.get_n_best_preds()
         self.assertGreater(len(sel_keys), 0)
 
         ensemble = ensbuilder.fit_ensemble(selected_keys=sel_keys)
-        print(ensemble, sel_keys)
 
         n_sel_valid, n_sel_test = ensbuilder.get_valid_test_preds(selected_keys=sel_keys)
 

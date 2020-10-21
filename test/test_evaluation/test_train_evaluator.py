@@ -82,7 +82,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.name = 'test'
 
         pipeline_mock.predict_proba.side_effect = \
-            lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+            lambda X, batch_size=None: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_additional_run_info.return_value = None
         pipeline_mock.get_max_iter.return_value = 1
@@ -150,7 +150,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             SideEffect().configuration_fully_fitted
         pipeline_mock.fit_transformer.return_value = Xt_fixture, {}
         pipeline_mock.predict_proba.side_effect = \
-            lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+            lambda X, batch_size=None: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.get_additional_run_info.return_value = None
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_max_iter.return_value = 512
@@ -249,7 +249,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             SideEffect().configuration_fully_fitted
         pipeline_mock.fit_transformer.return_value = Xt_fixture, {}
         pipeline_mock.predict_proba.side_effect = \
-            lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+            lambda X, batch_size=None: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_additional_run_info.return_value = None
         pipeline_mock.get_max_iter.return_value = 512
@@ -322,7 +322,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.estimator_supports_iterative_fit.return_value = False
         pipeline_mock.fit_transformer.return_value = Xt_fixture, {}
         pipeline_mock.predict_proba.side_effect = \
-            lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+            lambda X, batch_size=None: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_additional_run_info.return_value = None
         tmp_dir = os.path.join(os.getcwd(), '.tmp_test_iterative_holdout_not_iterative')
@@ -365,7 +365,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D = get_binary_classification_datamanager()
 
         pipeline_mock.predict_proba.side_effect = \
-            lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+            lambda X, batch_size=None: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_additional_run_info.return_value = None
         tmp_dir = os.path.join(os.getcwd(), '.tmp_test_cv')
@@ -416,7 +416,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D = get_binary_classification_datamanager()
 
         pipeline_mock.predict_proba.side_effect = \
-            lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+            lambda X, batch_size=None: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_additional_run_info.return_value = None
         pipeline_mock.get_max_iter.return_value = 1
@@ -479,7 +479,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             SideEffect().configuration_fully_fitted
         pipeline_mock.fit_transformer.return_value = Xt_fixture, {}
         pipeline_mock.predict_proba.side_effect = \
-            lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+            lambda X, batch_size=None: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.get_additional_run_info.return_value = None
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_max_iter.return_value = 512
@@ -578,9 +578,13 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         self.assertEqual(rval, (None, {}))
         self.assertEqual(self.backend_mock.save_targets_ensemble.call_count, 1)
-        self.assertEqual(self.backend_mock.save_predictions_as_npy.call_count, 3)
+        self.assertEqual(self.backend_mock.save_numrun_to_dir.call_count, 1)
+        self.assertEqual(self.backend_mock.save_numrun_to_dir.call_args_list[-1][1].keys(),
+                         {'seed', 'idx', 'budget', 'model', 'cv_model',
+                          'ensemble_predictions', 'valid_predictions', 'test_predictions'})
+        self.assertIsNotNone(self.backend_mock.save_numrun_to_dir.call_args_list[-1][1]['model'])
+        self.assertIsNone(self.backend_mock.save_numrun_to_dir.call_args_list[-1][1]['cv_model'])
         self.assertEqual(makedirs_mock.call_count, 1)
-        self.assertEqual(self.backend_mock.save_model.call_count, 1)
 
         evaluator.models = ['model2', 'model2']
         rval = evaluator.file_output(
@@ -590,9 +594,12 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         )
         self.assertEqual(rval, (None, {}))
         self.assertEqual(self.backend_mock.save_targets_ensemble.call_count, 2)
-        self.assertEqual(self.backend_mock.save_predictions_as_npy.call_count, 6)
-        self.assertEqual(makedirs_mock.call_count, 2)
-        self.assertEqual(self.backend_mock.save_model.call_count, 3)
+        self.assertEqual(self.backend_mock.save_numrun_to_dir.call_count, 2)
+        self.assertEqual(self.backend_mock.save_numrun_to_dir.call_args_list[-1][1].keys(),
+                         {'seed', 'idx', 'budget', 'model', 'cv_model',
+                          'ensemble_predictions', 'valid_predictions', 'test_predictions'})
+        self.assertIsNotNone(self.backend_mock.save_numrun_to_dir.call_args_list[-1][1]['model'])
+        self.assertIsNotNone(self.backend_mock.save_numrun_to_dir.call_args_list[-1][1]['cv_model'])
 
         # Check for not containing NaNs - that the models don't predict nonsense
         # for unseen data
@@ -719,7 +726,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
     def test_predict_proba_binary_classification(self, mock):
         D = get_binary_classification_datamanager()
         self.backend_mock.load_datamanager.return_value = D
-        mock.predict_proba.side_effect = lambda y, batch_size: np.array(
+        mock.predict_proba.side_effect = lambda y, batch_size=None: np.array(
             [[0.1, 0.9]] * y.shape[0]
         )
         mock.side_effect = lambda **kwargs: mock
@@ -735,12 +742,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    metric=accuracy)
 
         evaluator.fit_predict_and_loss()
-        Y_optimization_pred = self.backend_mock.save_predictions_as_npy.call_args_list[0][0][0]
+        Y_optimization_pred = self.backend_mock.save_numrun_to_dir.call_args_list[0][1][
+            'ensemble_predictions']
 
         for i in range(7):
             self.assertEqual(0.9, Y_optimization_pred[i][1])
-
-        self.assertEqual(self.backend_mock.save_model.call_count, 2)
 
     @unittest.mock.patch.object(TrainEvaluator, 'file_output')
     @unittest.mock.patch.object(TrainEvaluator, '_partial_fit_and_predict_standard')
@@ -999,8 +1005,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(finish_up_mock.call_args[1]['additional_run_info'], {'val': 14678})
 
     def test_get_results(self):
-        backend_mock = unittest.mock.Mock(spec=backend.Backend)
-        backend_mock.get_model_dir.return_value = 'dutirapbdxvltcrpbdlcatepdeau'
         queue_ = multiprocessing.Queue()
         for i in range(5):
             queue_.put((i * 1, 1 - (i * 0.2), 0, "", StatusType.SUCCESS))

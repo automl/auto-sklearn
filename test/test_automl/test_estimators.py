@@ -1,3 +1,4 @@
+import glob
 import os
 import pickle
 import re
@@ -16,7 +17,6 @@ import sklearn.datasets
 import autosklearn.pipeline.util as putil
 from autosklearn.ensemble_builder import MODEL_FN_RE
 import autosklearn.estimators  # noqa F401
-from autosklearn.estimators import AutoSklearnEstimator
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
 from autosklearn.metrics import accuracy, f1_macro, mean_squared_error, r2
@@ -288,13 +288,16 @@ class EstimatorTest(Base, unittest.TestCase):
         for run_key, run_value in automl.automl_.runhistory_.data.items():
             if run_value.additional_info is not None and 'num_run' in run_value.additional_info:
                 available_num_runs.add(run_value.additional_info['num_run'])
-        predictions_dir = automl.automl_._backend._get_prediction_output_dir(
-            'ensemble'
-        )
+        predictions = glob.glob(os.path.join(
+            glob.escape(automl.automl_._backend.get_runs_directory()),
+            '%d_*' % automl.seed,
+            'predictions_ensemble_%s_*_*.npy*' % automl.seed,
+        ))
+        print(predictions)
         available_predictions = set()
-        predictions = os.listdir(predictions_dir)
         seeds = set()
         for prediction in predictions:
+            prediction = os.path.split(prediction)[1]
             match = re.match(MODEL_FN_RE, prediction.replace("predictions_ensemble", ""))
             if match:
                 num_run = int(match.group(2))
@@ -302,20 +305,9 @@ class EstimatorTest(Base, unittest.TestCase):
                 seed = int(match.group(1))
                 seeds.add(seed)
 
-        done_dir = automl.automl_._backend.get_done_directory()
-        dones = os.listdir(done_dir)
-        available_dones = set()
-        for done in dones:
-            match = re.match(r'([0-9]*)_([0-9]*)', done)
-            if match:
-                num_run = int(match.group(2))
-                available_dones.add(num_run)
-
         # Remove the dummy prediction, it is not part of the runhistory
         available_predictions.remove(1)
         self.assertTrue(available_num_runs.issubset(available_predictions))
-        available_dones.remove(1)
-        self.assertSetEqual(available_dones, available_num_runs)
 
         self.assertEqual(len(seeds), 1)
 

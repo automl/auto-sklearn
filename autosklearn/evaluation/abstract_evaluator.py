@@ -3,7 +3,6 @@ import time
 import warnings
 from collections import namedtuple
 
-import lockfile
 import numpy as np
 from sklearn.dummy import DummyClassifier, DummyRegressor
 from sklearn.ensemble import VotingClassifier, VotingRegressor
@@ -29,8 +28,6 @@ from ConfigSpace import Configuration
 __all__ = [
     'AbstractEvaluator'
 ]
-
-WriteTask = namedtuple('WriteTask', ['lock', 'writer', 'args'])
 
 
 class MyDummyClassifier(DummyClassifier):
@@ -409,57 +406,6 @@ class AbstractEvaluator(object):
                     pass
                 self.backend.save_targets_ensemble(self.Y_optimization)
 
-        # The other four files have to be written together, meaning we start
-        # writing them just after acquiring the locks for all of them.
-        # But first we have to check which files have to be written.
-        write_tasks = []
-
-        # File 1 of 5: model
-        if ('model' not in self.disable_file_output):
-            if os.path.exists(self.backend.get_model_dir()):
-                file_path = self.backend.get_model_path(
-                    self.seed, self.num_run, self.budget)
-                write_tasks.append(
-                    WriteTask(
-                        lock=lockfile.LockFile(file_path),
-                        writer=self.backend.save_model,
-                        args=(self.model, file_path)
-                        ))
-
-        # File 2 of 5: predictions
-        if ('y_optimization' not in self.disable_file_output):
-            file_path = self.backend.get_prediction_output_path(
-                'ensemble', self.seed, self.num_run, self.budget)
-            write_tasks.append(
-                WriteTask(
-                    lock=lockfile.LockFile(file_path),
-                    writer=self.backend.save_predictions_as_npy,
-                    args=(Y_optimization_pred, file_path)
-                    ))
-
-        # File 3 of 5: validation predictions
-        if Y_valid_pred is not None:
-            file_path = self.backend.get_prediction_output_path(
-                'valid', self.seed, self.num_run, self.budget)
-            write_tasks.append(
-                WriteTask(
-                    lock=lockfile.LockFile(file_path),
-                    writer=self.backend.save_predictions_as_npy,
-                    args=(Y_valid_pred, file_path)
-                    ))
-
-        # File 4 of 5: test predictions
-        if Y_test_pred is not None:
-            file_path = self.backend.get_prediction_output_path(
-                'test', self.seed, self.num_run, self.budget)
-            write_tasks.append(
-                WriteTask(
-                    lock=lockfile.LockFile(file_path),
-                    writer=self.backend.save_predictions_as_npy,
-                    args=(Y_test_pred, file_path)
-                    ))
-
-        # File 5 of 5: ensemble of models in case of cross-validation
         if hasattr(self, 'models') and len(self.models) > 0 and self.models[0] is not None:
             if ('models' not in self.disable_file_output):
 
@@ -468,42 +414,27 @@ class AbstractEvaluator(object):
                 else:
                     models = VotingRegressor(estimators=None)
                 models.estimators_ = self.models
+            else:
+                models = None
+        else:
+            models = None
 
-                if os.path.exists(self.backend.get_cv_model_dir()):
-                    file_path = self.backend.get_cv_model_path(
-                        self.seed, self.num_run, self.budget)
-                    write_tasks.append(
-                        WriteTask(
-                            lock=lockfile.LockFile(file_path),
-                            writer=self.backend.save_model,
-                            args=(models, file_path)
-                            ))
-
-        # We then acquire the locks one by one in a stubborn fashion, i.e. if a file is
-        # already locked, we keep probing it until it is unlocked. This will NOT create a
-        # race condition with _delete_non_candidate_models() since this function doesn't
-        # acquire the locks in this stubborn way. The delete function releases all the
-        # locks and aborts the acquision process as soon as it finds a locked file.
-        for wt in write_tasks:
-            while True:
-                try:
-                    wt.lock.acquire()
-                    break
-                except lockfile.AlreadyLocked:
-                    time.sleep(.1)
-                    continue
-                except Exception as e:
-                    raise RuntimeError('Failed to lock %s due to %s' % (wt.lock, e))
-
-        # At this point we are good to write the files
-        for wt in write_tasks:
-            wt.writer(*wt.args)
-
-        # And finally release the locks
-        for wt in write_tasks:
-            wt.lock.release()
-
-        self.backend.note_numrun_as_done(self.seed, self.num_run)
+        self.backend.save_numrun_to_dir(
+            seed=self.seed,
+            idx=self.num_run,
+            budget=self.budget,
+            model=self.model if 'model' not in self.disable_file_output else None,
+            cv_model=models if 'cv_model' not in self.disable_file_output else None,
+            ensemble_predictions=(
+                Y_optimization_pred if 'y_optimization' not in self.disable_file_output else None
+            ),
+            valid_predictions=(
+                Y_valid_pred if 'y_valid' not in self.disable_file_output else None
+            ),
+            test_predictions=(
+                Y_test_pred if 'y_test' not in self.disable_file_output else None
+            ),
+        )
 
         return None, {}
 

@@ -233,13 +233,6 @@ class Backend(object):
             'run_%d' % seed
         )
 
-    def get_smac_output_glob(self, smac_run_id: Union[str, int] = 1) -> str:
-        return os.path.join(
-            glob.escape(self.temporary_directory),
-            'smac3-output',
-            'run_%s' % str(smac_run_id),
-        )
-
     def _get_targets_ensemble_filename(self) -> str:
         return os.path.join(self.internals_directory,
                             "true_targets_ensemble.npy")
@@ -315,78 +308,24 @@ class Backend(object):
             with open(filepath, 'rb') as fh:
                 return pickle.load(fh)
 
-    def get_done_directory(self) -> str:
-        return os.path.join(self.internals_directory, 'done')
+    def get_runs_directory(self):
+        return os.path.join(self.internals_directory, 'runs')
 
-    def note_numrun_as_done(self, seed: int, num_run: int) -> None:
-        done_directory = self.get_done_directory()
-        os.makedirs(done_directory, exist_ok=True)
-        done_path = os.path.join(done_directory, '%d_%d' % (seed, num_run))
-        with open(done_path, 'w'):
-            pass
+    def get_numrun_directory(self, seed: int, num_run: int) -> str:
+        return os.path.join(self.internals_directory, 'runs', '%d_%d' % (seed, num_run))
 
-    def get_model_dir(self) -> str:
-        return os.path.join(self.internals_directory, 'models')
+    def get_model_filename(self, seed: int, idx: int, budget: float) -> str:
+        return '%s.%s.%s.model' % (seed, idx, budget)
 
-    def get_cv_model_dir(self) -> str:
-        return os.path.join(self.internals_directory, 'cv_models')
-
-    def get_model_path(self, seed: int, idx: int, budget: float) -> str:
-        return os.path.join(self.get_model_dir(),
-                            '%s.%s.%s.model' % (seed, idx, budget))
-
-    def get_cv_model_path(self, seed: int, idx: int, budget: float) -> str:
-        return os.path.join(self.get_cv_model_dir(),
-                            '%s.%s.%s.model' % (seed, idx, budget))
-
-    def save_model(self, model: Pipeline, filepath: str) -> None:
-        with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
-                filepath), delete=False) as fh:
-            pickle.dump(model, fh, -1)
-            tempname = fh.name
-
-        os.rename(tempname, filepath)
+    def get_cv_model_filename(self, seed: int, idx: int, budget: float) -> str:
+        return '%s.%s.%s.cv_model' % (seed, idx, budget)
 
     def list_all_models(self, seed: int) -> List[str]:
-        model_directory = self.get_model_dir()
-        if seed >= 0:
-            model_files = glob.glob(
-                os.path.join(glob.escape(model_directory), '%s.*.*.model' % seed)
-            )
-        else:
-            model_files = os.listdir(model_directory)
-            model_files = [os.path.join(model_directory, model_file)
-                           for model_file in model_files]
-
+        runs_directory = self.get_runs_directory()
+        model_files = glob.glob(
+            os.path.join(glob.escape(runs_directory), '%d_*' % seed, '%s.*.*.model' % seed)
+        )
         return model_files
-
-    def load_all_models(self, seed: int) -> List:
-        model_files = self.list_all_models(seed)
-        models = self.load_models_by_file_names(model_files)
-        return models
-
-    def load_models_by_file_names(self, model_file_names: List[str]) -> Pipeline:
-        models = dict()
-
-        for model_file in model_file_names:
-            # File names are like: {seed}.{index}.{budget}.model
-            if model_file.endswith('/'):
-                model_file = model_file[:-1]
-            if not model_file.endswith('.model') and \
-                    not model_file.endswith('.model'):
-                continue
-
-            basename = os.path.basename(model_file)
-
-            basename_parts = basename.split('.')
-            seed = int(basename_parts[0])
-            idx = int(basename_parts[1])
-            budget = float(basename_parts[2])
-
-            models[(seed, idx, budget)] = self.load_model_by_seed_and_id_and_budget(
-                seed, idx, budget)
-
-        return models
 
     def load_models_by_identifiers(self, identifiers: List[Tuple[int, int, float]]
                                    ) -> Dict:
@@ -403,7 +342,7 @@ class Backend(object):
                                              idx: int,
                                              budget: float
                                              ) -> Pipeline:
-        model_directory = self.get_model_dir()
+        model_directory = self.get_numrun_directory(seed, idx)
 
         model_file_name = '%s.%s.%s.model' % (seed, idx, budget)
         model_file_path = os.path.join(model_directory, model_file_name)
@@ -426,12 +365,50 @@ class Backend(object):
                                                 idx: int,
                                                 budget: float
                                                 ) -> Pipeline:
-        model_directory = self.get_cv_model_dir()
+        model_directory = self.get_numrun_directory(seed, idx)
 
-        model_file_name = '%s.%s.%s.model' % (seed, idx, budget)
+        model_file_name = '%s.%s.%s.cv_model' % (seed, idx, budget)
         model_file_path = os.path.join(model_directory, model_file_name)
         with open(model_file_path, 'rb') as fh:
             return pickle.load(fh)
+
+    def save_numrun_to_dir(
+        self, seed: int, idx: int, budget: float, model: Optional[Pipeline],
+        cv_model: Optional[Pipeline], ensemble_predictions: Optional[np.ndarray],
+        valid_predictions: Optional[np.ndarray], test_predictions: Optional[np.ndarray],
+    ) -> None:
+        runs_directory = self.get_runs_directory()
+        tmpdir = tempfile.mkdtemp(dir=runs_directory)
+        if model is not None:
+            file_path = os.path.join(tmpdir, self.get_model_filename(seed, idx, budget))
+            with open(file_path, 'wb') as fh:
+                pickle.dump(model, fh, -1)
+
+        if cv_model is not None:
+            file_path = os.path.join(tmpdir, self.get_cv_model_filename(seed, idx, budget))
+            with open(file_path, 'wb') as fh:
+                pickle.dump(cv_model, fh, -1)
+
+        for preds, subset in (
+            (ensemble_predictions, 'ensemble'),
+            (valid_predictions, 'valid'),
+            (test_predictions, 'test')
+        ):
+            if preds is not None:
+                file_path = os.path.join(
+                    tmpdir,
+                    self.get_prediction_filename(subset, seed, idx, budget)
+                )
+                with open(file_path, 'wb') as fh:
+                    pickle.dump(preds.astype(np.float32), fh, -1)
+        try:
+            os.rename(tmpdir, self.get_numrun_directory(seed, idx))
+        except OSError:
+            if os.path.exists(self.get_numrun_directory(seed, idx)):
+                os.rename(self.get_numrun_directory(seed, idx),
+                          os.path.join(runs_directory, tmpdir + '.old'))
+                os.rename(tmpdir, self.get_numrun_directory(seed, idx))
+                shutil.rmtree(os.path.join(runs_directory, tmpdir + '.old'))
 
     def get_ensemble_dir(self) -> str:
         return os.path.join(self.internals_directory, 'ensembles')
@@ -474,32 +451,12 @@ class Backend(object):
             tempname = fh.name
         os.rename(tempname, filepath)
 
-    def _get_prediction_output_dir(self, subset: str) -> str:
-        return os.path.join(self.internals_directory,
-                            'predictions_%s' % subset)
-
-    def get_prediction_output_path(self, subset: str,
-                                   automl_seed: Union[str, int],
-                                   idx: int,
-                                   budget: float
-                                   ) -> str:
-        output_dir = self._get_prediction_output_dir(subset)
-        # Make sure an output directory exists
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-
-        return os.path.join(output_dir, 'predictions_%s_%s_%s_%s.npy' %
-                            (subset, automl_seed, idx, budget))
-
-    def save_predictions_as_npy(self,
-                                predictions: np.ndarray,
-                                filepath: str
-                                ) -> None:
-        with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
-                filepath), delete=False) as fh:
-            pickle.dump(predictions.astype(np.float32), fh, -1)
-            tempname = fh.name
-        os.rename(tempname, filepath)
+    def get_prediction_filename(self, subset: str,
+                                automl_seed: Union[str, int],
+                                idx: int,
+                                budget: float
+                                ) -> str:
+        return 'predictions_%s_%s_%s_%s.npy' % (subset, automl_seed, idx, budget)
 
     def save_predictions_as_txt(self,
                                 predictions: np.ndarray,

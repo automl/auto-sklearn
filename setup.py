@@ -33,7 +33,7 @@ extras_reqs={
         "pytest-timeout",
         "flaky",
         "pytest-cov",
-
+        "openml",
     ]
 }
 
