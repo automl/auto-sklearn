@@ -106,18 +106,25 @@ def get_per_run_time_limit(_per_run_time_limit, n_jobs, time_left_for_smac, logg
     # Automatically set the cutoff time per task
     total_time_all_workers = n_jobs * time_left_for_smac
     if _per_run_time_limit is None:
+        # We aim to run at least ten models
         per_run_time_limit = total_time_all_workers // 10
         per_run_time_limit = max(5, per_run_time_limit)
 
         num_total_models = total_time_all_workers / per_run_time_limit
-        if num_total_models < 20:
-            if per_run_time_limit >= 360:
+        # However, only running ten models might be too small. If our initial design is of size
+        # 25 (default in Auto-sklearn 1.0), we want to run as many of them, while keeping still
+        # giving each model 360s. This loop computes the number of models possible in the total
+        # time limit.
+        if num_total_models < 26 and per_run_time_limit >= 360:
                 for i in range(11, 26):
                     if total_time_all_workers // i < 360:
+                        # We're now under 360s and need to go ones step back
                         num_total_models = i - 1
                         per_run_time_limit = total_time_all_workers // num_total_models
                         break
                     else:
+                        # This is only relevant it i == 25, then the per_run_time_limit is
+                        # computed based on the assumption that we can run exactly 25 models
                         num_total_models = i
                         per_run_time_limit = total_time_all_workers // num_total_models
 
@@ -891,6 +898,7 @@ class AutoML(BaseEstimator):
 
         if self.ensemble_:
             identifiers = self.ensemble_.get_selected_model_identifiers()
+            print(identifiers)
             self.models_ = self._backend.load_models_by_identifiers(identifiers)
             if self._resampling_strategy in ('cv', ):
                 self.cv_models_ = self._backend.load_cv_models_by_identifiers(identifiers)

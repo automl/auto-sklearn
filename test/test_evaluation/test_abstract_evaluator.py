@@ -268,6 +268,6 @@ class AbstractEvaluatorTest(unittest.TestCase):
             )
 
             self.assertTrue(os.path.exists(os.path.join(self.working_directory, 'tmp',
-                                                        '.auto-sklearn', 'runs', '1_0')))
+                                                        '.auto-sklearn', 'runs', '1_0_None')))
 
             shutil.rmtree(self.working_directory, ignore_errors=True)

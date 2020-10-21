@@ -57,7 +57,7 @@ class BackendModelsTest(unittest.TestCase):
         self.assertDictEqual(expected_dict, actual_dict)
 
     def _setup_load_model_mocks(self, openMock, pickleLoadMock, seed, idx, budget):
-        model_path = '/runs/%s_%s/%s.%s.%s.model' % (seed, idx, seed, idx, budget)
+        model_path = '/runs/%s_%s_%s/%s.%s.%s.model' % (seed, idx, budget, seed, idx, budget)
         file_handler = 'file_handler'
         expected_model = 'model'
 

@@ -311,8 +311,8 @@ class Backend(object):
     def get_runs_directory(self) -> str:
         return os.path.join(self.internals_directory, 'runs')
 
-    def get_numrun_directory(self, seed: int, num_run: int) -> str:
-        return os.path.join(self.internals_directory, 'runs', '%d_%d' % (seed, num_run))
+    def get_numrun_directory(self, seed: int, num_run: int, budget: float) -> str:
+        return os.path.join(self.internals_directory, 'runs', '%d_%d_%s' % (seed, num_run, budget))
 
     def get_model_filename(self, seed: int, idx: int, budget: float) -> str:
         return '%s.%s.%s.model' % (seed, idx, budget)
@@ -342,7 +342,7 @@ class Backend(object):
                                              idx: int,
                                              budget: float
                                              ) -> Pipeline:
-        model_directory = self.get_numrun_directory(seed, idx)
+        model_directory = self.get_numrun_directory(seed, idx, budget)
 
         model_file_name = '%s.%s.%s.model' % (seed, idx, budget)
         model_file_path = os.path.join(model_directory, model_file_name)
@@ -365,7 +365,7 @@ class Backend(object):
                                                 idx: int,
                                                 budget: float
                                                 ) -> Pipeline:
-        model_directory = self.get_numrun_directory(seed, idx)
+        model_directory = self.get_numrun_directory(seed, idx, budget)
 
         model_file_name = '%s.%s.%s.cv_model' % (seed, idx, budget)
         model_file_path = os.path.join(model_directory, model_file_name)
@@ -402,12 +402,12 @@ class Backend(object):
                 with open(file_path, 'wb') as fh:
                     pickle.dump(preds.astype(np.float32), fh, -1)
         try:
-            os.rename(tmpdir, self.get_numrun_directory(seed, idx))
+            os.rename(tmpdir, self.get_numrun_directory(seed, idx, budget))
         except OSError:
-            if os.path.exists(self.get_numrun_directory(seed, idx)):
-                os.rename(self.get_numrun_directory(seed, idx),
+            if os.path.exists(self.get_numrun_directory(seed, idx, budget)):
+                os.rename(self.get_numrun_directory(seed, idx, budget),
                           os.path.join(runs_directory, tmpdir + '.old'))
-                os.rename(tmpdir, self.get_numrun_directory(seed, idx))
+                os.rename(tmpdir, self.get_numrun_directory(seed, idx, budget))
                 shutil.rmtree(os.path.join(runs_directory, tmpdir + '.old'))
 
     def get_ensemble_dir(self) -> str:

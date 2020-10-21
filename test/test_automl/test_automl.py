@@ -375,7 +375,7 @@ class AutoMLTest(Base, unittest.TestCase):
             self.assertFalse(os.path.exists(os.path.join(os.getcwd(),
                                                          '.auto-sklearn')))
             self.assertTrue(os.path.exists(os.path.join(
-                backend_api.temporary_directory, '.auto-sklearn', 'runs', '1_1',
+                backend_api.temporary_directory, '.auto-sklearn', 'runs', '1_1_0.0',
                 'predictions_ensemble_1_1_0.0.npy')))
 
             del auto
