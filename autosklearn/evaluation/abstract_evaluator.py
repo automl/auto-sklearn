@@ -115,7 +115,7 @@ def _fit_and_suppress_warnings(logger, model, X, y):
 class AbstractEvaluator(object):
     def __init__(self, backend, queue, metric,
                  configuration=None,
-                 all_scoring_functions=False,
+                 scoring_functions=None,
                  seed=1,
                  output_y_hat_optimization=True,
                  num_run=None,
@@ -146,7 +146,7 @@ class AbstractEvaluator(object):
         self.seed = seed
 
         self.output_y_hat_optimization = output_y_hat_optimization
-        self.all_scoring_functions = all_scoring_functions
+        self.scoring_functions = scoring_functions
 
         if isinstance(disable_file_output, (bool, list)):
             self.disable_file_output = disable_file_output
@@ -226,7 +226,7 @@ class AbstractEvaluator(object):
                                      init_params=self._init_params)
         return model
 
-    def _loss(self, y_true, y_hat, all_scoring_functions=None):
+    def _loss(self, y_true, y_hat, scoring_functions=None):
         """Auto-sklearn follows a minimization goal, so the make_scorer
         sign is used as a guide to obtain the value to reduce.
 
@@ -238,20 +238,20 @@ class AbstractEvaluator(object):
                 For accuracy for example: optimum(1) - (+1 * actual score)
                 For logloss for example: optimum(0) - (-1 * actual score)
         """
-        all_scoring_functions = (
-            self.all_scoring_functions
-            if all_scoring_functions is None
-            else all_scoring_functions
+        scoring_functions = (
+            self.scoring_functions
+            if scoring_functions is None
+            else scoring_functions
         )
         if not isinstance(self.configuration, Configuration):
-            if all_scoring_functions:
-                return {self.metric: 1.0}
+            if scoring_functions:
+                return {self.metric.name: 1.0}
             else:
                 return 1.0
 
         score = calculate_score(
             y_true, y_hat, self.task_type, self.metric,
-            all_scoring_functions=all_scoring_functions)
+            scoring_functions=scoring_functions)
 
         if hasattr(score, '__len__'):
             # TODO: instead of using self.metric, it should use all metrics given by key.

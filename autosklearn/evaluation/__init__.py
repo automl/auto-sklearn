@@ -88,7 +88,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
     def __init__(self, backend, autosklearn_seed, resampling_strategy, metric,
                  logger, cost_for_crash, abort_on_first_run_crash,
                  initial_num_run=1, stats=None,
-                 run_obj='quality', par_factor=1, all_scoring_functions=False,
+                 run_obj='quality', par_factor=1, scoring_functions=None,
                  output_y_hat_optimization=True, include=None, exclude=None,
                  memory_limit=None, disable_file_output=False, init_params=None,
                  budget_type=None, ta=False, **resampling_strategy_args):
@@ -142,7 +142,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.metric = metric
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_args = resampling_strategy_args
-        self.all_scoring_functions = all_scoring_functions
+        self.scoring_functions = scoring_functions
         # TODO deactivate output_y_hat_optimization and let the respective evaluator decide
         self.output_y_hat_optimization = output_y_hat_optimization
         self.include = include
@@ -257,7 +257,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             metric=self.metric,
             seed=self.autosklearn_seed,
             num_run=num_run,
-            all_scoring_functions=self.all_scoring_functions,
+            scoring_functions=self.scoring_functions,
             output_y_hat_optimization=self.output_y_hat_optimization,
             include=self.include,
             exclude=self.exclude,

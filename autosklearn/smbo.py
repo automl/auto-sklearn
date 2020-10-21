@@ -218,7 +218,8 @@ class AutoMLSMBO(object):
                  exclude_preprocessors=None,
                  disable_file_output=False,
                  smac_scenario_args=None,
-                 get_smac_object_callback=None):
+                 get_smac_object_callback=None,
+                 scoring_functions=None):
         super(AutoMLSMBO, self).__init__()
         # data related
         self.dataset_name = dataset_name
@@ -259,6 +260,7 @@ class AutoMLSMBO(object):
         self.disable_file_output = disable_file_output
         self.smac_scenario_args = smac_scenario_args
         self.get_smac_object_callback = get_smac_object_callback
+        self.scoring_functions = scoring_functions
 
         dataset_name_ = "" if dataset_name is None else dataset_name
         logger_name = '%s(%d):%s' % (self.__class__.__name__, self.seed, ":" + dataset_name_)
@@ -433,6 +435,7 @@ class AutoMLSMBO(object):
             metric=self.metric,
             memory_limit=self.memory_limit,
             disable_file_output=self.disable_file_output,
+            scoring_functions=self.scoring_functions,
             **self.resampling_strategy_args
         )
         ta = ExecuteTaFuncWithQueue

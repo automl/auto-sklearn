@@ -511,7 +511,7 @@ class EnsembleBuilder(multiprocessing.Process):
                                         prediction=y_ensemble,
                                         task_type=self.task_type,
                                         metric=self.metric,
-                                        all_scoring_functions=False)
+                                        scoring_functions=None)
 
                 if self.read_preds[y_ens_fn]["ens_score"] > -1:
                     self.logger.debug(
@@ -993,7 +993,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 prediction=train_pred,
                 task_type=self.task_type,
                 metric=self.metric,
-                all_scoring_functions=False
+                scoring_functions=None
             )
         }
         if valid_pred is not None:
@@ -1004,7 +1004,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 prediction=valid_pred,
                 task_type=self.task_type,
                 metric=self.metric,
-                all_scoring_functions=False
+                scoring_functions=None
             )
 
         # In case test_pred was provided
@@ -1014,7 +1014,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 prediction=test_pred,
                 task_type=self.task_type,
                 metric=self.metric,
-                all_scoring_functions=False
+                scoring_functions=None
             )
 
         self.queue.put(performance_stamp)

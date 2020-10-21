@@ -42,9 +42,9 @@ from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix
-from autosklearn.metrics import f1_macro, accuracy, r2
+from autosklearn.metrics import f1_macro, accuracy, r2, CLASSIFICATION_METRICS, REGRESSION_METRICS
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
-    REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION
+    REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION, CLASSIFICATION_TASKS
 from autosklearn.pipeline.components.classification import ClassifierChoice
 from autosklearn.pipeline.components.regression import RegressorChoice
 from autosklearn.pipeline.components.feature_preprocessing import FeaturePreprocessorChoice
@@ -119,6 +119,7 @@ class AutoML(BaseEstimator):
                  smac_scenario_args=None,
                  logging_config=None,
                  metric=None,
+                 scoring_functions=None
                  ):
         super(AutoML, self).__init__()
         self._backend = backend
@@ -141,6 +142,7 @@ class AutoML(BaseEstimator):
         self._include_preprocessors = include_preprocessors
         self._exclude_preprocessors = exclude_preprocessors
         self._resampling_strategy = resampling_strategy
+        self._scoring_functions = scoring_functions if scoring_functions is not None else []
         self._resampling_strategy_arguments = resampling_strategy_arguments \
             if resampling_strategy_arguments is not None else {}
         if self._resampling_strategy not in ['holdout',
@@ -623,6 +625,7 @@ class AutoML(BaseEstimator):
                 disable_file_output=self._disable_evaluator_output,
                 get_smac_object_callback=self._get_smac_object_callback,
                 smac_scenario_args=self._smac_scenario_args,
+                scoring_functions=self._scoring_functions,
             )
 
             try:
@@ -949,7 +952,7 @@ class AutoML(BaseEstimator):
                                prediction=prediction,
                                task_type=self._task,
                                metric=self._metric,
-                               all_scoring_functions=False)
+                               scoring_functions=None)
 
     @property
     def cv_results_(self):
@@ -984,11 +987,21 @@ class AutoML(BaseEstimator):
             masks[name] = []
             hp_names.append(name)
 
+        metric_mask = dict()
+        metric_dict = dict()
+        metric_name = []
+
+        for metric in self._scoring_functions:
+            metric_name.append(metric)
+            metric_dict[metric] = []
+            metric_mask[metric] = []
+
         mean_test_score = []
         mean_fit_time = []
         params = []
         status = []
         budgets = []
+        task_metrics = CLASSIFICATION_METRICS if self._task in CLASSIFICATION_TASKS else REGRESSION_METRICS
         for run_key in self.runhistory_.data:
             run_value = self.runhistory_.data[run_key]
             config_id = run_key.config_id
@@ -1031,7 +1044,23 @@ class AutoML(BaseEstimator):
                 parameter_dictionaries[hp_name].append(hp_value)
                 masks[hp_name].append(mask_value)
 
+            for name in metric_name:
+                if name in run_value.additional_info.keys():
+                    metric = task_metrics[name]
+                    metric_value = metric._optimum - (metric._sign * run_value.additional_info[name])
+                    mask_value = False
+                else:
+                    metric_value = np.NaN
+                    mask_value = True
+                metric_dict[name].append(metric_value)
+                metric_mask[name].append(mask_value)
+
         results['mean_test_score'] = np.array(mean_test_score)
+        for name in metric_name:
+            masked_array = ma.MaskedArray(metric_dict[name],
+                                          metric_mask[name])
+            results['metric_%s' % name] = masked_array
+
         results['mean_fit_time'] = np.array(mean_fit_time)
         results['params'] = params
         results['rank_test_scores'] = scipy.stats.rankdata(1 - results['mean_test_score'],

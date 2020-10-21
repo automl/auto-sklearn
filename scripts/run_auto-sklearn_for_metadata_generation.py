@@ -10,7 +10,7 @@ from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.metrics import accuracy, balanced_accuracy, roc_auc, log_loss, r2, \
-    mean_squared_error, mean_absolute_error, root_mean_squared_error
+    mean_squared_error, mean_absolute_error, root_mean_squared_error, CLASSIFICATION_METRICS, REGRESSION_METRICS
 
 from smac.runhistory.runhistory import RunInfo
 from smac.scenario.scenario import Scenario
@@ -93,8 +93,10 @@ automl_arguments['metric'] = metric
 
 if task_type == 'classification':
     automl = AutoSklearnClassifier(**automl_arguments)
+    scoring_functions = CLASSIFICATION_METRICS
 elif task_type == 'regression':
     automl = AutoSklearnRegressor(**automl_arguments)
+    scoring_functions = REGRESSION_METRICS
 else:
     raise ValueError(task_type)
 
@@ -138,7 +140,7 @@ for i, entry in enumerate(trajectory):
                                     disable_file_output=True,
                                     logger=logger,
                                     stats=stats,
-                                    all_scoring_functions=True,
+                                    scoring_functions=scoring_functions,
                                     include=include,
                                     metric=automl_arguments['metric'],
                                     cost_for_crash=get_cost_of_crash(automl_arguments['metric']),

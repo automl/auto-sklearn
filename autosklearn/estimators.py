@@ -43,6 +43,7 @@ class AutoSklearnEstimator(BaseEstimator):
         logging_config=None,
         metadata_directory=None,
         metric=None,
+        scoring_functions=None,
     ):
         """
         Parameters
@@ -264,6 +265,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.logging_config = logging_config
         self.metadata_directory = metadata_directory
         self._metric = metric
+        self._scoring_functions = scoring_functions
 
         self.automl_ = None  # type: Optional[AutoML]
         # n_jobs after conversion to a number (b/c default is None)
@@ -314,7 +316,8 @@ class AutoSklearnEstimator(BaseEstimator):
             smac_scenario_args=smac_scenario_args,
             logging_config=self.logging_config,
             metadata_directory=self.metadata_directory,
-            metric=self._metric
+            metric=self._metric,
+            scoring_functions=self._scoring_functions
         )
 
         return automl

@@ -341,12 +341,12 @@ def calculate_score(
     prediction: np.ndarray,
     task_type: int,
     metric: Scorer,
-    all_scoring_functions: bool = False
+    scoring_functions: list = None
 ) -> Union[float, Dict[str, float]]:
     if task_type not in TASK_TYPES:
         raise NotImplementedError(task_type)
 
-    if all_scoring_functions:
+    if scoring_functions:
         score_dict = dict()
         if task_type in REGRESSION_TASKS:
             # TODO put this into the regression metric itself
@@ -354,6 +354,9 @@ def calculate_score(
             metric_dict = copy.copy(REGRESSION_METRICS)
             metric_dict[metric.name] = metric
             for metric_ in REGRESSION_METRICS:
+                if metric_ not in scoring_functions:
+                    continue
+
                 func = REGRESSION_METRICS[metric_]
                 try:
                     score_dict[func.name] = func(solution, cprediction)
@@ -369,6 +372,9 @@ def calculate_score(
             metric_dict = copy.copy(CLASSIFICATION_METRICS)
             metric_dict[metric.name] = metric
             for metric_ in metric_dict:
+                if metric_ not in scoring_functions:
+                    continue
+
                 func = CLASSIFICATION_METRICS[metric_]
 
                 # TODO maybe annotate metrics to define which cases they can
