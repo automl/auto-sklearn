@@ -717,10 +717,12 @@ class EnsembleBuilder(object):
             raise ValueError("Invalid path format %s" % pred_path)
         _seed = int(match.group(1))
         _num_run = int(match.group(2))
+        _budget = float(match.group(3))
 
-        stored_files_for_run = os.listdir(self.backend.get_numrun_directory(_seed, _num_run))
+        stored_files_for_run = os.listdir(
+            self.backend.get_numrun_directory(_seed, _num_run, _budget))
         stored_files_for_run = [
-            os.path.join(self.backend.get_numrun_directory(_seed, _num_run), file_name)
+            os.path.join(self.backend.get_numrun_directory(_seed, _num_run, _budget), file_name)
             for file_name in stored_files_for_run]
         this_model_cost = sum([os.path.getsize(path) for path in stored_files_for_run])
 
@@ -747,7 +749,7 @@ class EnsembleBuilder(object):
 
         pred_path = os.path.join(
             glob.escape(self.backend.get_runs_directory()),
-            '%d_*' % self.seed,
+            '%d_*_*' % self.seed,
             'predictions_ensemble_%s_*_*.npy*' % self.seed,
         )
         y_ens_files = glob.glob(pred_path)
@@ -1036,7 +1038,11 @@ class EnsembleBuilder(object):
             valid_fn = glob.glob(
                 os.path.join(
                     glob.escape(self.backend.get_runs_directory()),
-                    '%d_%d' % (self.read_preds[k]["seed"], self.read_preds[k]["num_run"]),
+                    '%d_%d_%s' % (
+                        self.read_preds[k]["seed"],
+                        self.read_preds[k]["num_run"],
+                        self.read_preds[k]["budget"],
+                    ),
                     'predictions_valid_%d_%d_%s.npy*' % (
                         self.read_preds[k]["seed"],
                         self.read_preds[k]["num_run"],
@@ -1048,7 +1054,11 @@ class EnsembleBuilder(object):
             test_fn = glob.glob(
                 os.path.join(
                     glob.escape(self.backend.get_runs_directory()),
-                    '%d_%d' % (self.read_preds[k]["seed"], self.read_preds[k]["num_run"]),
+                    '%d_%d_%s' % (
+                        self.read_preds[k]["seed"],
+                        self.read_preds[k]["num_run"],
+                        self.read_preds[k]["budget"],
+                    ),
                     'predictions_test_%d_%d_%s.npy*' % (
                         self.read_preds[k]["seed"],
                         self.read_preds[k]["num_run"],
@@ -1368,12 +1378,13 @@ class EnsembleBuilder(object):
             match = self.model_fn_re.search(pred_path)
             _seed = int(match.group(1))
             _num_run = int(match.group(2))
+            _budget = float(match.group(3))
 
             # Do not delete the dummy prediction
             if _num_run == 1:
                 continue
 
-            numrun_dir = self.backend.get_numrun_directory(_seed, _num_run)
+            numrun_dir = self.backend.get_numrun_directory(_seed, _num_run, _budget)
             try:
                 os.rename(numrun_dir, numrun_dir + '.old')
                 shutil.rmtree(numrun_dir + '.old')
