@@ -116,17 +116,17 @@ def get_per_run_time_limit(_per_run_time_limit, n_jobs, time_left_for_smac, logg
         # giving each model 360s. This loop computes the number of models possible in the total
         # time limit.
         if num_total_models < 26 and per_run_time_limit >= 360:
-                for i in range(11, 26):
-                    if total_time_all_workers // i < 360:
-                        # We're now under 360s and need to go ones step back
-                        num_total_models = i - 1
-                        per_run_time_limit = total_time_all_workers // num_total_models
-                        break
-                    else:
-                        # This is only relevant it i == 25, then the per_run_time_limit is
-                        # computed based on the assumption that we can run exactly 25 models
-                        num_total_models = i
-                        per_run_time_limit = total_time_all_workers // num_total_models
+            for i in range(11, 26):
+                if total_time_all_workers // i < 360:
+                    # We're now under 360s and need to go ones step back
+                    num_total_models = i - 1
+                    per_run_time_limit = total_time_all_workers // num_total_models
+                    break
+                else:
+                    # This is only relevant it i == 25, then the per_run_time_limit is
+                    # computed based on the assumption that we can run exactly 25 models
+                    num_total_models = i
+                    per_run_time_limit = total_time_all_workers // num_total_models
 
     elif _per_run_time_limit > time_left_for_smac:
         logger.warning(

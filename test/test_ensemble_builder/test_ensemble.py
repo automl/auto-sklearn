@@ -256,19 +256,19 @@ class EnsembleTest(unittest.TestCase):
 
         filename = os.path.join(
             self.backend.temporary_directory,
-            ".auto-sklearn/runs/0_2/predictions_ensemble_0_2_0.0.npy"
+            ".auto-sklearn/runs/0_2_0.0/predictions_ensemble_0_2_0.0.npy"
         )
         ensbuilder.read_preds[filename]["ens_score"] = -1
 
         filename = os.path.join(
             self.backend.temporary_directory,
-            ".auto-sklearn/runs/0_3/predictions_ensemble_0_3_100.0.npy"
+            ".auto-sklearn/runs/0_3_100.0/predictions_ensemble_0_3_100.0.npy"
         )
         ensbuilder.read_preds[filename]["ens_score"] = -1
 
         filename = os.path.join(
             self.backend.temporary_directory,
-            ".auto-sklearn/runs/0_1/predictions_ensemble_0_1_0.0.npy"
+            ".auto-sklearn/runs/0_1_0.0/predictions_ensemble_0_1_0.0.npy"
         )
         ensbuilder.read_preds[filename]["ens_score"] = -1
 
@@ -276,7 +276,7 @@ class EnsembleTest(unittest.TestCase):
 
         fixture = os.path.join(
             self.backend.temporary_directory,
-            ".auto-sklearn/runs/0_1/predictions_ensemble_0_1_0.0.npy"
+            ".auto-sklearn/runs/0_1_0.0/predictions_ensemble_0_1_0.0.npy"
         )
         self.assertEqual(len(sel_keys), 1)
         self.assertEqual(sel_keys[0], fixture)
