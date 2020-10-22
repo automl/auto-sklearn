@@ -24,7 +24,7 @@ from autosklearn.constants import MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATI
 from smac.tae import StatusType
 
 sys.path.append(os.path.dirname(__file__))
-from base import Base, extract_msg_from_log, count_succeses  # noqa (E402: module level import not at top of file)
+from automl_utils import extract_msg_from_log, count_succeses  # noqa (E402: module level import not at top of file)
 
 
 class AutoMLStub(AutoML):
