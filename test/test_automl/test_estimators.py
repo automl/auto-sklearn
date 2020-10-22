@@ -417,8 +417,8 @@ def test_binary(tmp_dir, output_dir, dask_client):
 
     X_train, Y_train, X_test, Y_test = putil.get_dataset(
         'iris', make_binary=True)
-    automl = AutoSklearnClassifier(time_left_for_this_task=30,
-                                   per_run_time_limit=5,
+    automl = AutoSklearnClassifier(time_left_for_this_task=40,
+                                   per_run_time_limit=10,
                                    tmp_folder=tmp_dir,
                                    dask_client=dask_client,
                                    output_folder=output_dir)
@@ -435,7 +435,7 @@ def test_binary(tmp_dir, output_dir, dask_client):
     assert count_succeses(automl.cv_results_) > 0, extract_msg_from_log(log_file_path)
 
     output_files = os.listdir(output_dir)
-    assert 'binary_test_dataset_test_1.predict' in output_files
+    assert 'binary_test_dataset_test_1.predict' in output_files, extract_msg_from_log(log_file_path)
 
 
 def test_classification_pandas_support(tmp_dir, output_dir, dask_client):
