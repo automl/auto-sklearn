@@ -83,6 +83,9 @@ def ensemble_builder_process(
             How much time is left for the task. Job should finish within this allocated time
         sleep_duration: int
             How much to wait between each iteration of the ensemble builder process
+            This also means, how frequently we check for an ensemble builder iteration to be
+            done. We only allow 1 active ensemble builder. If that job is not finished, we
+            query if it is complete each sleep_duration seconds
         event: str
             The string identifier for an event indicating when this job must finish
         backend: util.backend.Backend
@@ -142,7 +145,9 @@ def ensemble_builder_process(
 
     history = []
 
-    futures = []
+    # We only submit new ensembles when there is not an active ensemble
+    # job
+    future = None
 
     logger = EnsembleBuilder._get_ensemble_logger(logger_name, backend.temporary_directory)
 
@@ -169,22 +174,24 @@ def ensemble_builder_process(
             )
             break
 
-        # Add the result of the run
-        # On the next while iteration, no references to
-        # ensemble builder object, so it should be garbage collected to
-        # save memory while waiting for resources
-        # Also, notice how ensemble nbest is returned, so we don't waste
-        # iterations testing if the deterministic predictions size can
-        # be fitted in memory
-        try:
-            with dask.distributed.worker_client() as client:
+        # Only submit new jobs if the previous ensemble job finished
+        if future is None:
 
-                # Submit a Dask job from this job, to properly
-                # see it in the dask diagnostic dashboard
-                # Notice that the forked ensemble_builder_process will
-                # wait for the below function to be done
-                futures.append(
-                    client.submit(
+            # Add the result of the run
+            # On the next while iteration, no references to
+            # ensemble builder object, so it should be garbage collected to
+            # save memory while waiting for resources
+            # Also, notice how ensemble nbest is returned, so we don't waste
+            # iterations testing if the deterministic predictions size can
+            # be fitted in memory
+            try:
+                with dask.distributed.worker_client() as client:
+
+                    # Submit a Dask job from this job, to properly
+                    # see it in the dask diagnostic dashboard
+                    # Notice that the forked ensemble_builder_process will
+                    # wait for the below function to be done
+                    future = client.submit(
                         fit_and_return_ensemble,
                         backend=backend,
                         dataset_name=dataset_name,
@@ -202,28 +209,27 @@ def ensemble_builder_process(
                         time_left=time_left_for_ensembles-elapsed_time,
                         iteration=iteration,
                     )
-                )
-                logger.info(
-                    "{} Started Ensemble builder job at {} for iteration {}. Future={}/{}".format(
-                        # Log the client to make sure we
-                        # remain connected to the scheduler
-                        client,
-                        time.strftime("%Y.%m.%d-%H.%M.%S"),
-                        iteration,
-                        futures[-1],
-                        len(futures),
-                    ),
-                )
-        except Exception as e:
-            exception_traceback = traceback.format_exc()
-            error_message = repr(e)
-            logger.critical(exception_traceback)
-            logger.critical(error_message)
+
+                    logger.info(
+                        "{}/{} Started Ensemble builder job at {} for iteration {}.".format(
+                            # Log the client to make sure we
+                            # remain connected to the scheduler
+                            future,
+                            client,
+                            time.strftime("%Y.%m.%d-%H.%M.%S"),
+                            iteration,
+                        ),
+                    )
+                iteration += 1
+            except Exception as e:
+                exception_traceback = traceback.format_exc()
+                error_message = repr(e)
+                logger.critical(exception_traceback)
+                logger.critical(error_message)
 
         # If pynisher kills a run, the result
         # might be None -- so no new timestamp info
-        done_futures = [f for f in futures if f.done()]
-        for future in done_futures:
+        if future.done():
             result = future.result()
             if result:
                 ensemble_history, ensemble_nbest = result
@@ -233,19 +239,26 @@ def ensemble_builder_process(
                     ensemble_history,
                 ))
                 history.extend(ensemble_history)
-            futures.remove(future)
+            future = None
+        else:
+            logger.info(
+                "{}/{} No new ensemble builder job will be allocated at {}.".format(
+                    future,
+                    client,
+                    time.strftime("%Y.%m.%d-%H.%M.%S"),
+                )
+            )
 
-        # Don;t take resources while waiting
+        # Don't take resources while waiting
         dask.distributed.secede()
         time.sleep(sleep_duration)
         dask.distributed.rejoin()
 
         # Update for next iteration
-        iteration += 1
         elapsed_time = time.time() - start_time
 
-    # Gather all futures if any when time is up!
-    for future in futures:
+    # Gather any future when time is up!
+    if future is not None:
         result = future.result()
         if result:
             ensemble_history, ensemble_nbest = result
