@@ -229,7 +229,7 @@ def ensemble_builder_process(
 
         # If pynisher kills a run, the result
         # might be None -- so no new timestamp info
-        if future.done():
+        if future is not None and future.done():
             result = future.result()
             if result:
                 ensemble_history, ensemble_nbest = result

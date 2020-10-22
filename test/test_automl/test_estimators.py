@@ -28,7 +28,7 @@ from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 from autosklearn.smbo import get_smac_object
 
 sys.path.append(os.path.dirname(__file__))
-from base import Base, extract_msg_from_log, count_succeses  # noqa (E402: module level import not at top of file)
+from automl_utils import extract_msg_from_log, count_succeses  # noqa (E402: module level import not at top of file)
 
 
 def test_fit_n_jobs(tmp_dir, output_dir):

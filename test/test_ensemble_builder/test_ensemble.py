@@ -28,7 +28,7 @@ from autosklearn.ensembles.singlebest_ensemble import SingleBest
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
-from utils import BackendMock, compare_read_preds, EnsembleBuilderMemMock, MockMetric  # noqa (E402: module level import not   at top of file)
+from ensemble_utils import BackendMock, compare_read_preds, EnsembleBuilderMemMock, MockMetric  # noqa (E402: module level import not   at top of file)
 
 
 @pytest.fixture(scope="function")
