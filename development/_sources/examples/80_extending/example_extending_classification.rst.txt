@@ -249,7 +249,7 @@ Print test accuracy and statistics
 
  .. code-block:: none
 
-    accuracy:  0.986013986013986
+    accuracy:  0.958041958041958
     [(1.000000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:MLPClassifier:activation': 'relu', 'classifier:MLPClassifier:alpha': 0.0001, 'classifier:MLPClassifier:hidden_layer_depth': 1, 'classifier:MLPClassifier:num_nodes_per_layer': 32, 'classifier:MLPClassifier:solver': 'adam', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01},
     dataset_properties={
       'task': 1,
@@ -266,7 +266,7 @@ Print test accuracy and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  24.316 seconds)
+   **Total running time of the script:** ( 0 minutes  24.312 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_classification.py:
