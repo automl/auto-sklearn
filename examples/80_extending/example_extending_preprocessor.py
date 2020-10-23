@@ -30,10 +30,9 @@ from sklearn.model_selection import train_test_split
 # Create LDA component for auto-sklearn
 # =====================================
 class LDA(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, solver, n_components, tol, shrinkage=None, random_state=None):
+    def __init__(self, solver, tol, shrinkage=None, random_state=None):
         self.solver = solver
         self.shrinkage = shrinkage
-        self.n_components = n_components
         self.tol = tol
         self.random_state = random_state
         self.preprocessor = None
@@ -43,7 +42,6 @@ class LDA(AutoSklearnPreprocessingAlgorithm):
             self.shrinkage = None
         else:
             self.shrinkage = float(self.shrinkage)
-        self.n_components = int(self.n_components)
         self.tol = float(self.tol)
 
         import sklearn.discriminant_analysis
@@ -51,7 +49,6 @@ class LDA(AutoSklearnPreprocessingAlgorithm):
             sklearn.discriminant_analysis.LinearDiscriminantAnalysis(
                 shrinkage=self.shrinkage,
                 solver=self.solver,
-                n_components=self.n_components,
                 tol=self.tol,
             )
         self.preprocessor.fit(X, y)
@@ -84,13 +81,10 @@ class LDA(AutoSklearnPreprocessingAlgorithm):
         shrinkage = UniformFloatHyperparameter(
             name="shrinkage", lower=0.0, upper=1.0, default_value=0.5
         )
-        n_components = UniformIntegerHyperparameter(
-            name="n_components", lower=1, upper=29, default_value=10
-        )
         tol = UniformFloatHyperparameter(
             name="tol", lower=0.0001, upper=1, default_value=0.0001
         )
-        cs.add_hyperparameters([solver, shrinkage, n_components, tol])
+        cs.add_hyperparameters([solver, shrinkage, tol])
         shrinkage_condition = InCondition(shrinkage, solver, ['lsqr', 'eigen'])
         cs.add_condition(shrinkage_condition)
         return cs
@@ -132,5 +126,5 @@ clf.fit(X_train, y_train)
 # =====================================
 
 y_pred = clf.predict(X_test)
-print("accracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
+print("accuracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
 print(clf.show_models())

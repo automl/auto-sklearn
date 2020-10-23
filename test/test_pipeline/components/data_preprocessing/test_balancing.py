@@ -75,7 +75,7 @@ class BalancingComponentTest(unittest.TestCase):
                 [('adaboost', AdaboostClassifier, 0.810, 0.735, 3),
                  ('decision_tree', DecisionTree, 0.780, 0.643, 3),
                  ('extra_trees', ExtraTreesClassifier, 0.780, 0.8, 3),
-                 ('random_forest', RandomForest, 0.75, 0.769, 3),
+                 ('random_forest', RandomForest, 0.75, 0.789, 3),
                  ('libsvm_svc', LibSVM_SVC, 0.769, 0.72, 3),
                  ('liblinear_svc', LibLinear_SVC, 0.762, 0.735, 3),
                  ('passive_aggressive', PassiveAggressive, 0.091, 0.762, 3),
@@ -126,7 +126,7 @@ class BalancingComponentTest(unittest.TestCase):
 
         for name, pre, acc_no_weighting, acc_weighting in \
                 [('extra_trees_preproc_for_classification',
-                    ExtraTreesPreprocessorClassification, 0.810, 0.581),
+                    ExtraTreesPreprocessorClassification, 0.810, 0.590),
                  ('liblinear_svc_preprocessor', LibLinear_Preprocessor,
                     0.837, 0.562)]:
             for strategy, acc in [('none', acc_no_weighting),

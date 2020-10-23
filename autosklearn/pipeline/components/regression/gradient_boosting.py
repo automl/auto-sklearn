@@ -8,14 +8,13 @@ from ConfigSpace.conditions import EqualsCondition, InCondition
 
 from autosklearn.pipeline.components.base import (
     AutoSklearnRegressionAlgorithm,
-    IterativeComponent,
-)
+    IterativeComponentWithSampleWeight)
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS
 from autosklearn.util.common import check_none
 
 
 class GradientBoosting(
-    IterativeComponent,
+    IterativeComponentWithSampleWeight,
     AutoSklearnRegressionAlgorithm,
 ):
     def __init__(self, loss, learning_rate, min_samples_leaf, max_depth,
@@ -47,7 +46,7 @@ class GradientBoosting(
     def get_current_iter(self):
         return self.estimator.n_iter_
 
-    def iterative_fit(self, X, y, n_iter=2, refit=False):
+    def iterative_fit(self, X, y, n_iter=2, refit=False, sample_weight=None):
 
         """
         Set n_iter=2 for the same reason as for SGD
@@ -112,7 +111,7 @@ class GradientBoosting(
             self.estimator.max_iter = min(self.estimator.max_iter,
                                           self.max_iter)
 
-        self.estimator.fit(X, y)
+        self.estimator.fit(X, y, sample_weight=sample_weight)
 
         if (
             self.estimator.max_iter >= self.max_iter
