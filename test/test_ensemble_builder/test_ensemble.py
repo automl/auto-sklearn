@@ -184,8 +184,8 @@ def testMaxModelsOnDisc(ensemble_backend):
             # If Float, translate float to # models.
             # below, mock of each file is 100 Mb and
             # 4 files .model and .npy (test/val/pred) exist
-            (700.0, 1),
-            (800.0, 2),
+            (1100.0, 1),
+            (1200.0, 2),
             (9999.0, 2),
     ]:
         ensbuilder = EnsembleBuilder(
@@ -226,7 +226,7 @@ def testMaxModelsOnDisc(ensemble_backend):
             "disc_space_cost_mb": 50*i,
         }
     sel_keys = ensbuilder.get_n_best_preds()
-    assert ['pred49', 'pred48', 'pred47', 'pred46'] == sel_keys
+    assert ['pred49', 'pred48', 'pred47'] == sel_keys
 
     # Make sure at least one model is kept alive
     ensbuilder.max_models_on_disc = 0.0

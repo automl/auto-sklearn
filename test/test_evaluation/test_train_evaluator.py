@@ -548,9 +548,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # and a total of five calls because of five iterations of fitting
         self.assertEqual(pipeline_mock.predict_proba.call_count, 36)
 
-    @unittest.mock.patch('os.makedirs')
     @unittest.mock.patch.object(TrainEvaluator, '_loss')
-    def test_file_output(self, loss_mock, makedirs_mock):
+    def test_file_output(self, loss_mock):
 
         D = get_regression_datamanager()
         D.name = 'test'
@@ -579,7 +578,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(rval, (None, {}))
         self.assertEqual(self.backend_mock.save_targets_ensemble.call_count, 1)
         self.assertEqual(self.backend_mock.save_predictions_as_npy.call_count, 3)
-        self.assertEqual(makedirs_mock.call_count, 1)
         self.assertEqual(self.backend_mock.save_model.call_count, 1)
 
         evaluator.models = ['model2', 'model2']
@@ -591,7 +589,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(rval, (None, {}))
         self.assertEqual(self.backend_mock.save_targets_ensemble.call_count, 2)
         self.assertEqual(self.backend_mock.save_predictions_as_npy.call_count, 6)
-        self.assertEqual(makedirs_mock.call_count, 2)
         self.assertEqual(self.backend_mock.save_model.call_count, 3)
 
         # Check for not containing NaNs - that the models don't predict nonsense

@@ -153,7 +153,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
         output_folder : string, optional (None)
             folder to store predictions for optional test set, if ``None``
-            automatically use ``/tmp/autosklearn_output_$pid_$random_number``
+            no output will be generated
 
         delete_tmp_folder_after_terminate: string, optional (True)
             remove tmp_folder, when finished. If tmp_folder is None

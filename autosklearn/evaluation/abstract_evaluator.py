@@ -403,10 +403,6 @@ class AbstractEvaluator(object):
         # This file can be written independently of the others down bellow
         if ('y_optimization' not in self.disable_file_output):
             if self.output_y_hat_optimization:
-                try:
-                    os.makedirs(self.backend.output_directory)
-                except OSError:
-                    pass
                 self.backend.save_targets_ensemble(self.Y_optimization)
 
         # The other four files have to be written together, meaning we start
@@ -438,7 +434,7 @@ class AbstractEvaluator(object):
                     ))
 
         # File 3 of 5: validation predictions
-        if Y_valid_pred is not None:
+        if Y_valid_pred is not None and 'y_valid' not in self.disable_file_output:
             file_path = self.backend.get_prediction_output_path(
                 'valid', self.seed, self.num_run, self.budget)
             write_tasks.append(
@@ -449,7 +445,7 @@ class AbstractEvaluator(object):
                     ))
 
         # File 4 of 5: test predictions
-        if Y_test_pred is not None:
+        if Y_test_pred is not None and 'y_test' not in self.disable_file_output:
             file_path = self.backend.get_prediction_output_path(
                 'test', self.seed, self.num_run, self.budget)
             write_tasks.append(

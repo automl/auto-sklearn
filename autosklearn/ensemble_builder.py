@@ -836,7 +836,7 @@ class EnsembleBuilder(object):
 
             if not self.read_preds.get(y_ens_fn):
                 self.read_preds[y_ens_fn] = {
-                    "ens_score": -1,
+                    "ens_score": -np.inf,
                     "mtime_ens": 0,
                     "mtime_valid": 0,
                     "mtime_test": 0,
@@ -851,6 +851,7 @@ class EnsembleBuilder(object):
                     # 0 - not loaded
                     # 1 - loaded and in memory
                     # 2 - loaded but dropped again
+                    # 3 - deleted from disk due to space constraints
                     "loaded": 0
                 }
 
@@ -867,7 +868,7 @@ class EnsembleBuilder(object):
                                         metric=self.metric,
                                         all_scoring_functions=False)
 
-                if self.read_preds[y_ens_fn]["ens_score"] > -1:
+                if np.isfinite(self.read_preds[y_ens_fn]["ens_score"]):
                     self.logger.debug(
                         'Changing ensemble score for file %s from %f to %f '
                         'because file modification time changed? %f - %f',
@@ -899,7 +900,7 @@ class EnsembleBuilder(object):
                     y_ens_fn,
                     traceback.format_exc(),
                 )
-                self.read_preds[y_ens_fn]["ens_score"] = -1
+                self.read_preds[y_ens_fn]["ens_score"] = -np.inf
 
         self.logger.debug(
             'Done reading %d new prediction files. Loaded %d predictions in '
@@ -976,18 +977,18 @@ class EnsembleBuilder(object):
                         v["disc_space_cost_mb"],
                     ] for v in self.read_preds.values() if v["disc_space_cost_mb"] is not None
                 ]
-                max_consumption = max(i[1] for i in consumption)
+                max_consumption = max(c[1] for c in consumption)
 
                 # We are pessimistic with the consumption limit indicated by
                 # max_models_on_disc by 1 model. Such model is assumed to spend
                 # max_consumption megabytes
-                if (sum(i[1] for i in consumption) + max_consumption) > self.max_models_on_disc:
+                if (sum(c[1] for c in consumption) + max_consumption) > self.max_models_on_disc:
 
                     # just leave the best -- higher is better!
                     # This list is in descending order, to preserve the best models
                     sorted_cum_consumption = np.cumsum([
-                        i[1] for i in list(reversed(sorted(consumption)))
-                    ])
+                        c[1] for c in list(reversed(sorted(consumption)))
+                    ]) + max_consumption
                     max_models = np.argmax(sorted_cum_consumption > self.max_models_on_disc)
 
                     # Make sure that at least 1 model survives
@@ -996,11 +997,13 @@ class EnsembleBuilder(object):
                         "Limiting num of models via float max_models_on_disc={}"
                         " as accumulated={} worst={} num_models={}".format(
                             self.max_models_on_disc,
-                            (sum(i[1] for i in consumption) + max_consumption),
+                            (sum(sum(c) for c in consumption) + max_consumption),
                             max_consumption,
                             self.max_resident_models
                         )
                     )
+                else:
+                    self.max_resident_models = None
             else:
                 self.max_resident_models = self.max_models_on_disc
 
@@ -1052,11 +1055,11 @@ class EnsembleBuilder(object):
 
         # Load the predictions for the winning
         for k in sorted_keys[:ensemble_n_best]:
-            if self.read_preds[k][Y_ENSEMBLE] is None:
+            if self.read_preds[k][Y_ENSEMBLE] is None and self.read_preds[k]['loaded'] != 3:
                 self.read_preds[k][Y_ENSEMBLE] = self._read_np_fn(k)
                 # No need to load valid and test here because they are loaded
                 #  only if the model ends up in the ensemble
-            self.read_preds[k]['loaded'] = 1
+                self.read_preds[k]['loaded'] = 1
 
         # return best scored keys of self.read_preds
         return sorted_keys[:ensemble_n_best]
@@ -1475,6 +1478,9 @@ class EnsembleBuilder(object):
                         os.remove(path)
                     self.logger.info(
                         "Deleted files of non-candidate model %s", model_name)
+                    self.read_preds[pred_path]["disc_space_cost_mb"] = None
+                    self.read_preds[pred_path]["loaded"] = 3
+                    self.read_preds[pred_path]["ens_score"] = -np.inf
                 except Exception as e:
                     self.logger.error(
                         "Failed to delete files of non-candidate model %s due"

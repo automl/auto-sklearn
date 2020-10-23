@@ -367,8 +367,10 @@ class EvaluationTest(unittest.TestCase):
         self.assertIn(
             info[1].additional_info['error'],
             (
-                """AttributeError("'BackendMock' object has no attribute 'output_directory'",)""",
-                """AttributeError("'BackendMock' object has no attribute 'output_directory'")""",
+                """AttributeError("'BackendMock' object has no attribute """
+                """'save_targets_ensemble'",)""",
+                """AttributeError("'BackendMock' object has no attribute """
+                """'save_targets_ensemble'")""",
             )
         )
         self.assertNotIn('exitcode', info[1].additional_info)
