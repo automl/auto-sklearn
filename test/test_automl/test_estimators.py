@@ -624,3 +624,8 @@ def test_autosklearn2_classification_methods_returns_self(dask_client):
 
     automl_refitted = automl.refit(X_train.copy(), y_train.copy())
     assert automl is automl_refitted
+
+    predictions = automl_fitted.predict(X_test)
+    assert sklearn.metrics.accuracy_score(y_test, predictions) >= 2 / 3
+
+    pickle.dumps(automl_fitted)
