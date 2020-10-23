@@ -3,6 +3,7 @@ import math
 import numbers
 import glob
 import gzip
+import threading
 import os
 import pickle
 import re
@@ -36,7 +37,9 @@ def ensemble_builder_process(
     start_time: int,
     time_left_for_ensembles: float,
     sleep_duration: int,
-    event: str,
+    address: str,
+    event: threading.Event,
+    history: List[Tuple[int, float, float, float]],
     backend: Backend,
     dataset_name: str,
     task: str,
@@ -86,8 +89,8 @@ def ensemble_builder_process(
             This also means, how frequently we check for an ensemble builder iteration to be
             done. We only allow 1 active ensemble builder. If that job is not finished, we
             query if it is complete each sleep_duration seconds
-        event: str
-            The string identifier for an event indicating when this job must finish
+        event: threading.Event
+            An event that signals that the ensemble builder process should finish
         backend: util.backend.Backend
             backend to write and read files
         dataset_name: str
@@ -134,22 +137,19 @@ def ensemble_builder_process(
             [[pandas_timestamp, train_performance, val_performance, test_performance], ...]
     """
 
-    # Create the event as one of the criteria to decide if we move to he next iteration
-    event = dask.distributed.Event(event) if event else None
-
     # The second criteria is elapsed time
     elapsed_time = time.time() - start_time
 
     # The last criteria is the number of iterations
     iteration = 0
 
-    history = []
-
     # We only submit new ensembles when there is not an active ensemble
     # job
     future = None
 
     logger = EnsembleBuilder._get_ensemble_logger(logger_name, backend.temporary_directory)
+
+    client = dask.distributed.get_client(address=address)
 
     while True:
 
@@ -185,41 +185,39 @@ def ensemble_builder_process(
             # iterations testing if the deterministic predictions size can
             # be fitted in memory
             try:
-                with dask.distributed.worker_client() as client:
+                # Submit a Dask job from this job, to properly
+                # see it in the dask diagnostic dashboard
+                # Notice that the forked ensemble_builder_process will
+                # wait for the below function to be done
+                future = client.submit(
+                    fit_and_return_ensemble,
+                    backend=backend,
+                    dataset_name=dataset_name,
+                    task_type=task,
+                    metric=metric,
+                    ensemble_size=ensemble_size,
+                    ensemble_nbest=ensemble_nbest,
+                    max_models_on_disc=max_models_on_disc,
+                    seed=seed,
+                    precision=precision,
+                    memory_limit=ensemble_memory_limit,
+                    read_at_most=read_at_most,
+                    random_state=seed,
+                    logger_name=logger_name,
+                    time_left=time_left_for_ensembles-elapsed_time,
+                    iteration=iteration,
+                )
 
-                    # Submit a Dask job from this job, to properly
-                    # see it in the dask diagnostic dashboard
-                    # Notice that the forked ensemble_builder_process will
-                    # wait for the below function to be done
-                    future = client.submit(
-                        fit_and_return_ensemble,
-                        backend=backend,
-                        dataset_name=dataset_name,
-                        task_type=task,
-                        metric=metric,
-                        ensemble_size=ensemble_size,
-                        ensemble_nbest=ensemble_nbest,
-                        max_models_on_disc=max_models_on_disc,
-                        seed=seed,
-                        precision=precision,
-                        memory_limit=ensemble_memory_limit,
-                        read_at_most=read_at_most,
-                        random_state=seed,
-                        logger_name=logger_name,
-                        time_left=time_left_for_ensembles-elapsed_time,
-                        iteration=iteration,
-                    )
-
-                    logger.info(
-                        "{}/{} Started Ensemble builder job at {} for iteration {}.".format(
-                            # Log the client to make sure we
-                            # remain connected to the scheduler
-                            future,
-                            client,
-                            time.strftime("%Y.%m.%d-%H.%M.%S"),
-                            iteration,
-                        ),
-                    )
+                logger.info(
+                    "{}/{} Started Ensemble builder job at {} for iteration {}.".format(
+                        # Log the client to make sure we
+                        # remain connected to the scheduler
+                        future,
+                        client,
+                        time.strftime("%Y.%m.%d-%H.%M.%S"),
+                        iteration,
+                    ),
+                )
                 iteration += 1
             except Exception as e:
                 exception_traceback = traceback.format_exc()
@@ -250,9 +248,7 @@ def ensemble_builder_process(
             )
 
         # Don't take resources while waiting
-        dask.distributed.secede()
         time.sleep(sleep_duration)
-        dask.distributed.rejoin()
 
         # Update for next iteration
         elapsed_time = time.time() - start_time
