@@ -2,11 +2,10 @@ import glob
 import os
 import sys
 import time
+import threading
 import unittest.mock
 import pickle
 import pytest
-
-import dask.distributed
 
 import numpy as np
 
@@ -627,16 +626,18 @@ def test_ensemble_builder_process_termination_request(dask_client, ensemble_back
     """
 
     # We need a dask_client for the event
-    event = dask.distributed.Event('None')
+    ensemble_termination_request = threading.Event()
 
     # Set the event so the run does not even start
-    event.set()
+    ensemble_termination_request.set()
 
     ensemble = ensemble_builder_process(
         start_time=time.time(),
         time_left_for_ensembles=1000,
         sleep_duration=2,
-        event='None',
+        address=dask_client.scheduler_info()['address'],
+        history=list(),
+        event=ensemble_termination_request,
         backend=ensemble_backend,
         dataset_name='Test',
         task=BINARY_CLASSIFICATION,
@@ -665,12 +666,13 @@ def test_ensemble_builder_process_termination_request(dask_client, ensemble_back
 
 
 def test_ensemble_builder_process_realrun(dask_client, ensemble_backend):
-    ensemble = dask_client.submit(
-        ensemble_builder_process,
+    history = ensemble_builder_process(
         start_time=time.time(),
         time_left_for_ensembles=1000,
         sleep_duration=2,
-        event='None',
+        event=None,
+        history=list(),
+        address=dask_client.scheduler_info()['address'],
         backend=ensemble_backend,
         dataset_name='Test',
         task=BINARY_CLASSIFICATION,
@@ -686,7 +688,6 @@ def test_ensemble_builder_process_realrun(dask_client, ensemble_backend):
         random_state=0,
         logger_name='Ensemblebuilder',
     )
-    history = ensemble.result()
 
     assert 'ensemble_optimization_score' in history[0]
     assert history[0]['ensemble_optimization_score'] == 0.9
