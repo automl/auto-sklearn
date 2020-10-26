@@ -3,6 +3,7 @@
 from typing import Optional, Dict
 
 import dask.distributed
+import joblib
 import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.utils.multiclass import type_of_target
