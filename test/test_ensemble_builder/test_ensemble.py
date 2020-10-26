@@ -523,11 +523,12 @@ def test_read_pickle_read_preds(ensemble_backend):
     )
     assert os.path.exists(ensemble_memory_file)
 
-    # Make sure we pickle the correct read preads
+    # Make sure we pickle the correct read preads and hash
     with (open(ensemble_memory_file, "rb")) as memory:
-        read_preds = pickle.load(memory)
+        read_preds, last_hash = pickle.load(memory)
 
     compare_read_preds(read_preds, ensbuilder.read_preds)
+    assert last_hash == ensbuilder.last_hash
 
     # Then create a new instance, which should automatically read this file
     ensbuilder2 = EnsembleBuilder(
@@ -540,6 +541,7 @@ def test_read_pickle_read_preds(ensemble_backend):
         max_models_on_disc=None,
         )
     compare_read_preds(ensbuilder2.read_preds, ensbuilder.read_preds)
+    assert ensbuilder2.last_hash == ensbuilder.last_hash
 
 
 def testPredict():

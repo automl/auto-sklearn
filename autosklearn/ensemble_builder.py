@@ -10,6 +10,7 @@ import re
 import time
 import traceback
 from typing import List, Optional, Tuple, Union
+import zlib
 
 import dask.distributed
 
@@ -145,7 +146,7 @@ def ensemble_builder_process(
 
     # We only submit new ensembles when there is not an active ensemble
     # job
-    future = None
+    futures = []
 
     logger = EnsembleBuilder._get_ensemble_logger(logger_name, backend.temporary_directory)
 
@@ -175,7 +176,7 @@ def ensemble_builder_process(
             break
 
         # Only submit new jobs if the previous ensemble job finished
-        if future is None:
+        if len(futures) == 0:
 
             # Add the result of the run
             # On the next while iteration, no references to
@@ -189,7 +190,7 @@ def ensemble_builder_process(
                 # see it in the dask diagnostic dashboard
                 # Notice that the forked ensemble_builder_process will
                 # wait for the below function to be done
-                future = client.submit(
+                futures.append(client.submit(
                     fit_and_return_ensemble,
                     backend=backend,
                     dataset_name=dataset_name,
@@ -206,13 +207,14 @@ def ensemble_builder_process(
                     logger_name=logger_name,
                     time_left=time_left_for_ensembles-elapsed_time,
                     iteration=iteration,
-                )
+                    priority=10,
+                ))
 
                 logger.info(
                     "{}/{} Started Ensemble builder job at {} for iteration {}.".format(
                         # Log the client to make sure we
                         # remain connected to the scheduler
-                        future,
+                        futures[0],
                         client,
                         time.strftime("%Y.%m.%d-%H.%M.%S"),
                         iteration,
@@ -228,21 +230,27 @@ def ensemble_builder_process(
         # If pynisher kills a run, the result
         # might be None -- so no new timestamp info
         sleep = True
-        if future is not None and future.done():
-            result = future.result()
-            if result:
-                ensemble_history, ensemble_nbest, sleep = result
-                logger.debug("iteration={} @ elapsed_time={} has history={}".format(
-                    iteration,
-                    elapsed_time,
-                    ensemble_history,
-                ))
-                history.extend(ensemble_history)
-            future = None
+        if len(futures) != 0:
+            try:
+                result = futures[0].result(timeout=sleep_duration)
+                if result:
+                    ensemble_history, ensemble_nbest, sleep = result
+                    logger.debug("iteration={} @ elapsed_time={} has history={}".format(
+                        iteration,
+                        elapsed_time,
+                        ensemble_history,
+                    ))
+                    history.extend(ensemble_history)
+                # Not sure why I have to cancel a finished future in the next line...
+                # not doing this results in countless futures on the client
+                futures.pop().cancel()
+            except dask.distributed.TimeoutError:
+                sleep = False
+
         else:
             logger.info(
                 "{}/{} No new ensemble builder job will be allocated at {}.".format(
-                    future,
+                    futures,
                     client,
                     time.strftime("%Y.%m.%d-%H.%M.%S"),
                 )
@@ -258,8 +266,8 @@ def ensemble_builder_process(
         elapsed_time = time.time() - start_time
 
     # Gather any future when time is up!
-    if future is not None:
-        result = future.result()
+    if len(futures) != 0:
+        result = futures.pop().result()
         if result:
             ensemble_history, ensemble_nbest, sleep = result
             logger.debug("iteration={} @ elapsed_time={} has history={}".format(
@@ -507,6 +515,10 @@ class EnsembleBuilder(object):
         self.start_time = 0
         self.model_fn_re = re.compile(MODEL_FN_RE)
 
+        self.last_hash = None  # hash of ensemble training data
+        self.y_true_ensemble = None
+        self.SAVE2DISC = True
+
         # already read prediction files
         # {"file name": {
         #    "ens_score": float
@@ -539,7 +551,7 @@ class EnsembleBuilder(object):
         if os.path.exists(self.ensemble_memory_file):
             try:
                 with (open(self.ensemble_memory_file, "rb")) as memory:
-                    self.read_preds = pickle.load(memory)
+                    self.read_preds, self.last_hash = pickle.load(memory)
             except Exception as e:
                 self.logger.warning(
                     "Could not load the previous iterations of ensemble_builder."
@@ -548,10 +560,6 @@ class EnsembleBuilder(object):
                         traceback.format_exc(),
                     )
                 )
-
-        self.last_hash = None  # hash of ensemble training data
-        self.y_true_ensemble = None
-        self.SAVE2DISC = True
 
         # hidden feature which can be activated via an environment variable. This keeps all
         # models and predictions which have ever been a candidate. This is necessary to post-hoc
@@ -655,7 +663,7 @@ class EnsembleBuilder(object):
         # to be in the ensemble
         candidate_models = self.get_n_best_preds()
         if not candidate_models:  # no candidates yet
-            return self.ensemble_history, self.ensemble_nbest, False
+            return self.ensemble_history, self.ensemble_nbest, True
 
         # populates predictions in self.read_preds
         # reduces selected models if file reading failed
@@ -728,7 +736,7 @@ class EnsembleBuilder(object):
 
         # Save the read preds status for the next iteration
         with (open(self.ensemble_memory_file, "wb")) as memory:
-            pickle.dump(self.read_preds, memory)
+            pickle.dump((self.read_preds, self.last_hash), memory)
 
         # If we are not able to create an ensemble, for instance, no new
         # predictions are available, we sleep in the hope new predictions
@@ -1175,7 +1183,7 @@ class EnsembleBuilder(object):
             for k in selected_keys]
 
         # check hash if ensemble training data changed
-        current_hash = hash(predictions_train.data.tobytes())
+        current_hash = zlib.adler32(predictions_train.data.tobytes())
         if self.last_hash == current_hash:
             self.logger.debug(
                 "No new model predictions selected -- skip ensemble building "
