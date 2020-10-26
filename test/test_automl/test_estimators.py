@@ -434,8 +434,8 @@ def test_binary(tmp_dir, output_dir, dask_client):
     assert score > 0.9, extract_msg_from_log(log_file_path)
     assert count_succeses(automl.cv_results_) > 0, extract_msg_from_log(log_file_path)
 
-    output_files = os.listdir(output_dir)
-    assert 'binary_test_dataset_test_1.predict' in output_files, extract_msg_from_log(log_file_path)
+    output_files = glob.glob(os.path.join(output_dir, 'binary_test_dataset_test_*.predict'))
+    assert len(output_files) > 0, (output_files, extract_msg_from_log(log_file_path))
 
 
 def test_classification_pandas_support(tmp_dir, output_dir, dask_client):
