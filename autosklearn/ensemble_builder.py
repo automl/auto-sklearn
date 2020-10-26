@@ -227,10 +227,11 @@ def ensemble_builder_process(
 
         # If pynisher kills a run, the result
         # might be None -- so no new timestamp info
+        sleep = True
         if future is not None and future.done():
             result = future.result()
             if result:
-                ensemble_history, ensemble_nbest = result
+                ensemble_history, ensemble_nbest, sleep = result
                 logger.debug("iteration={} @ elapsed_time={} has history={}".format(
                     iteration,
                     elapsed_time,
@@ -248,7 +249,10 @@ def ensemble_builder_process(
             )
 
         # Don't take resources while waiting
-        time.sleep(sleep_duration)
+        # By default the fit_and_return_ensemble indicate
+        # if we should wait before starting a new ensemble iteration
+        if sleep:
+            time.sleep(sleep_duration)
 
         # Update for next iteration
         elapsed_time = time.time() - start_time
@@ -257,7 +261,7 @@ def ensemble_builder_process(
     if future is not None:
         result = future.result()
         if result:
-            ensemble_history, ensemble_nbest = result
+            ensemble_history, ensemble_nbest, sleep = result
             logger.debug("iteration={} @ elapsed_time={} has history={}".format(
                 iteration,
                 elapsed_time,
@@ -284,7 +288,7 @@ def fit_and_return_ensemble(
     logger_name: str,
     time_left: float,
     iteration: int,
-) -> Tuple[List[Tuple[int, float, float, float]], int]:
+) -> Tuple[List[Tuple[int, float, float, float]], int, bool]:
     """
 
     A short function to fit and create an ensemble. It is just a wrapper to easily send
@@ -339,6 +343,8 @@ def fit_and_return_ensemble(
             [[pandas_timestamp, train_performance, val_performance, test_performance], ...]
         int:
             the size of the n best ensemble that fit in memory
+        bool:
+            Whether we should wait or not to initiate the new ensemble iteration
     """
     result = EnsembleBuilder(
         backend=backend,
@@ -613,7 +619,7 @@ class EnsembleBuilder(object):
             if safe_ensemble_script:
                 return safe_ensemble_script.result
             else:
-                return []
+                return [], self.ensemble_nbest, False
 
     def main(self, time_left, iteration):
         """
@@ -641,13 +647,15 @@ class EnsembleBuilder(object):
 
         # populates self.read_preds
         if not self.score_ensemble_preds():
-            return self.ensemble_history, self.ensemble_nbest
+            # We issue an seep request as we are not yet able to score the ensembles
+            # for example, the Ground Truth labels are not yet written to disk
+            return self.ensemble_history, self.ensemble_nbest, True
 
         # Only the models with the n_best predictions are candidates
         # to be in the ensemble
         candidate_models = self.get_n_best_preds()
         if not candidate_models:  # no candidates yet
-            return self.ensemble_history, self.ensemble_nbest
+            return self.ensemble_history, self.ensemble_nbest, False
 
         # populates predictions in self.read_preds
         # reduces selected models if file reading failed
@@ -660,7 +668,9 @@ class EnsembleBuilder(object):
             # Both n_sel_* have entries, but there is no overlap, this is critical
             self.logger.error("n_sel_valid and n_sel_test are not empty, but do "
                               "not overlap")
-            return self.ensemble_history, self.ensemble_nbest
+            # We submit a sleep request because the number of test and validation
+            # arrays might not yet fully be written in disk
+            return self.ensemble_history, self.ensemble_nbest, True
 
         # If any of n_sel_* is not empty and overlaps with candidate_models,
         # then ensure candidate_models AND n_sel_test are sorted the same
@@ -720,7 +730,10 @@ class EnsembleBuilder(object):
         with (open(self.ensemble_memory_file, "wb")) as memory:
             pickle.dump(self.read_preds, memory)
 
-        return self.ensemble_history, self.ensemble_nbest
+        # If we are not able to create an ensemble, for instance, no new
+        # predictions are available, we sleep in the hope new predictions
+        # will be available after a while
+        return self.ensemble_history, self.ensemble_nbest, ensemble is None
 
     def get_disk_consumption(self, pred_path):
         """

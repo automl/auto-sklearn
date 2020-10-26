@@ -446,7 +446,10 @@ def testMain(ensemble_backend):
         )
     ensbuilder.SAVE2DISC = False
 
-    run_history, ensemble_nbest = ensbuilder.main(time_left=np.inf, iteration=1)
+    run_history, ensemble_nbest, sleep = ensbuilder.main(time_left=np.inf, iteration=1)
+
+    # It is the first time we create the ensemble, so no sleep
+    assert not sleep
 
     assert len(ensbuilder.read_preds) == 3
     assert ensbuilder.last_hash is not None
@@ -469,6 +472,11 @@ def testMain(ensemble_backend):
     assert all(item in run_history[0].items() for item in expected_performance.items())
     assert 'Timestamp' in run_history[0]
     assert isinstance(run_history[0]['Timestamp'], pd.Timestamp)
+
+    # If we try to create the ensemble on the same data, no new
+    # ensemble will be created so we should sleep
+    run_history, ensemble_nbest, sleep = ensbuilder.main(time_left=np.inf, iteration=2)
+    assert sleep
 
 
 def testLimit(ensemble_backend):
@@ -506,7 +514,7 @@ def test_read_pickle_read_preds(ensemble_backend):
         )
     ensbuilder.SAVE2DISC = False
 
-    run_history, ensemble_nbest = ensbuilder.main(time_left=np.inf, iteration=1)
+    run_history, ensemble_nbest, sleep = ensbuilder.main(time_left=np.inf, iteration=1)
 
     # Check that the memory was created
     ensemble_memory_file = os.path.join(
@@ -710,7 +718,7 @@ def test_ensemble_builder_nbest_remembered(fit_ensemble, ensemble_backend):
 
     fit_ensemble.return_value = None
 
-    ensemble_history, ensemble_nbest = fit_and_return_ensemble(
+    ensemble_history, ensemble_nbest, sleep = fit_and_return_ensemble(
         time_left=1000,
         backend=ensemble_backend,
         dataset_name='Test',
