@@ -243,9 +243,15 @@ def ensemble_builder_process(
                     history.extend(ensemble_history)
                 # Not sure why I have to cancel a finished future in the next line...
                 # not doing this results in countless futures on the client
-                futures.pop().cancel()
+                future = futures.pop()
+                future.cancel()
             except dask.distributed.TimeoutError:
                 sleep = False
+            except Exception as e:
+                logger.debug("While trying to cancel {} run into {e}".format(
+                    futures,  # Hopefully will print an empty list
+                    e
+                ))
 
         else:
             logger.info(
