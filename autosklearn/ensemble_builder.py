@@ -248,7 +248,7 @@ def ensemble_builder_process(
             except dask.distributed.TimeoutError:
                 sleep = False
             except Exception as e:
-                logger.debug("While trying to cancel {} run into {e}".format(
+                logger.debug("While trying to cancel {} run into {}".format(
                     futures,  # Hopefully will print an empty list
                     e
                 ))
