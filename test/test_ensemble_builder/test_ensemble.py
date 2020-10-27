@@ -2,15 +2,13 @@ import glob
 import os
 import sys
 import time
-import threading
 import unittest.mock
 import pickle
 import pytest
 
+import dask.distributed
 import numpy as np
-
 import pandas as pd
-
 from smac.runhistory.runhistory import RunValue, RunKey, RunHistory
 
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, BINARY_CLASSIFICATION
@@ -18,7 +16,7 @@ from autosklearn.metrics import roc_auc, accuracy, log_loss
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensemble_builder import (
     EnsembleBuilder,
-    ensemble_builder_process,
+    EnsembleBuilderManager,
     fit_and_return_ensemble,
     Y_VALID,
     Y_TEST,
@@ -446,10 +444,7 @@ def testMain(ensemble_backend):
         )
     ensbuilder.SAVE2DISC = False
 
-    run_history, ensemble_nbest, sleep = ensbuilder.main(time_left=np.inf, iteration=1)
-
-    # It is the first time we create the ensemble, so no sleep
-    assert not sleep
+    run_history, ensemble_nbest = ensbuilder.main(time_left=np.inf, iteration=1)
 
     assert len(ensbuilder.read_preds) == 3
     assert ensbuilder.last_hash is not None
@@ -473,11 +468,6 @@ def testMain(ensemble_backend):
     assert 'Timestamp' in run_history[0]
     assert isinstance(run_history[0]['Timestamp'], pd.Timestamp)
 
-    # If we try to create the ensemble on the same data, no new
-    # ensemble will be created so we should sleep
-    run_history, ensemble_nbest, sleep = ensbuilder.main(time_left=np.inf, iteration=2)
-    assert sleep
-
 
 def testLimit(ensemble_backend):
     ensbuilder = EnsembleBuilderMemMock(backend=ensemble_backend,
@@ -492,9 +482,14 @@ def testLimit(ensemble_backend):
     ensbuilder.SAVE2DISC = False
 
     ensbuilder.run(time_left=1000, iteration=0)
+    ensbuilder.run(time_left=1000, iteration=0)
+    ensbuilder.run(time_left=1000, iteration=0)
 
     # it should try to reduce ensemble_nbest until it also failed at 2
     assert ensbuilder.ensemble_nbest == 1
+
+    with pytest.raises(ValueError, match='Memory Exception -- Unable to further reduce'):
+        ensbuilder.run(time_left=1000, iteration=0)
 
 
 def test_read_pickle_read_preds(ensemble_backend):
@@ -514,7 +509,7 @@ def test_read_pickle_read_preds(ensemble_backend):
         )
     ensbuilder.SAVE2DISC = False
 
-    run_history, ensemble_nbest, sleep = ensbuilder.main(time_left=np.inf, iteration=1)
+    ensbuilder.main(time_left=np.inf, iteration=1)
 
     # Check that the memory was created
     ensemble_memory_file = os.path.join(
@@ -630,59 +625,10 @@ def test_get_identifiers_from_run_history(exists, metric, ensemble_run_history):
     assert budget == 3.0
 
 
-def test_ensemble_builder_process_termination_request(dask_client, ensemble_backend):
-    """
-    Makes sure we can kill an ensemble process via a event
-    """
-
-    # We need a dask_client for the event
-    ensemble_termination_request = threading.Event()
-
-    # Set the event so the run does not even start
-    ensemble_termination_request.set()
-
-    ensemble = ensemble_builder_process(
-        start_time=time.time(),
-        time_left_for_ensembles=1000,
-        sleep_duration=2,
-        address=dask_client.scheduler_info()['address'],
-        history=list(),
-        event=ensemble_termination_request,
-        backend=ensemble_backend,
-        dataset_name='Test',
-        task=BINARY_CLASSIFICATION,
-        metric=roc_auc,
-        ensemble_size=50,
-        ensemble_nbest=10,
-        max_models_on_disc=None,
-        seed=0,
-        precision=32,
-        max_iterations=1,
-        read_at_most=np.inf,
-        ensemble_memory_limit=10,
-        random_state=0,
-        logger_name='Ensemblebuilder',
-    )
-
-    # make sure message is in log file
-    msg = 'Terminating ensemble building as SMAC process is done'
-    logfile = glob.glob(os.path.join(
-        ensemble_backend.temporary_directory, '*.log'))[0]
-    with open(logfile) as f:
-        assert msg in f.read()
-
-    # Also makes sure the ensemble does not return any history
-    assert ensemble == []
-
-
 def test_ensemble_builder_process_realrun(dask_client, ensemble_backend):
-    history = ensemble_builder_process(
+    manager = EnsembleBuilderManager(
         start_time=time.time(),
         time_left_for_ensembles=1000,
-        sleep_duration=2,
-        event=None,
-        history=list(),
-        address=dask_client.scheduler_info()['address'],
         backend=ensemble_backend,
         dataset_name='Test',
         task=BINARY_CLASSIFICATION,
@@ -698,6 +644,11 @@ def test_ensemble_builder_process_realrun(dask_client, ensemble_backend):
         random_state=0,
         logger_name='Ensemblebuilder',
     )
+    manager.build_ensemble(dask_client)
+    future = manager._futures.pop()
+    dask.distributed.wait([future])  # wait for the ensemble process to finish
+    result = future.result()
+    history, _ = result
 
     assert 'ensemble_optimization_score' in history[0]
     assert history[0]['ensemble_optimization_score'] == 0.9
@@ -708,7 +659,7 @@ def test_ensemble_builder_process_realrun(dask_client, ensemble_backend):
 
 
 @unittest.mock.patch('autosklearn.ensemble_builder.EnsembleBuilder.fit_ensemble')
-def test_ensemble_builder_nbest_remembered(fit_ensemble, ensemble_backend):
+def test_ensemble_builder_nbest_remembered(fit_ensemble, ensemble_backend, dask_client):
     """
     Makes sure ensemble builder returns the size of the ensemble that pynisher allowed
     This way, we can remember it and not waste more time trying big ensemble sizes
@@ -720,25 +671,42 @@ def test_ensemble_builder_nbest_remembered(fit_ensemble, ensemble_backend):
 
     fit_ensemble.return_value = None
 
-    ensemble_history, ensemble_nbest, sleep = fit_and_return_ensemble(
-        time_left=1000,
+    manager = EnsembleBuilderManager(
+        start_time=time.time(),
+        time_left_for_ensembles=1000,
         backend=ensemble_backend,
         dataset_name='Test',
-        task_type=MULTILABEL_CLASSIFICATION,
+        task=MULTILABEL_CLASSIFICATION,
         metric=roc_auc,
         ensemble_size=50,
         ensemble_nbest=10,
         max_models_on_disc=None,
         seed=0,
         precision=32,
-        iteration=0,
         read_at_most=np.inf,
-        memory_limit=1000,
+        ensemble_memory_limit=1000,
         random_state=0,
         logger_name='Ensemblebuilder',
+        max_iterations=None,
     )
 
-    # The ensemble n size must be one, because in 1Gb
-    # it can only fit 1 out of the 2 models as each one
-    # involves an overhead of an array of 2500x2500
-    assert ensemble_nbest == 1
+    manager.build_ensemble(dask_client)
+    future = manager._futures[0]
+    dask.distributed.wait([future])  # wait for the ensemble process to finish
+    assert not os.path.exists(os.path.join(
+        ensemble_backend.internals_directory,
+        'ensemble_read_preds.pkl'
+    ))
+
+    manager.build_ensemble(dask_client)
+
+    future = manager._futures[0]
+    dask.distributed.wait([future])  # wait for the ensemble process to finish
+    assert not os.path.exists(os.path.join(
+        ensemble_backend.internals_directory,
+        'ensemble_read_preds.pkl'
+    ))
+
+    result = future.result()
+    _, ensemble_nbest = result
+    assert ensemble_nbest == 2

@@ -159,6 +159,29 @@ def dask_client(request):
     return client
 
 
+@pytest.fixture(scope="function")
+def dask_client_single_worker(request):
+    """
+    Same as above, but only with a single worker.
+    """
+    dask.config.set({'distributed.worker.daemon': False})
+
+    client = Client(n_workers=1, threads_per_worker=1, processes=False)
+    print("Started Dask client={}\n".format(client))
+
+    def get_finalizer(address):
+        def session_run_at_end():
+            client = get_client(address)
+            print("Closed Dask client={}\n".format(client))
+            client.shutdown()
+            client.close()
+            del client
+        return session_run_at_end
+    request.addfinalizer(get_finalizer(client.scheduler_info()['address']))
+
+    return client
+
+
 def pytest_sessionfinish(session, exitstatus):
     proc = psutil.Process()
     for child in proc.children(recursive=True):

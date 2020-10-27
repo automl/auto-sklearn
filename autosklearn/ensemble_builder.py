@@ -19,6 +19,9 @@ import pandas as pd
 import pynisher
 import lockfile
 from sklearn.utils.validation import check_random_state
+from smac.callbacks import IncorporateRunResultCallback
+from smac.optimizer.smbo import SMBO
+from smac.runhistory.runhistory import RunInfo, RunValue
 
 from autosklearn.util.backend import Backend
 from autosklearn.constants import BINARY_CLASSIFICATION
@@ -34,64 +37,34 @@ Y_TEST = 2
 MODEL_FN_RE = r'_([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*)\.npy'
 
 
-def ensemble_builder_process(
-    start_time: int,
-    time_left_for_ensembles: float,
-    sleep_duration: int,
-    address: str,
-    event: threading.Event,
-    history: List[Tuple[int, float, float, float]],
-    backend: Backend,
-    dataset_name: str,
-    task: str,
-    metric: Scorer,
-    ensemble_size: int,
-    ensemble_nbest: int,
-    max_models_on_disc: Union[float, int],
-    seed: int,
-    precision: int,
-    max_iterations: int,
-    read_at_most: int,
-    ensemble_memory_limit: Optional[int],
-    random_state: int,
-    logger_name: str,
-) -> List[Tuple[int, float, float, float]]:
-    """ Persistent function that handles ensemble iteration
+class EnsembleBuilderManager(IncorporateRunResultCallback):
+    def __init__(
+        self,
+        start_time: float,
+        time_left_for_ensembles: float,
+        backend: Backend,
+        dataset_name: str,
+        task: int,
+        metric: Scorer,
+        ensemble_size: int,
+        ensemble_nbest: int,
+        max_models_on_disc: Union[float, int],
+        seed: int,
+        precision: int,
+        max_iterations: Optional[int],
+        read_at_most: int,
+        ensemble_memory_limit: Optional[int],
+        random_state: int,
+        logger_name: str,
+    ):
+        """ SMAC callback to handle ensemble building
 
-    This function is a bridge to interact between the ensemble builder
-    process and the AutoML. In particular, this function can be considered
-    as a multiprocessing task that can request resources to dask by itself.
-
-    The expectation of this function is:
-        + Every sleep_duration seconds, this function will try to create an
-          ensemble builder processes, that will be fitted to create an
-          Ensemble selection object. I/O are managed via the backend.
-        + The way this process happen is that every worker has a series of running
-          slots. Every two seconds this child process allocates himself in the pool
-          to build a ensemble. When the ensemble is built, this function secede the
-          pool resources (it removes itself from the execution slot) and sleeps until
-          the next iteration. Before the next iteration, it enlist itself in as a valid
-          task that needs resources.
-        + The ensemble builder is created in a memory efficient way. We do not
-          use a dask actor as the object will always be in memory, limiting the
-          resources for other task in the worker.
-        + ensemble_builder_process puts itself back into the workers pool, in other to launch
-          yet another task using fit_and_return_ensemble as another task. This gives the
-          flexibility to track the actual ensemble creation in the dask dashboard.
-
-    Parameters
-    ----------
+        Parameters
+        ----------
         start_time: int
             the time when this job was started, to account for any latency in job allocation
         time_left_for_ensemble: int
             How much time is left for the task. Job should finish within this allocated time
-        sleep_duration: int
-            How much to wait between each iteration of the ensemble builder process
-            This also means, how frequently we check for an ensemble builder iteration to be
-            done. We only allow 1 active ensemble builder. If that job is not finished, we
-            query if it is complete each sleep_duration seconds
-        event: threading.Event
-            An event that signals that the ensemble builder process should finish
         backend: util.backend.Backend
             backend to write and read files
         dataset_name: str
@@ -136,47 +109,83 @@ def ensemble_builder_process(
         List[Tuple[int, float, float, float]]:
             A list with the performance history of this ensemble, of the form
             [[pandas_timestamp, train_performance, val_performance, test_performance], ...]
-    """
+        """
+        self.start_time = start_time
+        self.time_left_for_ensembles = time_left_for_ensembles
+        self.backend = backend
+        self.dataset_name = dataset_name
+        self.task = task
+        self.metric = metric
+        self.ensemble_size = ensemble_size
+        self.ensemble_nbest = ensemble_nbest
+        self.max_models_on_disc = max_models_on_disc
+        self.seed = seed
+        self.precision = precision
+        self.max_iterations = max_iterations
+        self.read_at_most = read_at_most
+        self.ensemble_memory_limit = ensemble_memory_limit
+        self.random_state = random_state
+        self.logger_name = logger_name
 
-    # The second criteria is elapsed time
-    elapsed_time = time.time() - start_time
+        # Store something similar to SMAC's runhistory
+        self.history = []
 
-    # The last criteria is the number of iterations
-    iteration = 0
+        # We only submit new ensembles when there is not an active ensemble job
+        self._futures = []
 
-    # We only submit new ensembles when there is not an active ensemble
-    # job
-    futures = []
+        # The last criteria is the number of iterations
+        self.iteration = 0
 
-    logger = EnsembleBuilder._get_ensemble_logger(logger_name, backend.temporary_directory)
+    def __call__(
+        self,
+        smbo: 'SMBO',
+        run_info: RunInfo,
+        result: RunValue,
+        time_left: float,
+    ):
+        self.build_ensemble(smbo.tae_runner.client)
 
-    client = dask.distributed.get_client(address=address)
+    def build_ensemble(self, dask_client: dask.distributed.Client) -> None:
 
-    while True:
+        # The second criteria is elapsed time
+        elapsed_time = time.time() - self.start_time
+
+        logger = EnsembleBuilder._get_ensemble_logger(
+            self.logger_name,
+            self.backend.temporary_directory
+        )
 
         # First test for termination conditions
-        if time_left_for_ensembles < elapsed_time:
+        if self.time_left_for_ensembles < elapsed_time:
             logger.info(
                 "Terminate ensemble building as not time is left (run for {}s)".format(
                     elapsed_time
                 ),
             )
-            break
-        if event is not None and event.is_set():
-            logger.info(
-                "Terminating ensemble building as SMAC process is done...")
-            break
-        if max_iterations is not None and max_iterations <= iteration:
+            return
+        if self.max_iterations is not None and self.max_iterations <= self.iteration:
             logger.info(
                 "Terminate ensemble building because of max iterations: {} of {}".format(
-                    max_iterations,
-                    iteration
+                    self.max_iterations,
+                    self.iteration
                 )
             )
-            break
+            return
+
+        if len(self._futures) != 0:
+            if self._futures[0].done():
+                result = self._futures.pop().result()
+                if result:
+                    ensemble_history, self.ensemble_nbest = result
+                    logger.debug("iteration={} @ elapsed_time={} has history={}".format(
+                        self.iteration,
+                        elapsed_time,
+                        ensemble_history,
+                    ))
+                    self.history.extend(ensemble_history)
 
         # Only submit new jobs if the previous ensemble job finished
-        if len(futures) == 0:
+        if len(self._futures) == 0:
 
             # Add the result of the run
             # On the next while iteration, no references to
@@ -190,94 +199,42 @@ def ensemble_builder_process(
                 # see it in the dask diagnostic dashboard
                 # Notice that the forked ensemble_builder_process will
                 # wait for the below function to be done
-                futures.append(client.submit(
+                self._futures.append(dask_client.submit(
                     fit_and_return_ensemble,
-                    backend=backend,
-                    dataset_name=dataset_name,
-                    task_type=task,
-                    metric=metric,
-                    ensemble_size=ensemble_size,
-                    ensemble_nbest=ensemble_nbest,
-                    max_models_on_disc=max_models_on_disc,
-                    seed=seed,
-                    precision=precision,
-                    memory_limit=ensemble_memory_limit,
-                    read_at_most=read_at_most,
-                    random_state=seed,
-                    logger_name=logger_name,
-                    time_left=time_left_for_ensembles-elapsed_time,
-                    iteration=iteration,
-                    priority=10,
+                    backend=self.backend,
+                    dataset_name=self.dataset_name,
+                    task_type=self.task,
+                    metric=self.metric,
+                    ensemble_size=self.ensemble_size,
+                    ensemble_nbest=self.ensemble_nbest,
+                    max_models_on_disc=self.max_models_on_disc,
+                    seed=self.seed,
+                    precision=self.precision,
+                    memory_limit=self.ensemble_memory_limit,
+                    read_at_most=self.read_at_most,
+                    random_state=self.seed,
+                    logger_name=self.logger_name,
+                    time_left=self.time_left_for_ensembles - elapsed_time,
+                    iteration=self.iteration,
+                    priority=100,
                 ))
 
                 logger.info(
                     "{}/{} Started Ensemble builder job at {} for iteration {}.".format(
                         # Log the client to make sure we
                         # remain connected to the scheduler
-                        futures[0],
-                        client,
+                        self._futures[0],
+                        dask_client,
                         time.strftime("%Y.%m.%d-%H.%M.%S"),
-                        iteration,
+                        self.iteration,
                     ),
                 )
-                iteration += 1
+                self.iteration += 1
             except Exception as e:
                 exception_traceback = traceback.format_exc()
                 error_message = repr(e)
                 logger.critical(exception_traceback)
                 logger.critical(error_message)
-
-        # If pynisher kills a run, the result
-        # might be None -- so no new timestamp info
-        sleep = True
-        if len(futures) != 0:
-            try:
-                result = futures[0].result(timeout=sleep_duration)
-                if result:
-                    ensemble_history, ensemble_nbest, sleep = result
-                    logger.debug("iteration={} @ elapsed_time={} has history={}".format(
-                        iteration,
-                        elapsed_time,
-                        ensemble_history,
-                    ))
-                    history.extend(ensemble_history)
-                # Not sure why I have to cancel a finished future in the next line...
-                # not doing this results in countless futures on the client
-                futures.pop().cancel()
-            except dask.distributed.TimeoutError:
-                sleep = False
-
-        else:
-            logger.info(
-                "{}/{} No new ensemble builder job will be allocated at {}.".format(
-                    futures,
-                    client,
-                    time.strftime("%Y.%m.%d-%H.%M.%S"),
-                )
-            )
-
-        # Don't take resources while waiting
-        # By default the fit_and_return_ensemble indicate
-        # if we should wait before starting a new ensemble iteration
-        if sleep:
-            time.sleep(sleep_duration)
-
-        # Update for next iteration
-        elapsed_time = time.time() - start_time
-
-    # Gather any future when time is up!
-    if len(futures) != 0:
-        result = futures.pop().result()
-        if result:
-            ensemble_history, ensemble_nbest, sleep = result
-            logger.debug("iteration={} @ elapsed_time={} has history={}".format(
-                iteration,
-                elapsed_time,
-                ensemble_history,
-            ))
-            history.extend(ensemble_history)
-
-    return history
 
 
 def fit_and_return_ensemble(
@@ -296,7 +253,7 @@ def fit_and_return_ensemble(
     logger_name: str,
     time_left: float,
     iteration: int,
-) -> Tuple[List[Tuple[int, float, float, float]], int, bool]:
+) -> Tuple[List[Tuple[int, float, float, float]], int]:
     """
 
     A short function to fit and create an ensemble. It is just a wrapper to easily send
@@ -614,6 +571,12 @@ class EnsembleBuilder(object):
                         "argument 'ensemble_memory_limit' (current limit is {} MB)."
                         "".format(self.memory_limit)
                     )
+                    raise ValueError(
+                        "Memory Exception -- Unable to further reduce the number of ensemble "
+                        "members -- please restart Auto-sklearn with a higher value for the "
+                        "argument 'ensemble_memory_limit' (current limit is {} MB)."
+                        "".format(self.memory_limit)
+                    )
                 else:
                     if isinstance(self.ensemble_nbest, numbers.Integral):
                         self.ensemble_nbest = int(self.ensemble_nbest / 2)
@@ -623,11 +586,15 @@ class EnsembleBuilder(object):
                                         "less ensemble_nbest: %d" % self.ensemble_nbest)
                     # ATTENTION: main will start from scratch;
                     # all data structures are empty again
-                    continue
-            if safe_ensemble_script:
-                return safe_ensemble_script.result
+                    try:
+                        os.remove(self.ensemble_memory_file)
+                    except:
+                        pass
+                    return [], self.ensemble_nbest
             else:
-                return [], self.ensemble_nbest, False
+                return safe_ensemble_script.result
+
+        return [], self.ensemble_nbest
 
     def main(self, time_left, iteration):
         """
@@ -655,15 +622,13 @@ class EnsembleBuilder(object):
 
         # populates self.read_preds
         if not self.score_ensemble_preds():
-            # We issue an seep request as we are not yet able to score the ensembles
-            # for example, the Ground Truth labels are not yet written to disk
-            return self.ensemble_history, self.ensemble_nbest, True
+            return self.ensemble_history, self.ensemble_nbest
 
         # Only the models with the n_best predictions are candidates
         # to be in the ensemble
         candidate_models = self.get_n_best_preds()
         if not candidate_models:  # no candidates yet
-            return self.ensemble_history, self.ensemble_nbest, True
+            return self.ensemble_history, self.ensemble_nbest
 
         # populates predictions in self.read_preds
         # reduces selected models if file reading failed
@@ -676,9 +641,7 @@ class EnsembleBuilder(object):
             # Both n_sel_* have entries, but there is no overlap, this is critical
             self.logger.error("n_sel_valid and n_sel_test are not empty, but do "
                               "not overlap")
-            # We submit a sleep request because the number of test and validation
-            # arrays might not yet fully be written in disk
-            return self.ensemble_history, self.ensemble_nbest, True
+            return self.ensemble_history, self.ensemble_nbest
 
         # If any of n_sel_* is not empty and overlaps with candidate_models,
         # then ensure candidate_models AND n_sel_test are sorted the same
@@ -738,10 +701,7 @@ class EnsembleBuilder(object):
         with (open(self.ensemble_memory_file, "wb")) as memory:
             pickle.dump((self.read_preds, self.last_hash), memory)
 
-        # If we are not able to create an ensemble, for instance, no new
-        # predictions are available, we sleep in the hope new predictions
-        # will be available after a while
-        return self.ensemble_history, self.ensemble_nbest, ensemble is None
+        return self.ensemble_history, self.ensemble_nbest
 
     def get_disk_consumption(self, pred_path):
         """

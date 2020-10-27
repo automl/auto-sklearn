@@ -42,7 +42,7 @@ from autosklearn.metrics import calculate_score
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import get_logger, setup_logger
 from autosklearn.util import pipeline, RE_PATTERN
-from autosklearn.ensemble_builder import ensemble_builder_process
+from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix
@@ -174,12 +174,6 @@ class AutoML(BaseEstimator):
         self._n_jobs = n_jobs
         self._dask_client = dask_client
 
-        # For the ensemble building process
-
-        # How much patience to wait for the ensemble building process to finish by itself
-        self.ensemble_timeout_patience = 10
-        self.ensemble_termination_request = None
-
         self.precision = precision
         self._disable_evaluator_output = disable_evaluator_output
         # Check arguments prior to doing anything!
@@ -215,12 +209,6 @@ class AutoML(BaseEstimator):
         self._debug_mode = debug_mode
 
         self.InputValidator = InputValidator()
-
-        # Ensemble building process attributes
-
-        # How much time to wait between retries of
-        # ensemble building process
-        self.ensemble_sleep_duration = 2
 
         # The ensemble performance history through time
         self.ensemble_performance_history = []
@@ -595,44 +583,27 @@ class AutoML(BaseEstimator):
             self._logger.info(
                 'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
 
-            manager = multiprocessing.Manager()
-            self.ensemble_performance_history = manager.list()
-
-            # We expect the ensemble process to be time driven, and honor the maximum
-            # time provided via time_left_for_ensemble. As a safety measure, we also
-            # provide an event signal that stops the process before the next iteration
-            # of ensemble builder process
-            self.ensemble_termination_request = threading.Event()
-
             # Create a thread that internally submits ensemble builder objects
             # via Dask. Multiprocessing Process hangs, so as a work around we create a
             # thread from the main process
-            proc_ensemble = threading.Thread(
-                target=ensemble_builder_process,
-                args=(
-                    time.time(),  # Track when the ensemble builder processes was started
-                    time_left_for_ensembles,  # This is the max time the process can take
-                    self.ensemble_sleep_duration,  # How much time to wait between iterations
-                    self._dask_client.scheduler_info()['address'],
-                    self.ensemble_termination_request,  # Setting this event forces termination
-                    self.ensemble_performance_history,
-                    copy.deepcopy(self._backend),  # A backend object to access shared directories
-                    dataset_name,  # Name of the dataset to load
-                    task,  # type of the task
-                    self._metric,  # metric to evaluate the ensemble performance
-                    self._ensemble_size,  # Maximum number of models allowed
-                    self._ensemble_nbest,  # How many n best models to use
-                    self._max_models_on_disc,  # maximum number of models allowed in disc
-                    self._seed,  # Seed the ensemble creation and allow to retrieve files
-                    self.precision,  # The precision of the np arrays
-                    None,  # Maximum number of iterations for the ensemble
-                    np.inf,  # read_at_most -- maximum number of files to read for memory
-                    self._memory_limit,  # pynisher memory limit
-                    self._seed,  # random state
-                    self._logger.name,
-                )
+            proc_ensemble = EnsembleBuilderManager(
+                start_time=time.time(),
+                time_left_for_ensembles=time_left_for_ensembles,
+                backend=copy.deepcopy(self._backend),
+                dataset_name=dataset_name,
+                task=task,
+                metric=self._metric,
+                ensemble_size=self._ensemble_size,
+                ensemble_nbest=self._ensemble_nbest,
+                max_models_on_disc=self._max_models_on_disc,
+                seed=self._seed,
+                precision=self.precision,
+                max_iterations=None,
+                read_at_most=np.inf,
+                ensemble_memory_limit=self._memory_limit,
+                logger_name=self._logger.name,
+                random_state=self._seed,
             )
-            proc_ensemble.start()
 
         self._stopwatch.stop_task(ensemble_task_name)
 
@@ -705,6 +676,7 @@ class AutoML(BaseEstimator):
                 disable_file_output=self._disable_evaluator_output,
                 get_smac_object_callback=self._get_smac_object_callback,
                 smac_scenario_args=self._smac_scenario_args,
+                ensemble_callback=proc_ensemble,
             )
 
             try:
@@ -727,23 +699,10 @@ class AutoML(BaseEstimator):
         if proc_ensemble is not None:
             # Here we signal the ensemble process to finish
             # That is, no more iterations are allowed
-            self.ensemble_termination_request.set()
 
-            # We wait for self.ensemble_timeout_patience seconds for a job to finish
-            # Notice we provided a termination signal and also the maximum allowed time, so
-            # it is likely that the TimeoutError won't happen. In case it does, we notify
-            # the user
-            try:
-                proc_ensemble.join()
-
-                # Convert the multiprocessing list to a python list
-                self.ensemble_performance_history = list(self.ensemble_performance_history)
-            except Exception as e:
-                self._logger.error("The ensemble process unexpectedly hanged..."
-                                   "Please check the log file for errors={}.".format(e))
+            self.ensemble_performance_history = list(proc_ensemble.history)
 
             # Cleanup to make an estimator pickable
-            del self.ensemble_termination_request
             del proc_ensemble
 
         if load_models:
@@ -906,31 +865,29 @@ class AutoML(BaseEstimator):
         # Use the current thread to start the ensemble builder process
         # The function ensemble_builder_process will internally create a ensemble
         # builder in the provide dask client
-        self.ensemble_performance_history = ensemble_builder_process(
-            time.time(),  # Track when the ensemble builder processes was started
-            self._time_for_task,  # This is the max time the process can take
-            self.ensemble_sleep_duration,  # How much time to wait between iterations
-            self._dask_client.scheduler_info()['address'],
-            None,  # Setting this event forces termination
-            self.ensemble_performance_history,
-            copy.deepcopy(self._backend),  # A backend object to access shared directories
-            # Name of the dataset to load
-            dataset_name if dataset_name else self._dataset_name,
-            task if task else self._task,  # type of the task
-            self._metric,  # metric to evaluate the ensemble performance
-            # Maximum number of models allowed
-            ensemble_size if ensemble_size else self._ensemble_size,
-            # How many n best models to use
-            ensemble_nbest if ensemble_nbest else self._ensemble_nbest,
-            self._max_models_on_disc,  # maximum number of models allowed in disc
-            self._seed,  # Seed the ensemble creation and allow to retrieve files
-            precision if precision else self.precision,  # The precision of the np arrays
-            1,  # Maximum number of iterations for the ensemble
-            np.inf,  # read_at_most -- maximum number of files to read for memory
-            self._memory_limit,  # pynisher memory limit
-            self._seed,  # random state
-            self._logger.name,
+        manager = EnsembleBuilderManager(
+            start_time=time.time(),
+            time_left_for_ensembles=self._time_for_task,
+            backend=copy.deepcopy(self._backend),
+            dataset_name=dataset_name if dataset_name else self._dataset_name,
+            task=task if task else self._task,
+            metric=self._metric,
+            ensemble_size=ensemble_size if ensemble_size else self._ensemble_size,
+            ensemble_nbest=ensemble_nbest if ensemble_nbest else self._ensemble_nbest,
+            max_models_on_disc=self._max_models_on_disc,
+            seed=self._seed,
+            precision=precision if precision else self.precision,
+            max_iterations=1,
+            read_at_most=np.inf,
+            ensemble_memory_limit=self._memory_limit,
+            random_state=self._seed,
+            logger_name=self._logger.name,
         )
+        manager.build_ensemble(self._dask_client)
+        future = manager._futures.pop()
+        dask.distributed.wait([future])  # wait for the ensemble process to finish
+        result = future.result()
+        self.ensemble_performance_history, _ = result
 
         self._load_models()
         self._close_dask_client()

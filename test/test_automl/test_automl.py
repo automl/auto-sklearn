@@ -59,12 +59,14 @@ def test_fit(dask_client, backend):
     del automl
 
 
-def test_fit_roar(dask_client, backend):
+def test_fit_roar(dask_client_single_worker, backend):
     def get_roar_object_callback(
             scenario_dict,
             seed,
             ta,
             ta_kwargs,
+            dask_client,
+            n_jobs,
             **kwargs
     ):
         """Random online adaptive racing.
@@ -76,6 +78,8 @@ def test_fit_roar(dask_client, backend):
             rng=seed,
             tae_runner=ta,
             tae_runner_kwargs=ta_kwargs,
+            dask_client=dask_client,
+            n_jobs=n_jobs,
         )
 
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
@@ -86,7 +90,7 @@ def test_fit_roar(dask_client, backend):
         initial_configurations_via_metalearning=0,
         get_smac_object_callback=get_roar_object_callback,
         metric=accuracy,
-        dask_client=dask_client,
+        dask_client=dask_client_single_worker,
     )
     setup_logger()
     automl._logger = get_logger('test_fit_roar')
@@ -196,7 +200,7 @@ def test_delete_non_candidate_models(backend, dask_client):
         metric=accuracy,
         dask_client=dask_client,
         # Force model to be deleted. That is, from 50 which is the
-        # default to 10 to make sure we delete models.
+        # default to 8 to make sure we delete models.
         max_models_on_disc=8,
     )
 
@@ -317,7 +321,7 @@ def test_automl_outputs(backend, dask_client):
 
     fixture = os.listdir(os.path.join(backend.temporary_directory,
                                       '.auto-sklearn', 'ensembles'))
-    assert '100.0000000001.ensemble' in fixture
+    assert '100.0000000000.ensemble' in fixture
 
     # Start time
     start_time_file_path = os.path.join(backend.temporary_directory,
