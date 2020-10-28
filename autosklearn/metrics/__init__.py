@@ -394,14 +394,20 @@ def calculate_score(
                         continue
                     else:
                         raise e
+
+        if metric and metric.name not in score_dict.keys():
+            score_dict[metric.name] = get_metric_score(metric, prediction, solution, task_type)
         return score_dict
 
     else:
-        if task_type in REGRESSION_TASKS:
-            # TODO put this into the regression metric itself
-            cprediction = sanitize_array(prediction)
-            score = metric(solution, cprediction)
-        else:
-            score = metric(solution, prediction)
+        return get_metric_score(metric, prediction, solution, task_type)
 
-        return score
+
+def get_metric_score(metric, prediction, solution, task_type):
+    if task_type in REGRESSION_TASKS:
+        # TODO put this into the regression metric itself
+        cprediction = sanitize_array(prediction)
+        score = metric(solution, cprediction)
+    else:
+        score = metric(solution, prediction)
+    return score
