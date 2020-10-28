@@ -19,6 +19,7 @@ class LDA(AutoSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, Y):
+        import sklearn.discriminant_analysis
         import sklearn.multiclass
 
         if check_none(self.shrinkage):
