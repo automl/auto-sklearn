@@ -266,7 +266,7 @@ Print test accuracy and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  24.321 seconds)
+   **Total running time of the script:** ( 0 minutes  24.313 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_classification.py:
