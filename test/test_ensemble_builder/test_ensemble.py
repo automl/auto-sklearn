@@ -17,7 +17,6 @@ from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensemble_builder import (
     EnsembleBuilder,
     EnsembleBuilderManager,
-    fit_and_return_ensemble,
     Y_VALID,
     Y_TEST,
 )

@@ -552,7 +552,8 @@ class EnsembleBuilder(object):
 
         return get_logger('EnsembleBuilder')
 
-    def run(self,
+    def run(
+        self,
         iteration: int,
         time_left: Optional[float] = None,
         end_at: Optional[float] = None,
@@ -616,7 +617,7 @@ class EnsembleBuilder(object):
                     # all data structures are empty again
                     try:
                         os.remove(self.ensemble_memory_file)
-                    except:
+                    except:  # noqa E722
                         pass
                     return [], self.ensemble_nbest
             else:
