@@ -431,7 +431,7 @@ def testEntireEnsembleBuilder(ensemble_backend):
     np.testing.assert_array_almost_equal(y_valid, y_valid_d2)
 
 
-def testMain(ensemble_backend):
+def test_main(ensemble_backend):
 
     ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
@@ -467,6 +467,27 @@ def testMain(ensemble_backend):
     assert all(item in run_history[0].items() for item in expected_performance.items())
     assert 'Timestamp' in run_history[0]
     assert isinstance(run_history[0]['Timestamp'], pd.Timestamp)
+
+
+def test_run_end_at(ensemble_backend):
+    with unittest.mock.patch('pynisher.enforce_limits') as pynisher_mock:
+        ensbuilder = EnsembleBuilder(
+            backend=ensemble_backend,
+            dataset_name="TEST",
+            task_type=MULTILABEL_CLASSIFICATION,  # Multilabel Classification
+            metric=roc_auc,
+            seed=0,  # important to find the test files
+            ensemble_nbest=2,
+            max_models_on_disc=None,
+            )
+        ensbuilder.SAVE2DISC = False
+
+        current_time = time.time()
+
+        ensbuilder.run(end_at=current_time + 10, iteration=1)
+        # 4 seconds left because: 10 seconds - 5 seconds overhead - very little overhead,
+        # but then rounded to an integer
+        assert pynisher_mock.call_args_list[0][1]["wall_time_in_s"], 4
 
 
 def testLimit(ensemble_backend):
@@ -645,7 +666,7 @@ def test_ensemble_builder_process_realrun(dask_client, ensemble_backend):
         logger_name='Ensemblebuilder',
     )
     manager.build_ensemble(dask_client)
-    future = manager._futures.pop()
+    future = manager.futures.pop()
     dask.distributed.wait([future])  # wait for the ensemble process to finish
     result = future.result()
     history, _ = result
@@ -691,7 +712,7 @@ def test_ensemble_builder_nbest_remembered(fit_ensemble, ensemble_backend, dask_
     )
 
     manager.build_ensemble(dask_client)
-    future = manager._futures[0]
+    future = manager.futures[0]
     dask.distributed.wait([future])  # wait for the ensemble process to finish
     assert not os.path.exists(os.path.join(
         ensemble_backend.internals_directory,
@@ -700,7 +721,7 @@ def test_ensemble_builder_nbest_remembered(fit_ensemble, ensemble_backend, dask_
 
     manager.build_ensemble(dask_client)
 
-    future = manager._futures[0]
+    future = manager.futures[0]
     dask.distributed.wait([future])  # wait for the ensemble process to finish
     assert not os.path.exists(os.path.join(
         ensemble_backend.internals_directory,

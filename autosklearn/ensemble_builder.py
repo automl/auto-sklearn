@@ -3,7 +3,6 @@ import math
 import numbers
 import glob
 import gzip
-import threading
 import os
 import pickle
 import re
@@ -131,10 +130,13 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         self.history = []
 
         # We only submit new ensembles when there is not an active ensemble job
-        self._futures = []
+        self.futures = []
 
         # The last criteria is the number of iterations
         self.iteration = 0
+
+        # Keep track of when we started to know when we need to finish!
+        self.start_time = time.time()
 
     def __call__(
         self,
@@ -152,7 +154,8 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
 
         logger = EnsembleBuilder._get_ensemble_logger(
             self.logger_name,
-            self.backend.temporary_directory
+            self.backend.temporary_directory,
+            False
         )
 
         # First test for termination conditions
@@ -172,9 +175,9 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
             )
             return
 
-        if len(self._futures) != 0:
-            if self._futures[0].done():
-                result = self._futures.pop().result()
+        if len(self.futures) != 0:
+            if self.futures[0].done():
+                result = self.futures.pop().result()
                 if result:
                     ensemble_history, self.ensemble_nbest = result
                     logger.debug("iteration={} @ elapsed_time={} has history={}".format(
@@ -185,7 +188,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
                     self.history.extend(ensemble_history)
 
         # Only submit new jobs if the previous ensemble job finished
-        if len(self._futures) == 0:
+        if len(self.futures) == 0:
 
             # Add the result of the run
             # On the next while iteration, no references to
@@ -199,7 +202,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
                 # see it in the dask diagnostic dashboard
                 # Notice that the forked ensemble_builder_process will
                 # wait for the below function to be done
-                self._futures.append(dask_client.submit(
+                self.futures.append(dask_client.submit(
                     fit_and_return_ensemble,
                     backend=self.backend,
                     dataset_name=self.dataset_name,
@@ -214,7 +217,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
                     read_at_most=self.read_at_most,
                     random_state=self.seed,
                     logger_name=self.logger_name,
-                    time_left=self.time_left_for_ensembles - elapsed_time,
+                    end_at=self.start_time + self.time_left_for_ensembles,
                     iteration=self.iteration,
                     priority=100,
                 ))
@@ -223,7 +226,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
                     "{}/{} Started Ensemble builder job at {} for iteration {}.".format(
                         # Log the client to make sure we
                         # remain connected to the scheduler
-                        self._futures[0],
+                        self.futures[0],
                         dask_client,
                         time.strftime("%Y.%m.%d-%H.%M.%S"),
                         self.iteration,
@@ -251,7 +254,7 @@ def fit_and_return_ensemble(
     read_at_most: int,
     random_state: int,
     logger_name: str,
-    time_left: float,
+    end_at: float,
     iteration: int,
 ) -> Tuple[List[Tuple[int, float, float, float]], int]:
     """
@@ -296,8 +299,9 @@ def fit_and_return_ensemble(
             read at most n new prediction files in each iteration
         logger_name: str
             Name of the logger where we are gonna write information
-        time_left: int
-            How much time is left for the task. Job should finish within this allocated time
+        end_at: float
+            At what time the job must finish. Needs to be the endtime and not the time left
+            because we do not know when dask schedules the job.
         iteration: int
             The current iteration
 
@@ -326,7 +330,7 @@ def fit_and_return_ensemble(
         random_state=random_state,
         logger_name=logger_name,
     ).run(
-        time_left=time_left,
+        end_at=end_at,
         iteration=iteration,
     )
     return result
@@ -463,7 +467,7 @@ class EnsembleBuilder(object):
         # Setup the logger
         self.logger_name = logger_name
         self.logger = self._get_ensemble_logger(
-            self.logger_name, self.backend.temporary_directory)
+            self.logger_name, self.backend.temporary_directory, False)
 
         if ensemble_nbest == 1:
             self.logger.debug("Behaviour depends on int/float: %s, %s (ensemble_nbest, type)" %
@@ -532,30 +536,54 @@ class EnsembleBuilder(object):
         self.ensemble_history = []
 
     @classmethod
-    def _get_ensemble_logger(self, logger_name, dirname):
+    def _get_ensemble_logger(self, logger_name, dirname, setup):
         """
         Returns the logger of for the ensemble process.
         A subprocess will require to set this up, for instance,
         pynisher forks
         """
-        setup_logger(
-            os.path.join(
-                dirname,
-                '%s.log' % str(logger_name)
-            ),
-        )
+        if setup:
+            setup_logger(
+                os.path.join(
+                    dirname,
+                    '%s.log' % str(logger_name)
+                ),
+            )
 
         return get_logger('EnsembleBuilder')
 
-    def run(self, time_left, iteration, time_buffer=5):
+    def run(self,
+        iteration: int,
+        time_left: Optional[float] = None,
+        end_at: Optional[float] = None,
+        time_buffer=5,
+    ):
+
+        if time_left is None and end_at is None:
+            raise ValueError('Must provide either time_left or end_at.')
+        elif time_left is not None and end_at is not None:
+            raise ValueError('Cannot provide both time_left and end_at.')
+
+        self.logger = self._get_ensemble_logger(
+            self.logger_name, self.backend.temporary_directory, True)
+
         process_start_time = time.time()
         while True:
-            time_elapsed = time.time() - process_start_time
-            time_left -= time_elapsed
-            if time_left < 1:
+
+            if time_left is not None:
+                time_elapsed = time.time() - process_start_time
+                time_left -= time_elapsed
+            else:
+                current_time = time.time()
+                if current_time > end_at:
+                    break
+                else:
+                    time_left = end_at - current_time
+
+            if time_left - time_buffer < 1:
                 break
             safe_ensemble_script = pynisher.enforce_limits(
-                wall_time_in_s=int(time_left + time_buffer),
+                wall_time_in_s=int(time_left - time_buffer),
                 mem_in_mb=self.memory_limit,
                 logger=self.logger
             )(self.main)
@@ -608,7 +636,7 @@ class EnsembleBuilder(object):
         # the logger configuration. So we have to set it up
         # accordingly
         self.logger = self._get_ensemble_logger(
-            self.logger_name, self.backend.temporary_directory)
+            self.logger_name, self.backend.temporary_directory, False)
 
         self.start_time = time.time()
         valid_pred, test_pred = None, None

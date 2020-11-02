@@ -225,7 +225,7 @@ def test_delete_non_candidate_models(backend, dask_client):
         m_file = os.path.split(m_file)[1].replace('.model', '').split('.', 2)
         model_files_idx.add((int(m_file[0]), int(m_file[1]), float(m_file[2])))
     ensemble_members_idx = set(automl.ensemble_.identifiers_)
-    assert ensemble_members_idx.issubset(model_files_idx)
+    assert ensemble_members_idx.issubset(model_files_idx), (ensemble_members_idx, model_files_idx)
 
     del automl
 

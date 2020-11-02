@@ -2,12 +2,10 @@
 import copy
 import io
 import json
-import multiprocessing
 import platform
 import os
 import sys
 import time
-import threading
 from typing import Any, Dict, Optional, List, Union
 import unittest.mock
 import warnings
@@ -583,9 +581,6 @@ class AutoML(BaseEstimator):
             self._logger.info(
                 'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
 
-            # Create a thread that internally submits ensemble builder objects
-            # via Dask. Multiprocessing Process hangs, so as a work around we create a
-            # thread from the main process
             proc_ensemble = EnsembleBuilderManager(
                 start_time=time.time(),
                 time_left_for_ensembles=time_left_for_ensembles,
@@ -697,13 +692,10 @@ class AutoML(BaseEstimator):
         # Wait until the ensemble process is finished to avoid shutting down
         # while the ensemble builder tries to access the data
         if proc_ensemble is not None:
-            # Here we signal the ensemble process to finish
-            # That is, no more iterations are allowed
-
             self.ensemble_performance_history = list(proc_ensemble.history)
-
-            # Cleanup to make an estimator pickable
-            del proc_ensemble
+            if len(proc_ensemble.futures) > 0:
+                future = proc_ensemble.futures.pop()
+                future.cancel()
 
         if load_models:
             self._load_models()
@@ -884,7 +876,7 @@ class AutoML(BaseEstimator):
             logger_name=self._logger.name,
         )
         manager.build_ensemble(self._dask_client)
-        future = manager._futures.pop()
+        future = manager.futures.pop()
         dask.distributed.wait([future])  # wait for the ensemble process to finish
         result = future.result()
         self.ensemble_performance_history, _ = result
