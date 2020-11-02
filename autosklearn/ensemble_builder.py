@@ -997,7 +997,7 @@ class EnsembleBuilder(object):
                         "Limiting num of models via float max_models_on_disc={}"
                         " as accumulated={} worst={} num_models={}".format(
                             self.max_models_on_disc,
-                            (sum(sum(c) for c in consumption) + max_consumption),
+                            (sum(c[1] for c in consumption) + max_consumption),
                             max_consumption,
                             self.max_resident_models
                         )
