@@ -370,7 +370,6 @@ def test_do_dummy_prediction(backend, dask_client):
 
         # Check if data manager is correcly loaded
         assert D.info['task'] == datamanager.info['task']
-        print(os.listdir(backend.internals_directory))
         auto._do_dummy_prediction(D, 1)
 
         # Ensure that the dummy predictions are not in the current working
