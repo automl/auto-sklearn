@@ -43,7 +43,6 @@ class TestEvaluator_Test(BaseEvaluatorTest, unittest.TestCase):
 
             with self.subTest(testname):
                 backend_mock = unittest.mock.Mock(spec=Backend)
-                backend_mock.get_model_dir.return_value = 'dutirapbdxvltcrpbdlcatepdeau'
                 D = getter()
                 D_ = copy.deepcopy(D)
                 y = D.data['Y_train']

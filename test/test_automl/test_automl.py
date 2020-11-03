@@ -300,10 +300,14 @@ def test_automl_outputs(backend, dask_client):
         assert np.allclose(D.data['X_train'], X_train)
 
     # Check that all directories are there
-    fixture = ['cv_models', 'true_targets_ensemble.npy',
-               'start_time_100', 'datamanager.pkl',
-               'predictions_ensemble', 'ensemble_read_preds.pkl',
-               'done', 'ensembles', 'predictions_test', 'models']
+    fixture = [
+        'true_targets_ensemble.npy',
+        'start_time_100',
+        'datamanager.pkl',
+        'ensemble_read_preds.pkl',
+        'runs',
+        'ensembles',
+    ]
     assert (
         sorted(os.listdir(os.path.join(backend.temporary_directory, '.auto-sklearn')))
         == sorted(fixture)
@@ -311,12 +315,14 @@ def test_automl_outputs(backend, dask_client):
 
     # At least one ensemble, one validation, one test prediction and one
     # model and one ensemble
-    fixture = os.listdir(os.path.join(backend.temporary_directory,
-                                      '.auto-sklearn', 'predictions_ensemble'))
+    fixture = glob.glob(os.path.join(
+        backend.temporary_directory,
+        '.auto-sklearn', 'runs', '*', 'predictions_ensemble*npy',
+    ))
     assert len(fixture) > 0
 
     fixture = glob.glob(os.path.join(backend.temporary_directory, '.auto-sklearn',
-                                     'models', '100.*.model'))
+                                     'runs', '*', '100.*.model'))
     assert len(fixture) > 0
 
     fixture = os.listdir(os.path.join(backend.temporary_directory,
@@ -364,14 +370,14 @@ def test_do_dummy_prediction(backend, dask_client):
 
         # Check if data manager is correcly loaded
         assert D.info['task'] == datamanager.info['task']
-
+        print(os.listdir(backend.internals_directory))
         auto._do_dummy_prediction(D, 1)
 
         # Ensure that the dummy predictions are not in the current working
         # directory, but in the temporary directory.
         assert not os.path.exists(os.path.join(os.getcwd(), '.auto-sklearn'))
         assert os.path.exists(os.path.join(
-            backend.temporary_directory, '.auto-sklearn', 'predictions_ensemble',
+            backend.temporary_directory, '.auto-sklearn', 'runs', '1_1_0.0',
             'predictions_ensemble_1_1_0.0.npy')
         )
 
