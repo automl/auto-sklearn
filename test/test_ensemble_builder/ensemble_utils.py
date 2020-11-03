@@ -59,11 +59,14 @@ class BackendMock(object):
     def save_predictions_as_txt(self, predictions, subset, idx, prefix, precision):
         return
 
-    def get_runs_directory(self):
+    def get_runs_directory(self) -> str:
         return os.path.join(this_directory, 'data', '.auto-sklearn', 'runs')
 
-    def get_numrun_directory(self, seed, num_run, budget):
+    def get_numrun_directory(self, seed: int, num_run: int, budget: float) -> str:
         return os.path.join(self.get_runs_directory(), '%d_%d_%s' % (seed, num_run, budget))
+
+    def get_model_filename(self, seed: int, idx: int, budget: float) -> str:
+        return '%s.%s.%s.model' % (seed, idx, budget)
 
 
 def compare_read_preds(read_preds1, read_preds2):

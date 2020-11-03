@@ -634,7 +634,7 @@ def test_get_identifiers_from_run_history(exists, metric, ensemble_run_history, 
          metric=log_loss,
          seed=1,
          run_history=ensemble_run_history,
-         model_dir=ensemble_backend,
+         backend=ensemble_backend,
     )
 
     # Just one model
