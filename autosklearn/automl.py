@@ -314,7 +314,7 @@ class AutoML(BaseEstimator):
                                     cost_for_crash=get_cost_of_crash(self._metric),
                                     **self._resampling_strategy_arguments)
 
-        status, cost, runtime, additional_info = ta.run(1, cutoff=self._time_for_task)
+        status, cost, runtime, additional_info = ta.run(num_run, cutoff=self._time_for_task)
         if status == StatusType.SUCCESS:
             self._logger.info("Finished creating dummy predictions.")
         else:
@@ -512,10 +512,6 @@ class AutoML(BaseEstimator):
         )
 
         self._backend._make_internals_directory()
-        try:
-            os.makedirs(self._backend.get_runs_directory())
-        except (OSError, FileExistsError):
-            raise
 
         self._task = datamanager.info['task']
         self._label_num = datamanager.info['label_num']
@@ -939,9 +935,9 @@ class AutoML(BaseEstimator):
         # SingleBest contains the best model found by AutoML
         ensemble = SingleBest(
             metric=self._metric,
-            random_state=self._seed,
+            seed=self._seed,
             run_history=self.runhistory_,
-            model_dir=self._backend.get_model_dir(),
+            backend=self._backend,
         )
         self._logger.warning(
             "No valid ensemble was created. Please check the log"

@@ -1389,6 +1389,9 @@ class EnsembleBuilder(object):
                 os.rename(numrun_dir, numrun_dir + '.old')
                 shutil.rmtree(numrun_dir + '.old')
                 self.logger.info("Deleted files of non-candidate model %s", pred_path)
+                self.read_preds[pred_path]["disc_space_cost_mb"] = None
+                self.read_preds[pred_path]["loaded"] = 3
+                self.read_preds[pred_path]["ens_score"] = -np.inf
             except Exception as e:
                 self.logger.error(
                     "Failed to delete files of non-candidate model %s due"

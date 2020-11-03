@@ -130,13 +130,13 @@ def testRead(ensemble_backend):
 
     filename = os.path.join(
         ensemble_backend.temporary_directory,
-        ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_1_0.0.npy"
+        ".auto-sklearn/runs/0_1_0.0/predictions_ensemble_0_1_0.0.npy"
     )
     assert ensbuilder.read_preds[filename]["ens_score"] == 0.5
 
     filename = os.path.join(
         ensemble_backend.temporary_directory,
-        ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_0.0.npy"
+        ".auto-sklearn/runs/0_2_0.0/predictions_ensemble_0_2_0.0.npy"
     )
     assert ensbuilder.read_preds[filename]["ens_score"] == 1.0
 
@@ -167,7 +167,7 @@ def testNBest(ensemble_backend):
 
         fixture = os.path.join(
             ensemble_backend.temporary_directory,
-            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_0.0.npy"
+            ".auto-sklearn/runs/0_2_0.0/predictions_ensemble_0_2_0.0.npy"
         )
         assert sel_keys[0] == fixture
 
@@ -182,10 +182,12 @@ def testMaxModelsOnDisc(ensemble_backend):
             (4, 2),
             (1, 1),
             # If Float, translate float to # models.
-            # below, mock of each file is 100 Mb and
-            # 4 files .model and .npy (test/val/pred) exist
-            (1100.0, 1),
-            (1200.0, 2),
+            # below, mock of each file is 100 Mb and 4 files .model and .npy (test/val/pred) exist
+            # per run (except for run3, there they are 5). Now, it takes 500MB for run 3 and
+            # another 500 MB of slack because we keep as much space as the largest model
+            # available as slack
+            (1499.0, 1),
+            (1500.0, 2),
             (9999.0, 2),
     ]:
         ensbuilder = EnsembleBuilder(
@@ -202,7 +204,7 @@ def testMaxModelsOnDisc(ensemble_backend):
             mock.return_value = 100*1024*1024
             ensbuilder.score_ensemble_preds()
             sel_keys = ensbuilder.get_n_best_preds()
-            assert len(sel_keys) == exp
+            assert len(sel_keys) == exp, test_case
 
     # Test for Extreme scenarios
     # Make sure that the best predictions are kept
@@ -299,19 +301,19 @@ def testFallBackNBest(ensemble_backend):
 
     filename = os.path.join(
         ensemble_backend.temporary_directory,
-        ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_0.0.npy"
+        ".auto-sklearn/runs/0_2_0.0/predictions_ensemble_0_2_0.0.npy"
     )
     ensbuilder.read_preds[filename]["ens_score"] = -1
 
     filename = os.path.join(
         ensemble_backend.temporary_directory,
-        ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_3_100.0.npy"
+        ".auto-sklearn/runs/0_3_100.0/predictions_ensemble_0_3_100.0.npy"
     )
     ensbuilder.read_preds[filename]["ens_score"] = -1
 
     filename = os.path.join(
         ensemble_backend.temporary_directory,
-        ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_1_0.0.npy"
+        ".auto-sklearn/runs/0_1_0.0/predictions_ensemble_0_1_0.0.npy"
     )
     ensbuilder.read_preds[filename]["ens_score"] = -1
 
@@ -319,7 +321,7 @@ def testFallBackNBest(ensemble_backend):
 
     fixture = os.path.join(
         ensemble_backend.temporary_directory,
-        ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_1_0.0.npy"
+        ".auto-sklearn/runs/0_1_0.0/predictions_ensemble_0_1_0.0.npy"
     )
     assert len(sel_keys) == 1
     assert sel_keys[0] == fixture
@@ -339,15 +341,15 @@ def testGetValidTestPreds(ensemble_backend):
 
     d1 = os.path.join(
         ensemble_backend.temporary_directory,
-        ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_1_0.0.npy"
+        ".auto-sklearn/runs/0_1_0.0/predictions_ensemble_0_1_0.0.npy"
     )
     d2 = os.path.join(
         ensemble_backend.temporary_directory,
-        ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_0.0.npy"
+        ".auto-sklearn/runs/0_2_0.0/predictions_ensemble_0_2_0.0.npy"
     )
     d3 = os.path.join(
         ensemble_backend.temporary_directory,
-        ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_3_100.0.npy"
+        ".auto-sklearn/runs/0_3_100.0/predictions_ensemble_0_3_100.0.npy"
     )
 
     sel_keys = ensbuilder.get_n_best_preds()
@@ -359,7 +361,7 @@ def testGetValidTestPreds(ensemble_backend):
     assert len(ensbuilder.read_preds) == 3
     assert os.path.join(
             ensemble_backend.temporary_directory,
-            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_4_0.0.npy"
+            ".auto-sklearn/runs/0_4_0.0/predictions_ensemble_0_4_0.0.npy"
     ) not in ensbuilder.read_preds
 
     # not selected --> should still be None
@@ -389,7 +391,7 @@ def testEntireEnsembleBuilder(ensemble_backend):
 
     d2 = os.path.join(
         ensemble_backend.temporary_directory,
-        ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_0.0.npy"
+        ".auto-sklearn/runs/0_2_0.0/predictions_ensemble_0_2_0.0.npy"
     )
 
     sel_keys = ensbuilder.get_n_best_preds()
@@ -626,13 +628,13 @@ def testPredict():
 
 @pytest.mark.parametrize("metric", [log_loss, accuracy])
 @unittest.mock.patch('os.path.exists')
-def test_get_identifiers_from_run_history(exists, metric, ensemble_run_history):
+def test_get_identifiers_from_run_history(exists, metric, ensemble_run_history, ensemble_backend):
     exists.return_value = True
     ensemble = SingleBest(
          metric=log_loss,
-         random_state=1,
+         seed=1,
          run_history=ensemble_run_history,
-         model_dir='/tmp',
+         model_dir=ensemble_backend,
     )
 
     # Just one model

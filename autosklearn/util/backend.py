@@ -183,7 +183,10 @@ class Backend(object):
             os.makedirs(self.internals_directory)
         except Exception as e:
             self.logger.debug("_make_internals_directory: %s" % e)
-            pass
+        try:
+            os.makedirs(self.get_runs_directory())
+        except Exception as e:
+            self.logger.debug("_make_internals_directory: %s" % e)
 
     def _get_start_time_filename(self, seed: Union[str, int]) -> str:
         if isinstance(seed, str):
@@ -456,6 +459,8 @@ class Backend(object):
                                 subset: str,
                                 idx: int, precision: int,
                                 prefix: Optional[str] = None) -> None:
+        if not self.output_directory:
+            return
         # Write prediction scores in prescribed format
         filepath = os.path.join(
             self.output_directory,
