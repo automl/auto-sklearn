@@ -200,8 +200,8 @@ def test_delete_non_candidate_models(backend, dask_client):
         metric=accuracy,
         dask_client=dask_client,
         # Force model to be deleted. That is, from 50 which is the
-        # default to 8 to make sure we delete models.
-        max_models_on_disc=8,
+        # default to 3 to make sure we delete models.
+        max_models_on_disc=3,
     )
 
     automl.fit(X, Y, task=MULTICLASS_CLASSIFICATION,
