@@ -213,9 +213,9 @@ def test_delete_non_candidate_models(backend, dask_client):
         backend.temporary_directory, 'AutoML(' + str(seed) + '):*.log'))
     with open(log_file_path[0]) as log_file:
         log_content = log_file.read()
-        assert 'Deleted files of non-candidate model' in log_content
-        assert 'Failed to delete files of non-candidate model' not in log_content
-        assert 'Failed to lock model' not in log_content
+        assert 'Deleted files of non-candidate model' in log_content, log_content
+        assert 'Failed to delete files of non-candidate model' not in log_content, log_content
+        assert 'Failed to lock model' not in log_content, log_content
 
     # Assert that the files of the models used by the ensemble weren't deleted
     model_files = backend.list_all_models(seed=seed)

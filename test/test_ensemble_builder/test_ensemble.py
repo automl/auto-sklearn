@@ -685,11 +685,7 @@ def test_ensemble_builder_nbest_remembered(fit_ensemble, ensemble_backend, dask_
     This way, we can remember it and not waste more time trying big ensemble sizes
     """
 
-    def register_ensemble_sizes_per_call(selected_keys):
-        var = [np.ones([2500, 2500]) for a in selected_keys]  # noqa: F841
-    fit_ensemble.side_effect = register_ensemble_sizes_per_call
-
-    fit_ensemble.return_value = None
+    fit_ensemble.side_effect = MemoryError
 
     manager = EnsembleBuilderManager(
         start_time=time.time(),
