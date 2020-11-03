@@ -189,7 +189,7 @@ def test_delete_non_candidate_models(backend, dask_client):
     X, Y, _, _ = putil.get_dataset('iris')
     automl = autosklearn.automl.AutoML(
         backend,
-        time_left_for_this_task=45,
+        time_left_for_this_task=60,
         per_run_time_limit=5,
         ensemble_nbest=3,
         seed=seed,

@@ -713,20 +713,13 @@ def test_ensemble_builder_nbest_remembered(fit_ensemble, ensemble_backend, dask_
     manager.build_ensemble(dask_client)
     future = manager.futures[0]
     dask.distributed.wait([future])  # wait for the ensemble process to finish
-    assert not os.path.exists(os.path.join(
-        ensemble_backend.internals_directory,
-        'ensemble_read_preds.pkl'
-    ))
+    assert future.result() == ([], 5)
+    file_path = os.path.join(ensemble_backend.internals_directory, 'ensemble_read_preds.pkl')
+    assert not os.path.exists(file_path)
 
     manager.build_ensemble(dask_client)
 
     future = manager.futures[0]
     dask.distributed.wait([future])  # wait for the ensemble process to finish
-    assert not os.path.exists(os.path.join(
-        ensemble_backend.internals_directory,
-        'ensemble_read_preds.pkl'
-    ))
-
-    result = future.result()
-    _, ensemble_nbest = result
-    assert ensemble_nbest == 2
+    assert not os.path.exists(file_path)
+    assert future.result() == ([], 2)
