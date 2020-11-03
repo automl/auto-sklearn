@@ -1,6 +1,6 @@
 import random
 from collections import Counter
-from typing import List, Tuple, cast
+from typing import Any, Dict, List, Tuple, cast
 
 import numpy as np
 
@@ -27,6 +27,17 @@ class EnsembleSelection(AbstractEnsemble):
         self.mode = mode
         self.random_state = random_state
 
+    def __getstate__(self) -> Dict[str, Any]:
+        # Cannot serialize a metric if
+        # it is user defined.
+        # That is, if doing pickle dump
+        # the metric won't be the same as the
+        # one in __main__. we don't use the metric
+        # in the EnsembleSelection so this should
+        # be fine
+        self.metric = None  # type: ignore
+        return self.__dict__
+
     def fit(
         self,
         predictions: List[np.ndarray],
@@ -39,7 +50,11 @@ class EnsembleSelection(AbstractEnsemble):
         if self.task_type not in TASK_TYPES:
             raise ValueError('Unknown task type %s.' % self.task_type)
         if not isinstance(self.metric, Scorer):
-            raise ValueError('Metric must be of type scorer')
+            raise ValueError("The provided metric must be an instance of Scorer, "
+                             "nevertheless it is {}({})".format(
+                                 self.metric,
+                                 type(self.metric),
+                             ))
         if self.mode not in ('fast', 'slow'):
             raise ValueError('Unknown mode %s' % self.mode)
 
