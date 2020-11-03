@@ -13,7 +13,7 @@ import scipy.sparse
 import sklearn.utils
 from sklearn import preprocessing
 from sklearn.compose import make_column_transformer
-
+from category_encoders.ordinal import OrdinalEncoder
 
 class InputValidator:
     """
@@ -304,24 +304,6 @@ class InputValidator:
         Uses .iloc as a safe way to deal with pandas object
         """
 
-        # If there is a Nan, we cannot encode it due to a scikit learn limitation
-        if np.any(pd.isnull(X.dropna(axis='columns', how='all'))):
-            # Ignore all NaN columns, and if still a NaN
-            # Error out
-            raise ValueError("Categorical features in a dataframe cannot contain "
-                             "missing/NaN values. The OrdinalEncoder used by "
-                             "Auto-sklearn cannot handle this yet (due to a "
-                             "limitation on scikit-learn being addressed via: "
-                             "https://github.com/scikit-learn/scikit-learn/issues/17123)"
-                             )
-        elif np.any(pd.isnull(X)):
-            # After above check it means that if there is a NaN
-            # the whole column must be NaN
-            # Make sure it is numerical and let the pipeline handle it
-            for column in X.columns:
-                if X[column].isna().all():
-                    X[column] = pd.to_numeric(X[column])
-
         # Start with the features
         if hasattr(X, "iloc"):
             enc_columns, feature_types = self._check_and_get_columns_to_encode(X)
@@ -357,33 +339,37 @@ class InputValidator:
                 self.enc_columns = enc_columns
 
             if not self.feature_encoder:
-                self.feature_encoder = make_column_transformer(
-                    (preprocessing.OrdinalEncoder(), self.enc_columns),
-                    remainder="passthrough"
-                )
+                # TODO : Use OrdinalEncoder from scikit-learn when it can handle missing values
+                # self.feature_encoder = make_column_transformer(
+                #     (preprocessing.OrdinalEncoder(), self.enc_columns),
+                #     remainder="passthrough"
+                # )
+                self.feature_encoder = OrdinalEncoder(cols=enc_columns, handle_missing='return_nan',
+                                                      handle_unknown='return_nan')
 
                 # Mypy redefinition
                 assert self.feature_encoder is not None
                 self.feature_encoder.fit(X)
 
-                # The column transformer reoders the feature types - we therefore need to change
+                # TODO : Enable when OrdinalEncoder from scikit-learn is used for categorical encoding
+                # The column transformer reorders the feature types - we therefore need to change
                 # it as well
-                def comparator(cmp1, cmp2):
-                    if (
-                        cmp1 == 'categorical' and cmp2 == 'categorical'
-                        or cmp1 == 'numerical' and cmp2 == 'numerical'
-                    ):
-                        return 0
-                    elif cmp1 == 'categorical' and cmp2 == 'numerical':
-                        return -1
-                    elif cmp1 == 'numerical' and cmp2 == 'categorical':
-                        return 1
-                    else:
-                        raise ValueError((cmp1, cmp2))
-                self.feature_types = sorted(
-                    self.feature_types,
-                    key=functools.cmp_to_key(comparator)
-                )
+                # def comparator(cmp1, cmp2):
+                #     if (
+                #         cmp1 == 'categorical' and cmp2 == 'categorical'
+                #         or cmp1 == 'numerical' and cmp2 == 'numerical'
+                #     ):
+                #         return 0
+                #     elif cmp1 == 'categorical' and cmp2 == 'numerical':
+                #         return -1
+                #     elif cmp1 == 'numerical' and cmp2 == 'categorical':
+                #         return 1
+                #     else:
+                #         raise ValueError((cmp1, cmp2))
+                # self.feature_types = sorted(
+                #     self.feature_types,
+                #     key=functools.cmp_to_key(comparator)
+                # )
 
         if self.feature_encoder:
             try:

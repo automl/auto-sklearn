@@ -438,15 +438,15 @@ class InputValidatorTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Target values cannot contain missing/NaN'):
             InputValidator().validate_target(y, is_classification=False)
 
-        x = np.random.random_sample(4)
-        x[3] = np.nan
-        x = pd.DataFrame(data={'A': x, 'B': x*2})
-        y = np.random.choice([0.0, 1.0], 4)
-        y[1] = np.nan
-        y = pd.DataFrame(y)
+        # pandas - categorical
+        # np.nan in features is handled and will remain as it is after encoding
+        x = pd.DataFrame({'A': ['a', 'a', np.nan, 'c'], 'B': ['b', 'd', 'b', np.nan]}, dtype='category')
+        y = pd.DataFrame([1, np.nan, 3, 4])
 
-        with self.assertRaisesRegex(ValueError, 'Categorical features in a dataframe cannot'):
-            InputValidator().validate_features(x)
+        x_t = InputValidator().validate_features(x)
+        self.assertTrue(pd.isnull(x_t).any())  # Preserve NaN in features
+        self.assertTupleEqual(x.shape, x_t.shape)
+        np.testing.assert_array_equal(np.array([[1, 1], [1, 2], [np.nan, 1], [3, np.nan]]), x_t)
 
         with self.assertRaisesRegex(ValueError, 'Target values cannot contain missing/NaN'):
             InputValidator().validate_target(y, is_classification=True)
@@ -465,18 +465,15 @@ class InputValidatorTest(unittest.TestCase):
         x['A'] = x['A'].apply(lambda x: x*x)
         validator.validate_features(x)
 
-        # Then make sure we catch categorical extra categories
+        # Then make sure we convert categorical extra categories to np.nan
         x = pd.DataFrame({'A': [1, 2, 3, 4], 'B': [5, 6, 7, 8]}, dtype='category')
         y = pd.DataFrame([1, 2, 3, 4])
         validator = InputValidator()
         validator.validate(x, y, is_classification=True)
         validator.validate_features(x)
         x['A'] = x['A'].apply(lambda x: x*x)
-        with self.assertRaisesRegex(
-            ValueError,
-            'During fit, the input features contained categorical values'
-        ):
-            validator.validate_features(x)
+        x_t = validator.validate_features(x)
+        np.testing.assert_array_equal([[1, 1], [4, 2], [np.nan, 3], [np.nan, 4]], x_t)
 
         # For label encoder of targets
         with self.assertRaisesRegex(
@@ -505,19 +502,9 @@ class InputValidatorTest(unittest.TestCase):
         x, y = sklearn.datasets.fetch_openml(data_id=2, return_X_y=True, as_frame=True)
         validator = InputValidator()
 
-        with self.assertRaisesRegex(
-            ValueError,
-            'Categorical features in a dataframe cannot contain missing/NaN'
-        ):
-            x_t, y_t = validator.validate(x, y, is_classification=True)
-
-        # Make sure translation works apart from Nan
-
-        # NaN is not supported in categories, so
-        # drop columns with them. Also, do a proof of concept
-        # that all nan column is preserved, so that the pipeline deal
-        # with it
-        x = x.dropna('columns', 'any')
+        # Do a proof of concept that all nan column is preserved,
+        # so that the pipeline deal with it
+        # x = x.dropna('columns', 'any')
         x.insert(len(x.columns), 'NaNColumn', np.nan, True)
         x_t, y_t = validator.validate(x, y, is_classification=True)
         self.assertTupleEqual(np.shape(x), np.shape(x_t))
@@ -527,10 +514,6 @@ class InputValidatorTest(unittest.TestCase):
         # Leave columns that are complete NaN
         # The sklearn pipeline will handle that
         self.assertTrue(np.isnan(x_t).any())
-        np.testing.assert_array_equal(
-            pd.isnull(x.dropna(axis='columns', how='all')),
-            pd.isnull(x.dropna(axis='columns', how='any'))
-        )
 
         # make sure everything was encoded to number
         self.assertTrue(np.issubdtype(x_t.dtype, np.number))
@@ -538,13 +521,14 @@ class InputValidatorTest(unittest.TestCase):
         # No change to numerical columns
         np.testing.assert_array_equal(x['carbon'].to_numpy(), x_t[:, 3])
 
-        # Categorical columns are sorted to the beginning
+        # Feature order is maintained
         self.assertEqual(
             validator.feature_types,
-            (['categorical'] * 3) + (['numerical'] * 7)
+            (['categorical']*3) + (['numerical']*2) + (['categorical']*3) + ['numerical']
+            + (['categorical']*23) + (['numerical']*3) + (['categorical']*3) + ['numerical']
         )
-        self.assertEqual(x.iloc[0, 6], 610)
-        np.testing.assert_array_equal(x_t[0], [0, 0, 0, 8, 0, 0, 0.7, 610, 0, np.NaN])
+        self.assertEqual(x.iloc[0, 33], 610)
+        np.testing.assert_array_equal(x_t[0,:10], [np.nan, 1, 1, 8, 0, np.nan, 1, np.nan,  0, np.NaN])
 
         return
 
