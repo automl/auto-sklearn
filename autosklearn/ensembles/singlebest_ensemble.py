@@ -8,6 +8,7 @@ from smac.runhistory.runhistory import RunHistory
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.metrics import Scorer
 from autosklearn.pipeline.base import BasePipeline
+from autosklearn.util.backend import Backend
 
 
 class SingleBest(AbstractEnsemble):
@@ -23,17 +24,17 @@ class SingleBest(AbstractEnsemble):
         self,
         metric: Scorer,
         run_history: RunHistory,
-        random_state: np.random.RandomState,
-        model_dir: str,
+        seed: int,
+        backend: Backend,
     ):
         self.metric = metric
-        self.random_state = random_state
+        self.seed = seed
+        self.backend = backend
 
         # Add some default values -- at least 1 model in ensemble is assumed
         self.indices_ = [0]
         self.weights_ = [1.0]
         self.run_history = run_history
-        self.model_dir = model_dir
         self.identifiers_ = self.get_identifiers_from_run_history()
 
     def get_identifiers_from_run_history(self) -> List[Tuple[int, int, float]]:
@@ -55,12 +56,25 @@ class SingleBest(AbstractEnsemble):
                     or (score < best_model_score and self.metric._sign < 0):
 
                 # Make sure that the individual best model actually exists
-                id_ = (self.random_state, run_value.additional_info['num_run'], run_key.budget)
-                model_file_name = '%s.%s.%s.model' % id_
-                if not os.path.exists(os.path.join(self.model_dir, model_file_name)):
+                model_dir = self.backend.get_numrun_directory(
+                    self.seed,
+                    run_value.additional_info['num_run'],
+                    run_key.budget,
+                )
+                model_file_name = self.backend.get_model_filename(
+                    self.seed,
+                    run_value.additional_info['num_run'],
+                    run_key.budget,
+                )
+                file_path = os.path.join(model_dir, model_file_name)
+                if not os.path.exists(file_path):
                     continue
 
-                best_model_identifier = [id_]
+                best_model_identifier = [(
+                    self.seed,
+                    run_value.additional_info['num_run'],
+                    run_key.budget,
+                )]
                 best_model_score = score
 
         if not best_model_identifier:

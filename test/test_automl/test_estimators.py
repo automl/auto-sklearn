@@ -76,13 +76,13 @@ def test_fit_n_jobs(tmp_dir, output_dir):
     for run_key, run_value in automl.automl_.runhistory_.data.items():
         if run_value.additional_info is not None and 'num_run' in run_value.additional_info:
             available_num_runs.add(run_value.additional_info['num_run'])
-    predictions_dir = automl.automl_._backend._get_prediction_output_dir(
-        'ensemble'
-    )
     available_predictions = set()
-    predictions = os.listdir(predictions_dir)
+    predictions = glob.glob(
+        os.path.join(automl.automl_._backend.get_runs_directory(), '*', 'predictions_ensemble*.npy')
+    )
     seeds = set()
     for prediction in predictions:
+        prediction = os.path.split(prediction)[1]
         match = re.match(MODEL_FN_RE, prediction.replace("predictions_ensemble", ""))
         if match:
             num_run = int(match.group(2))
@@ -90,20 +90,9 @@ def test_fit_n_jobs(tmp_dir, output_dir):
             seed = int(match.group(1))
             seeds.add(seed)
 
-    done_dir = automl.automl_._backend.get_done_directory()
-    dones = os.listdir(done_dir)
-    available_dones = set()
-    for done in dones:
-        match = re.match(r'([0-9]*)_([0-9]*)', done)
-        if match:
-            num_run = int(match.group(2))
-            available_dones.add(num_run)
-
     # Remove the dummy prediction, it is not part of the runhistory
     available_predictions.remove(1)
     assert available_num_runs.issubset(available_predictions)
-    available_dones.remove(1)
-    assert available_dones == available_num_runs
 
     assert len(seeds) == 1
 

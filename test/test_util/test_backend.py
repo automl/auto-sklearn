@@ -14,25 +14,8 @@ class BackendModelsTest(unittest.TestCase):
             self.__class__ = Backend
 
     def setUp(self):
-        self.model_directory = '/model_directory/'
         self.backend = self.BackendStub()
-        self.backend.get_model_dir = lambda: self.model_directory
-
-    def test_load_models_by_file_names(self):
-        self.backend.load_model_by_seed_and_id_and_budget = unittest.mock.Mock()
-        self.backend.load_model_by_seed_and_id_and_budget.side_effect = lambda *args: args
-        rval = self.backend.load_models_by_file_names(['1.2.0.0.model',
-                                                       '1.3.50.0.model',
-                                                       '1.4.100.0models',
-                                                       ])
-        self.assertEqual(rval, {(1, 2, 0.0): (1, 2, 0.0),
-                                (1, 3, 50.0): (1, 3, 50.0)})
-
-        with self.assertRaisesRegex(
-            ValueError,
-            "could not convert string to float: 'model'",
-        ):
-            self.backend.load_models_by_file_names(['1.5.model'])
+        self.backend.internals_directory = '/'
 
     @unittest.mock.patch('pickle.load')
     @unittest.mock.patch('os.path.exists')
@@ -74,7 +57,7 @@ class BackendModelsTest(unittest.TestCase):
         self.assertDictEqual(expected_dict, actual_dict)
 
     def _setup_load_model_mocks(self, openMock, pickleLoadMock, seed, idx, budget):
-        model_path = '/model_directory/%s.%s.%s.model' % (seed, idx, budget)
+        model_path = '/runs/%s_%s_%s/%s.%s.%s.model' % (seed, idx, budget, seed, idx, budget)
         file_handler = 'file_handler'
         expected_model = 'model'
 

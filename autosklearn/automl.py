@@ -37,6 +37,7 @@ from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import _fit_with_budget
 from autosklearn.metrics import calculate_score
+from autosklearn.util.backend import Backend
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import get_logger, setup_logger
 from autosklearn.util import pipeline, RE_PATTERN
@@ -95,7 +96,7 @@ def _model_predict(model, X, batch_size, logger, task):
 class AutoML(BaseEstimator):
 
     def __init__(self,
-                 backend,
+                 backend: Backend,
                  time_left_for_this_task,
                  per_run_time_limit,
                  initial_configurations_via_metalearning=25,
@@ -179,7 +180,7 @@ class AutoML(BaseEstimator):
             raise ValueError('disable_evaluator_output must be of type bool '
                              'or list.')
         if isinstance(self._disable_evaluator_output, list):
-            allowed_elements = ['model', 'y_optimization']
+            allowed_elements = ['model', 'cv_model', 'y_optimization', 'y_test', 'y_valid']
             for element in self._disable_evaluator_output:
                 if element not in allowed_elements:
                     raise ValueError("List member '%s' for argument "
@@ -313,7 +314,7 @@ class AutoML(BaseEstimator):
                                     cost_for_crash=get_cost_of_crash(self._metric),
                                     **self._resampling_strategy_arguments)
 
-        status, cost, runtime, additional_info = ta.run(1, cutoff=self._time_for_task)
+        status, cost, runtime, additional_info = ta.run(num_run, cutoff=self._time_for_task)
         if status == StatusType.SUCCESS:
             self._logger.info("Finished creating dummy predictions.")
         else:
@@ -511,14 +512,6 @@ class AutoML(BaseEstimator):
         )
 
         self._backend._make_internals_directory()
-        try:
-            os.makedirs(self._backend.get_model_dir())
-        except (OSError, FileExistsError):
-            raise
-        try:
-            os.makedirs(self._backend.get_cv_model_dir())
-        except (OSError, FileExistsError):
-            raise
 
         self._task = datamanager.info['task']
         self._label_num = datamanager.info['label_num']
@@ -942,9 +935,9 @@ class AutoML(BaseEstimator):
         # SingleBest contains the best model found by AutoML
         ensemble = SingleBest(
             metric=self._metric,
-            random_state=self._seed,
+            seed=self._seed,
             run_history=self.runhistory_,
-            model_dir=self._backend.get_model_dir(),
+            backend=self._backend,
         )
         self._logger.warning(
             "No valid ensemble was created. Please check the log"

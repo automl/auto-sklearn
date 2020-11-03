@@ -38,7 +38,7 @@ class BackendMock(object):
         array = np.load(os.path.join(
             this_directory, 'data',
             '.auto-sklearn',
-            'predictions_test',
+            'runs', '0_3_100.0',
             'predictions_test_0_3_100.0.npy'
         ))
         manager.data.get.return_value = array
@@ -48,20 +48,25 @@ class BackendMock(object):
         with open(os.path.join(
             self.temporary_directory,
             ".auto-sklearn",
-            "predictions_ensemble",
             "predictions_ensemble_true.npy"
         ), "rb") as fp:
             y = np.load(fp, allow_pickle=True)
         return y
-
-    def get_done_directory(self):
-        return os.path.join(this_directory, 'data', '.auto-sklearn', 'done')
 
     def save_ensemble(self, ensemble, index_run, seed):
         return
 
     def save_predictions_as_txt(self, predictions, subset, idx, prefix, precision):
         return
+
+    def get_runs_directory(self) -> str:
+        return os.path.join(this_directory, 'data', '.auto-sklearn', 'runs')
+
+    def get_numrun_directory(self, seed: int, num_run: int, budget: float) -> str:
+        return os.path.join(self.get_runs_directory(), '%d_%d_%s' % (seed, num_run, budget))
+
+    def get_model_filename(self, seed: int, idx: int, budget: float) -> str:
+        return '%s.%s.%s.model' % (seed, idx, budget)
 
 
 def compare_read_preds(read_preds1, read_preds2):
