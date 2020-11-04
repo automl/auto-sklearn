@@ -10,7 +10,7 @@ dask
 distributed
 lockfile
 pyyaml
-pandas<1.0
+pandas>=1.0
 liac-arff
 
 ConfigSpace>=0.4.14,<0.5

@@ -3,6 +3,7 @@ import json
 import os
 import time
 import traceback
+import typing
 import warnings
 
 import dask.distributed
@@ -23,6 +24,7 @@ from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
     BINARY_CLASSIFICATION, TASK_TYPES_TO_STRING, CLASSIFICATION_TASKS, \
     REGRESSION_TASKS, MULTICLASS_CLASSIFICATION, REGRESSION, \
     MULTIOUTPUT_REGRESSION
+from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.metalearning.mismbo import suggest_via_metalearning
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
@@ -218,7 +220,9 @@ class AutoMLSMBO(object):
                  exclude_preprocessors=None,
                  disable_file_output=False,
                  smac_scenario_args=None,
-                 get_smac_object_callback=None):
+                 get_smac_object_callback=None,
+                 ensemble_callback: typing.Optional[EnsembleBuilderManager] = None,
+                 ):
         super(AutoMLSMBO, self).__init__()
         # data related
         self.dataset_name = dataset_name
@@ -259,6 +263,8 @@ class AutoMLSMBO(object):
         self.disable_file_output = disable_file_output
         self.smac_scenario_args = smac_scenario_args
         self.get_smac_object_callback = get_smac_object_callback
+
+        self.ensemble_callback = ensemble_callback
 
         dataset_name_ = "" if dataset_name is None else dataset_name
         logger_name = '%s(%d):%s' % (self.__class__.__name__, self.seed, ":" + dataset_name_)
@@ -419,11 +425,8 @@ class AutoMLSMBO(object):
             else:
                 raise ValueError(self.task)
 
-        backend_copy = copy.deepcopy(self.backend)
-        backend_copy.context.delete_output_folder_after_terminate = False
-        backend_copy.context.delete_tmp_folder_after_terminate = False
         ta_kwargs = dict(
-            backend=backend_copy,
+            backend=copy.deepcopy(self.backend),
             autosklearn_seed=seed,
             resampling_strategy=self.resampling_strategy,
             initial_num_run=num_run,
@@ -493,6 +496,9 @@ class AutoMLSMBO(object):
             smac = self.get_smac_object_callback(**smac_args)
         else:
             smac = get_smac_object(**smac_args)
+
+        if self.ensemble_callback is not None:
+            smac.register_callback(self.ensemble_callback)
 
         smac.optimize()
 

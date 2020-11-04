@@ -5,6 +5,8 @@ import pathlib
 import pickle
 from typing import Any, Dict, Optional, Union
 
+import dask.distributed
+
 from ConfigSpace import Configuration
 import numpy as np
 import pandas as pd
@@ -157,14 +159,14 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         ensemble_size: int = 50,
         ensemble_nbest: Union[float, int] = 50,
         max_models_on_disc: int = 50,
-        ensemble_memory_limit: int = 1024,
         seed: int = 1,
-        ml_memory_limit: int = 3072,
+        memory_limit: int = 3072,
         tmp_folder: Optional[str] = None,
         output_folder: Optional[str] = None,
         delete_tmp_folder_after_terminate: bool = True,
         delete_output_folder_after_terminate: bool = True,
         n_jobs: Optional[int] = None,
+        dask_client: Optional[dask.distributed.Client] = None,
         disable_evaluator_output: bool = False,
         smac_scenario_args: Optional[Dict[str, Any]] = None,
         logging_config: Optional[Dict[str, Any]] = None,
@@ -181,9 +183,8 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             ensemble_size=ensemble_size,
             ensemble_nbest=ensemble_nbest,
             max_models_on_disc=max_models_on_disc,
-            ensemble_memory_limit=ensemble_memory_limit,
             seed=seed,
-            ml_memory_limit=ml_memory_limit,
+            memory_limit=memory_limit,
             include_estimators=include_estimators,
             exclude_estimators=None,
             include_preprocessors=include_preprocessors,
@@ -195,6 +196,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             delete_tmp_folder_after_terminate=delete_tmp_folder_after_terminate,
             delete_output_folder_after_terminate=delete_output_folder_after_terminate,
             n_jobs=n_jobs,
+            dask_client=dask_client,
             disable_evaluator_output=disable_evaluator_output,
             get_smac_object_callback=None,
             smac_scenario_args=smac_scenario_args,

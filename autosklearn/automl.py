@@ -1,13 +1,15 @@
 # -*- encoding: utf-8 -*-
+import copy
 import io
 import json
-import multiprocessing
 import platform
 import os
 import sys
-from typing import Optional, List, Union
+import time
+from typing import Any, Dict, Optional, List, Union
 import unittest.mock
 import warnings
+import tempfile
 
 from ConfigSpace.read_and_write import json as cs_json
 import dask.distributed
@@ -35,10 +37,11 @@ from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import _fit_with_budget
 from autosklearn.metrics import calculate_score
+from autosklearn.util.backend import Backend
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import get_logger, setup_logger
 from autosklearn.util import pipeline, RE_PATTERN
-from autosklearn.ensemble_builder import EnsembleBuilder
+from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix
@@ -93,16 +96,15 @@ def _model_predict(model, X, batch_size, logger, task):
 class AutoML(BaseEstimator):
 
     def __init__(self,
-                 backend,
+                 backend: Backend,
                  time_left_for_this_task,
                  per_run_time_limit,
                  initial_configurations_via_metalearning=25,
                  ensemble_size=1,
                  ensemble_nbest=1,
                  max_models_on_disc=1,
-                 ensemble_memory_limit: Optional[int] = 1024,
                  seed=1,
-                 ml_memory_limit=3072,
+                 memory_limit=3072,
                  metadata_directory=None,
                  debug_mode=False,
                  include_estimators=None,
@@ -131,9 +133,8 @@ class AutoML(BaseEstimator):
         self._ensemble_size = ensemble_size
         self._ensemble_nbest = ensemble_nbest
         self._max_models_on_disc = max_models_on_disc
-        self._ensemble_memory_limit = ensemble_memory_limit
         self._seed = seed
-        self._ml_memory_limit = ml_memory_limit
+        self._memory_limit = memory_limit
         self._data_memory_limit = None
         self._metadata_directory = metadata_directory
         self._include_estimators = include_estimators
@@ -171,6 +172,7 @@ class AutoML(BaseEstimator):
             self._resampling_strategy_arguments['folds'] = 5
         self._n_jobs = n_jobs
         self._dask_client = dask_client
+
         self.precision = precision
         self._disable_evaluator_output = disable_evaluator_output
         # Check arguments prior to doing anything!
@@ -178,7 +180,7 @@ class AutoML(BaseEstimator):
             raise ValueError('disable_evaluator_output must be of type bool '
                              'or list.')
         if isinstance(self._disable_evaluator_output, list):
-            allowed_elements = ['model', 'y_optimization']
+            allowed_elements = ['model', 'cv_model', 'y_optimization', 'y_test', 'y_valid']
             for element in self._disable_evaluator_output:
                 if element not in allowed_elements:
                     raise ValueError("List member '%s' for argument "
@@ -207,8 +209,7 @@ class AutoML(BaseEstimator):
 
         self.InputValidator = InputValidator()
 
-        # Place holder for the run history of the
-        # Ensemble building process
+        # The ensemble performance history through time
         self.ensemble_performance_history = []
 
         if not isinstance(self._time_for_task, int):
@@ -220,6 +221,40 @@ class AutoML(BaseEstimator):
 
         # After assigning and checking variables...
         # self._backend = Backend(self._output_dir, self._tmp_dir)
+
+    def _create_dask_client(self):
+        self._is_dask_client_internally_created = True
+        processes = False
+        if self._n_jobs is not None and self._n_jobs > 1:
+            processes = True
+            dask.config.set({'distributed.worker.daemon': False})
+        self._dask_client = dask.distributed.Client(
+            dask.distributed.LocalCluster(
+                n_workers=self._n_jobs,
+                processes=processes,
+                threads_per_worker=1,
+                # We use the temporal directory to save the
+                # dask workers, because deleting workers
+                # more time than deleting backend directories
+                # This prevent an error saying that the worker
+                # file was deleted, so the client could not close
+                # the worker properly
+                local_directory=tempfile.gettempdir(),
+            )
+        )
+
+    def _close_dask_client(self):
+        if (
+            hasattr(self, '_is_dask_client_internally_created')
+            and self._is_dask_client_internally_created
+            and self._dask_client
+        ):
+            self._dask_client.shutdown()
+            self._dask_client.close()
+            del self._dask_client
+            self._dask_client = None
+            self._is_dask_client_internally_created = False
+            del self._is_dask_client_internally_created
 
     def _get_logger(self, name):
         logger_name = 'AutoML(%d):%s' % (self._seed, name)
@@ -256,7 +291,7 @@ class AutoML(BaseEstimator):
 
         self._logger.info("Starting to create dummy predictions.")
 
-        memory_limit = self._ml_memory_limit
+        memory_limit = self._memory_limit
         if memory_limit is not None:
             memory_limit = int(memory_limit)
 
@@ -279,7 +314,7 @@ class AutoML(BaseEstimator):
                                     cost_for_crash=get_cost_of_crash(self._metric),
                                     **self._resampling_strategy_arguments)
 
-        status, cost, runtime, additional_info = ta.run(1, cutoff=self._time_for_task)
+        status, cost, runtime, additional_info = ta.run(num_run, cutoff=self._time_for_task)
         if status == StatusType.SUCCESS:
             self._logger.info("Finished creating dummy predictions.")
         else:
@@ -349,6 +384,16 @@ class AutoML(BaseEstimator):
         if not isinstance(self._metric, Scorer):
             raise ValueError('Metric must be instance of '
                              'autosklearn.metrics.Scorer.')
+
+        # If no dask client was provided, we create one, so that we can
+        # start a ensemble process in parallel to smbo optimize
+        if (
+            self._dask_client is None and
+            (self._ensemble_size > 0 or self._n_jobs is not None and self._n_jobs > 1)
+        ):
+            self._create_dask_client()
+        else:
+            self._is_dask_client_internally_created = False
 
         if dataset_name is None:
             dataset_name = hash_array_or_matrix(X)
@@ -425,9 +470,8 @@ class AutoML(BaseEstimator):
         self._logger.debug('  ensemble_size: %d', self._ensemble_size)
         self._logger.debug('  ensemble_nbest: %f', self._ensemble_nbest)
         self._logger.debug('  max_models_on_disc: %s', str(self._max_models_on_disc))
-        self._logger.debug('  ensemble_memory_limit: %d', self._ensemble_memory_limit)
         self._logger.debug('  seed: %d', self._seed)
-        self._logger.debug('  ml_memory_limit: %s', str(self._ml_memory_limit))
+        self._logger.debug('  memory_limit: %s', str(self._memory_limit))
         self._logger.debug('  metadata_directory: %s', self._metadata_directory)
         self._logger.debug('  debug_mode: %s', self._debug_mode)
         self._logger.debug('  include_estimators: %s', str(self._include_estimators))
@@ -468,14 +512,6 @@ class AutoML(BaseEstimator):
         )
 
         self._backend._make_internals_directory()
-        try:
-            os.makedirs(self._backend.get_model_dir())
-        except (OSError, FileExistsError):
-            raise
-        try:
-            os.makedirs(self._backend.get_cv_model_dir())
-        except (OSError, FileExistsError):
-            raise
 
         self._task = datamanager.info['task']
         self._label_num = datamanager.info['label_num']
@@ -512,6 +548,7 @@ class AutoML(BaseEstimator):
             include_preprocessors=self._include_preprocessors,
             exclude_preprocessors=self._exclude_preprocessors)
         if only_return_configuration_space:
+            self._close_dask_client()
             return self.configuration_space
 
         # == RUN ensemble builder
@@ -522,8 +559,8 @@ class AutoML(BaseEstimator):
         self._stopwatch.start_task(ensemble_task_name)
         elapsed_time = self._stopwatch.wall_elapsed(self._dataset_name)
         time_left_for_ensembles = max(0, self._time_for_task - elapsed_time)
+        proc_ensemble = None
         if time_left_for_ensembles <= 0:
-            self._proc_ensemble = None
             # Fit only raises error when ensemble_size is not zero but
             # time_left_for_ensembles is zero.
             if self._ensemble_size > 0:
@@ -531,26 +568,30 @@ class AutoML(BaseEstimator):
                                  "is no time left. Try increasing the value "
                                  "of time_left_for_this_task.")
         elif self._ensemble_size <= 0:
-            self._proc_ensemble = None
             self._logger.info('Not starting ensemble builder because '
                               'ensemble size is <= 0.')
         else:
             self._logger.info(
                 'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
 
-            # Create a queue to communicate with the ensemble process
-            # And get the run history
-            # Use a Manager as a workaround to memory errors cause
-            # by three subprocesses (Automl-ensemble_builder-pynisher)
-            mgr = multiprocessing.Manager()
-            mgr.Namespace()
-            queue = mgr.Queue()
-
-            self._proc_ensemble = self._get_ensemble_process(
-                time_left_for_ensembles,
-                queue=queue,
+            proc_ensemble = EnsembleBuilderManager(
+                start_time=time.time(),
+                time_left_for_ensembles=time_left_for_ensembles,
+                backend=copy.deepcopy(self._backend),
+                dataset_name=dataset_name,
+                task=task,
+                metric=self._metric,
+                ensemble_size=self._ensemble_size,
+                ensemble_nbest=self._ensemble_nbest,
+                max_models_on_disc=self._max_models_on_disc,
+                seed=self._seed,
+                precision=self.precision,
+                max_iterations=None,
+                read_at_most=np.inf,
+                ensemble_memory_limit=self._memory_limit,
+                logger_name=self._logger.name,
+                random_state=self._seed,
             )
-            self._proc_ensemble.start()
 
         self._stopwatch.stop_task(ensemble_task_name)
 
@@ -603,7 +644,7 @@ class AutoML(BaseEstimator):
                 backend=self._backend,
                 total_walltime_limit=time_left_for_smac,
                 func_eval_time_limit=per_run_time_limit,
-                memory_limit=self._ml_memory_limit,
+                memory_limit=self._memory_limit,
                 data_memory_limit=self._data_memory_limit,
                 watcher=self._stopwatch,
                 n_jobs=self._n_jobs,
@@ -623,6 +664,7 @@ class AutoML(BaseEstimator):
                 disable_file_output=self._disable_evaluator_output,
                 get_smac_object_callback=self._get_smac_object_callback,
                 smac_scenario_args=self._smac_scenario_args,
+                ensemble_callback=proc_ensemble,
             )
 
             try:
@@ -642,14 +684,15 @@ class AutoML(BaseEstimator):
 
         # Wait until the ensemble process is finished to avoid shutting down
         # while the ensemble builder tries to access the data
-        if self._proc_ensemble is not None and self._ensemble_size > 0:
-            self._proc_ensemble.join()
-            self.ensemble_performance_history = self._proc_ensemble.get_ensemble_history()
-
-        self._proc_ensemble = None
+        if proc_ensemble is not None:
+            self.ensemble_performance_history = list(proc_ensemble.history)
+            if len(proc_ensemble.futures) > 0:
+                future = proc_ensemble.futures.pop()
+                future.cancel()
 
         if load_models:
             self._load_models()
+        self._close_dask_client()
 
         return self
 
@@ -798,62 +841,42 @@ class AutoML(BaseEstimator):
         # Make sure that input is valid
         y = self.InputValidator.validate_target(y, is_classification=True)
 
-        self._proc_ensemble = self._get_ensemble_process(
-            1, task, precision, dataset_name, max_iterations=1,
-            ensemble_nbest=ensemble_nbest, ensemble_size=ensemble_size)
-        self._proc_ensemble.main()
-        self.ensemble_performance_history = self._proc_ensemble.get_ensemble_history()
-        self._proc_ensemble = None
-        self._load_models()
-        return self
-
-    def _get_ensemble_process(self, time_left_for_ensembles,
-                              task=None, precision=None,
-                              dataset_name=None, max_iterations=None,
-                              ensemble_nbest=None, ensemble_size=None, queue=None):
-
-        if task is None:
-            task = self._task
+        # Create a client if needed
+        if self._dask_client is None:
+            self._create_dask_client()
         else:
-            self._task = task
+            self._is_dask_client_internally_created = False
 
-        if precision is None:
-            precision = self.precision
-        else:
-            self.precision = precision
-
-        if dataset_name is None:
-            dataset_name = self._dataset_name
-        else:
-            self._dataset_name = dataset_name
-
-        if ensemble_nbest is None:
-            ensemble_nbest = self._ensemble_nbest
-        else:
-            self._ensemble_nbest = ensemble_nbest
-
-        if ensemble_size is None:
-            ensemble_size = self._ensemble_size
-        else:
-            self._ensemble_size = ensemble_size
-
-        return EnsembleBuilder(
-            backend=self._backend,
-            dataset_name=dataset_name,
-            task_type=task,
+        # Use the current thread to start the ensemble builder process
+        # The function ensemble_builder_process will internally create a ensemble
+        # builder in the provide dask client
+        manager = EnsembleBuilderManager(
+            start_time=time.time(),
+            time_left_for_ensembles=self._time_for_task,
+            backend=copy.deepcopy(self._backend),
+            dataset_name=dataset_name if dataset_name else self._dataset_name,
+            task=task if task else self._task,
             metric=self._metric,
-            limit=time_left_for_ensembles,
-            ensemble_size=ensemble_size,
-            ensemble_nbest=ensemble_nbest,
+            ensemble_size=ensemble_size if ensemble_size else self._ensemble_size,
+            ensemble_nbest=ensemble_nbest if ensemble_nbest else self._ensemble_nbest,
             max_models_on_disc=self._max_models_on_disc,
             seed=self._seed,
-            precision=precision,
-            max_iterations=max_iterations,
+            precision=precision if precision else self.precision,
+            max_iterations=1,
             read_at_most=np.inf,
-            memory_limit=self._ensemble_memory_limit,
+            ensemble_memory_limit=self._memory_limit,
             random_state=self._seed,
-            queue=queue,
+            logger_name=self._logger.name,
         )
+        manager.build_ensemble(self._dask_client)
+        future = manager.futures.pop()
+        dask.distributed.wait([future])  # wait for the ensemble process to finish
+        result = future.result()
+        self.ensemble_performance_history, _ = result
+
+        self._load_models()
+        self._close_dask_client()
+        return self
 
     def _load_models(self):
         self.ensemble_ = self._backend.load_ensemble(self._seed)
@@ -912,8 +935,9 @@ class AutoML(BaseEstimator):
         # SingleBest contains the best model found by AutoML
         ensemble = SingleBest(
             metric=self._metric,
-            random_state=self._seed,
+            seed=self._seed,
             run_history=self.runhistory_,
+            backend=self._backend,
         )
         self._logger.warning(
             "No valid ensemble was created. Please check the log"
@@ -1126,6 +1150,19 @@ class AutoML(BaseEstimator):
 
     def configuration_space_created_hook(self, datamanager, configuration_space):
         return configuration_space
+
+    def __getstate__(self) -> Dict[str, Any]:
+        # Cannot serialize a client!
+        self._dask_client = None
+        return self.__dict__
+
+    def __del__(self):
+        self._close_dask_client()
+
+        # When a multiprocessing work is done, the
+        # objects are deleted. We don't want to delete run areas
+        # until the estimator is deleted
+        self._backend.context.delete_directories(force=False)
 
 
 class AutoMLClassifier(AutoML):
