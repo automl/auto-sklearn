@@ -136,7 +136,7 @@ clf = autosklearn.classification.AutoSklearnClassifier(
     # Bellow two flags are provided to speed up calculations
     # Not recommended for a real implementation
     initial_configurations_via_metalearning=0,
-    smac_scenario_args={'runcount_limit': 1},
+    smac_scenario_args={'runcount_limit': 5},
 )
 clf.fit(X_train, y_train)
 

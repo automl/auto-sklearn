@@ -89,14 +89,13 @@ Build and fit a regressor
     AutoSklearnRegressor(dask_client=None,
                          delete_output_folder_after_terminate=True,
                          delete_tmp_folder_after_terminate=True,
-                         disable_evaluator_output=False, ensemble_memory_limit=1024,
-                         ensemble_nbest=50, ensemble_size=50,
-                         exclude_estimators=None, exclude_preprocessors=None,
-                         get_smac_object_callback=None, include_estimators=None,
-                         include_preprocessors=None,
-                         initia...
+                         disable_evaluator_output=False, ensemble_nbest=50,
+                         ensemble_size=50, exclude_estimators=None,
+                         exclude_preprocessors=None, get_smac_object_callback=None,
+                         include_estimators=None, include_preprocessors=None,
+                         initial_configurations_via_metale...
                          logging_config=None, max_models_on_disc=50,
-                         metadata_directory=None, metric=None, ml_memory_limit=3072,
+                         memory_limit=3072, metadata_directory=None, metric=None,
                          n_jobs=None,
                          output_folder='/tmp/autosklearn_regression_example_out',
                          per_run_time_limit=30, resampling_strategy='holdout',
@@ -192,7 +191,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  55.292 seconds)
+   **Total running time of the script:** ( 1 minutes  58.145 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_regression.py:

@@ -92,15 +92,14 @@ Build and fit the classifier
     AutoSklearnClassifier(dask_client=None,
                           delete_output_folder_after_terminate=True,
                           delete_tmp_folder_after_terminate=False,
-                          disable_evaluator_output=False,
-                          ensemble_memory_limit=1024, ensemble_nbest=50,
+                          disable_evaluator_output=False, ensemble_nbest=50,
                           ensemble_size=0, exclude_estimators=None,
                           exclude_preprocessors=None, get_smac_object_callback=None,
                           include_estimators=None, include_preprocessors=None,
-                          initi...
+                          initial_configurations_via_metal...
                           logging_config=None, max_models_on_disc=50,
-                          metadata_directory=None, metric=None,
-                          ml_memory_limit=3072, n_jobs=None,
+                          memory_limit=3072, metadata_directory=None, metric=None,
+                          n_jobs=None,
                           output_folder='/tmp/autosklearn_sequential_example_out',
                           per_run_time_limit=30, resampling_strategy='holdout',
                           resampling_strategy_arguments=None, seed=1,
@@ -341,10 +340,10 @@ Get the Score of the final ensemble
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.992908
-      Number of target algorithm runs: 34
+      Number of target algorithm runs: 33
       Number of successful target algorithm runs: 31
       Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 1
+      Number of target algorithms that exceeded the time limit: 0
       Number of target algorithms that exceeded the memory limit: 2
 
     Accuracy score 0.958041958041958
@@ -355,7 +354,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  55.789 seconds)
+   **Total running time of the script:** ( 1 minutes  53.948 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_sequential.py:

@@ -158,7 +158,7 @@ To run <em>Auto-sklearn</em> on multiple machines check the example
         <span class="n">output_folder</span><span class="o">=</span><span class="s1">&#39;/tmp/autosklearn_parallel_1_example_out&#39;</span><span class="p">,</span>
         <span class="n">n_jobs</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
         <span class="c1"># Each one of the 4 jobs is allocated 3GB</span>
-        <span class="n">ml_memory_limit</span><span class="o">=</span><span class="mi">3072</span><span class="p">,</span>
+        <span class="n">memory_limit</span><span class="o">=</span><span class="mi">3072</span><span class="p">,</span>
         <span class="n">seed</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">dataset_name</span><span class="o">=</span><span class="s1">&#39;breast_cancer&#39;</span><span class="p">)</span>
@@ -173,14 +173,14 @@ To run <em>Auto-sklearn</em> on multiple machines check the example
   Dataset name: breast_cancer
   Metric: accuracy
   Best validation score: 0.992908
-  Number of target algorithm runs: 30
-  Number of successful target algorithm runs: 26
+  Number of target algorithm runs: 27
+  Number of successful target algorithm runs: 24
   Number of crashed target algorithm runs: 0
-  Number of target algorithms that exceeded the time limit: 4
+  Number of target algorithms that exceeded the time limit: 3
   Number of target algorithms that exceeded the memory limit: 0
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  54.909 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  53.773 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-60-search-example-parallel-n-jobs-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/a4805a0dbe95b28fbdaf650594951011/example_parallel_n_jobs.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_parallel_n_jobs.py</span></code></a></p>

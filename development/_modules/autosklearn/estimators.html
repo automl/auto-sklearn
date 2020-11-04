@@ -134,9 +134,8 @@
         <span class="n">ensemble_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
         <span class="n">ensemble_nbest</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
         <span class="n">max_models_on_disc</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-        <span class="n">ensemble_memory_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">,</span>
         <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">ml_memory_limit</span><span class="o">=</span><span class="mi">3072</span><span class="p">,</span>
+        <span class="n">memory_limit</span><span class="o">=</span><span class="mi">3072</span><span class="p">,</span>
         <span class="n">include_estimators</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">exclude_estimators</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">include_preprocessors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -194,21 +193,16 @@
 <span class="sd">            It must be an integer greater or equal than 1.</span>
 <span class="sd">            If set to None, all models are kept on the disc.</span>
 
-<span class="sd">        ensemble_memory_limit : int, optional (1024)</span>
-<span class="sd">            Memory limit in MB for the ensemble building process.</span>
-<span class="sd">            `auto-sklearn` will reduce the number of considered models</span>
-<span class="sd">            (``ensemble_nbest``) if the memory limit is reached.</span>
-<span class="sd">            If ``None``, no memory limit is enforced.</span>
-
 <span class="sd">        seed : int, optional (default=1)</span>
 <span class="sd">            Used to seed SMAC. Will determine the output file names.</span>
 
-<span class="sd">        ml_memory_limit : int, optional (3072)</span>
+<span class="sd">        memory_limit : int, optional (3072)</span>
 <span class="sd">            Memory limit in MB for the machine learning algorithm.</span>
 <span class="sd">            `auto-sklearn` will stop fitting the machine learning algorithm if</span>
-<span class="sd">            it tries to allocate more than `ml_memory_limit` MB.</span>
+<span class="sd">            it tries to allocate more than `memory_limit` MB.</span>
 <span class="sd">            If None is provided, no memory limit is set.</span>
-<span class="sd">            In case of multi-processing, `ml_memory_limit` will be per job.</span>
+<span class="sd">            In case of multi-processing, `memory_limit` will be per job.</span>
+<span class="sd">            This memory limit also applies to the ensemble creation process.</span>
 
 <span class="sd">        include_estimators : list, optional (None)</span>
 <span class="sd">            If None, all possible estimators are used. Otherwise specifies</span>
@@ -271,7 +265,7 @@
 
 <span class="sd">        output_folder : string, optional (None)</span>
 <span class="sd">            folder to store predictions for optional test set, if ``None``</span>
-<span class="sd">            automatically use ``/tmp/autosklearn_output_$pid_$random_number``</span>
+<span class="sd">            no output will be generated</span>
 
 <span class="sd">        delete_tmp_folder_after_terminate: string, optional (True)</span>
 <span class="sd">            remove tmp_folder, when finished. If tmp_folder is None</span>
@@ -282,17 +276,17 @@
 <span class="sd">            output_dir will always be deleted</span>
 
 <span class="sd">        n_jobs : int, optional, experimental</span>
-<span class="sd">            The number of jobs to run in parallel for ``fit()``. ``-1`` means </span>
-<span class="sd">            using all processors. By default, Auto-sklearn uses a single core </span>
+<span class="sd">            The number of jobs to run in parallel for ``fit()``. ``-1`` means</span>
+<span class="sd">            using all processors. By default, Auto-sklearn uses a single core</span>
 <span class="sd">            for fitting the machine learning model and a single core for fitting</span>
 <span class="sd">            an ensemble. Ensemble building is not affected by ``n_jobs`` but</span>
 <span class="sd">            can be controlled by the number of models in the ensemble. In</span>
 <span class="sd">            contrast to most scikit-learn models, ``n_jobs`` given in the</span>
-<span class="sd">            constructor is not applied to the ``predict()`` method. If </span>
+<span class="sd">            constructor is not applied to the ``predict()`` method. If</span>
 <span class="sd">            ``dask_client`` is None, a new dask client is created.</span>
-<span class="sd">            </span>
+
 <span class="sd">        dask_client : dask.distributed.Client, optional</span>
-<span class="sd">            User-created dask client, can be used to start a dask cluster and then </span>
+<span class="sd">            User-created dask client, can be used to start a dask cluster and then</span>
 <span class="sd">            attach auto-sklearn to it.</span>
 
 <span class="sd">        disable_evaluator_output: bool or list, optional (False)</span>
@@ -355,9 +349,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ensemble_size</span> <span class="o">=</span> <span class="n">ensemble_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ensemble_nbest</span> <span class="o">=</span> <span class="n">ensemble_nbest</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_models_on_disc</span> <span class="o">=</span> <span class="n">max_models_on_disc</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ensemble_memory_limit</span> <span class="o">=</span> <span class="n">ensemble_memory_limit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ml_memory_limit</span> <span class="o">=</span> <span class="n">ml_memory_limit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">memory_limit</span> <span class="o">=</span> <span class="n">memory_limit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">include_estimators</span> <span class="o">=</span> <span class="n">include_estimators</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">exclude_estimators</span> <span class="o">=</span> <span class="n">exclude_estimators</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">include_preprocessors</span> <span class="o">=</span> <span class="n">include_preprocessors</span>
@@ -381,6 +374,11 @@
         <span class="c1"># n_jobs after conversion to a number (b/c default is None)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Cannot serialize a client!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dask_client</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span>
 
     <span class="k">def</span> <span class="nf">build_automl</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -410,9 +408,8 @@
             <span class="n">ensemble_size</span><span class="o">=</span><span class="n">ensemble_size</span><span class="p">,</span>
             <span class="n">ensemble_nbest</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ensemble_nbest</span><span class="p">,</span>
             <span class="n">max_models_on_disc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_models_on_disc</span><span class="p">,</span>
-            <span class="n">ensemble_memory_limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ensemble_memory_limit</span><span class="p">,</span>
             <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
-            <span class="n">ml_memory_limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ml_memory_limit</span><span class="p">,</span>
+            <span class="n">memory_limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">memory_limit</span><span class="p">,</span>
             <span class="n">include_estimators</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">include_estimators</span><span class="p">,</span>
             <span class="n">exclude_estimators</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exclude_estimators</span><span class="p">,</span>
             <span class="n">include_preprocessors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">include_preprocessors</span><span class="p">,</span>
