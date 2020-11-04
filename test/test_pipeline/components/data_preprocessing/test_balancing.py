@@ -17,7 +17,8 @@ from autosklearn.pipeline.components.classification.random_forest import RandomF
 from autosklearn.pipeline.components.classification.liblinear_svc import LibLinear_SVC
 from autosklearn.pipeline.components.classification.libsvm_svc import LibSVM_SVC
 from autosklearn.pipeline.components.classification.sgd import SGD
-from autosklearn.pipeline.components.classification.gradient_boosting import GradientBoostingClassifier
+from autosklearn.pipeline.components.classification.gradient_boosting \
+    import GradientBoostingClassifier
 from autosklearn.pipeline.components.classification.passive_aggressive import PassiveAggressive
 from autosklearn.pipeline.components.feature_preprocessing\
     .extra_trees_preproc_for_classification import ExtraTreesPreprocessorClassification
