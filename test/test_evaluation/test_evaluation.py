@@ -356,6 +356,7 @@ class EvaluationTest(unittest.TestCase):
                                     metric=accuracy,
                                     cost_for_crash=get_cost_of_crash(accuracy),
                                     abort_on_first_run_crash=False,
+                                    iterative=False,
                                     )
         ta.pynisher_logger = unittest.mock.Mock()
         self.stats.submitted_ta_runs += 1
@@ -367,8 +368,10 @@ class EvaluationTest(unittest.TestCase):
         self.assertIn(
             info[1].additional_info['error'],
             (
-                """AttributeError("'BackendMock' object has no attribute 'output_directory'",)""",
-                """AttributeError("'BackendMock' object has no attribute 'output_directory'")""",
+                """AttributeError("'BackendMock' object has no attribute """
+                """'save_targets_ensemble'",)""",
+                """AttributeError("'BackendMock' object has no attribute """
+                """'save_targets_ensemble'")""",
             )
         )
         self.assertNotIn('exitcode', info[1].additional_info)

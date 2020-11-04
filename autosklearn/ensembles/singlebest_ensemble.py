@@ -1,3 +1,4 @@
+import os
 from typing import List, Tuple
 
 import numpy as np
@@ -7,6 +8,7 @@ from smac.runhistory.runhistory import RunHistory
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.metrics import Scorer
 from autosklearn.pipeline.base import BasePipeline
+from autosklearn.util.backend import Backend
 
 
 class SingleBest(AbstractEnsemble):
@@ -22,10 +24,12 @@ class SingleBest(AbstractEnsemble):
         self,
         metric: Scorer,
         run_history: RunHistory,
-        random_state: np.random.RandomState,
+        seed: int,
+        backend: Backend,
     ):
         self.metric = metric
-        self.random_state = random_state
+        self.seed = seed
+        self.backend = backend
 
         # Add some default values -- at least 1 model in ensemble is assumed
         self.indices_ = [0]
@@ -47,11 +51,30 @@ class SingleBest(AbstractEnsemble):
         for run_key in self.run_history.data.keys():
             run_value = self.run_history.data[run_key]
             score = self.metric._optimum - (self.metric._sign * run_value.cost)
+
             if (score > best_model_score and self.metric._sign > 0) \
                     or (score < best_model_score and self.metric._sign < 0):
-                best_model_identifier = [
-                    (self.random_state, run_value.additional_info['num_run'], run_key.budget)
-                ]
+
+                # Make sure that the individual best model actually exists
+                model_dir = self.backend.get_numrun_directory(
+                    self.seed,
+                    run_value.additional_info['num_run'],
+                    run_key.budget,
+                )
+                model_file_name = self.backend.get_model_filename(
+                    self.seed,
+                    run_value.additional_info['num_run'],
+                    run_key.budget,
+                )
+                file_path = os.path.join(model_dir, model_file_name)
+                if not os.path.exists(file_path):
+                    continue
+
+                best_model_identifier = [(
+                    self.seed,
+                    run_value.additional_info['num_run'],
+                    run_key.budget,
+                )]
                 best_model_score = score
 
         if not best_model_identifier:

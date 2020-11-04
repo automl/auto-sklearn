@@ -104,10 +104,12 @@ class Test(unittest.TestCase):
         # Test that metadata directory is set correctly (if user specifies,
         # Auto-sklearn should check that the directory exists. If not, it
         # should use the default directory.
+        dask_client = unittest.mock.Mock()
         automl1 = AutoSklearnClassifier(
             time_left_for_this_task=30,
             per_run_time_limit=5,
             metadata_directory="pyMetaLearn/metadata_dir",  # user specified metadata_dir
+            dask_client=dask_client,
         )
         self.assertEqual(automl1.metadata_directory,
                          "pyMetaLearn/metadata_dir")
@@ -115,6 +117,7 @@ class Test(unittest.TestCase):
         automl2 = AutoSklearnClassifier(  # default metadata_dir
             time_left_for_this_task=30,
             per_run_time_limit=5,
+            dask_client=dask_client,
         )
         self.assertIsNone(automl2.metadata_directory)
 
@@ -123,6 +126,8 @@ class Test(unittest.TestCase):
             time_left_for_this_task=30,
             per_run_time_limit=5,
             metadata_directory=nonexistent_dir,  # user specified metadata_dir
+            dask_client=dask_client,
+            ensemble_size=0,
         )
         X, y = load_breast_cancer(return_X_y=True)
         self.assertRaisesRegex(ValueError, "The specified metadata directory "
