@@ -44,7 +44,8 @@ from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix
 from autosklearn.metrics import f1_macro, accuracy, r2, CLASSIFICATION_METRICS, REGRESSION_METRICS
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
-    REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION, CLASSIFICATION_TASKS
+    REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION,\
+    CLASSIFICATION_TASKS
 from autosklearn.pipeline.components.classification import ClassifierChoice
 from autosklearn.pipeline.components.regression import RegressorChoice
 from autosklearn.pipeline.components.feature_preprocessing import FeaturePreprocessorChoice
@@ -1001,7 +1002,10 @@ class AutoML(BaseEstimator):
         params = []
         status = []
         budgets = []
-        task_metrics = CLASSIFICATION_METRICS if self._task in CLASSIFICATION_TASKS else REGRESSION_METRICS
+        if self._task in CLASSIFICATION_TASKS:
+            task_metrics = CLASSIFICATION_METRICS
+        else:
+            task_metrics = REGRESSION_METRICS
         for run_key in self.runhistory_.data:
             run_value = self.runhistory_.data[run_key]
             config_id = run_key.config_id
@@ -1047,7 +1051,8 @@ class AutoML(BaseEstimator):
             for name in metric_name:
                 if name in run_value.additional_info.keys():
                     metric = task_metrics[name]
-                    metric_value = metric._optimum - (metric._sign * run_value.additional_info[name])
+                    metric_cost = run_value.additional_info[name]
+                    metric_value = metric._optimum - (metric._sign * metric_cost)
                     mask_value = False
                 else:
                     metric_value = np.NaN

@@ -558,15 +558,16 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         configuration = unittest.mock.Mock(spec=Configuration)
         queue_ = multiprocessing.Queue()
         loss_mock.return_value = None
+        scorer_list = ['accuracy', 'balanced_accuracy', 'f1_macro', 'f1_micro',
+                       'f1_weighted', 'log_loss', 'precision_macro',
+                       'precision_micro', 'precision_weighted', 'recall_macro',
+                       'recall_micro', 'recall_weighted']
 
         evaluator = TrainEvaluator(self.backend_mock, queue=queue_,
                                    configuration=configuration,
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 5},
-                                   scoring_functions=['accuracy', 'balanced_accuracy', 'f1_macro', 'f1_micro',
-                                                      'f1_weighted', 'log_loss', 'precision_macro',
-                                                      'precision_micro', 'precision_weighted', 'recall_macro',
-                                                      'recall_micro', 'recall_weighted'],
+                                   scoring_functions=scorer_list,
                                    output_y_hat_optimization=True,
                                    metric=accuracy)
 
@@ -2293,9 +2294,10 @@ class FunctionsTest(unittest.TestCase):
             resampling_strategy_args=None,
             seed=1,
             num_run=1,
-            scoring_functions=['accuracy', 'balanced_accuracy', 'f1_macro', 'f1_micro', 'f1_weighted',
-                               'log_loss', 'precision_macro', 'precision_micro', 'precision_weighted',
-                               'recall_macro', 'recall_micro', 'recall_weighted'],
+            scoring_functions=['accuracy', 'balanced_accuracy', 'f1_macro', 'f1_micro',
+                               'f1_weighted', 'log_loss', 'precision_macro', 'precision_micro',
+                               'precision_weighted', 'recall_macro', 'recall_micro',
+                               'recall_weighted'],
             output_y_hat_optimization=True,
             include=None,
             exclude=None,
@@ -2526,9 +2528,10 @@ class FunctionsTest(unittest.TestCase):
             num_run=1,
             resampling_strategy='cv',
             resampling_strategy_args={'folds': 3},
-            scoring_functions=['accuracy', 'balanced_accuracy', 'f1_macro', 'f1_micro', 'f1_weighted',
-                               'log_loss', 'precision_macro', 'precision_micro', 'precision_weighted',
-                               'recall_macro', 'recall_micro', 'recall_weighted'],
+            scoring_functions=['accuracy', 'balanced_accuracy', 'f1_macro', 'f1_micro',
+                               'f1_weighted', 'log_loss', 'precision_macro', 'precision_micro',
+                               'precision_weighted', 'recall_macro', 'recall_micro',
+                               'recall_weighted'],
             output_y_hat_optimization=True,
             include=None,
             exclude=None,
