@@ -606,10 +606,9 @@ class EnsembleBuilder(object):
                             "Memory Exception -- Unable to further reduce the number of ensemble "
                             "members and can no further limit the number of ensemble members "
                             "loaded per iteration -- please restart Auto-sklearn with a higher "
-                            "value for the argument `memory_limit` (current limit is {} MB). "
+                            "value for the argument `memory_limit` (current limit is %s MB). "
                             "The ensemble builder will keep running to delete files from disk in "
-                            "case this was enabled."
-                            "".format(self.memory_limit)
+                            "case this was enabled.", self.memory_limit
                         )
                         self.ensemble_nbest = 0
                     else:
@@ -618,7 +617,6 @@ class EnsembleBuilder(object):
                             "Memory Exception -- Unable to further reduce the number of ensemble "
                             "members -- Now reducing the number of predictions per call to read "
                             "at most to 1."
-                            "".format(self.memory_limit)
                         )
                 else:
                     if isinstance(self.ensemble_nbest, numbers.Integral):
