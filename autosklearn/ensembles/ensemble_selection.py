@@ -1,6 +1,6 @@
 import random
 from collections import Counter
-from typing import Any, Dict, List, Tuple, cast, Union
+from typing import Any, Dict, List, Tuple, Union, cast
 
 import numpy as np
 

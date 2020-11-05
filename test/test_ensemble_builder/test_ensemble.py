@@ -1,4 +1,3 @@
-import glob
 import os
 import sys
 import time
@@ -36,7 +35,7 @@ def ensemble_backend(request):
 
     try:
         shutil.rmtree(test_dir)
-    except:
+    except:  # noqa E722
         pass
 
     # Make sure the folders we wanna create do not already exist.
@@ -46,7 +45,7 @@ def ensemble_backend(request):
         def session_run_at_end():
             try:
                 shutil.rmtree(test_dir)
-            except:
+            except:  # noqa E722
                 pass
         return session_run_at_end
     request.addfinalizer(get_finalizer(backend))
@@ -269,30 +268,30 @@ def testPerformanceRangeThreshold(ensemble_backend, performance_range_threshold,
 )
 def testPerformanceRangeThresholdMaxBest(ensemble_backend, performance_range_threshold,
                                          ensemble_nbest, exp):
-            ensbuilder = EnsembleBuilder(
-                backend=ensemble_backend,
-                dataset_name="TEST",
-                task_type=BINARY_CLASSIFICATION,
-                metric=roc_auc,
-                seed=0,  # important to find the test files
-                ensemble_nbest=ensemble_nbest,
-                performance_range_threshold=performance_range_threshold,
-                max_models_on_disc=None,
-            )
-            ensbuilder.read_scores = {
-                'A': {'ens_score': 1, 'num_run': 1, 'loaded': -1, "seed": 1},
-                'B': {'ens_score': 2, 'num_run': 2, 'loaded': -1, "seed": 1},
-                'C': {'ens_score': 3, 'num_run': 3, 'loaded': -1, "seed": 1},
-                'D': {'ens_score': 4, 'num_run': 4, 'loaded': -1, "seed": 1},
-                'E': {'ens_score': 5, 'num_run': 5, 'loaded': -1, "seed": 1},
-            }
-            ensbuilder.read_preds = {
-                key: {key_2: True for key_2 in (Y_ENSEMBLE, Y_VALID, Y_TEST)}
-                for key in ensbuilder.read_scores
-            }
-            sel_keys = ensbuilder.get_n_best_preds()
+    ensbuilder = EnsembleBuilder(
+        backend=ensemble_backend,
+        dataset_name="TEST",
+        task_type=BINARY_CLASSIFICATION,
+        metric=roc_auc,
+        seed=0,  # important to find the test files
+        ensemble_nbest=ensemble_nbest,
+        performance_range_threshold=performance_range_threshold,
+        max_models_on_disc=None,
+    )
+    ensbuilder.read_scores = {
+        'A': {'ens_score': 1, 'num_run': 1, 'loaded': -1, "seed": 1},
+        'B': {'ens_score': 2, 'num_run': 2, 'loaded': -1, "seed": 1},
+        'C': {'ens_score': 3, 'num_run': 3, 'loaded': -1, "seed": 1},
+        'D': {'ens_score': 4, 'num_run': 4, 'loaded': -1, "seed": 1},
+        'E': {'ens_score': 5, 'num_run': 5, 'loaded': -1, "seed": 1},
+    }
+    ensbuilder.read_preds = {
+        key: {key_2: True for key_2 in (Y_ENSEMBLE, Y_VALID, Y_TEST)}
+        for key in ensbuilder.read_scores
+    }
+    sel_keys = ensbuilder.get_n_best_preds()
 
-            assert len(sel_keys) == exp
+    assert len(sel_keys) == exp
 
 
 def testFallBackNBest(ensemble_backend):
@@ -534,7 +533,7 @@ def testLimit(ensemble_backend):
     )
 
     with unittest.mock.patch('logging.getLogger') as get_logger_mock, \
-        unittest.mock.patch('logging.config.dictConfig') as _:
+            unittest.mock.patch('logging.config.dictConfig') as _:
         logger_mock = unittest.mock.Mock()
         get_logger_mock.return_value = logger_mock
 
