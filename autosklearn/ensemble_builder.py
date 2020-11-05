@@ -705,16 +705,23 @@ class EnsembleBuilder(object):
             for candidate in candidate_models:
                 self._has_been_candidate.add(candidate)
 
+        # train ensemble
+        ensemble = self.fit_ensemble(selected_keys=candidate_models)
+
+        # Save the ensemble for later use in the main auto-sklearn module!
+        if ensemble is not None and self.SAVE2DISC:
+            self.backend.save_ensemble(ensemble, iteration, self.seed)
+
+        # Delete files of non-candidate models - can only be done after fitting the ensemble and
+        # saving it to disc so we do not accidentally delete models in the previous ensemble
+        if self.max_resident_models is not None:
+            self._delete_excess_models(selected_keys=candidate_models)
+
         # Save the read scores status for the next iteration
         with open(self.ensemble_score_file, "wb") as memory:
             pickle.dump(self.read_scores, memory)
 
-        # train ensemble
-        ensemble = self.fit_ensemble(selected_keys=candidate_models)
         if ensemble is not None:
-            # Save the ensemble for later use in the main auto-sklearn module!
-            if self.SAVE2DISC:
-                self.backend.save_ensemble(ensemble, iteration, self.seed)
             train_pred = self.predict(set_="train",
                                       ensemble=ensemble,
                                       selected_keys=candidate_models,
@@ -1182,10 +1189,6 @@ class EnsembleBuilder(object):
                 trained Ensemble
         """
 
-        # Delete files of non-candidate models
-        if self.max_resident_models is not None:
-            selected_keys = self._delete_excess_models(selected_keys)
-
         predictions_train = [self.read_preds[k][Y_ENSEMBLE] for k in selected_keys]
         include_num_runs = [
             (
@@ -1395,7 +1398,7 @@ class EnsembleBuilder(object):
         sorted_keys = list(reversed(sorted(sorted_keys, key=lambda x: x[1])))
         return sorted_keys
 
-    def _delete_excess_models(self, selected_keys: List[str]) -> List[str]:
+    def _delete_excess_models(self, selected_keys: List[str]):
         """
             Deletes models excess models on disc. self.max_models_on_disc
             defines the upper limit on how many models to keep.
@@ -1410,13 +1413,12 @@ class EnsembleBuilder(object):
 
         if len(sorted_keys) <= self.max_resident_models:
             # Don't waste time if not enough models to delete
-            return selected_keys
+            return
 
         # The top self.max_resident_models models would be the candidates
         # Any other low performance model will be deleted
         # The list is in ascending order of score
         candidates = sorted_keys[:self.max_resident_models]
-        selected_keys = selected_keys[:self.max_resident_models]
 
         # Loop through the files currently in the directory
         for pred_path in self.y_ens_files:
@@ -1450,8 +1452,6 @@ class EnsembleBuilder(object):
                     "Failed to delete files of non-candidate model %s due"
                     " to error %s", pred_path, e
                 )
-
-        return selected_keys
 
     def _read_np_fn(self, path):
 

@@ -519,7 +519,7 @@ def testLimit(ensemble_backend):
                                         seed=0,  # important to find the test files
                                         ensemble_nbest=10,
                                         # small to trigger MemoryException
-                                        memory_limit=10
+                                        memory_limit=100,
                                         )
     ensbuilder.SAVE2DISC = False
 

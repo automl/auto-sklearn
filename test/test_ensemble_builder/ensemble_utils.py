@@ -6,7 +6,7 @@ import numpy as np
 
 from autosklearn.metrics import make_scorer
 from autosklearn.ensemble_builder import (
-    EnsembleBuilder,
+    EnsembleBuilder, AbstractEnsemble
 )
 
 
@@ -92,4 +92,11 @@ def compare_read_preds(read_preds1, read_preds2):
 class EnsembleBuilderMemMock(EnsembleBuilder):
 
     def fit_ensemble(self, selected_keys):
+        return True
+
+    def predict(self, set_: str,
+                ensemble: AbstractEnsemble,
+                selected_keys: list,
+                n_preds: int,
+                index_run: int):
         np.ones([10000000, 1000000])
