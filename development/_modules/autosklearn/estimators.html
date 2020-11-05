@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>autosklearn.estimators &#8212; AutoSklearn 0.10.0 documentation</title>
+    <title>autosklearn.estimators &#8212; AutoSklearn 0.11.0 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.10.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.11.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -154,6 +154,7 @@
         <span class="n">logging_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">metadata_directory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">metric</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">load_models</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
@@ -328,6 +329,9 @@
 <span class="sd">            :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in</span>
 <span class="sd">            Metrics`_.</span>
 <span class="sd">            If None is provided, a default metric is selected depending on the task.</span>
+<span class="sd">            </span>
+<span class="sd">        load_models : bool, optional (True)</span>
+<span class="sd">            Whether to load the models after fitting Auto-sklearn.</span>
 
 <span class="sd">        Attributes</span>
 <span class="sd">        ----------</span>
@@ -369,6 +373,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">logging_config</span> <span class="o">=</span> <span class="n">logging_config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata_directory</span> <span class="o">=</span> <span class="n">metadata_directory</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span> <span class="o">=</span> <span class="n">metric</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_models</span> <span class="o">=</span> <span class="n">load_models</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[AutoML]</span>
         <span class="c1"># n_jobs after conversion to a number (b/c default is None)</span>
@@ -452,7 +457,7 @@
             <span class="n">tmp_folder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tmp_folder</span><span class="p">,</span>
             <span class="n">output_folder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_folder</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">load_models</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">load_models</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_load_models</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span>
 

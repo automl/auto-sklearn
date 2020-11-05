@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Resampling Strategies &#8212; AutoSklearn 0.10.0 documentation</title>
+    <title>Resampling Strategies &#8212; AutoSklearn 0.11.0 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.10.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.11.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -165,9 +165,7 @@ settings for the <code class="docutils literal notranslate"><span class="pre">Au
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[WARNING] [2020-11-04 23:09:23,904:AutoML(1):breast_cancer] No valid ensemble was created. Please check the logfile for errors. Default to the best individual estimator:[(1, 2, 0.0)]
-
-AutoSklearnClassifier(dask_client=None,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(dask_client=None,
                       delete_output_folder_after_terminate=True,
                       delete_tmp_folder_after_terminate=True,
                       disable_evaluator_output=False, ensemble_nbest=50,
@@ -175,9 +173,8 @@ AutoSklearnClassifier(dask_client=None,
                       exclude_preprocessors=None, get_smac_object_callback=None,
                       include_estimators=None, include_preprocessors=None,
                       initial_configurations_via_metal...
-                      logging_config=None, max_models_on_disc=50,
-                      memory_limit=3072, metadata_directory=None, metric=None,
-                      n_jobs=None,
+                      max_models_on_disc=50, memory_limit=3072,
+                      metadata_directory=None, metric=None, n_jobs=None,
                       output_folder=&#39;/tmp/autosklearn_resampling_example_out&#39;,
                       per_run_time_limit=30, resampling_strategy=&#39;holdout&#39;,
                       resampling_strategy_arguments={&#39;train_size&#39;: 0.67},
@@ -194,7 +191,7 @@ AutoSklearnClassifier(dask_client=None,
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score holdout:  0.9440559440559441
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score holdout:  0.958041958041958
 </pre></div>
 </div>
 </div>
@@ -325,7 +322,7 @@ splitting it on the first feature.</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score custom split 0.38461538461538464
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 5 minutes  43.321 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 5 minutes  37.854 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-resampling-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/c6beb850ad22be83885d2737cca63b33/example_resampling.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_resampling.py</span></code></a></p>

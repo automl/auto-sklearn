@@ -11,6 +11,29 @@
 Releases
 ========
 
+Version 0.11.0
+==============
+
+* ADD #992: Move ensemble building from being a separate process to a job submitted to the dask
+  cluster. This allows for better control of the memory used in multiprocessing settings.
+* FIX #905: Make ``AutoSklearn2Classifier`` picklable.
+* FIX #970: Fix a bug where Auto-sklearn would fail if categorical features are passed as a
+  Pandas Dataframe.
+* MAINT #772: Improve error message in case of dummy prediction failure.
+* MAINT #948: Finally use Pandas >= 1.0.
+* MAINT #973: Improve meta-data by running meta-data generation for more time and separately for
+  important metrics.
+* MAINT #997: Improve memory handling in the ensemble building process. This allows building
+  ensembles for larger datasets.
+
+Contributors v0.11.0
+********************
+
+* Matthias Feurer
+* Francisco Rivera
+* Karl Leswing
+* ROHIT AGARWAL
+
 Version 0.10.0
 ==============
 

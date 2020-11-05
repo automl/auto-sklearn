@@ -179,9 +179,10 @@ Build and fit a classifier
                           exclude_preprocessors=None, get_smac_object_callback=None,
                           include_estimators=None, include_preprocessors=None,
                           initial_configurations_via_metalearning=25,
-                          logging_config=None, max_models_on_disc=50,
-                          memory_limit=3072, metadata_directory=None, metric=None,
-                          n_jobs=None, output_folder=None, per_run_time_limit=30,
+                          load_models=None, logging_config=None,
+                          max_models_on_disc=50, memory_limit=3072,
+                          metadata_directory=None, metric=None, n_jobs=None,
+                          output_folder=None, per_run_time_limit=30,
                           resampling_strategy='holdout',
                           resampling_strategy_arguments=None, seed=1,
                           smac_scenario_args=None, time_left_for_this_task=120,
@@ -209,7 +210,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score 0.8869565217391304
+    Accuracy score 0.8666666666666667
 
 
 
@@ -270,7 +271,7 @@ Plot the ensemble performance
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  59.128 seconds)
+   **Total running time of the script:** ( 2 minutes  1.868 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_pandas_train_test.py:

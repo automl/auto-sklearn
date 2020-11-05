@@ -86,7 +86,6 @@ Holdout
 
  .. code-block:: none
 
-    [WARNING] [2020-11-04 23:09:23,904:AutoML(1):breast_cancer] No valid ensemble was created. Please check the logfile for errors. Default to the best individual estimator:[(1, 2, 0.0)]
 
     AutoSklearnClassifier(dask_client=None,
                           delete_output_folder_after_terminate=True,
@@ -96,9 +95,8 @@ Holdout
                           exclude_preprocessors=None, get_smac_object_callback=None,
                           include_estimators=None, include_preprocessors=None,
                           initial_configurations_via_metal...
-                          logging_config=None, max_models_on_disc=50,
-                          memory_limit=3072, metadata_directory=None, metric=None,
-                          n_jobs=None,
+                          max_models_on_disc=50, memory_limit=3072,
+                          metadata_directory=None, metric=None, n_jobs=None,
                           output_folder='/tmp/autosklearn_resampling_example_out',
                           per_run_time_limit=30, resampling_strategy='holdout',
                           resampling_strategy_arguments={'train_size': 0.67},
@@ -129,7 +127,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score holdout:  0.9440559440559441
+    Accuracy score holdout:  0.958041958041958
 
 
 
@@ -336,7 +334,7 @@ splitting it on the first feature.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 5 minutes  43.321 seconds)
+   **Total running time of the script:** ( 5 minutes  37.854 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_resampling.py:
