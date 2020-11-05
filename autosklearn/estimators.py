@@ -42,6 +42,7 @@ class AutoSklearnEstimator(BaseEstimator):
         logging_config=None,
         metadata_directory=None,
         metric=None,
+        load_models: bool = True,
     ):
         """
         Parameters
@@ -216,6 +217,9 @@ class AutoSklearnEstimator(BaseEstimator):
             :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
             Metrics`_.
             If None is provided, a default metric is selected depending on the task.
+            
+        load_models : bool, optional (True)
+            Whether to load the models after fitting Auto-sklearn.
 
         Attributes
         ----------
@@ -257,6 +261,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.logging_config = logging_config
         self.metadata_directory = metadata_directory
         self._metric = metric
+        self._load_models = load_models
 
         self.automl_ = None  # type: Optional[AutoML]
         # n_jobs after conversion to a number (b/c default is None)
@@ -340,7 +345,7 @@ class AutoSklearnEstimator(BaseEstimator):
             tmp_folder=self.tmp_folder,
             output_folder=self.output_folder,
         )
-        self.automl_.fit(load_models=True, **kwargs)
+        self.automl_.fit(load_models=self._load_models, **kwargs)
 
         return self
 

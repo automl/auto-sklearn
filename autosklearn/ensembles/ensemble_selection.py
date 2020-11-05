@@ -1,6 +1,6 @@
 import random
 from collections import Counter
-from typing import Any, Dict, List, Tuple, cast
+from typing import Any, Dict, List, Tuple, cast, Union
 
 import numpy as np
 
@@ -265,27 +265,32 @@ class EnsembleSelection(AbstractEnsemble):
             dtype=np.int64,
         )
 
-    def predict(self, predictions: np.ndarray) -> np.ndarray:
-        predictions = np.asarray(
-            predictions,
-            dtype=np.float64,
-        )
+    def predict(self, predictions: Union[np.ndarray, List[np.ndarray]]) -> np.ndarray:
+
+        average = np.zeros_like(predictions[0], dtype=np.float64)
+        tmp_predictions = np.empty_like(predictions[0], dtype=np.float64)
 
         # if predictions.shape[0] == len(self.weights_),
         # predictions include those of zero-weight models.
-        if predictions.shape[0] == len(self.weights_):
-            return np.average(predictions, axis=0, weights=self.weights_)
+        if len(predictions) == len(self.weights_):
+            for pred, weight in zip(predictions, self.weights_):
+                np.multiply(pred, weight, out=tmp_predictions)
+                np.add(average, tmp_predictions, out=average)
 
         # if prediction model.shape[0] == len(non_null_weights),
         # predictions do not include those of zero-weight models.
-        elif predictions.shape[0] == np.count_nonzero(self.weights_):
+        elif len(predictions) == np.count_nonzero(self.weights_):
             non_null_weights = [w for w in self.weights_ if w > 0]
-            return np.average(predictions, axis=0, weights=non_null_weights)
+            for pred, weight in zip(predictions, non_null_weights):
+                np.multiply(pred, weight, out=tmp_predictions)
+                np.add(average, tmp_predictions, out=average)
 
         # If none of the above applies, then something must have gone wrong.
         else:
             raise ValueError("The dimensions of ensemble predictions"
                              " and ensemble weights do not match!")
+        del tmp_predictions
+        return average
 
     def __str__(self) -> str:
         return 'Ensemble Selection:\n\tTrajectory: %s\n\tMembers: %s' \

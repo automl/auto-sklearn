@@ -1,5 +1,5 @@
 import os
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import numpy as np
 
@@ -85,7 +85,7 @@ class SingleBest(AbstractEnsemble):
 
         return best_model_identifier
 
-    def predict(self, predictions: np.ndarray) -> np.ndarray:
+    def predict(self, predictions: Union[np.ndarray, List[np.ndarray]]) -> np.ndarray:
         return predictions[0]
 
     def __str__(self) -> str:

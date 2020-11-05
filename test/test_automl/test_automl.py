@@ -305,6 +305,7 @@ def test_automl_outputs(backend, dask_client):
         'start_time_100',
         'datamanager.pkl',
         'ensemble_read_preds.pkl',
+        'ensemble_read_scores.pkl',
         'runs',
         'ensembles',
     ]

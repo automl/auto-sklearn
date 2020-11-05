@@ -1,6 +1,6 @@
 import os
+import shutil
 import unittest
-
 
 import numpy as np
 
@@ -8,8 +8,6 @@ from autosklearn.metrics import make_scorer
 from autosklearn.ensemble_builder import (
     EnsembleBuilder,
 )
-
-this_directory = os.path.dirname(__file__)
 
 
 def scorer_function(a, b):
@@ -21,22 +19,19 @@ MockMetric = make_scorer('mock', scorer_function)
 
 class BackendMock(object):
 
-    def __init__(self):
+    def __init__(self, target_directory):
         this_directory = os.path.abspath(
             os.path.dirname(__file__)
         )
-        self.temporary_directory = os.path.join(
-            this_directory, 'data',
-        )
-        self.internals_directory = os.path.join(
-            this_directory, 'data', '.auto-sklearn',
-        )
+        shutil.copytree(os.path.join(this_directory, 'data'), os.path.join(target_directory))
+        self.temporary_directory = target_directory
+        self.internals_directory = os.path.join(self.temporary_directory, '.auto-sklearn')
 
     def load_datamanager(self):
         manager = unittest.mock.Mock()
         manager.__reduce__ = lambda self: (unittest.mock.MagicMock, ())
         array = np.load(os.path.join(
-            this_directory, 'data',
+            self.temporary_directory,
             '.auto-sklearn',
             'runs', '0_3_100.0',
             'predictions_test_0_3_100.0.npy'
@@ -60,7 +55,7 @@ class BackendMock(object):
         return
 
     def get_runs_directory(self) -> str:
-        return os.path.join(this_directory, 'data', '.auto-sklearn', 'runs')
+        return os.path.join(self.temporary_directory, '.auto-sklearn', 'runs')
 
     def get_numrun_directory(self, seed: int, num_run: int, budget: float) -> str:
         return os.path.join(self.get_runs_directory(), '%d_%d_%s' % (seed, num_run, budget))

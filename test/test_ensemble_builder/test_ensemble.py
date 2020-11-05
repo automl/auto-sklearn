@@ -5,6 +5,7 @@ import time
 import unittest.mock
 import pickle
 import pytest
+import shutil
 
 import dask.distributed
 import numpy as np
@@ -17,6 +18,7 @@ from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensemble_builder import (
     EnsembleBuilder,
     EnsembleBuilderManager,
+    Y_ENSEMBLE,
     Y_VALID,
     Y_TEST,
 )
@@ -29,36 +31,23 @@ from ensemble_utils import BackendMock, compare_read_preds, EnsembleBuilderMemMo
 
 @pytest.fixture(scope="function")
 def ensemble_backend(request):
+    test_id = '%s_%s' % (request.module.__name__, request.node.name)
+    test_dir = os.path.join(this_directory, test_id)
+
+    try:
+        shutil.rmtree(test_dir)
+    except:
+        pass
 
     # Make sure the folders we wanna create do not already exist.
-    backend = BackendMock()
-    ensemble_memory_file = os.path.join(
-        backend.internals_directory,
-        'ensemble_read_preds.pkl'
-    )
-
-    # We make sure that every test starts without
-    # any memory file
-    if os.path.exists(ensemble_memory_file):
-        os.unlink(ensemble_memory_file)
+    backend = BackendMock(test_dir)
 
     def get_finalizer(ensemble_backend):
         def session_run_at_end():
-
-            # Remove the memory file created by the ensemble builder
-            ensemble_memory_file = os.path.join(
-                ensemble_backend.internals_directory,
-                'ensemble_read_preds.pkl'
-            )
-            if os.path.exists(ensemble_memory_file):
-                os.unlink(ensemble_memory_file)
-
-            # Remove the log file if created in the test/test_ensemble/data
-            # area
-            logfile = glob.glob(os.path.join(
-                ensemble_backend.temporary_directory, '*.log'))
-            if len(logfile) > 1 and os.path.exists(logfile[0]):
-                os.unlink(logfile[0])
+            try:
+                shutil.rmtree(test_dir)
+            except:
+                pass
         return session_run_at_end
     request.addfinalizer(get_finalizer(backend))
 
@@ -126,86 +115,91 @@ def testRead(ensemble_backend):
 
     success = ensbuilder.score_ensemble_preds()
     assert success, str(ensbuilder.read_preds)
-    assert len(ensbuilder.read_preds) == 3
+    assert len(ensbuilder.read_preds) == 3, ensbuilder.read_preds.keys()
+    assert len(ensbuilder.read_scores) == 3, ensbuilder.read_scores.keys()
 
     filename = os.path.join(
         ensemble_backend.temporary_directory,
         ".auto-sklearn/runs/0_1_0.0/predictions_ensemble_0_1_0.0.npy"
     )
-    assert ensbuilder.read_preds[filename]["ens_score"] == 0.5
+    assert ensbuilder.read_scores[filename]["ens_score"] == 0.5
 
     filename = os.path.join(
         ensemble_backend.temporary_directory,
         ".auto-sklearn/runs/0_2_0.0/predictions_ensemble_0_2_0.0.npy"
     )
-    assert ensbuilder.read_preds[filename]["ens_score"] == 1.0
+    assert ensbuilder.read_scores[filename]["ens_score"] == 1.0
 
 
-def testNBest(ensemble_backend):
-    for ensemble_nbest, models_on_disc, exp in (
+@pytest.mark.parametrize(
+    "ensemble_nbest,max_models_on_disc,exp",
+    (
             (1, None, 1),
             (1.0, None, 2),
             (0.1, None, 1),
             (0.9, None, 1),
             (1, 2, 1),
             (2, 1, 1),
-    ):
-        ensbuilder = EnsembleBuilder(
-            backend=ensemble_backend,
-            dataset_name="TEST",
-            task_type=BINARY_CLASSIFICATION,
-            metric=roc_auc,
-            seed=0,  # important to find the test files
-            ensemble_nbest=ensemble_nbest,
-            max_models_on_disc=models_on_disc,
-        )
+    )
+)
+def testNBest(ensemble_backend, ensemble_nbest, max_models_on_disc, exp):
+    ensbuilder = EnsembleBuilder(
+        backend=ensemble_backend,
+        dataset_name="TEST",
+        task_type=BINARY_CLASSIFICATION,
+        metric=roc_auc,
+        seed=0,  # important to find the test files
+        ensemble_nbest=ensemble_nbest,
+        max_models_on_disc=max_models_on_disc,
+    )
 
+    ensbuilder.score_ensemble_preds()
+    sel_keys = ensbuilder.get_n_best_preds()
+
+    assert len(sel_keys) == exp
+
+    fixture = os.path.join(
+        ensemble_backend.temporary_directory,
+        ".auto-sklearn/runs/0_2_0.0/predictions_ensemble_0_2_0.0.npy"
+    )
+    assert sel_keys[0] == fixture
+
+
+@pytest.mark.parametrize("test_case,exp", [
+    # If None, no reduction
+    (None, 2),
+    # If Int, limit only on exceed
+    (4, 2),
+    (1, 1),
+    # If Float, translate float to # models.
+    # below, mock of each file is 100 Mb and 4 files .model and .npy (test/val/pred) exist
+    # per run (except for run3, there they are 5). Now, it takes 500MB for run 3 and
+    # another 500 MB of slack because we keep as much space as the largest model
+    # available as slack
+    (1499.0, 1),
+    (1500.0, 2),
+    (9999.0, 2),
+])
+def testMaxModelsOnDisc(ensemble_backend, test_case, exp):
+    ensemble_nbest = 4
+    ensbuilder = EnsembleBuilder(
+        backend=ensemble_backend,
+        dataset_name="TEST",
+        task_type=BINARY_CLASSIFICATION,
+        metric=roc_auc,
+        seed=0,  # important to find the test files
+        ensemble_nbest=ensemble_nbest,
+        max_models_on_disc=test_case,
+    )
+
+    with unittest.mock.patch('os.path.getsize') as mock:
+        mock.return_value = 100*1024*1024
         ensbuilder.score_ensemble_preds()
         sel_keys = ensbuilder.get_n_best_preds()
-
-        assert len(sel_keys) == exp
-
-        fixture = os.path.join(
-            ensemble_backend.temporary_directory,
-            ".auto-sklearn/runs/0_2_0.0/predictions_ensemble_0_2_0.0.npy"
-        )
-        assert sel_keys[0] == fixture
+        assert len(sel_keys) == exp, test_case
 
 
-def testMaxModelsOnDisc(ensemble_backend):
-
-    ensemble_nbest = 4
-    for (test_case, exp) in [
-            # If None, no reduction
-            (None, 2),
-            # If Int, limit only on exceed
-            (4, 2),
-            (1, 1),
-            # If Float, translate float to # models.
-            # below, mock of each file is 100 Mb and 4 files .model and .npy (test/val/pred) exist
-            # per run (except for run3, there they are 5). Now, it takes 500MB for run 3 and
-            # another 500 MB of slack because we keep as much space as the largest model
-            # available as slack
-            (1499.0, 1),
-            (1500.0, 2),
-            (9999.0, 2),
-    ]:
-        ensbuilder = EnsembleBuilder(
-            backend=ensemble_backend,
-            dataset_name="TEST",
-            task_type=BINARY_CLASSIFICATION,
-            metric=roc_auc,
-            seed=0,  # important to find the test files
-            ensemble_nbest=ensemble_nbest,
-            max_models_on_disc=test_case,
-        )
-
-        with unittest.mock.patch('os.path.getsize') as mock:
-            mock.return_value = 100*1024*1024
-            ensbuilder.score_ensemble_preds()
-            sel_keys = ensbuilder.get_n_best_preds()
-            assert len(sel_keys) == exp, test_case
-
+def testMaxModelsOnDisc2(ensemble_backend):
     # Test for Extreme scenarios
     # Make sure that the best predictions are kept
     ensbuilder = EnsembleBuilder(
@@ -219,14 +213,14 @@ def testMaxModelsOnDisc(ensemble_backend):
     )
     ensbuilder.read_preds = {}
     for i in range(50):
-        ensbuilder.read_preds['pred'+str(i)] = {
+        ensbuilder.read_scores['pred'+str(i)] = {
             'ens_score': i*10,
             'num_run': i,
-            0: True,
             'loaded': 1,
             "seed": 1,
             "disc_space_cost_mb": 50*i,
         }
+        ensbuilder.read_preds['pred'+str(i)] = {Y_ENSEMBLE: True}
     sel_keys = ensbuilder.get_n_best_preds()
     assert ['pred49', 'pred48', 'pred47'] == sel_keys
 
@@ -236,55 +230,69 @@ def testMaxModelsOnDisc(ensemble_backend):
     assert ['pred49'] == sel_keys
 
 
-def testPerformanceRangeThreshold(ensemble_backend):
-    to_test = ((0.0, 4), (0.1, 4), (0.3, 3), (0.5, 2), (0.6, 2), (0.8, 1),
-               (1.0, 1), (1, 1))
-    for performance_range_threshold, exp in to_test:
-        ensbuilder = EnsembleBuilder(
-            backend=ensemble_backend,
-            dataset_name="TEST",
-            task_type=BINARY_CLASSIFICATION,
-            metric=roc_auc,
-            seed=0,  # important to find the test files
-            ensemble_nbest=100,
-            performance_range_threshold=performance_range_threshold
-        )
-        ensbuilder.read_preds = {
-            'A': {'ens_score': 1, 'num_run': 1, 0: True, 'loaded': -1, "seed": 1},
-            'B': {'ens_score': 2, 'num_run': 2, 0: True, 'loaded': -1, "seed": 1},
-            'C': {'ens_score': 3, 'num_run': 3, 0: True, 'loaded': -1, "seed": 1},
-            'D': {'ens_score': 4, 'num_run': 4, 0: True, 'loaded': -1, "seed": 1},
-            'E': {'ens_score': 5, 'num_run': 5, 0: True, 'loaded': -1, "seed": 1},
-        }
-        sel_keys = ensbuilder.get_n_best_preds()
+@pytest.mark.parametrize(
+    "performance_range_threshold,exp",
+    ((0.0, 4), (0.1, 4), (0.3, 3), (0.5, 2), (0.6, 2), (0.8, 1), (1.0, 1), (1, 1))
+)
+def testPerformanceRangeThreshold(ensemble_backend, performance_range_threshold, exp):
+    ensbuilder = EnsembleBuilder(
+        backend=ensemble_backend,
+        dataset_name="TEST",
+        task_type=BINARY_CLASSIFICATION,
+        metric=roc_auc,
+        seed=0,  # important to find the test files
+        ensemble_nbest=100,
+        performance_range_threshold=performance_range_threshold
+    )
+    ensbuilder.read_scores = {
+        'A': {'ens_score': 1, 'num_run': 1, 'loaded': -1, "seed": 1},
+        'B': {'ens_score': 2, 'num_run': 2, 'loaded': -1, "seed": 1},
+        'C': {'ens_score': 3, 'num_run': 3, 'loaded': -1, "seed": 1},
+        'D': {'ens_score': 4, 'num_run': 4, 'loaded': -1, "seed": 1},
+        'E': {'ens_score': 5, 'num_run': 5, 'loaded': -1, "seed": 1},
+    }
+    ensbuilder.read_preds = {
+        key: {key_2: True for key_2 in (Y_ENSEMBLE, Y_VALID, Y_TEST)}
+        for key in ensbuilder.read_scores
+    }
+    sel_keys = ensbuilder.get_n_best_preds()
 
-        assert len(sel_keys) == exp
+    assert len(sel_keys) == exp
 
 
-def testPerformanceRangeThresholdMaxBest(ensemble_backend):
-    to_test = ((0.0, 1, 1), (0.0, 1.0, 4), (0.1, 2, 2), (0.3, 4, 3),
-               (0.5, 1, 1), (0.6, 10, 2), (0.8, 0.5, 1), (1, 1.0, 1))
-    for performance_range_threshold, ensemble_nbest, exp in to_test:
-        ensbuilder = EnsembleBuilder(
-            backend=ensemble_backend,
-            dataset_name="TEST",
-            task_type=BINARY_CLASSIFICATION,
-            metric=roc_auc,
-            seed=0,  # important to find the test files
-            ensemble_nbest=ensemble_nbest,
-            performance_range_threshold=performance_range_threshold,
-            max_models_on_disc=None,
-        )
-        ensbuilder.read_preds = {
-            'A': {'ens_score': 1, 'num_run': 1, 0: True, 'loaded': -1, "seed": 1},
-            'B': {'ens_score': 2, 'num_run': 2, 0: True, 'loaded': -1, "seed": 1},
-            'C': {'ens_score': 3, 'num_run': 3, 0: True, 'loaded': -1, "seed": 1},
-            'D': {'ens_score': 4, 'num_run': 4, 0: True, 'loaded': -1, "seed": 1},
-            'E': {'ens_score': 5, 'num_run': 5, 0: True, 'loaded': -1, "seed": 1},
-        }
-        sel_keys = ensbuilder.get_n_best_preds()
+@pytest.mark.parametrize(
+    "performance_range_threshold,ensemble_nbest,exp",
+    (
+        (0.0, 1, 1), (0.0, 1.0, 4), (0.1, 2, 2), (0.3, 4, 3),
+        (0.5, 1, 1), (0.6, 10, 2), (0.8, 0.5, 1), (1, 1.0, 1)
+    )
+)
+def testPerformanceRangeThresholdMaxBest(ensemble_backend, performance_range_threshold,
+                                         ensemble_nbest, exp):
+            ensbuilder = EnsembleBuilder(
+                backend=ensemble_backend,
+                dataset_name="TEST",
+                task_type=BINARY_CLASSIFICATION,
+                metric=roc_auc,
+                seed=0,  # important to find the test files
+                ensemble_nbest=ensemble_nbest,
+                performance_range_threshold=performance_range_threshold,
+                max_models_on_disc=None,
+            )
+            ensbuilder.read_scores = {
+                'A': {'ens_score': 1, 'num_run': 1, 'loaded': -1, "seed": 1},
+                'B': {'ens_score': 2, 'num_run': 2, 'loaded': -1, "seed": 1},
+                'C': {'ens_score': 3, 'num_run': 3, 'loaded': -1, "seed": 1},
+                'D': {'ens_score': 4, 'num_run': 4, 'loaded': -1, "seed": 1},
+                'E': {'ens_score': 5, 'num_run': 5, 'loaded': -1, "seed": 1},
+            }
+            ensbuilder.read_preds = {
+                key: {key_2: True for key_2 in (Y_ENSEMBLE, Y_VALID, Y_TEST)}
+                for key in ensbuilder.read_scores
+            }
+            sel_keys = ensbuilder.get_n_best_preds()
 
-        assert len(sel_keys) == exp
+            assert len(sel_keys) == exp
 
 
 def testFallBackNBest(ensemble_backend):
@@ -298,24 +306,28 @@ def testFallBackNBest(ensemble_backend):
                                  )
 
     ensbuilder.score_ensemble_preds()
+    print()
+    print(ensbuilder.read_preds.keys())
+    print(ensbuilder.read_scores.keys())
+    print(ensemble_backend.temporary_directory)
 
     filename = os.path.join(
         ensemble_backend.temporary_directory,
         ".auto-sklearn/runs/0_2_0.0/predictions_ensemble_0_2_0.0.npy"
     )
-    ensbuilder.read_preds[filename]["ens_score"] = -1
+    ensbuilder.read_scores[filename]["ens_score"] = -1
 
     filename = os.path.join(
         ensemble_backend.temporary_directory,
         ".auto-sklearn/runs/0_3_100.0/predictions_ensemble_0_3_100.0.npy"
     )
-    ensbuilder.read_preds[filename]["ens_score"] = -1
+    ensbuilder.read_scores[filename]["ens_score"] = -1
 
     filename = os.path.join(
         ensemble_backend.temporary_directory,
         ".auto-sklearn/runs/0_1_0.0/predictions_ensemble_0_1_0.0.npy"
     )
-    ensbuilder.read_preds[filename]["ens_score"] = -1
+    ensbuilder.read_scores[filename]["ens_score"] = -1
 
     sel_keys = ensbuilder.get_n_best_preds()
 
@@ -445,7 +457,9 @@ def test_main(ensemble_backend):
         )
     ensbuilder.SAVE2DISC = False
 
-    run_history, ensemble_nbest = ensbuilder.main(time_left=np.inf, iteration=1)
+    run_history, ensemble_nbest, _, _, _ = ensbuilder.main(
+        time_left=np.inf, iteration=1, return_predictions=False,
+    )
 
     assert len(ensbuilder.read_preds) == 3
     assert ensbuilder.last_hash is not None
@@ -468,6 +482,13 @@ def test_main(ensemble_backend):
     assert all(item in run_history[0].items() for item in expected_performance.items())
     assert 'Timestamp' in run_history[0]
     assert isinstance(run_history[0]['Timestamp'], pd.Timestamp)
+
+    assert os.path.exists(
+        os.path.join(ensemble_backend.internals_directory, 'ensemble_read_preds.pkl')
+    ), os.listdir(ensemble_backend.internals_directory)
+    assert os.path.exists(
+        os.path.join(ensemble_backend.internals_directory, 'ensemble_read_scores.pkl')
+    ), os.listdir(ensemble_backend.internals_directory)
 
 
 def test_run_end_at(ensemble_backend):
@@ -503,15 +524,51 @@ def testLimit(ensemble_backend):
                                         )
     ensbuilder.SAVE2DISC = False
 
-    ensbuilder.run(time_left=1000, iteration=0)
-    ensbuilder.run(time_left=1000, iteration=0)
-    ensbuilder.run(time_left=1000, iteration=0)
+    read_scores_file = os.path.join(
+        ensemble_backend.internals_directory,
+        'ensemble_read_scores.pkl'
+    )
+    read_preds_file = os.path.join(
+        ensemble_backend.internals_directory,
+        'ensemble_read_preds.pkl'
+    )
 
-    # it should try to reduce ensemble_nbest until it also failed at 2
-    assert ensbuilder.ensemble_nbest == 1
+    with unittest.mock.patch('logging.getLogger') as get_logger_mock, \
+        unittest.mock.patch('logging.config.dictConfig') as _:
+        logger_mock = unittest.mock.Mock()
+        get_logger_mock.return_value = logger_mock
 
-    with pytest.raises(ValueError, match='Memory Exception -- Unable to further reduce'):
         ensbuilder.run(time_left=1000, iteration=0)
+        assert os.path.exists(read_scores_file)
+        assert not os.path.exists(read_preds_file)
+        assert logger_mock.warning.call_count == 1
+        ensbuilder.run(time_left=1000, iteration=0)
+        assert os.path.exists(read_scores_file)
+        assert not os.path.exists(read_preds_file)
+        assert logger_mock.warning.call_count == 2
+        ensbuilder.run(time_left=1000, iteration=0)
+        assert os.path.exists(read_scores_file)
+        assert not os.path.exists(read_preds_file)
+        assert logger_mock.warning.call_count == 3
+
+        # it should try to reduce ensemble_nbest until it also failed at 2
+        assert ensbuilder.ensemble_nbest == 1
+
+        ensbuilder.run(time_left=1000, iteration=0)
+        assert os.path.exists(read_scores_file)
+        assert not os.path.exists(read_preds_file)
+        assert logger_mock.warning.call_count == 4
+
+        # it should next reduce the number of models to read at most
+        assert ensbuilder.read_at_most == 1
+
+        # And then it still runs, but basically won't do anything any more except for raising error
+        # messages via the logger
+        ensbuilder.run(time_left=1000, iteration=0)
+        assert os.path.exists(read_scores_file)
+        assert not os.path.exists(read_preds_file)
+        assert logger_mock.warning.call_count == 4
+        assert logger_mock.error.call_count == 1
 
 
 def test_read_pickle_read_preds(ensemble_backend):
@@ -531,7 +588,7 @@ def test_read_pickle_read_preds(ensemble_backend):
         )
     ensbuilder.SAVE2DISC = False
 
-    ensbuilder.main(time_left=np.inf, iteration=1)
+    ensbuilder.main(time_left=np.inf, iteration=1, return_predictions=False)
 
     # Check that the memory was created
     ensemble_memory_file = os.path.join(
@@ -547,6 +604,18 @@ def test_read_pickle_read_preds(ensemble_backend):
     compare_read_preds(read_preds, ensbuilder.read_preds)
     assert last_hash == ensbuilder.last_hash
 
+    ensemble_memory_file = os.path.join(
+        ensemble_backend.internals_directory,
+        'ensemble_read_scores.pkl'
+    )
+    assert os.path.exists(ensemble_memory_file)
+
+    # Make sure we pickle the correct read scores
+    with (open(ensemble_memory_file, "rb")) as memory:
+        read_scores = pickle.load(memory)
+
+    compare_read_preds(read_scores, ensbuilder.read_scores)
+
     # Then create a new instance, which should automatically read this file
     ensbuilder2 = EnsembleBuilder(
         backend=ensemble_backend,
@@ -558,6 +627,7 @@ def test_read_pickle_read_preds(ensemble_backend):
         max_models_on_disc=None,
         )
     compare_read_preds(ensbuilder2.read_preds, ensbuilder.read_preds)
+    compare_read_preds(ensbuilder2.read_scores, ensbuilder.read_scores)
     assert ensbuilder2.last_hash == ensbuilder.last_hash
 
 
@@ -670,7 +740,7 @@ def test_ensemble_builder_process_realrun(dask_client, ensemble_backend):
     future = manager.futures.pop()
     dask.distributed.wait([future])  # wait for the ensemble process to finish
     result = future.result()
-    history, _ = result
+    history, _, _, _, _ = result
 
     assert 'ensemble_optimization_score' in history[0]
     assert history[0]['ensemble_optimization_score'] == 0.9
@@ -711,7 +781,7 @@ def test_ensemble_builder_nbest_remembered(fit_ensemble, ensemble_backend, dask_
     manager.build_ensemble(dask_client)
     future = manager.futures[0]
     dask.distributed.wait([future])  # wait for the ensemble process to finish
-    assert future.result() == ([], 5)
+    assert future.result() == ([], 5, None, None, None)
     file_path = os.path.join(ensemble_backend.internals_directory, 'ensemble_read_preds.pkl')
     assert not os.path.exists(file_path)
 
@@ -720,4 +790,4 @@ def test_ensemble_builder_nbest_remembered(fit_ensemble, ensemble_backend, dask_
     future = manager.futures[0]
     dask.distributed.wait([future])  # wait for the ensemble process to finish
     assert not os.path.exists(file_path)
-    assert future.result() == ([], 2)
+    assert future.result() == ([], 2, None, None, None)
