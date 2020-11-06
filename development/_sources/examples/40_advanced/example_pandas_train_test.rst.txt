@@ -210,7 +210,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score 0.8695652173913043
+    Accuracy score 0.8898550724637682
 
 
 
@@ -271,7 +271,7 @@ Plot the ensemble performance
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  3.208 seconds)
+   **Total running time of the script:** ( 1 minutes  57.518 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_pandas_train_test.py:
