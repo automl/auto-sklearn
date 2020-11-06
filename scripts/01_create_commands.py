@@ -3,6 +3,8 @@ import itertools
 import os
 import sys
 
+import openml
+
 sys.path.append('.')
 from update_metadata_util import classification_tasks, regression_tasks
 
@@ -23,6 +25,13 @@ absolute_script_name = os.path.join(this_directory, script_name)
 commands = []
 for task_id in (classification_tasks if not test else (75222, 233, 258)):
     for metric in ('accuracy', 'balanced_accuracy', 'roc_auc', 'logloss'):
+
+        if (
+            len(openml.tasks.get_task(task_id, download_data=False).class_labels) > 2
+            and metric == 'roc_auc'
+        ):
+            continue
+
         command = ('python3 %s --working-directory %s --time-limit 86400 '
                    '--per-run-time-limit 1800 --task-id %d -s 1 --metric %s' %
                    (absolute_script_name, working_directory, task_id, metric))

@@ -36,15 +36,14 @@ if __name__ == "__main__":
             metadata_sets = itertools.product(
                 [0, 1], [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION],
                 CLASSIFICATION_METRICS)
-            input_directory = os.path.join(working_directory, 'configuration',
-                                           'classification')
         elif task_type == 'regression':
             metadata_sets = itertools.product(
                 [0, 1], [REGRESSION], REGRESSION_METRICS)
-            input_directory = os.path.join(working_directory, 'configuration',
-                                           'regression')
         else:
             raise ValueError(task_type)
+
+        input_directory = os.path.join(working_directory, 'configuration', task_type)
+        metafeatures_dir_for_task = os.path.join(metafeatures_dir, task_type)
 
         for sparse, task, metric in metadata_sets:
             print(TASK_TYPES_TO_STRING[task], metric, sparse)
@@ -68,7 +67,7 @@ if __name__ == "__main__":
                 pass
 
             # Create description.txt
-            with open(os.path.join(metafeatures_dir,
+            with open(os.path.join(metafeatures_dir_for_task,
                                    "description.features.txt")) as fh:
                 description_metafeatures = fh.read()
 
@@ -90,7 +89,7 @@ if __name__ == "__main__":
                     fh.write("\n")
 
             # Copy feature values and add instance id
-            with open(os.path.join(metafeatures_dir,
+            with open(os.path.join(metafeatures_dir_for_task,
                                    "feature_values.arff")) as fh:
                 feature_values = arff.load(fh)
 
@@ -102,7 +101,7 @@ if __name__ == "__main__":
                 arff.dump(feature_values, fh)
 
             # Copy feature runstatus and add instance id
-            with open(os.path.join(metafeatures_dir,
+            with open(os.path.join(metafeatures_dir_for_task,
                                    "feature_runstatus.arff")) as fh:
                 feature_runstatus = arff.load(fh)
 
@@ -115,7 +114,7 @@ if __name__ == "__main__":
 
             # Copy feature runstatus and add instance id
             with open(
-                    os.path.join(metafeatures_dir, "feature_costs.arff")) as fh:
+                    os.path.join(metafeatures_dir_for_task, "feature_costs.arff")) as fh:
                 feature_costs = arff.load(fh)
 
             feature_costs['relation'] = scenario_id + "_" + feature_costs[

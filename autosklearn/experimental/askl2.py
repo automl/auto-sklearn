@@ -1,27 +1,45 @@
+import hashlib
 import json
 import os
+import pathlib
 import pickle
 from typing import Any, Dict, Optional, Union
+
+import dask.distributed
 
 from ConfigSpace import Configuration
 import numpy as np
 import pandas as pd
+import sklearn
 
+import autosklearn
 from autosklearn.classification import AutoSklearnClassifier
 import autosklearn.experimental.selector
 from autosklearn.metrics import Scorer
 
-this_directory = os.path.abspath(os.path.dirname(__file__))
-selector_file = os.path.join(this_directory, 'selector.pkl')
-training_data_file = os.path.join(this_directory, 'askl2_training_data.json')
+this_directory = pathlib.Path(__file__).resolve().parent
+training_data_file = this_directory / 'askl2_training_data.json'
 with open(training_data_file) as fh:
     training_data = json.load(fh)
+    fh.seek(0)
+    m = hashlib.md5()
+    m.update(fh.read().encode('utf8'))
+training_data_hash = m.hexdigest()[:10]
+sklearn_version = sklearn.__version__
+autosklearn_version = autosklearn.__version__
+selector_file = pathlib.Path(
+    os.environ.get(
+        'XDG_CACHE_HOME',
+        '~/.cache/auto-sklearn/askl2_selector_%s_%s_%s.pkl'
+        % (autosklearn_version, sklearn_version, training_data_hash),
+    )
+).expanduser()
 metafeatures = pd.DataFrame(training_data['metafeatures'])
 y_values = np.array(training_data['y_values'])
 strategies = training_data['strategies']
 minima_for_methods = training_data['minima_for_methods']
 maxima_for_methods = training_data['maxima_for_methods']
-if not os.path.exists(selector_file):
+if not selector_file.exists():
     selector = autosklearn.experimental.selector.OneVSOneSelector(
         configuration=training_data['configuration'],
         default_strategy_idx=strategies.index('RF_SH-eta4-i_holdout_iterative_es_if'),
@@ -34,12 +52,17 @@ if not os.path.exists(selector_file):
         minima=minima_for_methods,
         maxima=maxima_for_methods,
     )
+    selector_file.parent.mkdir(exist_ok=True, parents=True)
     with open(selector_file, 'wb') as fh:
         pickle.dump(selector, fh)
 
 
-def get_smac_object_callback(portfolio):
-    def get_smac_object(
+class SmacObjectCallback:
+    def __init__(self, portfolio):
+        self.portfolio = portfolio
+
+    def __call__(
+        self,
         scenario_dict,
         seed,
         ta,
@@ -51,12 +74,13 @@ def get_smac_object_callback(portfolio):
         from smac.facade.smac_ac_facade import SMAC4AC
         from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
         from smac.scenario.scenario import Scenario
+        from smac.intensification.simple_intensifier import SimpleIntensifier
 
         scenario = Scenario(scenario_dict)
 
         initial_configurations = [
             Configuration(configuration_space=scenario.cs, values=member)
-            for member in portfolio.values()]
+            for member in self.portfolio.values()]
 
         rh2EPM = RunHistory2EPM4LogCost
         return SMAC4AC(
@@ -66,15 +90,22 @@ def get_smac_object_callback(portfolio):
             tae_runner=ta,
             tae_runner_kwargs=ta_kwargs,
             initial_configurations=initial_configurations,
+            intensifier=SimpleIntensifier,
             run_id=seed,
             n_jobs=n_jobs,
             dask_client=dask_client,
         )
-    return get_smac_object
 
 
-def get_sh_object_callback(budget_type, eta, initial_budget, portfolio):
-    def get_smac_object(
+class SHObjectCallback:
+    def __init__(self, budget_type, eta, initial_budget, portfolio):
+        self.budget_type = budget_type
+        self.eta = eta
+        self.initial_budget = initial_budget
+        self.portfolio = portfolio
+
+    def __call__(
+        self,
         scenario_dict,
         seed,
         ta,
@@ -91,10 +122,10 @@ def get_sh_object_callback(budget_type, eta, initial_budget, portfolio):
         scenario = Scenario(scenario_dict)
         initial_configurations = [
             Configuration(configuration_space=scenario.cs, values=member)
-            for member in portfolio.values()]
+            for member in self.portfolio.values()]
 
         rh2EPM = RunHistory2EPM4LogCost
-        ta_kwargs['budget_type'] = budget_type
+        ta_kwargs['budget_type'] = self.budget_type
 
         smac4ac = SMAC4AC(
             scenario=scenario,
@@ -106,9 +137,9 @@ def get_sh_object_callback(budget_type, eta, initial_budget, portfolio):
             run_id=seed,
             intensifier=SuccessiveHalving,
             intensifier_kwargs={
-                'initial_budget': initial_budget,
+                'initial_budget': self.initial_budget,
                 'max_budget': 100,
-                'eta': eta,
+                'eta': self.eta,
                 'min_chall': 1,
             },
             dask_client=dask_client,
@@ -118,7 +149,6 @@ def get_sh_object_callback(budget_type, eta, initial_budget, portfolio):
             len(scenario.cs.get_hyperparameters()) / 2
         )
         return smac4ac
-    return get_smac_object
 
 
 class AutoSklearn2Classifier(AutoSklearnClassifier):
@@ -129,14 +159,14 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         ensemble_size: int = 50,
         ensemble_nbest: Union[float, int] = 50,
         max_models_on_disc: int = 50,
-        ensemble_memory_limit: int = 1024,
         seed: int = 1,
-        ml_memory_limit: int = 3072,
+        memory_limit: int = 3072,
         tmp_folder: Optional[str] = None,
         output_folder: Optional[str] = None,
         delete_tmp_folder_after_terminate: bool = True,
         delete_output_folder_after_terminate: bool = True,
         n_jobs: Optional[int] = None,
+        dask_client: Optional[dask.distributed.Client] = None,
         disable_evaluator_output: bool = False,
         smac_scenario_args: Optional[Dict[str, Any]] = None,
         logging_config: Optional[Dict[str, Any]] = None,
@@ -153,9 +183,8 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             ensemble_size=ensemble_size,
             ensemble_nbest=ensemble_nbest,
             max_models_on_disc=max_models_on_disc,
-            ensemble_memory_limit=ensemble_memory_limit,
             seed=seed,
-            ml_memory_limit=ml_memory_limit,
+            memory_limit=memory_limit,
             include_estimators=include_estimators,
             exclude_estimators=None,
             include_preprocessors=include_preprocessors,
@@ -167,6 +196,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             delete_tmp_folder_after_terminate=delete_tmp_folder_after_terminate,
             delete_output_folder_after_terminate=delete_output_folder_after_terminate,
             n_jobs=n_jobs,
+            dask_client=dask_client,
             disable_evaluator_output=disable_evaluator_output,
             get_smac_object_callback=None,
             smac_scenario_args=smac_scenario_args,
@@ -236,15 +266,15 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         else:
             resampling_strategy_kwargs = None
 
-        portfolio_file = os.path.join(this_directory, 'askl2_portfolios', '%s.json' % automl_policy)
+        portfolio_file = this_directory / 'askl2_portfolios' / ('%s.json' % automl_policy)
         with open(portfolio_file) as fh:
             portfolio_json = json.load(fh)
         portfolio = portfolio_json['portfolio']
 
         if setting['fidelity'] == 'SH':
-            smac_callback = get_sh_object_callback('iterations', 4, 5.0, portfolio)
+            smac_callback = SHObjectCallback('iterations', 4, 5.0, portfolio)
         else:
-            smac_callback = get_smac_object_callback(portfolio)
+            smac_callback = SmacObjectCallback(portfolio)
 
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_arguments = resampling_strategy_kwargs

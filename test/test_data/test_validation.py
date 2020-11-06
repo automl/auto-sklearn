@@ -538,6 +538,14 @@ class InputValidatorTest(unittest.TestCase):
         # No change to numerical columns
         np.testing.assert_array_equal(x['carbon'].to_numpy(), x_t[:, 3])
 
+        # Categorical columns are sorted to the beginning
+        self.assertEqual(
+            validator.feature_types,
+            (['categorical'] * 3) + (['numerical'] * 7)
+        )
+        self.assertEqual(x.iloc[0, 6], 610)
+        np.testing.assert_array_equal(x_t[0], [0, 0, 0, 8, 0, 0, 0.7, 610, 0, np.NaN])
+
         return
 
     def test_join_and_check(self):

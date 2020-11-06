@@ -7,7 +7,6 @@ import unittest
 import unittest.mock
 
 import numpy as np
-
 import pynisher
 from smac.runhistory.runhistory import RunInfo
 from smac.stats.stats import Stats
@@ -142,6 +141,7 @@ class EvaluationTest(unittest.TestCase):
     def test_eval_with_limits_holdout_fail_silent(self, pynisher_mock):
         pynisher_mock.return_value = None
         config = unittest.mock.Mock()
+        config.origin = 'MOCK'
         config.config_id = 198
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
@@ -159,9 +159,12 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[1].status, StatusType.CRASHED)
         self.assertEqual(info[1].cost, 1.0)
         self.assertIsInstance(info[1].time, float)
-        self.assertEqual(len(info[1].additional_info), 2)
-        self.assertIn('configuration_origin', info[1].additional_info)
-        self.assertEqual(info[1].additional_info['error'], "Result queue is empty")
+        self.assertEqual(info[1].additional_info, {'configuration_origin': 'MOCK',
+                                                   'error': "Result queue is empty",
+                                                   'exit_status': 0,
+                                                   'exitcode': 0,
+                                                   'subprocess_stdout': '',
+                                                   'subprocess_stderr': ''})
 
         self.stats.submitted_ta_runs += 1
         info = ta.run_wrapper(RunInfo(config=config, cutoff=30, instance=None,
@@ -169,9 +172,12 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[1].status, StatusType.CRASHED)
         self.assertEqual(info[1].cost, 1.0)
         self.assertIsInstance(info[1].time, float)
-        self.assertEqual(len(info[1].additional_info), 2)
-        self.assertIn('configuration_origin', info[1].additional_info)
-        self.assertEqual(info[1].additional_info['error'], "Result queue is empty")
+        self.assertEqual(info[1].additional_info, {'configuration_origin': 'MOCK',
+                                                   'error': "Result queue is empty",
+                                                   'exit_status': 0,
+                                                   'exitcode': 0,
+                                                   'subprocess_stdout': '',
+                                                   'subprocess_stderr': ''})
 
     @unittest.mock.patch('autosklearn.evaluation.train_evaluator.eval_holdout')
     def test_eval_with_limits_holdout_fail_memory_error(self, pynisher_mock):
@@ -195,6 +201,7 @@ class EvaluationTest(unittest.TestCase):
         worst_possible_result = MAXINT
         self.assertEqual(info[1].cost, worst_possible_result)
         self.assertIsInstance(info[1].time, float)
+        self.assertNotIn('exitcode', info[1].additional_info)
 
     @unittest.mock.patch('pynisher.enforce_limits')
     def test_eval_with_limits_holdout_fail_timeout(self, pynisher_mock):
@@ -221,6 +228,7 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[1].status, StatusType.TIMEOUT)
         self.assertEqual(info[1].cost, 1.0)
         self.assertIsInstance(info[1].time, float)
+        self.assertNotIn('exitcode', info[1].additional_info)
 
     @unittest.mock.patch('pynisher.enforce_limits')
     def test_eval_with_limits_holdout_timeout_with_results_in_queue(self, pynisher_mock):
@@ -255,6 +263,7 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[1].status, StatusType.SUCCESS)
         self.assertEqual(info[1].cost, 0.5)
         self.assertIsInstance(info[1].time, float)
+        self.assertNotIn('exitcode', info[1].additional_info)
 
         # And a crashed run which is in the queue
         def side_effect(**kwargs):
@@ -277,6 +286,7 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[1].status, StatusType.CRASHED)
         self.assertEqual(info[1].cost, 1.0)
         self.assertIsInstance(info[1].time, float)
+        self.assertNotIn('exitcode', info[1].additional_info)
 
     @unittest.mock.patch('autosklearn.evaluation.train_evaluator.eval_holdout')
     def test_eval_with_limits_holdout_2(self, eval_houldout_mock):
@@ -330,3 +340,40 @@ class EvaluationTest(unittest.TestCase):
         self.assertIsInstance(info[1].time, float)
         self.assertEqual(info[1].additional_info['error'], 'ValueError()')
         self.assertIn('traceback', info[1].additional_info)
+        self.assertNotIn('exitcode', info[1].additional_info)
+
+    def test_silent_exception_in_target_function(self):
+        config = unittest.mock.Mock()
+        config.config_id = 198
+
+        backend_mock = BackendMock()
+        ta = ExecuteTaFuncWithQueue(backend=backend_mock,
+                                    autosklearn_seed=1,
+                                    resampling_strategy='holdout',
+                                    logger=self.logger,
+                                    stats=self.stats,
+                                    memory_limit=3072,
+                                    metric=accuracy,
+                                    cost_for_crash=get_cost_of_crash(accuracy),
+                                    abort_on_first_run_crash=False,
+                                    iterative=False,
+                                    )
+        ta.pynisher_logger = unittest.mock.Mock()
+        self.stats.submitted_ta_runs += 1
+        info = ta.run_wrapper(RunInfo(config=config, cutoff=3000, instance=None,
+                                      instance_specific=None, seed=1, capped=False))
+        self.assertEqual(info[1].status, StatusType.CRASHED, msg=str(info[1].additional_info))
+        self.assertEqual(info[1].cost, 1.0)
+        self.assertIsInstance(info[1].time, float)
+        self.assertIn(
+            info[1].additional_info['error'],
+            (
+                """AttributeError("'BackendMock' object has no attribute """
+                """'save_targets_ensemble'",)""",
+                """AttributeError("'BackendMock' object has no attribute """
+                """'save_targets_ensemble'")""",
+            )
+        )
+        self.assertNotIn('exitcode', info[1].additional_info)
+        self.assertNotIn('exit_status', info[1].additional_info)
+        self.assertNotIn('traceback', info[1])

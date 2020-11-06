@@ -75,34 +75,6 @@ class AbstractDataManager():
     def encoder(self, value: DataPreprocessor) -> DataPreprocessor:
         self._encoder = value
 
-    def perform1HotEncoding(self) -> None:
-        sparse = True if self.info['is_sparse'] == 1 else False
-        has_missing = True if self.info['has_missing'] else False
-        to_encode = ['categorical']
-        if has_missing:
-            to_encode += ['binary']
-        encoding_mask = [feat_type.lower() in to_encode
-                         for feat_type in self.feat_type]
-
-        data = [self.data['X_train']]
-        if 'X_valid' in self.data:
-            data.append(self.data['X_valid'])
-        if 'X_test' in self.data:
-            data.append(self.data['X_test'])
-        data, sparse = perform_one_hot_encoding(
-            sparse=sparse, categorical=encoding_mask,
-            data=data)
-
-        self.info['is_sparse'] = 1 if sparse else 0
-        self.data['X_train'] = data[0]
-        if 'X_valid' in self.data and 'X_test' in self.data:
-            self.data['X_valid'] = data[1]
-            self.data['X_test'] = data[2]
-        elif 'X_valid' in self.data:
-            self.data['X_valid'] = data[1]
-        elif 'X_test' in self.data:
-            self.data['X_test'] = data[1]
-
     def __repr__(self) -> str:
         return 'DataManager : ' + self.name
 

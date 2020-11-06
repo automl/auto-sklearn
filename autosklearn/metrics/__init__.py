@@ -127,12 +127,28 @@ class _ProbaScorer(Scorer):
         score : float
             Score function applied to prediction of estimator on X.
         """
+
+        if self._score_func is sklearn.metrics.log_loss:
+            n_labels_pred = np.array(y_pred).reshape((len(y_pred), -1)).shape[1]
+            n_labels_test = len(np.unique(y_true))
+            if n_labels_pred != n_labels_test:
+                labels = list(range(n_labels_pred))
+                if sample_weight is not None:
+                    return self._sign * self._score_func(y_true, y_pred,
+                                                         sample_weight=sample_weight,
+                                                         labels=labels,
+                                                         **self._kwargs)
+                else:
+                    return self._sign * self._score_func(y_true, y_pred,
+                                                         labels=labels, **self._kwargs)
+
         if sample_weight is not None:
             return self._sign * self._score_func(y_true, y_pred,
                                                  sample_weight=sample_weight,
                                                  **self._kwargs)
         else:
-            return self._sign * self._score_func(y_true, y_pred, **self._kwargs)
+            return self._sign * self._score_func(y_true, y_pred,
+                                                 **self._kwargs)
 
 
 class _ThresholdScorer(Scorer):
@@ -339,7 +355,15 @@ def calculate_score(
             metric_dict[metric.name] = metric
             for metric_ in REGRESSION_METRICS:
                 func = REGRESSION_METRICS[metric_]
-                score_dict[func.name] = func(solution, cprediction)
+                try:
+                    score_dict[func.name] = func(solution, cprediction)
+                except ValueError as e:
+                    print(e, e.args[0])
+                    if e.args[0] == "Mean Squared Logarithmic Error cannot be used when " \
+                                    "targets contain negative values.":
+                        continue
+                    else:
+                        raise e
 
         else:
             metric_dict = copy.copy(CLASSIFICATION_METRICS)

@@ -68,7 +68,7 @@ class VerifyPackagesTests(unittest.TestCase):
 
         self.assertRaisesRegex(
             IncorrectPackageVersionError,
-            re.escape("'package 0.1.2' version mismatch (>0.1.2)"),
+            re.escape("found 'package' version 0.1.2 but requires package version >0.1.2"),
             verify_packages,
             requirement,
             )
@@ -82,7 +82,7 @@ class VerifyPackagesTests(unittest.TestCase):
 
         self.assertRaisesRegex(
             IncorrectPackageVersionError,
-            re.escape("'package 0.0.9' version mismatch (>=0.1)"),
+            re.escape("found 'package' version 0.0.9 but requires package version >=0.1"),
             verify_packages,
             requirement,
             )
@@ -96,7 +96,7 @@ class VerifyPackagesTests(unittest.TestCase):
 
         self.assertRaisesRegex(
             IncorrectPackageVersionError,
-            re.escape("'package 0.1.3' version mismatch (==0.1.2)"),
+            re.escape("found 'package' version 0.1.3 but requires package version ==0.1.2"),
             verify_packages,
             requirement,
             )

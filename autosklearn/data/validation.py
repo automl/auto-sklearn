@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 
+import functools
 import warnings
 from typing import List, Optional, Tuple, Union
 
@@ -364,6 +365,25 @@ class InputValidator:
                 # Mypy redefinition
                 assert self.feature_encoder is not None
                 self.feature_encoder.fit(X)
+
+                # The column transformer reoders the feature types - we therefore need to change
+                # it as well
+                def comparator(cmp1, cmp2):
+                    if (
+                        cmp1 == 'categorical' and cmp2 == 'categorical'
+                        or cmp1 == 'numerical' and cmp2 == 'numerical'
+                    ):
+                        return 0
+                    elif cmp1 == 'categorical' and cmp2 == 'numerical':
+                        return -1
+                    elif cmp1 == 'numerical' and cmp2 == 'categorical':
+                        return 1
+                    else:
+                        raise ValueError((cmp1, cmp2))
+                self.feature_types = sorted(
+                    self.feature_types,
+                    key=functools.cmp_to_key(comparator)
+                )
 
         if self.feature_encoder:
             try:
