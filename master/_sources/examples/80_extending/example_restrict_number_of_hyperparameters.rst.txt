@@ -188,20 +188,21 @@ Fit Random forest classifier to the data
 
  .. code-block:: none
 
+    [WARNING] [2020-11-06 13:52:02,932:AutoML(1):42974889890e197549f4f3f519c1e61c] No valid ensemble was created. Please check the logfile for errors. Default to the best individual estimator:[(1, 2, 0.0)]
 
     AutoSklearnClassifier(dask_client=None,
                           delete_output_folder_after_terminate=True,
                           delete_tmp_folder_after_terminate=True,
-                          disable_evaluator_output=False,
-                          ensemble_memory_limit=1024, ensemble_nbest=50,
+                          disable_evaluator_output=False, ensemble_nbest=50,
                           ensemble_size=50, exclude_estimators=['random_forest'],
                           exclude_preprocessors=None, get_smac_object_callback=None,
-                          include_estimators=None, include_preprocesso...,
+                          include_estimators=None, include_preprocessors=None,
                           initial_configurations_via_metalearning=0,
-                          logging_config=None, max_models_on_disc=50,
-                          metadata_directory=None, metric=None,
-                          ml_memory_limit=3072, n_jobs=None, output_folder=None,
-                          per_run_time_limit=10, resampling_strategy='holdout',
+                          load_models=None, logging_config=None,
+                          max_models_on_disc=50, memory_limit=3072,
+                          metadata_directory=None, metric=None, n_jobs=None,
+                          output_folder=None, per_run_time_limit=10,
+                          resampling_strategy='holdout',
                           resampling_strategy_arguments=None, seed=1,
                           smac_scenario_args={'runcount_limit': 1},
                           time_left_for_this_task=30, tmp_folder=None)
@@ -585,7 +586,7 @@ Print the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  24.414 seconds)
+   **Total running time of the script:** ( 0 minutes  2.963 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_restrict_number_of_hyperparameters.py:

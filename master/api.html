@@ -4,9 +4,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>APIs &#8212; AutoSklearn 0.10.0 documentation</title>
-    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <title>APIs &#8212; AutoSklearn 0.11.0 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery-binder.css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery-dataframe.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.10.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.11.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -136,7 +136,7 @@
 <h3>Classification<a class="headerlink" href="#classification" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt id="autosklearn.classification.AutoSklearnClassifier">
-<em class="property">class </em><code class="sig-prename descclassname">autosklearn.classification.</code><code class="sig-name descname">AutoSklearnClassifier</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_left_for_this_task</span><span class="o">=</span><span class="default_value">3600</span></em>, <em class="sig-param"><span class="n">per_run_time_limit</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="default_value">25</span></em>, <em class="sig-param"><span class="n">ensemble_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">50</span></em>, <em class="sig-param"><span class="n">ensemble_nbest</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">max_models_on_disc</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">ensemble_memory_limit</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">1024</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">ml_memory_limit</span><span class="o">=</span><span class="default_value">3072</span></em>, <em class="sig-param"><span class="n">include_estimators</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">exclude_estimators</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">include_preprocessors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">exclude_preprocessors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">resampling_strategy</span><span class="o">=</span><span class="default_value">'holdout'</span></em>, <em class="sig-param"><span class="n">resampling_strategy_arguments</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tmp_folder</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">output_folder</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">delete_output_folder_after_terminate</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">n_jobs</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dask_client</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>distributed.client.Client<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">disable_evaluator_output</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">get_smac_object_callback</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">smac_scenario_args</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logging_config</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">metadata_directory</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">metric</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">autosklearn.classification.</code><code class="sig-name descname">AutoSklearnClassifier</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_left_for_this_task</span><span class="o">=</span><span class="default_value">3600</span></em>, <em class="sig-param"><span class="n">per_run_time_limit</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="default_value">25</span></em>, <em class="sig-param"><span class="n">ensemble_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">50</span></em>, <em class="sig-param"><span class="n">ensemble_nbest</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">max_models_on_disc</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">memory_limit</span><span class="o">=</span><span class="default_value">3072</span></em>, <em class="sig-param"><span class="n">include_estimators</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">exclude_estimators</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">include_preprocessors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">exclude_preprocessors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">resampling_strategy</span><span class="o">=</span><span class="default_value">'holdout'</span></em>, <em class="sig-param"><span class="n">resampling_strategy_arguments</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tmp_folder</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">output_folder</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">delete_output_folder_after_terminate</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">n_jobs</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dask_client</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>distributed.client.Client<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">disable_evaluator_output</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">get_smac_object_callback</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">smac_scenario_args</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logging_config</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">metadata_directory</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">metric</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">load_models</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class implements the classification task.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
@@ -170,18 +170,14 @@ can be used for an ensemble.
 It must be an integer greater or equal than 1.
 If set to None, all models are kept on the disc.</p>
 </dd>
-<dt><strong>ensemble_memory_limit</strong><span class="classifier">int, optional (1024)</span></dt><dd><p>Memory limit in MB for the ensemble building process.
-<cite>auto-sklearn</cite> will reduce the number of considered models
-(<code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code>) if the memory limit is reached.
-If <code class="docutils literal notranslate"><span class="pre">None</span></code>, no memory limit is enforced.</p>
-</dd>
 <dt><strong>seed</strong><span class="classifier">int, optional (default=1)</span></dt><dd><p>Used to seed SMAC. Will determine the output file names.</p>
 </dd>
-<dt><strong>ml_memory_limit</strong><span class="classifier">int, optional (3072)</span></dt><dd><p>Memory limit in MB for the machine learning algorithm.
+<dt><strong>memory_limit</strong><span class="classifier">int, optional (3072)</span></dt><dd><p>Memory limit in MB for the machine learning algorithm.
 <cite>auto-sklearn</cite> will stop fitting the machine learning algorithm if
-it tries to allocate more than <cite>ml_memory_limit</cite> MB.
+it tries to allocate more than <cite>memory_limit</cite> MB.
 If None is provided, no memory limit is set.
-In case of multi-processing, <cite>ml_memory_limit</cite> will be per job.</p>
+In case of multi-processing, <cite>memory_limit</cite> will be per job.
+This memory limit also applies to the ensemble creation process.</p>
 </dd>
 <dt><strong>include_estimators</strong><span class="classifier">list, optional (None)</span></dt><dd><p>If None, all possible estimators are used. Otherwise specifies
 set of estimators to use.</p>
@@ -250,7 +246,7 @@ Refer to the ‘n_splits’ argument as ‘folds’.</p>
 automatically use <code class="docutils literal notranslate"><span class="pre">/tmp/autosklearn_tmp_$pid_$random_number</span></code></p>
 </dd>
 <dt><strong>output_folder</strong><span class="classifier">string, optional (None)</span></dt><dd><p>folder to store predictions for optional test set, if <code class="docutils literal notranslate"><span class="pre">None</span></code>
-automatically use <code class="docutils literal notranslate"><span class="pre">/tmp/autosklearn_output_$pid_$random_number</span></code></p>
+no output will be generated</p>
 </dd>
 <dt><strong>delete_tmp_folder_after_terminate: string, optional (True)</strong></dt><dd><p>remove tmp_folder, when finished. If tmp_folder is None
 tmp_dir will always be deleted</p>
@@ -258,16 +254,16 @@ tmp_dir will always be deleted</p>
 <dt><strong>delete_output_folder_after_terminate: bool, optional (True)</strong></dt><dd><p>remove output_folder, when finished. If output_folder is None
 output_dir will always be deleted</p>
 </dd>
-<dt><strong>n_jobs</strong><span class="classifier">int, optional, experimental</span></dt><dd><p>The number of jobs to run in parallel for <code class="docutils literal notranslate"><span class="pre">fit()</span></code>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> means 
-using all processors. By default, Auto-sklearn uses a single core 
+<dt><strong>n_jobs</strong><span class="classifier">int, optional, experimental</span></dt><dd><p>The number of jobs to run in parallel for <code class="docutils literal notranslate"><span class="pre">fit()</span></code>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> means
+using all processors. By default, Auto-sklearn uses a single core
 for fitting the machine learning model and a single core for fitting
 an ensemble. Ensemble building is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> but
 can be controlled by the number of models in the ensemble. In
 contrast to most scikit-learn models, <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> given in the
-constructor is not applied to the <code class="docutils literal notranslate"><span class="pre">predict()</span></code> method. If 
+constructor is not applied to the <code class="docutils literal notranslate"><span class="pre">predict()</span></code> method. If
 <code class="docutils literal notranslate"><span class="pre">dask_client</span></code> is None, a new dask client is created.</p>
 </dd>
-<dt><strong>dask_client</strong><span class="classifier">dask.distributed.Client, optional</span></dt><dd><p>User-created dask client, can be used to start a dask cluster and then 
+<dt><strong>dask_client</strong><span class="classifier">dask.distributed.Client, optional</span></dt><dd><p>User-created dask client, can be used to start a dask cluster and then
 attach auto-sklearn to it.</p>
 </dd>
 <dt><strong>disable_evaluator_output: bool or list, optional (False)</strong></dt><dd><p>If True, disable model and prediction output. Cannot be used
@@ -304,6 +300,8 @@ the directory <code class="docutils literal notranslate"><span class="pre">util/
 <a class="reference internal" href="#autosklearn.metrics.make_scorer" title="autosklearn.metrics.make_scorer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">autosklearn.metrics.make_scorer()</span></code></a>. These are the <a class="reference internal" href="#built-in-metrics">Built-in
 Metrics</a>.
 If None is provided, a default metric is selected depending on the task.</p>
+</dd>
+<dt><strong>load_models</strong><span class="classifier">bool, optional (True)</span></dt><dd><p>Whether to load the models after fitting Auto-sklearn.</p>
 </dd>
 </dl>
 </dd>
@@ -561,7 +559,7 @@ component of a nested object.</p>
 
 <dl class="py class">
 <dt id="autosklearn.experimental.askl2.AutoSklearn2Classifier">
-<em class="property">class </em><code class="sig-prename descclassname">autosklearn.experimental.askl2.</code><code class="sig-name descname">AutoSklearn2Classifier</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_left_for_this_task</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">3600</span></em>, <em class="sig-param"><span class="n">ensemble_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">50</span></em>, <em class="sig-param"><span class="n">ensemble_nbest</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>float<span class="p">, </span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">50</span></em>, <em class="sig-param"><span class="n">max_models_on_disc</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">50</span></em>, <em class="sig-param"><span class="n">ensemble_memory_limit</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">1024</span></em>, <em class="sig-param"><span class="n">seed</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">1</span></em>, <em class="sig-param"><span class="n">ml_memory_limit</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">3072</span></em>, <em class="sig-param"><span class="n">tmp_folder</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">output_folder</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">delete_tmp_folder_after_terminate</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">delete_output_folder_after_terminate</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">n_jobs</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">disable_evaluator_output</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">smac_scenario_args</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logging_config</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">metric</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>autosklearn.metrics.Scorer<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/experimental/askl2.html#AutoSklearn2Classifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.experimental.askl2.AutoSklearn2Classifier" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">autosklearn.experimental.askl2.</code><code class="sig-name descname">AutoSklearn2Classifier</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_left_for_this_task</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">3600</span></em>, <em class="sig-param"><span class="n">ensemble_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">50</span></em>, <em class="sig-param"><span class="n">ensemble_nbest</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>float<span class="p">, </span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">50</span></em>, <em class="sig-param"><span class="n">max_models_on_disc</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">50</span></em>, <em class="sig-param"><span class="n">seed</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">1</span></em>, <em class="sig-param"><span class="n">memory_limit</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">3072</span></em>, <em class="sig-param"><span class="n">tmp_folder</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">output_folder</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">delete_tmp_folder_after_terminate</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">delete_output_folder_after_terminate</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">n_jobs</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dask_client</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>distributed.client.Client<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">disable_evaluator_output</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">smac_scenario_args</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logging_config</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">metric</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>autosklearn.metrics.Scorer<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/experimental/askl2.html#AutoSklearn2Classifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.experimental.askl2.AutoSklearn2Classifier" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl>
@@ -594,18 +592,14 @@ can be used for an ensemble.
 It must be an integer greater or equal than 1.
 If set to None, all models are kept on the disc.</p>
 </dd>
-<dt><strong>ensemble_memory_limit</strong><span class="classifier">int, optional (1024)</span></dt><dd><p>Memory limit in MB for the ensemble building process.
-<cite>auto-sklearn</cite> will reduce the number of considered models
-(<code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code>) if the memory limit is reached.
-If <code class="docutils literal notranslate"><span class="pre">None</span></code>, no memory limit is enforced.</p>
-</dd>
 <dt><strong>seed</strong><span class="classifier">int, optional (default=1)</span></dt><dd><p>Used to seed SMAC. Will determine the output file names.</p>
 </dd>
-<dt><strong>ml_memory_limit</strong><span class="classifier">int, optional (3072)</span></dt><dd><p>Memory limit in MB for the machine learning algorithm.
+<dt><strong>memory_limit</strong><span class="classifier">int, optional (3072)</span></dt><dd><p>Memory limit in MB for the machine learning algorithm.
 <cite>auto-sklearn</cite> will stop fitting the machine learning algorithm if
-it tries to allocate more than <cite>ml_memory_limit</cite> MB.
+it tries to allocate more than <cite>memory_limit</cite> MB.
 If None is provided, no memory limit is set.
-In case of multi-processing, <cite>ml_memory_limit</cite> will be per job.</p>
+In case of multi-processing, <cite>memory_limit</cite> will be per job.
+This memory limit also applies to the ensemble creation process.</p>
 </dd>
 <dt><strong>include_estimators</strong><span class="classifier">list, optional (None)</span></dt><dd><p>If None, all possible estimators are used. Otherwise specifies
 set of estimators to use.</p>
@@ -674,7 +668,7 @@ Refer to the ‘n_splits’ argument as ‘folds’.</p>
 automatically use <code class="docutils literal notranslate"><span class="pre">/tmp/autosklearn_tmp_$pid_$random_number</span></code></p>
 </dd>
 <dt><strong>output_folder</strong><span class="classifier">string, optional (None)</span></dt><dd><p>folder to store predictions for optional test set, if <code class="docutils literal notranslate"><span class="pre">None</span></code>
-automatically use <code class="docutils literal notranslate"><span class="pre">/tmp/autosklearn_output_$pid_$random_number</span></code></p>
+no output will be generated</p>
 </dd>
 <dt><strong>delete_tmp_folder_after_terminate: string, optional (True)</strong></dt><dd><p>remove tmp_folder, when finished. If tmp_folder is None
 tmp_dir will always be deleted</p>
@@ -682,16 +676,16 @@ tmp_dir will always be deleted</p>
 <dt><strong>delete_output_folder_after_terminate: bool, optional (True)</strong></dt><dd><p>remove output_folder, when finished. If output_folder is None
 output_dir will always be deleted</p>
 </dd>
-<dt><strong>n_jobs</strong><span class="classifier">int, optional, experimental</span></dt><dd><p>The number of jobs to run in parallel for <code class="docutils literal notranslate"><span class="pre">fit()</span></code>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> means 
-using all processors. By default, Auto-sklearn uses a single core 
+<dt><strong>n_jobs</strong><span class="classifier">int, optional, experimental</span></dt><dd><p>The number of jobs to run in parallel for <code class="docutils literal notranslate"><span class="pre">fit()</span></code>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> means
+using all processors. By default, Auto-sklearn uses a single core
 for fitting the machine learning model and a single core for fitting
 an ensemble. Ensemble building is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> but
 can be controlled by the number of models in the ensemble. In
 contrast to most scikit-learn models, <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> given in the
-constructor is not applied to the <code class="docutils literal notranslate"><span class="pre">predict()</span></code> method. If 
+constructor is not applied to the <code class="docutils literal notranslate"><span class="pre">predict()</span></code> method. If
 <code class="docutils literal notranslate"><span class="pre">dask_client</span></code> is None, a new dask client is created.</p>
 </dd>
-<dt><strong>dask_client</strong><span class="classifier">dask.distributed.Client, optional</span></dt><dd><p>User-created dask client, can be used to start a dask cluster and then 
+<dt><strong>dask_client</strong><span class="classifier">dask.distributed.Client, optional</span></dt><dd><p>User-created dask client, can be used to start a dask cluster and then
 attach auto-sklearn to it.</p>
 </dd>
 <dt><strong>disable_evaluator_output: bool or list, optional (False)</strong></dt><dd><p>If True, disable model and prediction output. Cannot be used
@@ -728,6 +722,8 @@ the directory <code class="docutils literal notranslate"><span class="pre">util/
 <a class="reference internal" href="#autosklearn.metrics.make_scorer" title="autosklearn.metrics.make_scorer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">autosklearn.metrics.make_scorer()</span></code></a>. These are the <a class="reference internal" href="#built-in-metrics">Built-in
 Metrics</a>.
 If None is provided, a default metric is selected depending on the task.</p>
+</dd>
+<dt><strong>load_models</strong><span class="classifier">bool, optional (True)</span></dt><dd><p>Whether to load the models after fitting Auto-sklearn.</p>
 </dd>
 </dl>
 </dd>
@@ -988,7 +984,7 @@ component of a nested object.</p>
 <h3>Regression<a class="headerlink" href="#regression" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt id="autosklearn.regression.AutoSklearnRegressor">
-<em class="property">class </em><code class="sig-prename descclassname">autosklearn.regression.</code><code class="sig-name descname">AutoSklearnRegressor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_left_for_this_task</span><span class="o">=</span><span class="default_value">3600</span></em>, <em class="sig-param"><span class="n">per_run_time_limit</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="default_value">25</span></em>, <em class="sig-param"><span class="n">ensemble_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">50</span></em>, <em class="sig-param"><span class="n">ensemble_nbest</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">max_models_on_disc</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">ensemble_memory_limit</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">1024</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">ml_memory_limit</span><span class="o">=</span><span class="default_value">3072</span></em>, <em class="sig-param"><span class="n">include_estimators</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">exclude_estimators</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">include_preprocessors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">exclude_preprocessors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">resampling_strategy</span><span class="o">=</span><span class="default_value">'holdout'</span></em>, <em class="sig-param"><span class="n">resampling_strategy_arguments</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tmp_folder</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">output_folder</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">delete_output_folder_after_terminate</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">n_jobs</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dask_client</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>distributed.client.Client<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">disable_evaluator_output</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">get_smac_object_callback</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">smac_scenario_args</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logging_config</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">metadata_directory</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">metric</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnRegressor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">autosklearn.regression.</code><code class="sig-name descname">AutoSklearnRegressor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_left_for_this_task</span><span class="o">=</span><span class="default_value">3600</span></em>, <em class="sig-param"><span class="n">per_run_time_limit</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="default_value">25</span></em>, <em class="sig-param"><span class="n">ensemble_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">50</span></em>, <em class="sig-param"><span class="n">ensemble_nbest</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">max_models_on_disc</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">memory_limit</span><span class="o">=</span><span class="default_value">3072</span></em>, <em class="sig-param"><span class="n">include_estimators</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">exclude_estimators</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">include_preprocessors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">exclude_preprocessors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">resampling_strategy</span><span class="o">=</span><span class="default_value">'holdout'</span></em>, <em class="sig-param"><span class="n">resampling_strategy_arguments</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tmp_folder</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">output_folder</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">delete_output_folder_after_terminate</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">n_jobs</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dask_client</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>distributed.client.Client<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">disable_evaluator_output</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">get_smac_object_callback</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">smac_scenario_args</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logging_config</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">metadata_directory</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">metric</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">load_models</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnRegressor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class implements the regression task.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
@@ -1022,18 +1018,14 @@ can be used for an ensemble.
 It must be an integer greater or equal than 1.
 If set to None, all models are kept on the disc.</p>
 </dd>
-<dt><strong>ensemble_memory_limit</strong><span class="classifier">int, optional (1024)</span></dt><dd><p>Memory limit in MB for the ensemble building process.
-<cite>auto-sklearn</cite> will reduce the number of considered models
-(<code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code>) if the memory limit is reached.
-If <code class="docutils literal notranslate"><span class="pre">None</span></code>, no memory limit is enforced.</p>
-</dd>
 <dt><strong>seed</strong><span class="classifier">int, optional (default=1)</span></dt><dd><p>Used to seed SMAC. Will determine the output file names.</p>
 </dd>
-<dt><strong>ml_memory_limit</strong><span class="classifier">int, optional (3072)</span></dt><dd><p>Memory limit in MB for the machine learning algorithm.
+<dt><strong>memory_limit</strong><span class="classifier">int, optional (3072)</span></dt><dd><p>Memory limit in MB for the machine learning algorithm.
 <cite>auto-sklearn</cite> will stop fitting the machine learning algorithm if
-it tries to allocate more than <cite>ml_memory_limit</cite> MB.
+it tries to allocate more than <cite>memory_limit</cite> MB.
 If None is provided, no memory limit is set.
-In case of multi-processing, <cite>ml_memory_limit</cite> will be per job.</p>
+In case of multi-processing, <cite>memory_limit</cite> will be per job.
+This memory limit also applies to the ensemble creation process.</p>
 </dd>
 <dt><strong>include_estimators</strong><span class="classifier">list, optional (None)</span></dt><dd><p>If None, all possible estimators are used. Otherwise specifies
 set of estimators to use.</p>
@@ -1102,7 +1094,7 @@ Refer to the ‘n_splits’ argument as ‘folds’.</p>
 automatically use <code class="docutils literal notranslate"><span class="pre">/tmp/autosklearn_tmp_$pid_$random_number</span></code></p>
 </dd>
 <dt><strong>output_folder</strong><span class="classifier">string, optional (None)</span></dt><dd><p>folder to store predictions for optional test set, if <code class="docutils literal notranslate"><span class="pre">None</span></code>
-automatically use <code class="docutils literal notranslate"><span class="pre">/tmp/autosklearn_output_$pid_$random_number</span></code></p>
+no output will be generated</p>
 </dd>
 <dt><strong>delete_tmp_folder_after_terminate: string, optional (True)</strong></dt><dd><p>remove tmp_folder, when finished. If tmp_folder is None
 tmp_dir will always be deleted</p>
@@ -1110,16 +1102,16 @@ tmp_dir will always be deleted</p>
 <dt><strong>delete_output_folder_after_terminate: bool, optional (True)</strong></dt><dd><p>remove output_folder, when finished. If output_folder is None
 output_dir will always be deleted</p>
 </dd>
-<dt><strong>n_jobs</strong><span class="classifier">int, optional, experimental</span></dt><dd><p>The number of jobs to run in parallel for <code class="docutils literal notranslate"><span class="pre">fit()</span></code>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> means 
-using all processors. By default, Auto-sklearn uses a single core 
+<dt><strong>n_jobs</strong><span class="classifier">int, optional, experimental</span></dt><dd><p>The number of jobs to run in parallel for <code class="docutils literal notranslate"><span class="pre">fit()</span></code>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> means
+using all processors. By default, Auto-sklearn uses a single core
 for fitting the machine learning model and a single core for fitting
 an ensemble. Ensemble building is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> but
 can be controlled by the number of models in the ensemble. In
 contrast to most scikit-learn models, <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> given in the
-constructor is not applied to the <code class="docutils literal notranslate"><span class="pre">predict()</span></code> method. If 
+constructor is not applied to the <code class="docutils literal notranslate"><span class="pre">predict()</span></code> method. If
 <code class="docutils literal notranslate"><span class="pre">dask_client</span></code> is None, a new dask client is created.</p>
 </dd>
-<dt><strong>dask_client</strong><span class="classifier">dask.distributed.Client, optional</span></dt><dd><p>User-created dask client, can be used to start a dask cluster and then 
+<dt><strong>dask_client</strong><span class="classifier">dask.distributed.Client, optional</span></dt><dd><p>User-created dask client, can be used to start a dask cluster and then
 attach auto-sklearn to it.</p>
 </dd>
 <dt><strong>disable_evaluator_output: bool or list, optional (False)</strong></dt><dd><p>If True, disable model and prediction output. Cannot be used
@@ -1156,6 +1148,8 @@ the directory <code class="docutils literal notranslate"><span class="pre">util/
 <a class="reference internal" href="#autosklearn.metrics.make_scorer" title="autosklearn.metrics.make_scorer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">autosklearn.metrics.make_scorer()</span></code></a>. These are the <a class="reference internal" href="#built-in-metrics">Built-in
 Metrics</a>.
 If None is provided, a default metric is selected depending on the task.</p>
+</dd>
+<dt><strong>load_models</strong><span class="classifier">bool, optional (True)</span></dt><dd><p>Whether to load the models after fitting Auto-sklearn.</p>
 </dd>
 </dl>
 </dd>
@@ -1736,7 +1730,7 @@ underlying scikit-learn model and returns the transformed array.</p>
     </p>
     <p>
         &copy; Copyright 2014-2019, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.3.0.<br/>
     </p>
   </div>
 </footer>

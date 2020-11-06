@@ -73,7 +73,7 @@ Auto-sklearn requires dask workers to not run in the daemon setting
  .. code-block:: none
 
 
-    <dask.config.set object at 0x7f9213c31350>
+    <dask.config.set object at 0x7fac476d8390>
 
 
 
@@ -190,7 +190,7 @@ which means that it is automatically stopped one all computation is done.
             automl = AutoSklearnClassifier(
                 time_left_for_this_task=30,
                 per_run_time_limit=10,
-                ml_memory_limit=1024,
+                memory_limit=1024,
                 tmp_folder=tmp_folder,
                 output_folder=output_folder,
                 seed=777,
@@ -227,16 +227,16 @@ which means that it is automatically stopped one all computation is done.
  .. code-block:: none
 
     auto-sklearn results:
-      Dataset name: digits
+      Dataset name: d6d58dae5b02e07797da6d4d126ac9b6
       Metric: accuracy
       Best validation score: 0.992908
-      Number of target algorithm runs: 9
-      Number of successful target algorithm runs: 8
+      Number of target algorithm runs: 6
+      Number of successful target algorithm runs: 4
       Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 0
+      Number of target algorithms that exceeded the time limit: 1
       Number of target algorithms that exceeded the memory limit: 1
 
-    Accuracy score 0.965034965034965
+    Accuracy score 0.9440559440559441
 
 
 
@@ -244,7 +244,7 @@ which means that it is automatically stopped one all computation is done.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  37.008 seconds)
+   **Total running time of the script:** ( 0 minutes  36.947 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_manual_spawning.py:

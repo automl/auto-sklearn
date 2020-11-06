@@ -280,27 +280,6 @@ Examples of changing the search procedure of Auto-sklearn.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="A crucial feature of *auto-sklearn* is automatically optimizing the hyperparameters through SMA...">
-
-.. only:: html
-
- .. figure:: /examples/60_search/images/thumb/sphx_glr_example_random_search_thumb.png
-     :alt: Random Search
-
-     :ref:`sphx_glr_examples_60_search_example_random_search.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/60_search/example_random_search
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="*Auto-sklearn* uses dask.distributed &lt;https://distributed.dask.org/en/latest/index.html&gt;_ for p...">
 
 .. only:: html
@@ -319,6 +298,27 @@ Examples of changing the search procedure of Auto-sklearn.
    :hidden:
 
    /examples/60_search/example_parallel_manual_spawning
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A crucial feature of *auto-sklearn* is automatically optimizing the hyperparameters through SMA...">
+
+.. only:: html
+
+ .. figure:: /examples/60_search/images/thumb/sphx_glr_example_random_search_thumb.png
+     :alt: Random Search
+
+     :ref:`sphx_glr_examples_60_search_example_random_search.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/60_search/example_random_search
 
 .. raw:: html
 
@@ -357,27 +357,6 @@ Extension Examples
 Examples of extending Auto-sklearn with custom components.
 
 
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="The following example demonstrates how to create a new regression component for using in auto-s...">
-
-.. only:: html
-
- .. figure:: /examples/80_extending/images/thumb/sphx_glr_example_extending_regression_thumb.png
-     :alt: Extending Auto-Sklearn with Regression Component
-
-     :ref:`sphx_glr_examples_80_extending_example_extending_regression.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/80_extending/example_extending_regression
 
 .. raw:: html
 
@@ -420,6 +399,27 @@ Examples of extending Auto-sklearn with custom components.
    :hidden:
 
    /examples/80_extending/example_restrict_number_of_hyperparameters
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example demonstrates how to create a new regression component for using in auto-s...">
+
+.. only:: html
+
+ .. figure:: /examples/80_extending/images/thumb/sphx_glr_example_extending_regression_thumb.png
+     :alt: Extending Auto-Sklearn with Regression Component
+
+     :ref:`sphx_glr_examples_80_extending_example_extending_regression.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/80_extending/example_extending_regression
 
 .. raw:: html
 
