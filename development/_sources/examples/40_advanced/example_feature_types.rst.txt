@@ -94,7 +94,7 @@ Build and fit a classifier
 
  .. code-block:: none
 
-    [WARNING] [2020-11-06 22:55:31,012:AutoML(1):73543c4a360aa24498c0967fbc2f926b] No valid ensemble was created. Please check the logfile for errors. Default to the best individual estimator:[(1, 2, 0.0)]
+    [WARNING] [2020-11-07 22:30:42,834:AutoML(1):73543c4a360aa24498c0967fbc2f926b] No valid ensemble was created. Please check the logfile for errors. Default to the best individual estimator:[(1, 2, 0.0)]
 
     AutoSklearnClassifier(dask_client=None,
                           delete_output_folder_after_terminate=True,
@@ -142,7 +142,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  5.333 seconds)
+   **Total running time of the script:** ( 0 minutes  5.415 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_feature_types.py:
