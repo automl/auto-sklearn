@@ -188,7 +188,7 @@ Fit Random forest classifier to the data
 
  .. code-block:: none
 
-    [WARNING] [2020-11-07 22:53:16,023:AutoML(1):19b297da008dabf2f5ec43e3c65b5177] No valid ensemble was created. Please check the logfile for errors. Default to the best individual estimator:[(1, 2, 0.0)]
+    [WARNING] [2020-11-08 23:00:02,906:AutoML(1):8f9c054a07ebeccdf2898c42019c89e1] No valid ensemble was created. Please check the logfile for errors. Default to the best individual estimator:[(1, 2, 0.0)]
 
     AutoSklearnClassifier(dask_client=None,
                           delete_output_folder_after_terminate=True,
@@ -586,7 +586,7 @@ Print the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.001 seconds)
+   **Total running time of the script:** ( 0 minutes  2.961 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_restrict_number_of_hyperparameters.py:
