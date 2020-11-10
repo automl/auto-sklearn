@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
 
@@ -40,7 +40,7 @@ class AbstractEnsemble(object):
         pass
 
     @abstractmethod
-    def predict(self, base_models_predictions: np.ndarray) -> np.ndarray:
+    def predict(self, base_models_predictions: Union[np.ndarray, List[np.ndarray]]) -> np.ndarray:
         """Create ensemble predictions from the base model predictions.
 
         Parameters

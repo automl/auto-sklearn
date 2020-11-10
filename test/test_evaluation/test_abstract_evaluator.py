@@ -245,7 +245,6 @@ class AbstractEvaluatorTest(unittest.TestCase):
             load_datamanager_mock.return_value = get_multiclass_classification_datamanager()
 
             backend = Backend(context)
-            os.makedirs(backend.get_runs_directory())
 
             ae = AbstractEvaluator(
                 backend=backend,

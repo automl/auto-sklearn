@@ -102,7 +102,7 @@ class DataPreprocessor(AutoSklearnComponent):
             transformers=sklearn_transf_spec,
             sparse_threshold=float(self.sparse_),
             )
-        self.column_transformer.fit(X)
+        self.column_transformer.fit(X, y)
         return self
 
     def transform(self, X):
