@@ -1,6 +1,5 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-     CategoricalHyperparameter
+from ConfigSpace.hyperparameters import UniformFloatHyperparameter, CategoricalHyperparameter
 from ConfigSpace.conditions import EqualsCondition
 
 from autosklearn.pipeline.components.base import \

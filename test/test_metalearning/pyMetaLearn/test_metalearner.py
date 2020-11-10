@@ -35,7 +35,7 @@ class MetaLearnerTest(unittest.TestCase):
 
     def test_metalearning_suggest_all(self):
         ret = self.meta_optimizer.metalearning_suggest_all()
-        self.assertEqual(120, len(ret))
+        self.assertEqual(124, len(ret))
         # Reduced to 17 as we changed QDA searchspace
         self.assertEqual('gradient_boosting', ret[0]['classifier:__choice__'])
         self.assertEqual('adaboost', ret[1]['classifier:__choice__'])

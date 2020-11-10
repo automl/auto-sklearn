@@ -9,8 +9,7 @@ in auto-sklearn.
 """
 
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-     CategoricalHyperparameter
+from ConfigSpace.hyperparameters import UniformFloatHyperparameter, CategoricalHyperparameter
 from ConfigSpace.conditions import InCondition
 
 import sklearn.metrics
