@@ -11,6 +11,14 @@
 Releases
 ========
 
+Version 0.11.1
+==============
+
+* FIX #989: Fixes a bug where `y` was not passed to all data preprocessors which made 3rd party
+  category encoders fail.
+* FIX #1001: Fixes a bug which could make Auto-sklearn fail at random.
+* MAINT #1000: Introduce a minimal version for ``dask.distributed``.
+
 Version 0.11.0
 ==============
 

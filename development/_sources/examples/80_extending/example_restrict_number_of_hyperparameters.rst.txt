@@ -188,11 +188,7 @@ Fit Random forest classifier to the data
 
  .. code-block:: none
 
-    /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/distributed/node.py:155: UserWarning: Port 8787 is already in use.
-    Perhaps you already have a cluster running?
-    Hosting the HTTP server on port 37857 instead
-      http_address["port"], self.http_server.port
-    [WARNING] [2020-11-10 00:07:09,175:AutoML(1):a159f5fa5a53ae36583e1bc70ff99fdf] No valid ensemble was created. Please check the logfile for errors. Default to the best individual estimator:[(1, 2, 0.0)]
+    [WARNING] [2020-11-10 15:56:12,155:AutoML(1):d16e831cb545d70e700c66e2e4982c15] No valid ensemble was created. Please check the logfile for errors. Default to the best individual estimator:[(1, 2, 0.0)]
 
     AutoSklearnClassifier(dask_client=None,
                           delete_output_folder_after_terminate=True,
@@ -590,7 +586,7 @@ Print the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.992 seconds)
+   **Total running time of the script:** ( 0 minutes  3.074 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_restrict_number_of_hyperparameters.py:
