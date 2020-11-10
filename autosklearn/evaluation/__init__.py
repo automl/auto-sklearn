@@ -1,12 +1,14 @@
 # -*- encoding: utf-8 -*-
 import functools
+import json
 import math
 import multiprocessing
 from queue import Empty
 import time
 import traceback
-from typing import Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
+from ConfigSpace import Configuration
 import numpy as np
 import pynisher
 from smac.runhistory.runhistory import RunInfo, RunValue
@@ -35,11 +37,31 @@ def fit_predict_try_except_decorator(ta, queue, cost_for_crash, **kwargs):
         exception_traceback = traceback.format_exc()
         error_message = repr(e)
 
+        # Printing stuff to stdout just in case the queue doesn't work, which happened with the
+        # following traceback:
+        #     File "auto-sklearn/autosklearn/evaluation/__init__.py", line 29, in fit_predict_try_except_decorator  # noqa E501
+        #     return ta(queue=queue, **kwargs)
+        #     File "auto-sklearn/autosklearn/evaluation/train_evaluator.py", line 1067, in eval_holdout  # noqa E501
+        #     evaluator.fit_predict_and_loss(iterative=iterative)
+        #     File "auto-sklearn/autosklearn/evaluation/train_evaluator.py", line 616, in fit_predict_and_loss,  # noqa E501
+        #     status=status
+        #     File "auto-sklearn/autosklearn/evaluation/abstract_evaluator.py", line 320, in finish_up  # noqa E501
+        #     self.queue.put(rval_dict)
+        #     File "miniconda/3-4.5.4/envs/autosklearn/lib/python3.7/multiprocessing/queues.py", line 87, in put  # noqa E501
+        #     self._start_thread()
+        #     File "miniconda/3-4.5.4/envs/autosklearn/lib/python3.7/multiprocessing/queues.py", line 170, in _start_thread  # noqa E501
+        #     self._thread.start()
+        #     File "miniconda/3-4.5.4/envs/autosklearn/lib/python3.7/threading.py", line 847, in start  # noqa E501
+        #     RuntimeError: can't start new thread
+        print("Exception handling in `fit_predict_try_except_decorator`: "
+              "traceback: %s \nerror message: %s" % (exception_traceback, error_message))
+
         queue.put({'loss': cost_for_crash,
                    'additional_run_info': {'traceback': exception_traceback,
                                            'error': error_message},
                    'status': StatusType.CRASHED,
-                   'final_queue_element': True})
+                   'final_queue_element': True}, block=True)
+        queue.close()
 
 
 def get_cost_of_crash(metric):
@@ -59,6 +81,14 @@ def get_cost_of_crash(metric):
         worst_possible_result = metric._optimum - metric._worst_possible_result
 
     return worst_possible_result
+
+
+def _encode_exit_status(exit_status):
+    try:
+        json.dumps(exit_status)
+        return exit_status
+    except (TypeError, OverflowError):
+        return str(exit_status)
 
 
 # TODO potentially log all inputs to this class to pickle them in order to do
@@ -204,11 +234,15 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         return super().run_wrapper(run_info=run_info)
 
-    def run(self, config, instance=None,
-            cutoff=None,
-            seed=12345,
-            budget=0.0,
-            instance_specific=None):
+    def run(
+        self,
+        config: Configuration,
+        instance: Optional[str] = None,
+        cutoff: Optional[float] = None,
+        seed: int = 12345,
+        budget: float = 0.0,
+        instance_specific: Optional[str] = None,
+    ) -> Tuple[StatusType, float, float, Dict[str, Union[int, float, str, Dict, List, Tuple]]]:
 
         queue = multiprocessing.Queue()
 
@@ -222,6 +256,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             logger=autosklearn.util.logging_.get_logger("pynisher"),
             wall_time_in_s=cutoff,
             mem_in_mb=self.memory_limit,
+            capture_output=True,
         )
 
         if isinstance(config, int):
@@ -251,11 +286,19 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             obj_kwargs['resampling_strategy'] = self.resampling_strategy
             obj_kwargs['resampling_strategy_args'] = self.resampling_strategy_args
 
-        obj = pynisher.enforce_limits(**arguments)(self.ta)
-        obj(**obj_kwargs)
+        try:
+            obj = pynisher.enforce_limits(**arguments)(self.ta)
+            obj(**obj_kwargs)
+        except Exception as e:
+            exception_traceback = traceback.format_exc()
+            error_message = repr(e)
+            additional_info = {
+                'traceback': exception_traceback,
+                'error': error_message
+            }
+            return StatusType.CRASHED, self.cost_for_crash, 0.0, additional_info
 
-        if obj.exit_status in (pynisher.TimeoutException,
-                               pynisher.MemorylimitException):
+        if obj.exit_status in (pynisher.TimeoutException, pynisher.MemorylimitException):
             # Even if the pynisher thinks that a timeout or memout occured,
             # it can be that the target algorithm wrote something into the queue
             #  - then we treat it as a succesful run
@@ -264,6 +307,11 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                 result = info[-1]['loss']
                 status = info[-1]['status']
                 additional_run_info = info[-1]['additional_run_info']
+
+                if obj.stdout:
+                    additional_run_info['subprocess_stdout'] = obj.stdout
+                if obj.stderr:
+                    additional_run_info['subprocess_stderr'] = obj.stderr
 
                 if obj.exit_status is pynisher.TimeoutException:
                     additional_run_info['info'] = 'Run stopped because of timeout.'
@@ -283,8 +331,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                 elif obj.exit_status is pynisher.MemorylimitException:
                     status = StatusType.MEMOUT
                     additional_run_info = {
-                        'error': 'Memout (used more than %d MB).' %
-                                 self.memory_limit
+                        'error': 'Memout (used more than %d MB).' % self.memory_limit
                     }
                 else:
                     raise ValueError(obj.exit_status)
@@ -295,7 +342,11 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             status = StatusType.ABORT
             cost = self.worst_possible_result
             additional_run_info = {'error': 'Your configuration of '
-                                            'auto-sklearn does not work!'}
+                                            'auto-sklearn does not work!',
+                                   'exit_status': _encode_exit_status(obj.exit_status),
+                                   'subprocess_stdout': obj.stdout,
+                                   'subprocess_stderr': obj.stderr,
+                                   }
 
         else:
             try:
@@ -313,9 +364,18 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                                                   'because the pynisher exit ' \
                                                   'status %s is unknown.' % \
                                                   str(obj.exit_status)
+                    additional_run_info['exit_status'] = _encode_exit_status(obj.exit_status)
+                    additional_run_info['subprocess_stdout'] = obj.stdout
+                    additional_run_info['subprocess_stderr'] = obj.stderr
             except Empty:
                 info = None
-                additional_run_info = {'error': 'Result queue is empty'}
+                additional_run_info = {
+                    'error': 'Result queue is empty',
+                    'exit_status': _encode_exit_status(obj.exit_status),
+                    'subprocess_stdout': obj.stdout,
+                    'subprocess_stderr': obj.stderr,
+                    'exitcode': obj.exitcode
+                }
                 status = StatusType.CRASHED
                 cost = self.worst_possible_result
 

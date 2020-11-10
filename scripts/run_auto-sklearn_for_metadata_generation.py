@@ -43,11 +43,9 @@ X_train, y_train, X_test, y_test, cat, task_type = load_task(task_id)
 
 configuration_output_dir = os.path.join(working_directory, 'configuration',
                                         task_type)
-try:
-    os.makedirs(configuration_output_dir)
-except:
-    pass
+os.makedirs(configuration_output_dir, exist_ok=True)
 tmp_dir = os.path.join(configuration_output_dir, str(task_id), metric)
+os.makedirs(tmp_dir, exist_ok=True)
 
 tempdir = tempfile.mkdtemp()
 autosklearn_directory = os.path.join(tempdir, "dir")
@@ -59,7 +57,7 @@ automl_arguments = {
     'ensemble_size': 0,
     'ensemble_nbest': 0,
     'seed': seed,
-    'ml_memory_limit': 3072,
+    'memory_limit': 3072,
     'resampling_strategy': 'partial-cv',
     'delete_tmp_folder_after_terminate': False,
     'tmp_folder': autosklearn_directory,
@@ -132,7 +130,7 @@ for i, entry in enumerate(trajectory):
         # To avoid the output "first run crashed"...
         stats.submitted_ta_runs += 1
         stats.finished_ta_runs += 1
-        memory_lim = memory_limit_factor * automl_arguments['ml_memory_limit']
+        memory_lim = memory_limit_factor * automl_arguments['memory_limit']
         ta = ExecuteTaFuncWithQueue(backend=automl.automl_._backend,
                                     autosklearn_seed=seed,
                                     resampling_strategy='test',
@@ -164,14 +162,12 @@ for i, entry in enumerate(trajectory):
         validated_trajectory.append(list(entry) + [task_id] +
                                     [run_value.additional_info])
     print('Finished validating configuration %d/%d' % (i + 1, len(trajectory)))
+print('Finished to validate configurations')
 
-print('Starting to copy data to configuration directory')
+print('Starting to copy data to configuration directory', flush=True)
 validated_trajectory = [entry[:2] + [entry[2].get_dictionary()] + entry[3:]
                         for entry in validated_trajectory]
-validated_trajectory_file = os.path.join(autosklearn_directory,
-                                         'smac3-output',
-                                         'run_%d' % seed,
-                                         'validation_trajectory.json')
+validated_trajectory_file = os.path.join(tmp_dir, 'validation_trajectory_%d.json' % seed)
 with open(validated_trajectory_file, 'w') as fh:
     json.dump(validated_trajectory, fh, indent=4)
 
@@ -189,7 +185,7 @@ for dirpath, dirnames, filenames in os.walk(autosklearn_directory, topdown=False
 
 
 print('Going to copy the configuration directory')
-shutil.copytree(autosklearn_directory, tmp_dir)
+shutil.copytree(autosklearn_directory, os.path.join(tmp_dir, 'auto-sklearn-output'))
 print('Finished copying the configuration directory')
 try:
     shutil.rmtree(tempdir)

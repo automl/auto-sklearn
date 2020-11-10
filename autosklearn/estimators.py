@@ -22,9 +22,8 @@ class AutoSklearnEstimator(BaseEstimator):
         ensemble_size: int = 50,
         ensemble_nbest=50,
         max_models_on_disc=50,
-        ensemble_memory_limit: Optional[int] = 1024,
         seed=1,
-        ml_memory_limit=3072,
+        memory_limit=3072,
         include_estimators=None,
         exclude_estimators=None,
         include_preprocessors=None,
@@ -43,6 +42,7 @@ class AutoSklearnEstimator(BaseEstimator):
         logging_config=None,
         metadata_directory=None,
         metric=None,
+        load_models: bool = True,
     ):
         """
         Parameters
@@ -82,21 +82,16 @@ class AutoSklearnEstimator(BaseEstimator):
             It must be an integer greater or equal than 1.
             If set to None, all models are kept on the disc.
 
-        ensemble_memory_limit : int, optional (1024)
-            Memory limit in MB for the ensemble building process.
-            `auto-sklearn` will reduce the number of considered models
-            (``ensemble_nbest``) if the memory limit is reached.
-            If ``None``, no memory limit is enforced.
-
         seed : int, optional (default=1)
             Used to seed SMAC. Will determine the output file names.
 
-        ml_memory_limit : int, optional (3072)
+        memory_limit : int, optional (3072)
             Memory limit in MB for the machine learning algorithm.
             `auto-sklearn` will stop fitting the machine learning algorithm if
-            it tries to allocate more than `ml_memory_limit` MB.
+            it tries to allocate more than `memory_limit` MB.
             If None is provided, no memory limit is set.
-            In case of multi-processing, `ml_memory_limit` will be per job.
+            In case of multi-processing, `memory_limit` will be per job.
+            This memory limit also applies to the ensemble creation process.
 
         include_estimators : list, optional (None)
             If None, all possible estimators are used. Otherwise specifies
@@ -159,7 +154,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
         output_folder : string, optional (None)
             folder to store predictions for optional test set, if ``None``
-            automatically use ``/tmp/autosklearn_output_$pid_$random_number``
+            no output will be generated
 
         delete_tmp_folder_after_terminate: string, optional (True)
             remove tmp_folder, when finished. If tmp_folder is None
@@ -170,17 +165,17 @@ class AutoSklearnEstimator(BaseEstimator):
             output_dir will always be deleted
 
         n_jobs : int, optional, experimental
-            The number of jobs to run in parallel for ``fit()``. ``-1`` means 
-            using all processors. By default, Auto-sklearn uses a single core 
+            The number of jobs to run in parallel for ``fit()``. ``-1`` means
+            using all processors. By default, Auto-sklearn uses a single core
             for fitting the machine learning model and a single core for fitting
             an ensemble. Ensemble building is not affected by ``n_jobs`` but
             can be controlled by the number of models in the ensemble. In
             contrast to most scikit-learn models, ``n_jobs`` given in the
-            constructor is not applied to the ``predict()`` method. If 
+            constructor is not applied to the ``predict()`` method. If
             ``dask_client`` is None, a new dask client is created.
-            
+
         dask_client : dask.distributed.Client, optional
-            User-created dask client, can be used to start a dask cluster and then 
+            User-created dask client, can be used to start a dask cluster and then
             attach auto-sklearn to it.
 
         disable_evaluator_output: bool or list, optional (False)
@@ -222,6 +217,9 @@ class AutoSklearnEstimator(BaseEstimator):
             :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
             Metrics`_.
             If None is provided, a default metric is selected depending on the task.
+            
+        load_models : bool, optional (True)
+            Whether to load the models after fitting Auto-sklearn.
 
         Attributes
         ----------
@@ -243,9 +241,8 @@ class AutoSklearnEstimator(BaseEstimator):
         self.ensemble_size = ensemble_size
         self.ensemble_nbest = ensemble_nbest
         self.max_models_on_disc = max_models_on_disc
-        self.ensemble_memory_limit = ensemble_memory_limit
         self.seed = seed
-        self.ml_memory_limit = ml_memory_limit
+        self.memory_limit = memory_limit
         self.include_estimators = include_estimators
         self.exclude_estimators = exclude_estimators
         self.include_preprocessors = include_preprocessors
@@ -264,11 +261,17 @@ class AutoSklearnEstimator(BaseEstimator):
         self.logging_config = logging_config
         self.metadata_directory = metadata_directory
         self._metric = metric
+        self._load_models = load_models
 
         self.automl_ = None  # type: Optional[AutoML]
         # n_jobs after conversion to a number (b/c default is None)
         self._n_jobs = None
         super().__init__()
+
+    def __getstate__(self):
+        # Cannot serialize a client!
+        self.dask_client = None
+        return self.__dict__
 
     def build_automl(
         self,
@@ -298,9 +301,8 @@ class AutoSklearnEstimator(BaseEstimator):
             ensemble_size=ensemble_size,
             ensemble_nbest=self.ensemble_nbest,
             max_models_on_disc=self.max_models_on_disc,
-            ensemble_memory_limit=self.ensemble_memory_limit,
             seed=seed,
-            ml_memory_limit=self.ml_memory_limit,
+            memory_limit=self.memory_limit,
             include_estimators=self.include_estimators,
             exclude_estimators=self.exclude_estimators,
             include_preprocessors=self.include_preprocessors,
@@ -343,7 +345,7 @@ class AutoSklearnEstimator(BaseEstimator):
             tmp_folder=self.tmp_folder,
             output_folder=self.output_folder,
         )
-        self.automl_.fit(load_models=True, **kwargs)
+        self.automl_.fit(load_models=self._load_models, **kwargs)
 
         return self
 
