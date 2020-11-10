@@ -22,7 +22,7 @@ from autosklearn.metrics import accuracy, r2, f1_macro
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
 from evaluation_util import get_dataset_getters, BaseEvaluatorTest, \
-    get_multiclass_classification_datamanager  # noqa (E402: module level import not at top of file)
+    get_multiclass_classification_datamanager, SCORER_LIST  # noqa (E402: module level import not at top of file)
 
 
 N_TEST_RUNS = 3
@@ -114,10 +114,7 @@ class FunctionsTest(unittest.TestCase):
             config=self.configuration,
             metric=accuracy,
             seed=1, num_run=1,
-            scoring_functions=['accuracy', 'balanced_accuracy', 'f1_macro', 'f1_micro',
-                               'f1_weighted', 'log_loss', 'precision_macro', 'precision_micro',
-                               'precision_weighted', 'recall_macro', 'recall_micro',
-                               'recall_weighted'],
+            scoring_functions=SCORER_LIST,
             output_y_hat_optimization=False,
             include=None,
             exclude=None,

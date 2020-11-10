@@ -341,7 +341,7 @@ def calculate_score(
     prediction: np.ndarray,
     task_type: int,
     metric: Scorer,
-    scoring_functions: list = None
+    scoring_functions: List[Scorer] = None
 ) -> Union[float, Dict[str, float]]:
     if task_type not in TASK_TYPES:
         raise NotImplementedError(task_type)
@@ -351,15 +351,10 @@ def calculate_score(
         if task_type in REGRESSION_TASKS:
             # TODO put this into the regression metric itself
             cprediction = sanitize_array(prediction)
-            metric_dict = copy.copy(REGRESSION_METRICS)
-            metric_dict[metric.name] = metric
-            for metric_ in REGRESSION_METRICS:
-                if metric_ not in scoring_functions:
-                    continue
+            for metric_ in scoring_functions:
 
-                func = REGRESSION_METRICS[metric_]
                 try:
-                    score_dict[func.name] = func(solution, cprediction)
+                    score_dict[metric_.name] = metric_(solution, cprediction)
                 except ValueError as e:
                     print(e, e.args[0])
                     if e.args[0] == "Mean Squared Logarithmic Error cannot be used when " \
@@ -369,19 +364,13 @@ def calculate_score(
                         raise e
 
         else:
-            metric_dict = copy.copy(CLASSIFICATION_METRICS)
-            metric_dict[metric.name] = metric
-            for metric_ in metric_dict:
-                if metric_ not in scoring_functions:
-                    continue
-
-                func = CLASSIFICATION_METRICS[metric_]
+            for metric_ in scoring_functions:
 
                 # TODO maybe annotate metrics to define which cases they can
                 # handle?
 
                 try:
-                    score_dict[func.name] = func(solution, prediction)
+                    score_dict[metric_.name] = metric_(solution, prediction)
                 except ValueError as e:
                     if e.args[0] == 'multiclass format is not supported':
                         continue

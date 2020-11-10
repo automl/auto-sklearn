@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 import dask.distributed
 import joblib
@@ -9,6 +9,7 @@ from sklearn.base import BaseEstimator
 from sklearn.utils.multiclass import type_of_target
 
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, AutoML
+from autosklearn.metrics import Scorer
 from autosklearn.util.backend import create
 
 
@@ -42,7 +43,7 @@ class AutoSklearnEstimator(BaseEstimator):
         logging_config=None,
         metadata_directory=None,
         metric=None,
-        scoring_functions=None,
+        scoring_functions: List[Scorer] = None,
         load_models: bool = True,
     ):
         """
@@ -218,6 +219,10 @@ class AutoSklearnEstimator(BaseEstimator):
             :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
             Metrics`_.
             If None is provided, a default metric is selected depending on the task.
+            
+        scoring_functions : List[Scorer], optional (None)
+            List of scorers which will be calculated for each pipeline and results will be 
+            available via ``cv_results``
             
         load_models : bool, optional (True)
             Whether to load the models after fitting Auto-sklearn.

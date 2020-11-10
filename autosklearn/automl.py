@@ -45,7 +45,7 @@ from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix
-from autosklearn.metrics import f1_macro, accuracy, r2, CLASSIFICATION_METRICS, REGRESSION_METRICS
+from autosklearn.metrics import f1_macro, accuracy, r2
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
     REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION,\
     CLASSIFICATION_TASKS
@@ -1020,19 +1020,16 @@ class AutoML(BaseEstimator):
         metric_name = []
 
         for metric in self._scoring_functions:
-            metric_name.append(metric)
-            metric_dict[metric] = []
-            metric_mask[metric] = []
+            metric_name.append(metric.name)
+            metric_dict[metric.name] = []
+            metric_mask[metric.name] = []
 
         mean_test_score = []
         mean_fit_time = []
         params = []
         status = []
         budgets = []
-        if self._task in CLASSIFICATION_TASKS:
-            task_metrics = CLASSIFICATION_METRICS
-        else:
-            task_metrics = REGRESSION_METRICS
+
         for run_key in self.runhistory_.data:
             run_value = self.runhistory_.data[run_key]
             config_id = run_key.config_id
@@ -1075,17 +1072,16 @@ class AutoML(BaseEstimator):
                 parameter_dictionaries[hp_name].append(hp_value)
                 masks[hp_name].append(mask_value)
 
-            for name in metric_name:
-                if name in run_value.additional_info.keys():
-                    metric = task_metrics[name]
-                    metric_cost = run_value.additional_info[name]
+            for metric in self._scoring_functions:
+                if metric.name in run_value.additional_info.keys():
+                    metric_cost = run_value.additional_info[metric.name]
                     metric_value = metric._optimum - (metric._sign * metric_cost)
                     mask_value = False
                 else:
                     metric_value = np.NaN
                     mask_value = True
-                metric_dict[name].append(metric_value)
-                metric_mask[name].append(mask_value)
+                metric_dict[metric.name].append(metric_value)
+                metric_mask[metric.name].append(mask_value)
 
         results['mean_test_score'] = np.array(mean_test_score)
         for name in metric_name:

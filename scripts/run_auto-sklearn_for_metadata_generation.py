@@ -93,12 +93,14 @@ automl_arguments['metric'] = metric
 
 if task_type == 'classification':
     automl = AutoSklearnClassifier(**automl_arguments)
-    scoring_functions = CLASSIFICATION_METRICS
+    scorer_list = CLASSIFICATION_METRICS
 elif task_type == 'regression':
     automl = AutoSklearnRegressor(**automl_arguments)
-    scoring_functions = REGRESSION_METRICS
+    scorer_list = REGRESSION_METRICS
 else:
     raise ValueError(task_type)
+
+scoring_functions = [scorer for name, scorer in scorer_list.items()]
 
 automl.fit(X_train, y_train, dataset_name=str(task_id),
            feat_type=cat, X_test=X_test, y_test=y_test)

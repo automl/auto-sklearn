@@ -221,7 +221,7 @@ class AutoMLSMBO(object):
                  disable_file_output=False,
                  smac_scenario_args=None,
                  get_smac_object_callback=None,
-                 scoring_functions=None):
+                 scoring_functions=None,
                  ensemble_callback: typing.Optional[EnsembleBuilderManager] = None,
                  ):
         super(AutoMLSMBO, self).__init__()
