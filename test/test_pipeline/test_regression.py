@@ -97,7 +97,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                                   dataset_properties=dataset_properties)
 
     def test_multioutput(self):
-        cache = Memory(cachedir=tempfile.gettempdir())
+        cache = Memory(location=tempfile.gettempdir())
         cached_func = cache.cache(
             sklearn.datasets.make_regression
         )

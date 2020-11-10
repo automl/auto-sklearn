@@ -183,7 +183,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertIsInstance(cls, SimpleClassificationPipeline)
 
     def test_multilabel(self):
-        cache = Memory(cachedir=tempfile.gettempdir())
+        cache = Memory(location=tempfile.gettempdir())
         cached_func = cache.cache(
             sklearn.datasets.make_multilabel_classification
         )

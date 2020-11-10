@@ -44,7 +44,7 @@ if __name__ == '__main__':
         output_folder='/tmp/autosklearn_parallel_1_example_out',
         n_jobs=4,
         # Each one of the 4 jobs is allocated 3GB
-        ml_memory_limit=3072,
+        memory_limit=3072,
         seed=5,
     )
     automl.fit(X_train, y_train, dataset_name='breast_cancer')
