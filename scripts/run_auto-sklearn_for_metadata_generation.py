@@ -10,7 +10,8 @@ from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.metrics import accuracy, balanced_accuracy, roc_auc, log_loss, r2, \
-    mean_squared_error, mean_absolute_error, root_mean_squared_error, CLASSIFICATION_METRICS, REGRESSION_METRICS
+    mean_squared_error, mean_absolute_error, root_mean_squared_error, CLASSIFICATION_METRICS, \
+    REGRESSION_METRICS
 
 from smac.runhistory.runhistory import RunInfo
 from smac.scenario.scenario import Scenario
