@@ -383,7 +383,7 @@ def calculate_score(
                     else:
                         raise e
 
-        if metric and metric.name not in score_dict.keys():
+        if metric.name not in score_dict.keys():
             score_dict[metric.name] = get_metric_score(metric, prediction, solution, task_type)
         return score_dict
 
