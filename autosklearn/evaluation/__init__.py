@@ -1,12 +1,14 @@
 # -*- encoding: utf-8 -*-
 import functools
+import json
 import math
 import multiprocessing
 from queue import Empty
 import time
 import traceback
-from typing import Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
+from ConfigSpace import Configuration
 import numpy as np
 import pynisher
 from smac.runhistory.runhistory import RunInfo, RunValue
@@ -79,6 +81,14 @@ def get_cost_of_crash(metric):
         worst_possible_result = metric._optimum - metric._worst_possible_result
 
     return worst_possible_result
+
+
+def _encode_exit_status(exit_status):
+    try:
+        json.dumps(exit_status)
+        return exit_status
+    except (TypeError, OverflowError):
+        return str(exit_status)
 
 
 # TODO potentially log all inputs to this class to pickle them in order to do
@@ -224,11 +234,15 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         return super().run_wrapper(run_info=run_info)
 
-    def run(self, config, instance=None,
-            cutoff=None,
-            seed=12345,
-            budget=0.0,
-            instance_specific=None):
+    def run(
+        self,
+        config: Configuration,
+        instance: Optional[str] = None,
+        cutoff: Optional[float] = None,
+        seed: int = 12345,
+        budget: float = 0.0,
+        instance_specific: Optional[str] = None,
+    ) -> Tuple[StatusType, float, float, Dict[str, Union[int, float, str, Dict, List, Tuple]]]:
 
         queue = multiprocessing.Queue()
 
@@ -272,11 +286,19 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             obj_kwargs['resampling_strategy'] = self.resampling_strategy
             obj_kwargs['resampling_strategy_args'] = self.resampling_strategy_args
 
-        obj = pynisher.enforce_limits(**arguments)(self.ta)
-        obj(**obj_kwargs)
+        try:
+            obj = pynisher.enforce_limits(**arguments)(self.ta)
+            obj(**obj_kwargs)
+        except Exception as e:
+            exception_traceback = traceback.format_exc()
+            error_message = repr(e)
+            additional_info = {
+                'traceback': exception_traceback,
+                'error': error_message
+            }
+            return StatusType.CRASHED, self.cost_for_crash, 0.0, additional_info
 
-        if obj.exit_status in (pynisher.TimeoutException,
-                               pynisher.MemorylimitException):
+        if obj.exit_status in (pynisher.TimeoutException, pynisher.MemorylimitException):
             # Even if the pynisher thinks that a timeout or memout occured,
             # it can be that the target algorithm wrote something into the queue
             #  - then we treat it as a succesful run
@@ -309,8 +331,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                 elif obj.exit_status is pynisher.MemorylimitException:
                     status = StatusType.MEMOUT
                     additional_run_info = {
-                        'error': 'Memout (used more than %d MB).' %
-                                 self.memory_limit
+                        'error': 'Memout (used more than %d MB).' % self.memory_limit
                     }
                 else:
                     raise ValueError(obj.exit_status)
@@ -322,7 +343,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             cost = self.worst_possible_result
             additional_run_info = {'error': 'Your configuration of '
                                             'auto-sklearn does not work!',
-                                   'exit_status': obj.exit_status,
+                                   'exit_status': _encode_exit_status(obj.exit_status),
                                    'subprocess_stdout': obj.stdout,
                                    'subprocess_stderr': obj.stderr,
                                    }
@@ -343,14 +364,14 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                                                   'because the pynisher exit ' \
                                                   'status %s is unknown.' % \
                                                   str(obj.exit_status)
-                    additional_run_info['exit_status'] = obj.exit_status
+                    additional_run_info['exit_status'] = _encode_exit_status(obj.exit_status)
                     additional_run_info['subprocess_stdout'] = obj.stdout
                     additional_run_info['subprocess_stderr'] = obj.stderr
             except Empty:
                 info = None
                 additional_run_info = {
                     'error': 'Result queue is empty',
-                    'exit_status': obj.exit_status,
+                    'exit_status': _encode_exit_status(obj.exit_status),
                     'subprocess_stdout': obj.stdout,
                     'subprocess_stderr': obj.stderr,
                     'exitcode': obj.exitcode
