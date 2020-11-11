@@ -1,4 +1,3 @@
-import copy
 from abc import ABCMeta, abstractmethod
 from functools import partial
 from typing import Any, Callable, Dict, List, Optional, Union
@@ -392,11 +391,16 @@ def calculate_score(
         return get_metric_score(metric, prediction, solution, task_type)
 
 
-def get_metric_score(metric, prediction, solution, task_type):
+def get_metric_score(
+        metric_: Scorer,
+        prediction: np.ndarray,
+        solution: np.ndarray,
+        task_type: int
+) -> float:
     if task_type in REGRESSION_TASKS:
         # TODO put this into the regression metric itself
         cprediction = sanitize_array(prediction)
-        score = metric(solution, cprediction)
+        score = metric_(solution, cprediction)
     else:
-        score = metric(solution, prediction)
+        score = metric_(solution, prediction)
     return score

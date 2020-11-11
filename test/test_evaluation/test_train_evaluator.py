@@ -2258,7 +2258,7 @@ class FunctionsTest(unittest.TestCase):
             resampling_strategy_args=None,
             seed=1,
             num_run=1,
-            ascoring_functions=None,
+            scoring_functions=None,
             output_y_hat_optimization=True,
             include=None,
             exclude=None,

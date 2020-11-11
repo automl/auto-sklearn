@@ -47,8 +47,7 @@ from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix
 from autosklearn.metrics import f1_macro, accuracy, r2
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
-    REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION,\
-    CLASSIFICATION_TASKS
+    REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION
 from autosklearn.pipeline.components.classification import ClassifierChoice
 from autosklearn.pipeline.components.regression import RegressorChoice
 from autosklearn.pipeline.components.feature_preprocessing import FeaturePreprocessorChoice
