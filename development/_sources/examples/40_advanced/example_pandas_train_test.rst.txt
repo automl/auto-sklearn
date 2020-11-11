@@ -171,22 +171,8 @@ Build and fit a classifier
  .. code-block:: none
 
 
-    AutoSklearnClassifier(dask_client=None,
-                          delete_output_folder_after_terminate=True,
-                          delete_tmp_folder_after_terminate=True,
-                          disable_evaluator_output=False, ensemble_nbest=50,
-                          ensemble_size=50, exclude_estimators=None,
-                          exclude_preprocessors=None, get_smac_object_callback=None,
-                          include_estimators=None, include_preprocessors=None,
-                          initial_configurations_via_metalearning=25,
-                          load_models=None, logging_config=None,
-                          max_models_on_disc=50, memory_limit=3072,
-                          metadata_directory=None, metric=None, n_jobs=None,
-                          output_folder=None, per_run_time_limit=30,
-                          resampling_strategy='holdout',
-                          resampling_strategy_arguments=None, seed=1,
-                          smac_scenario_args=None, time_left_for_this_task=120,
-                          tmp_folder=None)
+    AutoSklearnClassifier(load_models=None, per_run_time_limit=30,
+                          time_left_for_this_task=120)
 
 
 
@@ -210,7 +196,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score 0.8695652173913043
+    Accuracy score 0.8898550724637682
 
 
 
@@ -271,7 +257,7 @@ Plot the ensemble performance
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  58.721 seconds)
+   **Total running time of the script:** ( 1 minutes  57.504 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_pandas_train_test.py:
