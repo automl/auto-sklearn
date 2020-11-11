@@ -341,7 +341,7 @@ def calculate_score(
     prediction: np.ndarray,
     task_type: int,
     metric: Scorer,
-    scoring_functions: List[Scorer] = None
+    scoring_functions: Optional[List[Scorer]] = None
 ) -> Union[float, Dict[str, float]]:
     if task_type not in TASK_TYPES:
         raise NotImplementedError(task_type)
