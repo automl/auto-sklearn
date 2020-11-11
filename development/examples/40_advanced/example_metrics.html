@@ -236,7 +236,7 @@ Available REGRESSION autosklearn.metrics.*:
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>################################################################################
 Use predefined accuracy metric
-[WARNING] [2020-11-11 12:31:12,617:AutoML(1):d6d58dae5b02e07797da6d4d126ac9b6] Capping the per_run_time_limit to 29.0 to have time for a least 2 models in each process.
+[WARNING] [2020-11-11 23:28:18,403:AutoML(1):d6d58dae5b02e07797da6d4d126ac9b6] Capping the per_run_time_limit to 29.0 to have time for a least 2 models in each process.
 Accuracy score 0.944056 using accuracy
 </pre></div>
 </div>
@@ -293,14 +293,16 @@ Accuracy score 0.944056 using accuracy
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>################################################################################
 Use self defined accuracy metric
-[WARNING] [2020-11-11 12:32:09,179:AutoML(1):d6d58dae5b02e07797da6d4d126ac9b6] Capping the per_run_time_limit to 29.0 to have time for a least 2 models in each process.
-[WARNING] [2020-11-11 12:32:09,179:AutoMLSMBO(1)::d6d58dae5b02e07797da6d4d126ac9b6] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.11.1-py3.7.egg/autosklearn/metalearning/files/accu_binary.classification_dense
-Accuracy score 0.958042 using accu
+[WARNING] [2020-11-11 23:29:09,185:AutoML(1):d6d58dae5b02e07797da6d4d126ac9b6] Capping the per_run_time_limit to 29.0 to have time for a least 2 models in each process.
+[WARNING] [2020-11-11 23:29:09,186:AutoMLSMBO(1)::d6d58dae5b02e07797da6d4d126ac9b6] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.11.1-py3.7.egg/autosklearn/metalearning/files/accu_binary.classification_dense
+Accuracy score 0.951049 using accu
 ################################################################################
 Use self defined error metric
-[WARNING] [2020-11-11 12:33:05,343:AutoML(1):d6d58dae5b02e07797da6d4d126ac9b6] Capping the per_run_time_limit to 29.0 to have time for a least 2 models in each process.
-[WARNING] [2020-11-11 12:33:05,344:AutoMLSMBO(1)::d6d58dae5b02e07797da6d4d126ac9b6] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.11.1-py3.7.egg/autosklearn/metalearning/files/error_binary.classification_dense
-Error rate -0.041958 using error
+[WARNING] [2020-11-11 23:30:05,947:AutoML(1):d6d58dae5b02e07797da6d4d126ac9b6] Capping the per_run_time_limit to 29.0 to have time for a least 2 models in each process.
+[WARNING] [2020-11-11 23:30:05,948:AutoMLSMBO(1)::d6d58dae5b02e07797da6d4d126ac9b6] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.11.1-py3.7.egg/autosklearn/metalearning/files/error_binary.classification_dense
+[WARNING] [2020-11-11 23:30:50,142:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2020-11-11 23:30:55,135:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+Error rate -0.048951 using error
 </pre></div>
 </div>
 </div>
@@ -364,22 +366,21 @@ Error rate -0.041958 using error
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>################################################################################
 Use self defined accuracy with additional argument
-[WARNING] [2020-11-11 12:34:02,379:AutoML(1):d6d58dae5b02e07797da6d4d126ac9b6] Capping the per_run_time_limit to 29.0 to have time for a least 2 models in each process.
-[WARNING] [2020-11-11 12:34:02,380:AutoMLSMBO(1)::d6d58dae5b02e07797da6d4d126ac9b6] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.11.1-py3.7.egg/autosklearn/metalearning/files/accu_add_binary.classification_dense
+[WARNING] [2020-11-11 23:31:02,476:AutoML(1):d6d58dae5b02e07797da6d4d126ac9b6] Capping the per_run_time_limit to 29.0 to have time for a least 2 models in each process.
+[WARNING] [2020-11-11 23:31:02,477:AutoMLSMBO(1)::d6d58dae5b02e07797da6d4d126ac9b6] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.11.1-py3.7.egg/autosklearn/metalearning/files/accu_add_binary.classification_dense
 Accuracy score 0.944056 using accu_add
 ################################################################################
 Use self defined error with additional argument
-[WARNING] [2020-11-11 12:34:59,312:AutoML(1):d6d58dae5b02e07797da6d4d126ac9b6] Capping the per_run_time_limit to 29.0 to have time for a least 2 models in each process.
-[WARNING] [2020-11-11 12:34:59,313:AutoMLSMBO(1)::d6d58dae5b02e07797da6d4d126ac9b6] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.11.1-py3.7.egg/autosklearn/metalearning/files/error_add_binary.classification_dense
-[WARNING] [2020-11-11 12:35:00,724:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2020-11-11 12:35:03,569:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2020-11-11 12:35:32,682:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2020-11-11 12:35:33,439:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2020-11-11 12:35:33,967:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2020-11-11 23:31:58,544:AutoML(1):d6d58dae5b02e07797da6d4d126ac9b6] Capping the per_run_time_limit to 29.0 to have time for a least 2 models in each process.
+[WARNING] [2020-11-11 23:31:58,545:AutoMLSMBO(1)::d6d58dae5b02e07797da6d4d126ac9b6] Could not find meta-data directory /home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.11.1-py3.7.egg/autosklearn/metalearning/files/error_add_binary.classification_dense
+[WARNING] [2020-11-11 23:32:00,078:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2020-11-11 23:32:29,268:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2020-11-11 23:32:32,435:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2020-11-11 23:32:32,887:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
 Error rate 0.615385 using error_add
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 4 minutes  43.922 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 4 minutes  37.106 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-metrics-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/1fdbce9dfa6b7292cc5a37970ed7b9d6/example_metrics.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_metrics.py</span></code></a></p>
