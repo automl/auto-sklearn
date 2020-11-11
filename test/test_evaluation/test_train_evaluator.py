@@ -546,13 +546,12 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         configuration = unittest.mock.Mock(spec=Configuration)
         queue_ = multiprocessing.Queue()
         loss_mock.return_value = None
-        scorer_list = SCORER_LIST
 
         evaluator = TrainEvaluator(self.backend_mock, queue=queue_,
                                    configuration=configuration,
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 5},
-                                   scoring_functions=scorer_list,
+                                   scoring_functions=SCORER_LIST,
                                    output_y_hat_optimization=True,
                                    metric=accuracy)
 
