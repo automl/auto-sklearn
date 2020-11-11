@@ -43,7 +43,7 @@ class AutoSklearnEstimator(BaseEstimator):
         logging_config=None,
         metadata_directory=None,
         metric=None,
-        scoring_functions: List[Scorer] = None,
+        scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
     ):
         """
