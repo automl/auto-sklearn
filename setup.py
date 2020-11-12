@@ -34,7 +34,16 @@ extras_reqs={
         "flaky",
         "pytest-cov",
         "openml",
-    ]
+        "pre-commit",
+        "pytest-cov",
+    ],
+    "examples": [
+        "matplotlib",
+        "jupyter",
+        "notebook",
+        "seaborn",
+    ],
+    "docs": ["sphinx", "sphinx-gallery", "sphinx_bootstrap_theme", "numpydoc"],
 }
 
 with open("autosklearn/__version__.py") as fh:
