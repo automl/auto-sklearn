@@ -600,6 +600,6 @@ def test_autosklearn2_classification_methods_returns_self(dask_client):
     predictions = automl_fitted.predict(X_test)
     assert sklearn.metrics.accuracy_score(
         y_test, predictions
-    ) >= 20 / 3, print_debug_information(automl)
+    ) >= 2 / 3, print_debug_information(automl)
 
     pickle.dumps(automl_fitted)
