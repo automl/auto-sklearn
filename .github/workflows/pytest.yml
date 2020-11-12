@@ -13,7 +13,7 @@ jobs:
           - python-version: 3.8
             code-cov: true
       fail-fast:  false
-      max-parallel: 2
+      max-parallel: 4
 
     steps:
     - uses: actions/checkout@v2
@@ -28,7 +28,7 @@ jobs:
     - name: Run tests
       run: |
         if [ ${{ matrix.code-cov }} ]; then codecov='--cov=autosklearn --cov-report=xml'; fi
-        python -m pytest -n 2 --timeout=600 --timeout-method=thread --dist load -sv $codecov
+        python -m pytest -n 4 --timeout=600 --timeout-method=thread --dist load -sv $codecov test
     - name: Upload coverage
       if: matrix.code-cov && always()
       uses: codecov/codecov-action@v1
