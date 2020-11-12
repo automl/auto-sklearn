@@ -31,6 +31,7 @@ extras_reqs={
         "mypy",
         "pytest-xdist",
         "pytest-timeout",
+        "pytest-rerunfailures",
         "flaky",
         "pytest-cov",
         "openml",
