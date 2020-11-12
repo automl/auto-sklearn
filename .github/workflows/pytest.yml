@@ -27,7 +27,7 @@ jobs:
         pip install -e .[test]
     - name: Run tests
       run: |
-        if [ ${{ matrix.code-cov }} ]; then codecov='--cov=autosklearn --long  --cov-report=xml'; fi
+        if [ ${{ matrix.code-cov }} ]; then codecov='--cov=autosklearn --cov-report=xml'; fi
         pytest -n 4 --force-flaky --max-runs 2 --timeout=600 --timeout-method=thread --dist load -sv $codecov test
     - name: Upload coverage
       if: matrix.code-cov && always()
