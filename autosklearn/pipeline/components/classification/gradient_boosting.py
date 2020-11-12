@@ -79,12 +79,15 @@ class GradientBoostingClassifier(
             if self.early_stop == "off":
                 self.n_iter_no_change = 0
                 self.validation_fraction_ = None
+                self.early_stopping_ = False
             elif self.early_stop == "train":
                 self.n_iter_no_change = int(self.n_iter_no_change)
                 self.validation_fraction_ = None
+                self.early_stopping_ = True
             elif self.early_stop == "valid":
                 self.n_iter_no_change = int(self.n_iter_no_change)
                 self.validation_fraction = float(self.validation_fraction)
+                self.early_stopping_ = True
                 n_classes = len(np.unique(y))
                 if self.validation_fraction * X.shape[0] < n_classes:
                     self.validation_fraction_ = n_classes
@@ -107,6 +110,7 @@ class GradientBoostingClassifier(
                 l2_regularization=self.l2_regularization,
                 tol=self.tol,
                 scoring=self.scoring,
+                early_stopping=self.early_stopping_,
                 n_iter_no_change=self.n_iter_no_change,
                 validation_fraction=self.validation_fraction_,
                 verbose=self.verbose,
