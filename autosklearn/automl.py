@@ -3,6 +3,7 @@ import copy
 import io
 import json
 import platform
+import logging.handlers
 import os
 import sys
 import time
@@ -10,6 +11,7 @@ from typing import Any, Dict, Optional, List, Union
 import unittest.mock
 import warnings
 import tempfile
+import threading
 
 from ConfigSpace.read_and_write import json as cs_json
 import dask.distributed
@@ -39,7 +41,12 @@ from autosklearn.evaluation.train_evaluator import _fit_with_budget
 from autosklearn.metrics import calculate_score
 from autosklearn.util.backend import Backend
 from autosklearn.util.stopwatch import StopWatch
-from autosklearn.util.logging_ import get_logger, setup_logger
+from autosklearn.util.logging_ import (
+    get_logger,
+    is_port_in_use,
+    LogRecordSocketReceiver,
+    setup_logger,
+)
 from autosklearn.util import pipeline, RE_PATTERN
 from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
@@ -258,11 +265,44 @@ class AutoML(BaseEstimator):
 
     def _get_logger(self, name):
         logger_name = 'AutoML(%d):%s' % (self._seed, name)
+
+        # Setup the configuration for the logger
+        # This is gonna be honored by the server
+        # Which is created below
         setup_logger(os.path.join(self._backend.temporary_directory,
                                   '%s.log' % str(logger_name)),
                      self.logging_config,
                      )
+
+        # The desired port might be used, so check this
+        while is_port_in_use(self._logger_port):
+            self._logger_port += 1
+
+        # As Auto-sklearn works with distributed process,
+        # we implement a logger server that can receive tcp
+        # pickled messages. They are unpickled and processed locally
+        # under the above logging configuration setting
+        # We need to specify the logger_name so that received records
+        # are treated under the logger_name ROOT logger setting
+        self.stop_logging_server = threading.Event()
+        self.logger_tcpserver = LogRecordSocketReceiver(logname=logger_name,
+                                                        port=self._logger_port,
+                                                        event=self.stop_logging_server)
+        self.logging_server = threading.Thread(target=self.logger_tcpserver.serve_until_stopped)
+        self.logging_server.daemon = False
+        self.logging_server.start()
         return get_logger(logger_name)
+
+    def _clean_logger(self):
+        if not hasattr(self, 'stop_logging_server') or self.stop_logging_server is None:
+            return
+
+        # Clean up the logger
+        if self.logging_server.is_alive():
+            self.stop_logging_server.set()
+            self.logging_server.join()
+            del self.logger_tcpserver
+            del self.stop_logging_server
 
     @staticmethod
     def _start_task(watcher, task_name):
@@ -403,6 +443,8 @@ class AutoML(BaseEstimator):
         self._dataset_name = dataset_name
         self._stopwatch.start_task(self._dataset_name)
 
+        # By default try to use the TCP logging port or get a new port
+        self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
         self._logger = self._get_logger(dataset_name)
 
         if feat_type is not None and len(feat_type) != X.shape[1]:
@@ -589,8 +631,8 @@ class AutoML(BaseEstimator):
                 max_iterations=None,
                 read_at_most=np.inf,
                 ensemble_memory_limit=self._memory_limit,
-                logger_name=self._logger.name,
                 random_state=self._seed,
+                logger_port=self._logger_port,
             )
 
         self._stopwatch.stop_task(ensemble_task_name)
@@ -693,6 +735,9 @@ class AutoML(BaseEstimator):
         if load_models:
             self._load_models()
         self._close_dask_client()
+
+        # Clean up the logger
+        self._clean_logger()
 
         return self
 
@@ -866,7 +911,7 @@ class AutoML(BaseEstimator):
             read_at_most=np.inf,
             ensemble_memory_limit=self._memory_limit,
             random_state=self._seed,
-            logger_name=self._logger.name,
+            logger_port=self._logger_port,
         )
         manager.build_ensemble(self._dask_client)
         future = manager.futures.pop()
@@ -1157,9 +1202,14 @@ class AutoML(BaseEstimator):
     def __getstate__(self) -> Dict[str, Any]:
         # Cannot serialize a client!
         self._dask_client = None
+        self.logging_server = None
+        self.stop_logging_server = None
         return self.__dict__
 
     def __del__(self):
+        # Clean up the logger
+        self._clean_logger()
+
         self._close_dask_client()
 
         # When a multiprocessing work is done, the
