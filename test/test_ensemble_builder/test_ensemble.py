@@ -532,10 +532,26 @@ def testLimit(ensemble_backend):
         'ensemble_read_preds.pkl'
     )
 
+    def mtime_mock(filename):
+        mtimes = {
+            'predictions_ensemble_0_1_0.0.npy': 0,
+            'predictions_valid_0_1_0.0.npy': 0.1,
+            'predictions_test_0_1_0.0.npy': 0.2,
+            'predictions_ensemble_0_2_0.0.npy': 1,
+            'predictions_valid_0_2_0.0.npy': 1.1,
+            'predictions_test_0_2_0.0.npy': 1.2,
+            'predictions_ensemble_0_3_100.0.npy': 2,
+            'predictions_valid_0_3_100.0.npy': 2.1,
+            'predictions_test_0_3_100.0.npy': 2.2,
+        }
+        return mtimes[os.path.split(filename)[1]]
+
     with unittest.mock.patch('logging.getLogger') as get_logger_mock, \
-            unittest.mock.patch('logging.config.dictConfig') as _:
+            unittest.mock.patch('logging.config.dictConfig') as _, \
+            unittest.mock.patch('os.path.getmtime') as mtime:
         logger_mock = unittest.mock.Mock()
         get_logger_mock.return_value = logger_mock
+        mtime.side_effect = mtime_mock
 
         ensbuilder.run(time_left=1000, iteration=0)
         assert os.path.exists(read_scores_file)

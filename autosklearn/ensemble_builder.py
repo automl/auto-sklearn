@@ -1,8 +1,8 @@
 # -*- encoding: utf-8 -*-
-import math
-import numbers
 import glob
 import gzip
+import math
+import numbers
 import os
 import pickle
 import re
@@ -820,13 +820,14 @@ class EnsembleBuilder(object):
             _seed = int(match.group(1))
             _num_run = int(match.group(2))
             _budget = float(match.group(3))
+            mtime = os.path.getmtime(y_ens_fn)
 
-            to_read.append([y_ens_fn, match, _seed, _num_run, _budget])
+            to_read.append([y_ens_fn, match, _seed, _num_run, _budget, mtime])
 
         n_read_files = 0
         # Now read file wrt to num_run
-        for y_ens_fn, match, _seed, _num_run, _budget in \
-                sorted(to_read, key=lambda x: x[3]):
+        for y_ens_fn, match, _seed, _num_run, _budget, mtime in \
+                sorted(to_read, key=lambda x: x[5]):
             if self.read_at_most and n_read_files >= self.read_at_most:
                 # limit the number of files that will be read
                 # to limit memory consumption
@@ -860,7 +861,7 @@ class EnsembleBuilder(object):
                     Y_TEST: None,
                 }
 
-            if self.read_scores[y_ens_fn]["mtime_ens"] == os.path.getmtime(y_ens_fn):
+            if self.read_scores[y_ens_fn]["mtime_ens"] == mtime:
                 # same time stamp; nothing changed;
                 continue
 
