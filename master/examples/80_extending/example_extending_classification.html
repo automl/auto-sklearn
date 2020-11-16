@@ -297,14 +297,19 @@ component for using in auto-sklearn.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.40559440559440557
-/home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/sklearn/base.py:197: FutureWarning: From version 0.24, get_params will raise an AttributeError if a parameter cannot be retrieved as an instance attribute. Previously it would return None.
-  FutureWarning)
-[(1.000000, MyDummyClassifier(configuration=1, init_params=None, random_state=None)),
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.9370629370629371
+[(1.000000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;MLPClassifier&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;normalize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;polynomial&#39;, &#39;classifier:MLPClassifier:activation&#39;: &#39;tanh&#39;, &#39;classifier:MLPClassifier:alpha&#39;: 0.5782654784801375, &#39;classifier:MLPClassifier:hidden_layer_depth&#39;: 1, &#39;classifier:MLPClassifier:num_nodes_per_layer&#39;: 174, &#39;classifier:MLPClassifier:solver&#39;: &#39;lbfgs&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.0074076265962875875, &#39;feature_preprocessor:polynomial:degree&#39;: 3, &#39;feature_preprocessor:polynomial:include_bias&#39;: &#39;False&#39;, &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;True&#39;},
+dataset_properties={
+  &#39;task&#39;: 1,
+  &#39;sparse&#39;: False,
+  &#39;multilabel&#39;: False,
+  &#39;multiclass&#39;: False,
+  &#39;target_type&#39;: &#39;classification&#39;,
+  &#39;signed&#39;: False})),
 ]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  23.532 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  22.325 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-extending-classification-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/515ab036d01801cb08e4878be1aef556/example_extending_classification.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_extending_classification.py</span></code></a></p>
@@ -337,7 +342,7 @@ component for using in auto-sklearn.</p>
     </p>
     <p>
         &copy; Copyright 2014-2019, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.3.0.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.3.1.<br/>
     </p>
   </div>
 </footer>
