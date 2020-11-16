@@ -106,8 +106,8 @@ Building the classifier
 
  .. code-block:: none
 
-    [WARNING] [2020-11-15 22:34:47,078:AutoML(1):reuters] Capping the per_run_time_limit to 29.0 to have time for a least 2 models in each process.
-    [WARNING] [2020-11-15 22:34:49,922:AutoML(1):reuters] No valid ensemble was created. Please check the logfile for errors. Default to the best individual estimator:[(1, 2, 0.0)]
+    [WARNING] [2020-11-16 22:41:45,790:AutoML(1):reuters] Capping the per_run_time_limit to 29.0 to have time for a least 2 models in each process.
+    [WARNING] [2020-11-16 22:41:48,634:AutoML(1):reuters] No valid ensemble was created. Please check the logfile for errors. Default to the best individual estimator:[(1, 2, 0.0)]
 
     AutoSklearnClassifier(initial_configurations_via_metalearning=0,
                           load_models=None, per_run_time_limit=30,
@@ -210,7 +210,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  7.798 seconds)
+   **Total running time of the script:** ( 0 minutes  7.841 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multilabel_classification.py:
