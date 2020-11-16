@@ -28,7 +28,7 @@ jobs:
     - name: Run tests
       run: |
         if [ ${{ matrix.code-cov }} ]; then codecov='--cov=autosklearn --cov-report=xml'; fi
-        pytest --force-flaky --max-runs 2 -sv $codecov test
+        pytest -sv $codecov test
     - name: Upload coverage
       if: matrix.code-cov && always()
       uses: codecov/codecov-action@v1
