@@ -194,7 +194,7 @@ the model weight in the ensemble and the model itself.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(0.280000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;adaboost&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:adaboost:algorithm&#39;: &#39;SAMME&#39;, &#39;classifier:adaboost:learning_rate&#39;: 0.011233995624432622, &#39;classifier:adaboost:max_depth&#39;: 9, &#39;classifier:adaboost:n_estimators&#39;: 477, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.018370622484682127, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.6039710338898471, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;},
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(0.300000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;k_nearest_neighbors&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;quantile_transformer&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:k_nearest_neighbors:n_neighbors&#39;: 4, &#39;classifier:k_nearest_neighbors:p&#39;: 1, &#39;classifier:k_nearest_neighbors:weights&#39;: &#39;distance&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles&#39;: 67, &#39;data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution&#39;: &#39;uniform&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.9756284876104786, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;},
 dataset_properties={
   &#39;task&#39;: 1,
   &#39;sparse&#39;: False,
@@ -202,7 +202,7 @@ dataset_properties={
   &#39;multiclass&#39;: False,
   &#39;target_type&#39;: &#39;classification&#39;,
   &#39;signed&#39;: False})),
-(0.260000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;random_forest&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;, &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;, &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;, &#39;classifier:random_forest:max_features&#39;: 0.5, &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0, &#39;classifier:random_forest:min_samples_leaf&#39;: 1, &#39;classifier:random_forest:min_samples_split&#39;: 2, &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.9999, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;},
+(0.180000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;adaboost&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:adaboost:algorithm&#39;: &#39;SAMME&#39;, &#39;classifier:adaboost:learning_rate&#39;: 0.011233995624432622, &#39;classifier:adaboost:max_depth&#39;: 9, &#39;classifier:adaboost:n_estimators&#39;: 477, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.018370622484682127, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.6039710338898471, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;},
 dataset_properties={
   &#39;task&#39;: 1,
   &#39;sparse&#39;: False,
@@ -210,7 +210,7 @@ dataset_properties={
   &#39;multiclass&#39;: False,
   &#39;target_type&#39;: &#39;classification&#39;,
   &#39;signed&#39;: False})),
-(0.260000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;adaboost&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;robust_scaler&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:adaboost:algorithm&#39;: &#39;SAMME&#39;, &#39;classifier:adaboost:learning_rate&#39;: 1.4120696722366737, &#39;classifier:adaboost:max_depth&#39;: 8, &#39;classifier:adaboost:n_estimators&#39;: 489, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.011307840322412704, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max&#39;: 0.7357867136119712, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min&#39;: 0.2832469215827823, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.99855313014133, &#39;feature_preprocessor:pca:whiten&#39;: &#39;True&#39;},
+(0.120000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;random_forest&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;, &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;, &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;, &#39;classifier:random_forest:max_features&#39;: 0.5, &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0, &#39;classifier:random_forest:min_samples_leaf&#39;: 1, &#39;classifier:random_forest:min_samples_split&#39;: 2, &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.9999, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;},
 dataset_properties={
   &#39;task&#39;: 1,
   &#39;sparse&#39;: False,
@@ -218,7 +218,7 @@ dataset_properties={
   &#39;multiclass&#39;: False,
   &#39;target_type&#39;: &#39;classification&#39;,
   &#39;signed&#39;: False})),
-(0.100000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;bernoulli_nb&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;normalize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:bernoulli_nb:alpha&#39;: 0.011929966129087241, &#39;classifier:bernoulli_nb:fit_prior&#39;: &#39;True&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.5976152033262122, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;},
+(0.120000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;adaboost&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;robust_scaler&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:adaboost:algorithm&#39;: &#39;SAMME&#39;, &#39;classifier:adaboost:learning_rate&#39;: 1.4120696722366737, &#39;classifier:adaboost:max_depth&#39;: 8, &#39;classifier:adaboost:n_estimators&#39;: 489, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.011307840322412704, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max&#39;: 0.7357867136119712, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min&#39;: 0.2832469215827823, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.99855313014133, &#39;feature_preprocessor:pca:whiten&#39;: &#39;True&#39;},
 dataset_properties={
   &#39;task&#39;: 1,
   &#39;sparse&#39;: False,
@@ -226,7 +226,7 @@ dataset_properties={
   &#39;multiclass&#39;: False,
   &#39;target_type&#39;: &#39;classification&#39;,
   &#39;signed&#39;: False})),
-(0.080000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;gaussian_nb&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;normalize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.5632675578693742, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;},
+(0.120000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;passive_aggressive&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;normalize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:passive_aggressive:C&#39;: 0.11150821778961238, &#39;classifier:passive_aggressive:average&#39;: &#39;True&#39;, &#39;classifier:passive_aggressive:fit_intercept&#39;: &#39;True&#39;, &#39;classifier:passive_aggressive:loss&#39;: &#39;hinge&#39;, &#39;classifier:passive_aggressive:tol&#39;: 1.8689990769998806e-05, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.7158520119045472, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;},
 dataset_properties={
   &#39;task&#39;: 1,
   &#39;sparse&#39;: False,
@@ -234,7 +234,31 @@ dataset_properties={
   &#39;multiclass&#39;: False,
   &#39;target_type&#39;: &#39;classification&#39;,
   &#39;signed&#39;: False})),
-(0.020000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;gradient_boosting&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;robust_scaler&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:gradient_boosting:early_stop&#39;: &#39;train&#39;, &#39;classifier:gradient_boosting:l2_regularization&#39;: 4.187065920024372e-09, &#39;classifier:gradient_boosting:learning_rate&#39;: 0.26826945251088985, &#39;classifier:gradient_boosting:loss&#39;: &#39;auto&#39;, &#39;classifier:gradient_boosting:max_bins&#39;: 255, &#39;classifier:gradient_boosting:max_depth&#39;: &#39;None&#39;, &#39;classifier:gradient_boosting:max_leaf_nodes&#39;: 5, &#39;classifier:gradient_boosting:min_samples_leaf&#39;: 20, &#39;classifier:gradient_boosting:scoring&#39;: &#39;loss&#39;, &#39;classifier:gradient_boosting:tol&#39;: 1e-07, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max&#39;: 0.720514537267965, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min&#39;: 0.27686628712984507, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.6428535788511281, &#39;feature_preprocessor:pca:whiten&#39;: &#39;True&#39;, &#39;classifier:gradient_boosting:n_iter_no_change&#39;: 14},
+(0.080000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;passive_aggressive&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;minmax&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:passive_aggressive:C&#39;: 0.08127752986307964, &#39;classifier:passive_aggressive:average&#39;: &#39;False&#39;, &#39;classifier:passive_aggressive:fit_intercept&#39;: &#39;True&#39;, &#39;classifier:passive_aggressive:loss&#39;: &#39;hinge&#39;, &#39;classifier:passive_aggressive:tol&#39;: 0.0340962023335284, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.667024556822579, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;},
+dataset_properties={
+  &#39;task&#39;: 1,
+  &#39;sparse&#39;: False,
+  &#39;multilabel&#39;: False,
+  &#39;multiclass&#39;: False,
+  &#39;target_type&#39;: &#39;classification&#39;,
+  &#39;signed&#39;: False})),
+(0.040000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;gaussian_nb&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;normalize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.5632675578693742, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;},
+dataset_properties={
+  &#39;task&#39;: 1,
+  &#39;sparse&#39;: False,
+  &#39;multilabel&#39;: False,
+  &#39;multiclass&#39;: False,
+  &#39;target_type&#39;: &#39;classification&#39;,
+  &#39;signed&#39;: False})),
+(0.020000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;qda&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;none&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:qda:reg_param&#39;: 0.2878935076126664, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.04212852907309801, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.8683631344706874, &#39;feature_preprocessor:pca:whiten&#39;: &#39;True&#39;},
+dataset_properties={
+  &#39;task&#39;: 1,
+  &#39;sparse&#39;: False,
+  &#39;multilabel&#39;: False,
+  &#39;multiclass&#39;: False,
+  &#39;target_type&#39;: &#39;classification&#39;,
+  &#39;signed&#39;: False})),
+(0.020000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;bernoulli_nb&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;normalize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:bernoulli_nb:alpha&#39;: 0.011929966129087241, &#39;classifier:bernoulli_nb:fit_prior&#39;: &#39;True&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.5976152033262122, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;},
 dataset_properties={
   &#39;task&#39;: 1,
   &#39;sparse&#39;: False,
@@ -257,10 +281,10 @@ iterations, number of models failed with a time out etc.</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>auto-sklearn results:
   Dataset name: breast_cancer
   Metric: accuracy
-  Best validation score: 0.957447
-  Number of target algorithm runs: 7
-  Number of successful target algorithm runs: 6
-  Number of crashed target algorithm runs: 1
+  Best validation score: 0.964539
+  Number of target algorithm runs: 10
+  Number of successful target algorithm runs: 10
+  Number of crashed target algorithm runs: 0
   Number of target algorithms that exceeded the time limit: 0
   Number of target algorithms that exceeded the memory limit: 0
 </pre></div>
@@ -275,7 +299,7 @@ optimization procedurce, which are stored in a so-called
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;smac.runhistory.runhistory.RunHistory object at 0x7fb64c1bce50&gt;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;smac.runhistory.runhistory.RunHistory object at 0x7eff773b3990&gt;
 </pre></div>
 </div>
 <p>Runs are stored inside an <code class="docutils literal notranslate"><span class="pre">OrderedDict</span></code> called <code class="docutils literal notranslate"><span class="pre">data</span></code>:</p>
@@ -283,7 +307,7 @@ optimization procedurce, which are stored in a so-called
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>9
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>12
 </pre></div>
 </div>
 <p>Let’s iterative over all entries</p>
@@ -296,30 +320,39 @@ optimization procedurce, which are stored in a so-called
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>#########
 RunKey(config_id=1, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
-RunValue(cost=0.08510638297872342, time=1.1239774227142334, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1605566517.1818194, endtime=1605566518.3181508, additional_info={&#39;duration&#39;: 1.0815339088439941, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunValue(cost=0.08510638297872342, time=1.1674728393554688, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1605578319.660169, endtime=1605578320.840068, additional_info={&#39;duration&#39;: 1.1218066215515137, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
 #########
 RunKey(config_id=2, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
-RunValue(cost=0.08510638297872342, time=0.21181154251098633, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1605566518.3739693, endtime=1605566518.5958495, additional_info={&#39;duration&#39;: 0.19146251678466797, &#39;num_run&#39;: 3, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunValue(cost=0.08510638297872342, time=0.2206435203552246, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1605578320.8980584, endtime=1605578321.1288898, additional_info={&#39;duration&#39;: 0.19887399673461914, &#39;num_run&#39;: 3, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
 #########
 RunKey(config_id=3, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
-RunValue(cost=0.04255319148936165, time=0.3204023838043213, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1605566518.9629624, endtime=1605566519.3132558, additional_info={&#39;duration&#39;: 0.28620409965515137, &#39;num_run&#39;: 4, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunValue(cost=0.04255319148936165, time=0.3616480827331543, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1605578321.5204551, endtime=1605578321.8964255, additional_info={&#39;duration&#39;: 0.3232386112213135, &#39;num_run&#39;: 4, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
 #########
 RunKey(config_id=4, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
-RunValue(cost=1.0, time=0.0, status=&lt;StatusType.CRASHED: 3&gt;, starttime=1605566520.7789679, endtime=1605566530.7969918, additional_info={&#39;traceback&#39;: &#39;Traceback (most recent call last):\n  File &quot;/home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/auto_sklearn-0.11.1-py3.7.egg/autosklearn/evaluation/__init__.py&quot;, line 291, in run\n    obj(**obj_kwargs)\n  File &quot;/home/travis/miniconda/envs/testenv/lib/python3.7/site-packages/pynisher/limit_function_call.py&quot;, line 276, in __call__\n    with open(os.path.join(tmp_dir.name, \&#39;std.out\&#39;), \&#39;r\&#39;) as fh:\nFileNotFoundError: [Errno 2] No such file or directory: \&#39;/tmp/tmpy5_ro3ki/std.out\&#39;\n&#39;, &#39;error&#39;: &quot;FileNotFoundError(2, &#39;No such file or directory&#39;)&quot;})
+RunValue(cost=0.04255319148936165, time=0.3202996253967285, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1605578323.4428818, endtime=1605578323.900568, additional_info={&#39;duration&#39;: 0.2934606075286865, &#39;num_run&#39;: 5, &#39;train_loss&#39;: 0.052631578947368474, &#39;configuration_origin&#39;: &#39;Random Search (sorted)&#39;})
 #########
 RunKey(config_id=5, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
-RunValue(cost=0.12056737588652477, time=0.3274874687194824, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1605566531.1674771, endtime=1605566531.5162127, additional_info={&#39;duration&#39;: 0.2943284511566162, &#39;num_run&#39;: 6, &#39;train_loss&#39;: 0.11929824561403513, &#39;configuration_origin&#39;: &#39;Random Search (sorted)&#39;})
+RunValue(cost=0.12056737588652477, time=0.36839842796325684, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1605578326.0267515, endtime=1605578326.446083, additional_info={&#39;duration&#39;: 0.3191056251525879, &#39;num_run&#39;: 6, &#39;train_loss&#39;: 0.11929824561403513, &#39;configuration_origin&#39;: &#39;Random Search (sorted)&#39;})
 #########
 RunKey(config_id=6, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
-RunValue(cost=0.07092198581560283, time=0.2824690341949463, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1605566533.3287182, endtime=1605566533.621837, additional_info={&#39;duration&#39;: 0.26176905632019043, &#39;num_run&#39;: 7, &#39;train_loss&#39;: 0.11929824561403513, &#39;configuration_origin&#39;: &#39;Random Search (sorted)&#39;})
+RunValue(cost=0.07092198581560283, time=0.2851064205169678, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1605578328.3602974, endtime=1605578328.655708, additional_info={&#39;duration&#39;: 0.26288485527038574, &#39;num_run&#39;: 7, &#39;train_loss&#39;: 0.11929824561403513, &#39;configuration_origin&#39;: &#39;Random Search (sorted)&#39;})
 #########
 RunKey(config_id=7, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
-RunValue(cost=0.11347517730496459, time=0.7283220291137695, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1605566533.9983013, endtime=1605566534.7643554, additional_info={&#39;duration&#39;: 0.6883361339569092, &#39;num_run&#39;: 8, &#39;train_loss&#39;: 0.0035087719298245723, &#39;configuration_origin&#39;: &#39;Random Search&#39;})
+RunValue(cost=0.11347517730496459, time=0.9579918384552002, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1605578329.0319924, endtime=1605578330.0368094, additional_info={&#39;duration&#39;: 0.9100391864776611, &#39;num_run&#39;: 8, &#39;train_loss&#39;: 0.0035087719298245723, &#39;configuration_origin&#39;: &#39;Random Search&#39;})
 #########
 RunKey(config_id=8, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
-RunValue(cost=2147483647.0, time=0.0, status=&lt;StatusType.RUNNING: 9&gt;, starttime=0.0, endtime=0.0, additional_info=None)
+RunValue(cost=0.1063829787234043, time=0.319838285446167, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1605578332.1984084, endtime=1605578332.5568924, additional_info={&#39;duration&#39;: 0.28366923332214355, &#39;num_run&#39;: 9, &#39;train_loss&#39;: 0.13684210526315788, &#39;configuration_origin&#39;: &#39;Random Search (sorted)&#39;})
 #########
 RunKey(config_id=9, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
+RunValue(cost=0.12056737588652477, time=0.2028493881225586, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1605578334.9582472, endtime=1605578335.1712117, additional_info={&#39;duration&#39;: 0.18171358108520508, &#39;num_run&#39;: 10, &#39;train_loss&#39;: 0.13684210526315788, &#39;configuration_origin&#39;: &#39;Random Search (sorted)&#39;})
+#########
+RunKey(config_id=10, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
+RunValue(cost=0.03546099290780147, time=0.3463633060455322, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1605578335.566518, endtime=1605578335.9395833, additional_info={&#39;duration&#39;: 0.309920072555542, &#39;num_run&#39;: 11, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Random Search&#39;})
+#########
+RunKey(config_id=11, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
+RunValue(cost=2147483647.0, time=0.0, status=&lt;StatusType.RUNNING: 9&gt;, starttime=0.0, endtime=0.0, additional_info=None)
+#########
+RunKey(config_id=12, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
 RunValue(cost=2147483647.0, time=0.0, status=&lt;StatusType.RUNNING: 9&gt;, starttime=0.0, endtime=0.0, additional_info=None)
 </pre></div>
 </div>
@@ -386,11 +419,11 @@ problems, too.</p>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Cost: 0.08510638297872342
-Time: 1.1239774227142334
+Time: 1.1674728393554688
 Status: StatusType.SUCCESS
-Additional information: {&#39;duration&#39;: 1.0815339088439941, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;}
-Start time: 1605566517.1818194
-End time 1605566518.3181508
+Additional information: {&#39;duration&#39;: 1.1218066215515137, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;}
+Start time: 1605578319.660169
+End time 1605578320.840068
 </pre></div>
 </div>
 <p>Cost is basically the same as a loss. In case the metric to optimize for
@@ -415,21 +448,21 @@ for the entry with the lowest loss:</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Lowest loss: 0.04255319148936165
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Lowest loss: 0.03546099290780147
 Best configuration: Configuration:
   balancing:strategy, Value: &#39;none&#39;
-  classifier:__choice__, Value: &#39;adaboost&#39;
-  classifier:adaboost:algorithm, Value: &#39;SAMME&#39;
-  classifier:adaboost:learning_rate, Value: 0.011233995624432622
-  classifier:adaboost:max_depth, Value: 9
-  classifier:adaboost:n_estimators, Value: 477
-  data_preprocessing:categorical_transformer:categorical_encoding:__choice__, Value: &#39;no_encoding&#39;
-  data_preprocessing:categorical_transformer:category_coalescence:__choice__, Value: &#39;minority_coalescer&#39;
-  data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Value: 0.018370622484682127
-  data_preprocessing:numerical_transformer:imputation:strategy, Value: &#39;mean&#39;
-  data_preprocessing:numerical_transformer:rescaling:__choice__, Value: &#39;standardize&#39;
+  classifier:__choice__, Value: &#39;k_nearest_neighbors&#39;
+  classifier:k_nearest_neighbors:n_neighbors, Value: 4
+  classifier:k_nearest_neighbors:p, Value: 1
+  classifier:k_nearest_neighbors:weights, Value: &#39;distance&#39;
+  data_preprocessing:categorical_transformer:categorical_encoding:__choice__, Value: &#39;one_hot_encoding&#39;
+  data_preprocessing:categorical_transformer:category_coalescence:__choice__, Value: &#39;no_coalescense&#39;
+  data_preprocessing:numerical_transformer:imputation:strategy, Value: &#39;median&#39;
+  data_preprocessing:numerical_transformer:rescaling:__choice__, Value: &#39;quantile_transformer&#39;
+  data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles, Value: 67
+  data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution, Value: &#39;uniform&#39;
   feature_preprocessor:__choice__, Value: &#39;pca&#39;
-  feature_preprocessor:pca:keep_variance, Value: 0.6039710338898471
+  feature_preprocessor:pca:keep_variance, Value: 0.9756284876104786
   feature_preprocessor:pca:whiten, Value: &#39;False&#39;
 </pre></div>
 </div>
@@ -443,292 +476,398 @@ same data as
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{&#39;mean_test_score&#39;: array([0.91489362, 0.91489362, 0.95744681, 0.        , 0.87943262,
-       0.92907801, 0.88652482]), &#39;mean_fit_time&#39;: array([1.12397742, 0.21181154, 0.32040238, 0.        , 0.32748747,
-       0.28246903, 0.72832203]), &#39;params&#39;: [{&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;random_forest&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;, &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;, &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;, &#39;classifier:random_forest:max_features&#39;: 0.5, &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0, &#39;classifier:random_forest:min_samples_leaf&#39;: 1, &#39;classifier:random_forest:min_samples_split&#39;: 2, &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.9999, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;adaboost&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;robust_scaler&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:adaboost:algorithm&#39;: &#39;SAMME&#39;, &#39;classifier:adaboost:learning_rate&#39;: 1.4120696722366737, &#39;classifier:adaboost:max_depth&#39;: 8, &#39;classifier:adaboost:n_estimators&#39;: 489, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.011307840322412704, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max&#39;: 0.7357867136119712, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min&#39;: 0.2832469215827823, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.99855313014133, &#39;feature_preprocessor:pca:whiten&#39;: &#39;True&#39;}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;adaboost&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:adaboost:algorithm&#39;: &#39;SAMME&#39;, &#39;classifier:adaboost:learning_rate&#39;: 0.011233995624432622, &#39;classifier:adaboost:max_depth&#39;: 9, &#39;classifier:adaboost:n_estimators&#39;: 477, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.018370622484682127, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.6039710338898471, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;passive_aggressive&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;minmax&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:passive_aggressive:C&#39;: 0.08127752986307964, &#39;classifier:passive_aggressive:average&#39;: &#39;False&#39;, &#39;classifier:passive_aggressive:fit_intercept&#39;: &#39;True&#39;, &#39;classifier:passive_aggressive:loss&#39;: &#39;hinge&#39;, &#39;classifier:passive_aggressive:tol&#39;: 0.0340962023335284, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.667024556822579, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;bernoulli_nb&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;normalize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:bernoulli_nb:alpha&#39;: 0.011929966129087241, &#39;classifier:bernoulli_nb:fit_prior&#39;: &#39;True&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.5976152033262122, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;}, {&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;gaussian_nb&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;normalize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.5632675578693742, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;gradient_boosting&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;robust_scaler&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:gradient_boosting:early_stop&#39;: &#39;train&#39;, &#39;classifier:gradient_boosting:l2_regularization&#39;: 4.187065920024372e-09, &#39;classifier:gradient_boosting:learning_rate&#39;: 0.26826945251088985, &#39;classifier:gradient_boosting:loss&#39;: &#39;auto&#39;, &#39;classifier:gradient_boosting:max_bins&#39;: 255, &#39;classifier:gradient_boosting:max_depth&#39;: &#39;None&#39;, &#39;classifier:gradient_boosting:max_leaf_nodes&#39;: 5, &#39;classifier:gradient_boosting:min_samples_leaf&#39;: 20, &#39;classifier:gradient_boosting:scoring&#39;: &#39;loss&#39;, &#39;classifier:gradient_boosting:tol&#39;: 1e-07, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max&#39;: 0.720514537267965, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min&#39;: 0.27686628712984507, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.6428535788511281, &#39;feature_preprocessor:pca:whiten&#39;: &#39;True&#39;, &#39;classifier:gradient_boosting:n_iter_no_change&#39;: 14}], &#39;rank_test_scores&#39;: array([3, 3, 1, 7, 6, 2, 5]), &#39;status&#39;: [&#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Crash&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;], &#39;budgets&#39;: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], &#39;param_balancing:strategy&#39;: masked_array(data=[&#39;none&#39;, &#39;none&#39;, &#39;none&#39;, &#39;none&#39;, &#39;none&#39;, &#39;weighting&#39;,
-                   &#39;none&#39;],
-             mask=[False, False, False, False, False, False, False],
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{&#39;mean_test_score&#39;: array([0.91489362, 0.91489362, 0.95744681, 0.95744681, 0.87943262,
+       0.92907801, 0.88652482, 0.89361702, 0.87943262, 0.96453901]), &#39;mean_fit_time&#39;: array([1.16747284, 0.22064352, 0.36164808, 0.32029963, 0.36839843,
+       0.28510642, 0.95799184, 0.31983829, 0.20284939, 0.34636331]), &#39;params&#39;: [{&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;random_forest&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;, &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;, &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;, &#39;classifier:random_forest:max_features&#39;: 0.5, &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0, &#39;classifier:random_forest:min_samples_leaf&#39;: 1, &#39;classifier:random_forest:min_samples_split&#39;: 2, &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.9999, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;adaboost&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;robust_scaler&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:adaboost:algorithm&#39;: &#39;SAMME&#39;, &#39;classifier:adaboost:learning_rate&#39;: 1.4120696722366737, &#39;classifier:adaboost:max_depth&#39;: 8, &#39;classifier:adaboost:n_estimators&#39;: 489, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.011307840322412704, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max&#39;: 0.7357867136119712, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min&#39;: 0.2832469215827823, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.99855313014133, &#39;feature_preprocessor:pca:whiten&#39;: &#39;True&#39;}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;adaboost&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:adaboost:algorithm&#39;: &#39;SAMME&#39;, &#39;classifier:adaboost:learning_rate&#39;: 0.011233995624432622, &#39;classifier:adaboost:max_depth&#39;: 9, &#39;classifier:adaboost:n_estimators&#39;: 477, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.018370622484682127, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.6039710338898471, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;passive_aggressive&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;minmax&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:passive_aggressive:C&#39;: 0.08127752986307964, &#39;classifier:passive_aggressive:average&#39;: &#39;False&#39;, &#39;classifier:passive_aggressive:fit_intercept&#39;: &#39;True&#39;, &#39;classifier:passive_aggressive:loss&#39;: &#39;hinge&#39;, &#39;classifier:passive_aggressive:tol&#39;: 0.0340962023335284, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.667024556822579, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;bernoulli_nb&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;normalize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:bernoulli_nb:alpha&#39;: 0.011929966129087241, &#39;classifier:bernoulli_nb:fit_prior&#39;: &#39;True&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.5976152033262122, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;}, {&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;gaussian_nb&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;normalize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.5632675578693742, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;gradient_boosting&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;robust_scaler&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:gradient_boosting:early_stop&#39;: &#39;train&#39;, &#39;classifier:gradient_boosting:l2_regularization&#39;: 4.187065920024372e-09, &#39;classifier:gradient_boosting:learning_rate&#39;: 0.26826945251088985, &#39;classifier:gradient_boosting:loss&#39;: &#39;auto&#39;, &#39;classifier:gradient_boosting:max_bins&#39;: 255, &#39;classifier:gradient_boosting:max_depth&#39;: &#39;None&#39;, &#39;classifier:gradient_boosting:max_leaf_nodes&#39;: 5, &#39;classifier:gradient_boosting:min_samples_leaf&#39;: 20, &#39;classifier:gradient_boosting:scoring&#39;: &#39;loss&#39;, &#39;classifier:gradient_boosting:tol&#39;: 1e-07, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max&#39;: 0.720514537267965, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min&#39;: 0.27686628712984507, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.6428535788511281, &#39;feature_preprocessor:pca:whiten&#39;: &#39;True&#39;, &#39;classifier:gradient_boosting:n_iter_no_change&#39;: 14}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;qda&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;none&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:qda:reg_param&#39;: 0.2878935076126664, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.04212852907309801, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.8683631344706874, &#39;feature_preprocessor:pca:whiten&#39;: &#39;True&#39;}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;passive_aggressive&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;normalize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:passive_aggressive:C&#39;: 0.11150821778961238, &#39;classifier:passive_aggressive:average&#39;: &#39;True&#39;, &#39;classifier:passive_aggressive:fit_intercept&#39;: &#39;True&#39;, &#39;classifier:passive_aggressive:loss&#39;: &#39;hinge&#39;, &#39;classifier:passive_aggressive:tol&#39;: 1.8689990769998806e-05, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.7158520119045472, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;k_nearest_neighbors&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;quantile_transformer&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:k_nearest_neighbors:n_neighbors&#39;: 4, &#39;classifier:k_nearest_neighbors:p&#39;: 1, &#39;classifier:k_nearest_neighbors:weights&#39;: &#39;distance&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles&#39;: 67, &#39;data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution&#39;: &#39;uniform&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.9756284876104786, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;}], &#39;rank_test_scores&#39;: array([5, 5, 2, 2, 9, 4, 8, 7, 9, 1]), &#39;status&#39;: [&#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;], &#39;budgets&#39;: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], &#39;param_balancing:strategy&#39;: masked_array(data=[&#39;none&#39;, &#39;none&#39;, &#39;none&#39;, &#39;none&#39;, &#39;none&#39;, &#39;weighting&#39;,
+                   &#39;none&#39;, &#39;none&#39;, &#39;none&#39;, &#39;none&#39;],
+             mask=[False, False, False, False, False, False, False, False,
+                   False, False],
        fill_value=&#39;N/A&#39;,
             dtype=&#39;&lt;U9&#39;), &#39;param_classifier:__choice__&#39;: masked_array(data=[&#39;random_forest&#39;, &#39;adaboost&#39;, &#39;adaboost&#39;,
                    &#39;passive_aggressive&#39;, &#39;bernoulli_nb&#39;, &#39;gaussian_nb&#39;,
-                   &#39;gradient_boosting&#39;],
-             mask=[False, False, False, False, False, False, False],
+                   &#39;gradient_boosting&#39;, &#39;qda&#39;, &#39;passive_aggressive&#39;,
+                   &#39;k_nearest_neighbors&#39;],
+             mask=[False, False, False, False, False, False, False, False,
+                   False, False],
        fill_value=&#39;N/A&#39;,
-            dtype=&#39;&lt;U18&#39;), &#39;param_data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: masked_array(data=[&#39;one_hot_encoding&#39;, &#39;no_encoding&#39;, &#39;no_encoding&#39;,
+            dtype=&#39;&lt;U19&#39;), &#39;param_data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: masked_array(data=[&#39;one_hot_encoding&#39;, &#39;no_encoding&#39;, &#39;no_encoding&#39;,
                    &#39;one_hot_encoding&#39;, &#39;no_encoding&#39;, &#39;one_hot_encoding&#39;,
-                   &#39;no_encoding&#39;],
-             mask=[False, False, False, False, False, False, False],
+                   &#39;no_encoding&#39;, &#39;no_encoding&#39;, &#39;no_encoding&#39;,
+                   &#39;one_hot_encoding&#39;],
+             mask=[False, False, False, False, False, False, False, False,
+                   False, False],
        fill_value=&#39;N/A&#39;,
             dtype=&#39;&lt;U16&#39;), &#39;param_data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: masked_array(data=[&#39;minority_coalescer&#39;, &#39;minority_coalescer&#39;,
                    &#39;minority_coalescer&#39;, &#39;no_coalescense&#39;,
-                   &#39;no_coalescense&#39;, &#39;no_coalescense&#39;, &#39;no_coalescense&#39;],
-             mask=[False, False, False, False, False, False, False],
+                   &#39;no_coalescense&#39;, &#39;no_coalescense&#39;, &#39;no_coalescense&#39;,
+                   &#39;minority_coalescer&#39;, &#39;no_coalescense&#39;,
+                   &#39;no_coalescense&#39;],
+             mask=[False, False, False, False, False, False, False, False,
+                   False, False],
        fill_value=&#39;N/A&#39;,
             dtype=&#39;&lt;U18&#39;), &#39;param_data_preprocessing:numerical_transformer:imputation:strategy&#39;: masked_array(data=[&#39;mean&#39;, &#39;mean&#39;, &#39;mean&#39;, &#39;mean&#39;, &#39;most_frequent&#39;,
-                   &#39;most_frequent&#39;, &#39;median&#39;],
-             mask=[False, False, False, False, False, False, False],
+                   &#39;most_frequent&#39;, &#39;median&#39;, &#39;mean&#39;, &#39;mean&#39;, &#39;median&#39;],
+             mask=[False, False, False, False, False, False, False, False,
+                   False, False],
        fill_value=&#39;N/A&#39;,
             dtype=&#39;&lt;U13&#39;), &#39;param_data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: masked_array(data=[&#39;standardize&#39;, &#39;robust_scaler&#39;, &#39;standardize&#39;,
-                   &#39;minmax&#39;, &#39;normalize&#39;, &#39;normalize&#39;, &#39;robust_scaler&#39;],
-             mask=[False, False, False, False, False, False, False],
+                   &#39;minmax&#39;, &#39;normalize&#39;, &#39;normalize&#39;, &#39;robust_scaler&#39;,
+                   &#39;none&#39;, &#39;normalize&#39;, &#39;quantile_transformer&#39;],
+             mask=[False, False, False, False, False, False, False, False,
+                   False, False],
        fill_value=&#39;N/A&#39;,
-            dtype=&#39;&lt;U13&#39;), &#39;param_feature_preprocessor:__choice__&#39;: masked_array(data=[&#39;pca&#39;, &#39;pca&#39;, &#39;pca&#39;, &#39;pca&#39;, &#39;pca&#39;, &#39;pca&#39;, &#39;pca&#39;],
-             mask=[False, False, False, False, False, False, False],
+            dtype=&#39;&lt;U20&#39;), &#39;param_feature_preprocessor:__choice__&#39;: masked_array(data=[&#39;pca&#39;, &#39;pca&#39;, &#39;pca&#39;, &#39;pca&#39;, &#39;pca&#39;, &#39;pca&#39;, &#39;pca&#39;, &#39;pca&#39;,
+                   &#39;pca&#39;, &#39;pca&#39;],
+             mask=[False, False, False, False, False, False, False, False,
+                   False, False],
        fill_value=&#39;N/A&#39;,
-            dtype=&#39;&lt;U3&#39;), &#39;param_classifier:adaboost:algorithm&#39;: masked_array(data=[--, &#39;SAMME&#39;, &#39;SAMME&#39;, --, --, --, --],
-             mask=[ True, False, False,  True,  True,  True,  True],
+            dtype=&#39;&lt;U3&#39;), &#39;param_classifier:adaboost:algorithm&#39;: masked_array(data=[--, &#39;SAMME&#39;, &#39;SAMME&#39;, --, --, --, --, --, --, --],
+             mask=[ True, False, False,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=&#39;N/A&#39;,
             dtype=&#39;&lt;U32&#39;), &#39;param_classifier:adaboost:learning_rate&#39;: masked_array(data=[--, 1.4120696722366737, 0.011233995624432622, --, --,
-                   --, --],
-             mask=[ True, False, False,  True,  True,  True,  True],
-       fill_value=1e+20), &#39;param_classifier:adaboost:max_depth&#39;: masked_array(data=[--, 8.0, 9.0, --, --, --, --],
-             mask=[ True, False, False,  True,  True,  True,  True],
-       fill_value=1e+20), &#39;param_classifier:adaboost:n_estimators&#39;: masked_array(data=[--, 489.0, 477.0, --, --, --, --],
-             mask=[ True, False, False,  True,  True,  True,  True],
-       fill_value=1e+20), &#39;param_classifier:bernoulli_nb:alpha&#39;: masked_array(data=[--, --, --, --, 0.011929966129087241, --, --],
-             mask=[ True,  True,  True,  True, False,  True,  True],
-       fill_value=1e+20), &#39;param_classifier:bernoulli_nb:fit_prior&#39;: masked_array(data=[--, --, --, --, &#39;True&#39;, --, --],
-             mask=[ True,  True,  True,  True, False,  True,  True],
+                   --, --, --, --, --],
+             mask=[ True, False, False,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20), &#39;param_classifier:adaboost:max_depth&#39;: masked_array(data=[--, 8.0, 9.0, --, --, --, --, --, --, --],
+             mask=[ True, False, False,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20), &#39;param_classifier:adaboost:n_estimators&#39;: masked_array(data=[--, 489.0, 477.0, --, --, --, --, --, --, --],
+             mask=[ True, False, False,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20), &#39;param_classifier:bernoulli_nb:alpha&#39;: masked_array(data=[--, --, --, --, 0.011929966129087241, --, --, --, --,
+                   --],
+             mask=[ True,  True,  True,  True, False,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20), &#39;param_classifier:bernoulli_nb:fit_prior&#39;: masked_array(data=[--, --, --, --, &#39;True&#39;, --, --, --, --, --],
+             mask=[ True,  True,  True,  True, False,  True,  True,  True,
+                    True,  True],
        fill_value=&#39;N/A&#39;,
-            dtype=&#39;&lt;U32&#39;), &#39;param_classifier:decision_tree:criterion&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=&#39;&lt;U32&#39;), &#39;param_classifier:decision_tree:criterion&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:decision_tree:max_depth_factor&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:decision_tree:max_depth_factor&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:decision_tree:max_features&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:decision_tree:max_features&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:decision_tree:max_leaf_nodes&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:decision_tree:max_leaf_nodes&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:decision_tree:min_impurity_decrease&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:decision_tree:min_impurity_decrease&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:decision_tree:min_samples_leaf&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:decision_tree:min_samples_leaf&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:decision_tree:min_samples_split&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:decision_tree:min_samples_split&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:decision_tree:min_weight_fraction_leaf&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:decision_tree:min_weight_fraction_leaf&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:extra_trees:bootstrap&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:extra_trees:bootstrap&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:extra_trees:criterion&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:extra_trees:criterion&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:extra_trees:max_depth&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:extra_trees:max_depth&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:extra_trees:max_features&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:extra_trees:max_features&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:extra_trees:max_leaf_nodes&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:extra_trees:max_leaf_nodes&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:extra_trees:min_impurity_decrease&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:extra_trees:min_impurity_decrease&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:extra_trees:min_samples_leaf&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:extra_trees:min_samples_leaf&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:extra_trees:min_samples_split&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:extra_trees:min_samples_split&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:extra_trees:min_weight_fraction_leaf&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:extra_trees:min_weight_fraction_leaf&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:gradient_boosting:early_stop&#39;: masked_array(data=[--, --, --, --, --, --, &#39;train&#39;],
-             mask=[ True,  True,  True,  True,  True,  True, False],
+            dtype=float64), &#39;param_classifier:gradient_boosting:early_stop&#39;: masked_array(data=[--, --, --, --, --, --, &#39;train&#39;, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True, False,  True,
+                    True,  True],
        fill_value=&#39;N/A&#39;,
-            dtype=&#39;&lt;U32&#39;), &#39;param_classifier:gradient_boosting:l2_regularization&#39;: masked_array(data=[--, --, --, --, --, --, 4.187065920024372e-09],
-             mask=[ True,  True,  True,  True,  True,  True, False],
-       fill_value=1e+20), &#39;param_classifier:gradient_boosting:learning_rate&#39;: masked_array(data=[--, --, --, --, --, --, 0.26826945251088985],
-             mask=[ True,  True,  True,  True,  True,  True, False],
-       fill_value=1e+20), &#39;param_classifier:gradient_boosting:loss&#39;: masked_array(data=[--, --, --, --, --, --, &#39;auto&#39;],
-             mask=[ True,  True,  True,  True,  True,  True, False],
+            dtype=&#39;&lt;U32&#39;), &#39;param_classifier:gradient_boosting:l2_regularization&#39;: masked_array(data=[--, --, --, --, --, --, 4.187065920024372e-09, --, --,
+                   --],
+             mask=[ True,  True,  True,  True,  True,  True, False,  True,
+                    True,  True],
+       fill_value=1e+20), &#39;param_classifier:gradient_boosting:learning_rate&#39;: masked_array(data=[--, --, --, --, --, --, 0.26826945251088985, --, --,
+                   --],
+             mask=[ True,  True,  True,  True,  True,  True, False,  True,
+                    True,  True],
+       fill_value=1e+20), &#39;param_classifier:gradient_boosting:loss&#39;: masked_array(data=[--, --, --, --, --, --, &#39;auto&#39;, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True, False,  True,
+                    True,  True],
        fill_value=&#39;N/A&#39;,
-            dtype=&#39;&lt;U32&#39;), &#39;param_classifier:gradient_boosting:max_bins&#39;: masked_array(data=[--, --, --, --, --, --, 255.0],
-             mask=[ True,  True,  True,  True,  True,  True, False],
-       fill_value=1e+20), &#39;param_classifier:gradient_boosting:max_depth&#39;: masked_array(data=[--, --, --, --, --, --, &#39;None&#39;],
-             mask=[ True,  True,  True,  True,  True,  True, False],
+            dtype=&#39;&lt;U32&#39;), &#39;param_classifier:gradient_boosting:max_bins&#39;: masked_array(data=[--, --, --, --, --, --, 255.0, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True, False,  True,
+                    True,  True],
+       fill_value=1e+20), &#39;param_classifier:gradient_boosting:max_depth&#39;: masked_array(data=[--, --, --, --, --, --, &#39;None&#39;, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True, False,  True,
+                    True,  True],
        fill_value=&#39;N/A&#39;,
-            dtype=&#39;&lt;U32&#39;), &#39;param_classifier:gradient_boosting:max_leaf_nodes&#39;: masked_array(data=[--, --, --, --, --, --, 5.0],
-             mask=[ True,  True,  True,  True,  True,  True, False],
-       fill_value=1e+20), &#39;param_classifier:gradient_boosting:min_samples_leaf&#39;: masked_array(data=[--, --, --, --, --, --, 20.0],
-             mask=[ True,  True,  True,  True,  True,  True, False],
-       fill_value=1e+20), &#39;param_classifier:gradient_boosting:scoring&#39;: masked_array(data=[--, --, --, --, --, --, &#39;loss&#39;],
-             mask=[ True,  True,  True,  True,  True,  True, False],
+            dtype=&#39;&lt;U32&#39;), &#39;param_classifier:gradient_boosting:max_leaf_nodes&#39;: masked_array(data=[--, --, --, --, --, --, 5.0, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True, False,  True,
+                    True,  True],
+       fill_value=1e+20), &#39;param_classifier:gradient_boosting:min_samples_leaf&#39;: masked_array(data=[--, --, --, --, --, --, 20.0, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True, False,  True,
+                    True,  True],
+       fill_value=1e+20), &#39;param_classifier:gradient_boosting:scoring&#39;: masked_array(data=[--, --, --, --, --, --, &#39;loss&#39;, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True, False,  True,
+                    True,  True],
        fill_value=&#39;N/A&#39;,
-            dtype=&#39;&lt;U32&#39;), &#39;param_classifier:gradient_boosting:tol&#39;: masked_array(data=[--, --, --, --, --, --, 1e-07],
-             mask=[ True,  True,  True,  True,  True,  True, False],
-       fill_value=1e+20), &#39;param_classifier:k_nearest_neighbors:n_neighbors&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:k_nearest_neighbors:p&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:k_nearest_neighbors:weights&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:lda:shrinkage&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:lda:tol&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:liblinear_svc:C&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:liblinear_svc:dual&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:liblinear_svc:fit_intercept&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:liblinear_svc:intercept_scaling&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:liblinear_svc:loss&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:liblinear_svc:multi_class&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:liblinear_svc:penalty&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:liblinear_svc:tol&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:libsvm_svc:C&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:libsvm_svc:gamma&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:libsvm_svc:kernel&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:libsvm_svc:max_iter&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:libsvm_svc:shrinking&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:libsvm_svc:tol&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:passive_aggressive:C&#39;: masked_array(data=[--, --, --, 0.08127752986307964, --, --, --],
-             mask=[ True,  True,  True, False,  True,  True,  True],
-       fill_value=1e+20), &#39;param_classifier:passive_aggressive:average&#39;: masked_array(data=[--, --, --, &#39;False&#39;, --, --, --],
-             mask=[ True,  True,  True, False,  True,  True,  True],
+            dtype=&#39;&lt;U32&#39;), &#39;param_classifier:gradient_boosting:tol&#39;: masked_array(data=[--, --, --, --, --, --, 1e-07, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True, False,  True,
+                    True,  True],
+       fill_value=1e+20), &#39;param_classifier:k_nearest_neighbors:n_neighbors&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, 4.0],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True, False],
+       fill_value=1e+20), &#39;param_classifier:k_nearest_neighbors:p&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, 1.0],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True, False],
+       fill_value=1e+20), &#39;param_classifier:k_nearest_neighbors:weights&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, &#39;distance&#39;],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True, False],
        fill_value=&#39;N/A&#39;,
-            dtype=&#39;&lt;U32&#39;), &#39;param_classifier:passive_aggressive:fit_intercept&#39;: masked_array(data=[--, --, --, &#39;True&#39;, --, --, --],
-             mask=[ True,  True,  True, False,  True,  True,  True],
+            dtype=&#39;&lt;U32&#39;), &#39;param_classifier:lda:shrinkage&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20,
+            dtype=float64), &#39;param_classifier:lda:tol&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20,
+            dtype=float64), &#39;param_classifier:liblinear_svc:C&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20,
+            dtype=float64), &#39;param_classifier:liblinear_svc:dual&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20,
+            dtype=float64), &#39;param_classifier:liblinear_svc:fit_intercept&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20,
+            dtype=float64), &#39;param_classifier:liblinear_svc:intercept_scaling&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20,
+            dtype=float64), &#39;param_classifier:liblinear_svc:loss&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20,
+            dtype=float64), &#39;param_classifier:liblinear_svc:multi_class&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20,
+            dtype=float64), &#39;param_classifier:liblinear_svc:penalty&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20,
+            dtype=float64), &#39;param_classifier:liblinear_svc:tol&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20,
+            dtype=float64), &#39;param_classifier:libsvm_svc:C&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20,
+            dtype=float64), &#39;param_classifier:libsvm_svc:gamma&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20,
+            dtype=float64), &#39;param_classifier:libsvm_svc:kernel&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20,
+            dtype=float64), &#39;param_classifier:libsvm_svc:max_iter&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20,
+            dtype=float64), &#39;param_classifier:libsvm_svc:shrinking&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20,
+            dtype=float64), &#39;param_classifier:libsvm_svc:tol&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20,
+            dtype=float64), &#39;param_classifier:passive_aggressive:C&#39;: masked_array(data=[--, --, --, 0.08127752986307964, --, --, --, --,
+                   0.11150821778961238, --],
+             mask=[ True,  True,  True, False,  True,  True,  True,  True,
+                   False,  True],
+       fill_value=1e+20), &#39;param_classifier:passive_aggressive:average&#39;: masked_array(data=[--, --, --, &#39;False&#39;, --, --, --, --, &#39;True&#39;, --],
+             mask=[ True,  True,  True, False,  True,  True,  True,  True,
+                   False,  True],
        fill_value=&#39;N/A&#39;,
-            dtype=&#39;&lt;U32&#39;), &#39;param_classifier:passive_aggressive:loss&#39;: masked_array(data=[--, --, --, &#39;hinge&#39;, --, --, --],
-             mask=[ True,  True,  True, False,  True,  True,  True],
+            dtype=&#39;&lt;U32&#39;), &#39;param_classifier:passive_aggressive:fit_intercept&#39;: masked_array(data=[--, --, --, &#39;True&#39;, --, --, --, --, &#39;True&#39;, --],
+             mask=[ True,  True,  True, False,  True,  True,  True,  True,
+                   False,  True],
        fill_value=&#39;N/A&#39;,
-            dtype=&#39;&lt;U32&#39;), &#39;param_classifier:passive_aggressive:tol&#39;: masked_array(data=[--, --, --, 0.0340962023335284, --, --, --],
-             mask=[ True,  True,  True, False,  True,  True,  True],
-       fill_value=1e+20), &#39;param_classifier:qda:reg_param&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:random_forest:bootstrap&#39;: masked_array(data=[&#39;True&#39;, --, --, --, --, --, --],
-             mask=[False,  True,  True,  True,  True,  True,  True],
+            dtype=&#39;&lt;U32&#39;), &#39;param_classifier:passive_aggressive:loss&#39;: masked_array(data=[--, --, --, &#39;hinge&#39;, --, --, --, --, &#39;hinge&#39;, --],
+             mask=[ True,  True,  True, False,  True,  True,  True,  True,
+                   False,  True],
        fill_value=&#39;N/A&#39;,
-            dtype=&#39;&lt;U4&#39;), &#39;param_classifier:random_forest:criterion&#39;: masked_array(data=[&#39;gini&#39;, --, --, --, --, --, --],
-             mask=[False,  True,  True,  True,  True,  True,  True],
+            dtype=&#39;&lt;U32&#39;), &#39;param_classifier:passive_aggressive:tol&#39;: masked_array(data=[--, --, --, 0.0340962023335284, --, --, --, --,
+                   1.8689990769998806e-05, --],
+             mask=[ True,  True,  True, False,  True,  True,  True,  True,
+                   False,  True],
+       fill_value=1e+20), &#39;param_classifier:qda:reg_param&#39;: masked_array(data=[--, --, --, --, --, --, --, 0.2878935076126664, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True, False,
+                    True,  True],
+       fill_value=1e+20), &#39;param_classifier:random_forest:bootstrap&#39;: masked_array(data=[&#39;True&#39;, --, --, --, --, --, --, --, --, --],
+             mask=[False,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=&#39;N/A&#39;,
-            dtype=&#39;&lt;U4&#39;), &#39;param_classifier:random_forest:max_depth&#39;: masked_array(data=[&#39;None&#39;, --, --, --, --, --, --],
-             mask=[False,  True,  True,  True,  True,  True,  True],
+            dtype=&#39;&lt;U4&#39;), &#39;param_classifier:random_forest:criterion&#39;: masked_array(data=[&#39;gini&#39;, --, --, --, --, --, --, --, --, --],
+             mask=[False,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=&#39;N/A&#39;,
-            dtype=&#39;&lt;U4&#39;), &#39;param_classifier:random_forest:max_features&#39;: masked_array(data=[0.5, --, --, --, --, --, --],
-             mask=[False,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20), &#39;param_classifier:random_forest:max_leaf_nodes&#39;: masked_array(data=[&#39;None&#39;, --, --, --, --, --, --],
-             mask=[False,  True,  True,  True,  True,  True,  True],
+            dtype=&#39;&lt;U4&#39;), &#39;param_classifier:random_forest:max_depth&#39;: masked_array(data=[&#39;None&#39;, --, --, --, --, --, --, --, --, --],
+             mask=[False,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=&#39;N/A&#39;,
-            dtype=&#39;&lt;U4&#39;), &#39;param_classifier:random_forest:min_impurity_decrease&#39;: masked_array(data=[0.0, --, --, --, --, --, --],
-             mask=[False,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20), &#39;param_classifier:random_forest:min_samples_leaf&#39;: masked_array(data=[1.0, --, --, --, --, --, --],
-             mask=[False,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20), &#39;param_classifier:random_forest:min_samples_split&#39;: masked_array(data=[2.0, --, --, --, --, --, --],
-             mask=[False,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20), &#39;param_classifier:random_forest:min_weight_fraction_leaf&#39;: masked_array(data=[0.0, --, --, --, --, --, --],
-             mask=[False,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20), &#39;param_classifier:sgd:alpha&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=&#39;&lt;U4&#39;), &#39;param_classifier:random_forest:max_features&#39;: masked_array(data=[0.5, --, --, --, --, --, --, --, --, --],
+             mask=[False,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20), &#39;param_classifier:random_forest:max_leaf_nodes&#39;: masked_array(data=[&#39;None&#39;, --, --, --, --, --, --, --, --, --],
+             mask=[False,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=&#39;N/A&#39;,
+            dtype=&#39;&lt;U4&#39;), &#39;param_classifier:random_forest:min_impurity_decrease&#39;: masked_array(data=[0.0, --, --, --, --, --, --, --, --, --],
+             mask=[False,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20), &#39;param_classifier:random_forest:min_samples_leaf&#39;: masked_array(data=[1.0, --, --, --, --, --, --, --, --, --],
+             mask=[False,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20), &#39;param_classifier:random_forest:min_samples_split&#39;: masked_array(data=[2.0, --, --, --, --, --, --, --, --, --],
+             mask=[False,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20), &#39;param_classifier:random_forest:min_weight_fraction_leaf&#39;: masked_array(data=[0.0, --, --, --, --, --, --, --, --, --],
+             mask=[False,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
+       fill_value=1e+20), &#39;param_classifier:sgd:alpha&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:sgd:average&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:sgd:average&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:sgd:fit_intercept&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:sgd:fit_intercept&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:sgd:learning_rate&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:sgd:learning_rate&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:sgd:loss&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:sgd:loss&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:sgd:penalty&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:sgd:penalty&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:sgd:tol&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:sgd:tol&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
             dtype=float64), &#39;param_data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: masked_array(data=[0.01, 0.011307840322412704, 0.018370622484682127, --,
-                   --, --, --],
-             mask=[False, False, False,  True,  True,  True,  True],
-       fill_value=1e+20), &#39;param_data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
-       fill_value=1e+20,
-            dtype=float64), &#39;param_data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max&#39;: masked_array(data=[--, 0.7357867136119712, --, --, --, --,
-                   0.720514537267965],
-             mask=[ True, False,  True,  True,  True,  True, False],
+                   --, --, --, 0.04212852907309801, --, --],
+             mask=[False, False, False,  True,  True,  True,  True, False,
+                    True,  True],
+       fill_value=1e+20), &#39;param_data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, 67.0],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True, False],
+       fill_value=1e+20), &#39;param_data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, &#39;uniform&#39;],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True, False],
+       fill_value=&#39;N/A&#39;,
+            dtype=&#39;&lt;U32&#39;), &#39;param_data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max&#39;: masked_array(data=[--, 0.7357867136119712, --, --, --, --,
+                   0.720514537267965, --, --, --],
+             mask=[ True, False,  True,  True,  True,  True, False,  True,
+                    True,  True],
        fill_value=1e+20), &#39;param_data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min&#39;: masked_array(data=[--, 0.2832469215827823, --, --, --, --,
-                   0.27686628712984507],
-             mask=[ True, False,  True,  True,  True,  True, False],
+                   0.27686628712984507, --, --, --],
+             mask=[ True, False,  True,  True,  True,  True, False,  True,
+                    True,  True],
        fill_value=1e+20), &#39;param_feature_preprocessor:pca:keep_variance&#39;: masked_array(data=[0.9999, 0.99855313014133, 0.6039710338898471,
                    0.667024556822579, 0.5976152033262122,
-                   0.5632675578693742, 0.6428535788511281],
-             mask=[False, False, False, False, False, False, False],
+                   0.5632675578693742, 0.6428535788511281,
+                   0.8683631344706874, 0.7158520119045472,
+                   0.9756284876104786],
+             mask=[False, False, False, False, False, False, False, False,
+                   False, False],
        fill_value=1e+20), &#39;param_feature_preprocessor:pca:whiten&#39;: masked_array(data=[&#39;False&#39;, &#39;True&#39;, &#39;False&#39;, &#39;False&#39;, &#39;False&#39;, &#39;False&#39;,
-                   &#39;True&#39;],
-             mask=[False, False, False, False, False, False, False],
+                   &#39;True&#39;, &#39;True&#39;, &#39;False&#39;, &#39;False&#39;],
+             mask=[False, False, False, False, False, False, False, False,
+                   False, False],
        fill_value=&#39;N/A&#39;,
-            dtype=&#39;&lt;U5&#39;), &#39;param_classifier:gradient_boosting:n_iter_no_change&#39;: masked_array(data=[--, --, --, --, --, --, 14.0],
-             mask=[ True,  True,  True,  True,  True,  True, False],
-       fill_value=1e+20), &#39;param_classifier:gradient_boosting:validation_fraction&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=&#39;&lt;U5&#39;), &#39;param_classifier:gradient_boosting:n_iter_no_change&#39;: masked_array(data=[--, --, --, --, --, --, 14.0, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True, False,  True,
+                    True,  True],
+       fill_value=1e+20), &#39;param_classifier:gradient_boosting:validation_fraction&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:lda:shrinkage_factor&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:lda:shrinkage_factor&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:libsvm_svc:coef0&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:libsvm_svc:coef0&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:libsvm_svc:degree&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:libsvm_svc:degree&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:sgd:epsilon&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:sgd:epsilon&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:sgd:eta0&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:sgd:eta0&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:sgd:l1_ratio&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:sgd:l1_ratio&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
-            dtype=float64), &#39;param_classifier:sgd:power_t&#39;: masked_array(data=[--, --, --, --, --, --, --],
-             mask=[ True,  True,  True,  True,  True,  True,  True],
+            dtype=float64), &#39;param_classifier:sgd:power_t&#39;: masked_array(data=[--, --, --, --, --, --, --, --, --, --],
+             mask=[ True,  True,  True,  True,  True,  True,  True,  True,
+                    True,  True],
        fill_value=1e+20,
             dtype=float64)}
 </pre></div>
@@ -754,24 +893,28 @@ The explained variance ratio per stage</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>The 0th pipeline has a explained variance of [0.43295688 0.1790573 ]
-The 1th pipeline has a explained variance of [4.32956881e-01 1.79057296e-01 1.11737571e-01 6.80724345e-02
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>The 0th pipeline has a explained variance of [0.45943611 0.18011916 0.09815268 0.06335132 0.05866043 0.03692087
+ 0.0247421  0.01657975 0.01326119 0.01023919 0.00829387 0.00684616]
+The 1th pipeline has a explained variance of [0.43295688 0.1790573 ]
+The 2th pipeline has a explained variance of [4.32956881e-01 1.79057296e-01 1.11737571e-01 6.80724345e-02
  5.94611519e-02 3.70629898e-02 2.38430977e-02 1.49326086e-02
  1.37641366e-02 1.13704890e-02 1.03737258e-02 8.74116751e-03
  7.57629717e-03 4.86528503e-03 3.32225143e-03 2.55773043e-03
  2.20759805e-03 1.88675402e-03 1.36245140e-03 1.03409213e-03
  8.39749085e-04 7.91287172e-04 6.75655689e-04 5.42961621e-04
  5.02641737e-04 2.07827509e-04 1.74597367e-04]
-The 2th pipeline has a explained variance of [6.86302645e-01 1.25544258e-01 9.02100053e-02 6.19996042e-02
+The 3th pipeline has a explained variance of [6.86302645e-01 1.25544258e-01 9.02100053e-02 6.19996042e-02
  1.45735150e-02 6.43944771e-03 4.53221101e-03 3.18708698e-03
  1.95256209e-03 1.57315864e-03 1.32456937e-03 7.57120105e-04
  4.44789943e-04]
-The 3th pipeline has a explained variance of [0.76699224]
 The 4th pipeline has a explained variance of [0.76699224]
-The 5th pipeline has a explained variance of [0.69475704]
+The 5th pipeline has a explained variance of [0.49503611 0.16649281 0.09111888]
+The 6th pipeline has a explained variance of [0.76699224]
+The 7th pipeline has a explained variance of [0.98080571]
+The 8th pipeline has a explained variance of [0.76699224]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  24.796 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  21.614 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-get-pipeline-components-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/e2278309f0c9a94fb08745a1f915766e/example_get_pipeline_components.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_get_pipeline_components.py</span></code></a></p>
