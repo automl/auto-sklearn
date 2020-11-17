@@ -223,3 +223,4 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
 
             if self.event is not None and self.event.is_set():
                 break
+        print("Finished the process")

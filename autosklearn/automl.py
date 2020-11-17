@@ -4,6 +4,7 @@ import io
 import json
 import platform
 import logging.handlers
+import multiprocessing
 import os
 import sys
 import time
@@ -11,7 +12,6 @@ from typing import Any, Dict, Optional, List, Union
 import unittest.mock
 import warnings
 import tempfile
-import threading
 
 from ConfigSpace.read_and_write import json as cs_json
 import dask.distributed
@@ -284,11 +284,12 @@ class AutoML(BaseEstimator):
         # under the above logging configuration setting
         # We need to specify the logger_name so that received records
         # are treated under the logger_name ROOT logger setting
-        self.stop_logging_server = threading.Event()
+        self.stop_logging_server = multiprocessing.Event()
         self.logger_tcpserver = LogRecordSocketReceiver(logname=logger_name,
                                                         port=self._logger_port,
                                                         event=self.stop_logging_server)
-        self.logging_server = threading.Thread(target=self.logger_tcpserver.serve_until_stopped)
+        self.logging_server = multiprocessing.Process(
+            target=self.logger_tcpserver.serve_until_stopped)
         self.logging_server.daemon = False
         self.logging_server.start()
         return get_logger(logger_name)
@@ -300,7 +301,15 @@ class AutoML(BaseEstimator):
         # Clean up the logger
         if self.logging_server.is_alive():
             self.stop_logging_server.set()
-            self.logging_server.join()
+
+            # We try to join the process, after we sent
+            # the terminate event. Then we try a join to
+            # nicely join the event. In case something
+            # bad happens with nicely trying to kill the
+            # process, we execute a terminate to kill the
+            # process.
+            self.logging_server.join(timeout=5)
+            self.logging_server.terminate()
             del self.logger_tcpserver
             del self.stop_logging_server
 

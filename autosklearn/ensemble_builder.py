@@ -153,7 +153,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         # The second criteria is elapsed time
         elapsed_time = time.time() - self.start_time
 
-        logger = EnsembleBuilder._get_ensemble_logger(self.logger_port)
+        logger = get_named_client_logger('EnsembleBuilder', port=self.logger_port)
 
         # First test for termination conditions
         if self.time_left_for_ensembles < elapsed_time:
@@ -307,6 +307,8 @@ def fit_and_return_ensemble(
             because we do not know when dask schedules the job.
         iteration: int
             The current iteration
+        logger_port: int
+            The port where the logging server is listening to.
 
     Returns
     -------
@@ -442,7 +444,7 @@ class EnsembleBuilder(object):
 
         # Setup the logger
         self.logger_port = logger_port
-        self.logger = self._get_ensemble_logger(self.logger_port)
+        self.logger = get_named_client_logger('EnsembleBuilder', port=self.logger_port)
 
         if ensemble_nbest == 1:
             self.logger.debug("Behaviour depends on int/float: %s, %s (ensemble_nbest, type)" %
@@ -529,15 +531,6 @@ class EnsembleBuilder(object):
         del datamanager
         self.ensemble_history = []
 
-    @classmethod
-    def _get_ensemble_logger(self, port: int):
-        """
-        Returns the logger of for the ensemble process.
-        A subprocess will require to set this up, for instance,
-        pynisher forks
-        """
-        return get_named_client_logger('EnsembleBuilder', port=port)
-
     def run(
         self,
         iteration: int,
@@ -552,7 +545,7 @@ class EnsembleBuilder(object):
         elif time_left is not None and end_at is not None:
             raise ValueError('Cannot provide both time_left and end_at.')
 
-        self.logger = self._get_ensemble_logger(self.logger_port)
+        self.logger = get_named_client_logger('EnsembleBuilder', port=self.logger_port)
 
         process_start_time = time.time()
         while True:
@@ -621,7 +614,7 @@ class EnsembleBuilder(object):
         # Pynisher jobs inside dask 'forget'
         # the logger configuration. So we have to set it up
         # accordingly
-        self.logger = self._get_ensemble_logger(self.logger_port)
+        self.logger = get_named_client_logger('EnsembleBuilder', port=self.logger_port)
 
         self.start_time = time.time()
         train_pred, valid_pred, test_pred = None, None, None
