@@ -290,10 +290,6 @@ def test_automl_outputs(backend, dask_client):
         task=MULTICLASS_CLASSIFICATION,
     )
 
-    # Log file path
-    log_file_path = glob.glob(os.path.join(
-        backend.temporary_directory, 'AutoML*.log'))[0]
-
     # pickled data manager (without one hot encoding!)
     with open(data_manager_file, 'rb') as fh:
         D = pickle.load(fh)
