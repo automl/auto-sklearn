@@ -49,6 +49,10 @@ jobs:
         sudo apt-get remove swig
         sudo apt-get install swig3.0
         sudo ln -s /usr/bin/swig3.0 /usr/bin/swig
+        # We need to install for the dependencies, like pytest
+        pip install -e .[test]
+        # Then we remove autosklearn and install from DIST
+        pip uninstall --yes auto-sklearn
         python setup.py sdist
         last_dist=$(ls -t dist/auto-sklearn-*.tar.gz | head -n 1)
         pip install $last_dist
@@ -58,6 +62,9 @@ jobs:
         export OPENBLAS_NUM_THREADS=1
         export OMP_NUM_THREADS=1
         export MKL_NUM_THREADS=1
+        # We activate conda as metalearning uses python directly, so we need
+        # to change the default python
+        export PATH="$CONDA/envs/testenv/bin:$PATH"
         if [ ${{ matrix.code-cov }} ]; then codecov='--cov=autosklearn --cov-report=xml'; fi
         $CONDA/envs/testenv/bin/python3 -m pytest --durations=20 -sv $codecov test
     - name: Run tests
