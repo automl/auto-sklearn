@@ -1,6 +1,6 @@
 name: pre-commit
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   run-all-files:
