@@ -47,7 +47,7 @@ def is_port_in_use(port: int) -> bool:
 
 def get_named_client_logger(name: str, host: str = 'localhost',
                             port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT
-                            ) -> logging.Logger:
+                            ) -> 'PickableLoggerAdapter':
     """
     When working with a logging server, clients are expected to create a logger using
     this method. For example, the automl object will create a master that awaits
@@ -70,11 +70,11 @@ def get_named_client_logger(name: str, host: str = 'localhost',
     -------
         local_loger: a logger object that has a socket handler
     """
-    local_logger = logging.getLogger(name)
+    local_logger = PickableLoggerAdapter(name)
 
     # Remove any handler, so that the server handles
     # how to process the message
-    local_logger.handlers.clear()
+    local_logger.logger.handlers.clear()
 
     # We also need to remove propagate, else the logger
     # will use the ROOT configuration. That is, automl sets
@@ -82,13 +82,17 @@ def get_named_client_logger(name: str, host: str = 'localhost',
     # Then we also set another handler. If two hanlders (the
     # ROOT handler and our new socket are avaiable) we print
     # twice to the log file
-    local_logger.propagate = False
+    local_logger.logger.propagate = False
 
     socketHandler = logging.handlers.SocketHandler(
         'localhost',
         port
     )
-    local_logger.addHandler(socketHandler)
+    local_logger.logger.addHandler(socketHandler)
+
+    # Pynisher messages are debug, so we want to see them
+    local_logger.logger.setLevel(logging.DEBUG)
+
     return local_logger
 
 

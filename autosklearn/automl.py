@@ -737,6 +737,13 @@ class AutoML(BaseEstimator):
         # while the ensemble builder tries to access the data
         if proc_ensemble is not None:
             self.ensemble_performance_history = list(proc_ensemble.history)
+
+            # save the ensemble performance history file
+            if len(self.ensemble_performance_history) > 0:
+                pd.DataFrame(
+                    self.ensemble_performance_history).to_csv(
+                        os.path.join(self._backend.internals_directory, 'ensemble_history.csv'))
+
             if len(proc_ensemble.futures) > 0:
                 future = proc_ensemble.futures.pop()
                 future.cancel()
