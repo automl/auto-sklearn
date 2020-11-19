@@ -12,14 +12,14 @@ class SGDComponentTest(BaseRegressionComponentTest):
     res = dict()
     res["default_boston"] = -1.1406255966671184e+28
     res["boston_n_calls"] = 6
-    res["default_boston_iterative"] = -1.1659916607994611e+28
+    res["default_boston_iterative"] = -1.1406255966671184e+28
     res["default_boston_sparse"] = -2.5492867904339725e+28
-    res["default_boston_iterative_sparse"] = -2.870272523003458e+27
+    res["default_boston_iterative_sparse"] = -2.5492867904339725e+28
     res["default_diabetes"] = 0.2731178369559112
     res["diabetes_n_calls"] = 10
-    res["default_diabetes_iterative"] = 0.32007097088415215
+    res["default_diabetes_iterative"] = 0.2731178369559112
     res["default_diabetes_sparse"] = 0.03484084539994714
-    res["default_diabetes_iterative_sparse"] = 0.10995569726401955
+    res["default_diabetes_iterative_sparse"] = 0.03484084539994714
 
     sk_mod = sklearn.linear_model.SGDRegressor
     module = SGD
