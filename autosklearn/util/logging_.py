@@ -70,28 +70,20 @@ def get_named_client_logger(name: str, host: str = 'localhost',
     -------
         local_loger: a logger object that has a socket handler
     """
+    # Setup the logger configuration
+    setup_logger()
+
     local_logger = PickableLoggerAdapter(name)
 
     # Remove any handler, so that the server handles
     # how to process the message
     local_logger.logger.handlers.clear()
 
-    # We also need to remove propagate, else the logger
-    # will use the ROOT configuration. That is, automl sets
-    # a default ROOT configuration to print to the log file
-    # Then we also set another handler. If two hanlders (the
-    # ROOT handler and our new socket are avaiable) we print
-    # twice to the log file
-    local_logger.logger.propagate = False
-
     socketHandler = logging.handlers.SocketHandler(
         'localhost',
         port
     )
     local_logger.logger.addHandler(socketHandler)
-
-    # Pynisher messages are debug, so we want to see them
-    local_logger.logger.setLevel(logging.DEBUG)
 
     return local_logger
 

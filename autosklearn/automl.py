@@ -740,9 +740,8 @@ class AutoML(BaseEstimator):
 
             # save the ensemble performance history file
             if len(self.ensemble_performance_history) > 0:
-                pd.DataFrame(
-                    self.ensemble_performance_history).to_csv(
-                        os.path.join(self._backend.internals_directory, 'ensemble_history.csv'))
+                pd.DataFrame(self.ensemble_performance_history).to_json(
+                        os.path.join(self._backend.internals_directory, 'ensemble_history.json'))
 
             if len(proc_ensemble.futures) > 0:
                 future = proc_ensemble.futures.pop()
