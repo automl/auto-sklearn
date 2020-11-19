@@ -224,8 +224,15 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    r2 score:  -0.8623440034893317
-    [(1.000000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:__choice__': 'pca', 'regressor:__choice__': 'KernelRidgeRegression', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0007330452142535147, 'feature_preprocessor:pca:keep_variance': 0.6941265236914974, 'feature_preprocessor:pca:whiten': 'False', 'regressor:KernelRidgeRegression:alpha': 0.35279628649372063, 'regressor:KernelRidgeRegression:gamma': 0.0012311896204582808, 'regressor:KernelRidgeRegression:kernel': 'polynomial', 'regressor:KernelRidgeRegression:coef0': 9.414610917159917, 'regressor:KernelRidgeRegression:degree': 2},
+    r2 score:  -0.5788957063406268
+    [(0.860000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:__choice__': 'pca', 'regressor:__choice__': 'KernelRidgeRegression', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0007330452142535147, 'feature_preprocessor:pca:keep_variance': 0.6941265236914974, 'feature_preprocessor:pca:whiten': 'False', 'regressor:KernelRidgeRegression:alpha': 0.35279628649372063, 'regressor:KernelRidgeRegression:gamma': 0.0012311896204582808, 'regressor:KernelRidgeRegression:kernel': 'polynomial', 'regressor:KernelRidgeRegression:coef0': 9.414610917159917, 'regressor:KernelRidgeRegression:degree': 2},
+    dataset_properties={
+      'task': 4,
+      'sparse': False,
+      'multioutput': False,
+      'target_type': 'regression',
+      'signed': False})),
+    (0.140000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'KernelRidgeRegression', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'regressor:KernelRidgeRegression:alpha': 1.0, 'regressor:KernelRidgeRegression:gamma': 0.1, 'regressor:KernelRidgeRegression:kernel': 'polynomial', 'regressor:KernelRidgeRegression:coef0': 1.0, 'regressor:KernelRidgeRegression:degree': 3},
     dataset_properties={
       'task': 4,
       'sparse': False,
@@ -240,7 +247,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  18.305 seconds)
+   **Total running time of the script:** ( 0 minutes  8.690 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_regression.py:
