@@ -304,6 +304,7 @@ def test_automl_outputs(backend, dask_client):
         'ensemble_read_scores.pkl',
         'runs',
         'ensembles',
+        'ensemble_history.json',
     ]
     assert (
         sorted(os.listdir(os.path.join(backend.temporary_directory, '.auto-sklearn')))

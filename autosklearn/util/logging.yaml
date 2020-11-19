@@ -44,3 +44,7 @@ loggers:
   smac.optimizer.smbo.SMBO:
     level: INFO
     handlers: [file_handler, console]
+
+  EnsembleBuilder:
+    level: DEBUG
+    propagate: no
