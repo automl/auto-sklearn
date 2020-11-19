@@ -346,19 +346,7 @@ class InputValidator:
         Uses .iloc as a safe way to deal with pandas object
         """
         # Start with the features
-        if hasattr(X, "iloc"):
-            enc_columns, feature_types = self._check_and_get_columns_to_encode(X)
-        else:
-            if len(X.shape) < 1:
-                raise ValueError("Input data X cannot be one dimensional "
-                                 "and need to be reshaped to a 2-D array-like object."
-                                 "You can do so via np.reshape(-1,1). "
-                                 )
-            enc_columns = list(range(X.shape[1]))
-
-            # By default, we treat everything as Numerical
-            # If the user provided a feat_type that is gonna be honored
-            feature_types = ['numerical' for f in enc_columns]
+        enc_columns, feature_types = self._check_and_get_columns_to_encode(X)
 
         # If there is a Nan, we cannot encode it due to a scikit learn limitation
         if len(enc_columns) > 0:
