@@ -307,9 +307,6 @@ def _test_regressor_iterative_fit(Regressor, dataset='diabetes', sparse=False):
         regressor.iterative_fit(X_train, Y_train, n_iter=n_iter)
         iteration += 1
 
-    #while not regressor.configuration_fully_fitted():
-    #    regressor = regressor.iterative_fit(X_train, Y_train)
-
     predictions = regressor.predict(X_test)
     return predictions, Y_test, regressor
 
