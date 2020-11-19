@@ -24,7 +24,7 @@ from autosklearn.constants import MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATI
 from smac.tae import StatusType
 
 sys.path.append(os.path.dirname(__file__))
-from automl_utils import extract_msg_from_log, count_succeses  # noqa (E402: module level import not at top of file)
+from automl_utils import print_debug_information, count_succeses  # noqa (E402: module level import not at top of file)
 
 
 class AutoMLStub(AutoML):
@@ -290,10 +290,6 @@ def test_automl_outputs(backend, dask_client):
         task=MULTICLASS_CLASSIFICATION,
     )
 
-    # Log file path
-    log_file_path = glob.glob(os.path.join(
-        backend.temporary_directory, 'AutoML*.log'))[0]
-
     # pickled data manager (without one hot encoding!)
     with open(data_manager_file, 'rb') as fh:
         D = pickle.load(fh)
@@ -335,7 +331,7 @@ def test_automl_outputs(backend, dask_client):
                                         '.auto-sklearn', "start_time_100")
     with open(start_time_file_path, 'r') as fh:
         start_time = float(fh.read())
-    assert time.time() - start_time >= 10, extract_msg_from_log(log_file_path)
+    assert time.time() - start_time >= 10, print_debug_information(auto)
 
     del auto
 
