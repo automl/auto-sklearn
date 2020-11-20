@@ -430,7 +430,6 @@ class AutoMLSMBO(object):
             autosklearn_seed=seed,
             resampling_strategy=self.resampling_strategy,
             initial_num_run=num_run,
-            logger=self.logger,
             include=include,
             exclude=exclude,
             metric=self.metric,

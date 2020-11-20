@@ -567,7 +567,9 @@ class EnsembleBuilder(object):
             context = multiprocessing.get_context('forkserver')
             # Try to copy as many modules into the new context to reduce startup time
             # http://www.bnikolic.co.uk/blog/python/parallelism/2019/11/13/python-forkserver-preload.html
-            context.set_forkserver_preload(list(sys.modules.keys()))
+            # do not copy the logging module as it causes deadlocks!
+            preload_modules = list(filter(lambda key: 'logging' not in key, sys.modules.keys()))
+            context.set_forkserver_preload(preload_modules)
             safe_ensemble_script = pynisher.enforce_limits(
                 wall_time_in_s=int(time_left - time_buffer),
                 mem_in_mb=self.memory_limit,

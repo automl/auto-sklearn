@@ -87,7 +87,6 @@ class EvaluationTest(unittest.TestCase):
         config.config_id = 198
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
                                     metric=accuracy,
@@ -107,7 +106,6 @@ class EvaluationTest(unittest.TestCase):
         config.config_id = 198
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     metric=accuracy,
                                     cost_for_crash=get_cost_of_crash(accuracy),
@@ -125,7 +123,6 @@ class EvaluationTest(unittest.TestCase):
         config.config_id = 198
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     metric=accuracy,
                                     cost_for_crash=get_cost_of_crash(accuracy),
@@ -145,7 +142,6 @@ class EvaluationTest(unittest.TestCase):
         config.config_id = 198
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
                                     metric=accuracy,
@@ -186,7 +182,6 @@ class EvaluationTest(unittest.TestCase):
         config.config_id = 198
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
                                     metric=log_loss,
@@ -216,7 +211,6 @@ class EvaluationTest(unittest.TestCase):
         m2.wall_clock_time = 30
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
                                     metric=accuracy,
@@ -251,7 +245,6 @@ class EvaluationTest(unittest.TestCase):
         # Test for a succesful run
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
                                     metric=accuracy,
@@ -274,7 +267,6 @@ class EvaluationTest(unittest.TestCase):
         m2.side_effect = side_effect
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
                                     metric=accuracy,
@@ -301,7 +293,6 @@ class EvaluationTest(unittest.TestCase):
         eval_houldout_mock.side_effect = side_effect
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
                                     metric=accuracy,
@@ -325,7 +316,6 @@ class EvaluationTest(unittest.TestCase):
         eval_holdout_mock.side_effect = ValueError
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
                                     metric=accuracy,
@@ -350,7 +340,6 @@ class EvaluationTest(unittest.TestCase):
         ta = ExecuteTaFuncWithQueue(backend=backend_mock,
                                     autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
                                     metric=accuracy,

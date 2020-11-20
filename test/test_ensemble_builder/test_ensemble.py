@@ -732,7 +732,7 @@ def test_get_identifiers_from_run_history(exists, metric, ensemble_run_history, 
     assert budget == 3.0
 
 
-def test_ensemble_builder_process_realrun(dask_client, ensemble_backend):
+def test_ensemble_builder_process_realrun(dask_client_single_worker, ensemble_backend):
     manager = EnsembleBuilderManager(
         start_time=time.time(),
         time_left_for_ensembles=1000,
@@ -750,7 +750,7 @@ def test_ensemble_builder_process_realrun(dask_client, ensemble_backend):
         ensemble_memory_limit=None,
         random_state=0,
     )
-    manager.build_ensemble(dask_client)
+    manager.build_ensemble(dask_client_single_worker)
     future = manager.futures.pop()
     dask.distributed.wait([future])  # wait for the ensemble process to finish
     result = future.result()
@@ -765,7 +765,11 @@ def test_ensemble_builder_process_realrun(dask_client, ensemble_backend):
 
 
 @unittest.mock.patch('autosklearn.ensemble_builder.EnsembleBuilder.fit_ensemble')
-def test_ensemble_builder_nbest_remembered(fit_ensemble, ensemble_backend, dask_client):
+def test_ensemble_builder_nbest_remembered(
+    fit_ensemble,
+    ensemble_backend,
+    dask_client_single_worker,
+):
     """
     Makes sure ensemble builder returns the size of the ensemble that pynisher allowed
     This way, we can remember it and not waste more time trying big ensemble sizes
@@ -791,14 +795,14 @@ def test_ensemble_builder_nbest_remembered(fit_ensemble, ensemble_backend, dask_
         max_iterations=None,
     )
 
-    manager.build_ensemble(dask_client)
+    manager.build_ensemble(dask_client_single_worker)
     future = manager.futures[0]
     dask.distributed.wait([future])  # wait for the ensemble process to finish
     assert future.result() == ([], 5, None, None, None)
     file_path = os.path.join(ensemble_backend.internals_directory, 'ensemble_read_preds.pkl')
     assert not os.path.exists(file_path)
 
-    manager.build_ensemble(dask_client)
+    manager.build_ensemble(dask_client_single_worker)
 
     future = manager.futures[0]
     dask.distributed.wait([future])  # wait for the ensemble process to finish

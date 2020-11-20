@@ -292,11 +292,12 @@ class AutoML(BaseEstimator):
         # under the above logging configuration setting
         # We need to specify the logger_name so that received records
         # are treated under the logger_name ROOT logger setting
-        self.stop_logging_server = multiprocessing.Event()
+        context = multiprocessing.get_context('fork')
+        self.stop_logging_server = context.Event()
         self.logger_tcpserver = LogRecordSocketReceiver(logname=logger_name,
                                                         port=self._logger_port,
                                                         event=self.stop_logging_server)
-        self.logging_server = multiprocessing.Process(
+        self.logging_server = context.Process(
             target=self.logger_tcpserver.serve_until_stopped)
         self.logging_server.daemon = False
         self.logging_server.start()
@@ -362,7 +363,6 @@ class AutoML(BaseEstimator):
                                     autosklearn_seed=self._seed,
                                     resampling_strategy=self._resampling_strategy,
                                     initial_num_run=num_run,
-                                    logger=self._logger,
                                     stats=stats,
                                     metric=self._metric,
                                     memory_limit=memory_limit,
