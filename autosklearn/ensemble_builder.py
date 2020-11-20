@@ -4,10 +4,12 @@ import gzip
 import math
 import numbers
 import logging.handlers
+import multiprocessing
 import os
 import pickle
 import re
 import shutil
+import sys
 import time
 import traceback
 from typing import List, Optional, Tuple, Union
@@ -28,7 +30,7 @@ from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.metrics import calculate_score, Scorer
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
-from autosklearn.util.logging_ import get_named_client_logger
+from autosklearn.util.logging_ import get_named_client_logger, get_logger
 
 Y_ENSEMBLE = 0
 Y_VALID = 1
@@ -153,7 +155,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         # The second criteria is elapsed time
         elapsed_time = time.time() - self.start_time
 
-        logger = get_named_client_logger('EnsembleBuilder', port=self.logger_port)
+        logger = get_logger('EnsembleBuilder')
 
         # First test for termination conditions
         if self.time_left_for_ensembles < elapsed_time:
@@ -562,10 +564,15 @@ class EnsembleBuilder(object):
 
             if time_left - time_buffer < 1:
                 break
+            context = multiprocessing.get_context('forkserver')
+            # Try to copy as many modules into the new context to reduce startup time
+            # http://www.bnikolic.co.uk/blog/python/parallelism/2019/11/13/python-forkserver-preload.html
+            context.set_forkserver_preload(list(sys.modules.keys()))
             safe_ensemble_script = pynisher.enforce_limits(
                 wall_time_in_s=int(time_left - time_buffer),
                 mem_in_mb=self.memory_limit,
-                logger=self.logger
+                logger=self.logger,
+                context=context,
             )(self.main)
             safe_ensemble_script(time_left, iteration, return_predictions)
             if safe_ensemble_script.exit_status is pynisher.MemorylimitException:

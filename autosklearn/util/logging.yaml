@@ -18,6 +18,12 @@ handlers:
     formatter: simple
     filename: autosklearn.log
 
+  distributed_logfile:
+    class: logging.FileHandler
+    level: DEBUG
+    formatter: simple
+    filename: distributed.log
+
 root:
   level: DEBUG
   handlers: [console, file_handler]
@@ -26,7 +32,6 @@ loggers:
   autosklearn.metalearning:
     level: DEBUG
     handlers: [file_handler]
-    propagate: no
 
   autosklearn.util.backend:
     level: DEBUG
@@ -48,3 +53,7 @@ loggers:
   EnsembleBuilder:
     level: DEBUG
     propagate: no
+
+  distributed:
+    level: DEBUG
+    handlers: [distributed_logfile]

@@ -4,6 +4,7 @@ import json
 import math
 import multiprocessing
 from queue import Empty
+import sys
 import time
 import traceback
 from typing import Dict, List, Optional, Tuple, Union
@@ -244,7 +245,11 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         instance_specific: Optional[str] = None,
     ) -> Tuple[StatusType, float, float, Dict[str, Union[int, float, str, Dict, List, Tuple]]]:
 
-        queue = multiprocessing.Queue()
+        context = multiprocessing.get_context('forkserver')
+        # Try to copy as many modules into the new context to reduce startup time
+        # http://www.bnikolic.co.uk/blog/python/parallelism/2019/11/13/python-forkserver-preload.html
+        context.set_forkserver_preload(list(sys.modules.keys()))
+        queue = context.Queue()
 
         if not (instance_specific is None or instance_specific == '0'):
             raise ValueError(instance_specific)
@@ -257,6 +262,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             wall_time_in_s=cutoff,
             mem_in_mb=self.memory_limit,
             capture_output=True,
+            context=context,
         )
 
         if isinstance(config, int):

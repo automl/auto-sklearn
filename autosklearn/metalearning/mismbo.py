@@ -19,7 +19,7 @@ def suggest_via_metalearning(
 
     task = TASK_TYPES_TO_STRING[task]
 
-    logger.warning(task)
+    logger.info(task)
 
     start = time.time()
     ml = MetaLearningOptimizer(
