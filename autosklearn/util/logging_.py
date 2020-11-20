@@ -5,7 +5,6 @@ import logging.handlers
 import os
 import pickle
 import select
-import socket
 import socketserver
 import struct
 import threading
@@ -48,11 +47,6 @@ def _create_logger(name: str) -> logging.Logger:
 def get_logger(name: str) -> 'PickableLoggerAdapter':
     logger = PickableLoggerAdapter(name)
     return logger
-
-
-def is_port_in_use(port: int) -> bool:
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex(('localhost', port)) == 0
 
 
 def get_named_client_logger(name: str, host: str = 'localhost',

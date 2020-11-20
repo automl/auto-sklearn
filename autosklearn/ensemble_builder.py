@@ -1394,24 +1394,11 @@ class EnsembleBuilder(object):
 
         """
 
-        # Obtain a list of sorted pred keys
-        sorted_keys = self._get_list_of_sorted_preds()
-        sorted_keys = list(map(lambda x: x[0], sorted_keys))
-
-        if len(sorted_keys) <= self.max_resident_models:
-            # Don't waste time if not enough models to delete
-            return
-
-        # The top self.max_resident_models models would be the candidates
-        # Any other low performance model will be deleted
-        # The list is in ascending order of score
-        candidates = sorted_keys[:self.max_resident_models]
-
         # Loop through the files currently in the directory
         for pred_path in self.y_ens_files:
 
             # Do not delete candidates
-            if pred_path in candidates:
+            if pred_path in selected_keys:
                 continue
 
             if pred_path in self._has_been_candidate:

@@ -43,7 +43,6 @@ from autosklearn.util.backend import Backend
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import (
     get_logger,
-    is_port_in_use,
     LogRecordSocketReceiver,
     setup_logger,
 )
@@ -281,11 +280,6 @@ class AutoML(BaseEstimator):
             output_dir=self._backend.temporary_directory,
         )
 
-        # The desired port might be used, so check this
-        self._logger_port = np.random.randint(10000, 65535)
-        while is_port_in_use(self._logger_port):
-            self._logger_port = np.random.randint(10000, 65535)
-
         # As Auto-sklearn works with distributed process,
         # we implement a logger server that can receive tcp
         # pickled messages. They are unpickled and processed locally
@@ -294,9 +288,18 @@ class AutoML(BaseEstimator):
         # are treated under the logger_name ROOT logger setting
         context = multiprocessing.get_context('fork')
         self.stop_logging_server = context.Event()
-        self.logger_tcpserver = LogRecordSocketReceiver(logname=logger_name,
-                                                        port=self._logger_port,
-                                                        event=self.stop_logging_server)
+
+        while True:
+            # Loop until we find a valid port
+            self._logger_port = np.random.randint(10000, 65535)
+            try:
+                self.logger_tcpserver = LogRecordSocketReceiver(logname=logger_name,
+                                                                port=self._logger_port,
+                                                                event=self.stop_logging_server)
+                break
+            except OSError:
+                continue
+
         self.logging_server = context.Process(
             target=self.logger_tcpserver.serve_until_stopped)
         self.logging_server.daemon = False
