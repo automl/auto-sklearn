@@ -73,7 +73,7 @@ Auto-sklearn requires dask workers to not run in the daemon setting
  .. code-block:: none
 
 
-    <dask.config.set object at 0x7f5efec8e050>
+    <dask.config.set object at 0x7f291d542b10>
 
 
 
@@ -244,7 +244,7 @@ which means that it is automatically stopped one all computation is done.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  36.919 seconds)
+   **Total running time of the script:** ( 0 minutes  37.065 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_manual_spawning.py:
