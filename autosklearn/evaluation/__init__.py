@@ -4,6 +4,7 @@ import json
 import math
 import multiprocessing
 from queue import Empty
+import sys
 import time
 import traceback
 from typing import Dict, List, Optional, Tuple, Union
@@ -96,7 +97,7 @@ def _encode_exit_status(exit_status):
 class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
     def __init__(self, backend, autosklearn_seed, resampling_strategy, metric,
-                 logger, cost_for_crash, abort_on_first_run_crash,
+                 cost_for_crash, abort_on_first_run_crash,
                  initial_num_run=1, stats=None,
                  run_obj='quality', par_factor=1, all_scoring_functions=False,
                  output_y_hat_optimization=True, include=None, exclude=None,
@@ -160,7 +161,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.disable_file_output = disable_file_output
         self.init_params = init_params
         self.budget_type = budget_type
-        self.logger = logger
 
         if memory_limit is not None:
             memory_limit = int(math.ceil(memory_limit))
@@ -244,7 +244,13 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         instance_specific: Optional[str] = None,
     ) -> Tuple[StatusType, float, float, Dict[str, Union[int, float, str, Dict, List, Tuple]]]:
 
-        queue = multiprocessing.Queue()
+        context = multiprocessing.get_context('forkserver')
+        # Try to copy as many modules into the new context to reduce startup time
+        # http://www.bnikolic.co.uk/blog/python/parallelism/2019/11/13/python-forkserver-preload.html
+        # do not copy the logging module as it causes deadlocks!
+        preload_modules = list(filter(lambda key: 'logging' not in key, sys.modules.keys()))
+        context.set_forkserver_preload(preload_modules)
+        queue = context.Queue()
 
         if not (instance_specific is None or instance_specific == '0'):
             raise ValueError(instance_specific)
@@ -257,6 +263,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             wall_time_in_s=cutoff,
             mem_in_mb=self.memory_limit,
             capture_output=True,
+            context=context,
         )
 
         if isinstance(config, int):
@@ -436,8 +443,4 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         runtime = float(obj.wall_clock_time)
 
         autosklearn.evaluation.util.empty_queue(queue)
-        self.logger.debug(
-            'Finished function evaluation. Status: %s, Cost: %f, Runtime: %f, Additional %s',
-            status, cost, runtime, additional_run_info,
-        )
         return status, cost, runtime, additional_run_info

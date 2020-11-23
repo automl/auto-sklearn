@@ -4,10 +4,12 @@ import gzip
 import math
 import numbers
 import logging.handlers
+import multiprocessing
 import os
 import pickle
 import re
 import shutil
+import sys
 import time
 import traceback
 from typing import List, Optional, Tuple, Union
@@ -28,7 +30,7 @@ from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.metrics import calculate_score, Scorer
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
-from autosklearn.util.logging_ import get_named_client_logger
+from autosklearn.util.logging_ import get_named_client_logger, get_logger
 
 Y_ENSEMBLE = 0
 Y_VALID = 1
@@ -153,7 +155,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         # The second criteria is elapsed time
         elapsed_time = time.time() - self.start_time
 
-        logger = get_named_client_logger('EnsembleBuilder', port=self.logger_port)
+        logger = get_logger('EnsembleBuilder')
 
         # First test for termination conditions
         if self.time_left_for_ensembles < elapsed_time:
@@ -562,10 +564,17 @@ class EnsembleBuilder(object):
 
             if time_left - time_buffer < 1:
                 break
+            context = multiprocessing.get_context('forkserver')
+            # Try to copy as many modules into the new context to reduce startup time
+            # http://www.bnikolic.co.uk/blog/python/parallelism/2019/11/13/python-forkserver-preload.html
+            # do not copy the logging module as it causes deadlocks!
+            preload_modules = list(filter(lambda key: 'logging' not in key, sys.modules.keys()))
+            context.set_forkserver_preload(preload_modules)
             safe_ensemble_script = pynisher.enforce_limits(
                 wall_time_in_s=int(time_left - time_buffer),
                 mem_in_mb=self.memory_limit,
-                logger=self.logger
+                logger=self.logger,
+                context=context,
             )(self.main)
             safe_ensemble_script(time_left, iteration, return_predictions)
             if safe_ensemble_script.exit_status is pynisher.MemorylimitException:
@@ -1385,24 +1394,11 @@ class EnsembleBuilder(object):
 
         """
 
-        # Obtain a list of sorted pred keys
-        sorted_keys = self._get_list_of_sorted_preds()
-        sorted_keys = list(map(lambda x: x[0], sorted_keys))
-
-        if len(sorted_keys) <= self.max_resident_models:
-            # Don't waste time if not enough models to delete
-            return
-
-        # The top self.max_resident_models models would be the candidates
-        # Any other low performance model will be deleted
-        # The list is in ascending order of score
-        candidates = sorted_keys[:self.max_resident_models]
-
         # Loop through the files currently in the directory
         for pred_path in self.y_ens_files:
 
             # Do not delete candidates
-            if pred_path in candidates:
+            if pred_path in selected_keys:
                 continue
 
             if pred_path in self._has_been_candidate:

@@ -54,7 +54,7 @@ class TestMetadataGeneration(unittest.TestCase):
         with open(commands_output_file) as fh:
             cmds = fh.read().split('\n')
             # 6 regression, 11 classification (roc_auc + task 258 is illegal), 1 empty line
-            self.assertEqual(len(cmds), 18)
+            self.assertEqual(len(cmds), 18, msg='\n'.join(cmds))
 
         for task_id, task_type, metric in (
                 (classification_task_id, 'classification', 'accuracy'),

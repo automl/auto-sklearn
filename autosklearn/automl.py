@@ -43,7 +43,6 @@ from autosklearn.util.backend import Backend
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import (
     get_logger,
-    is_port_in_use,
     LogRecordSocketReceiver,
     setup_logger,
 )
@@ -247,7 +246,11 @@ class AutoML(BaseEstimator):
                 # file was deleted, so the client could not close
                 # the worker properly
                 local_directory=tempfile.gettempdir(),
-            )
+                # Memory is handled by the pynisher, not by the dask worker/nanny
+                memory_limit=0,
+            ),
+            # Heartbeat every 10s
+            heartbeat_interval=10000,
         )
 
     def _close_dask_client(self):
@@ -269,14 +272,13 @@ class AutoML(BaseEstimator):
         # Setup the configuration for the logger
         # This is gonna be honored by the server
         # Which is created below
-        setup_logger(os.path.join(self._backend.temporary_directory,
-                                  '%s.log' % str(logger_name)),
-                     self.logging_config,
-                     )
-
-        # The desired port might be used, so check this
-        while is_port_in_use(self._logger_port):
-            self._logger_port += 1
+        setup_logger(
+            output_file=os.path.join(
+                self._backend.temporary_directory, '%s.log' % str(logger_name)
+            ),
+            logging_config=self.logging_config,
+            output_dir=self._backend.temporary_directory,
+        )
 
         # As Auto-sklearn works with distributed process,
         # we implement a logger server that can receive tcp
@@ -284,11 +286,21 @@ class AutoML(BaseEstimator):
         # under the above logging configuration setting
         # We need to specify the logger_name so that received records
         # are treated under the logger_name ROOT logger setting
-        self.stop_logging_server = multiprocessing.Event()
-        self.logger_tcpserver = LogRecordSocketReceiver(logname=logger_name,
-                                                        port=self._logger_port,
-                                                        event=self.stop_logging_server)
-        self.logging_server = multiprocessing.Process(
+        context = multiprocessing.get_context('fork')
+        self.stop_logging_server = context.Event()
+
+        while True:
+            # Loop until we find a valid port
+            self._logger_port = np.random.randint(10000, 65535)
+            try:
+                self.logger_tcpserver = LogRecordSocketReceiver(logname=logger_name,
+                                                                port=self._logger_port,
+                                                                event=self.stop_logging_server)
+                break
+            except OSError:
+                continue
+
+        self.logging_server = context.Process(
             target=self.logger_tcpserver.serve_until_stopped)
         self.logging_server.daemon = False
         self.logging_server.start()
@@ -354,7 +366,6 @@ class AutoML(BaseEstimator):
                                     autosklearn_seed=self._seed,
                                     resampling_strategy=self._resampling_strategy,
                                     initial_num_run=num_run,
-                                    logger=self._logger,
                                     stats=stats,
                                     metric=self._metric,
                                     memory_limit=memory_limit,
@@ -409,6 +420,9 @@ class AutoML(BaseEstimator):
         only_return_configuration_space: Optional[bool] = False,
         load_models: bool = True,
     ):
+        self._backend.save_start_time(self._seed)
+        self._stopwatch = StopWatch()
+
         # Make sure that input is valid
         # Performs Ordinal one hot encoding to the target
         # both for train and test data
@@ -434,6 +448,12 @@ class AutoML(BaseEstimator):
             raise ValueError('Metric must be instance of '
                              'autosklearn.metrics.Scorer.')
 
+        if dataset_name is None:
+            dataset_name = hash_array_or_matrix(X)
+        # By default try to use the TCP logging port or get a new port
+        self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
+        self._logger = self._get_logger(dataset_name)
+
         # If no dask client was provided, we create one, so that we can
         # start a ensemble process in parallel to smbo optimize
         if (
@@ -444,17 +464,8 @@ class AutoML(BaseEstimator):
         else:
             self._is_dask_client_internally_created = False
 
-        if dataset_name is None:
-            dataset_name = hash_array_or_matrix(X)
-
-        self._backend.save_start_time(self._seed)
-        self._stopwatch = StopWatch()
         self._dataset_name = dataset_name
         self._stopwatch.start_task(self._dataset_name)
-
-        # By default try to use the TCP logging port or get a new port
-        self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
-        self._logger = self._get_logger(dataset_name)
 
         if feat_type is not None and len(feat_type) != X.shape[1]:
             raise ValueError('Array feat_type does not have same number of '

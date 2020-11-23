@@ -5,7 +5,6 @@ import logging.handlers
 import os
 import pickle
 import select
-import socket
 import socketserver
 import struct
 import threading
@@ -14,20 +13,30 @@ from typing import Any, Dict, Optional, Type
 import yaml
 
 
-def setup_logger(output_file: Optional[str] = None, logging_config: Optional[Dict] = None
-                 ) -> None:
+def setup_logger(
+    output_file: Optional[str] = None,
+    logging_config: Optional[Dict] = None,
+    output_dir: Optional[str] = None,
+) -> None:
     # logging_config must be a dictionary object specifying the configuration
     # for the loggers to be used in auto-sklearn.
     if logging_config is not None:
         if output_file is not None:
             logging_config['handlers']['file_handler']['filename'] = output_file
+        if output_dir is not None:
+            logging_config['handlers']['distributed_logfile']['filename'] = os.path.join(
+                output_dir, 'distributed.log'
+            )
         logging.config.dictConfig(logging_config)
     else:
-        with open(os.path.join(os.path.dirname(__file__), 'logging.yaml'),
-                  'r') as fh:
+        with open(os.path.join(os.path.dirname(__file__), 'logging.yaml'), 'r') as fh:
             logging_config = yaml.safe_load(fh)
         if output_file is not None:
             logging_config['handlers']['file_handler']['filename'] = output_file
+        if output_dir is not None:
+            logging_config['handlers']['distributed_logfile']['filename'] = os.path.join(
+                output_dir, 'distributed.log'
+            )
         logging.config.dictConfig(logging_config)
 
 
@@ -38,11 +47,6 @@ def _create_logger(name: str) -> logging.Logger:
 def get_logger(name: str) -> 'PickableLoggerAdapter':
     logger = PickableLoggerAdapter(name)
     return logger
-
-
-def is_port_in_use(port: int) -> bool:
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex(('localhost', port)) == 0
 
 
 def get_named_client_logger(name: str, host: str = 'localhost',
@@ -157,13 +161,13 @@ class LogRecordStreamHandler(socketserver.StreamRequestHandler):
         according to whatever policy is configured locally.
         """
         while True:
-            chunk = self.connection.recv(4)
+            chunk = self.connection.recv(4)  # type: ignore[attr-defined]
             if len(chunk) < 4:
                 break
             slen = struct.unpack('>L', chunk)[0]
-            chunk = self.connection.recv(slen)
+            chunk = self.connection.recv(slen)  # type: ignore[attr-defined]
             while len(chunk) < slen:
-                chunk = chunk + self.connection.recv(slen - len(chunk))
+                chunk = chunk + self.connection.recv(slen - len(chunk))  # type: ignore[attr-defined]  # noqa: E501
             obj = self.unPickle(chunk)
             record = logging.makeLogRecord(obj)
             self.handleLogRecord(record)
@@ -216,6 +220,5 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
                                        self.timeout)
             if rd:
                 self.handle_request()
-
             if self.event is not None and self.event.is_set():
                 break

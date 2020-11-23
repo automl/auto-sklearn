@@ -177,6 +177,10 @@ class AutoSklearnEstimator(BaseEstimator):
         dask_client : dask.distributed.Client, optional
             User-created dask client, can be used to start a dask cluster and then
             attach auto-sklearn to it.
+            
+            Auto-sklearn can run into a deadlock if the dask client uses threads for
+            parallelization, it is therefore highly recommended to use dask workers
+            using a single process.
 
         disable_evaluator_output: bool or list, optional (False)
             If True, disable model and prediction output. Cannot be used
