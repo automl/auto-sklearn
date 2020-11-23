@@ -49,49 +49,6 @@ def get_logger(name: str) -> 'PickableLoggerAdapter':
     return logger
 
 
-def get_named_client_logger(name: str, host: str = 'localhost',
-                            port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT
-                            ) -> 'PickableLoggerAdapter':
-    """
-    When working with a logging server, clients are expected to create a logger using
-    this method. For example, the automl object will create a master that awaits
-    for records sent through tcp to localhost.
-
-    Ensemble builder will then instantiate a logger object that will submit records
-    via a socket handler to the server.
-
-    We do not need to use any format as the server will render the msg as it
-    needs to.
-
-    Parameters
-    ----------
-        name: (str)
-            the name of the logger, used to tag the messages in the main log
-        host: (str)
-            Address of where the server is gonna look for messages
-
-    Returns
-    -------
-        local_loger: a logger object that has a socket handler
-    """
-    # Setup the logger configuration
-    setup_logger()
-
-    local_logger = PickableLoggerAdapter(name)
-
-    # Remove any handler, so that the server handles
-    # how to process the message
-    local_logger.logger.handlers.clear()
-
-    socketHandler = logging.handlers.SocketHandler(
-        'localhost',
-        port
-    )
-    local_logger.logger.addHandler(socketHandler)
-
-    return local_logger
-
-
 class PickableLoggerAdapter(object):
 
     def __init__(self, name: str):
@@ -145,6 +102,92 @@ class PickableLoggerAdapter(object):
 
     def isEnabledFor(self, level: int) -> bool:
         return self.logger.isEnabledFor(level)
+
+
+def get_named_client_logger(
+    name: str,
+    host: str = 'localhost',
+    port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
+) -> 'PicklableClientLogger':
+    logger = PicklableClientLogger(name, host, port)
+    return logger
+
+
+def _get_named_client_logger(
+    name: str,
+    host: str = 'localhost',
+    port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
+) -> logging.Logger:
+    """
+    When working with a logging server, clients are expected to create a logger using
+    this method. For example, the automl object will create a master that awaits
+    for records sent through tcp to localhost.
+
+    Ensemble builder will then instantiate a logger object that will submit records
+    via a socket handler to the server.
+
+    We do not need to use any format as the server will render the msg as it
+    needs to.
+
+    Parameters
+    ----------
+        name: (str)
+            the name of the logger, used to tag the messages in the main log
+        host: (str)
+            Address of where the server is gonna look for messages
+
+    Returns
+    -------
+        local_loger: a logger object that has a socket handler
+    """
+    # Setup the logger configuration
+    setup_logger()
+
+    local_logger = _create_logger(name)
+
+    # Remove any handler, so that the server handles
+    # how to process the message
+    local_logger.handlers.clear()
+
+    socketHandler = logging.handlers.SocketHandler(host, port)
+    local_logger.addHandler(socketHandler)
+
+    return local_logger
+
+
+class PicklableClientLogger(PickableLoggerAdapter):
+
+    def __init__(self, name: str, host: str, port: int):
+        self.name = name
+        self.host = host
+        self.port = port
+        self.logger = _get_named_client_logger(name, host, port)
+
+    def __getstate__(self) -> Dict[str, Any]:
+        """
+        Method is called when pickle dumps an object.
+
+        Returns
+        -------
+        Dictionary, representing the object state to be pickled. Ignores
+        the self.logger field and only returns the logger name.
+        """
+        return {'name': self.name, 'host': self.host, 'port': self.port}
+
+    def __setstate__(self, state: Dict[str, Any]) -> None:
+        """
+        Method is called when pickle loads an object. Retrieves the name and
+        creates a logger.
+
+        Parameters
+        ----------
+        state - dictionary, containing the logger name.
+
+        """
+        self.name = state['name']
+        self.host = state['host']
+        self.port = state['port']
+        self.logger = _get_named_client_logger(self.name, self.host, self.port)
 
 
 class LogRecordStreamHandler(socketserver.StreamRequestHandler):

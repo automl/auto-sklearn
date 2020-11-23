@@ -548,6 +548,8 @@ class EnsembleBuilder(object):
             raise ValueError('Cannot provide both time_left and end_at.')
 
         self.logger = get_named_client_logger('EnsembleBuilder', port=self.logger_port)
+        self.pynisher_logger = get_named_client_logger('EnsembleBuilder(pynisher)',
+                                                       port=self.logger_port)
 
         process_start_time = time.time()
         while True:
@@ -573,7 +575,7 @@ class EnsembleBuilder(object):
             safe_ensemble_script = pynisher.enforce_limits(
                 wall_time_in_s=int(time_left - time_buffer),
                 mem_in_mb=self.memory_limit,
-                logger=self.logger,
+                logger=self.pynisher_logger,
                 context=context,
             )(self.main)
             safe_ensemble_script(time_left, iteration, return_predictions)
