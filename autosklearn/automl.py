@@ -756,7 +756,9 @@ class AutoML(BaseEstimator):
 
             if len(proc_ensemble.futures) > 0:
                 future = proc_ensemble.futures.pop()
-                future.cancel()
+                # Now we need to wait for the future to return as it cannot be cancelled while it
+                # is running: https://stackoverflow.com/a/49203129
+                future.result()
 
         if load_models:
             self._load_models()
