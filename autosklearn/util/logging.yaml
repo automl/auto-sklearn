@@ -52,7 +52,7 @@ loggers:
 
   EnsembleBuilder:
     level: DEBUG
-    propagate: no
+    handlers: [file_handler, console]
 
   distributed:
     level: DEBUG

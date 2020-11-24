@@ -2,8 +2,10 @@
 import logging
 import logging.config
 import logging.handlers
+import multiprocessing
 import os
 import pickle
+import random
 import select
 import socketserver
 import struct
@@ -235,6 +237,35 @@ class LogRecordStreamHandler(socketserver.StreamRequestHandler):
         logger.handle(record)
 
 
+def start_log_server(
+    host: str,
+    logname: str,
+    event: threading.Event,
+    port: multiprocessing.Value,
+    output_file: str,
+    logging_config: Dict,
+    output_dir: str,
+) -> None:
+    setup_logger(output_file, logging_config, output_dir)
+
+    while True:
+        # Loop until we find a valid port
+        _port = random.randint(10000, 65535)
+        try:
+            receiver = LogRecordSocketReceiver(
+                host=host,
+                port=_port,
+                logname=logname,
+                event=event,
+            )
+            with port.get_lock():
+                port.value = _port
+            receiver.serve_until_stopped()
+            break
+        except OSError:
+            continue
+
+
 class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
     """
     This class implement a entity that receives tcp messages on a given address
@@ -244,13 +275,14 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
 
     allow_reuse_address = True
 
-    def __init__(self,
-                 host: str = 'localhost',
-                 port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
-                 handler: Type[LogRecordStreamHandler] = LogRecordStreamHandler,
-                 logname: Optional[str] = None,
-                 event: threading.Event = None,
-                 ):
+    def __init__(
+        self,
+        host: str = 'localhost',
+        port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
+        handler: Type[LogRecordStreamHandler] = LogRecordStreamHandler,
+        logname: Optional[str] = None,
+        event: threading.Event = None,
+    ):
         socketserver.ThreadingTCPServer.__init__(self, (host, port), handler)
         self.timeout = 1
         self.logname = logname

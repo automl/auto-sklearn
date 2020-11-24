@@ -9,7 +9,6 @@ import os
 import pickle
 import re
 import shutil
-import sys
 import time
 import traceback
 from typing import List, Optional, Tuple, Union
@@ -548,8 +547,6 @@ class EnsembleBuilder(object):
             raise ValueError('Cannot provide both time_left and end_at.')
 
         self.logger = get_named_client_logger('EnsembleBuilder', port=self.logger_port)
-        self.pynisher_logger = get_named_client_logger('EnsembleBuilder(pynisher)',
-                                                       port=self.logger_port)
 
         process_start_time = time.time()
         while True:
@@ -566,16 +563,11 @@ class EnsembleBuilder(object):
 
             if time_left - time_buffer < 1:
                 break
-            context = multiprocessing.get_context('forkserver')
-            # Try to copy as many modules into the new context to reduce startup time
-            # http://www.bnikolic.co.uk/blog/python/parallelism/2019/11/13/python-forkserver-preload.html
-            # do not copy the logging module as it causes deadlocks!
-            preload_modules = list(filter(lambda key: 'logging' not in key, sys.modules.keys()))
-            context.set_forkserver_preload(preload_modules)
+            context = multiprocessing.get_context('spawn')
             safe_ensemble_script = pynisher.enforce_limits(
                 wall_time_in_s=int(time_left - time_buffer),
                 mem_in_mb=self.memory_limit,
-                logger=self.pynisher_logger,
+                logger=self.logger,
                 context=context,
             )(self.main)
             safe_ensemble_script(time_left, iteration, return_predictions)
