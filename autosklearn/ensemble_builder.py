@@ -149,7 +149,11 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
     ):
         self.build_ensemble(smbo.tae_runner.client)
 
-    def build_ensemble(self, dask_client: dask.distributed.Client) -> None:
+    def build_ensemble(
+        self,
+        dask_client: dask.distributed.Client,
+        pynisher_context: str = 'spawn',
+    ) -> None:
 
         # The second criteria is elapsed time
         elapsed_time = time.time() - self.start_time
@@ -218,6 +222,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
                     iteration=self.iteration,
                     return_predictions=False,
                     priority=100,
+                    pynisher_context=pynisher_context,
                     logger_port=self.logger_port,
                 ))
 
@@ -255,6 +260,7 @@ def fit_and_return_ensemble(
     end_at: float,
     iteration: int,
     return_predictions: bool,
+    pynisher_context: str,
     logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
 ) -> Tuple[
         List[Tuple[int, float, float, float]],
@@ -308,6 +314,8 @@ def fit_and_return_ensemble(
             because we do not know when dask schedules the job.
         iteration: int
             The current iteration
+        pynisher_context: str
+            Context to use for multiprocessing, can be either fork, spawn or forkserver.
         logger_port: int
             The port where the logging server is listening to.
 
@@ -336,6 +344,7 @@ def fit_and_return_ensemble(
         end_at=end_at,
         iteration=iteration,
         return_predictions=return_predictions,
+        pynisher_context=pynisher_context,
     )
     return result
 
@@ -539,6 +548,7 @@ class EnsembleBuilder(object):
         end_at: Optional[float] = None,
         time_buffer=5,
         return_predictions: bool = False,
+        pynisher_context: str = 'spawn',  # only change for unit testing!
     ):
 
         if time_left is None and end_at is None:
@@ -563,7 +573,7 @@ class EnsembleBuilder(object):
 
             if time_left - time_buffer < 1:
                 break
-            context = multiprocessing.get_context('spawn')
+            context = multiprocessing.get_context(pynisher_context)
             safe_ensemble_script = pynisher.enforce_limits(
                 wall_time_in_s=int(time_left - time_buffer),
                 mem_in_mb=self.memory_limit,

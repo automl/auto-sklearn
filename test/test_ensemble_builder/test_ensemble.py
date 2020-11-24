@@ -553,15 +553,15 @@ def testLimit(ensemble_backend):
         get_logger_mock.return_value = logger_mock
         mtime.side_effect = mtime_mock
 
-        ensbuilder.run(time_left=1000, iteration=0)
+        ensbuilder.run(time_left=1000, iteration=0, pynisher_context='fork')
         assert os.path.exists(read_scores_file)
         assert not os.path.exists(read_preds_file)
         assert logger_mock.warning.call_count == 1
-        ensbuilder.run(time_left=1000, iteration=0)
+        ensbuilder.run(time_left=1000, iteration=0, pynisher_context='fork')
         assert os.path.exists(read_scores_file)
         assert not os.path.exists(read_preds_file)
         assert logger_mock.warning.call_count == 2
-        ensbuilder.run(time_left=1000, iteration=0)
+        ensbuilder.run(time_left=1000, iteration=0, pynisher_context='fork')
         assert os.path.exists(read_scores_file)
         assert not os.path.exists(read_preds_file)
         assert logger_mock.warning.call_count == 3
@@ -569,7 +569,7 @@ def testLimit(ensemble_backend):
         # it should try to reduce ensemble_nbest until it also failed at 2
         assert ensbuilder.ensemble_nbest == 1
 
-        ensbuilder.run(time_left=1000, iteration=0)
+        ensbuilder.run(time_left=1000, iteration=0, pynisher_context='fork')
         assert os.path.exists(read_scores_file)
         assert not os.path.exists(read_preds_file)
         assert logger_mock.warning.call_count == 4
@@ -795,14 +795,15 @@ def test_ensemble_builder_nbest_remembered(
         max_iterations=None,
     )
 
-    manager.build_ensemble(dask_client_single_worker)
+    # Use fork context in the next line to allow for the mock to work
+    manager.build_ensemble(dask_client_single_worker, 'fork')
     future = manager.futures[0]
     dask.distributed.wait([future])  # wait for the ensemble process to finish
     assert future.result() == ([], 5, None, None, None)
     file_path = os.path.join(ensemble_backend.internals_directory, 'ensemble_read_preds.pkl')
     assert not os.path.exists(file_path)
 
-    manager.build_ensemble(dask_client_single_worker)
+    manager.build_ensemble(dask_client_single_worker, 'fork')
 
     future = manager.futures[0]
     dask.distributed.wait([future])  # wait for the ensemble process to finish

@@ -230,14 +230,12 @@ class AutoML(BaseEstimator):
 
     def _create_dask_client(self):
         self._is_dask_client_internally_created = True
-        processes = False
         if self._n_jobs is not None and self._n_jobs > 1:
-            processes = True
             dask.config.set({'distributed.worker.daemon': False})
         self._dask_client = dask.distributed.Client(
             dask.distributed.LocalCluster(
                 n_workers=self._n_jobs,
-                processes=processes,
+                processes=False,
                 threads_per_worker=1,
                 # We use the temporal directory to save the
                 # dask workers, because deleting workers
@@ -288,7 +286,7 @@ class AutoML(BaseEstimator):
         # are treated under the logger_name ROOT logger setting
         context = multiprocessing.get_context('spawn')
         self.stop_logging_server = context.Event()
-        port = context.Value('q')  # be safe by using a long long
+        port = context.Value('l')  # be safe by using a long
         port.value = -1
 
         self.logging_server = context.Process(
