@@ -4,7 +4,6 @@ import json
 import math
 import multiprocessing
 from queue import Empty
-import sys
 import time
 import traceback
 from typing import Dict, List, Optional, Tuple, Union
@@ -102,7 +101,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                  run_obj='quality', par_factor=1, all_scoring_functions=False,
                  output_y_hat_optimization=True, include=None, exclude=None,
                  memory_limit=None, disable_file_output=False, init_params=None,
-                 budget_type=None, ta=False, **resampling_strategy_args):
+                 budget_type=None, ta=False, pynisher_context='spawn', **resampling_strategy_args):
 
         if resampling_strategy == 'holdout':
             eval_function = autosklearn.evaluation.train_evaluator.eval_holdout
@@ -176,6 +175,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         else:
             self._get_test_loss = False
 
+        self.pynisher_context = pynisher_context
+
     def run_wrapper(
         self,
         run_info: RunInfo,
@@ -244,12 +245,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         instance_specific: Optional[str] = None,
     ) -> Tuple[StatusType, float, float, Dict[str, Union[int, float, str, Dict, List, Tuple]]]:
 
-        context = multiprocessing.get_context('forkserver')
-        # Try to copy as many modules into the new context to reduce startup time
-        # http://www.bnikolic.co.uk/blog/python/parallelism/2019/11/13/python-forkserver-preload.html
-        # do not copy the logging module as it causes deadlocks!
-        preload_modules = list(filter(lambda key: 'logging' not in key, sys.modules.keys()))
-        context.set_forkserver_preload(preload_modules)
+        context = multiprocessing.get_context(self.pynisher_context)
         queue = context.Queue()
 
         if not (instance_specific is None or instance_specific == '0'):

@@ -43,8 +43,8 @@ from autosklearn.util.backend import Backend
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import (
     get_logger,
-    LogRecordSocketReceiver,
     setup_logger,
+    start_log_server,
 )
 from autosklearn.util import pipeline, RE_PATTERN
 from autosklearn.ensemble_builder import EnsembleBuilderManager
@@ -230,14 +230,12 @@ class AutoML(BaseEstimator):
 
     def _create_dask_client(self):
         self._is_dask_client_internally_created = True
-        processes = False
         if self._n_jobs is not None and self._n_jobs > 1:
-            processes = True
             dask.config.set({'distributed.worker.daemon': False})
         self._dask_client = dask.distributed.Client(
             dask.distributed.LocalCluster(
                 n_workers=self._n_jobs,
-                processes=processes,
+                processes=False,
                 threads_per_worker=1,
                 # We use the temporal directory to save the
                 # dask workers, because deleting workers
@@ -286,24 +284,37 @@ class AutoML(BaseEstimator):
         # under the above logging configuration setting
         # We need to specify the logger_name so that received records
         # are treated under the logger_name ROOT logger setting
-        context = multiprocessing.get_context('fork')
+        context = multiprocessing.get_context('spawn')
         self.stop_logging_server = context.Event()
-
-        while True:
-            # Loop until we find a valid port
-            self._logger_port = np.random.randint(10000, 65535)
-            try:
-                self.logger_tcpserver = LogRecordSocketReceiver(logname=logger_name,
-                                                                port=self._logger_port,
-                                                                event=self.stop_logging_server)
-                break
-            except OSError:
-                continue
+        port = context.Value('l')  # be safe by using a long
+        port.value = -1
 
         self.logging_server = context.Process(
-            target=self.logger_tcpserver.serve_until_stopped)
-        self.logging_server.daemon = False
+            target=start_log_server,
+            kwargs=dict(
+                host='localhost',
+                logname=logger_name,
+                event=self.stop_logging_server,
+                port=port,
+                output_file=os.path.join(
+                    self._backend.temporary_directory, '%s.log' % str(logger_name)
+                ),
+                logging_config=self.logging_config,
+                output_dir=self._backend.temporary_directory,
+            ),
+        )
+
         self.logging_server.start()
+
+        while True:
+            with port.get_lock():
+                if port.value == -1:
+                    time.sleep(0.01)
+                else:
+                    break
+
+        self._logger_port = int(port.value)
+
         return get_logger(logger_name)
 
     def _clean_logger(self):
@@ -322,7 +333,6 @@ class AutoML(BaseEstimator):
             # process.
             self.logging_server.join(timeout=5)
             self.logging_server.terminate()
-            del self.logger_tcpserver
             del self.stop_logging_server
 
     @staticmethod
@@ -756,7 +766,9 @@ class AutoML(BaseEstimator):
 
             if len(proc_ensemble.futures) > 0:
                 future = proc_ensemble.futures.pop()
-                future.cancel()
+                # Now we need to wait for the future to return as it cannot be cancelled while it
+                # is running: https://stackoverflow.com/a/49203129
+                future.result()
 
         if load_models:
             self._load_models()
