@@ -433,6 +433,9 @@ class AutoML(BaseEstimator):
         self._backend.save_start_time(self._seed)
         self._stopwatch = StopWatch()
 
+        # Employ the user feature types if provided
+        self.InputValidator.register_user_feat_type(feat_type, X)
+
         # Make sure that input is valid
         # Performs Ordinal one hot encoding to the target
         # both for train and test data
@@ -477,27 +480,7 @@ class AutoML(BaseEstimator):
         self._dataset_name = dataset_name
         self._stopwatch.start_task(self._dataset_name)
 
-        if feat_type is not None and len(feat_type) != X.shape[1]:
-            raise ValueError('Array feat_type does not have same number of '
-                             'variables as X has features. %d vs %d.' %
-                             (len(feat_type), X.shape[1]))
-        if feat_type is not None and not all([isinstance(f, str)
-                                              for f in feat_type]):
-            raise ValueError('Array feat_type must only contain strings.')
-        if feat_type is not None:
-            for ft in feat_type:
-                if ft.lower() not in ['categorical', 'numerical']:
-                    raise ValueError('Only `Categorical` and `Numerical` are '
-                                     'valid feature types, you passed `%s`' % ft)
-
-        # Feature types dynamically understood from dataframe
-        if feat_type is not None and self.InputValidator.feature_types:
-            raise ValueError("feat_type cannot be provided when using pandas "
-                             "DataFrame as input. Auto-sklearn extracts the feature types "
-                             "automatically from the columns dtypes, so providing feat_type "
-                             "not only is not necessary, but not allowed."
-                             )
-        elif feat_type is None and self.InputValidator.feature_types:
+        if feat_type is None and self.InputValidator.feature_types:
             feat_type = self.InputValidator.feature_types
 
         # Produce debug information to the logfile

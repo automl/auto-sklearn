@@ -566,7 +566,8 @@ def test_fail_if_feat_type_on_pandas_input(backend, dask_client):
     y_train = [1, 0]
     with pytest.raises(
         ValueError,
-        match="feat_type cannot be provided when using pandas"
+        match=""
+        "providing the option feat_type to the fit method is not supported when using a Dataframe"
     ):
         automl.fit(
             X_train, y_train,
