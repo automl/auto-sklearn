@@ -17,7 +17,8 @@ class ExtraTreesComponentTest(BaseClassificationComponentTest):
     res["default_iris_sparse"] = 0.74
     res["default_digits"] = 0.9156041287188829
     res["digits_n_calls"] = 9
-    res["default_digits_iterative"] = 0.9174256223436551
+    res["default_digits_iterative"] = 0.9156041287188829
+    res["default_digits_iterative_places"] = 3
     res["default_digits_binary"] = 0.994535519125683
     res["default_digits_multilabel"] = 0.9983251633986928
     res["default_digits_multilabel_proba"] = 0.997710730679746

@@ -19,7 +19,7 @@ class RandomForestComponentTest(BaseClassificationComponentTest):
     # TODO find source of discrepancy!
     res["default_digits"] = 0.9058894960534305
     res["digits_n_calls"] = 9
-    res["default_digits_iterative"] = 0.9077109896782027
+    res["default_digits_iterative"] = 0.9058894960534305
     res["default_digits_binary"] = 0.9914996964177292
     res["default_digits_multilabel"] = 0.9957676902536715
     res["default_digits_multilabel_proba"] = 0.9965660960196189

@@ -143,8 +143,14 @@ def _test_classifier_iterative_fit(classifier, dataset='iris', sparse=False):
     classifier = classifier(random_state=np.random.RandomState(1),
                             **{hp_name: default[hp_name] for hp_name in
                                default if default[hp_name] is not None})
+
+    classifier.iterative_fit(X_train, Y_train, n_iter=2, refit=True)
+    iteration = 2
     while not classifier.configuration_fully_fitted():
-        classifier = classifier.iterative_fit(X_train, Y_train)
+        n_iter = int(2 ** iteration / 2)
+        classifier.iterative_fit(X_train, Y_train, n_iter=n_iter)
+        iteration += 1
+
     predictions = classifier.predict(X_test)
     return predictions, Y_test, classifier
 
@@ -293,8 +299,14 @@ def _test_regressor_iterative_fit(Regressor, dataset='diabetes', sparse=False):
     regressor = Regressor(random_state=np.random.RandomState(1),
                           **{hp_name: default[hp_name] for hp_name in
                              default})
+
+    regressor.iterative_fit(X_train, Y_train, n_iter=2, refit=True)
+    iteration = 2
     while not regressor.configuration_fully_fitted():
-        regressor = regressor.iterative_fit(X_train, Y_train)
+        n_iter = int(2 ** iteration / 2)
+        regressor.iterative_fit(X_train, Y_train, n_iter=n_iter)
+        iteration += 1
+
     predictions = regressor.predict(X_test)
     return predictions, Y_test, regressor
 

@@ -9,6 +9,7 @@ class NoCoalescence(AutoSklearnPreprocessingAlgorithm):
         pass
 
     def fit(self, X, y=None):
+        self.preprocessor = 'passthrough'
         return self
 
     def transform(self, X):
