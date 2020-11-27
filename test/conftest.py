@@ -3,7 +3,6 @@ import shutil
 import time
 import unittest.mock
 
-import dask
 from dask.distributed import Client, get_client
 import psutil
 import pytest
