@@ -36,7 +36,14 @@ output_folder = '/tmp/autosklearn_parallel_2_example_out'
 # Dask configuration
 # ==================
 #
-# Auto-sklearn requires dask workers to not run in the daemon setting
+# Auto-sklearn uses threads in Dask to launch memory constrained jobs.
+# This number of threads can be provided directly via the n_jobs argument
+# when creating the AutoSklearnClassifier. Additionally, the user can provide
+# a dask_client argument which can have processes=True.
+# When using processes to True, we need to specify the below setting
+# to allow internally generated processes.
+# Optionally, you can choose to provide a dask client with processes=False
+# and remove the following line.
 dask.config.set({'distributed.worker.daemon': False})
 
 
@@ -76,6 +83,9 @@ def start_python_worker(scheduler_address):
 # one can also start a dask scheduler from the command line), see the
 # `dask cli docs <https://docs.dask.org/en/latest/setup/cli.html>`_ for
 # further information.
+# Please not, that DASK_DISTRIBUTED__WORKER__DAEMON=False is required in this
+# case as dask-worker creates a new process. That is, it is equivalent to the
+# setting described above with dask.distributed.Client with processes=True
 #
 # Again, we need to make sure that we do not start the workers in a daemon
 # mode.
