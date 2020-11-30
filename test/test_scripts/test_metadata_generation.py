@@ -26,9 +26,9 @@ class TestMetadataGeneration(unittest.TestCase):
     def test_metadata_generation(self):
 
         regression_task_id = 5022
-        regression_dataset_name = 'SWD'
+        regression_dataset_name = 'SWD'.lower()
         classification_task_id = 75222
-        classification_dataset_name = 'analcatdata_halloffame'
+        classification_dataset_name = 'analcatdata_halloffame'.lower()
 
         current_directory = __file__
         scripts_directory = os.path.abspath(os.path.join(current_directory,

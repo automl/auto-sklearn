@@ -31,7 +31,7 @@ def load_task(task_id):
     y_test = y[test_indices]
     dataset = openml.datasets.get_dataset(task.dataset_id)
     _, _, cat, _ = dataset.get_data(target=task.target_name)
-    name = dataset.name
+    name = dataset.name.lower()
     del _
     del dataset
     cat = ['categorical' if c else 'numerical' for c in cat]
