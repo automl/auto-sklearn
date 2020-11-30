@@ -25,7 +25,7 @@ logger = logging.getLogger("03_calculate_metafeatures")
 
 
 def calculate_metafeatures(task_id):
-    X_train, y_train, X_test, y_test, cat, task_type = load_task(task_id)
+    X_train, y_train, X_test, y_test, cat, task_type, dataset_name = load_task(task_id)
     watch = StopWatch()
 
     if task_type == 'classification':
@@ -38,13 +38,13 @@ def calculate_metafeatures(task_id):
 
     _metafeatures_labels = _calculate_metafeatures(
         x_train=X_train, y_train=y_train, data_feat_type=cat,
-        data_info_task=task_type, basename=str(task_id), logger=logger,
+        data_info_task=task_type, basename=dataset_name, logger=logger,
         watcher=watch,
     )
 
     _metafeatures_encoded_labels = _calculate_metafeatures_encoded(
         x_train=X_train, y_train=y_train, data_feat_type=cat,
-        task=task_type, basename=str(task_id), logger=logger,
+        task=task_type, basename=dataset_name, logger=logger,
         watcher=watch,
     )
 
@@ -248,5 +248,5 @@ if __name__ == "__main__":
 
         with open(os.path.join(output_directory,
                                "description.features.txt"), "w") as fh:
-            for task_id in description:
-                fh.write("%s: %s\n" % (task_id, description[task_id]))
+            for entry in description:
+                fh.write("%s: %s\n" % (entry, description[entry]))
