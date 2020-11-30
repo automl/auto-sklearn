@@ -7,7 +7,6 @@ import typing
 import warnings
 
 import dask.distributed
-import numpy as np
 import pynisher
 
 from smac.facade.smac_ac_facade import SMAC4AC
@@ -632,8 +631,6 @@ class AutoMLSMBO(object):
                     for meta_feature_name in all_metafeatures.columns:
                         meta_features_list.append(
                             meta_features[meta_feature_name].value)
-                    meta_features_list = np.array(meta_features_list).reshape(
-                        (1, -1))
                     self.logger.info(list(meta_features_dict.keys()))
 
             else:
@@ -644,6 +641,5 @@ class AutoMLSMBO(object):
         else:
             meta_features = None
         if meta_features is None:
-            meta_features_list = []
             metalearning_configurations = []
         return metalearning_configurations

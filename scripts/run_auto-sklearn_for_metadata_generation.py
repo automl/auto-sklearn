@@ -41,7 +41,7 @@ if __name__ == '__main__':
     metric = args.metric
     is_test = args.unittest
 
-    X_train, y_train, X_test, y_test, cat, task_type = load_task(task_id)
+    X_train, y_train, X_test, y_test, cat, task_type, dataset_name = load_task(task_id)
 
     configuration_output_dir = os.path.join(working_directory, 'configuration',
                                             task_type)
@@ -69,8 +69,9 @@ if __name__ == '__main__':
     if is_test:
         automl_arguments['resampling_strategy_arguments'] = {'folds': 2}
         if task_type == 'classification':
-            automl_arguments['include_estimators'] = ['sgd']
-            include = {'classifier': ['sgd']}
+            automl_arguments['include_estimators'] = ['libsvm_svc']
+            automl_arguments['include_preprocessors'] = ['no_preprocessing']
+            include = {'classifier': ['libsvm_svc'], 'feature_preprocessor': ['no_preprocessing']}
         elif task_type == 'regression':
             automl_arguments['include_estimators'] = ['extra_trees']
             automl_arguments['include_preprocessors'] = ['no_preprocessing']
@@ -100,7 +101,7 @@ if __name__ == '__main__':
     else:
         raise ValueError(task_type)
 
-    automl.fit(X_train, y_train, dataset_name=str(task_id),
+    automl.fit(X_train, y_train, dataset_name=dataset_name,
                feat_type=cat, X_test=X_test, y_test=y_test)
     trajectory = automl.trajectory_
 
