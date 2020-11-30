@@ -14,6 +14,7 @@ import warnings
 import tempfile
 
 from ConfigSpace.read_and_write import json as cs_json
+import dask
 import dask.distributed
 import numpy as np
 import numpy.ma as ma
@@ -230,10 +231,11 @@ class AutoML(BaseEstimator):
 
     def _create_dask_client(self):
         self._is_dask_client_internally_created = True
+        dask.config.set({'distributed.worker.daemon': False})
         self._dask_client = dask.distributed.Client(
             dask.distributed.LocalCluster(
                 n_workers=self._n_jobs,
-                processes=False,
+                processes=True,
                 threads_per_worker=1,
                 # We use the temporal directory to save the
                 # dask workers, because deleting workers
@@ -269,9 +271,7 @@ class AutoML(BaseEstimator):
         # This is gonna be honored by the server
         # Which is created below
         setup_logger(
-            output_file=os.path.join(
-                self._backend.temporary_directory, '%s.log' % str(logger_name)
-            ),
+            filename='%s.log' % str(logger_name),
             logging_config=self.logging_config,
             output_dir=self._backend.temporary_directory,
         )
@@ -294,9 +294,7 @@ class AutoML(BaseEstimator):
                 logname=logger_name,
                 event=self.stop_logging_server,
                 port=port,
-                output_file=os.path.join(
-                    self._backend.temporary_directory, '%s.log' % str(logger_name)
-                ),
+                filename='%s.log' % str(logger_name),
                 logging_config=self.logging_config,
                 output_dir=self._backend.temporary_directory,
             ),

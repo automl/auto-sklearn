@@ -54,3 +54,24 @@ number_submission
 .pypirc
 dmypy.json
 *.log
+
+# Dask created work space
+dask-worker-space
+
+# Python distribution generated files
+.eggs
+
+# Unit test / coverage reports
+htmlcov/
+cover
+coverage
+htmlcov
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+.hypothesis/
+prof/
