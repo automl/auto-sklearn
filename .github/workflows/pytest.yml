@@ -56,6 +56,10 @@ jobs:
         python setup.py sdist
         last_dist=$(ls -t dist/auto-sklearn-*.tar.gz | head -n 1)
         pip install $last_dist
+    - name: Store repository status
+      id: status-before
+      run: |
+        echo "::set-output name=BEFORE::$(git status --porcelain -b)"
     - name: Conda Run tests
       if: matrix.use-conda == true
       run: |
@@ -66,7 +70,7 @@ jobs:
         # to change the default python
         export PATH="$CONDA/envs/testenv/bin:$PATH"
         if [ ${{ matrix.code-cov }} ]; then codecov='--cov=autosklearn --cov-report=xml'; fi
-        $CONDA/envs/testenv/bin/python3 -m pytest --durations=20 -sv $codecov test
+        $CONDA/envs/testenv/bin/python3 -m pytest --durations=20 --timeout=300 --timeout-method=thread -v $codecov test
     - name: Run tests
       if: matrix.use-conda == false
       run: |
@@ -74,7 +78,18 @@ jobs:
         export OMP_NUM_THREADS=1
         export MKL_NUM_THREADS=1
         if [ ${{ matrix.code-cov }} ]; then codecov='--cov=autosklearn --cov-report=xml'; fi
-        pytest --durations=20 -sv $codecov test
+        pytest --durations=20 --timeout=300 --timeout-method=thread -v $codecov test
+    - name: Check for files left behind by test
+      if: ${{ always() }}
+      run: |
+        before="${{ steps.status-before.outputs.BEFORE }}"
+        after="$(git status --porcelain -b)"
+        if [[ "$before" != "$after" ]]; then
+            echo "git status from before: $before"
+            echo "git status from after: $after"
+            echo "Not all generated files have been deleted!"
+            exit 1
+        fi
     - name: Upload coverage
       if: matrix.code-cov && always()
       uses: codecov/codecov-action@v1

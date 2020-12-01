@@ -454,7 +454,11 @@ class EnsembleBuilder(object):
 
         # Setup the logger
         self.logger_port = logger_port
-        self.logger = get_named_client_logger('EnsembleBuilder', port=self.logger_port)
+        self.logger = get_named_client_logger(
+            name='EnsembleBuilder',
+            port=self.logger_port,
+            output_dir=self.backend.temporary_directory,
+        )
 
         if ensemble_nbest == 1:
             self.logger.debug("Behaviour depends on int/float: %s, %s (ensemble_nbest, type)" %
@@ -556,7 +560,11 @@ class EnsembleBuilder(object):
         elif time_left is not None and end_at is not None:
             raise ValueError('Cannot provide both time_left and end_at.')
 
-        self.logger = get_named_client_logger('EnsembleBuilder', port=self.logger_port)
+        self.logger = get_named_client_logger(
+            name='EnsembleBuilder',
+            port=self.logger_port,
+            output_dir=self.backend.temporary_directory,
+        )
 
         process_start_time = time.time()
         while True:
@@ -627,7 +635,11 @@ class EnsembleBuilder(object):
         # Pynisher jobs inside dask 'forget'
         # the logger configuration. So we have to set it up
         # accordingly
-        self.logger = get_named_client_logger('EnsembleBuilder', port=self.logger_port)
+        self.logger = get_named_client_logger(
+            name='EnsembleBuilder',
+            port=self.logger_port,
+            output_dir=self.backend.temporary_directory,
+        )
 
         self.start_time = time.time()
         train_pred, valid_pred, test_pred = None, None, None

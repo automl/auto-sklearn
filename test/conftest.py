@@ -3,6 +3,7 @@ import shutil
 import time
 import unittest.mock
 
+import dask
 from dask.distributed import Client, get_client
 import psutil
 import pytest
@@ -124,7 +125,8 @@ def dask_client(request):
     Workers are in subprocesses to not create deadlocks with the pynisher and logging.
     """
 
-    client = Client(n_workers=2, threads_per_worker=1, processes=False)
+    dask.config.set({'distributed.worker.daemon': False})
+    client = Client(n_workers=2, threads_per_worker=1, processes=True)
     print("Started Dask client={}\n".format(client))
 
     def get_finalizer(address):
@@ -149,6 +151,7 @@ def dask_client_single_worker(request):
     it is used very rarely to avoid this issue as much as possible.
     """
 
+    dask.config.set({'distributed.worker.daemon': False})
     client = Client(n_workers=1, threads_per_worker=1, processes=False)
     print("Started Dask client={}\n".format(client))
 

@@ -18,6 +18,12 @@ handlers:
     formatter: simple
     filename: autosklearn.log
 
+  distributed_logfile:
+    class: logging.FileHandler
+    level: DEBUG
+    formatter: simple
+    filename: distributed.log
+
 root:
   level: CRITICAL
   handlers: [console, file_handler]
