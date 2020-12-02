@@ -12,7 +12,8 @@ if __name__ == '__main__':
     from autosklearn.regression import AutoSklearnRegressor
     from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
     from autosklearn.metrics import accuracy, balanced_accuracy, roc_auc, log_loss, r2, \
-        mean_squared_error, mean_absolute_error, root_mean_squared_error
+        mean_squared_error, mean_absolute_error, root_mean_squared_error, CLASSIFICATION_METRICS, \
+        REGRESSION_METRICS
 
     from smac.runhistory.runhistory import RunInfo
     from smac.scenario.scenario import Scenario
@@ -96,10 +97,14 @@ if __name__ == '__main__':
 
     if task_type == 'classification':
         automl = AutoSklearnClassifier(**automl_arguments)
+        scorer_list = CLASSIFICATION_METRICS
     elif task_type == 'regression':
         automl = AutoSklearnRegressor(**automl_arguments)
+        scorer_list = REGRESSION_METRICS
     else:
         raise ValueError(task_type)
+
+    scoring_functions = [scorer for name, scorer in scorer_list.items()]
 
     automl.fit(X_train, y_train, dataset_name=dataset_name,
                feat_type=cat, X_test=X_test, y_test=y_test)
@@ -141,7 +146,7 @@ if __name__ == '__main__':
                                         disable_file_output=True,
                                         logger=logger,
                                         stats=stats,
-                                        all_scoring_functions=True,
+                                        scoring_functions=scoring_functions,
                                         include=include,
                                         metric=automl_arguments['metric'],
                                         cost_for_crash=get_cost_of_crash(automl_arguments['metric']),

@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 import dask.distributed
 import joblib
@@ -9,6 +9,7 @@ from sklearn.base import BaseEstimator
 from sklearn.utils.multiclass import type_of_target
 
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, AutoML
+from autosklearn.metrics import Scorer
 from autosklearn.util.backend import create
 
 
@@ -42,6 +43,7 @@ class AutoSklearnEstimator(BaseEstimator):
         logging_config=None,
         metadata_directory=None,
         metric=None,
+        scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
     ):
         """
@@ -218,6 +220,10 @@ class AutoSklearnEstimator(BaseEstimator):
             Metrics`_.
             If None is provided, a default metric is selected depending on the task.
             
+        scoring_functions : List[Scorer], optional (None)
+            List of scorers which will be calculated for each pipeline and results will be 
+            available via ``cv_results``
+            
         load_models : bool, optional (True)
             Whether to load the models after fitting Auto-sklearn.
 
@@ -261,6 +267,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.logging_config = logging_config
         self.metadata_directory = metadata_directory
         self._metric = metric
+        self._scoring_functions = scoring_functions
         self._load_models = load_models
 
         self.automl_ = None  # type: Optional[AutoML]
@@ -316,7 +323,8 @@ class AutoSklearnEstimator(BaseEstimator):
             smac_scenario_args=smac_scenario_args,
             logging_config=self.logging_config,
             metadata_directory=self.metadata_directory,
-            metric=self._metric
+            metric=self._metric,
+            scoring_functions=self._scoring_functions
         )
 
         return automl

@@ -220,6 +220,7 @@ class AutoMLSMBO(object):
                  disable_file_output=False,
                  smac_scenario_args=None,
                  get_smac_object_callback=None,
+                 scoring_functions=None,
                  ensemble_callback: typing.Optional[EnsembleBuilderManager] = None,
                  ):
         super(AutoMLSMBO, self).__init__()
@@ -262,6 +263,7 @@ class AutoMLSMBO(object):
         self.disable_file_output = disable_file_output
         self.smac_scenario_args = smac_scenario_args
         self.get_smac_object_callback = get_smac_object_callback
+        self.scoring_functions = scoring_functions
 
         self.ensemble_callback = ensemble_callback
 
@@ -434,6 +436,7 @@ class AutoMLSMBO(object):
             metric=self.metric,
             memory_limit=self.memory_limit,
             disable_file_output=self.disable_file_output,
+            scoring_functions=self.scoring_functions,
             **self.resampling_strategy_args
         )
         ta = ExecuteTaFuncWithQueue

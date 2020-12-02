@@ -874,7 +874,7 @@ class EnsembleBuilder(object):
                                         prediction=y_ensemble,
                                         task_type=self.task_type,
                                         metric=self.metric,
-                                        all_scoring_functions=False)
+                                        scoring_functions=None)
 
                 if np.isfinite(self.read_scores[y_ens_fn]["ens_score"]):
                     self.logger.debug(
@@ -1349,7 +1349,7 @@ class EnsembleBuilder(object):
                 prediction=train_pred,
                 task_type=self.task_type,
                 metric=self.metric,
-                all_scoring_functions=False
+                scoring_functions=None
             )
         }
         if valid_pred is not None:
@@ -1360,7 +1360,7 @@ class EnsembleBuilder(object):
                 prediction=valid_pred,
                 task_type=self.task_type,
                 metric=self.metric,
-                all_scoring_functions=False
+                scoring_functions=None
             )
 
         # In case test_pred was provided
@@ -1370,7 +1370,7 @@ class EnsembleBuilder(object):
                 prediction=test_pred,
                 task_type=self.task_type,
                 metric=self.metric,
-                all_scoring_functions=False
+                scoring_functions=None
             )
 
         self.ensemble_history.append(performance_stamp)

@@ -143,7 +143,7 @@ class EnsembleSelection(AbstractEnsemble):
                 )
 
                 # Calculate score is versatile and can return a dict of score
-                # when all_scoring_functions=False, we know it will be a float
+                # when scoring_functions=None, we know it will be a float
                 calculated_score = cast(
                     float,
                     calculate_score(
@@ -151,7 +151,7 @@ class EnsembleSelection(AbstractEnsemble):
                         prediction=fant_ensemble_prediction,
                         task_type=self.task_type,
                         metric=self.metric,
-                        all_scoring_functions=False
+                        scoring_functions=None
                     )
                 )
                 scores[j] = self.metric._optimum - calculated_score
@@ -193,7 +193,7 @@ class EnsembleSelection(AbstractEnsemble):
                 ensemble.append(pred)
                 ensemble_prediction = np.mean(np.array(ensemble), axis=0)
                 # Calculate score is versatile and can return a dict of score
-                # when all_scoring_functions=False, we know it will be a float
+                # when scoring_functions=None, we know it will be a float
                 calculated_score = cast(
                     float,
                     calculate_score(
@@ -201,7 +201,7 @@ class EnsembleSelection(AbstractEnsemble):
                         prediction=ensemble_prediction,
                         task_type=self.task_type,
                         metric=self.metric,
-                        all_scoring_functions=False
+                        scoring_functions=None
                     )
                 )
                 scores[j] = self.metric._optimum - calculated_score
