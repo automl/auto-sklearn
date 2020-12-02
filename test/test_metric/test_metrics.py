@@ -461,7 +461,7 @@ class TestCalculateScore(unittest.TestCase):
             calculate_score(y_true, y_pred, 6, scorer)
         except NotImplementedError:
             raised = True
-        assert raised
+        self.assertTrue(raised)
 
     def test_classification_scoring_functions(self):
 
