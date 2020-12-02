@@ -1,8 +1,10 @@
 # -*- encoding: utf-8 -*-
-import math
-import numbers
 import glob
 import gzip
+import math
+import numbers
+import logging.handlers
+import multiprocessing
 import os
 import pickle
 import re
@@ -27,7 +29,7 @@ from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.metrics import calculate_score, Scorer
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
-from autosklearn.util.logging_ import get_logger, setup_logger
+from autosklearn.util.logging_ import get_named_client_logger, get_logger
 
 Y_ENSEMBLE = 0
 Y_VALID = 1
@@ -54,7 +56,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         read_at_most: int,
         ensemble_memory_limit: Optional[int],
         random_state: int,
-        logger_name: str,
+        logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
     ):
         """ SMAC callback to handle ensemble building
 
@@ -100,8 +102,8 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
             memory limit in mb. If ``None``, no memory limit is enforced.
         read_at_most: int
             read at most n new prediction files in each iteration
-        logger_name: str
-            Name of the logger where we are gonna write information
+        logger_port: int
+            port that receives logging records
 
     Returns
     -------
@@ -124,7 +126,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         self.read_at_most = read_at_most
         self.ensemble_memory_limit = ensemble_memory_limit
         self.random_state = random_state
-        self.logger_name = logger_name
+        self.logger_port = logger_port
 
         # Store something similar to SMAC's runhistory
         self.history = []
@@ -147,16 +149,16 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
     ):
         self.build_ensemble(smbo.tae_runner.client)
 
-    def build_ensemble(self, dask_client: dask.distributed.Client) -> None:
+    def build_ensemble(
+        self,
+        dask_client: dask.distributed.Client,
+        pynisher_context: str = 'spawn',
+    ) -> None:
 
         # The second criteria is elapsed time
         elapsed_time = time.time() - self.start_time
 
-        logger = EnsembleBuilder._get_ensemble_logger(
-            self.logger_name,
-            self.backend.temporary_directory,
-            False
-        )
+        logger = get_logger('EnsembleBuilder')
 
         # First test for termination conditions
         if self.time_left_for_ensembles < elapsed_time:
@@ -216,11 +218,12 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
                     memory_limit=self.ensemble_memory_limit,
                     read_at_most=self.read_at_most,
                     random_state=self.seed,
-                    logger_name=self.logger_name,
                     end_at=self.start_time + self.time_left_for_ensembles,
                     iteration=self.iteration,
                     return_predictions=False,
                     priority=100,
+                    pynisher_context=pynisher_context,
+                    logger_port=self.logger_port,
                 ))
 
                 logger.info(
@@ -254,10 +257,11 @@ def fit_and_return_ensemble(
     memory_limit: Optional[int],
     read_at_most: int,
     random_state: int,
-    logger_name: str,
     end_at: float,
     iteration: int,
     return_predictions: bool,
+    pynisher_context: str,
+    logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
 ) -> Tuple[
         List[Tuple[int, float, float, float]],
         int,
@@ -305,13 +309,15 @@ def fit_and_return_ensemble(
             memory limit in mb. If ``None``, no memory limit is enforced.
         read_at_most: int
             read at most n new prediction files in each iteration
-        logger_name: str
-            Name of the logger where we are gonna write information
         end_at: float
             At what time the job must finish. Needs to be the endtime and not the time left
             because we do not know when dask schedules the job.
         iteration: int
             The current iteration
+        pynisher_context: str
+            Context to use for multiprocessing, can be either fork, spawn or forkserver.
+        logger_port: int
+            The port where the logging server is listening to.
 
     Returns
     -------
@@ -333,11 +339,12 @@ def fit_and_return_ensemble(
         memory_limit=memory_limit,
         read_at_most=read_at_most,
         random_state=random_state,
-        logger_name=logger_name,
+        logger_port=logger_port,
     ).run(
         end_at=end_at,
         iteration=iteration,
         return_predictions=return_predictions,
+        pynisher_context=pynisher_context,
     )
     return result
 
@@ -358,7 +365,7 @@ class EnsembleBuilder(object):
             memory_limit: Optional[int] = 1024,
             read_at_most: int = 5,
             random_state: Optional[Union[int, np.random.RandomState]] = None,
-            logger_name: str = 'ensemble_builder',
+            logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
     ):
         """
             Constructor
@@ -404,8 +411,8 @@ class EnsembleBuilder(object):
                 memory limit in mb. If ``None``, no memory limit is enforced.
             read_at_most: int
                 read at most n new prediction files in each iteration
-            logger_name: str
-                Name of the logger where we are gonna write information
+            logger_port: int
+                port that receives logging records
         """
 
         super(EnsembleBuilder, self).__init__()
@@ -446,9 +453,12 @@ class EnsembleBuilder(object):
         self.random_state = check_random_state(random_state)
 
         # Setup the logger
-        self.logger_name = logger_name
-        self.logger = self._get_ensemble_logger(
-            self.logger_name, self.backend.temporary_directory, False)
+        self.logger_port = logger_port
+        self.logger = get_named_client_logger(
+            name='EnsembleBuilder',
+            port=self.logger_port,
+            output_dir=self.backend.temporary_directory,
+        )
 
         if ensemble_nbest == 1:
             self.logger.debug("Behaviour depends on int/float: %s, %s (ensemble_nbest, type)" %
@@ -535,23 +545,6 @@ class EnsembleBuilder(object):
         del datamanager
         self.ensemble_history = []
 
-    @classmethod
-    def _get_ensemble_logger(self, logger_name, dirname, setup):
-        """
-        Returns the logger of for the ensemble process.
-        A subprocess will require to set this up, for instance,
-        pynisher forks
-        """
-        if setup:
-            setup_logger(
-                os.path.join(
-                    dirname,
-                    '%s.log' % str(logger_name)
-                ),
-            )
-
-        return get_logger('EnsembleBuilder')
-
     def run(
         self,
         iteration: int,
@@ -559,6 +552,7 @@ class EnsembleBuilder(object):
         end_at: Optional[float] = None,
         time_buffer=5,
         return_predictions: bool = False,
+        pynisher_context: str = 'spawn',  # only change for unit testing!
     ):
 
         if time_left is None and end_at is None:
@@ -566,8 +560,11 @@ class EnsembleBuilder(object):
         elif time_left is not None and end_at is not None:
             raise ValueError('Cannot provide both time_left and end_at.')
 
-        self.logger = self._get_ensemble_logger(
-            self.logger_name, self.backend.temporary_directory, True)
+        self.logger = get_named_client_logger(
+            name='EnsembleBuilder',
+            port=self.logger_port,
+            output_dir=self.backend.temporary_directory,
+        )
 
         process_start_time = time.time()
         while True:
@@ -584,10 +581,12 @@ class EnsembleBuilder(object):
 
             if time_left - time_buffer < 1:
                 break
+            context = multiprocessing.get_context(pynisher_context)
             safe_ensemble_script = pynisher.enforce_limits(
                 wall_time_in_s=int(time_left - time_buffer),
                 mem_in_mb=self.memory_limit,
-                logger=self.logger
+                logger=self.logger,
+                context=context,
             )(self.main)
             safe_ensemble_script(time_left, iteration, return_predictions)
             if safe_ensemble_script.exit_status is pynisher.MemorylimitException:
@@ -636,8 +635,11 @@ class EnsembleBuilder(object):
         # Pynisher jobs inside dask 'forget'
         # the logger configuration. So we have to set it up
         # accordingly
-        self.logger = self._get_ensemble_logger(
-            self.logger_name, self.backend.temporary_directory, False)
+        self.logger = get_named_client_logger(
+            name='EnsembleBuilder',
+            port=self.logger_port,
+            output_dir=self.backend.temporary_directory,
+        )
 
         self.start_time = time.time()
         train_pred, valid_pred, test_pred = None, None, None
@@ -820,13 +822,14 @@ class EnsembleBuilder(object):
             _seed = int(match.group(1))
             _num_run = int(match.group(2))
             _budget = float(match.group(3))
+            mtime = os.path.getmtime(y_ens_fn)
 
-            to_read.append([y_ens_fn, match, _seed, _num_run, _budget])
+            to_read.append([y_ens_fn, match, _seed, _num_run, _budget, mtime])
 
         n_read_files = 0
         # Now read file wrt to num_run
-        for y_ens_fn, match, _seed, _num_run, _budget in \
-                sorted(to_read, key=lambda x: x[3]):
+        for y_ens_fn, match, _seed, _num_run, _budget, mtime in \
+                sorted(to_read, key=lambda x: x[5]):
             if self.read_at_most and n_read_files >= self.read_at_most:
                 # limit the number of files that will be read
                 # to limit memory consumption
@@ -860,7 +863,7 @@ class EnsembleBuilder(object):
                     Y_TEST: None,
                 }
 
-            if self.read_scores[y_ens_fn]["mtime_ens"] == os.path.getmtime(y_ens_fn):
+            if self.read_scores[y_ens_fn]["mtime_ens"] == mtime:
                 # same time stamp; nothing changed;
                 continue
 
@@ -1407,24 +1410,11 @@ class EnsembleBuilder(object):
 
         """
 
-        # Obtain a list of sorted pred keys
-        sorted_keys = self._get_list_of_sorted_preds()
-        sorted_keys = list(map(lambda x: x[0], sorted_keys))
-
-        if len(sorted_keys) <= self.max_resident_models:
-            # Don't waste time if not enough models to delete
-            return
-
-        # The top self.max_resident_models models would be the candidates
-        # Any other low performance model will be deleted
-        # The list is in ascending order of score
-        candidates = sorted_keys[:self.max_resident_models]
-
         # Loop through the files currently in the directory
         for pred_path in self.y_ens_files:
 
             # Do not delete candidates
-            if pred_path in candidates:
+            if pred_path in selected_keys:
                 continue
 
             if pred_path in self._has_been_candidate:

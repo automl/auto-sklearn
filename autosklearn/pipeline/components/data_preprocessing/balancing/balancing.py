@@ -33,7 +33,8 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
         # https://github.com/scikit-learn/scikit-learn/blob/0.15.X/sklearn/ensemble/weight_boosting.py#L121
         # Have RF and ET in here because they emit a warning if class_weights
         #  are used together with warmstarts
-        clf_ = ['adaboost', 'random_forest', 'extra_trees', 'sgd', 'passive_aggressive']
+        clf_ = ['adaboost', 'random_forest', 'extra_trees', 'sgd', 'passive_aggressive',
+                'gradient_boosting']
         pre_ = []
         if classifier in clf_ or preprocessor in pre_:
             if len(Y.shape) > 1:

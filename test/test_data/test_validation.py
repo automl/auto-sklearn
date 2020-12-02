@@ -438,15 +438,23 @@ class InputValidatorTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Target values cannot contain missing/NaN'):
             InputValidator().validate_target(y, is_classification=False)
 
-        x = np.random.random_sample(4)
+        # Make sure we allow NaN in numerical columns
+        x_only_numerical = np.random.random_sample(4)
         x[3] = np.nan
-        x = pd.DataFrame(data={'A': x, 'B': x*2})
+        x_only_numerical = pd.DataFrame(data={'A': x_only_numerical, 'B': x_only_numerical*2})
+        try:
+            InputValidator().validate_features(x_only_numerical)
+        except ValueError:
+            self.fail("NaN values in numerical columns is allowed")
+
+        # Make sure we do not allow NaN in categorical columns
+        x_only_categorical = pd.DataFrame(data=pd.Series([1, 2, pd.NA], dtype="category"))
+        with self.assertRaisesRegex(ValueError, 'Categorical features in a dataframe cannot'):
+            InputValidator().validate_features(x_only_categorical)
+
         y = np.random.choice([0.0, 1.0], 4)
         y[1] = np.nan
         y = pd.DataFrame(y)
-
-        with self.assertRaisesRegex(ValueError, 'Categorical features in a dataframe cannot'):
-            InputValidator().validate_features(x)
 
         with self.assertRaisesRegex(ValueError, 'Target values cannot contain missing/NaN'):
             InputValidator().validate_target(y, is_classification=True)

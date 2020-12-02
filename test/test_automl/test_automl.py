@@ -24,7 +24,7 @@ from autosklearn.constants import MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATI
 from smac.tae import StatusType
 
 sys.path.append(os.path.dirname(__file__))
-from automl_utils import extract_msg_from_log, count_succeses  # noqa (E402: module level import not at top of file)
+from automl_utils import print_debug_information, count_succeses  # noqa (E402: module level import not at top of file)
 
 
 class AutoMLStub(AutoML):
@@ -92,7 +92,7 @@ def test_fit_roar(dask_client_single_worker, backend):
         metric=accuracy,
         dask_client=dask_client_single_worker,
     )
-    setup_logger()
+    setup_logger(backend.temporary_directory)
     automl._logger = get_logger('test_fit_roar')
     automl.fit(
         X_train, Y_train, task=MULTICLASS_CLASSIFICATION,
@@ -279,7 +279,7 @@ def test_automl_outputs(backend, dask_client):
         metric=accuracy,
         dask_client=dask_client,
     )
-    setup_logger()
+    setup_logger(backend.temporary_directory)
     auto._logger = get_logger('test_automl_outputs')
     auto.fit(
         X=X_train,
@@ -289,10 +289,6 @@ def test_automl_outputs(backend, dask_client):
         dataset_name=name,
         task=MULTICLASS_CLASSIFICATION,
     )
-
-    # Log file path
-    log_file_path = glob.glob(os.path.join(
-        backend.temporary_directory, 'AutoML*.log'))[0]
 
     # pickled data manager (without one hot encoding!)
     with open(data_manager_file, 'rb') as fh:
@@ -308,6 +304,7 @@ def test_automl_outputs(backend, dask_client):
         'ensemble_read_scores.pkl',
         'runs',
         'ensembles',
+        'ensemble_history.json',
     ]
     assert (
         sorted(os.listdir(os.path.join(backend.temporary_directory, '.auto-sklearn')))
@@ -335,53 +332,52 @@ def test_automl_outputs(backend, dask_client):
                                         '.auto-sklearn', "start_time_100")
     with open(start_time_file_path, 'r') as fh:
         start_time = float(fh.read())
-    assert time.time() - start_time >= 10, extract_msg_from_log(log_file_path)
+    assert time.time() - start_time >= 10, print_debug_information(auto)
 
     del auto
 
 
-def test_do_dummy_prediction(backend, dask_client):
-    datasets = {
-        'breast_cancer': BINARY_CLASSIFICATION,
-        'wine': MULTICLASS_CLASSIFICATION,
-        'diabetes': REGRESSION,
-    }
+@pytest.mark.parametrize("datasets", [('breast_cancer', BINARY_CLASSIFICATION),
+                                      ('wine', MULTICLASS_CLASSIFICATION),
+                                      ('diabetes', REGRESSION)])
+def test_do_dummy_prediction(backend, dask_client, datasets):
 
-    for name, task in datasets.items():
+    name, task = datasets
 
-        X_train, Y_train, X_test, Y_test = putil.get_dataset(name)
-        datamanager = XYDataManager(
-            X_train, Y_train,
-            X_test, Y_test,
-            task=task,
-            dataset_name=name,
-            feat_type=None,
-        )
+    X_train, Y_train, X_test, Y_test = putil.get_dataset(name)
+    datamanager = XYDataManager(
+        X_train, Y_train,
+        X_test, Y_test,
+        task=task,
+        dataset_name=name,
+        feat_type=None,
+    )
 
-        auto = autosklearn.automl.AutoML(
-            backend, 20, 5,
-            initial_configurations_via_metalearning=25,
-            metric=accuracy,
-            dask_client=dask_client,
-        )
-        setup_logger()
-        auto._logger = get_logger('test_do_dummy_predictions')
-        auto._backend.save_datamanager(datamanager)
-        D = backend.load_datamanager()
+    auto = autosklearn.automl.AutoML(
+        backend, 20, 5,
+        initial_configurations_via_metalearning=25,
+        metric=accuracy,
+        dask_client=dask_client,
+    )
+    setup_logger(backend.temporary_directory)
+    auto._logger = get_logger('test_do_dummy_predictions')
 
-        # Check if data manager is correcly loaded
-        assert D.info['task'] == datamanager.info['task']
-        auto._do_dummy_prediction(D, 1)
+    auto._backend.save_datamanager(datamanager)
+    D = backend.load_datamanager()
 
-        # Ensure that the dummy predictions are not in the current working
-        # directory, but in the temporary directory.
-        assert not os.path.exists(os.path.join(os.getcwd(), '.auto-sklearn'))
-        assert os.path.exists(os.path.join(
-            backend.temporary_directory, '.auto-sklearn', 'runs', '1_1_0.0',
-            'predictions_ensemble_1_1_0.0.npy')
-        )
+    # Check if data manager is correcly loaded
+    assert D.info['task'] == datamanager.info['task']
+    auto._do_dummy_prediction(D, 1)
 
-        del auto
+    # Ensure that the dummy predictions are not in the current working
+    # directory, but in the temporary directory.
+    assert not os.path.exists(os.path.join(os.getcwd(), '.auto-sklearn'))
+    assert os.path.exists(os.path.join(
+        backend.temporary_directory, '.auto-sklearn', 'runs', '1_1_0.0',
+        'predictions_ensemble_1_1_0.0.npy')
+    )
+
+    del auto
 
 
 @unittest.mock.patch('autosklearn.evaluation.ExecuteTaFuncWithQueue.run')
@@ -405,7 +401,7 @@ def test_fail_if_dummy_prediction_fails(ta_run_mock, backend, dask_client):
                                      metric=accuracy,
                                      dask_client=dask_client,
                                      )
-    setup_logger()
+    setup_logger(backend.temporary_directory)
     auto._logger = get_logger('test_fail_if_dummy_prediction_fails')
     auto._backend._make_internals_directory()
     auto._backend.save_datamanager(datamanager)
@@ -483,7 +479,7 @@ def test_exceptions_inside_log_in_smbo(smbo_run_mock, backend, dask_client):
     )
 
     output_file = 'test_exceptions_inside_log.log'
-    setup_logger(output_file=output_file)
+    setup_logger(filename=output_file, output_dir=backend.temporary_directory)
     logger = get_logger('test_exceptions_inside_log')
 
     # Create a custom exception to prevent other errors to slip in
@@ -503,11 +499,11 @@ def test_exceptions_inside_log_in_smbo(smbo_run_mock, backend, dask_client):
                 Y_train,
                 task=MULTICLASS_CLASSIFICATION,
             )
-        with open(output_file) as f:
+        with open(os.path.join(backend.temporary_directory, output_file)) as f:
             assert message in f.read()
 
     # Cleanup
-    os.unlink(output_file)
+    os.unlink(os.path.join(backend.temporary_directory, output_file))
 
 
 @pytest.mark.parametrize("metric", [log_loss, balanced_accuracy])
@@ -569,7 +565,8 @@ def test_fail_if_feat_type_on_pandas_input(backend, dask_client):
     y_train = [1, 0]
     with pytest.raises(
         ValueError,
-        match="feat_type cannot be provided when using pandas"
+        match=""
+        "providing the option feat_type to the fit method is not supported when using a Dataframe"
     ):
         automl.fit(
             X_train, y_train,

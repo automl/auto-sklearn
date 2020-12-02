@@ -96,12 +96,12 @@ def _encode_exit_status(exit_status):
 class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
     def __init__(self, backend, autosklearn_seed, resampling_strategy, metric,
-                 logger, cost_for_crash, abort_on_first_run_crash,
+                 cost_for_crash, abort_on_first_run_crash,
                  initial_num_run=1, stats=None,
                  run_obj='quality', par_factor=1, scoring_functions=None,
                  output_y_hat_optimization=True, include=None, exclude=None,
                  memory_limit=None, disable_file_output=False, init_params=None,
-                 budget_type=None, ta=False, **resampling_strategy_args):
+                 budget_type=None, ta=False, pynisher_context='spawn', **resampling_strategy_args):
 
         if resampling_strategy == 'holdout':
             eval_function = autosklearn.evaluation.train_evaluator.eval_holdout
@@ -160,7 +160,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.disable_file_output = disable_file_output
         self.init_params = init_params
         self.budget_type = budget_type
-        self.logger = logger
 
         if memory_limit is not None:
             memory_limit = int(math.ceil(memory_limit))
@@ -175,6 +174,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             self._get_test_loss = True
         else:
             self._get_test_loss = False
+
+        self.pynisher_context = pynisher_context
 
     def run_wrapper(
         self,
@@ -244,7 +245,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         instance_specific: Optional[str] = None,
     ) -> Tuple[StatusType, float, float, Dict[str, Union[int, float, str, Dict, List, Tuple]]]:
 
-        queue = multiprocessing.Queue()
+        context = multiprocessing.get_context(self.pynisher_context)
+        queue = context.Queue()
 
         if not (instance_specific is None or instance_specific == '0'):
             raise ValueError(instance_specific)
@@ -257,6 +259,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             wall_time_in_s=cutoff,
             mem_in_mb=self.memory_limit,
             capture_output=True,
+            context=context,
         )
 
         if isinstance(config, int):
@@ -436,8 +439,4 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         runtime = float(obj.wall_clock_time)
 
         autosklearn.evaluation.util.empty_queue(queue)
-        self.logger.debug(
-            'Finished function evaluation. Status: %s, Cost: %f, Runtime: %f, Additional %s',
-            status, cost, runtime, additional_run_info,
-        )
         return status, cost, runtime, additional_run_info

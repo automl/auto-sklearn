@@ -9,6 +9,7 @@ class NoEncoding(AutoSklearnPreprocessingAlgorithm):
         pass
 
     def fit(self, X, y=None):
+        self.preprocessor = 'passthrough'
         self.fitted_ = True
         return self
 

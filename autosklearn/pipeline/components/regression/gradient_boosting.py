@@ -164,10 +164,9 @@ class GradientBoosting(
         max_bins = Constant("max_bins", 255)
         l2_regularization = UniformFloatHyperparameter(
             name="l2_regularization", lower=1E-10, upper=1, default_value=1E-10, log=True)
-        # Train temporarily disabled to avoid error with scikit-learn 0.22
-        # TODO re-enable with later scikit-learn version
+
         early_stop = CategoricalHyperparameter(
-            name="early_stop", choices=["off", "valid"], default_value="off")
+            name="early_stop", choices=["off", "valid", "train"], default_value="off")
         tol = UnParametrizedHyperparameter(
             name="tol", value=1e-7)
         scoring = UnParametrizedHyperparameter(
@@ -183,7 +182,7 @@ class GradientBoosting(
                                 validation_fraction])
 
         n_iter_no_change_cond = InCondition(
-            n_iter_no_change, early_stop, ["valid"])  # , "train"])
+            n_iter_no_change, early_stop, ["valid", "train"])
         validation_fraction_cond = EqualsCondition(
             validation_fraction, early_stop, "valid")
 

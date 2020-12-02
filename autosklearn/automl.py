@@ -3,6 +3,8 @@ import copy
 import io
 import json
 import platform
+import logging.handlers
+import multiprocessing
 import os
 import sys
 import time
@@ -12,6 +14,7 @@ import warnings
 import tempfile
 
 from ConfigSpace.read_and_write import json as cs_json
+import dask
 import dask.distributed
 import numpy as np
 import numpy.ma as ma
@@ -39,7 +42,11 @@ from autosklearn.evaluation.train_evaluator import _fit_with_budget
 from autosklearn.metrics import calculate_score
 from autosklearn.util.backend import Backend
 from autosklearn.util.stopwatch import StopWatch
-from autosklearn.util.logging_ import get_logger, setup_logger
+from autosklearn.util.logging_ import (
+    get_logger,
+    setup_logger,
+    start_log_server,
+)
 from autosklearn.util import pipeline, RE_PATTERN
 from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
@@ -226,14 +233,11 @@ class AutoML(BaseEstimator):
 
     def _create_dask_client(self):
         self._is_dask_client_internally_created = True
-        processes = False
-        if self._n_jobs is not None and self._n_jobs > 1:
-            processes = True
-            dask.config.set({'distributed.worker.daemon': False})
+        dask.config.set({'distributed.worker.daemon': False})
         self._dask_client = dask.distributed.Client(
             dask.distributed.LocalCluster(
                 n_workers=self._n_jobs,
-                processes=processes,
+                processes=True,
                 threads_per_worker=1,
                 # We use the temporal directory to save the
                 # dask workers, because deleting workers
@@ -242,7 +246,11 @@ class AutoML(BaseEstimator):
                 # file was deleted, so the client could not close
                 # the worker properly
                 local_directory=tempfile.gettempdir(),
-            )
+                # Memory is handled by the pynisher, not by the dask worker/nanny
+                memory_limit=0,
+            ),
+            # Heartbeat every 10s
+            heartbeat_interval=10000,
         )
 
     def _close_dask_client(self):
@@ -260,11 +268,70 @@ class AutoML(BaseEstimator):
 
     def _get_logger(self, name):
         logger_name = 'AutoML(%d):%s' % (self._seed, name)
-        setup_logger(os.path.join(self._backend.temporary_directory,
-                                  '%s.log' % str(logger_name)),
-                     self.logging_config,
-                     )
+
+        # Setup the configuration for the logger
+        # This is gonna be honored by the server
+        # Which is created below
+        setup_logger(
+            filename='%s.log' % str(logger_name),
+            logging_config=self.logging_config,
+            output_dir=self._backend.temporary_directory,
+        )
+
+        # As Auto-sklearn works with distributed process,
+        # we implement a logger server that can receive tcp
+        # pickled messages. They are unpickled and processed locally
+        # under the above logging configuration setting
+        # We need to specify the logger_name so that received records
+        # are treated under the logger_name ROOT logger setting
+        context = multiprocessing.get_context('spawn')
+        self.stop_logging_server = context.Event()
+        port = context.Value('l')  # be safe by using a long
+        port.value = -1
+
+        self.logging_server = context.Process(
+            target=start_log_server,
+            kwargs=dict(
+                host='localhost',
+                logname=logger_name,
+                event=self.stop_logging_server,
+                port=port,
+                filename='%s.log' % str(logger_name),
+                logging_config=self.logging_config,
+                output_dir=self._backend.temporary_directory,
+            ),
+        )
+
+        self.logging_server.start()
+
+        while True:
+            with port.get_lock():
+                if port.value == -1:
+                    time.sleep(0.01)
+                else:
+                    break
+
+        self._logger_port = int(port.value)
+
         return get_logger(logger_name)
+
+    def _clean_logger(self):
+        if not hasattr(self, 'stop_logging_server') or self.stop_logging_server is None:
+            return
+
+        # Clean up the logger
+        if self.logging_server.is_alive():
+            self.stop_logging_server.set()
+
+            # We try to join the process, after we sent
+            # the terminate event. Then we try a join to
+            # nicely join the event. In case something
+            # bad happens with nicely trying to kill the
+            # process, we execute a terminate to kill the
+            # process.
+            self.logging_server.join(timeout=5)
+            self.logging_server.terminate()
+            del self.stop_logging_server
 
     @staticmethod
     def _start_task(watcher, task_name):
@@ -307,7 +374,6 @@ class AutoML(BaseEstimator):
                                     autosklearn_seed=self._seed,
                                     resampling_strategy=self._resampling_strategy,
                                     initial_num_run=num_run,
-                                    logger=self._logger,
                                     stats=stats,
                                     metric=self._metric,
                                     memory_limit=memory_limit,
@@ -362,6 +428,12 @@ class AutoML(BaseEstimator):
         only_return_configuration_space: Optional[bool] = False,
         load_models: bool = True,
     ):
+        self._backend.save_start_time(self._seed)
+        self._stopwatch = StopWatch()
+
+        # Employ the user feature types if provided
+        self.InputValidator.register_user_feat_type(feat_type, X)
+
         # Make sure that input is valid
         # Performs Ordinal one hot encoding to the target
         # both for train and test data
@@ -387,6 +459,12 @@ class AutoML(BaseEstimator):
             raise ValueError('Metric must be instance of '
                              'autosklearn.metrics.Scorer.')
 
+        if dataset_name is None:
+            dataset_name = hash_array_or_matrix(X)
+        # By default try to use the TCP logging port or get a new port
+        self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
+        self._logger = self._get_logger(dataset_name)
+
         # If no dask client was provided, we create one, so that we can
         # start a ensemble process in parallel to smbo optimize
         if (
@@ -397,37 +475,10 @@ class AutoML(BaseEstimator):
         else:
             self._is_dask_client_internally_created = False
 
-        if dataset_name is None:
-            dataset_name = hash_array_or_matrix(X)
-
-        self._backend.save_start_time(self._seed)
-        self._stopwatch = StopWatch()
         self._dataset_name = dataset_name
         self._stopwatch.start_task(self._dataset_name)
 
-        self._logger = self._get_logger(dataset_name)
-
-        if feat_type is not None and len(feat_type) != X.shape[1]:
-            raise ValueError('Array feat_type does not have same number of '
-                             'variables as X has features. %d vs %d.' %
-                             (len(feat_type), X.shape[1]))
-        if feat_type is not None and not all([isinstance(f, str)
-                                              for f in feat_type]):
-            raise ValueError('Array feat_type must only contain strings.')
-        if feat_type is not None:
-            for ft in feat_type:
-                if ft.lower() not in ['categorical', 'numerical']:
-                    raise ValueError('Only `Categorical` and `Numerical` are '
-                                     'valid feature types, you passed `%s`' % ft)
-
-        # Feature types dynamically understood from dataframe
-        if feat_type is not None and self.InputValidator.feature_types:
-            raise ValueError("feat_type cannot be provided when using pandas "
-                             "DataFrame as input. Auto-sklearn extracts the feature types "
-                             "automatically from the columns dtypes, so providing feat_type "
-                             "not only is not necessary, but not allowed."
-                             )
-        elif feat_type is None and self.InputValidator.feature_types:
+        if feat_type is None and self.InputValidator.feature_types:
             feat_type = self.InputValidator.feature_types
 
         # Produce debug information to the logfile
@@ -591,8 +642,8 @@ class AutoML(BaseEstimator):
                 max_iterations=None,
                 read_at_most=np.inf,
                 ensemble_memory_limit=self._memory_limit,
-                logger_name=self._logger.name,
                 random_state=self._seed,
+                logger_port=self._logger_port,
             )
 
         self._stopwatch.stop_task(ensemble_task_name)
@@ -689,13 +740,24 @@ class AutoML(BaseEstimator):
         # while the ensemble builder tries to access the data
         if proc_ensemble is not None:
             self.ensemble_performance_history = list(proc_ensemble.history)
+
+            # save the ensemble performance history file
+            if len(self.ensemble_performance_history) > 0:
+                pd.DataFrame(self.ensemble_performance_history).to_json(
+                        os.path.join(self._backend.internals_directory, 'ensemble_history.json'))
+
             if len(proc_ensemble.futures) > 0:
                 future = proc_ensemble.futures.pop()
-                future.cancel()
+                # Now we need to wait for the future to return as it cannot be cancelled while it
+                # is running: https://stackoverflow.com/a/49203129
+                future.result()
 
         if load_models:
             self._load_models()
         self._close_dask_client()
+
+        # Clean up the logger
+        self._clean_logger()
 
         return self
 
@@ -869,7 +931,7 @@ class AutoML(BaseEstimator):
             read_at_most=np.inf,
             ensemble_memory_limit=self._memory_limit,
             random_state=self._seed,
-            logger_name=self._logger.name,
+            logger_port=self._logger_port,
         )
         manager.build_ensemble(self._dask_client)
         future = manager.futures.pop()
@@ -1186,9 +1248,14 @@ class AutoML(BaseEstimator):
     def __getstate__(self) -> Dict[str, Any]:
         # Cannot serialize a client!
         self._dask_client = None
+        self.logging_server = None
+        self.stop_logging_server = None
         return self.__dict__
 
     def __del__(self):
+        # Clean up the logger
+        self._clean_logger()
+
         self._close_dask_client()
 
         # When a multiprocessing work is done, the

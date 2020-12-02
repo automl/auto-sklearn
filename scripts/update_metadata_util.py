@@ -31,6 +31,7 @@ def load_task(task_id):
     y_test = y[test_indices]
     dataset = openml.datasets.get_dataset(task.dataset_id)
     _, _, cat, _ = dataset.get_data(target=task.target_name)
+    name = dataset.name.lower()
     del _
     del dataset
     cat = ['categorical' if c else 'numerical' for c in cat]
@@ -42,4 +43,4 @@ def load_task(task_id):
     else:
         raise ValueError('Unknown task type')
 
-    return X_train, y_train, X_test, y_test, cat, task_type
+    return X_train, y_train, X_test, y_test, cat, task_type, name

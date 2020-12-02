@@ -532,20 +532,36 @@ def testLimit(ensemble_backend):
         'ensemble_read_preds.pkl'
     )
 
+    def mtime_mock(filename):
+        mtimes = {
+            'predictions_ensemble_0_1_0.0.npy': 0,
+            'predictions_valid_0_1_0.0.npy': 0.1,
+            'predictions_test_0_1_0.0.npy': 0.2,
+            'predictions_ensemble_0_2_0.0.npy': 1,
+            'predictions_valid_0_2_0.0.npy': 1.1,
+            'predictions_test_0_2_0.0.npy': 1.2,
+            'predictions_ensemble_0_3_100.0.npy': 2,
+            'predictions_valid_0_3_100.0.npy': 2.1,
+            'predictions_test_0_3_100.0.npy': 2.2,
+        }
+        return mtimes[os.path.split(filename)[1]]
+
     with unittest.mock.patch('logging.getLogger') as get_logger_mock, \
-            unittest.mock.patch('logging.config.dictConfig') as _:
+            unittest.mock.patch('logging.config.dictConfig') as _, \
+            unittest.mock.patch('os.path.getmtime') as mtime:
         logger_mock = unittest.mock.Mock()
         get_logger_mock.return_value = logger_mock
+        mtime.side_effect = mtime_mock
 
-        ensbuilder.run(time_left=1000, iteration=0)
+        ensbuilder.run(time_left=1000, iteration=0, pynisher_context='fork')
         assert os.path.exists(read_scores_file)
         assert not os.path.exists(read_preds_file)
         assert logger_mock.warning.call_count == 1
-        ensbuilder.run(time_left=1000, iteration=0)
+        ensbuilder.run(time_left=1000, iteration=0, pynisher_context='fork')
         assert os.path.exists(read_scores_file)
         assert not os.path.exists(read_preds_file)
         assert logger_mock.warning.call_count == 2
-        ensbuilder.run(time_left=1000, iteration=0)
+        ensbuilder.run(time_left=1000, iteration=0, pynisher_context='fork')
         assert os.path.exists(read_scores_file)
         assert not os.path.exists(read_preds_file)
         assert logger_mock.warning.call_count == 3
@@ -553,7 +569,7 @@ def testLimit(ensemble_backend):
         # it should try to reduce ensemble_nbest until it also failed at 2
         assert ensbuilder.ensemble_nbest == 1
 
-        ensbuilder.run(time_left=1000, iteration=0)
+        ensbuilder.run(time_left=1000, iteration=0, pynisher_context='fork')
         assert os.path.exists(read_scores_file)
         assert not os.path.exists(read_preds_file)
         assert logger_mock.warning.call_count == 4
@@ -716,7 +732,7 @@ def test_get_identifiers_from_run_history(exists, metric, ensemble_run_history, 
     assert budget == 3.0
 
 
-def test_ensemble_builder_process_realrun(dask_client, ensemble_backend):
+def test_ensemble_builder_process_realrun(dask_client_single_worker, ensemble_backend):
     manager = EnsembleBuilderManager(
         start_time=time.time(),
         time_left_for_ensembles=1000,
@@ -733,9 +749,8 @@ def test_ensemble_builder_process_realrun(dask_client, ensemble_backend):
         read_at_most=np.inf,
         ensemble_memory_limit=None,
         random_state=0,
-        logger_name='Ensemblebuilder',
     )
-    manager.build_ensemble(dask_client)
+    manager.build_ensemble(dask_client_single_worker)
     future = manager.futures.pop()
     dask.distributed.wait([future])  # wait for the ensemble process to finish
     result = future.result()
@@ -750,7 +765,11 @@ def test_ensemble_builder_process_realrun(dask_client, ensemble_backend):
 
 
 @unittest.mock.patch('autosklearn.ensemble_builder.EnsembleBuilder.fit_ensemble')
-def test_ensemble_builder_nbest_remembered(fit_ensemble, ensemble_backend, dask_client):
+def test_ensemble_builder_nbest_remembered(
+    fit_ensemble,
+    ensemble_backend,
+    dask_client_single_worker,
+):
     """
     Makes sure ensemble builder returns the size of the ensemble that pynisher allowed
     This way, we can remember it and not waste more time trying big ensemble sizes
@@ -773,18 +792,18 @@ def test_ensemble_builder_nbest_remembered(fit_ensemble, ensemble_backend, dask_
         read_at_most=np.inf,
         ensemble_memory_limit=1000,
         random_state=0,
-        logger_name='Ensemblebuilder',
         max_iterations=None,
     )
 
-    manager.build_ensemble(dask_client)
+    # Use fork context in the next line to allow for the mock to work
+    manager.build_ensemble(dask_client_single_worker, 'fork')
     future = manager.futures[0]
     dask.distributed.wait([future])  # wait for the ensemble process to finish
     assert future.result() == ([], 5, None, None, None)
     file_path = os.path.join(ensemble_backend.internals_directory, 'ensemble_read_preds.pkl')
     assert not os.path.exists(file_path)
 
-    manager.build_ensemble(dask_client)
+    manager.build_ensemble(dask_client_single_worker, 'fork')
 
     future = manager.futures[0]
     dask.distributed.wait([future])  # wait for the ensemble process to finish

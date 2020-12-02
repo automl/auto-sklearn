@@ -81,8 +81,12 @@ class BackendContext(object):
             )
         )
         self._output_directory = output_directory
-        self._logger = logging.get_logger(__name__)
         self.create_directories()
+        # This is the first place the logger gets created.
+        # We want to make sure any logging forward sets the correct directory
+        # were all files should be created
+        logging.setup_logger(output_dir=self._temporary_directory)
+        self._logger = logging.get_logger(__name__)
 
     @property
     def output_directory(self) -> Optional[str]:

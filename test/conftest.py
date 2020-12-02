@@ -120,30 +120,13 @@ def _dir_fixture(dir_type, request):
 @pytest.fixture(scope="function")
 def dask_client(request):
     """
-    This fixture is meant to be called one per pytest session.
+    Create a dask client with two workers.
 
-    The goal of this function is to create a global client at the start
-    of the testing phase. We can create clients at the start of the
-    session (this case, as above scope is session), module, class or function
-    level.
-
-    The overhead of creating a dask client per class/module/session is something
-    that travis cannot handle, so we rely on the following execution flow:
-
-    1- At the start of the pytest session, session_run_at_beginning fixture is called
-    to create a global client on port 4567.
-    2- Any test that needs a client, would query the global scheduler that allows
-    communication through port 4567.
-    3- At the end of the test, we shutdown any remaining work being done by any worker
-    in the client. This has a maximum 10 seconds timeout. The client object will afterwards
-    be empty and when pytest closes, it can safely delete the object without hanging.
-
-    More info on this file can be found on:
-    https://docs.pytest.org/en/stable/writing_plugins.html#conftest-py-plugins
+    Workers are in subprocesses to not create deadlocks with the pynisher and logging.
     """
-    dask.config.set({'distributed.worker.daemon': False})
 
-    client = Client(n_workers=2, threads_per_worker=1, processes=False)
+    dask.config.set({'distributed.worker.daemon': False})
+    client = Client(n_workers=2, threads_per_worker=1, processes=True)
     print("Started Dask client={}\n".format(client))
 
     def get_finalizer(address):
@@ -163,9 +146,12 @@ def dask_client(request):
 def dask_client_single_worker(request):
     """
     Same as above, but only with a single worker.
-    """
-    dask.config.set({'distributed.worker.daemon': False})
 
+    Using this might cause deadlocks with the pynisher and the logging module. However,
+    it is used very rarely to avoid this issue as much as possible.
+    """
+
+    dask.config.set({'distributed.worker.daemon': False})
     client = Client(n_workers=1, threads_per_worker=1, processes=False)
     print("Started Dask client={}\n".format(client))
 
