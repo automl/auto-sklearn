@@ -524,7 +524,6 @@ class TestCalculateScore(unittest.TestCase):
     def test_regression_only_metric(self):
         y_true = np.array([1, 2, 3, 4])
         y_pred = y_true.copy()
-        
         scorer = autosklearn.metrics.root_mean_squared_error
 
         score = calculate_score(y_true, y_pred, REGRESSION, scorer)
