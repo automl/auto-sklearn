@@ -249,7 +249,9 @@ def test_cv_results(tmp_dir, output_dir):
                                 output_folder=output_dir,
                                 seed=1,
                                 initial_configurations_via_metalearning=0,
-                                ensemble_size=0)
+                                ensemble_size=0,
+                                scoring_functions=[autosklearn.metrics.precision,
+                                                   autosklearn.metrics.roc_auc])
     cls.fit(X_train, Y_train)
     cv_results = cls.cv_results_
     assert isinstance(cv_results, dict), type(cv_results)
@@ -261,6 +263,12 @@ def test_cv_results(tmp_dir, output_dir):
     assert isinstance(cv_results['params'], list), type(cv_results['params'])
     assert isinstance(cv_results['rank_test_scores'], np.ndarray), type(
         cv_results['rank_test_scores']
+    )
+    assert isinstance(cv_results['metric_precision'], npma.MaskedArray), type(
+        cv_results['metric_precision']
+    )
+    assert isinstance(cv_results['metric_roc_auc'], npma.MaskedArray), type(
+        cv_results['metric_roc_auc']
     )
     cv_result_items = [isinstance(val, npma.MaskedArray) for key, val in
                        cv_results.items() if key.startswith('param_')]
