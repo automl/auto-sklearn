@@ -71,6 +71,7 @@ sphinx_gallery_conf = {
     #},
     'backreferences_dir': None,
     'filename_pattern': 'example.*.py$',
+    'ignore_pattern': r'custom_metrics\.py|__init__\.py'
 }
 
 # Add any paths that contain templates here, relative to this directory.
