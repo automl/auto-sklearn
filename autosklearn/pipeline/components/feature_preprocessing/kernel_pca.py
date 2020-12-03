@@ -81,7 +81,7 @@ class KernelPCA(AutoSklearnPreprocessingAlgorithm):
             "gamma",
             3.0517578125e-05, 8,
             log=True,
-            default_value=1.0,
+            default_value=0.01,
         )
         degree = UniformIntegerHyperparameter('degree', 2, 5, 3)
         coef0 = UniformFloatHyperparameter("coef0", -1, 1, default_value=0)

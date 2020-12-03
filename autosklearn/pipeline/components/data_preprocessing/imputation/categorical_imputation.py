@@ -9,7 +9,7 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
     """
 
     def __init__(self, random_state=None):
-        self.random_stated = random_state
+        self.random_state = random_state
 
     def fit(self, X, y=None):
         import sklearn.impute
