@@ -13,7 +13,7 @@ class CategoryShift(AutoSklearnPreprocessingAlgorithm):
     """
 
     def __init__(self, random_state=None):
-        pass
+        self.random_state = random_state
 
     def fit(self, X, y=None):
         self.preprocessor = autosklearn.pipeline.implementations.CategoryShift\
