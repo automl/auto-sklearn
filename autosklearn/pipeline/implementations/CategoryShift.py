@@ -8,6 +8,9 @@ class CategoryShift(BaseEstimator, TransformerMixin):
     """ Add 3 to every category.
     """
 
+    def __init__(self, random_state=None):
+        self.random_state = random_state
+
     def _convert_and_check_X(self, X):
         X_data = X.data if sparse.issparse(X) else X
 
