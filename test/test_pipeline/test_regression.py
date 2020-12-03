@@ -193,6 +193,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 cls.predict(X_test)
             except MemoryError:
                 continue
+            except np.linalg.LinAlgError:
+                continue
             except ValueError as e:
                 if "Floating-point under-/overflow occurred at epoch" in \
                         e.args[0]:
