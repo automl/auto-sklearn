@@ -367,6 +367,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 cls.predict_proba(X_test)
             except MemoryError:
                 continue
+            except np.linalg.LinAlgError:
+                continue
             except ValueError as e:
                 if "Floating-point under-/overflow occurred at epoch" in \
                         e.args[0]:
