@@ -23,6 +23,7 @@ from sklearn.utils.validation import check_random_state
 from smac.callbacks import IncorporateRunResultCallback
 from smac.optimizer.smbo import SMBO
 from smac.runhistory.runhistory import RunInfo, RunValue
+from smac.tae.base import StatusType
 
 from autosklearn.util.backend import Backend
 from autosklearn.constants import BINARY_CLASSIFICATION
@@ -147,6 +148,8 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         result: RunValue,
         time_left: float,
     ):
+        if result.status in (StatusType.STOP, StatusType.ABORT):
+            return
         self.build_ensemble(smbo.tae_runner.client)
 
     def build_ensemble(
@@ -582,6 +585,7 @@ class EnsembleBuilder(object):
             if time_left - time_buffer < 1:
                 break
             context = multiprocessing.get_context(pynisher_context)
+
             safe_ensemble_script = pynisher.enforce_limits(
                 wall_time_in_s=int(time_left - time_buffer),
                 mem_in_mb=self.memory_limit,

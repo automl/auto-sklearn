@@ -736,6 +736,7 @@ class AutoML(BaseEstimator):
                 self._logger.exception(e)
                 raise
 
+        self._logger.info("Starting shutdown...")
         # Wait until the ensemble process is finished to avoid shutting down
         # while the ensemble builder tries to access the data
         if proc_ensemble is not None:
@@ -750,13 +751,21 @@ class AutoML(BaseEstimator):
                 future = proc_ensemble.futures.pop()
                 # Now we need to wait for the future to return as it cannot be cancelled while it
                 # is running: https://stackoverflow.com/a/49203129
+                self._logger.info("Ensemble script still running, waiting for it to finish.")
                 future.result()
+                self._logger.info("Ensemble script finished, continue shutdown.")
 
         if load_models:
+            self._logger.info("Loading models...")
             self._load_models()
+            self._logger.info("Finished loading models...")
+
+        self._logger.info("Closing the dask infrastructure")
         self._close_dask_client()
+        self._logger.info("Finished closing the dask infrastructure")
 
         # Clean up the logger
+        self._logger.info("Starting to clean up the logger")
         self._clean_logger()
 
         return self

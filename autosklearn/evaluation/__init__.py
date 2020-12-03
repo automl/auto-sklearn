@@ -176,6 +176,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             self._get_test_loss = False
 
         self.pynisher_context = pynisher_context
+        self.logger = autosklearn.util.logging_.get_logger("TAE")
 
     def run_wrapper(
         self,
@@ -218,7 +219,12 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         if remaining_time - 5 < run_info.cutoff:
             run_info = run_info._replace(cutoff=int(remaining_time - 5))
 
+        config_id = (
+            run_info.config if isinstance(run_info.config, int) else run_info.config.config_id
+        )
+
         if run_info.cutoff < 1.0:
+            self.logger.info("Not starting configuration %d because time is up" % config_id)
             return run_info, RunValue(
                 status=StatusType.STOP,
                 cost=self.worst_possible_result,
@@ -233,6 +239,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         ):
             run_info = run_info._replace(cutoff=int(np.ceil(run_info.cutoff)))
 
+        self.logger.info("Starting to evaluate configuration %d" % config_id)
         return super().run_wrapper(run_info=run_info)
 
     def run(
@@ -432,11 +439,14 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         if isinstance(config, int):
             origin = 'DUMMY'
+            config_id = config
         else:
             origin = getattr(config, 'origin', 'UNKNOWN')
+            config_id = config.config_id
         additional_run_info['configuration_origin'] = origin
 
         runtime = float(obj.wall_clock_time)
 
         autosklearn.evaluation.util.empty_queue(queue)
+        self.logger.info("Finished evaluating configuration %d" % config_id)
         return status, cost, runtime, additional_run_info
