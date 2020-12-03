@@ -19,7 +19,7 @@ import dask.distributed
 import numpy as np
 import numpy.ma as ma
 import pandas as pd
-import pkg_resources
+# import pkg_resources
 import scipy.stats
 from sklearn.base import BaseEstimator
 from sklearn.model_selection._split import _RepeatedSplits, \
@@ -47,7 +47,7 @@ from autosklearn.util.logging_ import (
     setup_logger,
     start_log_server,
 )
-from autosklearn.util import pipeline, RE_PATTERN
+from autosklearn.util import pipeline  # , RE_PATTERN
 from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.smbo import AutoMLSMBO
@@ -497,19 +497,19 @@ class AutoML(BaseEstimator):
         # self._logger.debug('  uname: %s', platform.uname())
         self._logger.debug('  Version: %s', platform.version())
         self._logger.debug('  Mac version: %s', platform.mac_ver())
-        requirements = pkg_resources.resource_string('autosklearn', 'requirements.txt')
-        requirements = requirements.decode('utf-8')
-        requirements = [requirement for requirement in requirements.split('\n')]
-        for requirement in requirements:
-            if not requirement:
-                continue
-            match = RE_PATTERN.match(requirement)
-            if match:
-                name = match.group('name')
-                module_dist = pkg_resources.get_distribution(name)
-                self._logger.debug('  %s', module_dist)
-            else:
-                raise ValueError('Unable to read requirement: %s' % requirement)
+        # requirements = pkg_resources.resource_string('autosklearn', 'requirements.txt')
+        # requirements = requirements.decode('utf-8')
+        # requirements = [requirement for requirement in requirements.split('\n')]
+        # for requirement in requirements:
+        #     if not requirement:
+        #         continue
+        #     match = RE_PATTERN.match(requirement)
+        #     if match:
+        #         name = match.group('name')
+        #         module_dist = pkg_resources.get_distribution(name)
+        #         self._logger.debug('  %s', module_dist)
+        #     else:
+        #         raise ValueError('Unable to read requirement: %s' % requirement)
         self._logger.debug('Done printing environment information')
         self._logger.debug('Starting to print arguments to auto-sklearn')
         self._logger.debug('  output_folder: %s', self._backend.context._output_directory)
