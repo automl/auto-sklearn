@@ -156,6 +156,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         self,
         dask_client: dask.distributed.Client,
         pynisher_context: str = 'spawn',
+        unit_test: bool = False
     ) -> None:
 
         # The second criteria is elapsed time
@@ -227,6 +228,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
                     priority=100,
                     pynisher_context=pynisher_context,
                     logger_port=self.logger_port,
+                    unit_test=unit_test,
                 ))
 
                 logger.info(
@@ -265,6 +267,7 @@ def fit_and_return_ensemble(
     return_predictions: bool,
     pynisher_context: str,
     logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
+    unit_test: bool = False,
 ) -> Tuple[
         List[Tuple[int, float, float, float]],
         int,
@@ -321,6 +324,11 @@ def fit_and_return_ensemble(
             Context to use for multiprocessing, can be either fork, spawn or forkserver.
         logger_port: int
             The port where the logging server is listening to.
+        unit_test: bool
+            Turn on unit testing mode. This currently makes fit_ensemble raise a MemoryError.
+            Having this is very bad coding style, but I did not find a way to make
+            unittest.mock work through the pynisher with all spawn contexts. If you know a
+            better solution, please let us know by opening an issue.
 
     Returns
     -------
@@ -343,6 +351,7 @@ def fit_and_return_ensemble(
         read_at_most=read_at_most,
         random_state=random_state,
         logger_port=logger_port,
+        unit_test=unit_test,
     ).run(
         end_at=end_at,
         iteration=iteration,
@@ -354,21 +363,22 @@ def fit_and_return_ensemble(
 
 class EnsembleBuilder(object):
     def __init__(
-            self,
-            backend: Backend,
-            dataset_name: str,
-            task_type: int,
-            metric: Scorer,
-            ensemble_size: int = 10,
-            ensemble_nbest: int = 100,
-            max_models_on_disc: int = 100,
-            performance_range_threshold: float = 0,
-            seed: int = 1,
-            precision: int = 32,
-            memory_limit: Optional[int] = 1024,
-            read_at_most: int = 5,
-            random_state: Optional[Union[int, np.random.RandomState]] = None,
-            logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
+        self,
+        backend: Backend,
+        dataset_name: str,
+        task_type: int,
+        metric: Scorer,
+        ensemble_size: int = 10,
+        ensemble_nbest: int = 100,
+        max_models_on_disc: int = 100,
+        performance_range_threshold: float = 0,
+        seed: int = 1,
+        precision: int = 32,
+        memory_limit: Optional[int] = 1024,
+        read_at_most: int = 5,
+        random_state: Optional[Union[int, np.random.RandomState]] = None,
+        logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
+        unit_test: bool = False,
     ):
         """
             Constructor
@@ -416,6 +426,11 @@ class EnsembleBuilder(object):
                 read at most n new prediction files in each iteration
             logger_port: int
                 port that receives logging records
+            unit_test: bool
+                Turn on unit testing mode. This currently makes fit_ensemble raise a MemoryError.
+                Having this is very bad coding style, but I did not find a way to make
+                unittest.mock work through the pynisher with all spawn contexts. If you know a
+                better solution, please let us know by opening an issue.
         """
 
         super(EnsembleBuilder, self).__init__()
@@ -454,6 +469,7 @@ class EnsembleBuilder(object):
         self.memory_limit = memory_limit
         self.read_at_most = read_at_most
         self.random_state = check_random_state(random_state)
+        self.unit_test = unit_test
 
         # Setup the logger
         self.logger_port = logger_port
@@ -1195,6 +1211,9 @@ class EnsembleBuilder(object):
             ensemble: EnsembleSelection
                 trained Ensemble
         """
+
+        if self.unit_test:
+            raise MemoryError()
 
         predictions_train = [self.read_preds[k][Y_ENSEMBLE] for k in selected_keys]
         include_num_runs = [

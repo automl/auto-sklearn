@@ -764,9 +764,7 @@ def test_ensemble_builder_process_realrun(dask_client_single_worker, ensemble_ba
     assert history[0]['ensemble_test_score'] == 0.9
 
 
-@unittest.mock.patch('autosklearn.ensemble_builder.EnsembleBuilder.fit_ensemble')
 def test_ensemble_builder_nbest_remembered(
-    fit_ensemble,
     ensemble_backend,
     dask_client_single_worker,
 ):
@@ -774,8 +772,6 @@ def test_ensemble_builder_nbest_remembered(
     Makes sure ensemble builder returns the size of the ensemble that pynisher allowed
     This way, we can remember it and not waste more time trying big ensemble sizes
     """
-
-    fit_ensemble.side_effect = MemoryError
 
     manager = EnsembleBuilderManager(
         start_time=time.time(),
@@ -795,15 +791,14 @@ def test_ensemble_builder_nbest_remembered(
         max_iterations=None,
     )
 
-    # Use fork context in the next line to allow for the mock to work
-    manager.build_ensemble(dask_client_single_worker, 'fork')
+    manager.build_ensemble(dask_client_single_worker, unit_test=True)
     future = manager.futures[0]
     dask.distributed.wait([future])  # wait for the ensemble process to finish
     assert future.result() == ([], 5, None, None, None)
     file_path = os.path.join(ensemble_backend.internals_directory, 'ensemble_read_preds.pkl')
     assert not os.path.exists(file_path)
 
-    manager.build_ensemble(dask_client_single_worker, 'fork')
+    manager.build_ensemble(dask_client_single_worker, unit_test=True)
 
     future = manager.futures[0]
     dask.distributed.wait([future])  # wait for the ensemble process to finish
