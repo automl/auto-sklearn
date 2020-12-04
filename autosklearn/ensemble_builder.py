@@ -148,7 +148,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         result: RunValue,
         time_left: float,
     ):
-        if result.status in (StatusType.STOP, StatusType.ABORT):
+        if result.status in (StatusType.STOP, StatusType.ABORT) or smbo._stop:
             return
         self.build_ensemble(smbo.tae_runner.client)
 
@@ -598,12 +598,13 @@ class EnsembleBuilder(object):
                 else:
                     time_left = end_at - current_time
 
-            if time_left - time_buffer < 1:
+            wall_time_in_s = int(time_left - time_buffer)
+            if wall_time_in_s < 1:
                 break
             context = multiprocessing.get_context(pynisher_context)
 
             safe_ensemble_script = pynisher.enforce_limits(
-                wall_time_in_s=int(time_left - time_buffer),
+                wall_time_in_s=wall_time_in_s,
                 mem_in_mb=self.memory_limit,
                 logger=self.logger,
                 context=context,
