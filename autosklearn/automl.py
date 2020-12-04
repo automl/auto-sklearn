@@ -380,6 +380,7 @@ class AutoML(BaseEstimator):
                                     disable_file_output=self._disable_evaluator_output,
                                     abort_on_first_run_crash=False,
                                     cost_for_crash=get_cost_of_crash(self._metric),
+                                    port=self._logger_port,
                                     **self._resampling_strategy_arguments)
 
         status, cost, runtime, additional_info = ta.run(num_run, cutoff=self._time_for_task)
@@ -718,6 +719,7 @@ class AutoML(BaseEstimator):
                 get_smac_object_callback=self._get_smac_object_callback,
                 smac_scenario_args=self._smac_scenario_args,
                 scoring_functions=self._scoring_functions,
+                port=self._logger_port,
                 ensemble_callback=proc_ensemble,
             )
 

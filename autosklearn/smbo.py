@@ -205,6 +205,7 @@ class AutoMLSMBO(object):
                  watcher,
                  n_jobs,
                  dask_client: dask.distributed.Client,
+                 port: int,
                  start_num_run=1,
                  data_memory_limit=None,
                  num_metalearning_cfgs=25,
@@ -230,6 +231,7 @@ class AutoMLSMBO(object):
         self.metric = metric
         self.task = None
         self.backend = backend
+        self.port = port
 
         # the configuration space
         self.config_space = config_space
@@ -437,6 +439,7 @@ class AutoMLSMBO(object):
             memory_limit=self.memory_limit,
             disable_file_output=self.disable_file_output,
             scoring_functions=self.scoring_functions,
+            port=self.port,
             **self.resampling_strategy_args
         )
         ta = ExecuteTaFuncWithQueue

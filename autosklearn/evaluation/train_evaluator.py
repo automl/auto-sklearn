@@ -142,6 +142,7 @@ def _fit_with_budget(X_train, Y_train, budget, budget_type, logger, model, train
 
 class TrainEvaluator(AbstractEvaluator):
     def __init__(self, backend, queue, metric,
+                 port,
                  configuration=None,
                  scoring_functions=None,
                  seed=1,
@@ -159,6 +160,7 @@ class TrainEvaluator(AbstractEvaluator):
         super().__init__(
             backend=backend,
             queue=queue,
+            port=port,
             configuration=configuration,
             metric=metric,
             scoring_functions=scoring_functions,
@@ -1049,6 +1051,7 @@ def eval_holdout(
         include,
         exclude,
         disable_file_output,
+        port,
         init_params=None,
         iterative=False,
         budget=100.0,
@@ -1056,6 +1059,7 @@ def eval_holdout(
 ):
     evaluator = TrainEvaluator(
         backend=backend,
+        port=port,
         queue=queue,
         resampling_strategy=resampling_strategy,
         resampling_strategy_args=resampling_strategy_args,
@@ -1090,12 +1094,14 @@ def eval_iterative_holdout(
         include,
         exclude,
         disable_file_output,
+        port,
         init_params=None,
         budget=100.0,
         budget_type=None,
 ):
     return eval_holdout(
         queue=queue,
+        port=port,
         config=config,
         backend=backend,
         metric=metric,
@@ -1131,6 +1137,7 @@ def eval_partial_cv(
         include,
         exclude,
         disable_file_output,
+        port,
         init_params=None,
         iterative=False,
         budget=None,
@@ -1143,6 +1150,7 @@ def eval_partial_cv(
 
     evaluator = TrainEvaluator(
         backend=backend,
+        port=port,
         queue=queue,
         metric=metric,
         configuration=config,
@@ -1178,9 +1186,10 @@ def eval_partial_cv_iterative(
         include,
         exclude,
         disable_file_output,
+        port,
         init_params=None,
         budget=None,
-        budget_type=None
+        budget_type=None,
 ):
     if budget_type is not None:
         raise NotImplementedError()
@@ -1192,6 +1201,7 @@ def eval_partial_cv_iterative(
         resampling_strategy=resampling_strategy,
         resampling_strategy_args=resampling_strategy_args,
         seed=seed,
+        port=port,
         num_run=num_run,
         instance=instance,
         scoring_functions=scoring_functions,
@@ -1220,6 +1230,7 @@ def eval_cv(
         include,
         exclude,
         disable_file_output,
+        port,
         init_params=None,
         budget=None,
         budget_type=None,
@@ -1227,6 +1238,7 @@ def eval_cv(
 ):
     evaluator = TrainEvaluator(
         backend=backend,
+        port=port,
         queue=queue,
         metric=metric,
         configuration=config,
@@ -1262,6 +1274,7 @@ def eval_iterative_cv(
         include,
         exclude,
         disable_file_output,
+        port,
         init_params=None,
         budget=None,
         budget_type=None,
@@ -1281,6 +1294,7 @@ def eval_iterative_cv(
         include=include,
         exclude=exclude,
         disable_file_output=disable_file_output,
+        port=port,
         init_params=init_params,
         budget=budget,
         budget_type=budget_type,

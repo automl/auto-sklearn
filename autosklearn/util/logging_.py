@@ -151,13 +151,13 @@ def _get_named_client_logger(
         local_loger: a logger object that has a socket handler
     """
     # Setup the logger configuration
-    setup_logger(output_dir=output_dir)
-
-    local_logger = _create_logger(name)
+    local_logger = _create_logger('Client-' + name)
+    local_logger.propagate = False
+    local_logger.setLevel(logging.DEBUG)
 
     # Remove any handler, so that the server handles
     # how to process the message
-    local_logger.handlers.clear()
+    # local_logger.handlers.clear()
 
     socketHandler = logging.handlers.SocketHandler(host, port)
     local_logger.addHandler(socketHandler)
