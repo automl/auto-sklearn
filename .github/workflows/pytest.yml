@@ -38,7 +38,7 @@ jobs:
         python -m pip install --upgrade pip
         if [[ `python -c 'import platform; print(platform.python_version())' | cut -d '.' -f 2` -eq 6 ]]; then
           # Numpy 1.20 dropped suppert for Python3.6
-          pip install numpy<=1.19
+          pip install "numpy<=1.19"
         fi
         pip install -e .[test]
         sudo apt-get update
