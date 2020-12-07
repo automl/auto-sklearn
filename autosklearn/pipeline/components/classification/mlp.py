@@ -60,6 +60,7 @@ class MLPClassifier(
         Set n_iter=2 for the same reason as for SGD
         """
         from sklearn.neural_network import MLPClassifier
+        n_iter = max(n_iter, 2)
 
         if refit:
             self.estimator = None
@@ -75,7 +76,7 @@ class MLPClassifier(
             self.activation = str(self.activation)
             self.alpha = float(self.alpha)
             self.learning_rate_init = float(self.learning_rate_init)
-            self.early_stopping_ = self.early_stopping
+            self.early_stopping_ = str(self.early_stopping)
             if self.early_stopping == "train":
                 self.validation_fraction = 0.0
                 self.tol = float(self.tol)
