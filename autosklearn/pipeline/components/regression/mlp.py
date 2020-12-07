@@ -4,6 +4,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, UnParametrizedHyperparameter, Constant, \
     CategoricalHyperparameter
+from ConfigSpace.conditions import InCondition
 
 from autosklearn.pipeline.components.base import (
     AutoSklearnRegressionAlgorithm,
@@ -19,9 +20,8 @@ class MLPRegressor(
 ):
     def __init__(self, hidden_layer_depth, num_nodes_per_layer, activation, alpha,
                  learning_rate_init, early_stopping, solver, batch_size,
-                 # n_iter_no_change, validation_fraction=None, tol,
-                 shuffle, beta_1, beta_2, epsilon,
-                 random_state=None, verbose=0):
+                 n_iter_no_change, tol, shuffle, beta_1, beta_2, epsilon,
+                 validation_fraction=None, random_state=None, verbose=0):
         self.hidden_layer_depth = hidden_layer_depth
         self.num_nodes_per_layer = num_nodes_per_layer
         self.max_iter = self.get_max_iter()
@@ -29,9 +29,9 @@ class MLPRegressor(
         self.alpha = alpha
         self.learning_rate_init = learning_rate_init
         self.early_stopping = early_stopping
-        # self.n_iter_no_change = n_iter_no_change
-        # self.validation_fraction = validation_fraction
-        # self.tol = tol
+        self.n_iter_no_change = n_iter_no_change
+        self.validation_fraction = validation_fraction
+        self.tol = tol
         self.solver = solver
         self.batch_size = batch_size
         self.shuffle = shuffle
@@ -49,7 +49,7 @@ class MLPRegressor(
         return 512
 
     def get_current_iter(self):
-        return self.estimator.max_iter
+        return self.estimator.n_iter_
 
     def iterative_fit(self, X, y, n_iter=2, refit=False):
         """
@@ -66,6 +66,7 @@ class MLPRegressor(
         if self.estimator is None:
             self.fully_fit_ = False
 
+            self.max_iter = int(self.max_iter)
             self.hidden_layer_depth = int(self.hidden_layer_depth)
             self.num_nodes_per_layer = int(self.num_nodes_per_layer)
             self.hidden_layer_sizes = tuple(self.num_nodes_per_layer
@@ -74,18 +75,25 @@ class MLPRegressor(
             self.alpha = float(self.alpha)
             self.learning_rate_init = float(self.learning_rate_init)
             self.early_stopping = str(self.early_stopping)
-            if self.early_stopping == "off":
+            self.early_stopping_ = str(self.early_stopping)
+            if self.early_stopping == "train":
+                self.validation_fraction = 0.0
+                self.tol = float(self.tol)
+                self.n_iter_no_change = int(self.n_iter_no_change)
                 self.early_stopping_val = False
-                # self.validation_fraction = 0.0
-                # Turn early stopping completely off
-                self.n_iter_no_change = self.max_iter
-                self.tol = 0
+            elif self.early_stopping == "valid":
+                self.validation_fraction = float(self.validation_fraction)
+                self.tol = float(self.tol)
+                self.n_iter_no_change = int(self.n_iter_no_change)
+                self.early_stopping_val = True
             else:
-                raise ValueError("Can't use early_stopping (set to %s)" % self.early_stopping)
-                # self.early_stopping_val = True
-                # self.validation_fraction = 0.0
-                # self.n_iter_no_change = self.max_iter
-                # self.tol = 0
+                raise ValueError("Set early stopping to unknown value %s" % self.early_stopping)
+            # elif self.early_stopping == "off":
+            #     self.validation_fraction = 0
+            #     self.tol = 10000
+            #     self.n_iter_no_change = self.max_iter
+            #     self.early_stopping_val = False
+
             self.solver = self.solver
 
             try:
@@ -118,7 +126,7 @@ class MLPRegressor(
                 verbose=self.verbose,
                 warm_start=True,
                 early_stopping=self.early_stopping_val,
-                # validation_fraction=self.validation_fraction,
+                validation_fraction=self.validation_fraction,
                 n_iter_no_change=self.n_iter_no_change,
                 tol=self.tol,
                 beta_1=self.beta_2,
@@ -133,15 +141,14 @@ class MLPRegressor(
             )
             self.scaler = sklearn.preprocessing.StandardScaler(copy=True)
             self.scaler.fit(y.reshape((-1, 1)))
-            Y_scaled = self.scaler.transform(y.reshape((-1, 1))).ravel()
-            iter_left = None
         else:
-            Y_scaled = self.scaler.transform(y.reshape((-1, 1))).ravel()
-            iter_left = min(self.max_iter - self.estimator.n_iter_, n_iter)
-            self.estimator.max_iter = iter_left
+            new_max_iter = min(self.max_iter - self.estimator.n_iter_, n_iter)
+            self.estimator.max_iter = new_max_iter
 
+        Y_scaled = self.scaler.transform(y.reshape((-1, 1))).ravel()
         self.estimator.fit(X, Y_scaled)
-        if self.estimator.n_iter_ >= self.max_iter:
+        if self.estimator.n_iter_ >= self.max_iter or \
+                self.estimator._no_improvement_count > self.n_iter_no_change:
             self.fully_fit_ = True
         return self
 
@@ -188,16 +195,15 @@ class MLPRegressor(
         learning_rate_init = UniformFloatHyperparameter(name="learning_rate_init",
                                                         lower=1e-4, upper=0.5, default_value=1e-3,
                                                         log=True)
-        # *Note*: If "early_stopping" is set to true, we can't use warm_starting. This
-        # is fixed w/ scikit-learn>=0.24 and we can make this a categorical with off/train/valid
-        early_stopping = Constant(name="early_stopping", value="off")
 
-        # We don't need these since we turn off early_stopping
-        # n_iter_no_change = Constant(name="n_iter_no_change", value=10)
-        # validation_fraction = Constant(name="validation_fraction", value=0.0)
-        # tol = UnParametrizedHyperparameter(name="tol", value=1e-4)
-
+        # Not allowing to turn off early stopping
+        early_stopping = CategoricalHyperparameter(name="early_stopping",
+                                                   choices=["valid", "train"],  # , "off"],
+                                                   default_value="valid")
         # Constants
+        n_iter_no_change = Constant(name="n_iter_no_change", value=32)  # default=10 is too low
+        validation_fraction = Constant(name="validation_fraction", value=0.1)
+        tol = UnParametrizedHyperparameter(name="tol", value=1e-4)
         solver = Constant(name="solver", value='adam')
 
         # Relying on sklearn defaults for now
@@ -219,12 +225,15 @@ class MLPRegressor(
         cs.add_hyperparameters([hidden_layer_depth, num_nodes_per_layer,
                                 activation, alpha,
                                 learning_rate_init, early_stopping,
-                                # n_iter_no_change, validation_fraction, tol,
+                                n_iter_no_change, validation_fraction, tol,
                                 solver, batch_size, shuffle,
                                 beta_1, beta_2, epsilon])
 
-        # We don't need these since we turn off early_stopping
-        # validation_fraction_cond = InCondition(validation_fraction, early_stopping, ["valid"])
-        # cs.add_conditions([validation_fraction_cond])
+        validation_fraction_cond = InCondition(validation_fraction, early_stopping, ["valid"])
+        cs.add_conditions([validation_fraction_cond])
+        # We always use early stopping
+        # n_iter_no_change_cond = InCondition(n_iter_no_change, early_stopping, ["valid", "train"])
+        # tol_cond = InCondition(n_iter_no_change, early_stopping, ["valid", "train"])
+        # cs.add_conditions([n_iter_no_change_cond, tol_cond])
 
         return cs
