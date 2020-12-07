@@ -28,7 +28,7 @@ jobs:
         branch_name=${GITHUB_REF##*/}
         cd ../gh-pages
         rm -rf $branch_name
-        cp -r ../autosklearn/doc/build/html $branch_name
+        cp -r ../auto-sklearn/doc/build/html $branch_name
     - name: Push to gh-pages
       if: (contains(github.ref, 'develop') || contains(github.ref, 'master')) && github.event_name == 'push'
       run: |
