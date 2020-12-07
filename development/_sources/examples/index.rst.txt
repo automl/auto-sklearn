@@ -137,48 +137,6 @@ procedure.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to obtain information from a finished Auto-sklearn run. In part...">
-
-.. only:: html
-
- .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_get_pipeline_components_thumb.png
-     :alt: Obtain run information
-
-     :ref:`sphx_glr_examples_40_advanced_example_get_pipeline_components.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/40_advanced/example_get_pipeline_components
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="In *auto-sklearn* it is possible to use different resampling strategies by specifying the argum...">
-
-.. only:: html
-
- .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_resampling_thumb.png
-     :alt: Resampling Strategies
-
-     :ref:`sphx_glr_examples_40_advanced_example_resampling.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/40_advanced/example_resampling
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="*Auto-sklearn* supports various built-in metrics, which can be found in the metrics section in ...">
 
 .. only:: html
@@ -218,6 +176,48 @@ procedure.
    :hidden:
 
    /examples/40_advanced/example_pandas_train_test
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In *auto-sklearn* it is possible to use different resampling strategies by specifying the argum...">
+
+.. only:: html
+
+ .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_resampling_thumb.png
+     :alt: Resampling Strategies
+
+     :ref:`sphx_glr_examples_40_advanced_example_resampling.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/40_advanced/example_resampling
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to obtain information from a finished Auto-sklearn run. In part...">
+
+.. only:: html
+
+ .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_get_pipeline_components_thumb.png
+     :alt: Obtain run information
+
+     :ref:`sphx_glr_examples_40_advanced_example_get_pipeline_components.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/40_advanced/example_get_pipeline_components
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>
@@ -381,27 +381,6 @@ Examples of extending Auto-sklearn with custom components.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="The following example demonstrates how to replace an existing component with a new component, i...">
-
-.. only:: html
-
- .. figure:: /examples/80_extending/images/thumb/sphx_glr_example_restrict_number_of_hyperparameters_thumb.png
-     :alt: Restricting the number of hyperparameters for an existing component
-
-     :ref:`sphx_glr_examples_80_extending_example_restrict_number_of_hyperparameters.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/80_extending/example_restrict_number_of_hyperparameters
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="The following example demonstrates how to create a new regression component for using in auto-s...">
 
 .. only:: html
@@ -420,6 +399,27 @@ Examples of extending Auto-sklearn with custom components.
    :hidden:
 
    /examples/80_extending/example_extending_regression
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example demonstrates how to replace an existing component with a new component, i...">
+
+.. only:: html
+
+ .. figure:: /examples/80_extending/images/thumb/sphx_glr_example_restrict_number_of_hyperparameters_thumb.png
+     :alt: Restricting the number of hyperparameters for an existing component
+
+     :ref:`sphx_glr_examples_80_extending_example_restrict_number_of_hyperparameters.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/80_extending/example_restrict_number_of_hyperparameters
 
 .. raw:: html
 

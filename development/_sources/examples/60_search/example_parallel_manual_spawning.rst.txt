@@ -54,7 +54,14 @@ on a single machine check out the example
 Dask configuration
 ==================
 
-Auto-sklearn requires dask workers to not run in the daemon setting
+Auto-sklearn uses threads in Dask to launch memory constrained jobs.
+This number of threads can be provided directly via the n_jobs argument
+when creating the AutoSklearnClassifier. Additionally, the user can provide
+a dask_client argument which can have processes=True.
+When using processes to True, we need to specify the below setting
+to allow internally generated processes.
+Optionally, you can choose to provide a dask client with processes=False
+and remove the following line.
 
 
 .. code-block:: default
@@ -73,7 +80,7 @@ Auto-sklearn requires dask workers to not run in the daemon setting
  .. code-block:: none
 
 
-    <dask.config.set object at 0x7fdecdd11250>
+    <dask.config.set object at 0x7f413878dfa0>
 
 
 
@@ -122,6 +129,9 @@ It is also possible to start dask workers from the command line (in fact,
 one can also start a dask scheduler from the command line), see the
 `dask cli docs <https://docs.dask.org/en/latest/setup/cli.html>`_ for
 further information.
+Please not, that DASK_DISTRIBUTED__WORKER__DAEMON=False is required in this
+case as dask-worker creates a new process. That is, it is equivalent to the
+setting described above with dask.distributed.Client with processes=True
 
 Again, we need to make sure that we do not start the workers in a daemon
 mode.
@@ -230,10 +240,10 @@ which means that it is automatically stopped one all computation is done.
       Dataset name: d6d58dae5b02e07797da6d4d126ac9b6
       Metric: accuracy
       Best validation score: 0.992908
-      Number of target algorithm runs: 6
+      Number of target algorithm runs: 7
       Number of successful target algorithm runs: 4
       Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 1
+      Number of target algorithms that exceeded the time limit: 2
       Number of target algorithms that exceeded the memory limit: 1
 
     Accuracy score 0.9440559440559441
@@ -244,7 +254,7 @@ which means that it is automatically stopped one all computation is done.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  36.921 seconds)
+   **Total running time of the script:** ( 0 minutes  46.834 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_manual_spawning.py:

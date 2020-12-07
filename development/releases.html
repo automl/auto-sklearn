@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Releases &#8212; AutoSklearn 0.11.1 documentation</title>
+    <title>Releases &#8212; AutoSklearn 0.12.0 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.11.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.12.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -106,7 +106,14 @@
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
 <li><a class="reference internal" href="#">Releases</a><ul>
-<li><a class="reference internal" href="#version-0-11-1">Version 0.11.1</a></li>
+<li><a class="reference internal" href="#version-0-12-0">Version 0.12.0</a><ul>
+<li><a class="reference internal" href="#contributors-v0-12-0">Contributors v0.12.0</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-11-1">Version 0.11.1</a><ul>
+<li><a class="reference internal" href="#contributors-v0-11-1">Contributors v0.11.1</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#version-0-11-0">Version 0.11.0</a><ul>
 <li><a class="reference internal" href="#contributors-v0-11-0">Contributors v0.11.0</a></li>
 </ul>
@@ -185,6 +192,30 @@
       
   <span class="target" id="releases"></span><div class="section" id="id1">
 <h1>Releases<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="version-0-12-0">
+<h2>Version 0.12.0<a class="headerlink" href="#version-0-12-0" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>BREAKING: Auto-sklearn must now be guarded by <code class="docutils literal notranslate"><span class="pre">__name__</span> <span class="pre">==</span> <span class="pre">&quot;__main__&quot;</span></code> due to the use of the
+<code class="docutils literal notranslate"><span class="pre">spawn</span></code> multiprocessing context.</p></li>
+<li><p>ADD #1026: Adds improved meta-data for Auto-sklearn 2.0 which results in strong improved
+performance.</p></li>
+<li><p>MAINT #984 and #1008: Move to scikit-learn 0.23.X</p></li>
+<li><p>MAINT #1004: Move from travis-ci to github actions.</p></li>
+<li><p>MAINT 8b67af6: drop the requirement to the lockfile package.</p></li>
+<li><p>FIX #990: Fixes a bug that made Auto-sklearn fail if there are missing values in a pandas
+DataFrame.</p></li>
+<li><p>FIX #1007, #1012 and #1014: Log multiprocessing output via a new log server. Remove several
+potential deadlocks related to the joint use of multi-processing, multi-threading and logging.</p></li>
+</ul>
+<div class="section" id="contributors-v0-12-0">
+<h3>Contributors v0.12.0<a class="headerlink" href="#contributors-v0-12-0" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Matthias Feurer</p></li>
+<li><p>ROHIT AGARWAL</p></li>
+<li><p>Francisco Rivera</p></li>
+</ul>
+</div>
+</div>
 <div class="section" id="version-0-11-1">
 <h2>Version 0.11.1<a class="headerlink" href="#version-0-11-1" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -193,6 +224,12 @@ category encoders fail.</p></li>
 <li><p>FIX #1001: Fixes a bug which could make Auto-sklearn fail at random.</p></li>
 <li><p>MAINT #1000: Introduce a minimal version for <code class="docutils literal notranslate"><span class="pre">dask.distributed</span></code>.</p></li>
 </ul>
+<div class="section" id="contributors-v0-11-1">
+<h3>Contributors v0.11.1<a class="headerlink" href="#contributors-v0-11-1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Matthias Feurer</p></li>
+</ul>
+</div>
 </div>
 <div class="section" id="version-0-11-0">
 <h2>Version 0.11.0<a class="headerlink" href="#version-0-11-0" title="Permalink to this headline">¶</a></h2>
