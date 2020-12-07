@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 
 from ConfigSpace.configuration_space import ConfigurationSpace
@@ -75,7 +76,6 @@ class MLPRegressor(
             self.alpha = float(self.alpha)
             self.learning_rate_init = float(self.learning_rate_init)
             self.early_stopping = str(self.early_stopping)
-            self.early_stopping_ = str(self.early_stopping)
             if self.early_stopping == "train":
                 self.validation_fraction = 0.0
                 self.tol = float(self.tol)
@@ -106,8 +106,6 @@ class MLPRegressor(
             self.beta_2 = float(self.beta_2)
             self.epsilon = float(self.epsilon)
             self.beta_1 = float(self.beta_1)
-
-            self.max_iter = int(self.max_iter)
             self.verbose = int(self.verbose)
 
             n_iter = int(np.ceil(n_iter))
@@ -122,7 +120,7 @@ class MLPRegressor(
                 learning_rate_init=self.learning_rate_init,
                 max_iter=n_iter,
                 shuffle=self.shuffle,
-                random_state=self.random_state,
+                random_state=copy.copy(self.random_state),
                 verbose=self.verbose,
                 warm_start=True,
                 early_stopping=self.early_stopping_val,

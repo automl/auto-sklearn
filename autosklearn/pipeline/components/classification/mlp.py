@@ -76,7 +76,7 @@ class MLPClassifier(
             self.activation = str(self.activation)
             self.alpha = float(self.alpha)
             self.learning_rate_init = float(self.learning_rate_init)
-            self.early_stopping_ = str(self.early_stopping)
+            self.early_stopping = str(self.early_stopping)
             if self.early_stopping == "train":
                 self.validation_fraction = 0.0
                 self.tol = float(self.tol)
@@ -139,7 +139,7 @@ class MLPClassifier(
                 # max_fun=self.max_fun
             )
         else:
-            new_max_iter = min(self.max_iter-self.estimator.n_iter_, n_iter)
+            new_max_iter = min(self.max_iter - self.estimator.n_iter_, n_iter)
             self.estimator.max_iter = new_max_iter
         self.estimator.fit(X, y)
         if self.estimator.n_iter_ >= self.max_iter or \
