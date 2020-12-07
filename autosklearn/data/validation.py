@@ -305,7 +305,7 @@ class InputValidator:
                         "Cast it to a valid dtype before using it in Auto-Sklearn. "
                         "Valid types are numerical, categorical or boolean. "
                         "You can cast it to a valid dtype using "
-                        "pandas.Series.astype ."
+                        "pandas.Series.astype. "
                         "If working with string objects, the following "
                         "tutorial illustrates how to work with text data: "
                         "https://scikit-learn.org/stable/tutorial/text_analytics/working_with_text_data.html".format(  # noqa: E501
