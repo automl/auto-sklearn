@@ -7,6 +7,7 @@ from typing import List, Optional, Tuple, Union
 import numpy as np
 
 import pandas as pd
+from pandas.api.types import is_numeric_dtype
 
 import scipy.sparse
 
@@ -53,6 +54,45 @@ class InputValidator:
         # are not allowed
         self.features_type = None  # type: Optional[type]
         self.target_type = None  # type: Optional[type]
+
+    def register_user_feat_type(self, feat_type: Optional[List[str]],
+                                X: Union[pd.DataFrame, np.ndarray]) -> None:
+        """
+        Incorporate information of the feature types when processing a Numpy array.
+        In case feature types is provided, if using a pd.DataFrame, this utility errors
+        out, explaining to the user this is contradictory.
+        """
+        if hasattr(X, "iloc") and feat_type is not None:
+            raise ValueError("When providing a DataFrame to Auto-Sklearn, we extract "
+                             "the feature types from the DataFrame.dtypes. That is, "
+                             "providing the option feat_type to the fit method is not "
+                             "supported when using a Dataframe. Please make sure that the "
+                             "type of each column in your DataFrame is properly set. "
+                             "More details about having the correct data type in your "
+                             "DataFrame can be seen in "
+                             "https://pandas.pydata.org/pandas-docs/stable/reference"
+                             "/api/pandas.DataFrame.astype.html")
+        elif feat_type is None:
+            # Nothing to register. No feat type is provided
+            # or the features are not numpy/list where this is required
+            return
+
+        # Some checks if feat_type is provided
+        if len(feat_type) != X.shape[1]:
+            raise ValueError('Array feat_type does not have same number of '
+                             'variables as X has features. %d vs %d.' %
+                             (len(feat_type), X.shape[1]))
+        if not all([isinstance(f, str) for f in feat_type]):
+            raise ValueError('Array feat_type must only contain strings.')
+
+        for ft in feat_type:
+            if ft.lower() not in ['categorical', 'numerical']:
+                raise ValueError('Only `Categorical` and `Numerical` are '
+                                 'valid feature types, you passed `%s`' % ft)
+
+        # Here we register proactively the feature types for
+        # Processing Numpy arrays
+        self.feature_types = feat_type
 
     def validate(
         self,
@@ -256,7 +296,9 @@ class InputValidator:
                 else:
                     enc_columns.append(i)
                 feature_types.append('categorical')
-            elif not np.issubdtype(X[column].dtype, np.number):
+            # Move away from np.issubdtype as it causes
+            # TypeError: data type not understood in certain pandas types
+            elif not is_numeric_dtype(X[column]):
                 if X[column].dtype.name == 'object':
                     raise ValueError(
                         "Input Column {} has invalid type object. "
@@ -303,17 +345,20 @@ class InputValidator:
         Interprets a Pandas
         Uses .iloc as a safe way to deal with pandas object
         """
+        # Start with the features
+        enc_columns, feature_types = self._check_and_get_columns_to_encode(X)
 
         # If there is a Nan, we cannot encode it due to a scikit learn limitation
-        if np.any(pd.isnull(X.dropna(axis='columns', how='all'))):
-            # Ignore all NaN columns, and if still a NaN
-            # Error out
-            raise ValueError("Categorical features in a dataframe cannot contain "
-                             "missing/NaN values. The OrdinalEncoder used by "
-                             "Auto-sklearn cannot handle this yet (due to a "
-                             "limitation on scikit-learn being addressed via: "
-                             "https://github.com/scikit-learn/scikit-learn/issues/17123)"
-                             )
+        if len(enc_columns) > 0:
+            if np.any(pd.isnull(X[enc_columns].dropna(axis='columns', how='all'))):
+                # Ignore all NaN columns, and if still a NaN
+                # Error out
+                raise ValueError("Categorical features in a dataframe cannot contain "
+                                 "missing/NaN values. The OrdinalEncoder used by "
+                                 "Auto-sklearn cannot handle this yet (due to a "
+                                 "limitation on scikit-learn being addressed via: "
+                                 "https://github.com/scikit-learn/scikit-learn/issues/17123)"
+                                 )
         elif np.any(pd.isnull(X)):
             # After above check it means that if there is a NaN
             # the whole column must be NaN
@@ -321,18 +366,6 @@ class InputValidator:
             for column in X.columns:
                 if X[column].isna().all():
                     X[column] = pd.to_numeric(X[column])
-
-        # Start with the features
-        if hasattr(X, "iloc"):
-            enc_columns, feature_types = self._check_and_get_columns_to_encode(X)
-        else:
-            if len(X.shape) < 1:
-                raise ValueError("Input data X cannot be one dimensional "
-                                 "and need to be reshaped to a 2-D array-like object."
-                                 "You can do so via np.reshape(-1,1). "
-                                 )
-            enc_columns = list(range(X.shape[1]))
-            feature_types = ['categorical' for f in enc_columns]
 
         # Make sure we only set this once. It should not change
         if not self.feature_types:

@@ -22,172 +22,161 @@ import autosklearn.metrics
 
 
 ############################################################################
-# Custom metrics definition
-# =========================
-
-def accuracy(solution, prediction):
-    # custom function defining accuracy
-    return np.mean(solution == prediction)
-
-
-def error(solution, prediction):
-    # custom function defining error
-    return np.mean(solution != prediction)
-
-
-def accuracy_wk(solution, prediction, dummy):
-    # custom function defining accuracy and accepting an additional argument
-    assert dummy is None
-    return np.mean(solution == prediction)
-
-
-def error_wk(solution, prediction, dummy):
-    # custom function defining error and accepting an additional argument
-    assert dummy is None
-    return np.mean(solution != prediction)
-
-
-############################################################################
 # Data Loading
 # ============
+# The custom metrics must be in a separate module to be usable together with
+# Auto-sklearn. We also print the content of the module below with
+# ``inspect`` to keep the example self-contained.
 
-X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-X_train, X_test, y_train, y_test = \
-    sklearn.model_selection.train_test_split(X, y, random_state=1)
+import custom_metrics
 
-############################################################################
-# Print a list of available metrics
-# =================================
 
-print("Available CLASSIFICATION metrics autosklearn.metrics.*:")
-print("\t*" + "\n\t*".join(autosklearn.metrics.CLASSIFICATION_METRICS))
+if __name__ == "__main__":
+    import inspect
 
-print("Available REGRESSION autosklearn.metrics.*:")
-print("\t*" + "\n\t*".join(autosklearn.metrics.REGRESSION_METRICS))
+    print(inspect.getsource(custom_metrics))
 
-############################################################################
-# First example: Use predefined accuracy metric
-# =============================================
+    ############################################################################
+    # Data Loading
+    # ============
 
-print("#"*80)
-print("Use predefined accuracy metric")
-cls = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=60,
-    per_run_time_limit=30,
-    seed=1,
-    metric=autosklearn.metrics.accuracy,
-)
-cls.fit(X_train, y_train)
+    X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
+    X_train, X_test, y_train, y_test = \
+        sklearn.model_selection.train_test_split(X, y, random_state=1)
 
-predictions = cls.predict(X_test)
-print("Accuracy score {:g} using {:s}".
-      format(sklearn.metrics.accuracy_score(y_test, predictions),
-             cls.automl_._metric.name))
+    ############################################################################
+    # Print a list of available metrics
+    # =================================
 
-############################################################################
-# Second example: Use own accuracy metric
-# =======================================
+    print("Available CLASSIFICATION metrics autosklearn.metrics.*:")
+    print("\t*" + "\n\t*".join(autosklearn.metrics.CLASSIFICATION_METRICS))
 
-print("#"*80)
-print("Use self defined accuracy metric")
-accuracy_scorer = autosklearn.metrics.make_scorer(
-    name="accu",
-    score_func=accuracy,
-    optimum=1,
-    greater_is_better=True,
-    needs_proba=False,
-    needs_threshold=False,
-)
-cls = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=60,
-    per_run_time_limit=30,
-    seed=1,
-    metric=accuracy_scorer,
-)
-cls.fit(X_train, y_train)
+    print("Available REGRESSION autosklearn.metrics.*:")
+    print("\t*" + "\n\t*".join(autosklearn.metrics.REGRESSION_METRICS))
 
-predictions = cls.predict(X_test)
-print("Accuracy score {:g} using {:s}".
-      format(sklearn.metrics.accuracy_score(y_test, predictions),
-             cls.automl_._metric.name))
+    ############################################################################
+    # First example: Use predefined accuracy metric
+    # =============================================
 
-print("#"*80)
-print("Use self defined error metric")
-error_rate = autosklearn.metrics.make_scorer(
-    name='error',
-    score_func=error,
-    optimum=0,
-    greater_is_better=False,
-    needs_proba=False,
-    needs_threshold=False
-)
-cls = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=60,
-    per_run_time_limit=30,
-    seed=1,
-    metric=error_rate,
-)
-cls.fit(X_train, y_train)
-
-cls.predictions = cls.predict(X_test)
-print("Error rate {:g} using {:s}".
-      format(error_rate(y_test, predictions),
-             cls.automl_._metric.name))
-
-############################################################################
-# Third example: Use own accuracy metric with additional argument
-# ===============================================================
-
-print("#"*80)
-print("Use self defined accuracy with additional argument")
-accuracy_scorer = autosklearn.metrics.make_scorer(
-    name="accu_add",
-    score_func=accuracy_wk,
-    optimum=1,
-    greater_is_better=True,
-    needs_proba=False,
-    needs_threshold=False,
-    dummy=None,
-)
-cls = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=60,
-    per_run_time_limit=30,
-    seed=1,
-    metric=accuracy_scorer
-)
-cls.fit(X_train, y_train)
-
-predictions = cls.predict(X_test)
-print(
-    "Accuracy score {:g} using {:s}".format(
-        sklearn.metrics.accuracy_score(y_test, predictions),
-        cls.automl_._metric.name
+    print("#"*80)
+    print("Use predefined accuracy metric")
+    cls = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=60,
+        per_run_time_limit=30,
+        seed=1,
+        metric=autosklearn.metrics.accuracy,
     )
-)
+    cls.fit(X_train, y_train)
 
-print("#"*80)
-print("Use self defined error with additional argument")
-error_rate = autosklearn.metrics.make_scorer(
-    name="error_add",
-    score_func=error_wk,
-    optimum=0,
-    greater_is_better=True,
-    needs_proba=False,
-    needs_threshold=False,
-    dummy=None,
-)
-cls = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=60,
-    per_run_time_limit=30,
-    seed=1,
-    metric=error_rate,
-)
-cls.fit(X_train, y_train)
+    predictions = cls.predict(X_test)
+    print("Accuracy score {:g} using {:s}".
+          format(sklearn.metrics.accuracy_score(y_test, predictions),
+                 cls.automl_._metric.name))
 
-predictions = cls.predict(X_test)
-print(
-    "Error rate {:g} using {:s}".format(
-        error_rate(y_test, predictions),
-        cls.automl_._metric.name
+    ############################################################################
+    # Second example: Use own accuracy metric
+    # =======================================
+
+    print("#"*80)
+    print("Use self defined accuracy metric")
+    accuracy_scorer = autosklearn.metrics.make_scorer(
+        name="accu",
+        score_func=custom_metrics.accuracy,
+        optimum=1,
+        greater_is_better=True,
+        needs_proba=False,
+        needs_threshold=False,
     )
-)
+    cls = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=60,
+        per_run_time_limit=30,
+        seed=1,
+        metric=accuracy_scorer,
+    )
+    cls.fit(X_train, y_train)
+
+    predictions = cls.predict(X_test)
+    print("Accuracy score {:g} using {:s}".
+          format(sklearn.metrics.accuracy_score(y_test, predictions),
+                 cls.automl_._metric.name))
+
+    print("#"*80)
+    print("Use self defined error metric")
+    error_rate = autosklearn.metrics.make_scorer(
+        name='error',
+        score_func=custom_metrics.error,
+        optimum=0,
+        greater_is_better=False,
+        needs_proba=False,
+        needs_threshold=False
+    )
+    cls = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=60,
+        per_run_time_limit=30,
+        seed=1,
+        metric=error_rate,
+    )
+    cls.fit(X_train, y_train)
+
+    cls.predictions = cls.predict(X_test)
+    print("Error rate {:g} using {:s}".
+          format(error_rate(y_test, predictions),
+                 cls.automl_._metric.name))
+
+    ############################################################################
+    # Third example: Use own accuracy metric with additional argument
+    # ===============================================================
+
+    print("#"*80)
+    print("Use self defined accuracy with additional argument")
+    accuracy_scorer = autosklearn.metrics.make_scorer(
+        name="accu_add",
+        score_func=custom_metrics.accuracy_wk,
+        optimum=1,
+        greater_is_better=True,
+        needs_proba=False,
+        needs_threshold=False,
+        dummy=None,
+    )
+    cls = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=60,
+        per_run_time_limit=30,
+        seed=1,
+        metric=accuracy_scorer
+    )
+    cls.fit(X_train, y_train)
+
+    predictions = cls.predict(X_test)
+    print(
+        "Accuracy score {:g} using {:s}".format(
+            sklearn.metrics.accuracy_score(y_test, predictions),
+            cls.automl_._metric.name
+        )
+    )
+
+    print("#"*80)
+    print("Use self defined error with additional argument")
+    error_rate = autosklearn.metrics.make_scorer(
+        name="error_add",
+        score_func=custom_metrics.error_wk,
+        optimum=0,
+        greater_is_better=True,
+        needs_proba=False,
+        needs_threshold=False,
+        dummy=None,
+    )
+    cls = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=60,
+        per_run_time_limit=30,
+        seed=1,
+        metric=error_rate,
+    )
+    cls.fit(X_train, y_train)
+
+    predictions = cls.predict(X_test)
+    print(
+        "Error rate {:g} using {:s}".format(
+            error_rate(y_test, predictions),
+            cls.automl_._metric.name
+        )
+    )

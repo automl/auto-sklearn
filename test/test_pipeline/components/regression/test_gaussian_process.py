@@ -11,7 +11,7 @@ class GaussianProcessComponentTest(BaseRegressionComponentTest):
     __test__ = True
 
     res = dict()
-    res["default_boston_le_ge"] = [0.6, 0.4]
+    res["default_boston_le_ge"] = [0.6, 0.2]
     res["default_boston_places"] = 1
     res["default_boston_iterative"] = None
     res["default_boston_sparse"] = None

@@ -57,8 +57,9 @@ class AlgorithmSelectionProblem(object):
         for expected_file in optional:
             full_path = os.path.join(self.dir_, expected_file)
             if not os.path.isfile(full_path):
-                self.logger.warning(
-                    "Not found: %s (maybe you want to add it)" % (full_path))
+                # self.logger.warning(
+                #     "Not found: %s (maybe you want to add it)" % (full_path))
+                pass
             else:
                 self.found_files.append(full_path)
 

@@ -34,7 +34,7 @@ this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
 from evaluation_util import get_regression_datamanager, BaseEvaluatorTest, \
     get_binary_classification_datamanager, get_dataset_getters, \
-    get_multiclass_classification_datamanager  # noqa (E402: module level import not at top of file)
+    get_multiclass_classification_datamanager, SCORER_LIST  # noqa (E402: module level import not at top of file)
 
 
 class BackendMock(object):
@@ -100,7 +100,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    resampling_strategy='holdout',
                                    resampling_strategy_args={'train_size': 0.66},
-                                   all_scoring_functions=False,
+                                   scoring_functions=None,
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
                                    )
@@ -165,7 +165,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator(backend_api, queue_,
                                    configuration=configuration,
                                    resampling_strategy='holdout',
-                                   all_scoring_functions=False,
+                                   scoring_functions=None,
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
                                    budget=0.0)
@@ -262,7 +262,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator(backend_api, queue_,
                                    configuration=configuration,
                                    resampling_strategy='holdout-iterative-fit',
-                                   all_scoring_functions=False,
+                                   scoring_functions=None,
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
                                    budget=0.0)
@@ -331,7 +331,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator(backend_api, queue_,
                                    configuration=configuration,
                                    resampling_strategy='holdout-iterative-fit',
-                                   all_scoring_functions=False,
+                                   scoring_functions=None,
                                    output_y_hat_optimization=True,
                                    metric=accuracy)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
@@ -373,7 +373,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 5},
-                                   all_scoring_functions=False,
+                                   scoring_functions=None,
                                    output_y_hat_optimization=True,
                                    metric=accuracy)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
@@ -426,7 +426,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    resampling_strategy='partial-cv',
                                    resampling_strategy_args={'folds': 5},
-                                   all_scoring_functions=False,
+                                   scoring_functions=None,
                                    output_y_hat_optimization=True,
                                    metric=accuracy)
 
@@ -485,7 +485,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    resampling_strategy='partial-cv-iterative-fit',
                                    resampling_strategy_args={'folds': 5},
-                                   all_scoring_functions=False,
+                                   scoring_functions=None,
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
                                    budget=0.0)
@@ -551,7 +551,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 5},
-                                   all_scoring_functions=True,
+                                   scoring_functions=SCORER_LIST,
                                    output_y_hat_optimization=True,
                                    metric=accuracy)
 
@@ -2258,7 +2258,7 @@ class FunctionsTest(unittest.TestCase):
             resampling_strategy_args=None,
             seed=1,
             num_run=1,
-            all_scoring_functions=False,
+            scoring_functions=None,
             output_y_hat_optimization=True,
             include=None,
             exclude=None,
@@ -2281,7 +2281,7 @@ class FunctionsTest(unittest.TestCase):
             resampling_strategy_args=None,
             seed=1,
             num_run=1,
-            all_scoring_functions=True,
+            scoring_functions=SCORER_LIST,
             output_y_hat_optimization=True,
             include=None,
             exclude=None,
@@ -2331,7 +2331,7 @@ class FunctionsTest(unittest.TestCase):
             resampling_strategy_args=None,
             seed=1,
             num_run=1,
-            all_scoring_functions=False,
+            scoring_functions=None,
             output_y_hat_optimization=True,
             include=None,
             exclude=None,
@@ -2354,7 +2354,7 @@ class FunctionsTest(unittest.TestCase):
             resampling_strategy_args=None,
             seed=1,
             num_run=1,
-            all_scoring_functions=False,
+            scoring_functions=None,
             output_y_hat_optimization=True,
             include=None,
             exclude=None,
@@ -2383,7 +2383,7 @@ class FunctionsTest(unittest.TestCase):
             resampling_strategy_args=None,
             seed=1,
             num_run=1,
-            all_scoring_functions=False,
+            scoring_functions=None,
             output_y_hat_optimization=True,
             include=None,
             exclude={'classifier': ['random_forest', 'liblinear_svc']},
@@ -2408,7 +2408,7 @@ class FunctionsTest(unittest.TestCase):
             resampling_strategy_args=None,
             seed=1,
             num_run=1,
-            all_scoring_functions=False,
+            scoring_functions=None,
             output_y_hat_optimization=True,
             include=None,
             exclude=None,
@@ -2434,7 +2434,7 @@ class FunctionsTest(unittest.TestCase):
             resampling_strategy_args=None,
             seed=1,
             num_run=1,
-            all_scoring_functions=False,
+            scoring_functions=None,
             output_y_hat_optimization=True,
             include=None,
             exclude=None,
@@ -2464,7 +2464,7 @@ class FunctionsTest(unittest.TestCase):
             resampling_strategy_args=None,
             seed=1,
             num_run=1,
-            all_scoring_functions=False,
+            scoring_functions=None,
             output_y_hat_optimization=True,
             include=None,
             exclude={'classifier': ['random_forest']},
@@ -2489,7 +2489,7 @@ class FunctionsTest(unittest.TestCase):
             num_run=1,
             resampling_strategy='cv',
             resampling_strategy_args={'folds': 3},
-            all_scoring_functions=False,
+            scoring_functions=None,
             output_y_hat_optimization=True,
             include=None,
             exclude=None,
@@ -2512,7 +2512,7 @@ class FunctionsTest(unittest.TestCase):
             num_run=1,
             resampling_strategy='cv',
             resampling_strategy_args={'folds': 3},
-            all_scoring_functions=True,
+            scoring_functions=SCORER_LIST,
             output_y_hat_optimization=True,
             include=None,
             exclude=None,
@@ -2556,7 +2556,7 @@ class FunctionsTest(unittest.TestCase):
     #     backend_api = backend.create(self.tmp_dir, self.tmp_dir)
     #     eval_cv(queue=self.queue, config=self.configuration, data=self.data,
     #             backend=backend_api, seed=1, num_run=1, folds=5, subsample=45,
-    #             with_predictions=True, all_scoring_functions=False,
+    #             with_predictions=True, scoring_functions=None,
     #             output_y_hat_optimization=True, include=None, exclude=None,
     #             disable_file_output=False)
     #     info = self.queue.get()
@@ -2580,7 +2580,7 @@ class FunctionsTest(unittest.TestCase):
                 instance=instance,
                 resampling_strategy='partial-cv',
                 resampling_strategy_args={'folds': 5},
-                all_scoring_functions=False,
+                scoring_functions=None,
                 output_y_hat_optimization=True,
                 include=None,
                 exclude=None,

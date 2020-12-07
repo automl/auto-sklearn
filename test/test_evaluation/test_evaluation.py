@@ -87,12 +87,12 @@ class EvaluationTest(unittest.TestCase):
         config.config_id = 198
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
                                     metric=accuracy,
                                     cost_for_crash=get_cost_of_crash(accuracy),
                                     abort_on_first_run_crash=False,
+                                    pynisher_context='fork',
                                     )
         info = ta.run_wrapper(RunInfo(config=config, cutoff=30, instance=None,
                                       instance_specific=None, seed=1, capped=False))
@@ -107,7 +107,6 @@ class EvaluationTest(unittest.TestCase):
         config.config_id = 198
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     metric=accuracy,
                                     cost_for_crash=get_cost_of_crash(accuracy),
@@ -125,7 +124,6 @@ class EvaluationTest(unittest.TestCase):
         config.config_id = 198
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     metric=accuracy,
                                     cost_for_crash=get_cost_of_crash(accuracy),
@@ -145,12 +143,12 @@ class EvaluationTest(unittest.TestCase):
         config.config_id = 198
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
                                     metric=accuracy,
                                     cost_for_crash=get_cost_of_crash(accuracy),
                                     abort_on_first_run_crash=False,
+                                    pynisher_context='fork',
                                     )
 
         # The following should not fail because abort on first config crashed is false
@@ -186,12 +184,12 @@ class EvaluationTest(unittest.TestCase):
         config.config_id = 198
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
                                     metric=log_loss,
                                     cost_for_crash=get_cost_of_crash(log_loss),
                                     abort_on_first_run_crash=False,
+                                    pynisher_context='fork',
                                     )
         info = ta.run_wrapper(RunInfo(config=config, cutoff=30, instance=None,
                                       instance_specific=None, seed=1, capped=False))
@@ -216,7 +214,6 @@ class EvaluationTest(unittest.TestCase):
         m2.wall_clock_time = 30
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
                                     metric=accuracy,
@@ -251,7 +248,6 @@ class EvaluationTest(unittest.TestCase):
         # Test for a succesful run
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
                                     metric=accuracy,
@@ -274,7 +270,6 @@ class EvaluationTest(unittest.TestCase):
         m2.side_effect = side_effect
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
                                     metric=accuracy,
@@ -301,12 +296,12 @@ class EvaluationTest(unittest.TestCase):
         eval_houldout_mock.side_effect = side_effect
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
                                     metric=accuracy,
                                     cost_for_crash=get_cost_of_crash(accuracy),
                                     abort_on_first_run_crash=False,
+                                    pynisher_context='fork',
                                     )
         self.scenario.wallclock_limit = 180
         instance = "{'subsample': 30}"
@@ -325,12 +320,12 @@ class EvaluationTest(unittest.TestCase):
         eval_holdout_mock.side_effect = ValueError
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
                                     metric=accuracy,
                                     cost_for_crash=get_cost_of_crash(accuracy),
                                     abort_on_first_run_crash=False,
+                                    pynisher_context='fork',
                                     )
         self.stats.submitted_ta_runs += 1
         info = ta.run_wrapper(RunInfo(config=config, cutoff=30, instance=None,
@@ -350,13 +345,13 @@ class EvaluationTest(unittest.TestCase):
         ta = ExecuteTaFuncWithQueue(backend=backend_mock,
                                     autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
                                     metric=accuracy,
                                     cost_for_crash=get_cost_of_crash(accuracy),
                                     abort_on_first_run_crash=False,
                                     iterative=False,
+                                    pynisher_context='fork',
                                     )
         ta.pynisher_logger = unittest.mock.Mock()
         self.stats.submitted_ta_runs += 1

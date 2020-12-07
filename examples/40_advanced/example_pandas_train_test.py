@@ -59,96 +59,97 @@ def get_runhistory_models_performance(automl):
     return pd.DataFrame(performance_list)
 
 
-############################################################################
-# Data Loading
-# ============
+if __name__ == "__main__":
+    ############################################################################
+    # Data Loading
+    # ============
 
-# Using Australian dataset https://www.openml.org/d/40981.
-# This example will use the command fetch_openml, which will
-# download a properly formatted dataframe if you use as_frame=True.
-# For demonstration purposes, we will download a numpy array using
-# as_frame=False, and manually creating the pandas DataFrame
-X, y = sklearn.datasets.fetch_openml(data_id=40981, return_X_y=True, as_frame=False)
+    # Using Australian dataset https://www.openml.org/d/40981.
+    # This example will use the command fetch_openml, which will
+    # download a properly formatted dataframe if you use as_frame=True.
+    # For demonstration purposes, we will download a numpy array using
+    # as_frame=False, and manually creating the pandas DataFrame
+    X, y = sklearn.datasets.fetch_openml(data_id=40981, return_X_y=True, as_frame=False)
 
-# bool and category will be automatically encoded.
-# Targets for classification are also automatically encoded
-# If using fetch_openml, data is already properly encoded, below
-# is an example for user reference
-X = pd.DataFrame(
-    data=X,
-    columns=['A' + str(i) for i in range(1, 15)]
-)
-desired_boolean_columns = ['A1']
-desired_categorical_columns = ['A4', 'A5', 'A6', 'A8', 'A9', 'A11', 'A12']
-desired_numerical_columns = ['A2', 'A3', 'A7', 'A10', 'A13', 'A14']
-for column in X.columns:
-    if column in desired_boolean_columns:
-        X[column] = X[column].astype('bool')
-    elif column in desired_categorical_columns:
-        X[column] = X[column].astype('category')
-    else:
-        X[column] = pd.to_numeric(X[column])
+    # bool and category will be automatically encoded.
+    # Targets for classification are also automatically encoded
+    # If using fetch_openml, data is already properly encoded, below
+    # is an example for user reference
+    X = pd.DataFrame(
+        data=X,
+        columns=['A' + str(i) for i in range(1, 15)]
+    )
+    desired_boolean_columns = ['A1']
+    desired_categorical_columns = ['A4', 'A5', 'A6', 'A8', 'A9', 'A11', 'A12']
+    desired_numerical_columns = ['A2', 'A3', 'A7', 'A10', 'A13', 'A14']
+    for column in X.columns:
+        if column in desired_boolean_columns:
+            X[column] = X[column].astype('bool')
+        elif column in desired_categorical_columns:
+            X[column] = X[column].astype('category')
+        else:
+            X[column] = pd.to_numeric(X[column])
 
-y = pd.DataFrame(y, dtype='category')
+    y = pd.DataFrame(y, dtype='category')
 
-X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
-    X, y, test_size=0.5, random_state=3
-)
-print(X.dtypes)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+        X, y, test_size=0.5, random_state=3
+    )
+    print(X.dtypes)
 
-############################################################################
-# Build and fit a classifier
-# ==========================
+    ############################################################################
+    # Build and fit a classifier
+    # ==========================
 
-cls = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=120,
-    per_run_time_limit=30,
-)
-cls.fit(X_train, y_train, X_test, y_test)
+    cls = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=120,
+        per_run_time_limit=30,
+    )
+    cls.fit(X_train, y_train, X_test, y_test)
 
-###########################################################################
-# Get the Score of the final ensemble
-# ===================================
+    ###########################################################################
+    # Get the Score of the final ensemble
+    # ===================================
 
-predictions = cls.predict(X_test)
-print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+    predictions = cls.predict(X_test)
+    print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 
-############################################################################
-# Plot the ensemble performance
-# ===================================
+    ############################################################################
+    # Plot the ensemble performance
+    # ===================================
 
-ensemble_performance_frame = pd.DataFrame(cls.automl_.ensemble_performance_history)
-best_values = pd.Series({'ensemble_optimization_score': -np.inf,
-                         'ensemble_test_score': -np.inf})
-for idx in ensemble_performance_frame.index:
-    if (
-        ensemble_performance_frame.loc[idx, 'ensemble_optimization_score']
-        > best_values['ensemble_optimization_score']
-    ):
-        best_values = ensemble_performance_frame.loc[idx]
-    ensemble_performance_frame.loc[idx] = best_values
+    ensemble_performance_frame = pd.DataFrame(cls.automl_.ensemble_performance_history)
+    best_values = pd.Series({'ensemble_optimization_score': -np.inf,
+                             'ensemble_test_score': -np.inf})
+    for idx in ensemble_performance_frame.index:
+        if (
+            ensemble_performance_frame.loc[idx, 'ensemble_optimization_score']
+            > best_values['ensemble_optimization_score']
+        ):
+            best_values = ensemble_performance_frame.loc[idx]
+        ensemble_performance_frame.loc[idx] = best_values
 
-individual_performance_frame = get_runhistory_models_performance(cls)
-best_values = pd.Series({'single_best_optimization_score': -np.inf,
-                         'single_best_test_score': -np.inf,
-                         'single_best_train_score': -np.inf})
-for idx in individual_performance_frame.index:
-    if (
-        individual_performance_frame.loc[idx, 'single_best_optimization_score']
-        > best_values['single_best_optimization_score']
-    ):
-        best_values = individual_performance_frame.loc[idx]
-    individual_performance_frame.loc[idx] = best_values
+    individual_performance_frame = get_runhistory_models_performance(cls)
+    best_values = pd.Series({'single_best_optimization_score': -np.inf,
+                             'single_best_test_score': -np.inf,
+                             'single_best_train_score': -np.inf})
+    for idx in individual_performance_frame.index:
+        if (
+            individual_performance_frame.loc[idx, 'single_best_optimization_score']
+            > best_values['single_best_optimization_score']
+        ):
+            best_values = individual_performance_frame.loc[idx]
+        individual_performance_frame.loc[idx] = best_values
 
-pd.merge(
-    ensemble_performance_frame,
-    individual_performance_frame,
-    on="Timestamp", how='outer'
-).sort_values('Timestamp').fillna(method='ffill').plot(
-    x='Timestamp',
-    kind='line',
-    legend=True,
-    title='Auto-sklearn accuracy over time',
-    grid=True,
-)
-plt.show()
+    pd.merge(
+        ensemble_performance_frame,
+        individual_performance_frame,
+        on="Timestamp", how='outer'
+    ).sort_values('Timestamp').fillna(method='ffill').plot(
+        x='Timestamp',
+        kind='line',
+        legend=True,
+        title='Auto-sklearn accuracy over time',
+        grid=True,
+    )
+    plt.show()

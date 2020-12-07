@@ -7,7 +7,6 @@ import typing
 import warnings
 
 import dask.distributed
-import numpy as np
 import pynisher
 
 from smac.facade.smac_ac_facade import SMAC4AC
@@ -221,6 +220,7 @@ class AutoMLSMBO(object):
                  disable_file_output=False,
                  smac_scenario_args=None,
                  get_smac_object_callback=None,
+                 scoring_functions=None,
                  ensemble_callback: typing.Optional[EnsembleBuilderManager] = None,
                  ):
         super(AutoMLSMBO, self).__init__()
@@ -263,6 +263,7 @@ class AutoMLSMBO(object):
         self.disable_file_output = disable_file_output
         self.smac_scenario_args = smac_scenario_args
         self.get_smac_object_callback = get_smac_object_callback
+        self.scoring_functions = scoring_functions
 
         self.ensemble_callback = ensemble_callback
 
@@ -430,12 +431,12 @@ class AutoMLSMBO(object):
             autosklearn_seed=seed,
             resampling_strategy=self.resampling_strategy,
             initial_num_run=num_run,
-            logger=self.logger,
             include=include,
             exclude=exclude,
             metric=self.metric,
             memory_limit=self.memory_limit,
             disable_file_output=self.disable_file_output,
+            scoring_functions=self.scoring_functions,
             **self.resampling_strategy_args
         )
         ta = ExecuteTaFuncWithQueue
@@ -633,8 +634,6 @@ class AutoMLSMBO(object):
                     for meta_feature_name in all_metafeatures.columns:
                         meta_features_list.append(
                             meta_features[meta_feature_name].value)
-                    meta_features_list = np.array(meta_features_list).reshape(
-                        (1, -1))
                     self.logger.info(list(meta_features_dict.keys()))
 
             else:
@@ -645,6 +644,5 @@ class AutoMLSMBO(object):
         else:
             meta_features = None
         if meta_features is None:
-            meta_features_list = []
             metalearning_configurations = []
         return metalearning_configurations

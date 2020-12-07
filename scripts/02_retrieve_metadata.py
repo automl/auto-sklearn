@@ -68,7 +68,7 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
                     best_configuration = Configuration(
                         configuration_space=configuration_space, values=config)
                     best_value = score
-                    best_configuration_dir = ped
+                    best_configuration_dir = validation_trajectory_file
                 except Exception as e:
                     print(e)
                     n_broken += 1

@@ -14,6 +14,13 @@ from autosklearn.constants import \
 from autosklearn.util.data import convert_to_bin
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.pipeline.util import get_dataset
+from autosklearn.metrics import accuracy, balanced_accuracy, f1_macro, f1_micro, f1_weighted, \
+    log_loss, precision_macro, precision_micro, precision_weighted, recall_macro, \
+    recall_micro, recall_weighted
+
+SCORER_LIST = [accuracy, balanced_accuracy, f1_macro, f1_micro, f1_weighted, log_loss,
+               precision_macro, precision_micro, precision_weighted, recall_macro,
+               recall_micro, recall_weighted]
 
 N_TEST_RUNS = 5
 

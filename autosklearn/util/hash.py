@@ -8,6 +8,9 @@ import scipy.sparse
 def hash_array_or_matrix(X: np.ndarray) -> str:
     m = hashlib.md5()
 
+    if hasattr(X, "iloc"):
+        X = X.to_numpy()
+
     if scipy.sparse.issparse(X):
         m.update(X.indices)
         m.update(X.indptr)

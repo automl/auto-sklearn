@@ -4,16 +4,15 @@ numpy>=1.9.0
 scipy>=0.14.1
 
 joblib
-scikit-learn>=0.22.0,<0.23
+scikit-learn>=0.23.0,<0.24
 
 dask
 distributed>=2.2.0
-lockfile
 pyyaml
 pandas>=1.0
 liac-arff
 
 ConfigSpace>=0.4.14,<0.5
-pynisher>=0.6.1
+pynisher>=0.6.3
 pyrfr>=0.7,<0.9
 smac>=0.13.1,<0.14
