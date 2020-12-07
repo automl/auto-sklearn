@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Feature Types &#8212; AutoSklearn 0.11.1 documentation</title>
+    <title>Feature Types &#8212; AutoSklearn 0.12.0 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.11.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.12.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -105,12 +105,7 @@
   <div class="row">
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
-<li><a class="reference internal" href="#">Feature Types</a><ul>
-<li><a class="reference internal" href="#data-loading">Data Loading</a></li>
-<li><a class="reference internal" href="#build-and-fit-a-classifier">Build and fit a classifier</a></li>
-<li><a class="reference internal" href="#get-the-score-of-the-final-ensemble">Get the Score of the final ensemble</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#">Feature Types</a></li>
 </ul>
 
         </div>
@@ -129,6 +124,13 @@
 <p>Additionally, you can provide a properly formatted pandas DataFrame, and the feature
 types will be automatically inferred, as demonstrated in
 <a class="reference external" href="example_pandas_train_test.html">Pandas Train and Test inputs</a>.</p>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score 0.8786127167630058
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">import</span> <span class="nn">sklearn.model_selection</span>
@@ -136,72 +138,49 @@ types will be automatically inferred, as demonstrated in
 <span class="kn">import</span> <span class="nn">sklearn.metrics</span>
 
 <span class="kn">import</span> <span class="nn">autosklearn.classification</span>
-</pre></div>
-</div>
-<div class="section" id="data-loading">
-<h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
-<p>Load Australian dataset from <a class="reference external" href="https://www.openml.org/d/40981">https://www.openml.org/d/40981</a></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bunch</span> <span class="o">=</span> <span class="n">data</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">fetch_openml</span><span class="p">(</span><span class="n">data_id</span><span class="o">=</span><span class="mi">40981</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">bunch</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
-<span class="n">X</span> <span class="o">=</span> <span class="n">bunch</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
 
-<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> \
-     <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-<span class="c1"># Auto-sklearn can automatically recognize categorical/numerical data from a pandas</span>
-<span class="c1"># DataFrame. This example highlights how the user can provide the feature types,</span>
-<span class="c1"># when using numpy arrays, as there is no per-column dtype in this case.</span>
-<span class="c1"># feat_type is a list that tags each column from a DataFrame/ numpy array / list</span>
-<span class="c1"># with the case-insensitive string categorical or numerical, accordingly.</span>
-<span class="n">feat_type</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Categorical&#39;</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;category&#39;</span> <span class="k">else</span> <span class="s1">&#39;Numerical&#39;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">bunch</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dtypes</span><span class="p">]</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="build-and-fit-a-classifier">
-<h2>Build and fit a classifier<a class="headerlink" href="#build-and-fit-a-classifier" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">cls</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
-    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-    <span class="c1"># Bellow two flags are provided to speed up calculations</span>
-    <span class="c1"># Not recommended for a real implementation</span>
-    <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-    <span class="n">smac_scenario_args</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;runcount_limit&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-<span class="p">)</span>
-<span class="bp">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">feat_type</span><span class="o">=</span><span class="n">feat_type</span><span class="p">)</span>
-</pre></div>
-</div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[WARNING] [2020-11-30 18:13:19,039:AutoML(1):73543c4a360aa24498c0967fbc2f926b] No valid ensemble was created. Please check the logfile for errors. Default to the best individual estimator:[(1, 2, 0.0)]
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c1">############################################################################</span>
+    <span class="c1"># Data Loading</span>
+    <span class="c1"># ============</span>
+    <span class="c1"># Load Australian dataset from https://www.openml.org/d/40981</span>
+    <span class="n">bunch</span> <span class="o">=</span> <span class="n">data</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">fetch_openml</span><span class="p">(</span><span class="n">data_id</span><span class="o">=</span><span class="mi">40981</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">bunch</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">bunch</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
 
-AutoSklearnClassifier(dask_client=None,
-                      delete_output_folder_after_terminate=True,
-                      delete_tmp_folder_after_terminate=True,
-                      disable_evaluator_output=False, ensemble_nbest=50,
-                      ensemble_size=50, exclude_estimators=None,
-                      exclude_preprocessors=None, get_smac_object_callback=None,
-                      include_estimators=None, include_preprocessors=None,
-                      initial_configurations_via_metalearning=0,
-                      load_models=None, logging_config=None,
-                      max_models_on_disc=50, memory_limit=3072,
-                      metadata_directory=None, metric=None, n_jobs=None,
-                      output_folder=None, per_run_time_limit=3,
-                      resampling_strategy=&#39;holdout&#39;,
-                      resampling_strategy_arguments=None, seed=1,
-                      smac_scenario_args={&#39;runcount_limit&#39;: 1},
-                      time_left_for_this_task=30, tmp_folder=None)
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> \
+         <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Auto-sklearn can automatically recognize categorical/numerical data from a pandas</span>
+    <span class="c1"># DataFrame. This example highlights how the user can provide the feature types,</span>
+    <span class="c1"># when using numpy arrays, as there is no per-column dtype in this case.</span>
+    <span class="c1"># feat_type is a list that tags each column from a DataFrame/ numpy array / list</span>
+    <span class="c1"># with the case-insensitive string categorical or numerical, accordingly.</span>
+    <span class="n">feat_type</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Categorical&#39;</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;category&#39;</span> <span class="k">else</span> <span class="s1">&#39;Numerical&#39;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">bunch</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dtypes</span><span class="p">]</span>
+
+    <span class="c1">############################################################################</span>
+    <span class="c1"># Build and fit a classifier</span>
+    <span class="c1"># ==========================</span>
+
+    <span class="bp">cls</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+        <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="c1"># Bellow two flags are provided to speed up calculations</span>
+        <span class="c1"># Not recommended for a real implementation</span>
+        <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">smac_scenario_args</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;runcount_limit&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="bp">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">feat_type</span><span class="o">=</span><span class="n">feat_type</span><span class="p">)</span>
+
+    <span class="c1">###########################################################################</span>
+    <span class="c1"># Get the Score of the final ensemble</span>
+    <span class="c1"># ===================================</span>
+
+    <span class="n">predictions</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="get-the-score-of-the-final-ensemble">
-<h2>Get the Score of the final ensemble<a class="headerlink" href="#get-the-score-of-the-final-ensemble" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">predictions</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
-</pre></div>
-</div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score 0.8786127167630058
-</pre></div>
-</div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  11.489 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  16.705 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-feature-types-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/5b4bc868a66a5fb8badc81c3e3fc8cb5/example_feature_types.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_feature_types.py</span></code></a></p>
@@ -211,7 +190,6 @@ AutoSklearnClassifier(dask_client=None,
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
-</div>
 </div>
 
 

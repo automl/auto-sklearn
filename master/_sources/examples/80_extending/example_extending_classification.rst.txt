@@ -142,6 +142,38 @@ Create MLP classifier component for auto-sklearn
     print(cs)
 
 
+    if __name__ == "__main__":
+
+        ############################################################################
+        # Data Loading
+        # ============
+
+        X, y = load_breast_cancer(return_X_y=True)
+        X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+        ############################################################################
+        # Fit MLP classifier to the data
+        # ==============================
+
+        clf = autosklearn.classification.AutoSklearnClassifier(
+            time_left_for_this_task=30,
+            per_run_time_limit=10,
+            include_estimators=['MLPClassifier'],
+            # Bellow two flags are provided to speed up calculations
+            # Not recommended for a real implementation
+            initial_configurations_via_metalearning=0,
+            smac_scenario_args={'runcount_limit': 5},
+        )
+        clf.fit(X_train, y_train)
+
+        ############################################################################
+        # Print test accuracy and statistics
+        # ==================================
+
+        y_pred = clf.predict(X_test)
+        print("accuracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
+        print(clf.show_models())
+
 
 
 
@@ -159,121 +191,10 @@ Create MLP classifier component for auto-sklearn
         num_nodes_per_layer, Type: UniformInteger, Range: [16, 216], Default: 32
         solver, Type: Categorical, Choices: {lbfgs, sgd, adam}, Default: adam
 
-
-
-
-
-Data Loading
-============
-
-
-.. code-block:: default
-
-
-    X, y = load_breast_cancer(return_X_y=True)
-    X_train, X_test, y_train, y_test = train_test_split(X, y)
-
-
-
-
-
-
-
-
-Fit MLP classifier to the data
-==============================
-
-
-.. code-block:: default
-
-
-    clf = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=30,
-        per_run_time_limit=10,
-        include_estimators=['MLPClassifier'],
-        # Bellow two flags are provided to speed up calculations
-        # Not recommended for a real implementation
-        initial_configurations_via_metalearning=0,
-        smac_scenario_args={'runcount_limit': 5},
-    )
-    clf.fit(X_train, y_train)
-
-
-
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-
-    AutoSklearnClassifier(dask_client=None,
-                          delete_output_folder_after_terminate=True,
-                          delete_tmp_folder_after_terminate=True,
-                          disable_evaluator_output=False, ensemble_nbest=50,
-                          ensemble_size=50, exclude_estimators=None,
-                          exclude_preprocessors=None, get_smac_object_callback=None,
-                          include_estimators=['MLPClassifier'],
-                          include_preprocessors=None,
-                          initial_configurations_via_metalearning=0,
-                          load_models=None, logging_config=None,
-                          max_models_on_disc=50, memory_limit=3072,
-                          metadata_directory=None, metric=None, n_jobs=None,
-                          output_folder=None, per_run_time_limit=10,
-                          resampling_strategy='holdout',
-                          resampling_strategy_arguments=None, seed=1,
-                          smac_scenario_args={'runcount_limit': 5},
-                          time_left_for_this_task=30, tmp_folder=None)
-
-
-
-Print test accuracy and statistics
-==================================
-
-
-.. code-block:: default
-
-
-    y_pred = clf.predict(X_test)
-    print("accuracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
-    print(clf.show_models())
-
-
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-    accuracy:  0.986013986013986
-    [(0.680000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:MLPClassifier:activation': 'relu', 'classifier:MLPClassifier:alpha': 0.0001, 'classifier:MLPClassifier:hidden_layer_depth': 1, 'classifier:MLPClassifier:num_nodes_per_layer': 32, 'classifier:MLPClassifier:solver': 'adam', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01},
-    dataset_properties={
-      'task': 1,
-      'sparse': False,
-      'multilabel': False,
-      'multiclass': False,
-      'target_type': 'classification',
-      'signed': False})),
-    (0.240000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:__choice__': 'extra_trees_preproc_for_classification', 'classifier:MLPClassifier:activation': 'identity', 'classifier:MLPClassifier:alpha': 0.46285121813270996, 'classifier:MLPClassifier:hidden_layer_depth': 1, 'classifier:MLPClassifier:num_nodes_per_layer': 26, 'classifier:MLPClassifier:solver': 'sgd', 'feature_preprocessor:extra_trees_preproc_for_classification:bootstrap': 'True', 'feature_preprocessor:extra_trees_preproc_for_classification:criterion': 'gini', 'feature_preprocessor:extra_trees_preproc_for_classification:max_depth': 'None', 'feature_preprocessor:extra_trees_preproc_for_classification:max_features': 0.926161785067392, 'feature_preprocessor:extra_trees_preproc_for_classification:max_leaf_nodes': 'None', 'feature_preprocessor:extra_trees_preproc_for_classification:min_impurity_decrease': 0.0, 'feature_preprocessor:extra_trees_preproc_for_classification:min_samples_leaf': 3, 'feature_preprocessor:extra_trees_preproc_for_classification:min_samples_split': 6, 'feature_preprocessor:extra_trees_preproc_for_classification:min_weight_fraction_leaf': 0.0, 'feature_preprocessor:extra_trees_preproc_for_classification:n_estimators': 100},
-    dataset_properties={
-      'task': 1,
-      'sparse': False,
-      'multilabel': False,
-      'multiclass': False,
-      'target_type': 'classification',
-      'signed': False})),
-    (0.080000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:MLPClassifier:activation': 'tanh', 'classifier:MLPClassifier:alpha': 0.7695384684849209, 'classifier:MLPClassifier:hidden_layer_depth': 1, 'classifier:MLPClassifier:num_nodes_per_layer': 88, 'classifier:MLPClassifier:solver': 'lbfgs'},
-    dataset_properties={
-      'task': 1,
-      'sparse': False,
-      'multilabel': False,
-      'multiclass': False,
-      'target_type': 'classification',
-      'signed': False})),
+    accuracy:  0.34965034965034963
+    /opt/hostedtoolcache/Python/3.8.6/x64/lib/python3.8/site-packages/sklearn/base.py:209: FutureWarning: From version 0.24, get_params will raise an AttributeError if a parameter cannot be retrieved as an instance attribute. Previously it would return None.
+      warnings.warn('From version 0.24, get_params will raise an '
+    [(1.000000, MyDummyClassifier(configuration=1, random_state=None)),
     ]
 
 
@@ -282,7 +203,7 @@ Print test accuracy and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  20.870 seconds)
+   **Total running time of the script:** ( 0 minutes  14.054 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_classification.py:

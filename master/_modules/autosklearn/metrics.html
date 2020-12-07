@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>autosklearn.metrics &#8212; AutoSklearn 0.11.1 documentation</title>
+    <title>autosklearn.metrics &#8212; AutoSklearn 0.12.0 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.11.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.12.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -110,8 +110,7 @@
     <div class="body col-md-9 content" role="main">
       
   <h1>Source code for autosklearn.metrics</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
@@ -453,22 +452,20 @@
     <span class="n">prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">metric</span><span class="p">:</span> <span class="n">Scorer</span><span class="p">,</span>
-    <span class="n">all_scoring_functions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">scoring_functions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
     <span class="k">if</span> <span class="n">task_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">TASK_TYPES</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">task_type</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">all_scoring_functions</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">scoring_functions</span><span class="p">:</span>
         <span class="n">score_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">task_type</span> <span class="ow">in</span> <span class="n">REGRESSION_TASKS</span><span class="p">:</span>
             <span class="c1"># TODO put this into the regression metric itself</span>
             <span class="n">cprediction</span> <span class="o">=</span> <span class="n">sanitize_array</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span>
-            <span class="n">metric_dict</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">REGRESSION_METRICS</span><span class="p">)</span>
-            <span class="n">metric_dict</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric</span>
-            <span class="k">for</span> <span class="n">metric_</span> <span class="ow">in</span> <span class="n">REGRESSION_METRICS</span><span class="p">:</span>
-                <span class="n">func</span> <span class="o">=</span> <span class="n">REGRESSION_METRICS</span><span class="p">[</span><span class="n">metric_</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">metric_</span> <span class="ow">in</span> <span class="n">scoring_functions</span><span class="p">:</span>
+
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">score_dict</span><span class="p">[</span><span class="n">func</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">cprediction</span><span class="p">)</span>
+                    <span class="n">score_dict</span><span class="p">[</span><span class="n">metric_</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">cprediction</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                     <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Mean Squared Logarithmic Error cannot be used when &quot;</span> \
@@ -478,16 +475,13 @@
                         <span class="k">raise</span> <span class="n">e</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">metric_dict</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">CLASSIFICATION_METRICS</span><span class="p">)</span>
-            <span class="n">metric_dict</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric</span>
-            <span class="k">for</span> <span class="n">metric_</span> <span class="ow">in</span> <span class="n">metric_dict</span><span class="p">:</span>
-                <span class="n">func</span> <span class="o">=</span> <span class="n">CLASSIFICATION_METRICS</span><span class="p">[</span><span class="n">metric_</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">metric_</span> <span class="ow">in</span> <span class="n">scoring_functions</span><span class="p">:</span>
 
                 <span class="c1"># TODO maybe annotate metrics to define which cases they can</span>
                 <span class="c1"># handle?</span>
 
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">score_dict</span><span class="p">[</span><span class="n">func</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">prediction</span><span class="p">)</span>
+                    <span class="n">score_dict</span><span class="p">[</span><span class="n">metric_</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">prediction</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;multiclass format is not supported&#39;</span><span class="p">:</span>
                         <span class="k">continue</span>
@@ -500,17 +494,28 @@
                         <span class="k">continue</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="n">e</span>
+
+        <span class="k">if</span> <span class="n">metric</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">score_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">score_dict</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_metric_score</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">solution</span><span class="p">,</span> <span class="n">task_type</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">score_dict</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">task_type</span> <span class="ow">in</span> <span class="n">REGRESSION_TASKS</span><span class="p">:</span>
-            <span class="c1"># TODO put this into the regression metric itself</span>
-            <span class="n">cprediction</span> <span class="o">=</span> <span class="n">sanitize_array</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span>
-            <span class="n">score</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">cprediction</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">score</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">prediction</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">get_metric_score</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">solution</span><span class="p">,</span> <span class="n">task_type</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">score</span>
+
+<span class="k">def</span> <span class="nf">get_metric_score</span><span class="p">(</span>
+        <span class="n">metric_</span><span class="p">:</span> <span class="n">Scorer</span><span class="p">,</span>
+        <span class="n">prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">solution</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">task_type</span> <span class="ow">in</span> <span class="n">REGRESSION_TASKS</span><span class="p">:</span>
+        <span class="c1"># TODO put this into the regression metric itself</span>
+        <span class="n">cprediction</span> <span class="o">=</span> <span class="n">sanitize_array</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="n">metric_</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">cprediction</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="n">metric_</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">prediction</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">score</span>
 </pre></div>
 
     </div>

@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Restricting the number of hyperparameters for an existing component &#8212; AutoSklearn 0.11.1 documentation</title>
+    <title>Restricting the number of hyperparameters for an existing component &#8212; AutoSklearn 0.12.0 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.11.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.12.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -105,13 +105,7 @@
   <div class="row">
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
-<li><a class="reference internal" href="#">Restricting the number of hyperparameters for an existing component</a><ul>
-<li><a class="reference internal" href="#subclass-auto-sklearn-s-random-forest-classifier">Subclass auto-sklearn’s random forest classifier</a></li>
-<li><a class="reference internal" href="#data-loading">Data Loading</a></li>
-<li><a class="reference internal" href="#fit-random-forest-classifier-to-the-data">Fit Random forest classifier to the data</a></li>
-<li><a class="reference internal" href="#print-the-configuration-space">Print the configuration space</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#">Restricting the number of hyperparameters for an existing component</a></li>
 </ul>
 
         </div>
@@ -127,160 +121,13 @@
 <p>The following example demonstrates how to replace an existing
 component with a new component, implementing the same classifier,
 but with different hyperparameters .</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ConfigSpace.configuration_space</span> <span class="kn">import</span> <span class="n">ConfigurationSpace</span>
-<span class="kn">from</span> <span class="nn">ConfigSpace.hyperparameters</span> <span class="kn">import</span> <span class="n">UniformIntegerHyperparameter</span><span class="p">,</span> <span class="n">UniformFloatHyperparameter</span>
-
-<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_breast_cancer</span>
-<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
-
-<span class="kn">import</span> <span class="nn">autosklearn.classification</span>
-<span class="kn">import</span> <span class="nn">autosklearn.pipeline.components.classification</span>
-<span class="kn">from</span> <span class="nn">autosklearn.pipeline.components.classification</span> \
-    <span class="kn">import</span> <span class="nn">AutoSklearnClassificationAlgorithm</span>
-<span class="kn">from</span> <span class="nn">autosklearn.pipeline.constants</span> <span class="kn">import</span> <span class="n">DENSE</span><span class="p">,</span> <span class="n">UNSIGNED_DATA</span><span class="p">,</span> <span class="n">PREDICTIONS</span><span class="p">,</span> <span class="n">SPARSE</span>
-</pre></div>
-</div>
-<div class="section" id="subclass-auto-sklearn-s-random-forest-classifier">
-<h2>Subclass auto-sklearn’s random forest classifier<a class="headerlink" href="#subclass-auto-sklearn-s-random-forest-classifier" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># This classifier only has one of the hyperparameter&#39;s of auto-sklearn&#39;s</span>
-<span class="c1"># default parametrization (``max_features``). Instead, it also</span>
-<span class="c1"># tunes the number of estimators (``n_estimators``).</span>
-
-<span class="k">class</span> <span class="nc">CustomRandomForest</span><span class="p">(</span><span class="n">AutoSklearnClassificationAlgorithm</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">n_estimators</span><span class="p">,</span>
-                 <span class="n">max_features</span><span class="p">,</span>
-                 <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span> <span class="o">=</span> <span class="n">n_estimators</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">max_features</span> <span class="o">=</span> <span class="n">max_features</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
-
-    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_features</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;sqrt&quot;</span><span class="p">,</span> <span class="s2">&quot;log2&quot;</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">):</span>
-            <span class="n">max_features</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_features</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">max_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_features</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span>
-            <span class="n">n_estimators</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span><span class="p">,</span>
-            <span class="n">max_features</span><span class="o">=</span><span class="n">max_features</span><span class="p">,</span>
-            <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span>
-
-    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">get_properties</span><span class="p">(</span><span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;shortname&#39;</span><span class="p">:</span> <span class="s1">&#39;RF&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Random Forest Classifier&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;handles_regression&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="s1">&#39;handles_classification&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;handles_multiclass&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;handles_multilabel&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;handles_multioutput&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="s1">&#39;is_deterministic&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;input&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">DENSE</span><span class="p">,</span> <span class="n">SPARSE</span><span class="p">,</span> <span class="n">UNSIGNED_DATA</span><span class="p">),</span>
-                <span class="s1">&#39;output&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">PREDICTIONS</span><span class="p">,)}</span>
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">get_hyperparameter_search_space</span><span class="p">(</span><span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="n">cs</span> <span class="o">=</span> <span class="n">ConfigurationSpace</span><span class="p">()</span>
-
-        <span class="c1"># The maximum number of features used in the forest is calculated as m^max_features, where</span>
-        <span class="c1"># m is the total number of features, and max_features is the hyperparameter specified below.</span>
-        <span class="c1"># The default is 0.5, which yields sqrt(m) features as max_features in the estimator. This</span>
-        <span class="c1"># corresponds with Geurts&#39; heuristic.</span>
-        <span class="n">max_features</span> <span class="o">=</span> <span class="n">UniformFloatHyperparameter</span><span class="p">(</span><span class="s2">&quot;max_features&quot;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-        <span class="n">n_estimators</span> <span class="o">=</span> <span class="n">UniformIntegerHyperparameter</span><span class="p">(</span><span class="s2">&quot;n_estimators&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-
-        <span class="n">cs</span><span class="o">.</span><span class="n">add_hyperparameters</span><span class="p">([</span><span class="n">max_features</span><span class="p">,</span> <span class="n">n_estimators</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">cs</span>
-
-
-<span class="c1"># Add custom random forest classifier component to auto-sklearn.</span>
-<span class="n">autosklearn</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">add_classifier</span><span class="p">(</span><span class="n">CustomRandomForest</span><span class="p">)</span>
-<span class="n">cs</span> <span class="o">=</span> <span class="n">CustomRandomForest</span><span class="o">.</span><span class="n">get_hyperparameter_search_space</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span>
-</pre></div>
-</div>
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Configuration space object:
   Hyperparameters:
     max_features, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.5
     n_estimators, Type: UniformInteger, Range: [10, 1000], Default: 100
-</pre></div>
-</div>
-</div>
-<div class="section" id="data-loading">
-<h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="fit-random-forest-classifier-to-the-data">
-<h2>Fit Random forest classifier to the data<a class="headerlink" href="#fit-random-forest-classifier-to-the-data" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">clf</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
-    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-    <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-    <span class="c1"># Here we exclude auto-sklearn&#39;s default random forest component</span>
-    <span class="n">exclude_estimators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;random_forest&#39;</span><span class="p">],</span>
-    <span class="c1"># Bellow two flags are provided to speed up calculations</span>
-    <span class="c1"># Not recommended for a real implementation</span>
-    <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-    <span class="n">smac_scenario_args</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;runcount_limit&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-<span class="p">)</span>
-<span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
-</pre></div>
-</div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[WARNING] [2020-11-30 18:35:11,802:AutoML(1):76d07ecd29b13558cb6ad4488f116515] No valid ensemble was created. Please check the logfile for errors. Default to the best individual estimator:[(1, 2, 0.0)]
 
-AutoSklearnClassifier(dask_client=None,
-                      delete_output_folder_after_terminate=True,
-                      delete_tmp_folder_after_terminate=True,
-                      disable_evaluator_output=False, ensemble_nbest=50,
-                      ensemble_size=50, exclude_estimators=[&#39;random_forest&#39;],
-                      exclude_preprocessors=None, get_smac_object_callback=None,
-                      include_estimators=None, include_preprocessors=None,
-                      initial_configurations_via_metalearning=0,
-                      load_models=None, logging_config=None,
-                      max_models_on_disc=50, memory_limit=3072,
-                      metadata_directory=None, metric=None, n_jobs=None,
-                      output_folder=None, per_run_time_limit=10,
-                      resampling_strategy=&#39;holdout&#39;,
-                      resampling_strategy_arguments=None, seed=1,
-                      smac_scenario_args={&#39;runcount_limit&#39;: 1},
-                      time_left_for_this_task=30, tmp_folder=None)
-</pre></div>
-</div>
-</div>
-<div class="section" id="print-the-configuration-space">
-<h2>Print the configuration space<a class="headerlink" href="#print-the-configuration-space" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Observe that this configuration space only contains our custom random</span>
-<span class="c1"># forest, but not auto-sklearn&#39;s ``random_forest``</span>
-<span class="n">cs</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">get_configuration_space</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
-<span class="k">assert</span> <span class="s1">&#39;random_forest&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span>
-</pre></div>
-</div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Configuration space object:
+Configuration space object:
   Hyperparameters:
     balancing:strategy, Type: Categorical, Choices: {none, weighting}, Default: none
     classifier:CustomRandomForest:max_features, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.5
@@ -309,7 +156,7 @@ AutoSklearnClassifier(dask_client=None,
     classifier:extra_trees:min_samples_leaf, Type: UniformInteger, Range: [1, 20], Default: 1
     classifier:extra_trees:min_samples_split, Type: UniformInteger, Range: [2, 20], Default: 2
     classifier:extra_trees:min_weight_fraction_leaf, Type: Constant, Value: 0.0
-    classifier:gradient_boosting:early_stop, Type: Categorical, Choices: {off, valid}, Default: off
+    classifier:gradient_boosting:early_stop, Type: Categorical, Choices: {off, valid, train}, Default: off
     classifier:gradient_boosting:l2_regularization, Type: UniformFloat, Range: [1e-10, 1.0], Default: 1e-10, on log-scale
     classifier:gradient_boosting:learning_rate, Type: UniformFloat, Range: [0.01, 1.0], Default: 0.1, on log-scale
     classifier:gradient_boosting:loss, Type: Constant, Value: auto
@@ -324,7 +171,6 @@ AutoSklearnClassifier(dask_client=None,
     classifier:k_nearest_neighbors:n_neighbors, Type: UniformInteger, Range: [1, 100], Default: 1, on log-scale
     classifier:k_nearest_neighbors:p, Type: Categorical, Choices: {1, 2}, Default: 2
     classifier:k_nearest_neighbors:weights, Type: Categorical, Choices: {uniform, distance}, Default: uniform
-    classifier:lda:n_components, Type: UniformInteger, Range: [1, 250], Default: 10
     classifier:lda:shrinkage, Type: Categorical, Choices: {None, auto, manual}, Default: None
     classifier:lda:shrinkage_factor, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.5
     classifier:lda:tol, Type: UniformFloat, Range: [1e-05, 0.1], Default: 0.0001, on log-scale
@@ -372,7 +218,6 @@ AutoSklearnClassifier(dask_client=None,
     data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution, Type: Categorical, Choices: {uniform, normal}, Default: uniform
     data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max, Type: UniformFloat, Range: [0.7, 0.999], Default: 0.75
     data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min, Type: UniformFloat, Range: [0.001, 0.3], Default: 0.25
-    feature_preprocessor:LDA:n_components, Type: UniformInteger, Range: [1, 29], Default: 10
     feature_preprocessor:LDA:shrinkage, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.5
     feature_preprocessor:LDA:solver, Type: Categorical, Choices: {svd, lsqr, eigen}, Default: svd
     feature_preprocessor:LDA:tol, Type: UniformFloat, Range: [0.0001, 1.0], Default: 0.0001
@@ -466,14 +311,13 @@ AutoSklearnClassifier(dask_client=None,
     classifier:gradient_boosting:max_depth | classifier:__choice__ == &#39;gradient_boosting&#39;
     classifier:gradient_boosting:max_leaf_nodes | classifier:__choice__ == &#39;gradient_boosting&#39;
     classifier:gradient_boosting:min_samples_leaf | classifier:__choice__ == &#39;gradient_boosting&#39;
-    classifier:gradient_boosting:n_iter_no_change | classifier:gradient_boosting:early_stop in {&#39;valid&#39;}
+    classifier:gradient_boosting:n_iter_no_change | classifier:gradient_boosting:early_stop in {&#39;valid&#39;, &#39;train&#39;}
     classifier:gradient_boosting:scoring | classifier:__choice__ == &#39;gradient_boosting&#39;
     classifier:gradient_boosting:tol | classifier:__choice__ == &#39;gradient_boosting&#39;
     classifier:gradient_boosting:validation_fraction | classifier:gradient_boosting:early_stop == &#39;valid&#39;
     classifier:k_nearest_neighbors:n_neighbors | classifier:__choice__ == &#39;k_nearest_neighbors&#39;
     classifier:k_nearest_neighbors:p | classifier:__choice__ == &#39;k_nearest_neighbors&#39;
     classifier:k_nearest_neighbors:weights | classifier:__choice__ == &#39;k_nearest_neighbors&#39;
-    classifier:lda:n_components | classifier:__choice__ == &#39;lda&#39;
     classifier:lda:shrinkage | classifier:__choice__ == &#39;lda&#39;
     classifier:lda:shrinkage_factor | classifier:lda:shrinkage == &#39;manual&#39;
     classifier:lda:tol | classifier:__choice__ == &#39;lda&#39;
@@ -517,7 +361,6 @@ AutoSklearnClassifier(dask_client=None,
     data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution | data_preprocessing:numerical_transformer:rescaling:__choice__ == &#39;quantile_transformer&#39;
     data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max | data_preprocessing:numerical_transformer:rescaling:__choice__ == &#39;robust_scaler&#39;
     data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min | data_preprocessing:numerical_transformer:rescaling:__choice__ == &#39;robust_scaler&#39;
-    feature_preprocessor:LDA:n_components | feature_preprocessor:__choice__ == &#39;LDA&#39;
     feature_preprocessor:LDA:shrinkage | feature_preprocessor:LDA:solver in {&#39;lsqr&#39;, &#39;eigen&#39;}
     feature_preprocessor:LDA:solver | feature_preprocessor:__choice__ == &#39;LDA&#39;
     feature_preprocessor:LDA:tol | feature_preprocessor:__choice__ == &#39;LDA&#39;
@@ -629,7 +472,137 @@ AutoSklearnClassifier(dask_client=None,
     (Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.979 seconds)</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ConfigSpace.configuration_space</span> <span class="kn">import</span> <span class="n">ConfigurationSpace</span>
+<span class="kn">from</span> <span class="nn">ConfigSpace.hyperparameters</span> <span class="kn">import</span> <span class="n">UniformIntegerHyperparameter</span><span class="p">,</span> <span class="n">UniformFloatHyperparameter</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_breast_cancer</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="kn">import</span> <span class="nn">autosklearn.classification</span>
+<span class="kn">import</span> <span class="nn">autosklearn.pipeline.components.classification</span>
+<span class="kn">from</span> <span class="nn">autosklearn.pipeline.components.classification</span> \
+    <span class="kn">import</span> <span class="nn">AutoSklearnClassificationAlgorithm</span>
+<span class="kn">from</span> <span class="nn">autosklearn.pipeline.constants</span> <span class="kn">import</span> <span class="n">DENSE</span><span class="p">,</span> <span class="n">UNSIGNED_DATA</span><span class="p">,</span> <span class="n">PREDICTIONS</span><span class="p">,</span> <span class="n">SPARSE</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c1">############################################################################</span>
+    <span class="c1"># Subclass auto-sklearn&#39;s random forest classifier</span>
+    <span class="c1"># ================================================</span>
+
+    <span class="c1"># This classifier only has one of the hyperparameter&#39;s of auto-sklearn&#39;s</span>
+    <span class="c1"># default parametrization (``max_features``). Instead, it also</span>
+    <span class="c1"># tunes the number of estimators (``n_estimators``).</span>
+
+    <span class="k">class</span> <span class="nc">CustomRandomForest</span><span class="p">(</span><span class="n">AutoSklearnClassificationAlgorithm</span><span class="p">):</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                     <span class="n">n_estimators</span><span class="p">,</span>
+                     <span class="n">max_features</span><span class="p">,</span>
+                     <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span> <span class="o">=</span> <span class="n">n_estimators</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_features</span> <span class="o">=</span> <span class="n">max_features</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+
+        <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+            <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_features</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;sqrt&quot;</span><span class="p">,</span> <span class="s2">&quot;log2&quot;</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">):</span>
+                <span class="n">max_features</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_features</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">max_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_features</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span>
+                <span class="n">n_estimators</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span><span class="p">,</span>
+                <span class="n">max_features</span><span class="o">=</span><span class="n">max_features</span><span class="p">,</span>
+                <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+        <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="nd">@staticmethod</span>
+        <span class="k">def</span> <span class="nf">get_properties</span><span class="p">(</span><span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;shortname&#39;</span><span class="p">:</span> <span class="s1">&#39;RF&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Random Forest Classifier&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;handles_regression&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s1">&#39;handles_classification&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s1">&#39;handles_multiclass&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s1">&#39;handles_multilabel&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s1">&#39;handles_multioutput&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s1">&#39;is_deterministic&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s1">&#39;input&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">DENSE</span><span class="p">,</span> <span class="n">SPARSE</span><span class="p">,</span> <span class="n">UNSIGNED_DATA</span><span class="p">),</span>
+                    <span class="s1">&#39;output&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">PREDICTIONS</span><span class="p">,)}</span>
+
+        <span class="nd">@staticmethod</span>
+        <span class="k">def</span> <span class="nf">get_hyperparameter_search_space</span><span class="p">(</span><span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">cs</span> <span class="o">=</span> <span class="n">ConfigurationSpace</span><span class="p">()</span>
+
+            <span class="c1"># The maximum number of features used in the forest is calculated as m^max_features, where</span>
+            <span class="c1"># m is the total number of features, and max_features is the hyperparameter specified below.</span>
+            <span class="c1"># The default is 0.5, which yields sqrt(m) features as max_features in the estimator. This</span>
+            <span class="c1"># corresponds with Geurts&#39; heuristic.</span>
+            <span class="n">max_features</span> <span class="o">=</span> <span class="n">UniformFloatHyperparameter</span><span class="p">(</span><span class="s2">&quot;max_features&quot;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">n_estimators</span> <span class="o">=</span> <span class="n">UniformIntegerHyperparameter</span><span class="p">(</span><span class="s2">&quot;n_estimators&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+            <span class="n">cs</span><span class="o">.</span><span class="n">add_hyperparameters</span><span class="p">([</span><span class="n">max_features</span><span class="p">,</span> <span class="n">n_estimators</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">cs</span>
+
+
+    <span class="c1"># Add custom random forest classifier component to auto-sklearn.</span>
+    <span class="n">autosklearn</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">add_classifier</span><span class="p">(</span><span class="n">CustomRandomForest</span><span class="p">)</span>
+    <span class="n">cs</span> <span class="o">=</span> <span class="n">CustomRandomForest</span><span class="o">.</span><span class="n">get_hyperparameter_search_space</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span>
+
+    <span class="c1">############################################################################</span>
+    <span class="c1"># Data Loading</span>
+    <span class="c1"># ============</span>
+
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+    <span class="c1">############################################################################</span>
+    <span class="c1"># Fit Random forest classifier to the data</span>
+    <span class="c1"># ========================================</span>
+
+    <span class="n">clf</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+        <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="c1"># Here we exclude auto-sklearn&#39;s default random forest component</span>
+        <span class="n">exclude_estimators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;random_forest&#39;</span><span class="p">],</span>
+        <span class="c1"># Bellow two flags are provided to speed up calculations</span>
+        <span class="c1"># Not recommended for a real implementation</span>
+        <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">smac_scenario_args</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;runcount_limit&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+    <span class="c1">############################################################################</span>
+    <span class="c1"># Print the configuration space</span>
+    <span class="c1"># =============================</span>
+
+    <span class="c1"># Observe that this configuration space only contains our custom random</span>
+    <span class="c1"># forest, but not auto-sklearn&#39;s ``random_forest``</span>
+    <span class="n">cs</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">get_configuration_space</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s1">&#39;random_forest&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  7.065 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-restrict-number-of-hyperparameters-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/3188e6424499bf3242cdcdfc032bf614/example_restrict_number_of_hyperparameters.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_restrict_number_of_hyperparameters.py</span></code></a></p>
@@ -639,7 +612,6 @@ AutoSklearnClassifier(dask_client=None,
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
-</div>
 </div>
 
 
