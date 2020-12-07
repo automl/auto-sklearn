@@ -185,7 +185,7 @@ class MLPRegressor(
         num_nodes_per_layer = UniformIntegerHyperparameter(name="num_nodes_per_layer",
                                                            lower=16, upper=264, default_value=32,
                                                            log=True)
-        activation = CategoricalHyperparameter(name="activation", choices=['tanh', 'logistic'],
+        activation = CategoricalHyperparameter(name="activation", choices=['tanh', 'relu'],
                                                default_value='tanh')
         alpha = UniformFloatHyperparameter(name="alpha", lower=1e-7, upper=1e-1, default_value=1e-4,
                                            log=True)
