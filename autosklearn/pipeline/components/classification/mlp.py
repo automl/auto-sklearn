@@ -66,7 +66,7 @@ class MLPClassifier(
             self.estimator = None
 
         if self.estimator is None:
-            self.fully_fit_ = False
+            self._fully_fit = False
 
             self.max_iter = int(self.max_iter)
             self.hidden_layer_depth = int(self.hidden_layer_depth)
@@ -144,17 +144,17 @@ class MLPClassifier(
         self.estimator.fit(X, y)
         if self.estimator.n_iter_ >= self.max_iter or \
                 self.estimator._no_improvement_count > self.n_iter_no_change:
-            self.fully_fit_ = True
+            self._fully_fit = True
 
         return self
 
     def configuration_fully_fitted(self):
         if self.estimator is None:
             return False
-        elif not hasattr(self, 'fully_fit_'):
+        elif not hasattr(self, '_fully_fit'):
             return False
         else:
-            return self.fully_fit_
+            return self._fully_fit
 
     def predict(self, X):
         if self.estimator is None:
