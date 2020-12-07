@@ -11,7 +11,7 @@ class MLPComponentTest(BaseRegressionComponentTest):
 
     res = dict()
     res["default_boston"] = 0.3622815479003514
-    res["default_boston_places"] = 5
+    res["default_boston_places"] = 4
     res["boston_n_calls"] = 8
     res["boston_iterative_n_iter"] = 161
     res["default_boston_iterative"] = res["default_boston"]
