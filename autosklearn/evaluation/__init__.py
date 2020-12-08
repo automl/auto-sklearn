@@ -180,7 +180,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.pynisher_context = pynisher_context
         self.logger = get_named_client_logger(
             name="TAE",
-            output_dir=self.backend.temporary_directory,
             port=self.port,
         )
 
@@ -272,7 +271,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         else:
             logger = get_named_client_logger(
                 name="pynisher",
-                output_dir=self.backend.temporary_directory,
                 port=self.port,
             )
         arguments = dict(

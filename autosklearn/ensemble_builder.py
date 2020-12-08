@@ -165,7 +165,6 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         logger = get_named_client_logger(
             name='EnsembleBuilder',
             port=self.logger_port,
-            output_dir=self.backend.temporary_directory,
         )
 
         # First test for termination conditions
@@ -480,7 +479,6 @@ class EnsembleBuilder(object):
         self.logger = get_named_client_logger(
             name='EnsembleBuilder',
             port=self.logger_port,
-            output_dir=self.backend.temporary_directory,
         )
 
         if ensemble_nbest == 1:
@@ -586,7 +584,6 @@ class EnsembleBuilder(object):
         self.logger = get_named_client_logger(
             name='EnsembleBuilder',
             port=self.logger_port,
-            output_dir=self.backend.temporary_directory,
         )
 
         process_start_time = time.time()
@@ -663,7 +660,6 @@ class EnsembleBuilder(object):
         self.logger = get_named_client_logger(
             name='EnsembleBuilder',
             port=self.logger_port,
-            output_dir=self.backend.temporary_directory,
         )
 
         self.start_time = time.time()

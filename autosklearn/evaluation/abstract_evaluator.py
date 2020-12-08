@@ -197,7 +197,6 @@ class AbstractEvaluator(object):
             self.logger = get_named_client_logger(
                 name=logger_name,
                 port=self.port,
-                output_dir=self.backend.temporary_directory,
             )
 
         self.Y_optimization = None

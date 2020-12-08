@@ -43,9 +43,9 @@ from autosklearn.metrics import calculate_score
 from autosklearn.util.backend import Backend
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import (
-    get_logger,
     setup_logger,
     start_log_server,
+    get_named_client_logger,
 )
 from autosklearn.util import pipeline, RE_PATTERN
 from autosklearn.ensemble_builder import EnsembleBuilderManager
@@ -316,7 +316,11 @@ class AutoML(BaseEstimator):
 
         self._logger_port = int(port.value)
 
-        return get_logger(logger_name)
+        return get_named_client_logger(
+            name=logger_name,
+            host='localhost',
+            port=self._logger_port,
+        )
 
     def _clean_logger(self):
         if not hasattr(self, 'stop_logging_server') or self.stop_logging_server is None:
@@ -432,6 +436,12 @@ class AutoML(BaseEstimator):
         only_return_configuration_space: Optional[bool] = False,
         load_models: bool = True,
     ):
+        if dataset_name is None:
+            dataset_name = hash_array_or_matrix(X)
+        # The first thing we have to do is create the logger to update the backend
+        self._logger = self._get_logger(dataset_name)
+        self._backend.setup_logger(self._logger_port)
+
         self._backend.save_start_time(self._seed)
         self._stopwatch = StopWatch()
 
@@ -462,10 +472,6 @@ class AutoML(BaseEstimator):
         if not isinstance(self._metric, Scorer):
             raise ValueError('Metric must be instance of '
                              'autosklearn.metrics.Scorer.')
-
-        if dataset_name is None:
-            dataset_name = hash_array_or_matrix(X)
-        self._logger = self._get_logger(dataset_name)
 
         # If no dask client was provided, we create one, so that we can
         # start a ensemble process in parallel to smbo optimize

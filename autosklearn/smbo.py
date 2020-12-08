@@ -278,7 +278,6 @@ class AutoMLSMBO(object):
         else:
             self.logger = get_named_client_logger(
                 name=logger_name,
-                output_dir=self.backend.temporary_directory,
                 port=self.port,
             )
 
