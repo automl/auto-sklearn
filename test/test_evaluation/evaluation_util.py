@@ -1,5 +1,6 @@
 import functools
 import traceback
+import tempfile
 import unittest
 
 import numpy as np
@@ -9,6 +10,7 @@ from sklearn import preprocessing
 import sklearn.model_selection
 
 
+from autosklearn.util.backend import Backend
 from autosklearn.constants import \
     MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION, BINARY_CLASSIFICATION, REGRESSION
 from autosklearn.util.data import convert_to_bin
@@ -23,6 +25,16 @@ SCORER_LIST = [accuracy, balanced_accuracy, f1_macro, f1_micro, f1_weighted, log
                recall_micro, recall_weighted]
 
 N_TEST_RUNS = 5
+
+
+def get_evaluation_backend():
+    backend_mock = unittest.mock.Mock(spec=Backend)
+    backend_mock.temporary_directory = tempfile.gettempdir()
+
+    # Assign a default data
+    backend_mock.load_datamanager.return_value = get_multiclass_classification_datamanager()
+
+    return backend_mock
 
 
 class Dummy(object):

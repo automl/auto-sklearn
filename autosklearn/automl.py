@@ -228,6 +228,9 @@ class AutoML(BaseEstimator):
             raise ValueError("per_run_time_limit not of type integer, but %s" %
                              str(type(self._per_run_time_limit)))
 
+        # By default try to use the TCP logging port or get a new port
+        self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
+
         # After assigning and checking variables...
         # self._backend = Backend(self._output_dir, self._tmp_dir)
 
@@ -462,8 +465,6 @@ class AutoML(BaseEstimator):
 
         if dataset_name is None:
             dataset_name = hash_array_or_matrix(X)
-        # By default try to use the TCP logging port or get a new port
-        self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
         self._logger = self._get_logger(dataset_name)
 
         # If no dask client was provided, we create one, so that we can
