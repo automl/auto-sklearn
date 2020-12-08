@@ -25,7 +25,7 @@ class TestMetadataGeneration(unittest.TestCase):
 
     def test_metadata_generation(self):
 
-        regression_task_id = 5022
+        regression_task_id = 360029
         regression_dataset_name = 'SWD'.lower()
         classification_task_id = 75222
         classification_dataset_name = 'analcatdata_halloffame'.lower()
