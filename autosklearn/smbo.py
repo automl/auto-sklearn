@@ -1,5 +1,6 @@
 import copy
 import json
+import logging
 import os
 import time
 import traceback
@@ -27,7 +28,7 @@ from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.metalearning.mismbo import suggest_via_metalearning
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
-from autosklearn.util.logging_ import get_logger
+from autosklearn.util.logging_ import get_named_client_logger
 from autosklearn.metalearning.metalearning.meta_base import MetaBase
 from autosklearn.metalearning.metafeatures.metafeatures import \
     calculate_all_metafeatures_with_labels, calculate_all_metafeatures_encoded_labels
@@ -85,7 +86,7 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
         result = calculate_all_metafeatures_with_labels(
             x_train, y_train, categorical=categorical,
             dataset_name=basename,
-            dont_calculate=EXCLUDE_META_FEATURES, )
+            dont_calculate=EXCLUDE_META_FEATURES, logger=logger)
         for key in list(result.metafeature_values.keys()):
             if result.metafeature_values[key].type_ != 'METAFEATURE':
                 del result.metafeature_values[key]
@@ -112,7 +113,7 @@ def _calculate_metafeatures_encoded(data_feat_type, basename, x_train, y_train, 
 
     result = calculate_all_metafeatures_encoded_labels(
         x_train, y_train, categorical=categorical,
-        dataset_name=basename, dont_calculate=EXCLUDE_META_FEATURES)
+        dataset_name=basename, dont_calculate=EXCLUDE_META_FEATURES, logger=logger)
     for key in list(result.metafeature_values.keys()):
         if result.metafeature_values[key].type_ != 'METAFEATURE':
             del result.metafeature_values[key]
@@ -136,7 +137,8 @@ def _get_metalearning_configurations(meta_base, basename, metric,
             meta_base, basename, metric,
             task,
             is_sparse == 1,
-            initial_configurations_via_metalearning
+            initial_configurations_via_metalearning,
+            logger=logger,
         )
     except Exception as e:
         logger.error("Error getting metalearning configurations!")
@@ -271,7 +273,14 @@ class AutoMLSMBO(object):
 
         dataset_name_ = "" if dataset_name is None else dataset_name
         logger_name = '%s(%d):%s' % (self.__class__.__name__, self.seed, ":" + dataset_name_)
-        self.logger = get_logger(logger_name)
+        if port is None:
+            self.logger = logging.getLogger(__name__)
+        else:
+            self.logger = get_named_client_logger(
+                name=logger_name,
+                output_dir=self.backend.temporary_directory,
+                port=self.port,
+            )
 
     def _send_warnings_to_log(self, message, category, filename, lineno,
                               file=None, line=None):
@@ -573,7 +582,7 @@ class AutoMLSMBO(object):
 
                 self.logger.info('Metadata directory: %s',
                                  self.metadata_directory)
-                meta_base = MetaBase(self.config_space, self.metadata_directory)
+                meta_base = MetaBase(self.config_space, self.metadata_directory, self.logger)
 
                 metafeature_calculation_time_limit = int(
                     self.total_walltime_limit / 4)

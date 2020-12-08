@@ -1,6 +1,5 @@
 import pandas as pd
 
-from ...util.logging_ import get_logger
 from ..input import aslib_simple
 from ..metafeatures.metafeature import DatasetMetafeatures
 from ConfigSpace.configuration_space import Configuration
@@ -24,7 +23,7 @@ class Instance(object):
 
 
 class MetaBase(object):
-    def __init__(self, configuration_space, aslib_directory):
+    def __init__(self, configuration_space, aslib_directory, logger):
         """Container for dataset metadata and experiment results.
 
         Constructor arguments:
@@ -32,7 +31,7 @@ class MetaBase(object):
         - aslib_directory: directory with a problem instance in the aslib format
         """
 
-        self.logger = get_logger(__name__)
+        self.logger = logger
 
         self.configuration_space = configuration_space
         self.aslib_directory = aslib_directory
@@ -60,7 +59,7 @@ class MetaBase(object):
             metafeatures = pd.Series(name=name, data=data_)
         if name.lower() in self.metafeatures.index:
             self.logger.warning(
-                'Dataset %s already in meta-data. Removing occurence.', name
+                'Dataset %s already in meta-data. Removing occurence.', name.lower()
             )
             self.metafeatures.drop(name.lower(), inplace=True)
         self.metafeatures = self.metafeatures.append(metafeatures)

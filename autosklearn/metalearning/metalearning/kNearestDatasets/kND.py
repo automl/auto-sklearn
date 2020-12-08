@@ -5,12 +5,10 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import MinMaxScaler
 import sklearn.utils
 
-from ....util.logging_ import get_logger
-
 
 class KNearestDatasets(object):
-    def __init__(self, metric='l1', random_state=None, metric_params=None):
-        self.logger = get_logger(__name__)
+    def __init__(self, logger, metric='l1', random_state=None, metric_params=None):
+        self.logger = logger
 
         self.metric = metric
         self.model = None

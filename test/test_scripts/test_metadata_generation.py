@@ -4,6 +4,7 @@ import random
 import shutil
 import socket
 import subprocess
+import sys
 import unittest
 
 import arff
@@ -23,6 +24,7 @@ class TestMetadataGeneration(unittest.TestCase):
         for dirpath, dirnames, filenames in os.walk(self.working_directory):
             print(dirpath, dirnames, filenames)
 
+    @unittest.skipIf(sys.version_info < (3, 7), reason="requires python3.7 or higher")
     def test_metadata_generation(self):
 
         regression_task_id = 5022

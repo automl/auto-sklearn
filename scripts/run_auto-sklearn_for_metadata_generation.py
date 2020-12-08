@@ -140,6 +140,7 @@ if __name__ == '__main__':
             stats.finished_ta_runs += 1
             memory_lim = memory_limit_factor * automl_arguments['memory_limit']
             ta = ExecuteTaFuncWithQueue(backend=automl.automl_._backend,
+                                        port=None,
                                         autosklearn_seed=seed,
                                         resampling_strategy='test',
                                         memory_limit=memory_lim,
