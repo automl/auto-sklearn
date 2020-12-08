@@ -550,6 +550,7 @@ def testLimit(ensemble_backend):
             unittest.mock.patch('logging.config.dictConfig') as _, \
             unittest.mock.patch('os.path.getmtime') as mtime:
         logger_mock = unittest.mock.Mock()
+        logger_mock.handlers = []
         get_logger_mock.return_value = logger_mock
         mtime.side_effect = mtime_mock
 
