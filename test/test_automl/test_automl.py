@@ -518,6 +518,13 @@ def test_fail_if_dummy_prediction_fails(ta_run_mock, backend, dask_client):
 @unittest.mock.patch('autosklearn.smbo.AutoMLSMBO.run_smbo')
 def test_exceptions_inside_log_in_smbo(smbo_run_mock, backend, dask_client):
 
+    # Below importing and shutdown is a workaround, to make sure
+    # we reset the port to collect messages. Randomly, when running
+    # this test with multiple other test at the same time causes this
+    # test to fail. This resets the singletons of the logging class
+    import logging
+    logging.shutdown()
+
     automl = autosklearn.automl.AutoML(
         backend,
         20,
@@ -546,11 +553,13 @@ def test_exceptions_inside_log_in_smbo(smbo_run_mock, backend, dask_client):
         )
 
     # make sure that the logfile was created
+    import shutil
+    shutil.copytree(backend.temporary_directory, '/tmp/trydebug')
     logger_name = 'AutoML(%d):%s' % (1, dataset_name)
     logfile = os.path.join(backend.temporary_directory, logger_name + '.log')
-    assert os.path.exists(logfile)
+    assert os.path.exists(logfile), automl._clean_logger()
     with open(logfile) as f:
-        assert message in f.read()
+        assert message in f.read(), automl._clean_logger()
 
     # Speed up the closing after forced crash
     automl._clean_logger()
