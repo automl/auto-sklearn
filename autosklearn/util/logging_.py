@@ -157,7 +157,7 @@ def _get_named_client_logger(
 
     try:
         ports = [handler.port for handler in local_logger.handlers]
-    except:
+    except AttributeError:
         # We do not want to log twice but adding multiple times the same
         # handler. So we check to what ports we communicate to
         # We can prevent errors with streamers not having a port with this try
