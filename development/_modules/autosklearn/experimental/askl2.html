@@ -115,7 +115,7 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">dask.distributed</span>
 
@@ -283,7 +283,123 @@
         <span class="n">smac_scenario_args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">logging_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">metric</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">scoring_functions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">load_models</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        time_left_for_this_task : int, optional (default=3600)</span>
+<span class="sd">            Time limit in seconds for the search of appropriate</span>
+<span class="sd">            models. By increasing this value, *auto-sklearn* has a higher</span>
+<span class="sd">            chance of finding better models.</span>
+
+<span class="sd">        ensemble_size : int, optional (default=50)</span>
+<span class="sd">            Number of models added to the ensemble built by *Ensemble</span>
+<span class="sd">            selection from libraries of models*. Models are drawn with</span>
+<span class="sd">            replacement.</span>
+
+<span class="sd">        ensemble_nbest : int, optional (default=50)</span>
+<span class="sd">            Only consider the ``ensemble_nbest`` models when building an</span>
+<span class="sd">            ensemble.</span>
+
+<span class="sd">        max_models_on_disc: int, optional (default=50),</span>
+<span class="sd">            Defines the maximum number of models that are kept in the disc.</span>
+<span class="sd">            The additional number of models are permanently deleted. Due to the</span>
+<span class="sd">            nature of this variable, it sets the upper limit on how many models</span>
+<span class="sd">            can be used for an ensemble.</span>
+<span class="sd">            It must be an integer greater or equal than 1.</span>
+<span class="sd">            If set to None, all models are kept on the disc.</span>
+
+<span class="sd">        seed : int, optional (default=1)</span>
+<span class="sd">            Used to seed SMAC. Will determine the output file names.</span>
+
+<span class="sd">        memory_limit : int, optional (3072)</span>
+<span class="sd">            Memory limit in MB for the machine learning algorithm.</span>
+<span class="sd">            `auto-sklearn` will stop fitting the machine learning algorithm if</span>
+<span class="sd">            it tries to allocate more than `memory_limit` MB.</span>
+<span class="sd">            If None is provided, no memory limit is set.</span>
+<span class="sd">            In case of multi-processing, `memory_limit` will be per job.</span>
+<span class="sd">            This memory limit also applies to the ensemble creation process.</span>
+
+<span class="sd">        tmp_folder : string, optional (None)</span>
+<span class="sd">            folder to store configuration output and log files, if ``None``</span>
+<span class="sd">            automatically use ``/tmp/autosklearn_tmp_$pid_$random_number``</span>
+
+<span class="sd">        output_folder : string, optional (None)</span>
+<span class="sd">            folder to store predictions for optional test set, if ``None``</span>
+<span class="sd">            no output will be generated</span>
+
+<span class="sd">        delete_tmp_folder_after_terminate: string, optional (True)</span>
+<span class="sd">            remove tmp_folder, when finished. If tmp_folder is None</span>
+<span class="sd">            tmp_dir will always be deleted</span>
+
+<span class="sd">        delete_output_folder_after_terminate: bool, optional (True)</span>
+<span class="sd">            remove output_folder, when finished. If output_folder is None</span>
+<span class="sd">            output_dir will always be deleted</span>
+
+<span class="sd">        n_jobs : int, optional, experimental</span>
+<span class="sd">            The number of jobs to run in parallel for ``fit()``. ``-1`` means</span>
+<span class="sd">            using all processors. By default, Auto-sklearn uses a single core</span>
+<span class="sd">            for fitting the machine learning model and a single core for fitting</span>
+<span class="sd">            an ensemble. Ensemble building is not affected by ``n_jobs`` but</span>
+<span class="sd">            can be controlled by the number of models in the ensemble. In</span>
+<span class="sd">            contrast to most scikit-learn models, ``n_jobs`` given in the</span>
+<span class="sd">            constructor is not applied to the ``predict()`` method. If</span>
+<span class="sd">            ``dask_client`` is None, a new dask client is created.</span>
+
+<span class="sd">        dask_client : dask.distributed.Client, optional</span>
+<span class="sd">            User-created dask client, can be used to start a dask cluster and then</span>
+<span class="sd">            attach auto-sklearn to it.</span>
+
+<span class="sd">        disable_evaluator_output: bool or list, optional (False)</span>
+<span class="sd">            If True, disable model and prediction output. Cannot be used</span>
+<span class="sd">            together with ensemble building. ``predict()`` cannot be used when</span>
+<span class="sd">            setting this True. Can also be used as a list to pass more</span>
+<span class="sd">            fine-grained information on what to save. Allowed elements in the</span>
+<span class="sd">            list are:</span>
+
+<span class="sd">            * ``&#39;y_optimization&#39;`` : do not save the predictions for the</span>
+<span class="sd">              optimization/validation set, which would later on be used to build</span>
+<span class="sd">              an ensemble.</span>
+<span class="sd">            * ``&#39;model&#39;`` : do not save any model files</span>
+
+<span class="sd">        smac_scenario_args : dict, optional (None)</span>
+<span class="sd">            Additional arguments inserted into the scenario of SMAC. See the</span>
+<span class="sd">            `SMAC documentation </span>
+<span class="sd">            &lt;https://automl.github.io/SMAC3/master/options.html?highlight=scenario</span>
+<span class="sd">            #scenario&gt;`_</span>
+<span class="sd">            for a list of available arguments.</span>
+
+<span class="sd">        logging_config : dict, optional (None)</span>
+<span class="sd">            dictionary object specifying the logger configuration. If None,</span>
+<span class="sd">            the default logging.yaml file is used, which can be found in</span>
+<span class="sd">            the directory ``util/logging.yaml`` relative to the installation.</span>
+
+<span class="sd">        metric : Scorer, optional (None)</span>
+<span class="sd">            An instance of :class:`autosklearn.metrics.Scorer` as created by</span>
+<span class="sd">            :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in</span>
+<span class="sd">            Metrics`_.</span>
+<span class="sd">            If None is provided, a default metric is selected depending on the task.</span>
+
+<span class="sd">        scoring_functions : List[Scorer], optional (None)</span>
+<span class="sd">            List of scorers which will be calculated for each pipeline and results will be </span>
+<span class="sd">            available via ``cv_results``</span>
+
+<span class="sd">        load_models : bool, optional (True)</span>
+<span class="sd">            Whether to load the models after fitting Auto-sklearn.</span>
+
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        cv_results\_ : dict of numpy (masked) ndarrays</span>
+<span class="sd">            A dict with keys as column headers and values as columns, that can be</span>
+<span class="sd">            imported into a pandas ``DataFrame``.</span>
+
+<span class="sd">            Not all keys returned by scikit-learn are supported yet.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa (links are too long)</span>
 
         <span class="n">include_estimators</span> <span class="o">=</span> <span class="p">[</span>
             <span class="s1">&#39;extra_trees&#39;</span><span class="p">,</span> <span class="s1">&#39;passive_aggressive&#39;</span><span class="p">,</span> <span class="s1">&#39;random_forest&#39;</span><span class="p">,</span> <span class="s1">&#39;sgd&#39;</span><span class="p">,</span> <span class="s1">&#39;gradient_boosting&#39;</span><span class="p">,</span>
@@ -315,6 +431,8 @@
             <span class="n">logging_config</span><span class="o">=</span><span class="n">logging_config</span><span class="p">,</span>
             <span class="n">metadata_directory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
+            <span class="n">scoring_functions</span><span class="o">=</span><span class="n">scoring_functions</span><span class="p">,</span>
+            <span class="n">load_models</span><span class="o">=</span><span class="n">load_models</span><span class="p">,</span>
         <span class="p">)</span>
 
 <div class="viewcode-block" id="AutoSklearn2Classifier.fit"><a class="viewcode-back" href="../../../api.html#autosklearn.experimental.askl2.AutoSklearn2Classifier.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>
