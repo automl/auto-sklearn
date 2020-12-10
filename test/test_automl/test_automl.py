@@ -355,13 +355,9 @@ def test_automl_outputs(backend, dask_client):
     total_completed_runs_log = parser.count_tae_pynisher_calls() - 1  # Dummy not in run history
     total_completed_runs_auto = 0
     for run_value in auto.runhistory_.data.values():
-        if run_value.status != StatusType.RUNNING:
-            # Running is not gonna return a value, it is left running
-            if 'info' in run_value.additional_info or 'traceback' in run_value.additional_info:
-                # If the run had a TIMEOUT,
-                # it won't log a return value, only the exception
-                # Same with a crash - this information is available in runhistory
-                continue
+        # Make sure that running jobs are properly tracked. Killed runs do not always
+        # print the return value to the log file (yet the run history has this information)
+        if run_value.status == StatusType.SUCCESS:
             total_completed_runs_auto += 1
 
     # We check if we have all success return in the log file. Checking for crashes depends on
