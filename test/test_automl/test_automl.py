@@ -358,6 +358,11 @@ def test_automl_outputs(backend, dask_client):
         # Make sure that running jobs are properly tracked. Killed runs do not always
         # print the return value to the log file (yet the run history has this information)
         if run_value.status == StatusType.SUCCESS:
+            # Success is not sufficient to guarantee a return message in the log file
+            #  'info': 'Run stopped because of timeout.' --> we can still have a success
+            # but the run was killed with a timeout
+            if 'info' in run_value.additional_info or 'traceback' in run_value.additional_info:
+                continue
             total_completed_runs_auto += 1
 
     # We check if we have all success return in the log file. Checking for crashes depends on
