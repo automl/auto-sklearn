@@ -584,7 +584,15 @@ def testLimit(ensemble_backend):
         assert os.path.exists(read_scores_file)
         assert not os.path.exists(read_preds_file)
         assert logger_mock.warning.call_count == 4
-        assert logger_mock.error.call_count == 1
+
+        # In the previous assert, reduction is tried until failure
+        # So that means we should have more than 1 memoryerror message
+        assert logger_mock.error.call_count >= 1, "{}".format(
+            logger_mock.error.call_args_list
+        )
+        for i in range(len(logger_mock.error.call_args_list)):
+            assert 'Memory Exception -- Unable to further reduce' in str(
+                logger_mock.error.call_args_list[i])
 
 
 def test_read_pickle_read_preds(ensemble_backend):
