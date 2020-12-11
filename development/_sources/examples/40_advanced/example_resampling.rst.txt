@@ -27,7 +27,7 @@ settings for the ``AutoSklearnClassifier``.
 
  .. code-block:: none
 
-    Accuracy score holdout:  0.958041958041958
+    Accuracy score holdout:  0.951048951048951
     Before re-fit
     Accuracy score CV 0.951048951048951
     After re-fit
@@ -168,7 +168,7 @@ settings for the ``AutoSklearnClassifier``.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 5 minutes  42.500 seconds)
+   **Total running time of the script:** ( 5 minutes  43.832 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_resampling.py:
