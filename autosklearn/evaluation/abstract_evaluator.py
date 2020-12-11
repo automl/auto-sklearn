@@ -35,6 +35,8 @@ class MyDummyClassifier(DummyClassifier):
             super(MyDummyClassifier, self).__init__(strategy="uniform")
         else:
             super(MyDummyClassifier, self).__init__(strategy="most_frequent")
+        self.random_state = random_state
+        self.init_params = init_params
 
     def pre_transform(self, X, y, fit_params=None):  # pylint: disable=R0201
         if fit_params is None:
@@ -69,6 +71,8 @@ class MyDummyRegressor(DummyRegressor):
             super(MyDummyRegressor, self).__init__(strategy='mean')
         else:
             super(MyDummyRegressor, self).__init__(strategy='median')
+        self.random_state = random_state
+        self.init_params = init_params
 
     def pre_transform(self, X, y, fit_params=None):
         if fit_params is None:

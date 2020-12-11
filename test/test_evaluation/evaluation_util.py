@@ -122,7 +122,7 @@ def get_abalone_datamanager():
     feat_type = [
         'Categorical' if x.name == 'category' else 'Numerical' for x in data['data'].dtypes
     ]
-    X, y = sklearn.datasets.fetch_openml(data_id=183, return_X_y=True)
+    X, y = sklearn.datasets.fetch_openml(data_id=183, return_X_y=True, as_frame=False)
     y = preprocessing.LabelEncoder().fit_transform(y)
     X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
         X, y, random_state=1

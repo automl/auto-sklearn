@@ -290,7 +290,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         """  # noqa (links are too long)
 
         include_estimators = [
-            'extra_trees', 'passive_aggressive', 'random_forest', 'sgd', 'gradient_boosting',
+            'extra_trees', 'passive_aggressive', 'random_forest', 'sgd', 'gradient_boosting', 'mlp',
         ]
         include_preprocessors = ["no_preprocessing"]
         super().__init__(

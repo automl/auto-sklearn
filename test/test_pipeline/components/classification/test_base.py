@@ -226,8 +226,14 @@ class BaseClassificationComponentTest(unittest.TestCase):
             return
 
         def check_classifier(cls):
-            X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-            y = np.array([0, 1, 1, 0])
+            X = np.array([[0, 0], [0, 1], [1, 0], [1, 1],
+                          [0, 0], [0, 1], [1, 0], [1, 1],
+                          [0, 0], [0, 1], [1, 0], [1, 1],
+                          [0, 0], [0, 1], [1, 0], [1, 1]])
+            y = np.array([0, 1, 1, 0,
+                          0, 1, 1, 0,
+                          0, 1, 1, 0,
+                          0, 1, 1, 0])
             params = []
 
             for i in range(2):

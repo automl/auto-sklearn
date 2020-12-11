@@ -13,7 +13,6 @@ import sklearn.metrics
 
 class KernelPCAComponentTest(PreprocessingTestCase):
     @unittest.skipIf(sys.version_info < (3, 7), 'Random failures for Python < 3.7')
-    @pytest.mark.flaky()
     def test_default_configuration(self):
         transformation, original = _test_preprocessing(KernelPCA,
                                                        dataset='digits',
@@ -48,7 +47,7 @@ class KernelPCAComponentTest(PreprocessingTestCase):
             predictor = classifier.fit(X_train_trans, Y_train)
             predictions = predictor.predict(X_test_trans)
             accuracy = sklearn.metrics.accuracy_score(predictions, Y_test)
-            self.assertAlmostEqual(accuracy, 0.0903387703889586)
+            self.assertAlmostEqual(accuracy, 0.6775407779171895)
 
     @unittest.skip("Always returns float64")
     def test_preprocessing_dtype(self):
