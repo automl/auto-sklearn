@@ -18,7 +18,6 @@ import sklearn.ensemble
 import sklearn.svm
 from sklearn.utils.validation import check_is_fitted
 
-from ConfigSpace.exceptions import ForbiddenValueError
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
