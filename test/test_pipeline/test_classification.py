@@ -18,7 +18,6 @@ import sklearn.ensemble
 import sklearn.svm
 from sklearn.utils.validation import check_is_fitted
 
-from ConfigSpace.exceptions import ForbiddenValueError
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
@@ -383,6 +382,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     continue
                 elif 'The condensed distance matrix must contain only finite ' \
                      'values.' in e.args[0]:
+                    continue
+                elif 'Internal work array size computation failed' in e.args[0]:
                     continue
                 else:
                     print(config)
@@ -832,16 +833,20 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         """Make sure that if a preprocessor is added, it's fit
         method is called"""
         preprocessing_components.add_preprocessor(CrashPreprocessor)
-        cls = SimpleClassificationPipeline()
+
+        # We reduce the search space as forbidden clauses prevent to instantiate
+        # the user defined preprocessor manually
+        cls = SimpleClassificationPipeline(include={'classifier': ['random_forest']})
         cs = cls.get_hyperparameter_search_space()
         self.assertIn('CrashPreprocessor', str(cs))
         config = cs.sample_configuration()
-        while True:
-            try:
-                config['feature_preprocessor:__choice__'] = 'CrashPreprocessor'
-                break
-            except ForbiddenValueError:
-                continue
+        try:
+            config['feature_preprocessor:__choice__'] = 'CrashPreprocessor'
+        except Exception as e:
+            # In case of failure clean up the components and print enough information
+            # to clean up with check in the future
+            del preprocessing_components._addons.components['CrashPreprocessor']
+            self.fail("cs={} config={} Exception={}".format(cs, config, e))
         cls.set_hyperparameters(config)
         with self.assertRaisesRegex(
             ValueError,
