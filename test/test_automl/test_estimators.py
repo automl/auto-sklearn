@@ -28,7 +28,7 @@ from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 from autosklearn.smbo import get_smac_object
 
 sys.path.append(os.path.dirname(__file__))
-from automl_utils import extract_msg_from_log, count_succeses  # noqa (E402: module level import not at top of file)
+from automl_utils import print_debug_information, count_succeses  # noqa (E402: module level import not at top of file)
 
 
 def test_fit_n_jobs(tmp_dir, output_dir):
@@ -249,7 +249,9 @@ def test_cv_results(tmp_dir, output_dir):
                                 output_folder=output_dir,
                                 seed=1,
                                 initial_configurations_via_metalearning=0,
-                                ensemble_size=0)
+                                ensemble_size=0,
+                                scoring_functions=[autosklearn.metrics.precision,
+                                                   autosklearn.metrics.roc_auc])
     cls.fit(X_train, Y_train)
     cv_results = cls.cv_results_
     assert isinstance(cv_results, dict), type(cv_results)
@@ -261,6 +263,12 @@ def test_cv_results(tmp_dir, output_dir):
     assert isinstance(cv_results['params'], list), type(cv_results['params'])
     assert isinstance(cv_results['rank_test_scores'], np.ndarray), type(
         cv_results['rank_test_scores']
+    )
+    assert isinstance(cv_results['metric_precision'], npma.MaskedArray), type(
+        cv_results['metric_precision']
+    )
+    assert isinstance(cv_results['metric_roc_auc'], npma.MaskedArray), type(
+        cv_results['metric_roc_auc']
     )
     cv_result_items = [isinstance(val, npma.MaskedArray) for key, val in
                        cv_results.items() if key.startswith('param_')]
@@ -388,15 +396,13 @@ def test_multilabel(tmp_dir, output_dir, dask_client):
                                    output_folder=output_dir)
 
     automl.fit(X_train, Y_train)
-    # Log file path
-    log_file_path = glob.glob(os.path.join(
-        tmp_dir, 'AutoML*.log'))[0]
+
     predictions = automl.predict(X_test)
-    assert predictions.shape == (50, 3), extract_msg_from_log(log_file_path)
-    assert count_succeses(automl.cv_results_) > 0,  extract_msg_from_log(log_file_path)
+    assert predictions.shape == (50, 3), print_debug_information(automl)
+    assert count_succeses(automl.cv_results_) > 0,  print_debug_information(automl)
 
     score = f1_macro(Y_test, predictions)
-    assert score >= 0.9, extract_msg_from_log(log_file_path)
+    assert score >= 0.9, print_debug_information(automl)
 
     probs = automl.predict_proba(X_train)
     assert np.mean(probs) == pytest.approx(0.33, rel=1e-1)
@@ -414,17 +420,16 @@ def test_binary(tmp_dir, output_dir, dask_client):
 
     automl.fit(X_train, Y_train, X_test=X_test, y_test=Y_test,
                dataset_name='binary_test_dataset')
-    log_file_path = glob.glob(os.path.join(
-        tmp_dir, 'AutoML*.log'))[0]
+
     predictions = automl.predict(X_test)
-    assert predictions.shape == (50, ), extract_msg_from_log(log_file_path)
+    assert predictions.shape == (50, ), print_debug_information(automl)
 
     score = accuracy(Y_test, predictions)
-    assert score > 0.9, extract_msg_from_log(log_file_path)
-    assert count_succeses(automl.cv_results_) > 0, extract_msg_from_log(log_file_path)
+    assert score > 0.9, print_debug_information(automl)
+    assert count_succeses(automl.cv_results_) > 0, print_debug_information(automl)
 
     output_files = glob.glob(os.path.join(output_dir, 'binary_test_dataset_test_*.predict'))
-    assert len(output_files) > 0, (output_files, extract_msg_from_log(log_file_path))
+    assert len(output_files) > 0, (output_files, print_debug_information(automl))
 
 
 def test_classification_pandas_support(tmp_dir, output_dir, dask_client):
@@ -453,12 +458,9 @@ def test_classification_pandas_support(tmp_dir, output_dir, dask_client):
 
     automl.fit(X, y)
 
-    log_file_path = glob.glob(os.path.join(
-        tmp_dir, 'AutoML*.log'))[0]
-
     # Make sure that at least better than random.
     # We use same X_train==X_test to test code quality
-    assert automl.score(X, y) > 0.555, extract_msg_from_log(log_file_path)
+    assert automl.score(X, y) > 0.555, print_debug_information(automl)
 
     automl.refit(X, y)
 
@@ -482,10 +484,6 @@ def test_regression(tmp_dir, output_dir, dask_client):
 
     automl.fit(X_train, Y_train)
 
-    # Log file path
-    log_file_path = glob.glob(os.path.join(
-        tmp_dir, 'AutoML*.log'))[0]
-
     predictions = automl.predict(X_test)
     assert predictions.shape == (356,)
     score = mean_squared_error(Y_test, predictions)
@@ -493,7 +491,7 @@ def test_regression(tmp_dir, output_dir, dask_client):
     # On average np.sqrt(30) away from the target -> ~5.5 on average
     # Results with select rates drops avg score to a range of -32.40 to -37, on 30 seconds
     # constraint. With more time_left_for_this_task this is no longer an issue
-    assert score >= -37, extract_msg_from_log(log_file_path)
+    assert score >= -37, print_debug_information(automl)
     assert count_succeses(automl.cv_results_) > 0
 
 
@@ -513,15 +511,11 @@ def test_cv_regression(tmp_dir, output_dir, dask_client):
 
     automl.fit(X_train, Y_train)
 
-    # Log file path
-    log_file_path = glob.glob(os.path.join(
-        tmp_dir, 'AutoML*.log'))[0]
-
     predictions = automl.predict(X_test)
     assert predictions.shape == (206,)
     score = r2(Y_test, predictions)
-    assert score >= 0.1, extract_msg_from_log(log_file_path)
-    assert count_succeses(automl.cv_results_) > 0, extract_msg_from_log(log_file_path)
+    assert score >= 0.1, print_debug_information(automl)
+    assert count_succeses(automl.cv_results_) > 0, print_debug_information(automl)
 
 
 def test_regression_pandas_support(tmp_dir, output_dir, dask_client):
@@ -545,18 +539,15 @@ def test_regression_pandas_support(tmp_dir, output_dir, dask_client):
     # Make sure we error out because y is not encoded
     automl.fit(X, y)
 
-    log_file_path = glob.glob(os.path.join(
-        tmp_dir, 'AutoML*.log'))[0]
-
     # Make sure that at least better than random.
     # We use same X_train==X_test to test code quality
-    assert automl.score(X, y) >= 0.5, extract_msg_from_log(log_file_path)
+    assert automl.score(X, y) >= 0.5, print_debug_information(automl)
 
     automl.refit(X, y)
 
     # Make sure that at least better than random.
-    assert r2(y, automl.predict(X)) > 0.5, extract_msg_from_log(log_file_path)
-    assert count_succeses(automl.cv_results_) > 0, extract_msg_from_log(log_file_path)
+    assert r2(y, automl.predict(X)) > 0.5, print_debug_information(automl)
+    assert count_succeses(automl.cv_results_) > 0, print_debug_information(automl)
 
 
 # Currently this class only tests that the methods of AutoSklearnClassifier
@@ -615,6 +606,8 @@ def test_autosklearn2_classification_methods_returns_self(dask_client):
     assert automl is automl_refitted
 
     predictions = automl_fitted.predict(X_test)
-    assert sklearn.metrics.accuracy_score(y_test, predictions) >= 2 / 3
+    assert sklearn.metrics.accuracy_score(
+        y_test, predictions
+    ) >= 2 / 3, print_debug_information(automl)
 
     pickle.dumps(automl_fitted)

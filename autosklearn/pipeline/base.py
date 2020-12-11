@@ -98,10 +98,9 @@ class BasePipeline(Pipeline):
             fit_params = {}
         fit_params = {key.replace(":", "__"): value for key, value in
                       fit_params.items()}
-        Xt, fit_params = self._fit(X, y, **fit_params)
-        if fit_params is None:
-            fit_params = {}
-        return Xt, fit_params
+        fit_params_steps = self._check_fit_params(**fit_params)
+        Xt = self._fit(X, y, **fit_params_steps)
+        return Xt, fit_params_steps[self.steps[-1][0]]
 
     def fit_estimator(self, X, y, **fit_params):
         fit_params = {key.replace(":", "__"): value for key, value in

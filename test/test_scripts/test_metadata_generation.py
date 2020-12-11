@@ -26,7 +26,9 @@ class TestMetadataGeneration(unittest.TestCase):
     def test_metadata_generation(self):
 
         regression_task_id = 5022
+        regression_dataset_name = 'SWD'.lower()
         classification_task_id = 75222
+        classification_dataset_name = 'analcatdata_halloffame'.lower()
 
         current_directory = __file__
         scripts_directory = os.path.abspath(os.path.join(current_directory,
@@ -54,22 +56,31 @@ class TestMetadataGeneration(unittest.TestCase):
         with open(commands_output_file) as fh:
             cmds = fh.read().split('\n')
             # 6 regression, 11 classification (roc_auc + task 258 is illegal), 1 empty line
-            self.assertEqual(len(cmds), 18)
+            self.assertEqual(len(cmds), 18, msg='\n'.join(cmds))
 
-        for task_id, task_type, metric in (
-                (classification_task_id, 'classification', 'accuracy'),
-                (regression_task_id, 'regression', 'r2')
+        for task_id, dataset_name, task_type, metric in (
+            (
+                classification_task_id,
+                classification_dataset_name,
+                'classification',
+                'balanced_accuracy',
+            ),
+            (regression_task_id, regression_dataset_name, 'regression', 'r2')
         ):
+            cmd = None
             with open(commands_output_file) as fh:
                 while True:
                     cmd = fh.readline()
-                    if 'task-id %d' % task_id in cmd:
+                    if 'task-id %d' % task_id in cmd and metric in cmd:
                         break
+            if cmd is None:
+                self.fail('Did not find a command for task_id %s and metric %s in %s'
+                          % (task_id, metric, cmds))
 
             self.assertIn('time-limit 86400', cmd)
             self.assertIn('per-run-time-limit 1800', cmd)
             cmd = cmd.replace('time-limit 86400', 'time-limit 60').replace(
-                'per-run-time-limit 1800', 'per-run-time-limit 7')
+                'per-run-time-limit 1800', 'per-run-time-limit 5')
             # This tells the script to use the same memory limit for testing as
             # for training. In production, it would use twice as much!
             cmd = cmd.replace('-s 1', '-s 1 --unittest')
@@ -88,7 +99,7 @@ class TestMetadataGeneration(unittest.TestCase):
                                                      'auto-sklearn-output')
             self.assertTrue(os.path.exists(expected_output_directory),
                             msg=expected_output_directory)
-            smac_log = os.path.join(expected_output_directory, 'AutoML(1):%d.log' % task_id)
+            smac_log = os.path.join(expected_output_directory, 'AutoML(1):%s.log' % dataset_name)
             with open(smac_log) as fh:
                 smac_output = fh.read()
             self.assertEqual(rval.returncode, 0, msg=str(rval) + '\n' + smac_output)
@@ -183,7 +194,7 @@ class TestMetadataGeneration(unittest.TestCase):
             metafeatures_arff = fh.read().split('\n')
             contains_regression_id = False
             for line in metafeatures_arff:
-                if line.startswith('2280,'):
+                if line.startswith('kin8nm,'):
                     contains_regression_id = True
             self.assertTrue(contains_regression_id, msg=metafeatures_arff)
 
@@ -195,7 +206,7 @@ class TestMetadataGeneration(unittest.TestCase):
             metafeatures_arff = fh.read().split('\n')
             contains_classification_id = False
             for line in metafeatures_arff:
-                if line.startswith('233,'):
+                if line.startswith('kr-vs-kp,'):
                     contains_classification_id = True
             self.assertTrue(contains_classification_id, msg=metafeatures_arff)
 
@@ -207,18 +218,22 @@ class TestMetadataGeneration(unittest.TestCase):
                               stderr=subprocess.PIPE)
         self.assertEqual(rval.returncode, 0, msg=str(rval))
 
-        for metric, combination in (
-            ('accuracy', 'accuracy_binary.classification_dense'),
-            ('r2', 'r2_regression_dense'),
+        for metric_, combination in (
+            (metric, '%s_binary.classification_dense' % metric),
+            (metric, '%s_regression_dense' % metric),
         ):
+
+            if task_type not in combination:
+                continue
+
             for file in ['algorithm_runs.arff', 'configurations.csv',
                          'description.txt', 'feature_costs.arff',
                          'feature_runstatus.arff', 'feature_values.arff',
                          'readme.txt']:
-                self.assertTrue(os.path.exists(os.path.join(self.working_directory,
-                                                            'metadata',
-                                                            combination,
-                                                            file)))
+                expected_path = os.path.join(
+                    self.working_directory, 'metadata', combination, file,
+                )
+                self.assertTrue(os.path.exists(expected_path), msg=expected_path)
 
             with open(os.path.join(self.working_directory,
                                    'metadata',
@@ -229,7 +244,7 @@ class TestMetadataGeneration(unittest.TestCase):
                                  [('instance_id', 'STRING'),
                                   ('repetition', 'NUMERIC'),
                                   ('algorithm', 'STRING'),
-                                  (metric, 'NUMERIC'),
+                                  (metric_, 'NUMERIC'),
                                   ('runstatus',
                                    ['ok', 'timeout', 'memout', 'not_applicable',
                                     'crash', 'other'])])

@@ -3,7 +3,7 @@ import json
 import os
 import pathlib
 import pickle
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import dask.distributed
 
@@ -171,10 +171,126 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         smac_scenario_args: Optional[Dict[str, Any]] = None,
         logging_config: Optional[Dict[str, Any]] = None,
         metric: Optional[Scorer] = None,
+        scoring_functions: Optional[List[Scorer]] = None,
+        load_models: bool = True,
     ):
 
+        """
+        Parameters
+        ----------
+        time_left_for_this_task : int, optional (default=3600)
+            Time limit in seconds for the search of appropriate
+            models. By increasing this value, *auto-sklearn* has a higher
+            chance of finding better models.
+
+        ensemble_size : int, optional (default=50)
+            Number of models added to the ensemble built by *Ensemble
+            selection from libraries of models*. Models are drawn with
+            replacement.
+
+        ensemble_nbest : int, optional (default=50)
+            Only consider the ``ensemble_nbest`` models when building an
+            ensemble.
+
+        max_models_on_disc: int, optional (default=50),
+            Defines the maximum number of models that are kept in the disc.
+            The additional number of models are permanently deleted. Due to the
+            nature of this variable, it sets the upper limit on how many models
+            can be used for an ensemble.
+            It must be an integer greater or equal than 1.
+            If set to None, all models are kept on the disc.
+
+        seed : int, optional (default=1)
+            Used to seed SMAC. Will determine the output file names.
+
+        memory_limit : int, optional (3072)
+            Memory limit in MB for the machine learning algorithm.
+            `auto-sklearn` will stop fitting the machine learning algorithm if
+            it tries to allocate more than `memory_limit` MB.
+            If None is provided, no memory limit is set.
+            In case of multi-processing, `memory_limit` will be per job.
+            This memory limit also applies to the ensemble creation process.
+
+        tmp_folder : string, optional (None)
+            folder to store configuration output and log files, if ``None``
+            automatically use ``/tmp/autosklearn_tmp_$pid_$random_number``
+
+        output_folder : string, optional (None)
+            folder to store predictions for optional test set, if ``None``
+            no output will be generated
+
+        delete_tmp_folder_after_terminate: string, optional (True)
+            remove tmp_folder, when finished. If tmp_folder is None
+            tmp_dir will always be deleted
+
+        delete_output_folder_after_terminate: bool, optional (True)
+            remove output_folder, when finished. If output_folder is None
+            output_dir will always be deleted
+
+        n_jobs : int, optional, experimental
+            The number of jobs to run in parallel for ``fit()``. ``-1`` means
+            using all processors. By default, Auto-sklearn uses a single core
+            for fitting the machine learning model and a single core for fitting
+            an ensemble. Ensemble building is not affected by ``n_jobs`` but
+            can be controlled by the number of models in the ensemble. In
+            contrast to most scikit-learn models, ``n_jobs`` given in the
+            constructor is not applied to the ``predict()`` method. If
+            ``dask_client`` is None, a new dask client is created.
+
+        dask_client : dask.distributed.Client, optional
+            User-created dask client, can be used to start a dask cluster and then
+            attach auto-sklearn to it.
+
+        disable_evaluator_output: bool or list, optional (False)
+            If True, disable model and prediction output. Cannot be used
+            together with ensemble building. ``predict()`` cannot be used when
+            setting this True. Can also be used as a list to pass more
+            fine-grained information on what to save. Allowed elements in the
+            list are:
+
+            * ``'y_optimization'`` : do not save the predictions for the
+              optimization/validation set, which would later on be used to build
+              an ensemble.
+            * ``'model'`` : do not save any model files
+
+        smac_scenario_args : dict, optional (None)
+            Additional arguments inserted into the scenario of SMAC. See the
+            `SMAC documentation 
+            <https://automl.github.io/SMAC3/master/options.html?highlight=scenario
+            #scenario>`_
+            for a list of available arguments.
+
+        logging_config : dict, optional (None)
+            dictionary object specifying the logger configuration. If None,
+            the default logging.yaml file is used, which can be found in
+            the directory ``util/logging.yaml`` relative to the installation.
+
+        metric : Scorer, optional (None)
+            An instance of :class:`autosklearn.metrics.Scorer` as created by
+            :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
+            Metrics`_.
+            If None is provided, a default metric is selected depending on the task.
+
+        scoring_functions : List[Scorer], optional (None)
+            List of scorers which will be calculated for each pipeline and results will be 
+            available via ``cv_results``
+
+        load_models : bool, optional (True)
+            Whether to load the models after fitting Auto-sklearn.
+
+        Attributes
+        ----------
+
+        cv_results\_ : dict of numpy (masked) ndarrays
+            A dict with keys as column headers and values as columns, that can be
+            imported into a pandas ``DataFrame``.
+
+            Not all keys returned by scikit-learn are supported yet.
+
+        """  # noqa (links are too long)
+
         include_estimators = [
-            'extra_trees', 'passive_aggressive', 'random_forest', 'sgd', 'gradient_boosting',
+            'extra_trees', 'passive_aggressive', 'random_forest', 'sgd', 'gradient_boosting', 'mlp',
         ]
         include_preprocessors = ["no_preprocessing"]
         super().__init__(
@@ -203,6 +319,8 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             logging_config=logging_config,
             metadata_directory=None,
             metric=metric,
+            scoring_functions=scoring_functions,
+            load_models=load_models,
         )
 
     def fit(self, X, y,

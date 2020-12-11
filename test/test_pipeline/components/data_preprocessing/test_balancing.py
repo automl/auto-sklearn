@@ -17,6 +17,8 @@ from autosklearn.pipeline.components.classification.random_forest import RandomF
 from autosklearn.pipeline.components.classification.liblinear_svc import LibLinear_SVC
 from autosklearn.pipeline.components.classification.libsvm_svc import LibSVM_SVC
 from autosklearn.pipeline.components.classification.sgd import SGD
+from autosklearn.pipeline.components.classification.gradient_boosting \
+    import GradientBoostingClassifier
 from autosklearn.pipeline.components.classification.passive_aggressive import PassiveAggressive
 from autosklearn.pipeline.components.feature_preprocessing\
     .extra_trees_preproc_for_classification import ExtraTreesPreprocessorClassification
@@ -75,11 +77,12 @@ class BalancingComponentTest(unittest.TestCase):
                 [('adaboost', AdaboostClassifier, 0.810, 0.735, 3),
                  ('decision_tree', DecisionTree, 0.780, 0.643, 3),
                  ('extra_trees', ExtraTreesClassifier, 0.780, 0.8, 3),
-                 ('random_forest', RandomForest, 0.75, 0.769, 3),
+                 ('random_forest', RandomForest, 0.75, 0.789, 3),
                  ('libsvm_svc', LibSVM_SVC, 0.769, 0.72, 3),
                  ('liblinear_svc', LibLinear_SVC, 0.762, 0.735, 3),
                  ('passive_aggressive', PassiveAggressive, 0.091, 0.762, 3),
-                 ('sgd', SGD, 0.818, 0.567, 2)
+                 ('sgd', SGD, 0.818, 0.567, 2),
+                 ('gradient_boosting', GradientBoostingClassifier, 0.666, 0.682, 2)
                  ]:
             for strategy, acc in [
                 ('none', acc_no_weighting),
@@ -126,7 +129,7 @@ class BalancingComponentTest(unittest.TestCase):
 
         for name, pre, acc_no_weighting, acc_weighting in \
                 [('extra_trees_preproc_for_classification',
-                    ExtraTreesPreprocessorClassification, 0.810, 0.581),
+                    ExtraTreesPreprocessorClassification, 0.810, 0.590),
                  ('liblinear_svc_preprocessor', LibLinear_Preprocessor,
                     0.837, 0.562)]:
             for strategy, acc in [('none', acc_no_weighting),

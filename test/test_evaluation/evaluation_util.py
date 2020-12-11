@@ -14,6 +14,13 @@ from autosklearn.constants import \
 from autosklearn.util.data import convert_to_bin
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.pipeline.util import get_dataset
+from autosklearn.metrics import accuracy, balanced_accuracy, f1_macro, f1_micro, f1_weighted, \
+    log_loss, precision_macro, precision_micro, precision_weighted, recall_macro, \
+    recall_micro, recall_weighted
+
+SCORER_LIST = [accuracy, balanced_accuracy, f1_macro, f1_micro, f1_weighted, log_loss,
+               precision_macro, precision_micro, precision_weighted, recall_macro,
+               recall_micro, recall_weighted]
 
 N_TEST_RUNS = 5
 
@@ -115,7 +122,7 @@ def get_abalone_datamanager():
     feat_type = [
         'Categorical' if x.name == 'category' else 'Numerical' for x in data['data'].dtypes
     ]
-    X, y = sklearn.datasets.fetch_openml(data_id=183, return_X_y=True)
+    X, y = sklearn.datasets.fetch_openml(data_id=183, return_X_y=True, as_frame=False)
     y = preprocessing.LabelEncoder().fit_transform(y)
     X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
         X, y, random_state=1

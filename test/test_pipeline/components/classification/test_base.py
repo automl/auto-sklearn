@@ -67,7 +67,7 @@ class BaseClassificationComponentTest(unittest.TestCase):
             if self.step_hyperparameter is not None:
                 self.assertEqual(
                     getattr(classifier.estimator, self.step_hyperparameter['name']),
-                    self.step_hyperparameter['value']
+                    self.res.get("iris_iterative_n_iter", self.step_hyperparameter['value'])
                 )
 
     def test_default_iris_predict_proba(self):
@@ -158,7 +158,7 @@ class BaseClassificationComponentTest(unittest.TestCase):
             if self.step_hyperparameter is not None:
                 self.assertEqual(
                     getattr(classifier.estimator, self.step_hyperparameter['name']),
-                    self.step_hyperparameter['value']
+                    self.res.get("digits_iterative_n_iter", self.step_hyperparameter['value'])
                 )
 
     def test_default_digits_multilabel(self):
@@ -226,8 +226,14 @@ class BaseClassificationComponentTest(unittest.TestCase):
             return
 
         def check_classifier(cls):
-            X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-            y = np.array([0, 1, 1, 0])
+            X = np.array([[0, 0], [0, 1], [1, 0], [1, 1],
+                          [0, 0], [0, 1], [1, 0], [1, 1],
+                          [0, 0], [0, 1], [1, 0], [1, 1],
+                          [0, 0], [0, 1], [1, 0], [1, 1]])
+            y = np.array([0, 1, 1, 0,
+                          0, 1, 1, 0,
+                          0, 1, 1, 0,
+                          0, 1, 1, 0])
             params = []
 
             for i in range(2):
@@ -275,7 +281,7 @@ class BaseClassificationComponentTest(unittest.TestCase):
                                    default if default[hp_name] is not None})
         check_classifier(classifier)
 
-        for i in range(10):
+        for i in range(5):
             classifier = self.module
             config = configuration_space.sample_configuration()
             classifier = classifier(random_state=np.random.RandomState(1),

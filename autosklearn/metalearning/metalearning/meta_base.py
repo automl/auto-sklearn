@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from ...util.logging_ import get_logger
@@ -57,12 +58,12 @@ class MetaBase(object):
         metafeatures.name = name
         if isinstance(metafeatures, DatasetMetafeatures):
             data_ = {mf.name: mf.value for mf in metafeatures.metafeature_values.values()}
-            metafeatures = pd.Series(name=name, data=data_)
-        if name in self.metafeatures.index:
+            metafeatures = pd.Series(name=name, data=data_, dtype=np.float64)
+        if name.lower() in self.metafeatures.index:
             self.logger.warning(
                 'Dataset %s already in meta-data. Removing occurence.', name
             )
-            self.metafeatures.drop(name, inplace=True)
+            self.metafeatures.drop(name.lower(), inplace=True)
         self.metafeatures = self.metafeatures.append(metafeatures)
 
         runs = pd.Series([], name=name)

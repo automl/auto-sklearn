@@ -96,12 +96,12 @@ def _encode_exit_status(exit_status):
 class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
     def __init__(self, backend, autosklearn_seed, resampling_strategy, metric,
-                 logger, cost_for_crash, abort_on_first_run_crash,
+                 cost_for_crash, abort_on_first_run_crash,
                  initial_num_run=1, stats=None,
-                 run_obj='quality', par_factor=1, all_scoring_functions=False,
+                 run_obj='quality', par_factor=1, scoring_functions=None,
                  output_y_hat_optimization=True, include=None, exclude=None,
                  memory_limit=None, disable_file_output=False, init_params=None,
-                 budget_type=None, ta=False, **resampling_strategy_args):
+                 budget_type=None, ta=False, pynisher_context='spawn', **resampling_strategy_args):
 
         if resampling_strategy == 'holdout':
             eval_function = autosklearn.evaluation.train_evaluator.eval_holdout
@@ -152,7 +152,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.metric = metric
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_args = resampling_strategy_args
-        self.all_scoring_functions = all_scoring_functions
+        self.scoring_functions = scoring_functions
         # TODO deactivate output_y_hat_optimization and let the respective evaluator decide
         self.output_y_hat_optimization = output_y_hat_optimization
         self.include = include
@@ -160,7 +160,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.disable_file_output = disable_file_output
         self.init_params = init_params
         self.budget_type = budget_type
-        self.logger = logger
 
         if memory_limit is not None:
             memory_limit = int(math.ceil(memory_limit))
@@ -175,6 +174,9 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             self._get_test_loss = True
         else:
             self._get_test_loss = False
+
+        self.pynisher_context = pynisher_context
+        self.logger = autosklearn.util.logging_.get_logger("TAE")
 
     def run_wrapper(
         self,
@@ -217,7 +219,12 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         if remaining_time - 5 < run_info.cutoff:
             run_info = run_info._replace(cutoff=int(remaining_time - 5))
 
+        config_id = (
+            run_info.config if isinstance(run_info.config, int) else run_info.config.config_id
+        )
+
         if run_info.cutoff < 1.0:
+            self.logger.info("Not starting configuration %d because time is up" % config_id)
             return run_info, RunValue(
                 status=StatusType.STOP,
                 cost=self.worst_possible_result,
@@ -232,6 +239,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         ):
             run_info = run_info._replace(cutoff=int(np.ceil(run_info.cutoff)))
 
+        self.logger.info("Starting to evaluate configuration %d" % config_id)
         return super().run_wrapper(run_info=run_info)
 
     def run(
@@ -244,7 +252,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         instance_specific: Optional[str] = None,
     ) -> Tuple[StatusType, float, float, Dict[str, Union[int, float, str, Dict, List, Tuple]]]:
 
-        queue = multiprocessing.Queue()
+        context = multiprocessing.get_context(self.pynisher_context)
+        queue = context.Queue()
 
         if not (instance_specific is None or instance_specific == '0'):
             raise ValueError(instance_specific)
@@ -257,6 +266,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             wall_time_in_s=cutoff,
             mem_in_mb=self.memory_limit,
             capture_output=True,
+            context=context,
         )
 
         if isinstance(config, int):
@@ -271,7 +281,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             metric=self.metric,
             seed=self.autosklearn_seed,
             num_run=num_run,
-            all_scoring_functions=self.all_scoring_functions,
+            scoring_functions=self.scoring_functions,
             output_y_hat_optimization=self.output_y_hat_optimization,
             include=self.include,
             exclude=self.exclude,
@@ -429,15 +439,14 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         if isinstance(config, int):
             origin = 'DUMMY'
+            config_id = config
         else:
             origin = getattr(config, 'origin', 'UNKNOWN')
+            config_id = config.config_id
         additional_run_info['configuration_origin'] = origin
 
         runtime = float(obj.wall_clock_time)
 
         autosklearn.evaluation.util.empty_queue(queue)
-        self.logger.debug(
-            'Finished function evaluation. Status: %s, Cost: %f, Runtime: %f, Additional %s',
-            status, cost, runtime, additional_run_info,
-        )
+        self.logger.info("Finished evaluating configuration %d" % config_id)
         return status, cost, runtime, additional_run_info

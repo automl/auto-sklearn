@@ -1,8 +1,9 @@
 import numpy as np
 from scipy import sparse
+from sklearn.base import BaseEstimator, TransformerMixin
 
 
-class MinorityCoalescer:
+class MinorityCoalescer(BaseEstimator, TransformerMixin):
     """ Group together categories which occurence is less than a specified
     minimum fraction. Coalesced categories get index of one.
     """

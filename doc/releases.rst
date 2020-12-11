@@ -7,9 +7,45 @@
     commit. From http://stackoverflow.com/questions/6482436/list-of-authors-in-git-since-a-given-commit
     git log 2e29eba.. --format="%aN <%aE>" --reverse | perl -e 'my %dedupe; while (<STDIN>) { print unless $dedupe{$_}++}'
 
+
 ========
 Releases
 ========
+
+Version 0.12.0
+==============
+
+* BREAKING: Auto-sklearn must now be guarded by ``__name__ == "__main__"`` due to the use of the
+  ``spawn`` multiprocessing context.
+* ADD #1026: Adds improved meta-data for Auto-sklearn 2.0 which results in strong improved
+  performance.
+* MAINT #984 and #1008: Move to scikit-learn 0.23.X
+* MAINT #1004: Move from travis-ci to github actions.
+* MAINT 8b67af6: drop the requirement to the lockfile package.
+* FIX #990: Fixes a bug that made Auto-sklearn fail if there are missing values in a pandas
+  DataFrame.
+* FIX #1007, #1012 and #1014: Log multiprocessing output via a new log server. Remove several
+  potential deadlocks related to the joint use of multi-processing, multi-threading and logging.
+
+Contributors v0.12.0
+********************
+
+* Matthias Feurer
+* ROHIT AGARWAL
+* Francisco Rivera
+
+Version 0.11.1
+==============
+
+* FIX #989: Fixes a bug where `y` was not passed to all data preprocessors which made 3rd party
+  category encoders fail.
+* FIX #1001: Fixes a bug which could make Auto-sklearn fail at random.
+* MAINT #1000: Introduce a minimal version for ``dask.distributed``.
+
+Contributors v0.11.1
+********************
+
+* Matthias Feurer
 
 Version 0.11.0
 ==============

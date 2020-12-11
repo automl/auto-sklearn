@@ -8,10 +8,9 @@ class NoPreprocessing(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(self, random_state):
         """ This preprocessors does not change the data """
-        self.preprocessor = None
 
     def fit(self, X, Y=None):
-        self.preprocessor = 0
+        self.preprocessor = 'passthrough'
         self.fitted_ = True
         return self
 

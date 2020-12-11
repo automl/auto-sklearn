@@ -7,8 +7,6 @@ import time
 import uuid
 from typing import Dict, List, Optional, Tuple, Union
 
-import lockfile
-
 import numpy as np
 
 from sklearn.pipeline import Pipeline
@@ -81,8 +79,12 @@ class BackendContext(object):
             )
         )
         self._output_directory = output_directory
-        self._logger = logging.get_logger(__name__)
         self.create_directories()
+        # This is the first place the logger gets created.
+        # We want to make sure any logging forward sets the correct directory
+        # were all files should be created
+        logging.setup_logger(output_dir=self._temporary_directory)
+        self._logger = logging.get_logger(__name__)
 
     @property
     def output_directory(self) -> Optional[str]:
@@ -254,30 +256,20 @@ class Backend(object):
         except Exception:
             pass
 
-        with lockfile.LockFile(filepath):
-            if os.path.exists(filepath):
-                with open(filepath, 'rb') as fh:
-                    existing_targets = np.load(fh, allow_pickle=True)
-                    if existing_targets.shape[0] > targets.shape[0] or \
-                            (existing_targets.shape == targets.shape and
-                             np.allclose(existing_targets, targets)):
-                        return filepath
+        with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
+                filepath), delete=False) as fh_w:
+            np.save(fh_w, targets.astype(np.float32))
+            tempname = fh_w.name
 
-            with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
-                    filepath), delete=False) as fh_w:
-                np.save(fh_w, targets.astype(np.float32))
-                tempname = fh_w.name
-
-            os.rename(tempname, filepath)
+        os.rename(tempname, filepath)
 
         return filepath
 
     def load_targets_ensemble(self) -> np.ndarray:
         filepath = self._get_targets_ensemble_filename()
 
-        with lockfile.LockFile(filepath):
-            with open(filepath, 'rb') as fh:
-                targets = np.load(fh, allow_pickle=True)
+        with open(filepath, 'rb') as fh:
+            targets = np.load(fh, allow_pickle=True)
 
         return targets
 
@@ -288,21 +280,18 @@ class Backend(object):
         self._make_internals_directory()
         filepath = self._get_datamanager_pickle_filename()
 
-        with lockfile.LockFile(filepath):
-            if not os.path.exists(filepath):
-                with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
-                        filepath), delete=False) as fh:
-                    pickle.dump(datamanager, fh, -1)
-                    tempname = fh.name
-                os.rename(tempname, filepath)
+        with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
+                filepath), delete=False) as fh:
+            pickle.dump(datamanager, fh, -1)
+            tempname = fh.name
+        os.rename(tempname, filepath)
 
         return filepath
 
     def load_datamanager(self) -> AbstractDataManager:
         filepath = self._get_datamanager_pickle_filename()
-        with lockfile.LockFile(filepath):
-            with open(filepath, 'rb') as fh:
-                return pickle.load(fh)
+        with open(filepath, 'rb') as fh:
+            return pickle.load(fh)
 
     def get_runs_directory(self) -> str:
         return os.path.join(self.internals_directory, 'runs')
@@ -480,10 +469,9 @@ class Backend(object):
         os.rename(tempname, filepath)
 
     def write_txt_file(self, filepath: str, data: str, name: str) -> None:
-        with lockfile.LockFile(filepath):
-            with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(
-                    filepath), delete=False) as fh:
-                fh.write(data)
-                tempname = fh.name
-            os.rename(tempname, filepath)
-            self.logger.debug('Created %s file %s' % (name, filepath))
+        with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(
+                filepath), delete=False) as fh:
+            fh.write(data)
+            tempname = fh.name
+        os.rename(tempname, filepath)
+        self.logger.debug('Created %s file %s' % (name, filepath))
