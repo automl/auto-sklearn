@@ -417,16 +417,17 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cs = SimpleClassificationPipeline().get_hyperparameter_search_space()
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
+        forbiddens = cs.get_forbiddens()
 
         self.assertEqual(len(cs.get_hyperparameter(
             'data_preprocessing:numerical_transformer:rescaling:__choice__').choices), 6)
         self.assertEqual(len(cs.get_hyperparameter(
-            'classifier:__choice__').choices), 15)
+            'classifier:__choice__').choices), 16)
         self.assertEqual(len(cs.get_hyperparameter(
             'feature_preprocessor:__choice__').choices), 13)
 
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(152, len(hyperparameters))
+        self.assertEqual(167, len(hyperparameters))
 
         # for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp
@@ -434,6 +435,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         # The four components which are always active are classifier,
         # feature preprocessor, balancing and data preprocessing pipeline.
         self.assertEqual(len(hyperparameters) - 7, len(conditions))
+
+        self.assertEqual(len(forbiddens), 53)
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
         cs = SimpleClassificationPipeline(include={'classifier': ['libsvm_svc']})\
