@@ -179,9 +179,8 @@ Implement kernel ridge regression component for auto-sklearn
         degree | kernel == 'polynomial'
 
     r2 score:  0.0
-    /opt/hostedtoolcache/Python/3.8.6/x64/lib/python3.8/site-packages/sklearn/base.py:209: FutureWarning: From version 0.24, get_params will raise an AttributeError if a parameter cannot be retrieved as an instance attribute. Previously it would return None.
-      warnings.warn('From version 0.24, get_params will raise an '
-    [(1.000000, MyDummyRegressor(configuration=1, random_state=None)),
+    [(1.000000, MyDummyRegressor(configuration=1, init_params={'instance': None},
+                     random_state=1)),
     ]
 
 
@@ -190,7 +189,7 @@ Implement kernel ridge regression component for auto-sklearn
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  14.576 seconds)
+   **Total running time of the script:** ( 0 minutes  13.533 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_regression.py:

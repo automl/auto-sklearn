@@ -59,7 +59,7 @@ list or numpy arrays as there is no per-column dtype (further details in the exa
     A13     float64
     A14     float64
     dtype: object
-    Accuracy score 0.8753623188405797
+    Accuracy score 0.8608695652173913
 
 
 
@@ -206,7 +206,7 @@ list or numpy arrays as there is no per-column dtype (further details in the exa
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  57.979 seconds)
+   **Total running time of the script:** ( 1 minutes  54.030 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_pandas_train_test.py:

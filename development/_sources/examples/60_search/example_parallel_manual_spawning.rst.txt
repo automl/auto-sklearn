@@ -80,7 +80,7 @@ and remove the following line.
  .. code-block:: none
 
 
-    <dask.config.set object at 0x7f671025afa0>
+    <dask.config.set object at 0x7fbb941eb190>
 
 
 
@@ -254,7 +254,7 @@ which means that it is automatically stopped one all computation is done.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  46.944 seconds)
+   **Total running time of the script:** ( 0 minutes  46.810 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_manual_spawning.py:

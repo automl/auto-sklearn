@@ -191,10 +191,9 @@ Create MLP classifier component for auto-sklearn
         num_nodes_per_layer, Type: UniformInteger, Range: [16, 216], Default: 32
         solver, Type: Categorical, Choices: {lbfgs, sgd, adam}, Default: adam
 
-    accuracy:  0.3146853146853147
-    /opt/hostedtoolcache/Python/3.8.6/x64/lib/python3.8/site-packages/sklearn/base.py:209: FutureWarning: From version 0.24, get_params will raise an AttributeError if a parameter cannot be retrieved as an instance attribute. Previously it would return None.
-      warnings.warn('From version 0.24, get_params will raise an '
-    [(1.000000, MyDummyClassifier(configuration=1, random_state=None)),
+    accuracy:  0.4195804195804196
+    [(1.000000, MyDummyClassifier(configuration=1, init_params={'instance': None},
+                      random_state=1)),
     ]
 
 
@@ -203,7 +202,7 @@ Create MLP classifier component for auto-sklearn
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  15.174 seconds)
+   **Total running time of the script:** ( 0 minutes  14.179 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_classification.py:
