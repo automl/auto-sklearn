@@ -6119,6 +6119,7 @@
     "configuration": {
         "min_samples_split": 4,
         "min_samples_leaf": 1,
-        "max_features": 0.5269378551142441
+        "max_features": 0.5269378551142441,
+        "bootstrap": "True"
     }
 }
