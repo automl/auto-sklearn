@@ -23,7 +23,7 @@ script_name = 'run_auto-sklearn_for_metadata_generation.py'
 absolute_script_name = os.path.join(this_directory, script_name)
 
 commands = []
-for task_id in (classification_tasks if not test else (75222, 233, 258)):
+for task_id in (classification_tasks if not test else (233, 245, 258)):
     for metric in ('accuracy', 'balanced_accuracy', 'roc_auc', 'logloss'):
 
         if (
