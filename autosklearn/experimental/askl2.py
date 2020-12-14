@@ -15,7 +15,7 @@ import sklearn
 import autosklearn
 from autosklearn.classification import AutoSklearnClassifier
 import autosklearn.experimental.selector
-from autosklearn.metrics import Scorer, balanced_accuracy, roc_auc, log_loss
+from autosklearn.metrics import Scorer, balanced_accuracy, roc_auc, log_loss, accuracy
 
 metrics = (balanced_accuracy, roc_auc, log_loss)
 selector_files = {}
@@ -302,7 +302,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         Attributes
         ----------
 
-        cv_results\_ : dict of numpy (masked) ndarrays
+        cv_results_ : dict of numpy (masked) ndarrays
             A dict with keys as column headers and values as columns, that can be
             imported into a pandas ``DataFrame``.
 
@@ -352,10 +352,18 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             feat_type=None,
             dataset_name=None):
 
+        if self._metric is None:
+            if len(y.shape) == 1 or y.shape[1] == 1:
+                self._metric = accuracy
+            else:
+                self._metric = log_loss
+
         if self._metric in metrics:
-            selector_file = selector_files[self._metric.name]
+            metric_name = self._metric.name
+            selector_file = selector_files[metric_name]
         else:
-            selector_file = selector_files['balanced_accuracy']
+            metric_name = 'balanced_accuracy'
+            selector_file = selector_files[metric_name]
         with open(selector_file, 'rb') as fh:
             selector = pickle.load(fh)
 
@@ -411,7 +419,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             resampling_strategy_kwargs = None
 
         portfolio_file = (
-            this_directory / self._metric.name / 'askl2_portfolios' / ('%s.json' % automl_policy)
+            this_directory / metric_name / 'askl2_portfolios' / ('%s.json' % automl_policy)
         )
         with open(portfolio_file) as fh:
             portfolio_json = json.load(fh)
