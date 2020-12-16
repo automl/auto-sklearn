@@ -144,7 +144,7 @@ class AutoMLLogParser(object):
     def count_tae_pynisher_calls(self) -> int:
         # We expect the return msg to be something like:
         # [DEBUG] [2020-12-16 11:57:08,987:Client-pynisher] Function called with argument: ()
-        #, {'queue': <multiprocessing.queues.Queue object at 0x7f9e3cfaae20>, 'config': 1
+        # , {'queue': <multiprocessing.queues.Queue object at 0x7f9e3cfaae20>, 'config': 1
         # [DEBUG] [2020-12-16 11:57:10,537:Client-pynisher] Function called with argument: ()
         # , {'queue': <multiprocessing.queues.Queue object at 0x7f16f5d95c40>,
         # 'config': Configuration:
