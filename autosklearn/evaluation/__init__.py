@@ -178,10 +178,13 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         self.port = port
         self.pynisher_context = pynisher_context
-        self.logger = get_named_client_logger(
-            name="TAE",
-            port=self.port,
-        )
+        if self.port is None:
+            self.logger = logging.getLogger("TAE")
+        else:
+            self.logger = get_named_client_logger(
+                name="TAE",
+                port=self.port,
+            )
 
     def run_wrapper(
         self,

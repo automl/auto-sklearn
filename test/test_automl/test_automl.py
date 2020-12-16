@@ -349,27 +349,20 @@ def test_automl_outputs(backend, dask_client):
     assert len(total_ensemble_iterations) > 1  # At least 1 iteration
     assert range(1, max(total_ensemble_iterations) + 1), total_ensemble_iterations
 
-    # The number of completed tae calls must be in the log file
-    # Running configurations cannot be check as they might not reached
     # a point where pynisher is called before budget exhaustion
-    total_completed_runs_log = parser.count_tae_pynisher_calls() - 1  # Dummy not in run history
-    total_completed_runs_auto = 0
-    for run_value in auto.runhistory_.data.values():
-        # Make sure that running jobs are properly tracked. Killed runs do not always
-        # print the return value to the log file (yet the run history has this information)
-        if run_value.status == StatusType.SUCCESS:
-            # Success is not sufficient to guarantee a return message in the log file
-            #  'info': 'Run stopped because of timeout.' --> we can still have a success
-            # but the run was killed with a timeout
-            if 'info' in run_value.additional_info or 'traceback' in run_value.additional_info:
-                continue
-            total_completed_runs_auto += 1
+    # Dummy not in run history
+    total_calls_to_pynisher_log = parser.count_tae_pynisher_calls() - 1
+    total_returns_from_pynisher_log = parser.count_tae_pynisher_returns() - 1
+    total_elements_rh = len([run_value for run_value in auto.runhistory_.data.values(
+    ) if run_value.status == StatusType.RUNNING])
 
-    # We check if we have all success return in the log file. Checking for crashes depends on
-    # the stage where the job finished. An job that is not success full will be registered in the
-    # run history, but not necessarily in the log file as it might have been terminated before
-    # printing.
-    assert total_completed_runs_log >= total_completed_runs_auto, print_debug_information(auto)
+    # Make sure we register all calls to pynisher
+    # The less than or equal here is added as a WA as
+    # https://github.com/automl/SMAC3/pull/712 is not yet integrated
+    assert total_elements_rh <= total_calls_to_pynisher_log, print_debug_information(auto)
+
+    # Make sure we register all returns from pynisher
+    assert total_elements_rh <= total_returns_from_pynisher_log, print_debug_information(auto)
 
     # Lastly check that settings are print to logfile
     ensemble_size = parser.get_automl_setting_from_log(auto._dataset_name, 'ensemble_size')

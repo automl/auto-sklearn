@@ -143,11 +143,33 @@ class AutoMLLogParser(object):
 
     def count_tae_pynisher_calls(self) -> int:
         # We expect the return msg to be something like:
+        # [DEBUG] [2020-12-16 11:57:08,987:Client-pynisher] Function called with argument: ()
+        #, {'queue': <multiprocessing.queues.Queue object at 0x7f9e3cfaae20>, 'config': 1
+        # [DEBUG] [2020-12-16 11:57:10,537:Client-pynisher] Function called with argument: ()
+        # , {'queue': <multiprocessing.queues.Queue object at 0x7f16f5d95c40>,
+        # 'config': Configuration:
+        # Only the parenthesis below need to be escaped, ] and { do not.
+        call_msgs = len([line for line in self.lines if re.search(
+            r'pynisher]\s+Function called with argument: \(\), {', line)])
+        return call_msgs
+
+    def count_tae_pynisher_returns(self) -> int:
+        # We expect the return msg to be something like:
         # [DEBUG] [2020-11-30 11:53:11,264:pynisher] return value: (None, 0)
         # [DEBUG] [2020-11-30 11:53:13,768:pynisher] return value: (None, 0)
         return_msgs = len([line for line in self.lines if re.search(
             r'pynisher]\s+return value:\s+', line)])
-        return (return_msgs)
+        # When the pynisher pipe is prematurely closed, we also expect:
+        # Your function call closed the pipe prematurely
+        # -> Subprocess probably got an uncatchable signal
+        # We expect the return msg to be something like:
+        # OR
+        # Something else went wrong, sorry.
+        premature_msgs = len([line for line in self.lines if re.search(
+            r'pynisher]\s+Your function call closed the pipe prematurely', line)])
+        failure_msgs = len([line for line in self.lines if re.search(
+            r'pynisher]\s+Something else went wrong, sorry.', line)])
+        return return_msgs + premature_msgs + failure_msgs
 
     def get_automl_setting_from_log(self, dataset_name: str, setting: str) -> str:
         for line in self.lines:
