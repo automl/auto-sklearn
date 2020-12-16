@@ -1118,9 +1118,9 @@ class AutoML(BaseEstimator):
                 status.append('Abort')
             elif s == StatusType.MEMOUT:
                 status.append('Memout')
-            elif s == StatusType.RUNNING:
-                continue
-            elif s == StatusType.BUDGETEXHAUSTED:
+            # TODO remove StatusType.RUNNING at some point in the future when the new SMAC 0.13.2
+            #  is the new minimum required version!
+            elif s in (StatusType.STOP, StatusType.RUNNING):
                 continue
             else:
                 raise NotImplementedError(s)

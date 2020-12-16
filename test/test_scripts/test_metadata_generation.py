@@ -25,10 +25,10 @@ class TestMetadataGeneration(unittest.TestCase):
 
     def test_metadata_generation(self):
 
-        regression_task_id = 5022
+        regression_task_id = 360029
         regression_dataset_name = 'SWD'.lower()
-        classification_task_id = 75222
-        classification_dataset_name = 'analcatdata_halloffame'.lower()
+        classification_task_id = 245
+        classification_dataset_name = 'breast-w'.lower()
 
         current_directory = __file__
         scripts_directory = os.path.abspath(os.path.join(current_directory,
@@ -55,7 +55,7 @@ class TestMetadataGeneration(unittest.TestCase):
 
         with open(commands_output_file) as fh:
             cmds = fh.read().split('\n')
-            # 6 regression, 11 classification (roc_auc + task 258 is illegal), 1 empty line
+            # 6 regression, 7 classification (roc_auc + task 258 is illegal), 1 empty line
             self.assertEqual(len(cmds), 18, msg='\n'.join(cmds))
 
         for task_id, dataset_name, task_type, metric in (
@@ -194,7 +194,7 @@ class TestMetadataGeneration(unittest.TestCase):
             metafeatures_arff = fh.read().split('\n')
             contains_regression_id = False
             for line in metafeatures_arff:
-                if line.startswith('kin8nm,'):
+                if line.startswith('fri_c4_500_25,'):
                     contains_regression_id = True
             self.assertTrue(contains_regression_id, msg=metafeatures_arff)
 
@@ -206,7 +206,7 @@ class TestMetadataGeneration(unittest.TestCase):
             metafeatures_arff = fh.read().split('\n')
             contains_classification_id = False
             for line in metafeatures_arff:
-                if line.startswith('kr-vs-kp,'):
+                if line.startswith('anneal,'):
                     contains_classification_id = True
             self.assertTrue(contains_classification_id, msg=metafeatures_arff)
 
