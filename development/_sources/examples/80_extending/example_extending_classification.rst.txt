@@ -191,7 +191,7 @@ Create MLP classifier component for auto-sklearn
         num_nodes_per_layer, Type: UniformInteger, Range: [16, 216], Default: 32
         solver, Type: Categorical, Choices: {lbfgs, sgd, adam}, Default: adam
 
-    accuracy:  0.3356643356643357
+    accuracy:  0.40559440559440557
     [(1.000000, MyDummyClassifier(configuration=1, init_params={'instance': None},
                       random_state=1)),
     ]
@@ -202,7 +202,7 @@ Create MLP classifier component for auto-sklearn
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  15.963 seconds)
+   **Total running time of the script:** ( 0 minutes  15.163 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_classification.py:

@@ -27,45 +27,50 @@ The following example shows how to fit a simple regression model with
 
     /opt/hostedtoolcache/Python/3.8.6/x64/lib/python3.8/site-packages/pyparsing.py:3190: FutureWarning: Possible set intersection at position 3
       self.re = re.compile(self.reString)
-    [WARNING] [2020-12-11 17:21:09,863:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 45 not found
-    [WARNING] [2020-12-11 17:21:09,863:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 17 not found
-    [WARNING] [2020-12-11 17:21:09,865:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 24 not found
-    [(0.280000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'select_rates_regression', 'regressor:__choice__': 'adaboost', 'feature_preprocessor:select_rates_regression:alpha': 0.13294870400704156, 'feature_preprocessor:select_rates_regression:mode': 'fwe', 'feature_preprocessor:select_rates_regression:score_func': 'f_regression', 'regressor:adaboost:learning_rate': 0.47982456668237294, 'regressor:adaboost:loss': 'exponential', 'regressor:adaboost:max_depth': 6, 'regressor:adaboost:n_estimators': 178},
+    [WARNING] [2020-12-16 15:39:26,474:autosklearn.metalearning.metalearning.meta_base] Dataset boston already in meta-data. Removing occurence.
+    [WARNING] [2020-12-16 15:39:26,505:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance aloi
+    [WARNING] [2020-12-16 15:39:26,509:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance flora
+    [WARNING] [2020-12-16 15:39:26,514:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance qsar-tid-100852
+    [WARNING] [2020-12-16 15:39:26,515:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance qsar-tid-10475
+    [WARNING] [2020-12-16 15:39:26,515:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance qsar-tid-10502
+    [WARNING] [2020-12-16 15:39:26,515:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance qsar-tid-10809
+    [WARNING] [2020-12-16 15:39:26,516:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance qsar-tid-10980
+    [WARNING] [2020-12-16 15:39:26,516:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance qsar-tid-11
+    [WARNING] [2020-12-16 15:39:26,517:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance qsar-tid-11626
+    [WARNING] [2020-12-16 15:39:26,517:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance qsar-tid-12569
+    [WARNING] [2020-12-16 15:39:26,518:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance qsar-tid-12947
+    [WARNING] [2020-12-16 15:39:26,518:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance qsar-tid-12968
+    [WARNING] [2020-12-16 15:39:26,518:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance qsar-tid-163
+    [WARNING] [2020-12-16 15:39:26,519:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance qsar-tid-72
+    [WARNING] [2020-12-16 15:39:26,570:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance qsar-tid-11
+    [WARNING] [2020-12-16 15:39:26,571:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance qsar-tid-10980
+    [WARNING] [2020-12-16 15:39:26,571:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance qsar-tid-72
+    [WARNING] [2020-12-16 15:39:26,571:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance qsar-tid-163
+    [WARNING] [2020-12-16 15:39:26,571:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance qsar-tid-10502
+    [WARNING] [2020-12-16 15:39:26,571:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance qsar-tid-12947
+    [WARNING] [2020-12-16 15:39:26,571:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance qsar-tid-10475
+    [WARNING] [2020-12-16 15:39:26,571:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance qsar-tid-12569
+    [WARNING] [2020-12-16 15:39:26,571:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance qsar-tid-100852
+    [WARNING] [2020-12-16 15:39:26,572:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance qsar-tid-12968
+    [WARNING] [2020-12-16 15:39:26,572:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance qsar-tid-10809
+    [WARNING] [2020-12-16 15:39:26,572:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance qsar-tid-11626
+    [WARNING] [2020-12-16 15:39:26,572:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance aloi
+    [WARNING] [2020-12-16 15:39:26,572:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance flora
+    [(0.640000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'regressor:random_forest:bootstrap': 'True', 'regressor:random_forest:criterion': 'mse', 'regressor:random_forest:max_depth': 'None', 'regressor:random_forest:max_features': 1.0, 'regressor:random_forest:max_leaf_nodes': 'None', 'regressor:random_forest:min_impurity_decrease': 0.0, 'regressor:random_forest:min_samples_leaf': 1, 'regressor:random_forest:min_samples_split': 2, 'regressor:random_forest:min_weight_fraction_leaf': 0.0},
     dataset_properties={
       'task': 4,
       'sparse': False,
       'multioutput': False,
       'target_type': 'regression',
       'signed': False})),
-    (0.200000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'libsvm_svr', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.014087234899150132, 'regressor:libsvm_svr:C': 243.80018215429655, 'regressor:libsvm_svr:epsilon': 0.0010313680328976054, 'regressor:libsvm_svr:kernel': 'rbf', 'regressor:libsvm_svr:max_iter': -1, 'regressor:libsvm_svr:shrinking': 'True', 'regressor:libsvm_svr:tol': 0.0003015355281210108, 'regressor:libsvm_svr:degree': 5, 'regressor:libsvm_svr:gamma': 0.12602136380125653},
+    (0.200000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'gaussian_process', 'feature_preprocessor:polynomial:degree': 2, 'feature_preprocessor:polynomial:include_bias': 'True', 'feature_preprocessor:polynomial:interaction_only': 'True', 'regressor:gaussian_process:alpha': 0.037731974209709904, 'regressor:gaussian_process:thetaL': 5.002213042554931e-07, 'regressor:gaussian_process:thetaU': 22409.945864393645},
     dataset_properties={
       'task': 4,
       'sparse': False,
       'multioutput': False,
       'target_type': 'regression',
       'signed': False})),
-    (0.180000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'select_rates_regression', 'regressor:__choice__': 'adaboost', 'feature_preprocessor:select_rates_regression:alpha': 0.13294870400704156, 'feature_preprocessor:select_rates_regression:mode': 'fwe', 'feature_preprocessor:select_rates_regression:score_func': 'f_regression', 'regressor:adaboost:learning_rate': 0.47982456668237294, 'regressor:adaboost:loss': 'square', 'regressor:adaboost:max_depth': 10, 'regressor:adaboost:n_estimators': 143},
-    dataset_properties={
-      'task': 4,
-      'sparse': False,
-      'multioutput': False,
-      'target_type': 'regression',
-      'signed': False})),
-    (0.140000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'select_rates_regression', 'regressor:__choice__': 'gradient_boosting', 'feature_preprocessor:select_rates_regression:alpha': 0.12022046696839699, 'feature_preprocessor:select_rates_regression:mode': 'fdr', 'feature_preprocessor:select_rates_regression:score_func': 'f_regression', 'regressor:gradient_boosting:early_stop': 'off', 'regressor:gradient_boosting:l2_regularization': 9.732836733778985e-06, 'regressor:gradient_boosting:learning_rate': 0.07118635674179737, 'regressor:gradient_boosting:loss': 'least_squares', 'regressor:gradient_boosting:max_bins': 255, 'regressor:gradient_boosting:max_depth': 'None', 'regressor:gradient_boosting:max_leaf_nodes': 9, 'regressor:gradient_boosting:min_samples_leaf': 6, 'regressor:gradient_boosting:scoring': 'loss', 'regressor:gradient_boosting:tol': 1e-07},
-    dataset_properties={
-      'task': 4,
-      'sparse': False,
-      'multioutput': False,
-      'target_type': 'regression',
-      'signed': False})),
-    (0.120000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'feature_preprocessor:__choice__': 'fast_ica', 'regressor:__choice__': 'gradient_boosting', 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max': 0.7049491520337817, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min': 0.23602880130851764, 'feature_preprocessor:fast_ica:algorithm': 'deflation', 'feature_preprocessor:fast_ica:fun': 'cube', 'feature_preprocessor:fast_ica:whiten': 'False', 'regressor:gradient_boosting:early_stop': 'off', 'regressor:gradient_boosting:l2_regularization': 4.696295762197504e-10, 'regressor:gradient_boosting:learning_rate': 0.03269357604116943, 'regressor:gradient_boosting:loss': 'least_squares', 'regressor:gradient_boosting:max_bins': 255, 'regressor:gradient_boosting:max_depth': 'None', 'regressor:gradient_boosting:max_leaf_nodes': 32, 'regressor:gradient_boosting:min_samples_leaf': 14, 'regressor:gradient_boosting:scoring': 'loss', 'regressor:gradient_boosting:tol': 1e-07},
-    dataset_properties={
-      'task': 4,
-      'sparse': False,
-      'multioutput': False,
-      'target_type': 'regression',
-      'signed': False})),
-    (0.080000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'feature_preprocessor:__choice__': 'feature_agglomeration', 'regressor:__choice__': 'gradient_boosting', 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 1425, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'uniform', 'feature_preprocessor:feature_agglomeration:affinity': 'cosine', 'feature_preprocessor:feature_agglomeration:linkage': 'complete', 'feature_preprocessor:feature_agglomeration:n_clusters': 276, 'feature_preprocessor:feature_agglomeration:pooling_func': 'max', 'regressor:gradient_boosting:early_stop': 'off', 'regressor:gradient_boosting:l2_regularization': 0.00018459550741867383, 'regressor:gradient_boosting:learning_rate': 0.04757728173371449, 'regressor:gradient_boosting:loss': 'least_squares', 'regressor:gradient_boosting:max_bins': 255, 'regressor:gradient_boosting:max_depth': 'None', 'regressor:gradient_boosting:max_leaf_nodes': 16, 'regressor:gradient_boosting:min_samples_leaf': 6, 'regressor:gradient_boosting:scoring': 'loss', 'regressor:gradient_boosting:tol': 1e-07},
+    (0.160000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'ard_regression', 'feature_preprocessor:polynomial:degree': 2, 'feature_preprocessor:polynomial:include_bias': 'True', 'feature_preprocessor:polynomial:interaction_only': 'False', 'regressor:ard_regression:alpha_1': 0.0003701926442639788, 'regressor:ard_regression:alpha_2': 2.2118001735899097e-07, 'regressor:ard_regression:fit_intercept': 'True', 'regressor:ard_regression:lambda_1': 1.2037591637980971e-06, 'regressor:ard_regression:lambda_2': 4.358378124977852e-09, 'regressor:ard_regression:n_iter': 300, 'regressor:ard_regression:threshold_lambda': 1136.5286041327277, 'regressor:ard_regression:tol': 0.021944240404849075},
     dataset_properties={
       'task': 4,
       'sparse': False,
@@ -73,7 +78,7 @@ The following example shows how to fit a simple regression model with
       'target_type': 'regression',
       'signed': False})),
     ]
-    R2 score: 0.8957471434869163
+    R2 score: 0.9040477219435149
 
 
 
@@ -129,7 +134,7 @@ The following example shows how to fit a simple regression model with
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  4.422 seconds)
+   **Total running time of the script:** ( 1 minutes  57.803 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_regression.py:

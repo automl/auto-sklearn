@@ -446,7 +446,7 @@ Both examples are intended to show how the optimization strategy in *auto-sklear
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  46.024 seconds)
+   **Total running time of the script:** ( 1 minutes  47.307 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_random_search.py:
