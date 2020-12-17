@@ -5,8 +5,6 @@ import sklearn.utils
 
 from autosklearn.metalearning.metalearning.kNearestDatasets.kND import KNearestDatasets
 
-from ....util.logging_ import get_logger
-
 
 def test_function(params):
     return np.random.random()
@@ -14,7 +12,7 @@ def test_function(params):
 
 class MetaLearningOptimizer(object):
     def __init__(self, dataset_name, configuration_space,
-                 meta_base, distance='l1', seed=None, use_features=None,
+                 meta_base, logger, distance='l1', seed=None, use_features=None,
                  distance_kwargs=None):
         self.dataset_name = dataset_name
         self.configuration_space = configuration_space
@@ -25,7 +23,7 @@ class MetaLearningOptimizer(object):
         self.distance_kwargs = distance_kwargs
         self.kND = None     # For caching, makes things faster...
 
-        self.logger = get_logger(__name__)
+        self.logger = logger
 
     def metalearning_suggest_all(self, exclude_double_configurations=True):
         """Return a list of the best hyperparameters of neighboring datasets"""
@@ -102,6 +100,7 @@ class MetaLearningOptimizer(object):
             random_state = sklearn.utils.check_random_state(self.seed)
             kND = KNearestDatasets(metric=self.distance,
                                    random_state=random_state,
+                                   logger=self.logger,
                                    metric_params=rf_params)
 
             runs = dict()

@@ -5,30 +5,28 @@ import time
 import arff
 import scipy.sparse
 
-from autosklearn.util.logging_ import get_logger
-
 
 class AbstractMetaFeature(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
     def __init__(self):
-        self.logger = get_logger(__name__)
-
-    @abstractmethod
-    def _calculate(cls, X, y, categorical):
         pass
 
-    def __call__(self, X, y, categorical=None):
+    @abstractmethod
+    def _calculate(cls, X, y, logger, categorical):
+        pass
+
+    def __call__(self, X, y, logger, categorical=None):
         if categorical is None:
             categorical = [False for i in range(X.shape[1])]
         starttime = time.time()
 
         try:
             if scipy.sparse.issparse(X) and hasattr(self, "_calculate_sparse"):
-                value = self._calculate_sparse(X, y, categorical)
+                value = self._calculate_sparse(X, y, logger, categorical)
             else:
-                value = self._calculate(X, y, categorical)
+                value = self._calculate(X, y, logger, categorical)
             comment = ""
         except MemoryError:
             value = None
