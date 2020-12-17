@@ -252,7 +252,7 @@ class AutoML(BaseEstimator):
         self._dask_client = dask.distributed.Client(
             dask.distributed.LocalCluster(
                 n_workers=self._n_jobs,
-                processes=True if self._n_jobs != 1 else False,
+                processes=False,
                 threads_per_worker=1,
                 # We use the temporal directory to save the
                 # dask workers, because deleting workers
