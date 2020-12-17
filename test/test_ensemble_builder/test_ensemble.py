@@ -11,8 +11,8 @@ import numpy as np
 import pandas as pd
 from smac.runhistory.runhistory import RunValue, RunKey, RunHistory
 
-from autosklearn.constants import MULTILABEL_CLASSIFICATION, BINARY_CLASSIFICATION
-from autosklearn.metrics import roc_auc, accuracy, log_loss
+from autosklearn.constants import MULTILABEL_CLASSIFICATION, BINARY_CLASSIFICATION, REGRESSION
+from autosklearn.metrics import roc_auc, accuracy, log_loss, root_mean_squared_error
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensemble_builder import (
     EnsembleBuilder,
@@ -644,6 +644,42 @@ def test_read_pickle_read_preds(ensemble_backend):
     compare_read_preds(ensbuilder2.read_preds, ensbuilder.read_preds)
     compare_read_preds(ensbuilder2.read_scores, ensbuilder.read_scores)
     assert ensbuilder2.last_hash == ensbuilder.last_hash
+
+
+def testEnsembleSelection():
+    """
+    Makes sure ensemble selection fit method creates an ensemble correctly
+    """
+
+    ensemble = EnsembleSelection(ensemble_size=10,
+                                 task_type=REGRESSION,
+                                 random_state=np.random.RandomState(0),
+                                 metric=root_mean_squared_error)
+
+    # We create a problem such that we encourage the addition of members to the ensemble
+    # Fundamentally, the average of 10 sequential number is 5.5
+    y_true = np.full((100000), 5.5)
+    predictions = []
+    for i in range(1, 20):
+        pred = np.full((100000), i, dtype=np.float32)
+        pred[i*5:5*(i+1)] = 5.5 * i
+        predictions.append(pred)
+
+    ensemble.fit(predictions, y_true, identifiers=[(i, i, i) for i in range(20)])
+
+    np.testing.assert_array_equal(ensemble.weights_,
+                                  np.array([0.1, 0.2, 0.2, 0.1, 0.1, 0.1, 0.1, 0.1,
+                                           0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+                                           0.,  0., 0.]))
+
+    assert ensemble.identifiers_ == [(i, i, i) for i in range(20)]
+
+    np.testing.assert_array_almost_equal(np.array(ensemble.trajectory_),
+                                         np.array([3.462296925452813, 2.679202306657711,
+                                                  2.2748626436960375, 2.065717187806695,
+                                                  1.7874562615598728, 1.6983448128441783,
+                                                  1.559451106330085, 1.5316326052614575,
+                                                  1.3801950121782542, 1.3554980575295374]))
 
 
 def testPredict():
