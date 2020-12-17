@@ -59,15 +59,7 @@ list or numpy arrays as there is no per-column dtype (further details in the exa
     A13     float64
     A14     float64
     dtype: object
-    [WARNING] [2020-12-16 15:48:41,976:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance cifar_10
-    [WARNING] [2020-12-16 15:48:41,982:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance gtsrb-hog03
-    [WARNING] [2020-12-16 15:48:41,985:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance kuzushiji-49
-    [WARNING] [2020-12-16 15:48:41,995:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance svhn
-    [WARNING] [2020-12-16 15:48:42,083:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance svhn
-    [WARNING] [2020-12-16 15:48:42,083:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance cifar_10
-    [WARNING] [2020-12-16 15:48:42,084:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance gtsrb-hog03
-    [WARNING] [2020-12-16 15:48:42,084:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance kuzushiji-49
-    Accuracy score 0.8753623188405797
+    Accuracy score 0.8521739130434782
 
 
 
@@ -214,7 +206,7 @@ list or numpy arrays as there is no per-column dtype (further details in the exa
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  56.272 seconds)
+   **Total running time of the script:** ( 2 minutes  0.383 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_pandas_train_test.py:

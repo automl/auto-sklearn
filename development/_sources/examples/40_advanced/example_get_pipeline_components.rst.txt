@@ -32,216 +32,8 @@ with the sklearn components directly, in this case a PCA preprocessor.
 
  .. code-block:: none
 
-    [WARNING] [2020-12-16 15:56:40,975:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance cifar_10
-    [WARNING] [2020-12-16 15:56:40,981:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance gtsrb-hog03
-    [WARNING] [2020-12-16 15:56:40,985:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance kuzushiji-49
-    [WARNING] [2020-12-16 15:56:40,995:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance svhn
-    [WARNING] [2020-12-16 15:56:41,080:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance cifar_10
-    [WARNING] [2020-12-16 15:56:41,080:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance svhn
-    [WARNING] [2020-12-16 15:56:41,080:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance gtsrb-hog03
-    [WARNING] [2020-12-16 15:56:41,080:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance kuzushiji-49
-    [WARNING] [2020-12-16 15:56:41,081:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 176 not found
-    [WARNING] [2020-12-16 15:56:41,081:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 162 not found
-    [WARNING] [2020-12-16 15:56:41,081:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 476 not found
-    [WARNING] [2020-12-16 15:56:41,081:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 601 not found
-    [WARNING] [2020-12-16 15:56:41,082:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 492 not found
-    [WARNING] [2020-12-16 15:56:41,082:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 440 not found
-    [WARNING] [2020-12-16 15:56:41,082:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 32 not found
-    [WARNING] [2020-12-16 15:56:41,082:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 220 not found
-    [WARNING] [2020-12-16 15:56:41,082:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 566 not found
-    [WARNING] [2020-12-16 15:56:41,082:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 332 not found
-    [WARNING] [2020-12-16 15:56:41,082:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 22 not found
-    [WARNING] [2020-12-16 15:56:41,083:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 61 not found
-    [WARNING] [2020-12-16 15:56:41,083:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 407 not found
-    [WARNING] [2020-12-16 15:56:41,083:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 91 not found
-    [WARNING] [2020-12-16 15:56:41,083:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 702 not found
-    [WARNING] [2020-12-16 15:56:41,083:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 546 not found
-    [WARNING] [2020-12-16 15:56:41,084:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 663 not found
-    [WARNING] [2020-12-16 15:56:41,084:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 257 not found
-    [WARNING] [2020-12-16 15:56:41,084:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 467 not found
-    [WARNING] [2020-12-16 15:56:41,084:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 631 not found
-    [WARNING] [2020-12-16 15:56:41,084:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 7 not found
-    [WARNING] [2020-12-16 15:56:41,084:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 184 not found
-    [WARNING] [2020-12-16 15:56:41,084:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 560 not found
-    [WARNING] [2020-12-16 15:56:41,084:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 329 not found
-    [WARNING] [2020-12-16 15:56:41,084:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 386 not found
-    [WARNING] [2020-12-16 15:56:41,085:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 9 not found
-    [WARNING] [2020-12-16 15:56:41,085:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 75 not found
-    [WARNING] [2020-12-16 15:56:41,085:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 345 not found
-    [WARNING] [2020-12-16 15:56:41,085:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 399 not found
-    [WARNING] [2020-12-16 15:56:41,085:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 222 not found
-    [WARNING] [2020-12-16 15:56:41,085:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 149 not found
-    [WARNING] [2020-12-16 15:56:41,085:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 238 not found
-    [WARNING] [2020-12-16 15:56:41,085:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 211 not found
-    [WARNING] [2020-12-16 15:56:41,086:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 358 not found
-    [WARNING] [2020-12-16 15:56:41,086:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 188 not found
-    [WARNING] [2020-12-16 15:56:41,086:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 460 not found
-    [WARNING] [2020-12-16 15:56:41,086:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 585 not found
-    [WARNING] [2020-12-16 15:56:41,086:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 690 not found
-    [WARNING] [2020-12-16 15:56:41,086:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 254 not found
-    [WARNING] [2020-12-16 15:56:41,086:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 473 not found
-    [WARNING] [2020-12-16 15:56:41,087:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 71 not found
-    [WARNING] [2020-12-16 15:56:41,087:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 230 not found
-    [WARNING] [2020-12-16 15:56:41,087:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 108 not found
-    [WARNING] [2020-12-16 15:56:41,087:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 590 not found
-    [WARNING] [2020-12-16 15:56:41,087:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 81 not found
-    [WARNING] [2020-12-16 15:56:41,088:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 506 not found
-    [WARNING] [2020-12-16 15:56:41,088:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 694 not found
-    [WARNING] [2020-12-16 15:56:41,088:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 426 not found
-    [WARNING] [2020-12-16 15:56:41,089:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 327 not found
-    [WARNING] [2020-12-16 15:56:41,089:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 657 not found
-    [WARNING] [2020-12-16 15:56:41,089:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 659 not found
-    [WARNING] [2020-12-16 15:56:41,090:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 532 not found
-    [WARNING] [2020-12-16 15:56:41,090:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 315 not found
-    [WARNING] [2020-12-16 15:56:41,090:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 138 not found
-    [WARNING] [2020-12-16 15:56:41,090:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 206 not found
-    [WARNING] [2020-12-16 15:56:41,090:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 579 not found
-    [WARNING] [2020-12-16 15:56:41,091:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 668 not found
-    [WARNING] [2020-12-16 15:56:41,091:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 454 not found
-    [WARNING] [2020-12-16 15:56:41,091:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 1 not found
-    [WARNING] [2020-12-16 15:56:41,091:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 147 not found
-    [WARNING] [2020-12-16 15:56:41,091:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 393 not found
-    [WARNING] [2020-12-16 15:56:41,091:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 347 not found
-    [WARNING] [2020-12-16 15:56:41,091:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 701 not found
-    [WARNING] [2020-12-16 15:56:41,092:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 28 not found
-    [WARNING] [2020-12-16 15:56:41,092:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 282 not found
-    [WARNING] [2020-12-16 15:56:41,092:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 367 not found
-    [WARNING] [2020-12-16 15:56:41,092:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 518 not found
-    [WARNING] [2020-12-16 15:56:41,092:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 648 not found
-    [WARNING] [2020-12-16 15:56:41,093:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 521 not found
-    [WARNING] [2020-12-16 15:56:41,093:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 227 not found
-    [WARNING] [2020-12-16 15:56:41,093:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 145 not found
-    [WARNING] [2020-12-16 15:56:41,093:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 576 not found
-    [WARNING] [2020-12-16 15:56:41,093:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 680 not found
-    [WARNING] [2020-12-16 15:56:41,093:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 605 not found
-    [WARNING] [2020-12-16 15:56:41,094:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 624 not found
-    [WARNING] [2020-12-16 15:56:41,094:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 191 not found
-    [WARNING] [2020-12-16 15:56:41,094:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 251 not found
-    [WARNING] [2020-12-16 15:56:41,094:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 414 not found
-    [WARNING] [2020-12-16 15:56:41,094:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 574 not found
-    [WARNING] [2020-12-16 15:56:41,094:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 283 not found
-    [WARNING] [2020-12-16 15:56:41,094:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 262 not found
-    [WARNING] [2020-12-16 15:56:41,094:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 369 not found
-    [WARNING] [2020-12-16 15:56:41,095:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 444 not found
-    [WARNING] [2020-12-16 15:56:41,095:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 264 not found
-    [WARNING] [2020-12-16 15:56:41,095:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 14 not found
-    [WARNING] [2020-12-16 15:56:41,095:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 670 not found
-    [WARNING] [2020-12-16 15:56:41,095:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 430 not found
-    [WARNING] [2020-12-16 15:56:41,095:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 674 not found
-    [WARNING] [2020-12-16 15:56:41,095:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 563 not found
-    [WARNING] [2020-12-16 15:56:41,095:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 357 not found
-    [WARNING] [2020-12-16 15:56:41,096:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 608 not found
-    [WARNING] [2020-12-16 15:56:41,096:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 338 not found
-    [WARNING] [2020-12-16 15:56:41,096:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 43 not found
-    [WARNING] [2020-12-16 15:56:41,096:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 160 not found
-    [WARNING] [2020-12-16 15:56:41,096:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 382 not found
-    [WARNING] [2020-12-16 15:56:41,096:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 53 not found
-    [WARNING] [2020-12-16 15:56:41,096:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 48 not found
-    [WARNING] [2020-12-16 15:56:41,096:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 536 not found
-    [WARNING] [2020-12-16 15:56:41,097:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 555 not found
-    [WARNING] [2020-12-16 15:56:41,097:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 214 not found
-    [WARNING] [2020-12-16 15:56:41,097:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 388 not found
-    [WARNING] [2020-12-16 15:56:41,097:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 676 not found
-    [WARNING] [2020-12-16 15:56:41,097:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 97 not found
-    [WARNING] [2020-12-16 15:56:41,097:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 40 not found
-    [WARNING] [2020-12-16 15:56:41,097:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 270 not found
-    [WARNING] [2020-12-16 15:56:41,097:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 512 not found
-    [WARNING] [2020-12-16 15:56:41,098:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 595 not found
-    [WARNING] [2020-12-16 15:56:41,098:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 131 not found
-    [WARNING] [2020-12-16 15:56:41,098:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 687 not found
-    [WARNING] [2020-12-16 15:56:41,098:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 114 not found
-    [WARNING] [2020-12-16 15:56:41,098:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 129 not found
-    [WARNING] [2020-12-16 15:56:41,098:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 193 not found
-    [WARNING] [2020-12-16 15:56:41,098:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 197 not found
-    [WARNING] [2020-12-16 15:56:41,099:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 485 not found
-    [WARNING] [2020-12-16 15:56:41,099:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 83 not found
-    [WARNING] [2020-12-16 15:56:41,099:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 88 not found
-    [WARNING] [2020-12-16 15:56:41,099:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 37 not found
-    [WARNING] [2020-12-16 15:56:41,100:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 422 not found
-    [WARNING] [2020-12-16 15:56:41,100:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 237 not found
-    [WARNING] [2020-12-16 15:56:41,100:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 470 not found
-    [WARNING] [2020-12-16 15:56:41,100:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 613 not found
-    [WARNING] [2020-12-16 15:56:41,100:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 293 not found
-    [WARNING] [2020-12-16 15:56:41,100:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 378 not found
-    [WARNING] [2020-12-16 15:56:41,100:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 204 not found
-    [WARNING] [2020-12-16 15:56:41,100:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 154 not found
-    [WARNING] [2020-12-16 15:56:41,100:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 340 not found
-    [WARNING] [2020-12-16 15:56:41,101:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 617 not found
-    [WARNING] [2020-12-16 15:56:41,101:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 247 not found
-    [WARNING] [2020-12-16 15:56:41,101:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 352 not found
-    [WARNING] [2020-12-16 15:56:41,101:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 172 not found
-    [WARNING] [2020-12-16 15:56:41,101:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 277 not found
-    [WARNING] [2020-12-16 15:56:41,102:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 683 not found
-    [WARNING] [2020-12-16 15:56:41,102:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 124 not found
-    [WARNING] [2020-12-16 15:56:41,102:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 232 not found
-    [WARNING] [2020-12-16 15:56:41,102:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 112 not found
-    [WARNING] [2020-12-16 15:56:41,102:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 183 not found
-    [WARNING] [2020-12-16 15:56:41,102:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 571 not found
-    [WARNING] [2020-12-16 15:56:41,102:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 524 not found
-    [WARNING] [2020-12-16 15:56:41,102:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 707 not found
-    [WARNING] [2020-12-16 15:56:41,103:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 635 not found
-    [WARNING] [2020-12-16 15:56:41,103:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 99 not found
-    [WARNING] [2020-12-16 15:56:41,103:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 434 not found
-    [WARNING] [2020-12-16 15:56:41,103:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 494 not found
-    [WARNING] [2020-12-16 15:56:41,103:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 615 not found
-    [WARNING] [2020-12-16 15:56:41,103:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 587 not found
-    [WARNING] [2020-12-16 15:56:41,103:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 302 not found
-    [WARNING] [2020-12-16 15:56:41,103:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 653 not found
-    [WARNING] [2020-12-16 15:56:41,104:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 445 not found
-    [WARNING] [2020-12-16 15:56:41,104:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 69 not found
-    [WARNING] [2020-12-16 15:56:41,104:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 437 not found
-    [WARNING] [2020-12-16 15:56:41,104:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 142 not found
-    [WARNING] [2020-12-16 15:56:41,104:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 310 not found
-    [WARNING] [2020-12-16 15:56:41,104:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 173 not found
-    [WARNING] [2020-12-16 15:56:41,104:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 647 not found
-    [WARNING] [2020-12-16 15:56:41,104:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 461 not found
-    [WARNING] [2020-12-16 15:56:41,105:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 515 not found
-    [WARNING] [2020-12-16 15:56:41,105:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 17 not found
-    [WARNING] [2020-12-16 15:56:41,105:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 395 not found
-    [WARNING] [2020-12-16 15:56:41,105:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 25 not found
-    [WARNING] [2020-12-16 15:56:41,105:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 121 not found
-    [WARNING] [2020-12-16 15:56:41,105:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 165 not found
-    [WARNING] [2020-12-16 15:56:41,106:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 313 not found
-    [WARNING] [2020-12-16 15:56:41,106:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 412 not found
-    [WARNING] [2020-12-16 15:56:41,106:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 628 not found
-    [WARNING] [2020-12-16 15:56:41,106:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 288 not found
-    [WARNING] [2020-12-16 15:56:41,106:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 298 not found
-    [WARNING] [2020-12-16 15:56:41,106:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 486 not found
-    [WARNING] [2020-12-16 15:56:41,106:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 243 not found
-    [WARNING] [2020-12-16 15:56:41,106:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 480 not found
-    [WARNING] [2020-12-16 15:56:41,106:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 553 not found
-    [WARNING] [2020-12-16 15:56:41,107:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 363 not found
-    [WARNING] [2020-12-16 15:56:41,107:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 528 not found
-    [WARNING] [2020-12-16 15:56:41,107:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 403 not found
-    [WARNING] [2020-12-16 15:56:41,107:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 622 not found
-    [WARNING] [2020-12-16 15:56:41,107:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 199 not found
-    [WARNING] [2020-12-16 15:56:41,107:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 448 not found
-    [WARNING] [2020-12-16 15:56:41,107:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 134 not found
-    [WARNING] [2020-12-16 15:56:41,107:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 543 not found
-    [WARNING] [2020-12-16 15:56:41,107:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 548 not found
-    [WARNING] [2020-12-16 15:56:41,108:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 499 not found
-    [WARNING] [2020-12-16 15:56:41,108:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 596 not found
-    [WARNING] [2020-12-16 15:56:41,108:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 19 not found
-    [WARNING] [2020-12-16 15:56:41,108:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 58 not found
-    [WARNING] [2020-12-16 15:56:41,108:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 640 not found
-    [WARNING] [2020-12-16 15:56:41,108:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 317 not found
-    [WARNING] [2020-12-16 15:56:41,109:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 509 not found
-    [WARNING] [2020-12-16 15:56:41,109:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 419 not found
-    [WARNING] [2020-12-16 15:56:41,109:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 304 not found
-    [WARNING] [2020-12-16 15:56:41,109:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 503 not found
-    [WARNING] [2020-12-16 15:56:41,109:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 375 not found
-    [WARNING] [2020-12-16 15:56:41,109:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 643 not found
-    [WARNING] [2020-12-16 15:56:41,110:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 322 not found
-    [WARNING] [2020-12-16 15:56:41,110:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 538 not found
-    [WARNING] [2020-12-16 15:56:41,110:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 86 not found
-    [WARNING] [2020-12-16 15:56:41,110:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 120 not found
-    [WARNING] [2020-12-16 15:56:41,110:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 452 not found
-    [WARNING] [2020-12-16 15:56:41,111:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 291 not found
-    [WARNING] [2020-12-16 15:56:41,111:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 102 not found
-    [WARNING] [2020-12-16 15:56:41,111:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 275 not found
-    [WARNING] [2020-12-16 15:56:41,111:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Configuration 150 not found
-    Accuracy score:0.951048951048951
-    [(0.320000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'pca', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.9331254454871041, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 2, 'classifier:random_forest:min_samples_split': 20, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.005069923784737444, 'feature_preprocessor:pca:keep_variance': 0.9967857433838874, 'feature_preprocessor:pca:whiten': 'False'},
+    Accuracy score:0.9440559440559441
+    [(0.260000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'mlp', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'feature_preprocessor:__choice__': 'pca', 'classifier:mlp:activation': 'tanh', 'classifier:mlp:alpha': 1.103855734598575e-05, 'classifier:mlp:batch_size': 'auto', 'classifier:mlp:beta_1': 0.9, 'classifier:mlp:beta_2': 0.999, 'classifier:mlp:early_stopping': 'valid', 'classifier:mlp:epsilon': 1e-08, 'classifier:mlp:hidden_layer_depth': 3, 'classifier:mlp:learning_rate_init': 0.00014375616988222174, 'classifier:mlp:n_iter_no_change': 32, 'classifier:mlp:num_nodes_per_layer': 229, 'classifier:mlp:shuffle': 'True', 'classifier:mlp:solver': 'adam', 'classifier:mlp:tol': 0.0001, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.002766772136115771, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 180, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'uniform', 'feature_preprocessor:pca:keep_variance': 0.7895711479212801, 'feature_preprocessor:pca:whiten': 'True', 'classifier:mlp:validation_fraction': 0.1},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -249,7 +41,7 @@ with the sklearn components directly, in this case a PCA preprocessor.
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.300000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'mlp', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'feature_preprocessor:__choice__': 'pca', 'classifier:mlp:activation': 'tanh', 'classifier:mlp:alpha': 1.103855734598575e-05, 'classifier:mlp:batch_size': 'auto', 'classifier:mlp:beta_1': 0.9, 'classifier:mlp:beta_2': 0.999, 'classifier:mlp:early_stopping': 'valid', 'classifier:mlp:epsilon': 1e-08, 'classifier:mlp:hidden_layer_depth': 3, 'classifier:mlp:learning_rate_init': 0.00014375616988222174, 'classifier:mlp:n_iter_no_change': 32, 'classifier:mlp:num_nodes_per_layer': 229, 'classifier:mlp:shuffle': 'True', 'classifier:mlp:solver': 'adam', 'classifier:mlp:tol': 0.0001, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.002766772136115771, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 180, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'uniform', 'feature_preprocessor:pca:keep_variance': 0.7895711479212801, 'feature_preprocessor:pca:whiten': 'True', 'classifier:mlp:validation_fraction': 0.1},
+    (0.240000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'pca', 'classifier:random_forest:bootstrap': 'False', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5422582251087723, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 17, 'classifier:random_forest:min_samples_split': 15, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0038512976944604285, 'feature_preprocessor:pca:keep_variance': 0.5735718374870298, 'feature_preprocessor:pca:whiten': 'False'},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -257,7 +49,7 @@ with the sklearn components directly, in this case a PCA preprocessor.
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.140000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'pca', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'feature_preprocessor:pca:keep_variance': 0.9999, 'feature_preprocessor:pca:whiten': 'False'},
+    (0.220000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'pca', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.9331254454871041, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 2, 'classifier:random_forest:min_samples_split': 20, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.005069923784737444, 'feature_preprocessor:pca:keep_variance': 0.9967857433838874, 'feature_preprocessor:pca:whiten': 'False'},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -265,7 +57,7 @@ with the sklearn components directly, in this case a PCA preprocessor.
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.140000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'libsvm_svc', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'pca', 'classifier:libsvm_svc:C': 100.5905006626969, 'classifier:libsvm_svc:gamma': 0.011333066835975528, 'classifier:libsvm_svc:kernel': 'poly', 'classifier:libsvm_svc:max_iter': -1, 'classifier:libsvm_svc:shrinking': 'True', 'classifier:libsvm_svc:tol': 0.012391313886912093, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.010000000000000004, 'feature_preprocessor:pca:keep_variance': 0.9290439925152777, 'feature_preprocessor:pca:whiten': 'False', 'classifier:libsvm_svc:coef0': 0.08087614244138486, 'classifier:libsvm_svc:degree': 3},
+    (0.180000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'libsvm_svc', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'pca', 'classifier:libsvm_svc:C': 100.5905006626969, 'classifier:libsvm_svc:gamma': 0.011333066835975528, 'classifier:libsvm_svc:kernel': 'poly', 'classifier:libsvm_svc:max_iter': -1, 'classifier:libsvm_svc:shrinking': 'True', 'classifier:libsvm_svc:tol': 0.012391313886912093, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.010000000000000004, 'feature_preprocessor:pca:keep_variance': 0.9290439925152777, 'feature_preprocessor:pca:whiten': 'False', 'classifier:libsvm_svc:coef0': 0.08087614244138486, 'classifier:libsvm_svc:degree': 3},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -273,7 +65,15 @@ with the sklearn components directly, in this case a PCA preprocessor.
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.100000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'k_nearest_neighbors', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:__choice__': 'pca', 'classifier:k_nearest_neighbors:n_neighbors': 4, 'classifier:k_nearest_neighbors:p': 2, 'classifier:k_nearest_neighbors:weights': 'distance', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.008015420020402715, 'feature_preprocessor:pca:keep_variance': 0.8047274080856589, 'feature_preprocessor:pca:whiten': 'False'},
+    (0.080000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'pca', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'feature_preprocessor:pca:keep_variance': 0.9999, 'feature_preprocessor:pca:whiten': 'False'},
+    dataset_properties={
+      'task': 1,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'classification',
+      'signed': False})),
+    (0.020000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'k_nearest_neighbors', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:__choice__': 'pca', 'classifier:k_nearest_neighbors:n_neighbors': 4, 'classifier:k_nearest_neighbors:p': 2, 'classifier:k_nearest_neighbors:weights': 'distance', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.008015420020402715, 'feature_preprocessor:pca:keep_variance': 0.8047274080856589, 'feature_preprocessor:pca:whiten': 'False'},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -287,31 +87,31 @@ with the sklearn components directly, in this case a PCA preprocessor.
       Metric: accuracy
       Best validation score: 0.971631
       Number of target algorithm runs: 6
-      Number of successful target algorithm runs: 5
+      Number of successful target algorithm runs: 6
       Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 1
+      Number of target algorithms that exceeded the time limit: 0
       Number of target algorithms that exceeded the memory limit: 0
 
-    <smac.runhistory.runhistory.RunHistory object at 0x7f19c4407af0>
+    <smac.runhistory.runhistory.RunHistory object at 0x7f95659b21c0>
     8
     #########
     RunKey(config_id=1, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.08510638297872342, time=2.608668565750122, status=<StatusType.SUCCESS: 1>, starttime=1608134201.9004984, endtime=1608134204.6039965, additional_info={'duration': 1.668154001235962, 'num_run': 2, 'train_loss': 0.0, 'configuration_origin': 'Initial design'})
+    RunValue(cost=0.08510638297872342, time=2.1666722297668457, status=<StatusType.SUCCESS: 1>, starttime=1608205983.8942142, endtime=1608205986.1624799, additional_info={'duration': 1.3106963634490967, 'num_run': 2, 'train_loss': 0.0, 'configuration_origin': 'Initial design'})
     #########
     RunKey(config_id=2, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.07092198581560283, time=2.3877782821655273, status=<StatusType.SUCCESS: 1>, starttime=1608134204.642403, endtime=1608134207.125843, additional_info={'duration': 1.3939154148101807, 'num_run': 3, 'train_loss': 0.06315789473684208, 'configuration_origin': 'Initial design'})
+    RunValue(cost=0.07092198581560283, time=1.9038007259368896, status=<StatusType.SUCCESS: 1>, starttime=1608205986.196437, endtime=1608205988.2036173, additional_info={'duration': 1.088761329650879, 'num_run': 3, 'train_loss': 0.06315789473684208, 'configuration_origin': 'Initial design'})
     #########
     RunKey(config_id=3, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.028368794326241176, time=2.232430934906006, status=<StatusType.SUCCESS: 1>, starttime=1608134208.835775, endtime=1608134211.1629097, additional_info={'duration': 1.339444875717163, 'num_run': 4, 'train_loss': 0.04210526315789476, 'configuration_origin': 'Initial design'})
+    RunValue(cost=0.028368794326241176, time=1.8092832565307617, status=<StatusType.SUCCESS: 1>, starttime=1608205989.654303, endtime=1608205991.557806, additional_info={'duration': 1.033571481704712, 'num_run': 4, 'train_loss': 0.04210526315789476, 'configuration_origin': 'Initial design'})
     #########
     RunKey(config_id=4, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.1063829787234043, time=1.279904842376709, status=<StatusType.SUCCESS: 1>, starttime=1608134211.1975677, endtime=1608134212.5692801, additional_info={'duration': 0.35587143898010254, 'num_run': 5, 'train_loss': 0.0, 'configuration_origin': 'Initial design'})
+    RunValue(cost=0.1063829787234043, time=1.0505905151367188, status=<StatusType.SUCCESS: 1>, starttime=1608205991.5879648, endtime=1608205992.73911, additional_info={'duration': 0.29955530166625977, 'num_run': 5, 'train_loss': 0.0, 'configuration_origin': 'Initial design'})
     #########
     RunKey(config_id=5, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.11347517730496459, time=1.246011734008789, status=<StatusType.SUCCESS: 1>, starttime=1608134214.2991076, endtime=1608134215.6595075, additional_info={'duration': 0.2673919200897217, 'num_run': 6, 'train_loss': 0.09122807017543855, 'configuration_origin': 'Initial design'})
+    RunValue(cost=0.11347517730496459, time=1.0726685523986816, status=<StatusType.SUCCESS: 1>, starttime=1608205994.1532829, endtime=1608205995.3587432, additional_info={'duration': 0.19776606559753418, 'num_run': 6, 'train_loss': 0.09122807017543855, 'configuration_origin': 'Initial design'})
     #########
     RunKey(config_id=6, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=1.0, time=1.0134475231170654, status=<StatusType.TIMEOUT: 2>, starttime=1608134216.427164, endtime=1608134218.4495962, additional_info={'error': 'Timeout', 'configuration_origin': 'Random Search (sorted)'})
+    RunValue(cost=0.06382978723404253, time=1.9744932651519775, status=<StatusType.SUCCESS: 1>, starttime=1608205995.722534, endtime=1608205997.793604, additional_info={'duration': 0.9969675540924072, 'num_run': 7, 'train_loss': 0.06666666666666665, 'configuration_origin': 'Random Search (sorted)'})
     #########
     RunKey(config_id=7, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
     RunValue(cost=2147483647.0, time=0.0, status=<StatusType.RUNNING: 9>, starttime=0.0, endtime=0.0, additional_info=None)
@@ -344,11 +144,11 @@ with the sklearn components directly, in this case a PCA preprocessor.
       feature_preprocessor:pca:whiten, Value: 'False'
 
     Cost: 0.08510638297872342
-    Time: 2.608668565750122
+    Time: 2.1666722297668457
     Status: StatusType.SUCCESS
-    Additional information: {'duration': 1.668154001235962, 'num_run': 2, 'train_loss': 0.0, 'configuration_origin': 'Initial design'}
-    Start time: 1608134201.9004984
-    End time 1608134204.6039965
+    Additional information: {'duration': 1.3106963634490967, 'num_run': 2, 'train_loss': 0.0, 'configuration_origin': 'Initial design'}
+    Start time: 1608205983.8942142
+    End time 1608205986.1624799
     Lowest loss: 0.028368794326241176
     Best configuration: Configuration:
       balancing:strategy, Value: 'weighting'
@@ -380,8 +180,8 @@ with the sklearn components directly, in this case a PCA preprocessor.
       feature_preprocessor:pca:whiten, Value: 'True'
 
     {'mean_test_score': array([0.91489362, 0.92907801, 0.97163121, 0.89361702, 0.88652482,
-           0.        ]), 'mean_fit_time': array([2.60866857, 2.38777828, 2.23243093, 1.27990484, 1.24601173,
-           1.01344752]), 'params': [{'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'pca', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'feature_preprocessor:pca:keep_variance': 0.9999, 'feature_preprocessor:pca:whiten': 'False'}, {'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'pca', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.9331254454871041, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 2, 'classifier:random_forest:min_samples_split': 20, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.005069923784737444, 'feature_preprocessor:pca:keep_variance': 0.9967857433838874, 'feature_preprocessor:pca:whiten': 'False'}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'mlp', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'feature_preprocessor:__choice__': 'pca', 'classifier:mlp:activation': 'tanh', 'classifier:mlp:alpha': 1.103855734598575e-05, 'classifier:mlp:batch_size': 'auto', 'classifier:mlp:beta_1': 0.9, 'classifier:mlp:beta_2': 0.999, 'classifier:mlp:early_stopping': 'valid', 'classifier:mlp:epsilon': 1e-08, 'classifier:mlp:hidden_layer_depth': 3, 'classifier:mlp:learning_rate_init': 0.00014375616988222174, 'classifier:mlp:n_iter_no_change': 32, 'classifier:mlp:num_nodes_per_layer': 229, 'classifier:mlp:shuffle': 'True', 'classifier:mlp:solver': 'adam', 'classifier:mlp:tol': 0.0001, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.002766772136115771, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 180, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'uniform', 'feature_preprocessor:pca:keep_variance': 0.7895711479212801, 'feature_preprocessor:pca:whiten': 'True', 'classifier:mlp:validation_fraction': 0.1}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'k_nearest_neighbors', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:__choice__': 'pca', 'classifier:k_nearest_neighbors:n_neighbors': 4, 'classifier:k_nearest_neighbors:p': 2, 'classifier:k_nearest_neighbors:weights': 'distance', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.008015420020402715, 'feature_preprocessor:pca:keep_variance': 0.8047274080856589, 'feature_preprocessor:pca:whiten': 'False'}, {'balancing:strategy': 'none', 'classifier:__choice__': 'libsvm_svc', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'pca', 'classifier:libsvm_svc:C': 100.5905006626969, 'classifier:libsvm_svc:gamma': 0.011333066835975528, 'classifier:libsvm_svc:kernel': 'poly', 'classifier:libsvm_svc:max_iter': -1, 'classifier:libsvm_svc:shrinking': 'True', 'classifier:libsvm_svc:tol': 0.012391313886912093, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.010000000000000004, 'feature_preprocessor:pca:keep_variance': 0.9290439925152777, 'feature_preprocessor:pca:whiten': 'False', 'classifier:libsvm_svc:coef0': 0.08087614244138486, 'classifier:libsvm_svc:degree': 3}, {'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'pca', 'classifier:random_forest:bootstrap': 'False', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5422582251087723, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 17, 'classifier:random_forest:min_samples_split': 15, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0038512976944604285, 'feature_preprocessor:pca:keep_variance': 0.5735718374870298, 'feature_preprocessor:pca:whiten': 'False'}], 'rank_test_scores': array([3, 2, 1, 4, 5, 6]), 'status': ['Success', 'Success', 'Success', 'Success', 'Success', 'Timeout'], 'budgets': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'param_balancing:strategy': masked_array(data=['none', 'none', 'weighting', 'weighting', 'none',
+           0.93617021]), 'mean_fit_time': array([2.16667223, 1.90380073, 1.80928326, 1.05059052, 1.07266855,
+           1.97449327]), 'params': [{'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'pca', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'feature_preprocessor:pca:keep_variance': 0.9999, 'feature_preprocessor:pca:whiten': 'False'}, {'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'pca', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.9331254454871041, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 2, 'classifier:random_forest:min_samples_split': 20, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.005069923784737444, 'feature_preprocessor:pca:keep_variance': 0.9967857433838874, 'feature_preprocessor:pca:whiten': 'False'}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'mlp', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'feature_preprocessor:__choice__': 'pca', 'classifier:mlp:activation': 'tanh', 'classifier:mlp:alpha': 1.103855734598575e-05, 'classifier:mlp:batch_size': 'auto', 'classifier:mlp:beta_1': 0.9, 'classifier:mlp:beta_2': 0.999, 'classifier:mlp:early_stopping': 'valid', 'classifier:mlp:epsilon': 1e-08, 'classifier:mlp:hidden_layer_depth': 3, 'classifier:mlp:learning_rate_init': 0.00014375616988222174, 'classifier:mlp:n_iter_no_change': 32, 'classifier:mlp:num_nodes_per_layer': 229, 'classifier:mlp:shuffle': 'True', 'classifier:mlp:solver': 'adam', 'classifier:mlp:tol': 0.0001, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.002766772136115771, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 180, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'uniform', 'feature_preprocessor:pca:keep_variance': 0.7895711479212801, 'feature_preprocessor:pca:whiten': 'True', 'classifier:mlp:validation_fraction': 0.1}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'k_nearest_neighbors', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:__choice__': 'pca', 'classifier:k_nearest_neighbors:n_neighbors': 4, 'classifier:k_nearest_neighbors:p': 2, 'classifier:k_nearest_neighbors:weights': 'distance', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.008015420020402715, 'feature_preprocessor:pca:keep_variance': 0.8047274080856589, 'feature_preprocessor:pca:whiten': 'False'}, {'balancing:strategy': 'none', 'classifier:__choice__': 'libsvm_svc', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'pca', 'classifier:libsvm_svc:C': 100.5905006626969, 'classifier:libsvm_svc:gamma': 0.011333066835975528, 'classifier:libsvm_svc:kernel': 'poly', 'classifier:libsvm_svc:max_iter': -1, 'classifier:libsvm_svc:shrinking': 'True', 'classifier:libsvm_svc:tol': 0.012391313886912093, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.010000000000000004, 'feature_preprocessor:pca:keep_variance': 0.9290439925152777, 'feature_preprocessor:pca:whiten': 'False', 'classifier:libsvm_svc:coef0': 0.08087614244138486, 'classifier:libsvm_svc:degree': 3}, {'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'pca', 'classifier:random_forest:bootstrap': 'False', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5422582251087723, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 17, 'classifier:random_forest:min_samples_split': 15, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0038512976944604285, 'feature_preprocessor:pca:keep_variance': 0.5735718374870298, 'feature_preprocessor:pca:whiten': 'False'}], 'rank_test_scores': array([4, 3, 1, 5, 6, 2]), 'status': ['Success', 'Success', 'Success', 'Success', 'Success', 'Success'], 'budgets': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'param_balancing:strategy': masked_array(data=['none', 'none', 'weighting', 'weighting', 'none',
                        'none'],
                  mask=[False, False, False, False, False, False],
            fill_value='N/A',
@@ -704,18 +504,19 @@ with the sklearn components directly, in this case a PCA preprocessor.
                  mask=[ True,  True,  True,  True,  True,  True],
            fill_value=1e+20,
                 dtype=float64)}
-    The 0th pipeline has a explained variance of [0.98080571 0.01684553]
-    The 1th pipeline has a explained variance of [0.45954164 0.18010277 0.09814953 0.06334655]
-    The 2th pipeline has a explained variance of [4.32956881e-01 1.79057296e-01 1.11737571e-01 6.80724345e-02
+    The 0th pipeline has a explained variance of [0.45954164 0.18010277 0.09814953 0.06334655]
+    The 1th pipeline has a explained variance of [0.49503611 0.16649281]
+    The 2th pipeline has a explained variance of [0.98080571 0.01684553]
+    The 3th pipeline has a explained variance of [0.49503611 0.16649281 0.09111888 0.07213284 0.04865917 0.03208923
+     0.01851537 0.01223987]
+    The 4th pipeline has a explained variance of [4.32956881e-01 1.79057296e-01 1.11737571e-01 6.80724345e-02
      5.94611519e-02 3.70629898e-02 2.38430977e-02 1.49326086e-02
      1.37641366e-02 1.13704890e-02 1.03737258e-02 8.74116751e-03
      7.57629717e-03 4.86528503e-03 3.32225143e-03 2.55773043e-03
      2.20759805e-03 1.88675402e-03 1.36245140e-03 1.03409213e-03
      8.39749085e-04 7.91287172e-04 6.75655689e-04 5.42961621e-04
      5.02641737e-04 2.07827509e-04 1.74597367e-04]
-    The 3th pipeline has a explained variance of [0.49503611 0.16649281 0.09111888 0.07213284 0.04865917 0.03208923
-     0.01851537 0.01223987]
-    The 4th pipeline has a explained variance of [0.76699224 0.17152095]
+    The 5th pipeline has a explained variance of [0.76699224 0.17152095]
 
 
 
@@ -906,7 +707,7 @@ with the sklearn components directly, in this case a PCA preprocessor.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  25.770 seconds)
+   **Total running time of the script:** ( 0 minutes  25.243 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_get_pipeline_components.py:

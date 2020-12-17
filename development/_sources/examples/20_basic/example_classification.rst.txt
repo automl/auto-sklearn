@@ -25,14 +25,6 @@ The following example shows how to fit a simple classification model with
 
  .. code-block:: none
 
-    [WARNING] [2020-12-16 15:41:21,210:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance cifar_10
-    [WARNING] [2020-12-16 15:41:21,216:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance gtsrb-hog03
-    [WARNING] [2020-12-16 15:41:21,219:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance kuzushiji-49
-    [WARNING] [2020-12-16 15:41:21,229:autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner] Could not find runs for instance svhn
-    [WARNING] [2020-12-16 15:41:21,317:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance cifar_10
-    [WARNING] [2020-12-16 15:41:21,318:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance svhn
-    [WARNING] [2020-12-16 15:41:21,318:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance gtsrb-hog03
-    [WARNING] [2020-12-16 15:41:21,318:autosklearn.metalearning.metalearning.kNearestDatasets.kND] Found no best configuration for instance kuzushiji-49
     [(0.120000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'mlp', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'feature_agglomeration', 'classifier:mlp:activation': 'tanh', 'classifier:mlp:alpha': 0.0001363185819149026, 'classifier:mlp:batch_size': 'auto', 'classifier:mlp:beta_1': 0.9, 'classifier:mlp:beta_2': 0.999, 'classifier:mlp:early_stopping': 'valid', 'classifier:mlp:epsilon': 1e-08, 'classifier:mlp:hidden_layer_depth': 3, 'classifier:mlp:learning_rate_init': 0.00018009776276177523, 'classifier:mlp:n_iter_no_change': 32, 'classifier:mlp:num_nodes_per_layer': 115, 'classifier:mlp:shuffle': 'True', 'classifier:mlp:solver': 'adam', 'classifier:mlp:tol': 0.0001, 'feature_preprocessor:feature_agglomeration:affinity': 'euclidean', 'feature_preprocessor:feature_agglomeration:linkage': 'ward', 'feature_preprocessor:feature_agglomeration:n_clusters': 182, 'feature_preprocessor:feature_agglomeration:pooling_func': 'mean', 'classifier:mlp:validation_fraction': 0.1},
     dataset_properties={
       'task': 1,
@@ -257,7 +249,7 @@ The following example shows how to fit a simple classification model with
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  59.910 seconds)
+   **Total running time of the script:** ( 2 minutes  3.176 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_classification.py:
