@@ -168,7 +168,7 @@ settings for the ``AutoSklearnClassifier``.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 6 minutes  13.053 seconds)
+   **Total running time of the script:** ( 6 minutes  12.866 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_resampling.py:

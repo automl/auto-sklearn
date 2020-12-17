@@ -80,7 +80,7 @@ and remove the following line.
  .. code-block:: none
 
 
-    <dask.config.set object at 0x7f9567ef61c0>
+    <dask.config.set object at 0x7fd6f8214250>
 
 
 
@@ -240,10 +240,10 @@ which means that it is automatically stopped one all computation is done.
       Dataset name: d6d58dae5b02e07797da6d4d126ac9b6
       Metric: accuracy
       Best validation score: 0.985816
-      Number of target algorithm runs: 10
+      Number of target algorithm runs: 9
       Number of successful target algorithm runs: 8
       Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 2
+      Number of target algorithms that exceeded the time limit: 1
       Number of target algorithms that exceeded the memory limit: 0
 
     Accuracy score 0.958041958041958
@@ -254,7 +254,7 @@ which means that it is automatically stopped one all computation is done.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  46.777 seconds)
+   **Total running time of the script:** ( 0 minutes  46.934 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_manual_spawning.py:
