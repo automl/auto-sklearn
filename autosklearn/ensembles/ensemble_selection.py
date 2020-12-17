@@ -106,20 +106,9 @@ class EnsembleSelection(AbstractEnsemble):
             )
             s = len(ensemble)
             if s > 0:
-                # Weighted ensemble prediction contains in this point the average of
-                # (s-1) elements. We do an efficient incorporation of just the new element.
-                # We incorporate the new prediction ensemble[-1] (divided by (s))
-                # We do so to just have 1 addition and 1 multiplication to integrate the new pred
-                # remember that in the past iteration we divided by s+1 all predictions in ensemble
-                # in preparation to search for a new ensemble member.
                 np.add(
                     weighted_ensemble_prediction,
-                    ensemble[-1] * (1/s),
-                    out=weighted_ensemble_prediction,
-                )
-                np.multiply(
-                    weighted_ensemble_prediction,
-                    (s / float(s+1)),
+                    ensemble[-1],
                     out=weighted_ensemble_prediction,
                 )
 
@@ -128,11 +117,15 @@ class EnsembleSelection(AbstractEnsemble):
                 # fant_ensemble_prediction is the prediction of the current ensemble
                 # and should be ([predictions[selected_prev_iterations] + predictions[j])/(s+1)
                 # We overwrite the contents of fant_ensemble_prediction
-                # directly with weighted_ensemble_prediction (that is previously divided by 1/(s+1))
-                # + the next prediction candidate (scaled by 1/(s+1)) to mimic the averaging
+                # directly with weighted_ensemble_prediction + new_prediction and then scale for avg
                 np.add(
                     weighted_ensemble_prediction,
-                    (1. / float(s + 1)) * pred,
+                    pred,
+                    out=fant_ensemble_prediction
+                )
+                np.multiply(
+                    fant_ensemble_prediction,
+                    (1. / float(s + 1)),
                     out=fant_ensemble_prediction
                 )
 

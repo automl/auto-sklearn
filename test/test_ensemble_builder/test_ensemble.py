@@ -658,10 +658,10 @@ def testEnsembleSelection():
 
     # We create a problem such that we encourage the addition of members to the ensemble
     # Fundamentally, the average of 10 sequential number is 5.5
-    y_true = np.full((100000), 5.5)
+    y_true = np.full((100), 5.5)
     predictions = []
     for i in range(1, 20):
-        pred = np.full((100000), i, dtype=np.float32)
+        pred = np.full((100), i, dtype=np.float32)
         pred[i*5:5*(i+1)] = 5.5 * i
         predictions.append(pred)
 
