@@ -228,7 +228,7 @@ class AutoML(BaseEstimator):
         # examples. Nevertheless, multi-process runs
         # have spawn as requirement to reduce the
         # possibility of a deadlock
-        self._multiprocessing_context = 'spawn'
+        self._multiprocessing_context = 'forkserver'
         if self._n_jobs == 1 and self._dask_client is None:
             self._multiprocessing_context = 'fork'
             self._dask_client = SingleThreadedClient()

@@ -102,7 +102,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                  run_obj='quality', par_factor=1, scoring_functions=None,
                  output_y_hat_optimization=True, include=None, exclude=None,
                  memory_limit=None, disable_file_output=False, init_params=None,
-                 budget_type=None, ta=False, pynisher_context='spawn', **resampling_strategy_args):
+                 budget_type=None, ta=False, pynisher_context='forkserver',
+                 **resampling_strategy_args):
 
         if resampling_strategy == 'holdout':
             eval_function = autosklearn.evaluation.train_evaluator.eval_holdout

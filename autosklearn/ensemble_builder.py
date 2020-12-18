@@ -576,7 +576,7 @@ class EnsembleBuilder(object):
         end_at: Optional[float] = None,
         time_buffer=5,
         return_predictions: bool = False,
-        pynisher_context: str = 'spawn',
+        pynisher_context: str = 'forkserver',
     ):
 
         if time_left is None and end_at is None:
