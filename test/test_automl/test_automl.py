@@ -131,6 +131,7 @@ def test_refit_shuffle_on_fail(backend, dask_client):
         # Make sure a valid 2D array is given to automl
         X = np.array([1, 2, 3]).reshape(-1, 1)
         y = np.array([1, 2, 3])
+        auto.InputValidator.fit(X, y)
         auto.refit(X, y)
 
         assert failing_model.fit.call_count == 3
@@ -634,31 +635,6 @@ def test_fail_if_feat_type_on_pandas_input(backend, dask_client):
             X_train, y_train,
             task=BINARY_CLASSIFICATION,
             feat_type=['Categorical', 'Numerical'],
-        )
-
-
-def test_fail_if_dtype_changes_automl(backend, dask_client):
-    """We do not support changes in the input type.
-    Once a estimator is fitted, it should not change data type
-    """
-    automl = autosklearn.automl.AutoML(
-        backend=backend,
-        time_left_for_this_task=30,
-        per_run_time_limit=5,
-        metric=accuracy,
-        dask_client=dask_client,
-    )
-
-    X_train = pd.DataFrame({'a': [1, 1], 'c': [1, 2]})
-    y_train = [1, 0]
-    automl.InputValidator.validate(X_train, y_train, is_classification=True)
-    with pytest.raises(
-        ValueError,
-        match="Auto-sklearn previously received features of type"
-    ):
-        automl.fit(
-            X_train.to_numpy(), y_train,
-            task=BINARY_CLASSIFICATION,
         )
 
 

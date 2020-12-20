@@ -4,7 +4,6 @@ import warnings
 import numpy as np
 
 import pandas as pd
-from pandas.api.types import is_numeric_dtype
 
 import scipy.sparse
 
@@ -12,6 +11,7 @@ import sklearn.utils
 from sklearn import preprocessing
 from sklearn.base import BaseEstimator
 from sklearn.compose import make_column_transformer
+from sklearn.utils.multiclass import type_of_target
 
 
 class TargetValidator(BaseEstimator):
@@ -28,9 +28,9 @@ class TargetValidator(BaseEstimator):
         self.data_type = None  # type: typing.Optional[type]
 
         self.encoder = None  # type: typing.Optional[BaseEstimator]
-        self.enc_columns = []  # type: typing.List[str]
 
-        self.output_dimensionality = None  # type: Optional[int]
+        self.out_dimensionality = None  # type: typing.Optional[int]
+        self.type_of_target = None  # type: typing.Optional[str]
 
         self._is_fitted = False
 
@@ -89,8 +89,14 @@ class TargetValidator(BaseEstimator):
                 During classification, the targets are encoded.
         """
 
-        if not is_classification:
+        if not hasattr(y_train, 'shape'):
+            # Make it numpy array for easier checking
+            y_train = np.array(y_train)
+
+        if not is_classification or self.type_of_target == 'multilabel-indicator':
             # Only fit an encoder for classification tasks
+            # Also, encoding multilabel indicator data makes the data multiclass
+            # Let the user employ a MultiLabelBinarizer if needed
             return self
 
         if y_test is not None:
@@ -101,20 +107,21 @@ class TargetValidator(BaseEstimator):
             elif isinstance(y_train, np.ndarray):
                 y_train = np.concatenate((y_train, y_test))
 
-        if y_train.ndim == 1 or (y_train.ndim > 1 and y_train.shape[1] == 1):
+        ndim = len(np.shape(y_train))
+        if ndim == 1 or (ndim > 1 and np.shape(y_train)[1] == 1):
             # The label encoder makes sure data is, and remains
             # 1 dimensional
             self.encoder = preprocessing.LabelEncoder()
         else:
             self.encoder = make_column_transformer(
-                (preprocessing.OrdinalEncoder(), list(range(y_train.shape[1]))),
+                (preprocessing.OrdinalEncoder(), list(range(np.shape(y_train)[1]))),
             )
 
         # Mypy redefinition
         assert self.encoder is not None
 
         # remove ravel warning from pandas Series
-        if len(y_train.shape) > 1 and y_train.shape[1] == 1 and hasattr(y_train, "to_numpy"):
+        if ndim > 1 and np.shape(y_train)[1] == 1 and hasattr(y_train, "to_numpy"):
             self.encoder.fit(y_train.to_numpy().ravel())
         else:
             self.encoder.fit(y_train)
@@ -145,7 +152,8 @@ class TargetValidator(BaseEstimator):
         if self.encoder is not None:
             try:
                 # remove ravel warning from pandas Series
-                if len(y.shape) > 1 and y.shape[1] == 1 and hasattr(y, "to_numpy"):
+                shape = np.shape(y)
+                if len(shape) > 1 and shape[1] == 1 and hasattr(y, "to_numpy"):
                     y = self.encoder.transform(y.to_numpy().ravel())
                 else:
                     y = self.encoder.transform(y)
@@ -245,10 +253,12 @@ class TargetValidator(BaseEstimator):
 
         self._check_data(y_train)
 
+        shape = np.shape(y_train)
         if y_test is not None:
             self._check_data(y_test)
 
-            if len(np.shape(y_train)) != len(np.shape(y_test)):
+            if len(shape) != len(np.shape(y_test)) or (
+                    len(shape) > 1 and (shape[1] != np.shape(y_test)[1])):
                 raise ValueError("The dimensionality of the train and test targets "
                                  "does not match train({}) != test({})".format(
                                      np.shape(y_train),
@@ -267,19 +277,19 @@ class TargetValidator(BaseEstimator):
                 if list(y_train.dtypes) != list(y_test.dtypes):
                     raise ValueError("Train and test targets must both have the same dtypes")
 
-        if self.output_dimensionality is None:
-            self.output_dimensionality = 1 if len(y_train.shape) == 1 else y_train.shape[1]
+        if self.out_dimensionality is None:
+            self.out_dimensionality = 1 if len(shape) == 1 else shape[1]
         else:
-            _n_outputs = 1 if len(y_train.shape) == 1 else y_train.shape[1]
-            if self.output_dimensionality != _n_outputs:
+            _n_outputs = 1 if len(shape) == 1 else shape[1]
+            if self.out_dimensionality != _n_outputs:
                 raise ValueError('Number of outputs changed from %d to %d!' %
-                                 (self.output_dimensionality, _n_outputs))
+                                 (self.out_dimensionality, _n_outputs))
 
     def is_single_column_target(self) -> bool:
         """
         Output is encoded with a single column encoding
         """
-        return self.output_dimensionality == 1
+        return self.out_dimensionality == 1
 
     def _check_data(
         self,
@@ -312,17 +322,6 @@ class TargetValidator(BaseEstimator):
                              ),
                           )
 
-        # Do not support category/string numpy data. Only numbers
-        if hasattr(y, "dtype"):
-            if not np.issubdtype(y.dtype.type, np.number):  # type: ignore[union-attr]
-                raise ValueError(
-                    "When providing a numpy array as targets Auto-sklearn, the only valid "
-                    "dtypes are numerical ones. The provided data type {} is not supported."
-                    "".format(
-                        y.dtype.type,  # type: ignore[union-attr]
-                    )
-                )
-
         # No Nan is supported
         if np.any(pd.isnull(y)):
             raise ValueError("Target values cannot contain missing/NaN values. "
@@ -336,3 +335,7 @@ class TargetValidator(BaseEstimator):
                              "type sparse. Please convert the target input (y) "
                              "to a dense array via scipy.sparse.csr_matrix.todense(). "
                              )
+
+        # Pandas Series is not supported for multi-label indicator
+        # This format checks are done by type of target
+        self.type_of_target = type_of_target(y)

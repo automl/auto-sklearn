@@ -303,7 +303,7 @@ def test_multiclass_prediction(predict_mock, backend, dask_client):
         backend=backend,
         dask_client=dask_client,
     )
-    classifier.InputValidator.validate_target(
+    classifier.InputValidator.target_validator.fit(
         pd.DataFrame(expected_result, dtype='category'),
         is_classification=True,
     )
@@ -331,7 +331,7 @@ def test_multilabel_prediction(predict_mock, backend, dask_client):
         backend=backend,
         dask_client=dask_client,
     )
-    classifier.InputValidator.validate_target(
+    classifier.InputValidator.target_validator.fit(
         pd.DataFrame(expected_result, dtype='int64'),
         is_classification=True,
     )
@@ -467,8 +467,7 @@ def test_classification_pandas_support(tmp_dir, output_dir, dask_client):
     # Make sure that at least better than random.
     # accuracy in sklearn needs valid data
     # It should be 0.555 as the dataset is unbalanced.
-    y = automl.automl_.InputValidator.encode_target(y)
-    prediction = automl.automl_.InputValidator.encode_target(automl.predict(X))
+    prediction = automl.predict(X)
     assert accuracy(y, prediction) > 0.555
     assert count_succeses(automl.cv_results_) > 0
 
