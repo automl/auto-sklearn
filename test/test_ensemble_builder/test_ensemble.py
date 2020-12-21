@@ -106,9 +106,15 @@ def testRead(ensemble_backend):
     ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
         dataset_name="TEST",
-        task_type=BINARY_CLASSIFICATION,
+        # With roc_auc, task cannot be binary as the test predictions coming
+        # from the ensemble_backend are [0., 1., 1., 1., 1.], a 1D array not supported
+        # by ROC AUC
+        task_type=MULTILABEL_CLASSIFICATION,
         metric=roc_auc,
         seed=0,  # important to find the test files
+        # Do not assume predictions in disc have been pre-processed for
+        # the metric at hand. We test multiple metrics in unit testing
+        enable_fast_predictions=False,
     )
 
     success = ensbuilder.score_ensemble_preds()
@@ -144,7 +150,10 @@ def testNBest(ensemble_backend, ensemble_nbest, max_models_on_disc, exp):
     ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
         dataset_name="TEST",
-        task_type=BINARY_CLASSIFICATION,
+        # With roc_auc, task cannot be binary as the test predictions coming
+        # from the ensemble_backend are [0., 1., 1., 1., 1.], a 1D array not supported
+        # by ROC AUC
+        task_type=MULTILABEL_CLASSIFICATION,
         metric=roc_auc,
         seed=0,  # important to find the test files
         ensemble_nbest=ensemble_nbest,
@@ -183,7 +192,10 @@ def testMaxModelsOnDisc(ensemble_backend, test_case, exp):
     ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
         dataset_name="TEST",
-        task_type=BINARY_CLASSIFICATION,
+        # With roc_auc, task cannot be binary as the test predictions coming
+        # from the ensemble_backend are [0., 1., 1., 1., 1.], a 1D array not supported
+        # by ROC AUC
+        task_type=MULTILABEL_CLASSIFICATION,
         metric=roc_auc,
         seed=0,  # important to find the test files
         ensemble_nbest=ensemble_nbest,
@@ -203,7 +215,10 @@ def testMaxModelsOnDisc2(ensemble_backend):
     ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
         dataset_name="TEST",
-        task_type=BINARY_CLASSIFICATION,
+        # With roc_auc, task cannot be binary as the test predictions coming
+        # from the ensemble_backend are [0., 1., 1., 1., 1.], a 1D array not supported
+        # by ROC AUC
+        task_type=MULTILABEL_CLASSIFICATION,
         metric=roc_auc,
         seed=0,  # important to find the test files
         ensemble_nbest=50,
@@ -236,7 +251,7 @@ def testPerformanceRangeThreshold(ensemble_backend, performance_range_threshold,
     ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
         dataset_name="TEST",
-        task_type=BINARY_CLASSIFICATION,
+        task_type=MULTILABEL_CLASSIFICATION,
         metric=roc_auc,
         seed=0,  # important to find the test files
         ensemble_nbest=100,
@@ -270,7 +285,7 @@ def testPerformanceRangeThresholdMaxBest(ensemble_backend, performance_range_thr
     ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
         dataset_name="TEST",
-        task_type=BINARY_CLASSIFICATION,
+        task_type=MULTILABEL_CLASSIFICATION,
         metric=roc_auc,
         seed=0,  # important to find the test files
         ensemble_nbest=ensemble_nbest,
@@ -297,7 +312,7 @@ def testFallBackNBest(ensemble_backend):
 
     ensbuilder = EnsembleBuilder(backend=ensemble_backend,
                                  dataset_name="TEST",
-                                 task_type=BINARY_CLASSIFICATION,
+                                 task_type=MULTILABEL_CLASSIFICATION,
                                  metric=roc_auc,
                                  seed=0,  # important to find the test files
                                  ensemble_nbest=1
@@ -341,7 +356,7 @@ def testGetValidTestPreds(ensemble_backend):
 
     ensbuilder = EnsembleBuilder(backend=ensemble_backend,
                                  dataset_name="TEST",
-                                 task_type=BINARY_CLASSIFICATION,
+                                 task_type=MULTILABEL_CLASSIFICATION,
                                  metric=roc_auc,
                                  seed=0,  # important to find the test files
                                  ensemble_nbest=1
@@ -390,10 +405,11 @@ def testEntireEnsembleBuilder(ensemble_backend):
     ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
         dataset_name="TEST",
-        task_type=BINARY_CLASSIFICATION,
+        task_type=MULTILABEL_CLASSIFICATION,
         metric=roc_auc,
         seed=0,  # important to find the test files
         ensemble_nbest=2,
+        enable_fast_predictions=False,
     )
     ensbuilder.SAVE2DISC = False
 
@@ -438,7 +454,7 @@ def testEntireEnsembleBuilder(ensemble_backend):
     # since d2 provides perfect predictions
     # it should get a higher weight
     # so that y_valid should be exactly y_valid_d2
-    y_valid_d2 = ensbuilder.read_preds[d2][Y_VALID][:, 1]
+    y_valid_d2 = ensbuilder.read_preds[d2][Y_VALID]
     np.testing.assert_array_almost_equal(y_valid, y_valid_d2)
 
 
@@ -513,7 +529,7 @@ def test_run_end_at(ensemble_backend):
 def testLimit(ensemble_backend):
     ensbuilder = EnsembleBuilderMemMock(backend=ensemble_backend,
                                         dataset_name="TEST",
-                                        task_type=BINARY_CLASSIFICATION,
+                                        task_type=MULTILABEL_CLASSIFICATION,
                                         metric=roc_auc,
                                         seed=0,  # important to find the test files
                                         ensemble_nbest=10,

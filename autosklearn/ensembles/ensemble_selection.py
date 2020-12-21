@@ -138,6 +138,7 @@ class EnsembleSelection(AbstractEnsemble):
                         prediction=fant_ensemble_prediction,
                         task_type=self.task_type,
                         metric=self.metric,
+                        fast_mode=True,
                         scoring_functions=None
                     )
                 )
@@ -188,6 +189,7 @@ class EnsembleSelection(AbstractEnsemble):
                         prediction=ensemble_prediction,
                         task_type=self.task_type,
                         metric=self.metric,
+                        fast_mode=True,
                         scoring_functions=None
                     )
                 )

@@ -746,7 +746,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             'ensemble_predictions']
 
         for i in range(7):
-            self.assertEqual(0.9, Y_optimization_pred[i][1])
+            # Ensemble predictions correspond the automl.predict, not to
+            # automl.predict_proba
+            self.assertEqual(1.0, Y_optimization_pred[i])
 
     @unittest.mock.patch.object(TrainEvaluator, 'file_output')
     @unittest.mock.patch.object(TrainEvaluator, '_partial_fit_and_predict_standard')

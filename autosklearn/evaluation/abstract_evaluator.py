@@ -6,6 +6,7 @@ import warnings
 import numpy as np
 from sklearn.dummy import DummyClassifier, DummyRegressor
 from sklearn.ensemble import VotingClassifier, VotingRegressor
+from sklearn.utils.multiclass import type_of_target
 
 import autosklearn.pipeline.classification
 import autosklearn.pipeline.regression
@@ -422,6 +423,17 @@ class AbstractEvaluator(object):
                 models = None
         else:
             models = None
+
+        # Clean up the predictions via the scorer, so that future
+        # ensemble iterations do not have the need to do so
+        # This include operations like argmax and type change
+        task_type = type_of_target(self.Y_optimization)
+        if 'y_optimization' not in self.disable_file_output and Y_optimization_pred is not None:
+            Y_optimization_pred = self.metric.clean_predictions(Y_optimization_pred, task_type)
+        if 'y_valid' not in self.disable_file_output and Y_valid_pred is not None:
+            Y_valid_pred = self.metric.clean_predictions(Y_valid_pred, task_type)
+        if 'y_test' not in self.disable_file_output and Y_test_pred is not None:
+            Y_test_pred = self.metric.clean_predictions(Y_test_pred, task_type)
 
         self.backend.save_numrun_to_dir(
             seed=self.seed,

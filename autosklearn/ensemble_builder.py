@@ -385,6 +385,7 @@ class EnsembleBuilder(object):
         read_at_most: int = 5,
         random_state: Optional[Union[int, np.random.RandomState]] = None,
         logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
+        enable_fast_predictions: bool = True,
         unit_test: bool = False,
     ):
         """
@@ -433,6 +434,11 @@ class EnsembleBuilder(object):
                 read at most n new prediction files in each iteration
             logger_port: int
                 port that receives logging records
+            enable_fast_predictions: bool
+                Enables fast predictions mode -- Ensemble construction will assume that the
+                predictions from the individual models have been corrected for the specific
+                optimization metric. This save significant processing time like data type,
+                format among other checks.
             unit_test: bool
                 Turn on unit testing mode. This currently makes fit_ensemble raise a MemoryError.
                 Having this is very bad coding style, but I did not find a way to make
@@ -477,6 +483,7 @@ class EnsembleBuilder(object):
         self.read_at_most = read_at_most
         self.random_state = check_random_state(random_state)
         self.unit_test = unit_test
+        self.enable_fast_predictions = enable_fast_predictions
 
         # Setup the logger
         self.logger_port = logger_port
@@ -900,8 +907,8 @@ class EnsembleBuilder(object):
                                         prediction=y_ensemble,
                                         task_type=self.task_type,
                                         metric=self.metric,
+                                        fast_mode=self.enable_fast_predictions,
                                         scoring_functions=None)
-
                 if np.isfinite(self.read_scores[y_ens_fn]["ens_score"]):
                     self.logger.debug(
                         'Changing ensemble score for file %s from %f to %f '
@@ -1321,7 +1328,10 @@ class EnsembleBuilder(object):
 
         if n_preds == len(predictions):
             y = ensemble.predict(predictions)
-            if self.task_type == BINARY_CLASSIFICATION:
+            if self.task_type == BINARY_CLASSIFICATION and len(y.shape) > 1:
+                # When doing fast predictions, the output is already cleaned up
+                # by every individual model. Then ensemble, consequently also outputs
+                # predictions that have gone through np.argmax
                 y = y[:, 1]
             if self.SAVE2DISC:
                 self.backend.save_predictions_as_txt(
@@ -1357,20 +1367,6 @@ class EnsembleBuilder(object):
             The predictions on the test set using ensemble
 
         """
-        if self.task_type == BINARY_CLASSIFICATION:
-            if len(train_pred.shape) == 1 or train_pred.shape[1] == 1:
-                train_pred = np.vstack(
-                    ((1 - train_pred).reshape((1, -1)), train_pred.reshape((1, -1)))
-                ).transpose()
-            if valid_pred is not None and (len(valid_pred.shape) == 1 or valid_pred.shape[1] == 1):
-                valid_pred = np.vstack(
-                    ((1 - valid_pred).reshape((1, -1)), valid_pred.reshape((1, -1)))
-                ).transpose()
-            if test_pred is not None and (len(test_pred.shape) == 1 or test_pred.shape[1] == 1):
-                test_pred = np.vstack(
-                    ((1 - test_pred).reshape((1, -1)), test_pred.reshape((1, -1)))
-                ).transpose()
-
         performance_stamp = {
             'Timestamp': pd.Timestamp.now(),
             'ensemble_optimization_score': calculate_score(
@@ -1378,6 +1374,7 @@ class EnsembleBuilder(object):
                 prediction=train_pred,
                 task_type=self.task_type,
                 metric=self.metric,
+                fast_mode=self.enable_fast_predictions,
                 scoring_functions=None
             )
         }
@@ -1389,6 +1386,7 @@ class EnsembleBuilder(object):
                 prediction=valid_pred,
                 task_type=self.task_type,
                 metric=self.metric,
+                fast_mode=self.enable_fast_predictions,
                 scoring_functions=None
             )
 
@@ -1399,6 +1397,7 @@ class EnsembleBuilder(object):
                 prediction=test_pred,
                 task_type=self.task_type,
                 metric=self.metric,
+                fast_mode=self.enable_fast_predictions,
                 scoring_functions=None
             )
 
