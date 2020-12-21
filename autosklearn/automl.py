@@ -54,7 +54,8 @@ from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix
 from autosklearn.metrics import f1_macro, accuracy, r2
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
-    REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION
+    REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION, \
+    CLASSIFICATION_TASKS
 from autosklearn.pipeline.components.classification import ClassifierChoice
 from autosklearn.pipeline.components.regression import RegressorChoice
 from autosklearn.pipeline.components.feature_preprocessing import FeaturePreprocessorChoice
@@ -459,6 +460,15 @@ class AutoML(BaseEstimator):
                 raise ValueError('Target value shapes do not match: %s vs %s'
                                  % (y.shape, y_test.shape))
 
+        X, y = self.subsample_if_too_large(
+            X=X,
+            y=y,
+            logger=self._logger,
+            seed=self._seed,
+            memory_limit=self._memory_limit,
+            task=self._task,
+        )
+
         # Reset learnt stuff
         self.models_ = None
         self.cv_models_ = None
@@ -778,6 +788,59 @@ class AutoML(BaseEstimator):
         self._clean_logger()
 
         return self
+
+    @staticmethod
+    def subsample_if_too_large(X, y, logger, seed, memory_limit, task):
+        if isinstance(X, np.ndarray):
+            if X.dtype == np.float32:
+                multiplier = 4
+            elif X.dtype in (np.float64, np.float):
+                multiplier = 8
+            elif X.dtype == np.float128:
+                multiplier = 16
+            else:
+                # Just assuming some value - very unlikely
+                multiplier = 8
+                logger.warning('Unknown dtype for X: %s, assuming it takes 8 bit/number',
+                               str(X.dtype))
+            megabytes = X.shape[0] * X.shape[1] * multiplier / 1024 / 1024
+            if memory_limit <= megabytes * 10:
+                new_num_samples = int(
+                    memory_limit / (10 * X.shape[1] * multiplier / 1024 / 1024)
+                )
+                logger.warning(
+                    'Dataset too large for memory limit %dMB, reducing number of samples from '
+                    '%d to %d.',
+                    memory_limit,
+                    X.shape[0],
+                    new_num_samples,
+                )
+                if task in CLASSIFICATION_TASKS:
+                    try:
+                        X, _, y, _ = sklearn.model_selection.train_test_split(
+                            X, y,
+                            train_size=new_num_samples,
+                            random_state=seed,
+                            stratify=y,
+                        )
+                    except Exception:
+                        logger.warning(
+                            'Could not sample dataset in stratified manner, resorting to random '
+                            'sampling',
+                            exc_info=True
+                        )
+                        X, _, y, _ = sklearn.model_selection.train_test_split(
+                            X, y,
+                            train_size=new_num_samples,
+                            random_state=seed,
+                        )
+                else:
+                    X, _, y, _ = sklearn.model_selection.train_test_split(
+                        X, y,
+                        train_size=new_num_samples,
+                        random_state=seed,
+                    )
+        return X, y
 
     def refit(self, X, y):
 

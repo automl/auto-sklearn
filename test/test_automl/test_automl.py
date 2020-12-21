@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+import itertools
 import os
 import pickle
 import sys
@@ -19,7 +20,15 @@ import autosklearn.automl
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.metrics import accuracy, log_loss, balanced_accuracy
 import autosklearn.pipeline.util as putil
-from autosklearn.constants import MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION, REGRESSION
+from autosklearn.constants import (
+    MULTICLASS_CLASSIFICATION,
+    BINARY_CLASSIFICATION,
+    MULTILABEL_CLASSIFICATION,
+    REGRESSION,
+    MULTIOUTPUT_REGRESSION,
+    CLASSIFICATION_TASKS,
+    REGRESSION_TASKS,
+)
 from smac.tae import StatusType
 
 sys.path.append(os.path.dirname(__file__))
@@ -651,3 +660,51 @@ def test_fail_if_dtype_changes_automl(backend, dask_client):
             X_train.to_numpy(), y_train,
             task=BINARY_CLASSIFICATION,
         )
+
+
+@pytest.mark.parametrize(
+    'memory_limit,task',
+    [
+        (memory_limit, task)
+        for task in itertools.chain(CLASSIFICATION_TASKS, REGRESSION_TASKS)
+        for memory_limit in (1, 10)
+    ]
+)
+def test_subsample_if_too_large(memory_limit, task):
+    fixture = {
+        BINARY_CLASSIFICATION: {1: 436, 10: 569},
+        MULTICLASS_CLASSIFICATION: {1: 204, 10: 1797},
+        MULTILABEL_CLASSIFICATION: {1: 204, 10: 1797},
+        REGRESSION: {1: 1310, 10: 1326},
+        MULTIOUTPUT_REGRESSION: {1: 1310, 10: 1326}
+    }
+    mock = unittest.mock.Mock()
+    if task == BINARY_CLASSIFICATION:
+        X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
+    elif task == MULTICLASS_CLASSIFICATION:
+        X, y = sklearn.datasets.load_digits(return_X_y=True)
+    elif task == MULTILABEL_CLASSIFICATION:
+        X, y_ = sklearn.datasets.load_digits(return_X_y=True)
+        y = np.zeros((X.shape[0], 10))
+        for i, j in enumerate(y_):
+            y[i, j] = 1
+    elif task == REGRESSION:
+        X, y = sklearn.datasets.load_diabetes(return_X_y=True)
+        X = np.vstack((X, X, X))
+        y = np.vstack((y.reshape((-1, 1)), y.reshape((-1, 1)), y.reshape((-1, 1))))
+    elif task == MULTIOUTPUT_REGRESSION:
+        X, y = sklearn.datasets.load_diabetes(return_X_y=True)
+        y = np.vstack((y, y)).transpose()
+        X = np.vstack((X, X, X))
+        y = np.vstack((y, y, y))
+    else:
+        raise ValueError(task)
+
+    assert X.shape[0] == y.shape[0]
+
+    X_new, y_new = AutoML.subsample_if_too_large(X, y, mock, 1, memory_limit, task)
+    assert X_new.shape[0] == fixture[task][memory_limit]
+    if memory_limit == 1:
+        assert mock.warning.call_count == 1
+    else:
+        assert mock.warning.call_count == 0
