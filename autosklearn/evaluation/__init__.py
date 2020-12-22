@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 import functools
+import logging
 import json
 import math
 import multiprocessing
@@ -22,7 +23,7 @@ from autosklearn.metrics import Scorer
 import autosklearn.evaluation.train_evaluator
 import autosklearn.evaluation.test_evaluator
 import autosklearn.evaluation.util
-import autosklearn.util.logging_
+from autosklearn.util.logging_ import get_named_client_logger
 
 
 def fit_predict_try_except_decorator(ta, queue, cost_for_crash, **kwargs):
@@ -96,7 +97,7 @@ def _encode_exit_status(exit_status):
 class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
     def __init__(self, backend, autosklearn_seed, resampling_strategy, metric,
-                 cost_for_crash, abort_on_first_run_crash,
+                 cost_for_crash, abort_on_first_run_crash, port,
                  initial_num_run=1, stats=None,
                  run_obj='quality', par_factor=1, scoring_functions=None,
                  output_y_hat_optimization=True, include=None, exclude=None,
@@ -175,8 +176,15 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         else:
             self._get_test_loss = False
 
+        self.port = port
         self.pynisher_context = pynisher_context
-        self.logger = autosklearn.util.logging_.get_logger("TAE")
+        if self.port is None:
+            self.logger = logging.getLogger("TAE")
+        else:
+            self.logger = get_named_client_logger(
+                name="TAE",
+                port=self.port,
+            )
 
     def run_wrapper(
         self,
@@ -261,8 +269,15 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         if self.init_params is not None:
             init_params.update(self.init_params)
 
+        if self.port is None:
+            logger = logging.getLogger("pynisher")
+        else:
+            logger = get_named_client_logger(
+                name="pynisher",
+                port=self.port,
+            )
         arguments = dict(
-            logger=autosklearn.util.logging_.get_logger("pynisher"),
+            logger=logger,
             wall_time_in_s=cutoff,
             mem_in_mb=self.memory_limit,
             capture_output=True,
@@ -278,6 +293,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             queue=queue,
             config=config,
             backend=self.backend,
+            port=self.port,
             metric=self.metric,
             seed=self.autosklearn_seed,
             num_run=num_run,

@@ -26,9 +26,10 @@ class MetaLearnerTest(unittest.TestCase):
         self.cs = autosklearn.pipeline.classification\
             .SimpleClassificationPipeline().get_hyperparameter_search_space()
 
-        meta_base = MetaBase(self.cs, data_dir)
+        self.logger = logging.getLogger()
+        meta_base = MetaBase(self.cs, data_dir, logger=self.logger)
         self.meta_optimizer = metalearner.MetaLearningOptimizer(
-            '233', self.cs, meta_base)
+            '233', self.cs, meta_base, logger=self.logger)
 
     def tearDown(self):
         os.chdir(self.cwd)

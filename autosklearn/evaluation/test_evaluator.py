@@ -18,6 +18,7 @@ __all__ = [
 class TestEvaluator(AbstractEvaluator):
 
     def __init__(self, backend, queue, metric,
+                 port,
                  configuration=None,
                  scoring_functions=None,
                  seed=1,
@@ -28,6 +29,7 @@ class TestEvaluator(AbstractEvaluator):
         super(TestEvaluator, self).__init__(
             backend=backend,
             queue=queue,
+            port=port,
             configuration=configuration,
             metric=metric,
             scoring_functions=scoring_functions,
@@ -102,10 +104,11 @@ class TestEvaluator(AbstractEvaluator):
 # Has a stupid name so pytest doesn't regard it as a test
 def eval_t(queue, config, backend, metric, seed, num_run, instance,
            scoring_functions, output_y_hat_optimization, include,
-           exclude, disable_file_output, init_params=None, budget_type=None,
+           exclude, disable_file_output, port, init_params=None, budget_type=None,
            budget=None):
     evaluator = TestEvaluator(configuration=config,
                               backend=backend, metric=metric, seed=seed,
+                              port=port,
                               queue=queue,
                               scoring_functions=scoring_functions,
                               include=include, exclude=exclude,

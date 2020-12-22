@@ -4,7 +4,7 @@ if __name__ == '__main__':
     import json
     import logging
     import os
-    import shutil
+    import subprocess
     import sys
     import tempfile
 
@@ -140,6 +140,7 @@ if __name__ == '__main__':
             stats.finished_ta_runs += 1
             memory_lim = memory_limit_factor * automl_arguments['memory_limit']
             ta = ExecuteTaFuncWithQueue(backend=automl.automl_._backend,
+                                        port=None,
                                         autosklearn_seed=seed,
                                         resampling_strategy='test',
                                         memory_limit=memory_lim,
@@ -191,12 +192,34 @@ if __name__ == '__main__':
             if dirname in ('models', 'cv_models'):
                 os.rmdir(os.path.join(dirpath, dirname))
 
-
+    print('*' * 80)
     print('Going to copy the configuration directory')
-    shutil.copytree(autosklearn_directory, os.path.join(tmp_dir, 'auto-sklearn-output'))
+    script = 'cp -r %s %s' % (autosklearn_directory, os.path.join(tmp_dir, 'auto-sklearn-output'))
+    proc = subprocess.run(
+        script,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        shell=True,
+        executable='/bin/bash',
+    )
+    print('*' * 80)
+    print(script)
+    print(proc.stdout)
+    print(proc.stderr)
     print('Finished copying the configuration directory')
-    try:
-        shutil.rmtree(tempdir)
-    except:
-        pass
+
+    if not tempdir.startswith('/tmp'):
+        raise ValueError('%s must not start with /tmp' % tempdir)
+    script = 'rm -rf %s' % tempdir
+    print('*' * 80)
+    print(script)
+    proc = subprocess.run(
+        script,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        shell=True,
+        executable='/bin/bash',
+    )
+    print(proc.stdout)
+    print(proc.stderr)
     print('Finished configuring')

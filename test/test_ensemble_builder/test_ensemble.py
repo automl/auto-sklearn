@@ -13,7 +13,6 @@ from smac.runhistory.runhistory import RunValue, RunKey, RunHistory
 
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, BINARY_CLASSIFICATION
 from autosklearn.metrics import roc_auc, accuracy, log_loss
-from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensemble_builder import (
     EnsembleBuilder,
     EnsembleBuilderManager,
@@ -550,6 +549,7 @@ def testLimit(ensemble_backend):
             unittest.mock.patch('logging.config.dictConfig') as _, \
             unittest.mock.patch('os.path.getmtime') as mtime:
         logger_mock = unittest.mock.Mock()
+        logger_mock.handlers = []
         get_logger_mock.return_value = logger_mock
         mtime.side_effect = mtime_mock
 
@@ -583,7 +583,15 @@ def testLimit(ensemble_backend):
         assert os.path.exists(read_scores_file)
         assert not os.path.exists(read_preds_file)
         assert logger_mock.warning.call_count == 4
-        assert logger_mock.error.call_count == 1
+
+        # In the previous assert, reduction is tried until failure
+        # So that means we should have more than 1 memoryerror message
+        assert logger_mock.error.call_count >= 1, "{}".format(
+            logger_mock.error.call_args_list
+        )
+        for i in range(len(logger_mock.error.call_args_list)):
+            assert 'Memory Exception -- Unable to further reduce' in str(
+                logger_mock.error.call_args_list[i])
 
 
 def test_read_pickle_read_preds(ensemble_backend):
@@ -644,71 +652,6 @@ def test_read_pickle_read_preds(ensemble_backend):
     compare_read_preds(ensbuilder2.read_preds, ensbuilder.read_preds)
     compare_read_preds(ensbuilder2.read_scores, ensbuilder.read_scores)
     assert ensbuilder2.last_hash == ensbuilder.last_hash
-
-
-def testPredict():
-    # Test that ensemble prediction applies weights correctly to given
-    # predictions. There are two possible cases:
-    # 1) predictions.shape[0] == len(self.weights_). In this case,
-    # predictions include those made by zero-weighted models. Therefore,
-    # we simply apply each weights to the corresponding model preds.
-    # 2) predictions.shape[0] < len(self.weights_). In this case,
-    # predictions exclude those made by zero-weighted models. Therefore,
-    # we first exclude all occurrences of zero in self.weights_, and then
-    # apply the weights.
-    # If none of the above is the case, predict() raises Error.
-    ensemble = EnsembleSelection(ensemble_size=3,
-                                 task_type=BINARY_CLASSIFICATION,
-                                 random_state=np.random.RandomState(0),
-                                 metric=accuracy,
-                                 )
-    # Test for case 1. Create (3, 2, 2) predictions.
-    per_model_pred = np.array([
-        [[0.9, 0.1],
-         [0.4, 0.6]],
-        [[0.8, 0.2],
-         [0.3, 0.7]],
-        [[1.0, 0.0],
-         [0.1, 0.9]]
-    ])
-    # Weights of 3 hypothetical models
-    ensemble.weights_ = [0.7, 0.2, 0.1]
-    pred = ensemble.predict(per_model_pred)
-    truth = np.array([[0.89, 0.11],  # This should be the true prediction.
-                      [0.35, 0.65]])
-    assert np.allclose(pred, truth)
-
-    # Test for case 2.
-    per_model_pred = np.array([
-        [[0.9, 0.1],
-         [0.4, 0.6]],
-        [[0.8, 0.2],
-         [0.3, 0.7]],
-        [[1.0, 0.0],
-         [0.1, 0.9]]
-    ])
-    # The third model now has weight of zero.
-    ensemble.weights_ = [0.7, 0.2, 0.0, 0.1]
-    pred = ensemble.predict(per_model_pred)
-    truth = np.array([[0.89, 0.11],
-                      [0.35, 0.65]])
-    assert np.allclose(pred, truth)
-
-    # Test for error case.
-    per_model_pred = np.array([
-        [[0.9, 0.1],
-         [0.4, 0.6]],
-        [[0.8, 0.2],
-         [0.3, 0.7]],
-        [[1.0, 0.0],
-         [0.1, 0.9]]
-    ])
-    # Now the weights have 2 zero weights and 2 non-zero weights,
-    # which is incompatible.
-    ensemble.weights_ = [0.6, 0.0, 0.0, 0.4]
-
-    with pytest.raises(ValueError):
-        ensemble.predict(per_model_pred)
 
 
 @pytest.mark.parametrize("metric", [log_loss, accuracy])

@@ -1,3 +1,4 @@
+import logging
 import os
 import tempfile
 from io import StringIO
@@ -54,29 +55,34 @@ class MetaFeaturesTest(TestCase):
         self.mf = meta_features.metafeatures
         self.helpers = meta_features.helper_functions
 
+        # Create a logger for testing
+        self.logger = logging.getLogger()
+
         # Precompute some helper functions
         self.helpers.set_value(
-            "PCA", self.helpers["PCA"](self.X_transformed, self.y),
+            "PCA", self.helpers["PCA"](self.X_transformed, self.y, self.logger),
             )
         self.helpers.set_value(
             "MissingValues",
-            self.helpers["MissingValues"](self.X, self.y, self.categorical),
+            self.helpers["MissingValues"](self.X, self.y, self.logger,  self.categorical),
             )
         self.helpers.set_value(
             "NumSymbols",
-            self.helpers["NumSymbols"](self.X, self.y, self.categorical),
+            self.helpers["NumSymbols"](self.X, self.y, self.logger,  self.categorical),
             )
         self.helpers.set_value(
             "ClassOccurences",
-            self.helpers["ClassOccurences"](self.X, self.y),
+            self.helpers["ClassOccurences"](self.X, self.y, self.logger),
             )
         self.helpers.set_value(
             "Skewnesses",
-            self.helpers["Skewnesses"](self.X_transformed, self.y, self.categorical_transformed),
+            self.helpers["Skewnesses"](self.X_transformed, self.y,
+                                       self.logger, self.categorical_transformed),
             )
         self.helpers.set_value(
             "Kurtosisses",
-            self.helpers["Kurtosisses"](self.X_transformed, self.y, self.categorical_transformed),
+            self.helpers["Kurtosisses"](self.X_transformed, self.y,
+                                        self.logger, self.categorical_transformed),
             )
 
     def tearDown(self):
@@ -95,34 +101,34 @@ class MetaFeaturesTest(TestCase):
         )
 
     def test_number_of_instance(self):
-        mf = self.mf["NumberOfInstances"](self.X, self.y, self.categorical)
+        mf = self.mf["NumberOfInstances"](self.X, self.y, self.logger,  self.categorical)
         self.assertEqual(mf.value, 898)
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_number_of_classes(self):
-        mf = self.mf["NumberOfClasses"](self.X, self.y, self.categorical)
+        mf = self.mf["NumberOfClasses"](self.X, self.y, self.logger,  self.categorical)
         self.assertEqual(mf.value, 5)
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_number_of_classes_multilabel(self):
         X, y = self.get_multilabel()
-        mf = self.mf["NumberOfClasses"](X, y)
+        mf = self.mf["NumberOfClasses"](X, y, self.logger)
         self.assertEqual(mf.value, 2)
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_number_of_features(self):
-        mf = self.mf["NumberOfFeatures"](self.X, self.y, self.categorical)
+        mf = self.mf["NumberOfFeatures"](self.X, self.y, self.logger,  self.categorical)
         self.assertEqual(mf.value, 38)
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_missing_values(self):
-        mf = self.helpers["MissingValues"](self.X, self.y, self.categorical)
+        mf = self.helpers["MissingValues"](self.X, self.y, self.logger,  self.categorical)
         self.assertIsInstance(mf.value, np.ndarray)
         self.assertEqual(mf.value.shape, self.X.shape)
         self.assertEqual(22175, np.sum(mf.value))
 
     def test_number_of_Instances_with_missing_values(self):
-        mf = self.mf["NumberOfInstancesWithMissingValues"](self.X, self.y,
+        mf = self.mf["NumberOfInstancesWithMissingValues"](self.X, self.y, self.logger,
                                                            self.categorical)
         self.assertEqual(mf.value, 898)
         self.assertIsInstance(mf, MetaFeatureValue)
@@ -130,79 +136,85 @@ class MetaFeaturesTest(TestCase):
     def test_percentage_of_Instances_with_missing_values(self):
         self.mf.set_value(
             "NumberOfInstancesWithMissingValues",
-            self.mf["NumberOfInstancesWithMissingValues"](self.X, self.y, self.categorical),
+            self.mf["NumberOfInstancesWithMissingValues"](
+                self.X, self.y, self.logger,  self.categorical),
             )
-        mf = self.mf["PercentageOfInstancesWithMissingValues"](self.X, self.y, self.categorical)
+        mf = self.mf["PercentageOfInstancesWithMissingValues"](self.X, self.y,
+                                                               self.logger,  self.categorical)
         self.assertAlmostEqual(mf.value, 1.0)
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_number_of_features_with_missing_values(self):
-        mf = self.mf["NumberOfFeaturesWithMissingValues"](self.X, self.y, self.categorical)
+        mf = self.mf["NumberOfFeaturesWithMissingValues"](self.X, self.y,
+                                                          self.logger,  self.categorical)
         self.assertEqual(mf.value, 29)
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_percentage_of_features_with_missing_values(self):
         self.mf.set_value(
             "NumberOfFeaturesWithMissingValues",
-            self.mf["NumberOfFeaturesWithMissingValues"](self.X, self.y, self.categorical))
-        mf = self.mf["PercentageOfFeaturesWithMissingValues"](self.X, self.y, self.categorical)
+            self.mf["NumberOfFeaturesWithMissingValues"](self.X, self.y,
+                                                         self.logger,  self.categorical))
+        mf = self.mf["PercentageOfFeaturesWithMissingValues"](self.X, self.y,
+                                                              self.logger,  self.categorical)
         self.assertAlmostEqual(mf.value, float(29)/float(38))
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_number_of_missing_values(self):
-        mf = self.mf["NumberOfMissingValues"](self.X, self.y, self.categorical)
+        mf = self.mf["NumberOfMissingValues"](self.X, self.y, self.logger,  self.categorical)
         self.assertEqual(mf.value, 22175)
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_percentage_missing_values(self):
         self.mf.set_value("NumberOfMissingValues",
-                          self.mf["NumberOfMissingValues"](self.X, self.y, self.categorical))
-        mf = self.mf["PercentageOfMissingValues"](self.X, self.y, self.categorical)
+                          self.mf["NumberOfMissingValues"](self.X, self.y,
+                                                           self.logger,  self.categorical))
+        mf = self.mf["PercentageOfMissingValues"](self.X, self.y, self.logger,  self.categorical)
         self.assertAlmostEqual(mf.value, float(22175)/float((38*898)))
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_number_of_numeric_features(self):
-        mf = self.mf["NumberOfNumericFeatures"](self.X, self.y,
+        mf = self.mf["NumberOfNumericFeatures"](self.X, self.y, self.logger,
                                                 self.categorical)
         self.assertEqual(mf.value, 6)
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_number_of_categorical_features(self):
-        mf = self.mf["NumberOfCategoricalFeatures"](self.X, self.y,
+        mf = self.mf["NumberOfCategoricalFeatures"](self.X, self.y, self.logger,
                                                     self.categorical)
         self.assertEqual(mf.value, 32)
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_ratio_numerical_to_categorical(self):
-        mf = self.mf["RatioNumericalToNominal"](self.X, self.y,
+        mf = self.mf["RatioNumericalToNominal"](self.X, self.y, self.logger,
                                                 self.categorical)
         self.assertAlmostEqual(mf.value, float(6)/float(32))
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_ratio_categorical_to_numerical(self):
-        mf = self.mf["RatioNominalToNumerical"](self.X, self.y,
+        mf = self.mf["RatioNominalToNumerical"](self.X, self.y, self.logger,
                                                 self.categorical)
         self.assertAlmostEqual(mf.value, float(32)/float(6))
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_dataset_ratio(self):
-        mf = self.mf["DatasetRatio"](self.X, self.y, self.categorical)
+        mf = self.mf["DatasetRatio"](self.X, self.y, self.logger,  self.categorical)
         self.assertAlmostEqual(mf.value, float(38)/float(898))
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_inverse_dataset_ratio(self):
-        mf = self.mf["InverseDatasetRatio"](self.X, self.y, self.categorical)
+        mf = self.mf["InverseDatasetRatio"](self.X, self.y, self.logger,  self.categorical)
         self.assertAlmostEqual(mf.value, float(898)/float(38))
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_class_occurences(self):
-        mf = self.helpers["ClassOccurences"](self.X, self.y, self.categorical)
+        mf = self.helpers["ClassOccurences"](self.X, self.y, self.logger,  self.categorical)
         self.assertEqual(mf.value,
                          {0.0: 8.0, 1.0: 99.0, 2.0: 684.0, 4.0: 67.0, 5.0: 40.0})
 
     def test_class_occurences_multilabel(self):
         X, y = self.get_multilabel()
-        mf = self.helpers["ClassOccurences"](X, y)
+        mf = self.helpers["ClassOccurences"](X, y, self.logger)
         self.assertEqual(mf.value,
                          [{0: 16.0, 1: 84.0},
                           {0: 8.0, 1: 92.0},
@@ -211,33 +223,33 @@ class MetaFeaturesTest(TestCase):
                           {0: 28.0, 1: 72.0}])
 
     def test_class_probability_min(self):
-        mf = self.mf["ClassProbabilityMin"](self.X, self.y, self.categorical)
+        mf = self.mf["ClassProbabilityMin"](self.X, self.y, self.logger,  self.categorical)
         self.assertAlmostEqual(mf.value, float(8)/float(898))
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_class_probability_min_multilabel(self):
         X, y = self.get_multilabel()
         self.helpers.set_value("ClassOccurences",
-                               self.helpers["ClassOccurences"](X, y))
-        mf = self.mf["ClassProbabilityMin"](X, y)
+                               self.helpers["ClassOccurences"](X, y, self.logger))
+        mf = self.mf["ClassProbabilityMin"](X, y, self.logger)
         self.assertAlmostEqual(mf.value, float(8) / float(100))
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_class_probability_max(self):
-        mf = self.mf["ClassProbabilityMax"](self.X, self.y, self.categorical)
+        mf = self.mf["ClassProbabilityMax"](self.X, self.y, self.logger,  self.categorical)
         self.assertAlmostEqual(mf.value, float(684)/float(898))
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_class_probability_max_multilabel(self):
         X, y = self.get_multilabel()
         self.helpers.set_value("ClassOccurences",
-                               self.helpers["ClassOccurences"](X, y))
-        mf = self.mf["ClassProbabilityMax"](X, y)
+                               self.helpers["ClassOccurences"](X, y, self.logger))
+        mf = self.mf["ClassProbabilityMax"](X, y, self.logger)
         self.assertAlmostEqual(mf.value, float(92) / float(100))
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_class_probability_mean(self):
-        mf = self.mf["ClassProbabilityMean"](self.X, self.y, self.categorical)
+        mf = self.mf["ClassProbabilityMean"](self.X, self.y, self.logger,  self.categorical)
         classes = np.array((8, 99, 684, 67, 40), dtype=np.float64)
         prob_mean = (classes / float(898)).mean()
         self.assertAlmostEqual(mf.value, prob_mean)
@@ -246,15 +258,15 @@ class MetaFeaturesTest(TestCase):
     def test_class_probability_mean_multilabel(self):
         X, y = self.get_multilabel()
         self.helpers.set_value("ClassOccurences",
-                               self.helpers["ClassOccurences"](X, y))
-        mf = self.mf["ClassProbabilityMean"](X, y)
+                               self.helpers["ClassOccurences"](X, y, self.logger))
+        mf = self.mf["ClassProbabilityMean"](X, y, self.logger)
         classes = [(16, 84), (8, 92), (68, 32), (15, 85), (28, 72)]
         probas = np.mean([np.mean(np.array(cls_)) / 100 for cls_ in classes])
         self.assertAlmostEqual(mf.value, probas)
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_class_probability_std(self):
-        mf = self.mf["ClassProbabilitySTD"](self.X, self.y, self.categorical)
+        mf = self.mf["ClassProbabilitySTD"](self.X, self.y, self.logger,  self.categorical)
         classes = np.array((8, 99, 684, 67, 40), dtype=np.float64)
         prob_std = (classes / float(898)).std()
         self.assertAlmostEqual(mf.value, prob_std)
@@ -263,89 +275,97 @@ class MetaFeaturesTest(TestCase):
     def test_class_probability_std_multilabel(self):
         X, y = self.get_multilabel()
         self.helpers.set_value("ClassOccurences",
-                               self.helpers["ClassOccurences"](X, y))
-        mf = self.mf["ClassProbabilitySTD"](X, y)
+                               self.helpers["ClassOccurences"](X, y, self.logger))
+        mf = self.mf["ClassProbabilitySTD"](X, y, self.logger)
         classes = [(16, 84), (8, 92), (68, 32), (15, 85), (28, 72)]
         probas = np.mean([np.std(np.array(cls_) / 100.) for cls_ in classes])
         self.assertAlmostEqual(mf.value, probas)
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_num_symbols(self):
-        mf = self.helpers["NumSymbols"](self.X, self.y, self.categorical)
+        mf = self.helpers["NumSymbols"](self.X, self.y, self.logger,  self.categorical)
         symbol_frequency = [2, 1, 7, 1, 2, 4, 1, 1, 4, 2, 1, 1, 1, 2, 1, 0,
                             1, 1, 1, 0, 1, 1, 0, 3, 1, 0, 0, 0, 2, 2, 3, 2]
         self.assertEqual(mf.value, symbol_frequency)
 
     def test_symbols_min(self):
-        mf = self.mf["SymbolsMin"](self.X, self.y, self.categorical)
+        mf = self.mf["SymbolsMin"](self.X, self.y, self.logger,  self.categorical)
         self.assertEqual(mf.value, 1)
 
     def test_symbols_max(self):
         # this is attribute steel
-        mf = self.mf["SymbolsMax"](self.X, self.y, self.categorical)
+        mf = self.mf["SymbolsMax"](self.X, self.y, self.logger,  self.categorical)
         self.assertEqual(mf.value, 7)
 
     def test_symbols_mean(self):
-        mf = self.mf["SymbolsMean"](self.X, self.y, self.categorical)
+        mf = self.mf["SymbolsMean"](self.X, self.y, self.logger,  self.categorical)
         # Empty looking spaces denote empty attributes
         symbol_frequency = [2, 1, 7, 1, 2, 4, 1, 1, 4, 2, 1, 1, 1, 2, 1,  #
                             1, 1, 1,   1, 1,    3, 1,           2, 2, 3, 2]
         self.assertAlmostEqual(mf.value, np.mean(symbol_frequency))
 
     def test_symbols_std(self):
-        mf = self.mf["SymbolsSTD"](self.X, self.y, self.categorical)
+        mf = self.mf["SymbolsSTD"](self.X, self.y, self.logger,  self.categorical)
         symbol_frequency = [2, 1, 7, 1, 2, 4, 1, 1, 4, 2, 1, 1, 1, 2, 1,  #
                             1, 1, 1,   1, 1,    3, 1,           2, 2, 3, 2]
         self.assertAlmostEqual(mf.value, np.std(symbol_frequency))
 
     def test_symbols_sum(self):
-        mf = self.mf["SymbolsSum"](self.X, self.y, self.categorical)
+        mf = self.mf["SymbolsSum"](self.X, self.y, self.logger,  self.categorical)
         self.assertEqual(mf.value, 49)
 
     def test_kurtosisses(self):
-        mf = self.helpers["Kurtosisses"](self.X_transformed, self.y,
+        mf = self.helpers["Kurtosisses"](self.X_transformed, self.y, self.logger,
                                          self.categorical_transformed)
         self.assertEqual(6, len(mf.value))
 
     def test_kurtosis_min(self):
         # TODO: somehow compute the expected output?
-        self.mf["KurtosisMin"](self.X_transformed, self.y, self.categorical_transformed)
+        self.mf["KurtosisMin"](self.X_transformed, self.y, self.logger,
+                               self.categorical_transformed)
 
     def test_kurtosis_max(self):
         # TODO: somehow compute the expected output?
-        self.mf["KurtosisMax"](self.X_transformed, self.y, self.categorical_transformed)
+        self.mf["KurtosisMax"](self.X_transformed, self.y, self.logger,
+                               self.categorical_transformed)
 
     def test_kurtosis_mean(self):
         # TODO: somehow compute the expected output?
-        self.mf["KurtosisMean"](self.X_transformed, self.y, self.categorical_transformed)
+        self.mf["KurtosisMean"](self.X_transformed, self.y, self.logger,
+                                self.categorical_transformed)
 
     def test_kurtosis_std(self):
         # TODO: somehow compute the expected output?
-        self.mf["KurtosisSTD"](self.X_transformed, self.y, self.categorical_transformed)
+        self.mf["KurtosisSTD"](self.X_transformed, self.y, self.logger,
+                               self.categorical_transformed)
 
     def test_skewnesses(self):
-        mf = self.helpers["Skewnesses"](self.X_transformed, self.y,
+        mf = self.helpers["Skewnesses"](self.X_transformed, self.y, self.logger,
                                         self.categorical_transformed)
         self.assertEqual(6, len(mf.value))
 
     def test_skewness_min(self):
         # TODO: somehow compute the expected output?
-        self.mf["SkewnessMin"](self.X_transformed, self.y, self.categorical_transformed)
+        self.mf["SkewnessMin"](self.X_transformed, self.y, self.logger,
+                               self.categorical_transformed)
 
     def test_skewness_max(self):
         # TODO: somehow compute the expected output?
-        self.mf["SkewnessMax"](self.X_transformed, self.y, self.categorical_transformed)
+        self.mf["SkewnessMax"](self.X_transformed, self.y, self.logger,
+                               self.categorical_transformed)
 
     def test_skewness_mean(self):
         # TODO: somehow compute the expected output?
-        self.mf["SkewnessMean"](self.X_transformed, self.y, self.categorical_transformed)
+        self.mf["SkewnessMean"](self.X_transformed, self.y, self.logger,
+                                self.categorical_transformed)
 
     def test_skewness_std(self):
         # TODO: somehow compute the expected output?
-        self.mf["SkewnessSTD"](self.X_transformed, self.y, self.categorical_transformed)
+        self.mf["SkewnessSTD"](self.X_transformed, self.y, self.logger,
+                               self.categorical_transformed)
 
     def test_class_entropy(self):
-        mf = self.mf["ClassEntropy"](self.X, self.y, self.categorical)
+        mf = self.mf["ClassEntropy"](self.X, self.y, self.logger,  self.categorical)
         classes = np.array((8, 99, 684, 67, 40), dtype=np.float64)
         classes = classes / sum(classes)
         entropy = -np.sum([c * np.log2(c) for c in classes])
@@ -354,7 +374,7 @@ class MetaFeaturesTest(TestCase):
 
     def test_class_entropy_multilabel(self):
         X, y = self.get_multilabel()
-        mf = self.mf["ClassEntropy"](X, y)
+        mf = self.mf["ClassEntropy"](X, y, self.logger)
 
         classes = [(16, 84), (8, 92), (68, 32), (15, 85), (28, 72)]
         entropies = []
@@ -368,81 +388,82 @@ class MetaFeaturesTest(TestCase):
 
     def test_landmark_lda(self):
         # TODO: somehow compute the expected output?
-        self.mf["LandmarkLDA"](self.X_transformed, self.y)
+        self.mf["LandmarkLDA"](self.X_transformed, self.y, self.logger)
 
     def test_landmark_lda_multilabel(self):
         X, y = self.get_multilabel()
-        mf = self.mf["LandmarkLDA"](X, y)
+        mf = self.mf["LandmarkLDA"](X, y, self.logger)
         self.assertTrue(np.isfinite(mf.value))
 
     def test_landmark_naive_bayes(self):
         # TODO: somehow compute the expected output?
-        self.mf["LandmarkNaiveBayes"](self.X_transformed, self.y)
+        self.mf["LandmarkNaiveBayes"](self.X_transformed, self.y, self.logger)
 
     def test_landmark_naive_bayes_multilabel(self):
         X, y = self.get_multilabel()
-        mf = self.mf["LandmarkNaiveBayes"](X, y)
+        mf = self.mf["LandmarkNaiveBayes"](X, y, self.logger)
         self.assertTrue(np.isfinite(mf.value))
 
     def test_landmark_decision_tree(self):
         # TODO: somehow compute the expected output?
-        self.mf["LandmarkDecisionTree"](self.X_transformed, self.y)
+        self.mf["LandmarkDecisionTree"](self.X_transformed, self.y, self.logger)
 
     def test_landmark_decision_tree_multilabel(self):
         X, y = self.get_multilabel()
-        mf = self.mf["LandmarkDecisionTree"](X, y)
+        mf = self.mf["LandmarkDecisionTree"](X, y, self.logger)
         self.assertTrue(np.isfinite(mf.value))
 
     def test_decision_node(self):
         # TODO: somehow compute the expected output?
-        self.mf["LandmarkDecisionNodeLearner"](self.X_transformed, self.y)
+        self.mf["LandmarkDecisionNodeLearner"](self.X_transformed, self.y, self.logger)
 
     def test_landmark_decision_node_multilabel(self):
         X, y = self.get_multilabel()
-        mf = self.mf["LandmarkDecisionNodeLearner"](X, y)
+        mf = self.mf["LandmarkDecisionNodeLearner"](X, y, self.logger)
         self.assertTrue(np.isfinite(mf.value))
 
     def test_random_node(self):
         # TODO: somehow compute the expected output?
-        self.mf["LandmarkRandomNodeLearner"](self.X_transformed, self.y)
+        self.mf["LandmarkRandomNodeLearner"](self.X_transformed, self.y, self.logger)
 
     def test_landmark_random_node_multilabel(self):
         X, y = self.get_multilabel()
-        mf = self.mf["LandmarkRandomNodeLearner"](X, y)
+        mf = self.mf["LandmarkRandomNodeLearner"](X, y, self.logger)
         self.assertTrue(np.isfinite(mf.value))
 
     @unittest.skip("Currently not implemented!")
     def test_worst_node(self):
         # TODO: somehow compute the expected output?
-        self.mf["LandmarkWorstNodeLearner"](self.X_transformed, self.y)
+        self.mf["LandmarkWorstNodeLearner"](self.X_transformed, self.y, self.logger)
 
     def test_1NN(self):
         # TODO: somehow compute the expected output?
-        self.mf["Landmark1NN"](self.X_transformed, self.y)
+        self.mf["Landmark1NN"](self.X_transformed, self.y, self.logger)
 
     def test_1NN_multilabel(self):
         X, y = self.get_multilabel()
-        mf = self.mf["Landmark1NN"](X, y)
+        mf = self.mf["Landmark1NN"](X, y, self.logger)
         self.assertTrue(np.isfinite(mf.value))
 
     def test_pca(self):
-        self.helpers["PCA"](self.X_transformed, self.y)
+        self.helpers["PCA"](self.X_transformed, self.y, self.logger)
 
     def test_pca_95percent(self):
-        mf = self.mf["PCAFractionOfComponentsFor95PercentVariance"](self.X_transformed, self.y)
+        mf = self.mf["PCAFractionOfComponentsFor95PercentVariance"](
+            self.X_transformed, self.y, self.logger)
         self.assertAlmostEqual(0.2716049382716049, mf.value)
 
     def test_pca_kurtosis_first_pc(self):
-        mf = self.mf["PCAKurtosisFirstPC"](self.X_transformed, self.y)
+        mf = self.mf["PCAKurtosisFirstPC"](self.X_transformed, self.y, self.logger)
         self.assertNotAlmostEqual(-0.702850, mf.value)
 
     def test_pca_skewness_first_pc(self):
-        mf = self.mf["PCASkewnessFirstPC"](self.X_transformed, self.y)
+        mf = self.mf["PCASkewnessFirstPC"](self.X_transformed, self.y, self.logger)
         self.assertNotAlmostEqual(0.051210, mf.value)
 
     def test_calculate_all_metafeatures(self):
         mf = meta_features.calculate_all_metafeatures(
-            self.X, self.y, self.categorical, "2")
+            self.X, self.y, self.categorical, "2", logger=self.logger)
         self.assertEqual(52, len(mf.metafeature_values))
         self.assertEqual(mf.metafeature_values[
                              'NumberOfCategoricalFeatures'].value, 32)
@@ -454,7 +475,7 @@ class MetaFeaturesTest(TestCase):
         X, y = self.get_multilabel()
         categorical = [False] * 10
         mf = meta_features.calculate_all_metafeatures(
-            X, y, categorical, "Generated")
+            X, y,  categorical, "Generated", logger=self.logger)
         self.assertEqual(52, len(mf.metafeature_values))
         sio = StringIO()
         mf.dump(sio)

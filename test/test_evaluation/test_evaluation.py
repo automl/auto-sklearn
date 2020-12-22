@@ -1,5 +1,6 @@
 import os
 import logging
+import logging.handlers
 import shutil
 import sys
 import time
@@ -18,7 +19,7 @@ from autosklearn.metrics import accuracy, log_loss
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
-from evaluation_util import get_multiclass_classification_datamanager  # noqa E402
+from evaluation_util import get_multiclass_classification_datamanager, get_evaluation_backend  # noqa E402
 
 
 def safe_eval_success_mock(*args, **kwargs):
@@ -26,11 +27,6 @@ def safe_eval_success_mock(*args, **kwargs):
     queue.put({'status': StatusType.SUCCESS,
                'loss': 0.5,
                'additional_run_info': ''})
-
-
-class BackendMock(object):
-    def load_datamanager(self):
-        return get_multiclass_classification_datamanager()
 
 
 class EvaluationTest(unittest.TestCase):
@@ -46,6 +42,9 @@ class EvaluationTest(unittest.TestCase):
         stats = Stats(scenario_mock)
         stats.start_timing()
         self.stats = stats
+        self.logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
+
+        self.backend = get_evaluation_backend()
 
         try:
             shutil.rmtree(self.tmp)
@@ -85,7 +84,8 @@ class EvaluationTest(unittest.TestCase):
         pynisher_mock.side_effect = safe_eval_success_mock
         config = unittest.mock.Mock()
         config.config_id = 198
-        ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
+        ta = ExecuteTaFuncWithQueue(backend=self.backend, autosklearn_seed=1,
+                                    port=self.logger_port,
                                     resampling_strategy='holdout',
                                     stats=self.stats,
                                     memory_limit=3072,
@@ -105,7 +105,8 @@ class EvaluationTest(unittest.TestCase):
     def test_zero_or_negative_cutoff(self, pynisher_mock):
         config = unittest.mock.Mock()
         config.config_id = 198
-        ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
+        ta = ExecuteTaFuncWithQueue(backend=self.backend, autosklearn_seed=1,
+                                    port=self.logger_port,
                                     resampling_strategy='holdout',
                                     stats=self.stats,
                                     metric=accuracy,
@@ -122,7 +123,8 @@ class EvaluationTest(unittest.TestCase):
     def test_cutoff_lower_than_remaining_time(self, pynisher_mock):
         config = unittest.mock.Mock()
         config.config_id = 198
-        ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
+        ta = ExecuteTaFuncWithQueue(backend=self.backend, autosklearn_seed=1,
+                                    port=self.logger_port,
                                     resampling_strategy='holdout',
                                     stats=self.stats,
                                     metric=accuracy,
@@ -141,7 +143,8 @@ class EvaluationTest(unittest.TestCase):
         config = unittest.mock.Mock()
         config.origin = 'MOCK'
         config.config_id = 198
-        ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
+        ta = ExecuteTaFuncWithQueue(backend=self.backend, autosklearn_seed=1,
+                                    port=self.logger_port,
                                     resampling_strategy='holdout',
                                     stats=self.stats,
                                     memory_limit=3072,
@@ -182,7 +185,8 @@ class EvaluationTest(unittest.TestCase):
         pynisher_mock.side_effect = MemoryError
         config = unittest.mock.Mock()
         config.config_id = 198
-        ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
+        ta = ExecuteTaFuncWithQueue(backend=self.backend, autosklearn_seed=1,
+                                    port=self.logger_port,
                                     resampling_strategy='holdout',
                                     stats=self.stats,
                                     memory_limit=3072,
@@ -212,7 +216,8 @@ class EvaluationTest(unittest.TestCase):
         pynisher_mock.return_value = m1
         m2.exit_status = pynisher.TimeoutException
         m2.wall_clock_time = 30
-        ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
+        ta = ExecuteTaFuncWithQueue(backend=self.backend, autosklearn_seed=1,
+                                    port=self.logger_port,
                                     resampling_strategy='holdout',
                                     stats=self.stats,
                                     memory_limit=3072,
@@ -246,7 +251,8 @@ class EvaluationTest(unittest.TestCase):
         m2.wall_clock_time = 30
 
         # Test for a succesful run
-        ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
+        ta = ExecuteTaFuncWithQueue(backend=self.backend, autosklearn_seed=1,
+                                    port=self.logger_port,
                                     resampling_strategy='holdout',
                                     stats=self.stats,
                                     memory_limit=3072,
@@ -268,7 +274,8 @@ class EvaluationTest(unittest.TestCase):
                        'loss': 2.0,
                        'additional_run_info': {}})
         m2.side_effect = side_effect
-        ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
+        ta = ExecuteTaFuncWithQueue(backend=self.backend, autosklearn_seed=1,
+                                    port=self.logger_port,
                                     resampling_strategy='holdout',
                                     stats=self.stats,
                                     memory_limit=3072,
@@ -294,7 +301,8 @@ class EvaluationTest(unittest.TestCase):
                        'loss': 0.5,
                        'additional_run_info': kwargs['instance']})
         eval_houldout_mock.side_effect = side_effect
-        ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
+        ta = ExecuteTaFuncWithQueue(backend=self.backend, autosklearn_seed=1,
+                                    port=self.logger_port,
                                     resampling_strategy='holdout',
                                     stats=self.stats,
                                     memory_limit=3072,
@@ -318,7 +326,8 @@ class EvaluationTest(unittest.TestCase):
         config.config_id = 198
 
         eval_holdout_mock.side_effect = ValueError
-        ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
+        ta = ExecuteTaFuncWithQueue(backend=self.backend, autosklearn_seed=1,
+                                    port=self.logger_port,
                                     resampling_strategy='holdout',
                                     stats=self.stats,
                                     memory_limit=3072,
@@ -337,12 +346,14 @@ class EvaluationTest(unittest.TestCase):
         self.assertIn('traceback', info[1].additional_info)
         self.assertNotIn('exitcode', info[1].additional_info)
 
+    @unittest.skipIf(sys.version_info < (3, 7), reason="requires python3.7 or higher")
     def test_silent_exception_in_target_function(self):
         config = unittest.mock.Mock()
         config.config_id = 198
 
-        backend_mock = BackendMock()
-        ta = ExecuteTaFuncWithQueue(backend=backend_mock,
+        delattr(self.backend, 'save_targets_ensemble')
+        ta = ExecuteTaFuncWithQueue(backend=self.backend,
+                                    port=self.logger_port,
                                     autosklearn_seed=1,
                                     resampling_strategy='holdout',
                                     stats=self.stats,
@@ -367,6 +378,7 @@ class EvaluationTest(unittest.TestCase):
                 """'save_targets_ensemble'",)""",
                 """AttributeError("'BackendMock' object has no attribute """
                 """'save_targets_ensemble'")""",
+                """AttributeError('save_targets_ensemble')"""
             )
         )
         self.assertNotIn('exitcode', info[1].additional_info)

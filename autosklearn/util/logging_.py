@@ -106,13 +106,11 @@ class PickableLoggerAdapter(object):
 
 
 def get_named_client_logger(
-    output_dir: str,
     name: str,
     host: str = 'localhost',
     port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
 ) -> 'PicklableClientLogger':
     logger = PicklableClientLogger(
-        output_dir=output_dir,
         name=name,
         host=host,
         port=port
@@ -121,7 +119,6 @@ def get_named_client_logger(
 
 
 def _get_named_client_logger(
-    output_dir: str,
     name: str,
     host: str = 'localhost',
     port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
@@ -139,41 +136,52 @@ def _get_named_client_logger(
 
     Parameters
     ----------
-        outputdir: (str)
-            The path where the log files are going to be dumped
         name: (str)
             the name of the logger, used to tag the messages in the main log
         host: (str)
             Address of where the server is gonna look for messages
+        port: (str)
+            Port used to communicate with the server
 
     Returns
     -------
         local_loger: a logger object that has a socket handler
     """
     # Setup the logger configuration
-    setup_logger(output_dir=output_dir)
+    # We add client not only to identify that this is the client
+    # communication part of the logger, but to make sure we have
+    # a new singleton with the desired socket handlers
+    local_logger = _create_logger('Client-' + name)
+    local_logger.propagate = False
+    local_logger.setLevel(logging.DEBUG)
 
-    local_logger = _create_logger(name)
+    try:
+        # Ignore mypy logging.handlers.SocketHandler has no attribute port
+        # This is not the case clearly, yet MyPy assumes this is not the case
+        # Even when using direct casting or getattr
+        ports = [getattr(handler, 'port', None
+                         ) for handler in local_logger.handlers]  # type: ignore[attr-defined]
+    except AttributeError:
+        # We do not want to log twice but adding multiple times the same
+        # handler. So we check to what ports we communicate to
+        # We can prevent errors with streamers not having a port with this try
+        # block -- but it is a scenario that is unlikely to happen
+        ports = []
 
-    # Remove any handler, so that the server handles
-    # how to process the message
-    local_logger.handlers.clear()
-
-    socketHandler = logging.handlers.SocketHandler(host, port)
-    local_logger.addHandler(socketHandler)
+    if port not in ports:
+        socketHandler = logging.handlers.SocketHandler(host, port)
+        local_logger.addHandler(socketHandler)
 
     return local_logger
 
 
 class PicklableClientLogger(PickableLoggerAdapter):
 
-    def __init__(self, output_dir: str, name: str, host: str, port: int):
-        self.output_dir = output_dir
+    def __init__(self, name: str, host: str, port: int):
         self.name = name
         self.host = host
         self.port = port
         self.logger = _get_named_client_logger(
-            output_dir=output_dir,
             name=name,
             host=host,
             port=port
@@ -192,7 +200,6 @@ class PicklableClientLogger(PickableLoggerAdapter):
             'name': self.name,
             'host': self.host,
             'port': self.port,
-            'output_dir': self.output_dir,
         }
 
     def __setstate__(self, state: Dict[str, Any]) -> None:
@@ -208,12 +215,10 @@ class PicklableClientLogger(PickableLoggerAdapter):
         self.name = state['name']
         self.host = state['host']
         self.port = state['port']
-        self.output_dir = state['output_dir']
         self.logger = _get_named_client_logger(
             name=self.name,
             host=self.host,
             port=self.port,
-            output_dir=self.output_dir,
         )
 
 

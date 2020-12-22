@@ -30,7 +30,7 @@ from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.metrics import calculate_score, Scorer
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
-from autosklearn.util.logging_ import get_named_client_logger, get_logger
+from autosklearn.util.logging_ import get_named_client_logger
 
 Y_ENSEMBLE = 0
 Y_VALID = 1
@@ -162,7 +162,10 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         # The second criteria is elapsed time
         elapsed_time = time.time() - self.start_time
 
-        logger = get_logger('EnsembleBuilder')
+        logger = get_named_client_logger(
+            name='EnsembleBuilder',
+            port=self.logger_port,
+        )
 
         # First test for termination conditions
         if self.time_left_for_ensembles < elapsed_time:
@@ -476,7 +479,6 @@ class EnsembleBuilder(object):
         self.logger = get_named_client_logger(
             name='EnsembleBuilder',
             port=self.logger_port,
-            output_dir=self.backend.temporary_directory,
         )
 
         if ensemble_nbest == 1:
@@ -582,7 +584,6 @@ class EnsembleBuilder(object):
         self.logger = get_named_client_logger(
             name='EnsembleBuilder',
             port=self.logger_port,
-            output_dir=self.backend.temporary_directory,
         )
 
         process_start_time = time.time()
@@ -659,7 +660,6 @@ class EnsembleBuilder(object):
         self.logger = get_named_client_logger(
             name='EnsembleBuilder',
             port=self.logger_port,
-            output_dir=self.backend.temporary_directory,
         )
 
         self.start_time = time.time()

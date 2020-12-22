@@ -1,3 +1,5 @@
+import typing
+import logging
 import time
 import warnings
 
@@ -18,7 +20,7 @@ from autosklearn.pipeline.implementations.util import (
     convert_multioutput_multiclass_to_multilabel
 )
 from autosklearn.metrics import calculate_score, CLASSIFICATION_METRICS, REGRESSION_METRICS
-from autosklearn.util.logging_ import get_logger
+from autosklearn.util.logging_ import get_named_client_logger
 
 from ConfigSpace import Configuration
 
@@ -35,6 +37,8 @@ class MyDummyClassifier(DummyClassifier):
             super(MyDummyClassifier, self).__init__(strategy="uniform")
         else:
             super(MyDummyClassifier, self).__init__(strategy="most_frequent")
+        self.random_state = random_state
+        self.init_params = init_params
 
     def pre_transform(self, X, y, fit_params=None):  # pylint: disable=R0201
         if fit_params is None:
@@ -69,6 +73,8 @@ class MyDummyRegressor(DummyRegressor):
             super(MyDummyRegressor, self).__init__(strategy='mean')
         else:
             super(MyDummyRegressor, self).__init__(strategy='median')
+        self.random_state = random_state
+        self.init_params = init_params
 
     def pre_transform(self, X, y, fit_params=None):
         if fit_params is None:
@@ -109,6 +115,7 @@ def _fit_and_suppress_warnings(logger, model, X, y):
 
 class AbstractEvaluator(object):
     def __init__(self, backend, queue, metric,
+                 port: typing.Optional[int],
                  configuration=None,
                  scoring_functions=None,
                  seed=1,
@@ -125,6 +132,7 @@ class AbstractEvaluator(object):
 
         self.configuration = configuration
         self.backend = backend
+        self.port = port
         self.queue = queue
 
         self.datamanager = self.backend.load_datamanager()
@@ -186,7 +194,14 @@ class AbstractEvaluator(object):
 
         logger_name = '%s(%d):%s' % (self.__class__.__name__.split('.')[-1],
                                      self.seed, self.datamanager.name)
-        self.logger = get_logger(logger_name)
+
+        if self.port is None:
+            self.logger = logging.getLogger(__name__)
+        else:
+            self.logger = get_named_client_logger(
+                name=logger_name,
+                port=self.port,
+            )
 
         self.Y_optimization = None
         self.Y_actual_train = None
