@@ -1,3 +1,4 @@
+import logging
 import unittest
 import numpy as np
 
@@ -20,9 +21,10 @@ class kNDTest(unittest.TestCase):
                      233: [np.NaN, 0.1, 0.7],
                      234: [0.5, 0.7, 0.1]}
         self.runs = pd.DataFrame(self.runs)
+        self.logger = logging.getLogger()
 
     def test_fit_l1_distance(self):
-        kND = KNearestDatasets()
+        kND = KNearestDatasets(logger=self.logger)
 
         kND.fit(pd.DataFrame([self.anneal, self.krvskp, self.labor]), self.runs)
         self.assertEqual(kND.best_configuration_per_dataset[232], 0)
@@ -33,7 +35,7 @@ class kNDTest(unittest.TestCase):
 
     # TODO: rename to kNearestTasks or something
     def test_kNearestDatasets(self):
-        kND = KNearestDatasets()
+        kND = KNearestDatasets(logger=self.logger)
         kND.fit(pd.DataFrame([self.krvskp, self.labor]),
                 self.runs.loc[:, [233, 234]])
 
@@ -62,7 +64,7 @@ class kNDTest(unittest.TestCase):
         self.assertRaises(ValueError, kND.kNearestDatasets, self.anneal, -2)
 
     def test_kBestSuggestions(self):
-        kND = KNearestDatasets()
+        kND = KNearestDatasets(logger=self.logger)
         kND.fit(pd.DataFrame([self.krvskp, self.labor]),
                 self.runs.loc[:, [233, 234]])
         neighbor = kND.kBestSuggestions(self.anneal, 1)
@@ -85,7 +87,8 @@ class kNDTest(unittest.TestCase):
         self.assertRaises(ValueError, kND.kBestSuggestions, self.anneal, -2)
 
     def test_random_metric(self):
-        kND = KNearestDatasets(metric=get_random_metric(random_state=1))
+        kND = KNearestDatasets(logger=self.logger,
+                               metric=get_random_metric(random_state=1))
         kND.fit(pd.DataFrame([self.krvskp, self.labor]),
                 self.runs.loc[:, [233, 234]])
         distances = []
