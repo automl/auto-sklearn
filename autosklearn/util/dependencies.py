@@ -44,7 +44,6 @@ def _verify_package(name: str, operation: Optional[str], version: str) -> None:
         return
 
     required_version = LooseVersion(version)
-    print(required_version)
 
     if operation == '==':
         check = required_version == installed_version

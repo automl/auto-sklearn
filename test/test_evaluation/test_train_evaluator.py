@@ -1,8 +1,10 @@
 import copy
 import json
+import logging.handlers
 import queue
 import multiprocessing
 import os
+import tempfile
 import shutil
 import sys
 import unittest
@@ -37,11 +39,6 @@ from evaluation_util import get_regression_datamanager, BaseEvaluatorTest, \
     get_multiclass_classification_datamanager, SCORER_LIST  # noqa (E402: module level import not at top of file)
 
 
-class BackendMock(object):
-    def load_datamanager(self):
-        return get_multiclass_classification_datamanager()
-
-
 class Dummy(object):
     def __init__(self):
         self.name = 'dummy'
@@ -63,6 +60,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         dummy_pred_files = [os.path.join(self.ev_path, str(n)) for n in range(100, 200)]
         dummy_cv_model_files = [os.path.join(self.ev_path, str(n)) for n in range(200, 300)]
         backend_mock = unittest.mock.Mock()
+        backend_mock.temporary_directory = tempfile.gettempdir()
         backend_mock.get_model_dir.return_value = self.ev_path
         backend_mock.get_cv_model_dir.return_value = self.ev_path
         backend_mock.get_model_path.side_effect = dummy_model_files
@@ -72,6 +70,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         self.tmp_dir = os.path.join(self.ev_path, 'tmp_dir')
         self.output_dir = os.path.join(self.ev_path, 'out_dir')
+
+        self.port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
 
     def tearDown(self):
         if os.path.exists(self.ev_path):
@@ -103,6 +103,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
+                                   port=self.port,
                                    )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -163,6 +164,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         queue_ = multiprocessing.Queue()
 
         evaluator = TrainEvaluator(backend_api, queue_,
+                                   port=self.port,
                                    configuration=configuration,
                                    resampling_strategy='holdout',
                                    scoring_functions=None,
@@ -260,6 +262,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         queue_ = multiprocessing.Queue()
 
         evaluator = TrainEvaluator(backend_api, queue_,
+                                   port=self.port,
                                    configuration=configuration,
                                    resampling_strategy='holdout-iterative-fit',
                                    scoring_functions=None,
@@ -329,6 +332,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         queue_ = multiprocessing.Queue()
 
         evaluator = TrainEvaluator(backend_api, queue_,
+                                   port=self.port,
                                    configuration=configuration,
                                    resampling_strategy='holdout-iterative-fit',
                                    scoring_functions=None,
@@ -370,6 +374,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         queue_ = multiprocessing.Queue()
 
         evaluator = TrainEvaluator(backend_api, queue_,
+                                   port=self.port,
                                    configuration=configuration,
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 5},
@@ -423,6 +428,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         queue_ = multiprocessing.Queue()
 
         evaluator = TrainEvaluator(backend_api, queue_,
+                                   port=self.port,
                                    configuration=configuration,
                                    resampling_strategy='partial-cv',
                                    resampling_strategy_args={'folds': 5},
@@ -482,6 +488,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         queue_ = multiprocessing.Queue()
 
         evaluator = TrainEvaluator(backend_api, queue_,
+                                   port=self.port,
                                    configuration=configuration,
                                    resampling_strategy='partial-cv-iterative-fit',
                                    resampling_strategy_args={'folds': 5},
@@ -548,6 +555,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         loss_mock.return_value = None
 
         evaluator = TrainEvaluator(self.backend_mock, queue=queue_,
+                                   port=self.port,
                                    configuration=configuration,
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 5},
@@ -631,7 +639,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         queue_ = multiprocessing.Queue()
         D = get_binary_classification_datamanager()
         backend_mock.load_datamanager.return_value = D
+        backend_mock.temporary_directory = tempfile.gettempdir()
         evaluator = TrainEvaluator(backend_mock, queue_,
+                                   port=self.port,
                                    configuration=configuration,
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 10},
@@ -677,7 +687,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         configuration = unittest.mock.Mock(spec=Configuration)
         queue_ = multiprocessing.Queue()
+        backend_mock.temporary_directory = tempfile.gettempdir()
         evaluator = TrainEvaluator(backend_mock, queue_,
+                                   port=self.port,
                                    configuration=configuration,
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 10},
@@ -722,6 +734,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         queue_ = multiprocessing.Queue()
 
         evaluator = TrainEvaluator(self.backend_mock, queue_,
+                                   port=self.port,
                                    configuration=configuration,
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 10},
@@ -745,6 +758,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
     ):
         D = get_binary_classification_datamanager()
         backend_mock.load_datamanager.return_value = D
+        backend_mock.temporary_directory = tempfile.gettempdir()
         mock.side_effect = lambda **kwargs: mock
         _partial_fit_and_predict_mock.return_value = (
             np.array([[0.1, 0.9]] * 46),
@@ -760,6 +774,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator = TrainEvaluator(
             backend_mock, queue_,
+            port=self.port,
             configuration=configuration,
             resampling_strategy='holdout',
             output_y_hat_optimization=False,
@@ -803,6 +818,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         _partial_fit_and_predict_mock.side_effect = SideEffect()
         evaluator = TrainEvaluator(
             backend_mock, queue_,
+            port=self.port,
             configuration=configuration,
             resampling_strategy='cv',
             resampling_strategy_args={'folds': 2},
@@ -847,6 +863,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         D = get_binary_classification_datamanager()
         backend_mock.load_datamanager.return_value = D
+        backend_mock.temporary_directory = tempfile.gettempdir()
         mock.side_effect = lambda **kwargs: mock
 
         configuration = unittest.mock.Mock(spec=Configuration)
@@ -854,6 +871,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator = TrainEvaluator(
             backend_mock, queue_,
+            port=self.port,
             configuration=configuration,
             resampling_strategy='holdout',
             output_y_hat_optimization=False,
@@ -883,6 +901,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         D = get_binary_classification_datamanager()
         backend_mock.load_datamanager.return_value = D
+        backend_mock.temporary_directory = tempfile.gettempdir()
         mock.side_effect = lambda **kwargs: mock
 
         configuration = unittest.mock.Mock(spec=Configuration)
@@ -890,6 +909,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator = TrainEvaluator(
             backend_mock, queue_,
+            port=self.port,
             configuration=configuration,
             resampling_strategy='holdout',
             output_y_hat_optimization=False,
@@ -929,6 +949,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         D = get_binary_classification_datamanager()
         backend_mock.load_datamanager.return_value = D
+        backend_mock.temporary_directory = tempfile.gettempdir()
         mock.side_effect = lambda **kwargs: mock
 
         configuration = unittest.mock.Mock(spec=Configuration)
@@ -936,6 +957,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator = TrainEvaluator(
             backend_mock, queue_,
+            port=self.port,
             configuration=configuration,
             resampling_strategy='holdout',
             output_y_hat_optimization=False,
@@ -967,6 +989,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         D = get_binary_classification_datamanager()
         backend_mock.load_datamanager.return_value = D
+        backend_mock.temporary_directory = tempfile.gettempdir()
         mock.side_effect = lambda **kwargs: mock
 
         configuration = unittest.mock.Mock(spec=Configuration)
@@ -974,6 +997,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator = TrainEvaluator(
             backend_mock, queue_,
+            port=self.port,
             configuration=configuration,
             resampling_strategy='holdout',
             output_y_hat_optimization=False,
@@ -1019,6 +1043,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                  MULTICLASS_CLASSIFICATION: accuracy,
                                  REGRESSION: r2}
                 evaluator = TrainEvaluator(self.backend_mock, queue_,
+                                           port=self.port,
                                            resampling_strategy='cv',
                                            resampling_strategy_args={'folds': 2},
                                            output_y_hat_optimization=False,
@@ -2233,6 +2258,7 @@ class FunctionsTest(unittest.TestCase):
             shutil.rmtree(self.ev_path)
         os.makedirs(self.ev_path, exist_ok=False)
         self.backend = unittest.mock.Mock()
+        self.backend.temporary_directory = tempfile.gettempdir()
         self.backend.get_model_dir.return_value = self.ev_path
         self.backend.get_cv_model_dir.return_value = self.ev_path
         dummy_model_files = [os.path.join(self.ev_path, str(n)) for n in range(100)]
@@ -2244,6 +2270,7 @@ class FunctionsTest(unittest.TestCase):
         self.backend.load_datamanager.return_value = self.data
         self.backend.output_directory = 'duapdbaetpdbe'
         self.dataset_name = json.dumps({'task_id': 'test'})
+        self.port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
 
     def tearDown(self):
         if os.path.exists(self.ev_path):
@@ -2252,6 +2279,7 @@ class FunctionsTest(unittest.TestCase):
     def test_eval_holdout(self):
         eval_holdout(
             queue=self.queue,
+            port=self.port,
             config=self.configuration,
             backend=self.backend,
             resampling_strategy='holdout',
@@ -2275,6 +2303,7 @@ class FunctionsTest(unittest.TestCase):
     def test_eval_holdout_all_loss_functions(self):
         eval_holdout(
             queue=self.queue,
+            port=self.port,
             config=self.configuration,
             backend=self.backend,
             resampling_strategy='holdout',
@@ -2325,6 +2354,7 @@ class FunctionsTest(unittest.TestCase):
     def test_eval_holdout_iterative_fit_no_timeout(self):
         eval_iterative_holdout(
             queue=self.queue,
+            port=self.port,
             config=self.configuration,
             backend=self.backend,
             resampling_strategy='holdout',
@@ -2348,6 +2378,7 @@ class FunctionsTest(unittest.TestCase):
     def test_eval_holdout_budget_iterations(self):
         eval_holdout(
             queue=self.queue,
+            port=self.port,
             config=self.configuration,
             backend=self.backend,
             resampling_strategy='holdout',
@@ -2377,6 +2408,7 @@ class FunctionsTest(unittest.TestCase):
         ).get_default_configuration()
         eval_holdout(
             queue=self.queue,
+            port=self.port,
             config=configuration,
             backend=self.backend,
             resampling_strategy='holdout',
@@ -2402,6 +2434,7 @@ class FunctionsTest(unittest.TestCase):
     def test_eval_holdout_budget_subsample(self):
         eval_holdout(
             queue=self.queue,
+            port=self.port,
             config=self.configuration,
             backend=self.backend,
             resampling_strategy='holdout',
@@ -2428,6 +2461,7 @@ class FunctionsTest(unittest.TestCase):
         print(self.configuration)
         eval_holdout(
             queue=self.queue,
+            port=self.port,
             config=self.configuration,
             backend=self.backend,
             resampling_strategy='holdout',
@@ -2458,6 +2492,7 @@ class FunctionsTest(unittest.TestCase):
         self.assertEqual(configuration['classifier:__choice__'], 'liblinear_svc')
         eval_holdout(
             queue=self.queue,
+            port=self.port,
             config=configuration,
             backend=self.backend,
             resampling_strategy='holdout',
@@ -2483,6 +2518,7 @@ class FunctionsTest(unittest.TestCase):
     def test_eval_cv(self):
         eval_cv(
             queue=self.queue,
+            port=self.port,
             config=self.configuration,
             backend=self.backend,
             seed=1,
@@ -2506,6 +2542,7 @@ class FunctionsTest(unittest.TestCase):
     def test_eval_cv_all_loss_functions(self):
         eval_cv(
             queue=self.queue,
+            port=self.port,
             config=self.configuration,
             backend=self.backend,
             seed=1,
@@ -2572,6 +2609,7 @@ class FunctionsTest(unittest.TestCase):
         for fold in range(5):
             instance = json.dumps({'task_id': 'data', 'fold': fold})
             eval_partial_cv(
+                port=self.port,
                 queue=self.queue,
                 config=self.configuration,
                 backend=self.backend,
