@@ -17,7 +17,7 @@ from autosklearn.constants import (
 from autosklearn.pipeline.implementations.util import (
     convert_multioutput_multiclass_to_multilabel
 )
-from autosklearn.metrics import calculate_score, CLASSIFICATION_METRICS, REGRESSION_METRICS
+from autosklearn.metrics import calculate_score
 from autosklearn.util.logging_ import get_logger
 
 from ConfigSpace import Configuration
