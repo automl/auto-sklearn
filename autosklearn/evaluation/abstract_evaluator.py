@@ -253,14 +253,9 @@ class AbstractEvaluator(object):
             scoring_functions=scoring_functions)
 
         if hasattr(score, '__len__'):
-            # TODO: instead of using self.metric, it should use all metrics given by key.
-            # But now this throws error...
-            if self.task_type in CLASSIFICATION_TASKS:
-                err = {key: metric._optimum - score[key] for key, metric in
-                       CLASSIFICATION_METRICS.items() if key in score}
-            else:
-                err = {key: metric._optimum - score[key] for key, metric in
-                       REGRESSION_METRICS.items() if key in score}
+            err = {metric.name: metric._optimum - score[metric.name]
+                   for metric in scoring_functions}
+            err[self.metric.name] = self.metric._optimum - score[self.metric.name]
         else:
             err = self.metric._optimum - score
 
