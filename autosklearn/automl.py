@@ -751,18 +751,20 @@ class AutoML(BaseEstimator):
         if proc_ensemble is not None:
             self.ensemble_performance_history = list(proc_ensemble.history)
 
+            if len(proc_ensemble.futures) > 0:
+                # Now we need to wait for the future to return as it cannot be cancelled while it
+                # is running: https://stackoverflow.com/a/49203129
+                self._logger.info("Ensemble script still running, waiting for it to finish.")
+                result = proc_ensemble.futures.pop().result()
+                if result:
+                    ensemble_history, _, _, _, _ = result
+                    self.ensemble_performance_history.extend(ensemble_history)
+                self._logger.info("Ensemble script finished, continue shutdown.")
+
             # save the ensemble performance history file
             if len(self.ensemble_performance_history) > 0:
                 pd.DataFrame(self.ensemble_performance_history).to_json(
                         os.path.join(self._backend.internals_directory, 'ensemble_history.json'))
-
-            if len(proc_ensemble.futures) > 0:
-                future = proc_ensemble.futures.pop()
-                # Now we need to wait for the future to return as it cannot be cancelled while it
-                # is running: https://stackoverflow.com/a/49203129
-                self._logger.info("Ensemble script still running, waiting for it to finish.")
-                future.result()
-                self._logger.info("Ensemble script finished, continue shutdown.")
 
         if load_models:
             self._logger.info("Loading models...")
