@@ -9,6 +9,7 @@ import os
 import pickle
 import re
 import shutil
+import sys
 import time
 import traceback
 from typing import List, Optional, Tuple, Union
@@ -606,6 +607,14 @@ class EnsembleBuilder(object):
             if wall_time_in_s < 1:
                 break
             context = multiprocessing.get_context(pynisher_context)
+            all_loaded_modules = sys.modules.keys()
+            preload = [
+                loaded_module for loaded_module in all_loaded_modules
+                if loaded_module.split('.')[0] in (
+                    'smac', 'autosklearn', 'numpy', 'scipy', 'pandas', 'pynisher', 'sklearn',
+                ) and 'logging' not in loaded_module
+            ]
+            context.set_forkserver_preload(preload)
 
             safe_ensemble_script = pynisher.enforce_limits(
                 wall_time_in_s=wall_time_in_s,
