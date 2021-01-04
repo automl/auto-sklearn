@@ -4,17 +4,17 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Parallel Usage with manual process spawning &#8212; AutoSklearn 0.12.0 documentation</title>
+    <title>Parallel Usage with manual process spawning &#8212; AutoSklearn 0.12.1 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery-binder.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-rendered-html.css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
 <meta charset='utf-8'>
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.12.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.12.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -120,7 +120,8 @@
       
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
-<p>Click <a class="reference internal" href="#sphx-glr-download-examples-60-search-example-parallel-manual-spawning-py"><span class="std std-ref">here</span></a>     to download the full example code</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-60-search-example-parallel-manual-spawning-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
 </div>
 <div class="sphx-glr-example-title section" id="parallel-usage-with-manual-process-spawning">
 <span id="sphx-glr-examples-60-search-example-parallel-manual-spawning-py"></span><h1>Parallel Usage with manual process spawning<a class="headerlink" href="#parallel-usage-with-manual-process-spawning" title="Permalink to this headline">¶</a></h1>
@@ -163,7 +164,7 @@ and remove the following line.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;dask.config.set object at 0x7f9b186a1b50&gt;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;dask.config.set object at 0x7f2ac0b55dc0&gt;
 </pre></div>
 </div>
 </div>
@@ -284,17 +285,17 @@ which means that it is automatically stopped one all computation is done.</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>auto-sklearn results:
   Dataset name: d6d58dae5b02e07797da6d4d126ac9b6
   Metric: accuracy
-  Best validation score: 0.978723
-  Number of target algorithm runs: 7
-  Number of successful target algorithm runs: 3
+  Best validation score: 0.985816
+  Number of target algorithm runs: 8
+  Number of successful target algorithm runs: 7
   Number of crashed target algorithm runs: 0
   Number of target algorithms that exceeded the time limit: 1
-  Number of target algorithms that exceeded the memory limit: 3
+  Number of target algorithms that exceeded the memory limit: 0
 
-Accuracy score 0.9440559440559441
+Accuracy score 0.958041958041958
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  46.817 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  46.889 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-60-search-example-parallel-manual-spawning-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/da17aeeaf222877617893f53916d7917/example_parallel_manual_spawning.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_parallel_manual_spawning.py</span></code></a></p>
@@ -327,7 +328,7 @@ Accuracy score 0.9440559440559441
     </p>
     <p>
         &copy; Copyright 2014-2019, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.3.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.4.2.<br/>
     </p>
   </div>
 </footer>

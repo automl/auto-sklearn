@@ -4,17 +4,17 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>sklearn.base &#8212; AutoSklearn 0.12.0 documentation</title>
+    <title>sklearn.base &#8212; AutoSklearn 0.12.1 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery-binder.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-rendered-html.css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
 <meta charset='utf-8'>
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.12.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.12.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -110,11 +110,7 @@
     <div class="body col-md-9 content" role="main">
       
   <h1>Source code for sklearn.base</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Base classes for all estimators.</span>
-
-<span class="sd">Used for VotingClassifier</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;Base classes for all estimators.&quot;&quot;&quot;</span>
 
 <span class="c1"># Author: Gael Varoquaux &lt;gael.varoquaux@normalesup.org&gt;</span>
 <span class="c1"># License: BSD 3 clause</span>
@@ -131,46 +127,39 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">__version__</span>
 <span class="kn">from</span> <span class="nn">._config</span> <span class="kn">import</span> <span class="n">get_config</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">_IS_32BIT</span>
+<span class="kn">from</span> <span class="nn">.utils._tags</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_DEFAULT_TAGS</span><span class="p">,</span>
+    <span class="n">_safe_tags</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.utils.validation</span> <span class="kn">import</span> <span class="n">check_X_y</span>
 <span class="kn">from</span> <span class="nn">.utils.validation</span> <span class="kn">import</span> <span class="n">check_array</span>
 <span class="kn">from</span> <span class="nn">.utils._estimator_html_repr</span> <span class="kn">import</span> <span class="n">estimator_html_repr</span>
 <span class="kn">from</span> <span class="nn">.utils.validation</span> <span class="kn">import</span> <span class="n">_deprecate_positional_args</span>
 
-<span class="n">_DEFAULT_TAGS</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;non_deterministic&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s1">&#39;requires_positive_X&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s1">&#39;requires_positive_y&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s1">&#39;X_types&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;2darray&#39;</span><span class="p">],</span>
-    <span class="s1">&#39;poor_score&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s1">&#39;no_validation&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s1">&#39;multioutput&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s2">&quot;allow_nan&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s1">&#39;stateless&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s1">&#39;multilabel&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s1">&#39;_skip_test&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s1">&#39;_xfail_checks&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s1">&#39;multioutput_only&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s1">&#39;binary_only&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s1">&#39;requires_fit&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="s1">&#39;requires_y&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="p">}</span>
-
 
 <span class="nd">@_deprecate_positional_args</span>
 <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Constructs a new estimator with the same parameters.</span>
+    <span class="sd">&quot;&quot;&quot;Constructs a new unfitted estimator with the same parameters.</span>
 
 <span class="sd">    Clone does a deep copy of the model in an estimator</span>
 <span class="sd">    without actually copying attached data. It yields a new estimator</span>
-<span class="sd">    with the same parameters that has not been fit on any data.</span>
+<span class="sd">    with the same parameters that has not been fitted on any data.</span>
+
+<span class="sd">    If the estimator&#39;s `random_state` parameter is an integer (or if the</span>
+<span class="sd">    estimator doesn&#39;t have a `random_state` parameter), an *exact clone* is</span>
+<span class="sd">    returned: the clone and the original estimator will give the exact same</span>
+<span class="sd">    results. Otherwise, *statistical clone* is returned: the clone might</span>
+<span class="sd">    yield different results from the original estimator. More details can be</span>
+<span class="sd">    found in :ref:`randomness`.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    estimator : {list, tuple, set} of estimator objects or estimator object</span>
+<span class="sd">    estimator : {list, tuple, set} of estimator instance or a single \</span>
+<span class="sd">            estimator instance</span>
 <span class="sd">        The estimator or group of estimators to be cloned.</span>
 
 <span class="sd">    safe : bool, default=True</span>
-<span class="sd">        If safe is false, clone will fall back to a deep copy on objects</span>
+<span class="sd">        If safe is False, clone will fall back to a deep copy on objects</span>
 <span class="sd">        that are not estimators.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -262,7 +251,7 @@
 
 
 <span class="k">class</span> <span class="nc">BaseEstimator</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Base class for all estimators in scikit-learn</span>
+    <span class="sd">&quot;&quot;&quot;Base class for all estimators in scikit-learn.</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
@@ -310,20 +299,12 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        params : mapping of string to any</span>
+<span class="sd">        params : dict</span>
 <span class="sd">            Parameter names mapped to their values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">out</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_param_names</span><span class="p">():</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;From version 0.24, get_params will raise an &#39;</span>
-                              <span class="s1">&#39;AttributeError if a parameter cannot be &#39;</span>
-                              <span class="s1">&#39;retrieved as an instance attribute. Previously &#39;</span>
-                              <span class="s1">&#39;it would return None.&#39;</span><span class="p">,</span>
-                              <span class="ne">FutureWarning</span><span class="p">)</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">deep</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;get_params&#39;</span><span class="p">):</span>
                 <span class="n">deep_items</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                 <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">((</span><span class="n">key</span> <span class="o">+</span> <span class="s1">&#39;__&#39;</span> <span class="o">+</span> <span class="n">k</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">deep_items</span><span class="p">)</span>
@@ -335,9 +316,9 @@
 <span class="sd">        Set the parameters of this estimator.</span>
 
 <span class="sd">        The method works on simple estimators as well as on nested objects</span>
-<span class="sd">        (such as pipelines). The latter have parameters of the form</span>
-<span class="sd">        ``&lt;component&gt;__&lt;parameter&gt;`` so that it&#39;s possible to update each</span>
-<span class="sd">        component of a nested object.</span>
+<span class="sd">        (such as :class:`~sklearn.pipeline.Pipeline`). The latter have</span>
+<span class="sd">        parameters of the form ``&lt;component&gt;__&lt;parameter&gt;`` so that it&#39;s</span>
+<span class="sd">        possible to update each component of a nested object.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -346,7 +327,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        self : object</span>
+<span class="sd">        self : estimator instance</span>
 <span class="sd">            Estimator instance.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">params</span><span class="p">:</span>
@@ -472,27 +453,32 @@
 <span class="sd">            The input samples.</span>
 <span class="sd">        reset : bool</span>
 <span class="sd">            If True, the `n_features_in_` attribute is set to `X.shape[1]`.</span>
-<span class="sd">            Else, the attribute must already exist and the function checks</span>
-<span class="sd">            that it is equal to `X.shape[1]`.</span>
+<span class="sd">            If False and the attribute exists, then check that it is equal to</span>
+<span class="sd">            `X.shape[1]`. If False and the attribute does *not* exist, then</span>
+<span class="sd">            the check is skipped.</span>
+<span class="sd">            .. note::</span>
+<span class="sd">               It is recommended to call reset=True in `fit` and in the first</span>
+<span class="sd">               call to `partial_fit`. All other methods that validate `X`</span>
+<span class="sd">               should set `reset=False`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">n_features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">reset</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">n_features_in_</span> <span class="o">=</span> <span class="n">n_features</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;n_features_in_&#39;</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                    <span class="s2">&quot;The reset parameter is False but there is no &quot;</span>
-                    <span class="s2">&quot;n_features_in_ attribute. Is this estimator fitted?&quot;</span>
-                <span class="p">)</span>
-            <span class="k">if</span> <span class="n">n_features</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_features_in_</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s1">&#39;X has </span><span class="si">{}</span><span class="s1"> features, but this </span><span class="si">{}</span><span class="s1"> is expecting </span><span class="si">{}</span><span class="s1"> features &#39;</span>
-                    <span class="s1">&#39;as input.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
-                                       <span class="bp">self</span><span class="o">.</span><span class="n">n_features_in_</span><span class="p">)</span>
-                <span class="p">)</span>
+            <span class="k">return</span>
 
-    <span class="k">def</span> <span class="nf">_validate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;n_features_in_&quot;</span><span class="p">):</span>
+            <span class="c1"># Skip this check if the expected number of expected input features</span>
+            <span class="c1"># was not recorded by calling fit first. This is typically the case</span>
+            <span class="c1"># for stateless transformers.</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">n_features</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_features_in_</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;X has </span><span class="si">{</span><span class="n">n_features</span><span class="si">}</span><span class="s2"> features, but </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;is expecting </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features_in_</span><span class="si">}</span><span class="s2"> features as input.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_validate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;no_validation&#39;</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                        <span class="n">validate_separately</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">check_params</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Validate input data and set or check the `n_features_in_` attribute.</span>
 
@@ -501,13 +487,25 @@
 <span class="sd">        X : {array-like, sparse matrix, dataframe} of shape \</span>
 <span class="sd">                (n_samples, n_features)</span>
 <span class="sd">            The input samples.</span>
-<span class="sd">        y : array-like of shape (n_samples,), default=None</span>
-<span class="sd">            The targets. If None, `check_array` is called on `X` and</span>
-<span class="sd">            `check_X_y` is called otherwise.</span>
+<span class="sd">        y : array-like of shape (n_samples,), default=&#39;no_validation&#39;</span>
+<span class="sd">            The targets.</span>
+
+<span class="sd">            - If `None`, `check_array` is called on `X`. If the estimator&#39;s</span>
+<span class="sd">              requires_y tag is True, then an error will be raised.</span>
+<span class="sd">            - If `&#39;no_validation&#39;`, `check_array` is called on `X` and the</span>
+<span class="sd">              estimator&#39;s requires_y tag is ignored. This is a default</span>
+<span class="sd">              placeholder and is never meant to be explicitly set.</span>
+<span class="sd">            - Otherwise, both `X` and `y` are checked with either `check_array`</span>
+<span class="sd">              or `check_X_y` depending on `validate_separately`.</span>
+
 <span class="sd">        reset : bool, default=True</span>
 <span class="sd">            Whether to reset the `n_features_in_` attribute.</span>
 <span class="sd">            If False, the input will be checked for consistency with data</span>
 <span class="sd">            provided when reset was last True.</span>
+<span class="sd">            .. note::</span>
+<span class="sd">               It is recommended to call reset=True in `fit` and in the first</span>
+<span class="sd">               call to `partial_fit`. All other methods that validate `X`</span>
+<span class="sd">               should set `reset=False`.</span>
 <span class="sd">        validate_separately : False or tuple of dicts, default=False</span>
 <span class="sd">            Only used if y is not None.</span>
 <span class="sd">            If False, call validate_X_y(). Else, it must be a tuple of kwargs</span>
@@ -529,6 +527,9 @@
                     <span class="sa">f</span><span class="s2">&quot;This </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> estimator &quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;requires y to be passed, but the target y is None.&quot;</span>
                 <span class="p">)</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">check_array</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="o">**</span><span class="n">check_params</span><span class="p">)</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">y</span> <span class="o">==</span> <span class="s1">&#39;no_validation&#39;</span><span class="p">:</span>
             <span class="n">X</span> <span class="o">=</span> <span class="n">check_array</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="o">**</span><span class="n">check_params</span><span class="p">)</span>
             <span class="n">out</span> <span class="o">=</span> <span class="n">X</span>
         <span class="k">else</span><span class="p">:</span>
@@ -597,7 +598,7 @@
 <span class="sd">            Test samples.</span>
 
 <span class="sd">        y : array-like of shape (n_samples,) or (n_samples, n_outputs)</span>
-<span class="sd">            True labels for X.</span>
+<span class="sd">            True labels for `X`.</span>
 
 <span class="sd">        sample_weight : array-like of shape (n_samples,), default=None</span>
 <span class="sd">            Sample weights.</span>
@@ -605,7 +606,7 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        score : float</span>
-<span class="sd">            Mean accuracy of self.predict(X) wrt. y.</span>
+<span class="sd">            Mean accuracy of ``self.predict(X)`` wrt. `y`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">.metrics</span> <span class="kn">import</span> <span class="n">accuracy_score</span>
         <span class="k">return</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">)</span>
@@ -619,27 +620,28 @@
     <span class="n">_estimator_type</span> <span class="o">=</span> <span class="s2">&quot;regressor&quot;</span>
 
     <span class="k">def</span> <span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return the coefficient of determination R^2 of the prediction.</span>
+        <span class="sd">&quot;&quot;&quot;Return the coefficient of determination :math:`R^2` of the</span>
+<span class="sd">        prediction.</span>
 
-<span class="sd">        The coefficient R^2 is defined as (1 - u/v), where u is the residual</span>
-<span class="sd">        sum of squares ((y_true - y_pred) ** 2).sum() and v is the total</span>
-<span class="sd">        sum of squares ((y_true - y_true.mean()) ** 2).sum().</span>
-<span class="sd">        The best possible score is 1.0 and it can be negative (because the</span>
-<span class="sd">        model can be arbitrarily worse). A constant model that always</span>
-<span class="sd">        predicts the expected value of y, disregarding the input features,</span>
-<span class="sd">        would get a R^2 score of 0.0.</span>
+<span class="sd">        The coefficient :math:`R^2` is defined as :math:`(1 - \\frac{u}{v})`,</span>
+<span class="sd">        where :math:`u` is the residual sum of squares ``((y_true - y_pred)</span>
+<span class="sd">        ** 2).sum()`` and :math:`v` is the total sum of squares ``((y_true -</span>
+<span class="sd">        y_true.mean()) ** 2).sum()``. The best possible score is 1.0 and it</span>
+<span class="sd">        can be negative (because the model can be arbitrarily worse). A</span>
+<span class="sd">        constant model that always predicts the expected value of `y`,</span>
+<span class="sd">        disregarding the input features, would get a :math:`R^2` score of</span>
+<span class="sd">        0.0.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        X : array-like of shape (n_samples, n_features)</span>
-<span class="sd">            Test samples. For some estimators this may be a</span>
-<span class="sd">            precomputed kernel matrix or a list of generic objects instead,</span>
-<span class="sd">            shape = (n_samples, n_samples_fitted),</span>
-<span class="sd">            where n_samples_fitted is the number of</span>
-<span class="sd">            samples used in the fitting for the estimator.</span>
+<span class="sd">            Test samples. For some estimators this may be a precomputed</span>
+<span class="sd">            kernel matrix or a list of generic objects instead with shape</span>
+<span class="sd">            ``(n_samples, n_samples_fitted)``, where ``n_samples_fitted``</span>
+<span class="sd">            is the number of samples used in the fitting for the estimator.</span>
 
 <span class="sd">        y : array-like of shape (n_samples,) or (n_samples, n_outputs)</span>
-<span class="sd">            True values for X.</span>
+<span class="sd">            True values for `X`.</span>
 
 <span class="sd">        sample_weight : array-like of shape (n_samples,), default=None</span>
 <span class="sd">            Sample weights.</span>
@@ -647,11 +649,11 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        score : float</span>
-<span class="sd">            R^2 of self.predict(X) wrt. y.</span>
+<span class="sd">            :math:`R^2` of ``self.predict(X)`` wrt. `y`.</span>
 
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
-<span class="sd">        The R2 score used when calling ``score`` on a regressor uses</span>
+<span class="sd">        The :math:`R^2` score used when calling ``score`` on a regressor uses</span>
 <span class="sd">        ``multioutput=&#39;uniform_average&#39;`` from version 0.23 to keep consistent</span>
 <span class="sd">        with default value of :func:`~sklearn.metrics.r2_score`.</span>
 <span class="sd">        This influences the ``score`` method of all the multioutput</span>
@@ -673,7 +675,7 @@
 
     <span class="k">def</span> <span class="nf">fit_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Perform clustering on X and returns cluster labels.</span>
+<span class="sd">        Perform clustering on `X` and returns cluster labels.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -685,7 +687,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        labels : ndarray of shape (n_samples,)</span>
+<span class="sd">        labels : ndarray of shape (n_samples,), dtype=np.int64</span>
 <span class="sd">            Cluster labels.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># non-optimized default implementation; override when a better</span>
@@ -693,9 +695,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels_</span>
 
+    <span class="k">def</span> <span class="nf">_more_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;preserves_dtype&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+
 
 <span class="k">class</span> <span class="nc">BiclusterMixin</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Mixin class for all bicluster estimators in scikit-learn&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Mixin class for all bicluster estimators in scikit-learn.&quot;&quot;&quot;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">biclusters_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -706,7 +711,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns_</span>
 
     <span class="k">def</span> <span class="nf">get_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Row and column indices of the i&#39;th bicluster.</span>
+        <span class="sd">&quot;&quot;&quot;Row and column indices of the `i`&#39;th bicluster.</span>
 
 <span class="sd">        Only works if ``rows_`` and ``columns_`` attributes exist.</span>
 
@@ -728,7 +733,7 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">rows</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">columns</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">get_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Shape of the i&#39;th bicluster.</span>
+        <span class="sd">&quot;&quot;&quot;Shape of the `i`&#39;th bicluster.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -737,8 +742,11 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        shape : tuple (int, int)</span>
-<span class="sd">            Number of rows and columns (resp.) in the bicluster.</span>
+<span class="sd">        n_rows : int</span>
+<span class="sd">            Number of rows in the bicluster.</span>
+
+<span class="sd">        n_cols : int</span>
+<span class="sd">            Number of columns in the bicluster.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_indices</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">)</span>
@@ -750,13 +758,13 @@
 <span class="sd">        ----------</span>
 <span class="sd">        i : int</span>
 <span class="sd">            The index of the cluster.</span>
-<span class="sd">        data : array-like</span>
+<span class="sd">        data : array-like of shape (n_samples, n_features)</span>
 <span class="sd">            The data.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        submatrix : ndarray</span>
-<span class="sd">            The submatrix corresponding to bicluster i.</span>
+<span class="sd">        submatrix : ndarray of shape (n_rows, n_cols)</span>
+<span class="sd">            The submatrix corresponding to bicluster `i`.</span>
 
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
@@ -776,16 +784,17 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fit to data, then transform it.</span>
 
-<span class="sd">        Fits transformer to X and y with optional parameters fit_params</span>
-<span class="sd">        and returns a transformed version of X.</span>
+<span class="sd">        Fits transformer to `X` and `y` with optional parameters `fit_params`</span>
+<span class="sd">        and returns a transformed version of `X`.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        X : {array-like, sparse matrix, dataframe} of shape \</span>
-<span class="sd">                (n_samples, n_features)</span>
+<span class="sd">        X : array-like of shape (n_samples, n_features)</span>
+<span class="sd">            Input samples.</span>
 
-<span class="sd">        y : ndarray of shape (n_samples,), default=None</span>
-<span class="sd">            Target values.</span>
+<span class="sd">        y :  array-like of shape (n_samples,) or (n_samples, n_outputs), \</span>
+<span class="sd">                default=None</span>
+<span class="sd">            Target values (None for unsupervised transformations).</span>
 
 <span class="sd">        **fit_params : dict</span>
 <span class="sd">            Additional fit parameters.</span>
@@ -810,11 +819,12 @@
     <span class="n">_estimator_type</span> <span class="o">=</span> <span class="s2">&quot;DensityEstimator&quot;</span>
 
     <span class="k">def</span> <span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return the score of the model on the data X</span>
+        <span class="sd">&quot;&quot;&quot;Return the score of the model on the data `X`.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        X : array-like of shape (n_samples, n_features)</span>
+<span class="sd">            Test samples.</span>
 
 <span class="sd">        y : Ignored</span>
 <span class="sd">            Not used, present for API consistency by convention.</span>
@@ -891,7 +901,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    estimator : object</span>
+<span class="sd">    estimator : estimator instance</span>
 <span class="sd">        Estimator object to test.</span>
 
 <span class="sd">    Returns</span>
@@ -907,7 +917,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    estimator : object</span>
+<span class="sd">    estimator : estimator instance</span>
 <span class="sd">        Estimator object to test.</span>
 
 <span class="sd">    Returns</span>
@@ -916,6 +926,47 @@
 <span class="sd">        True if estimator is an outlier detector and False otherwise.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="s2">&quot;_estimator_type&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;outlier_detector&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">_is_pairwise</span><span class="p">(</span><span class="n">estimator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns True if estimator is pairwise.</span>
+
+<span class="sd">    - If the `_pairwise` attribute and the tag are present and consistent,</span>
+<span class="sd">      then use the value and not issue a warning.</span>
+<span class="sd">    - If the `_pairwise` attribute and the tag are present and not</span>
+<span class="sd">      consistent, use the `_pairwise` value and issue a deprecation</span>
+<span class="sd">      warning.</span>
+<span class="sd">    - If only the `_pairwise` attribute is present and it is not False,</span>
+<span class="sd">      issue a deprecation warning and use the `_pairwise` value.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    estimator : object</span>
+<span class="sd">        Estimator object to test.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    out : bool</span>
+<span class="sd">        True if the estimator is pairwise and False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">)</span>
+        <span class="n">has_pairwise_attribute</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="s1">&#39;_pairwise&#39;</span><span class="p">)</span>
+        <span class="n">pairwise_attribute</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="s1">&#39;_pairwise&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">pairwise_tag</span> <span class="o">=</span> <span class="n">_safe_tags</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;pairwise&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">has_pairwise_attribute</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pairwise_attribute</span> <span class="o">!=</span> <span class="n">pairwise_tag</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;_pairwise was deprecated in 0.24 and will be removed in 1.1 &quot;</span>
+                <span class="s2">&quot;(renaming of 0.26). Set the estimator tags of your estimator &quot;</span>
+                <span class="s2">&quot;instead&quot;</span><span class="p">,</span>
+                <span class="ne">FutureWarning</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">pairwise_attribute</span>
+
+    <span class="c1"># use pairwise tag when the attribute is not present</span>
+    <span class="k">return</span> <span class="n">pairwise_tag</span>
 </pre></div>
 
     </div>
@@ -933,7 +984,7 @@
     </p>
     <p>
         &copy; Copyright 2014-2019, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.3.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.4.2.<br/>
     </p>
   </div>
 </footer>
