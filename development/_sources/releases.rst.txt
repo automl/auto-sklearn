@@ -12,6 +12,25 @@
 Releases
 ========
 
+Version 0.12.1
+==============
+
+* ADD: A new heuristic which gives a warning and subsamples the data if it is too large for the
+  given ``memory_limit``.
+* ADD #1024: Tune scikit-learn's ``MLPClassifier`` and ``MLPRegressor``.
+* MAINT #1017: Improve the logging server introduced in release 0.12.0.
+* MAINT #1024: Move to scikit-learn 0.24.X.
+* MAINT #1038: Use new datasets for regression and classification and also update the metadata
+  used for Auto-sklearn 1.0.
+* MAINT #1040: Minor speed improvements in the ensemble selection algorithm.
+
+Contributors v0.12.1
+********************
+
+* Matthias Feurer
+* Katharina Eggensperger
+* Francisco Rivera
+
 Version 0.12.0
 ==============
 
