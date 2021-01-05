@@ -116,6 +116,27 @@ procedure.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="In *Auto-sklearn*, model is optimized over a metric, either built-in or custom metric. Moreover...">
+
+.. only:: html
+
+ .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_calc_multiple_metrics_thumb.png
+     :alt: Metrics
+
+     :ref:`sphx_glr_examples_40_advanced_example_calc_multiple_metrics.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/40_advanced/example_calc_multiple_metrics
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="In *auto-sklearn* it is possible to specify the feature types of a dataset when calling the met...">
 
 .. only:: html
