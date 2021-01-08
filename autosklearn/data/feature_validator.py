@@ -19,7 +19,7 @@ from autosklearn.util.logging_ import PickableLoggerAdapter
 
 
 SUPPORTED_FEAT_TYPES = typing.Union[
-    list,
+    typing.List,
     pd.DataFrame,
     np.ndarray,
     scipy.sparse.bsr_matrix,
@@ -172,7 +172,7 @@ class FeatureValidator(BaseEstimator):
                 self.encoder = make_column_transformer(
                     (preprocessing.OrdinalEncoder(
                         handle_unknown='use_encoded_value',
-                        unknown_value=np.nan,
+                        unknown_value=-1,
                     ), self.enc_columns),
                     remainder="passthrough"
                 )
@@ -294,10 +294,10 @@ class FeatureValidator(BaseEstimator):
 
         # Then for Pandas, we do not support Nan in categorical columns
         if hasattr(X, "iloc"):
-            enc_columns, _ = self._get_columns_to_encode(X)
-            if len(enc_columns) > 0:
+            self.enc_columns, _ = self._get_columns_to_encode(X)
+            if len(self.enc_columns) > 0:
                 if np.any(pd.isnull(
-                    X[enc_columns].dropna(  # type: ignore[call-overload]
+                    X[self.enc_columns].dropna(  # type: ignore[call-overload]
                         axis='columns', how='all')
                 )):
                     # Ignore all NaN columns, and if still a NaN
@@ -308,17 +308,6 @@ class FeatureValidator(BaseEstimator):
                                      "limitation on scikit-learn being addressed via: "
                                      "https://github.com/scikit-learn/scikit-learn/issues/17123)"
                                      )
-            if self.enc_columns and self.enc_columns != enc_columns:
-                raise ValueError(
-                    "Changing the column-types of the input data to Auto-Sklearn is not "
-                    "allowed. The estimator previously was fitted with categorical/boolean "
-                    "columns {}, yet, the new input data has categorical/boolean values {}. "
-                    "Please recreate the estimator from scratch when changing the input "
-                    "data. ".format(
-                        self.enc_columns,
-                        enc_columns,
-                    )
-                )
 
     def _get_columns_to_encode(
         self,
@@ -409,6 +398,12 @@ class FeatureValidator(BaseEstimator):
                 checks) and a encoder fitted in the case the data needs encoding
             X_test: typing.Optional[SUPPORTED_FEAT_TYPES]
                 A hold out set of data used for checking
+        Returns
+        -------
+            pd.DataFrame:
+                transformed train data from list to pandas DataFrame
+            pd.DataFrame:
+                transformed test data from list to pandas DataFrame
         """
 
         # If a list was provided, it will be converted to pandas

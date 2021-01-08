@@ -60,7 +60,7 @@ def input_data_targettest(request):
         _, openml_id = request.param.split('_')
         X, y = sklearn.datasets.fetch_openml(data_id=int(openml_id),
                                              return_X_y=True, as_frame=True)
-        if len(y.shape) > 1 and y.shape[1] > 1 and np.any(y[y.eq('TRUE').any(1)]):
+        if len(y.shape) > 1 and y.shape[1] > 1 and np.any(y.eq('TRUE').any(1).to_numpy()):
             # This 'if' is only asserted for multi-label data
             # Force the downloaded data to be interpreted as multilabel
             y = y.dropna()
@@ -212,6 +212,9 @@ def test_targetvalidator_supported_types_classification(input_data_targettest):
             for col in range(transformed_y.shape[1]):
                 assert np.min(transformed_y[:, col]) == 0
                 assert np.max(transformed_y[:, col]) == len(np.unique(transformed_y[:, col])) - 1
+
+        # Make sure we can perform inverse transform
+        validator.inverse_transform(transformed_y)
     else:
         # Sparse is not encoded, mainly because the sparse data is expected
         # to be numpy of numerical type -- which currently does not require encoding
@@ -235,7 +238,8 @@ def test_targetvalidator_supported_types_classification(input_data_targettest):
 def test_targetvalidator_binary(input_data_targettest):
     assert type_of_target(input_data_targettest) == 'binary'
     validator = TargetValidator(is_classification=True)
-    validator.fit(input_data_targettest)
+    # Test the X_test also!
+    validator.fit(input_data_targettest, input_data_targettest)
     transformed_y = validator.transform(input_data_targettest)
     assert type_of_target(transformed_y) == 'binary'
 
@@ -254,7 +258,8 @@ def test_targetvalidator_binary(input_data_targettest):
 def test_targetvalidator_multiclass(input_data_targettest):
     assert type_of_target(input_data_targettest) == 'multiclass'
     validator = TargetValidator(is_classification=True)
-    validator.fit(input_data_targettest)
+    # Test the X_test also!
+    validator.fit(input_data_targettest, input_data_targettest)
     transformed_y = validator.transform(input_data_targettest)
     assert type_of_target(transformed_y) == 'multiclass'
 
@@ -272,7 +277,8 @@ def test_targetvalidator_multiclass(input_data_targettest):
 def test_targetvalidator_multilabel(input_data_targettest):
     assert type_of_target(input_data_targettest) == 'multilabel-indicator'
     validator = TargetValidator(is_classification=True)
-    validator.fit(input_data_targettest)
+    # Test the X_test also!
+    validator.fit(input_data_targettest, input_data_targettest)
     transformed_y = validator.transform(input_data_targettest)
     assert type_of_target(transformed_y) == 'multilabel-indicator'
 
@@ -291,7 +297,8 @@ def test_targetvalidator_multilabel(input_data_targettest):
 def test_targetvalidator_continuous(input_data_targettest):
     assert type_of_target(input_data_targettest) == 'continuous'
     validator = TargetValidator(is_classification=False)
-    validator.fit(input_data_targettest)
+    # Test the X_test also!
+    validator.fit(input_data_targettest, input_data_targettest)
     transformed_y = validator.transform(input_data_targettest)
     assert type_of_target(transformed_y) == 'continuous'
 
@@ -309,7 +316,8 @@ def test_targetvalidator_continuous(input_data_targettest):
 def test_targetvalidator_continuous_multioutput(input_data_targettest):
     assert type_of_target(input_data_targettest) == 'continuous-multioutput'
     validator = TargetValidator(is_classification=False)
-    validator.fit(input_data_targettest)
+    # Test the X_test also!
+    validator.fit(input_data_targettest, input_data_targettest)
     transformed_y = validator.transform(input_data_targettest)
     assert type_of_target(transformed_y) == 'continuous-multioutput'
 
@@ -367,11 +375,16 @@ def test_target_unsupported():
     Makes sure we raise a proper message to the user,
     when providing not supported data input
     """
-    validator = TargetValidator()
+    validator = TargetValidator(is_classification=True)
     with pytest.raises(ValueError, match=r"The dimensionality of the train and test targets"):
         validator.fit(
             np.array([[0, 1, 0], [0, 1, 1]]),
             np.array([[0, 1, 0, 0], [0, 1, 1, 1]]),
+        )
+    with pytest.raises(ValueError, match=r"Train and test targets must both have the same dtypes"):
+        validator.fit(
+            pd.DataFrame({'a': [1, 2, 3]}),
+            pd.DataFrame({'a': [True, False, False]}),
         )
     with pytest.raises(ValueError, match=r"Provided targets are not supported.*"):
         validator.fit(
@@ -389,12 +402,20 @@ def test_target_unsupported():
         validator.fit(np.array([np.nan, 1, 2]))
     with pytest.raises(ValueError, match=r"arget values cannot contain missing/NaN values"):
         validator.fit(sparse.csr_matrix(np.array([1, 2, np.nan])))
+    with pytest.raises(ValueError, match=r"Cannot call transform on a validator that is not fit"):
+        validator.transform(np.array([1, 2, 3]))
+    with pytest.raises(ValueError, match=r"Multi-dimensional classification is not yet supported"):
+        validator._fit(np.array([[1, 2, 3], [1, 5, 6]]))
 
     # Dia/ DOK are not supported as type of target makes calls len on the array
     # which causes TypeError: len() of unsized object. Basically, sparse data as
     # multi-label is the only thing that makes sense in this format.
     with pytest.raises(ValueError, match=r"The provided data could not be interpreted by Sklearn"):
         validator.fit(sparse.dia_matrix(np.array([1, 2, 3])))
+
+    validator.fit(np.array([[0, 1, 0], [0, 1, 1]]))
+    with pytest.raises(ValueError, match=r"Number of outputs changed from"):
+        validator.fit(np.array([0, 1, 0]))
 
 
 def test_targetvalidator_inversetransform():
@@ -423,3 +444,34 @@ def test_targetvalidator_inversetransform():
 
     y_decoded = validator.inverse_transform(y)
     np.testing.assert_array_almost_equal(y, y_decoded)
+
+
+# Actual checks for the targets
+@pytest.mark.parametrize(
+    'input_data_targettest',
+    (
+        'series_binary',
+        'series_multiclass',
+        'pandas_binary',
+        'pandas_multiclass',
+        'numpy_binary',
+        'numpy_multiclass',
+        'list_binary',
+        'list_multiclass',
+    ),
+    indirect=True
+)
+def test_unknown_categories_in_targets(input_data_targettest):
+    validator = TargetValidator(is_classification=True)
+    validator.fit(input_data_targettest)
+
+    # Add an extra category
+    if isinstance(input_data_targettest, list):
+        input_data_targettest.append(input_data_targettest[-1] + 5000)
+    elif isinstance(input_data_targettest, (pd.DataFrame, pd.Series)):
+        input_data_targettest.iloc[-1] = 5000
+    elif isinstance(input_data_targettest, np.ndarray):
+        input_data_targettest[-1] = 5000
+
+    x_t = validator.transform(input_data_targettest)
+    assert x_t[-1].item(0) == -1

@@ -112,3 +112,28 @@ def test_sparse_data_validation_for_regression():
 
     # Make sure we can change the sparse format
     X_t, y_t = validator.transform(sparse.csr_matrix(X), y)
+
+
+def test_validation_unsupported():
+    """
+    Makes sure we raise a proper message to the user,
+    when providing not supported data input
+    """
+    validator = InputValidator()
+    with pytest.raises(ValueError, match=r"Inconsistent number of train datapoints.*"):
+        validator.fit(
+            X_train=np.array([[0, 1, 0], [0, 1, 1]]),
+            y_train=np.array([0, 1, 0, 0, 0, 0]),
+        )
+    with pytest.raises(ValueError, match=r"Inconsistent number of test datapoints.*"):
+        validator.fit(
+            X_train=np.array([[0, 1, 0], [0, 1, 1]]),
+            y_train=np.array([0, 1]),
+            X_test=np.array([[0, 1, 0], [0, 1, 1]]),
+            y_test=np.array([0, 1, 0, 0, 0, 0]),
+        )
+    with pytest.raises(ValueError, match=r"Cannot call transform on a validator .*fitted"):
+        validator.transform(
+            X=np.array([[0, 1, 0], [0, 1, 1]]),
+            y=np.array([0, 1]),
+        )

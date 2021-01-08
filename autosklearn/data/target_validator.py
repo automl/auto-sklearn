@@ -17,7 +17,7 @@ from autosklearn.util.logging_ import PickableLoggerAdapter
 
 
 SUPPORTED_TARGET_TYPES = typing.Union[
-    list,
+    typing.List,
     pd.Series,
     pd.DataFrame,
     np.ndarray,
@@ -97,7 +97,7 @@ class TargetValidator(BaseEstimator):
             if isinstance(y_train, pd.DataFrame):
                 y_train = typing.cast(pd.DataFrame, y_train)
                 y_test = typing.cast(pd.DataFrame, y_test)
-                if y_train.columns != y_test.columns:
+                if y_train.columns.tolist() != y_test.columns.tolist():
                     raise ValueError(
                         "Train and test targets must both have the same columns, yet "
                         "y={} and y_test={} ".format(
@@ -161,7 +161,8 @@ class TargetValidator(BaseEstimator):
         if ndim == 1 or (ndim > 1 and np.shape(y_train)[1] == 1):
             # The label encoder makes sure data is, and remains
             # 1 dimensional
-            self.encoder = preprocessing.LabelEncoder()
+            self.encoder = preprocessing.OrdinalEncoder(handle_unknown='use_encoded_value',
+                                                        unknown_value=-1)
         else:
             # We should not reach this if statement as we check for type of targets before
             raise ValueError("Multi-dimensional classification is not yet supported. "
@@ -175,11 +176,14 @@ class TargetValidator(BaseEstimator):
         assert self.encoder is not None
 
         # remove ravel warning from pandas Series
-        if ndim > 1 and np.shape(y_train)[1] == 1 and hasattr(y_train, "to_numpy"):
-            y_train = typing.cast(pd.DataFrame, y_train)
-            self.encoder.fit(y_train.to_numpy().ravel())
-        else:
+        if ndim > 1:
             self.encoder.fit(y_train)
+        else:
+            if hasattr(y_train, 'iloc'):
+                y_train = typing.cast(pd.DataFrame, y_train)
+                self.encoder.fit(y_train.to_numpy().reshape(-1, 1))
+            else:
+                self.encoder.fit(np.array(y_train).reshape(-1, 1))
 
         return self
 
@@ -205,43 +209,18 @@ class TargetValidator(BaseEstimator):
             raise NotFittedError("Cannot call transform on a validator that is not fitted")
 
         if self.encoder is not None:
-            try:
-                # remove ravel warning from pandas Series
-                shape = np.shape(y)
-                if len(shape) > 1 and shape[1] == 1 and hasattr(y, "to_numpy"):
+            # remove ravel warning from pandas Series
+            shape = np.shape(y)
+            if len(shape) > 1:
+                y = self.encoder.transform(y)
+            else:
+                # The Ordinal encoder expects a 2 dimensional input.
+                # The targets are 1 dimensional, so reshape to match the expected shape
+                if hasattr(y, 'iloc'):
                     y = typing.cast(pd.DataFrame, y)
-                    y = self.encoder.transform(y.to_numpy().ravel())
+                    y = self.encoder.transform(y.to_numpy().reshape(-1, 1)).reshape(-1)
                 else:
-                    y = self.encoder.transform(y)
-            except ValueError as e:
-                if 'Found unknown categories' in e.args[0]:
-                    # Make the message more informative for Ordinal
-                    raise ValueError(
-                        "During fit, the target array contained the categorical values {} "
-                        "which were encoded by Auto-sklearn automatically. "
-                        "Nevertheless, a new target set contained new categories not seen during "
-                        "training = {}. The OrdinalEncoder used by Auto-sklearn cannot handle "
-                        "this yet (due to a limitation on scikit-learn being addressed via:"
-                        " https://github.com/scikit-learn/scikit-learn/issues/17123)"
-                        "".format(
-                            self.encoder.transformers_[0][1].categories_,
-                            e.args[0],
-                        )
-                    )
-                elif 'contains previously unseen labels' in e.args[0]:
-                    # Make the message more informative
-                    raise ValueError(
-                        "During fit, the target array contained the categorical values {} "
-                        "which were encoded by Auto-sklearn automatically. "
-                        "Nevertheless, a new target set contained new categories not seen during "
-                        "training = {}. This is a limitation in scikit-learn encoders being "
-                        "discussed in //github.com/scikit-learn/scikit-learn/issues/17123".format(
-                            self.encoder.classes_,
-                            e.args[0],
-                        )
-                    )
-                else:
-                    raise e
+                    y = self.encoder.transform(np.array(y).reshape(-1, 1)).reshape(-1)
 
         # sklearn check array will make sure we have the
         # correct numerical features for the array
@@ -281,8 +260,16 @@ class TargetValidator(BaseEstimator):
 
         if self.encoder is None:
             return y
-
-        return self.encoder.inverse_transform(y)
+        shape = np.shape(y)
+        if len(shape) > 1:
+            return self.encoder.inverse_transform(y)
+        else:
+            # The targets should be a flattened array, hence reshape with -1
+            if hasattr(y, 'iloc'):
+                y = typing.cast(pd.DataFrame, y)
+                return self.encoder.inverse_transform(y.to_numpy().reshape(-1, 1)).reshape(-1)
+            else:
+                return self.encoder.inverse_transform(np.array(y).reshape(-1, 1)).reshape(-1)
 
     def is_single_column_target(self) -> bool:
         """
@@ -323,7 +310,7 @@ class TargetValidator(BaseEstimator):
         if self.data_type is None:
             self.data_type = type(y)
         if self.data_type != type(y):
-            self.logger.warning("Auto-sklearn previously received features of type %s "
+            self.logger.warning("Auto-sklearn previously received targets of type %s "
                                 "yet the current features have type %s. Changing the dtype "
                                 "of inputs to an estimator might cause problems" % (
                                       str(self.data_type),

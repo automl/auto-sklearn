@@ -77,8 +77,8 @@ def input_data_featuretest(request):
         ], dtype='category')
     elif request.param == 'pandas_numericalonly_nan':
         return pd.DataFrame([
-            {'A': 1, 'B': 2},
-            {'A': 3},
+            {'A': 1, 'B': 2, 'C': np.nan},
+            {'A': 3, 'C': np.nan},
         ], dtype='float')
     elif request.param == 'pandas_mixed_nan':
         frame = pd.DataFrame([
@@ -323,10 +323,11 @@ def test_featurevalidator_get_columns_to_encode():
     assert feature_types == ['numerical', 'numerical', 'categorical', 'categorical']
 
 
-def test_dataframe_input_unsupported():
+def test_unsupported_calls_are_raised():
     """
     Makes sure we raise a proper message to the user,
-    when providing not supported data input
+    when providing not supported data input or using the validator in a way that is not
+    expected
     """
     validator = FeatureValidator()
     with pytest.raises(ValueError, match=r"Auto-sklearn does not support time"):
@@ -341,6 +342,12 @@ def test_dataframe_input_unsupported():
         validator.fit({'input1': 1, 'input2': 2})
     with pytest.raises(ValueError, match=r"has unsupported dtype string"):
         validator.fit(pd.DataFrame([{'A': 1, 'B': 2}], dtype='string'))
+    with pytest.raises(ValueError, match=r"The feature dimensionality of the train and test"):
+        validator.fit(X_train=np.array([[1, 2, 3], [4, 5, 6]]),
+                      X_test=np.array([[1, 2, 3, 4], [4, 5, 6, 7]]),
+                      )
+    with pytest.raises(ValueError, match=r"Cannot call transform on a validator that is not fit"):
+        validator.transform(np.array([[1, 2, 3], [4, 5, 6]]))
 
 
 @pytest.mark.parametrize(
@@ -439,3 +446,23 @@ def test_no_new_category_after_fit():
     validator.fit(x)
     x['A'] = x['A'].apply(lambda x: x*x)
     validator.transform(x)
+
+
+def test_unknown_encode_value():
+    x = pd.DataFrame([
+        {'a': -41, 'b': -3, 'c': 'a', 'd': -987.2},
+        {'a': -21, 'b': -3, 'c': 'a', 'd': -9.2},
+        {'a': 0, 'b': -4, 'c': 'b', 'd': -97.2},
+        {'a': -51, 'b': -3, 'c': 'a', 'd': 987.2},
+        {'a': 500, 'b': -3, 'c': 'a', 'd': -92},
+    ])
+    x['c'] = x['c'].astype('category')
+    validator = FeatureValidator()
+
+    # Make sure that this value is honored
+    validator.fit(x)
+    x['c'].cat.add_categories(['NA'], inplace=True)
+    x.loc[0, 'c'] = 'NA'  # unknown value
+    x_t = validator.transform(x)
+    # The first row should have a -1 as we added a new categorical there
+    assert -1 in x_t[0].tolist()
