@@ -87,9 +87,10 @@ sphinx_gallery_conf = {
          'binderhub_url': 'https://mybinder.org',
          'dependencies': ['../.binder/apt.txt', '../.binder/requirements.txt'],
          #'filepath_prefix': '<prefix>' # A prefix to prepend to any filepaths in Binder links.
-         'notebooks_dir': 'notebooks/generated_notebooks' # Jupyter notebooks for Binder will be copied to this directory (relative to built documentation root).
-         'use_jupyter_lab': True # Whether Binder links should start Jupyter Lab instead of the Jupyter Notebook interface.
-         }
+         # Jupyter notebooks for Binder will be copied to this directory (relative to built documentation root).
+         'notebooks_dir': 'notebooks/generated_notebooks',
+         'use_jupyter_lab': True, # Whether Binder links should start Jupyter Lab instead of the Jupyter Notebook interface.
+         },
 }
 
 # Add any paths that contain templates here, relative to this directory.
