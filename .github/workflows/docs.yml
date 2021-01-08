@@ -18,19 +18,19 @@ jobs:
         cd doc
         make html
     - name: Pull latest gh-pages
-      if: (contains(github.ref, 'develop') || contains(github.ref, 'master')) && github.event_name == 'push'
+      if: (contains(github.ref, 'develop') || contains(github.ref, 'master') || contains(github.ref, 'binder')) && github.event_name == 'push'
       run: |
         cd ..
         git clone https://github.com/automl/auto-sklearn.git --branch gh-pages --single-branch gh-pages
     - name: Copy new doc into gh-pages
-      if: (contains(github.ref, 'develop') || contains(github.ref, 'master')) && github.event_name == 'push'
+      if: (contains(github.ref, 'develop') || contains(github.ref, 'master') || contains(github.ref, 'binder')) && github.event_name == 'push'
       run: |
         branch_name=${GITHUB_REF##*/}
         cd ../gh-pages
         rm -rf $branch_name
         cp -r ../auto-sklearn/doc/build/html $branch_name
     - name: Push to gh-pages
-      if: (contains(github.ref, 'develop') || contains(github.ref, 'master')) && github.event_name == 'push'
+      if: (contains(github.ref, 'develop') || contains(github.ref, 'master') || contains(github.ref, 'binder')) && github.event_name == 'push'
       run: |
         last_commit=$(git log --pretty=format:"%an: %s")
         cd ../gh-pages
