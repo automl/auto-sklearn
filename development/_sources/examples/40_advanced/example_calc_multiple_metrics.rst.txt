@@ -60,13 +60,14 @@ and self-defined metrics for a classification problem.
                    15           gradient_boosting         0.964539                  0.959918          0.966667       0.977528   0.972067             0.035461
                    15               random_forest         0.964539                  0.959918          0.966667       0.977528   0.972067             0.035461
                     6                 extra_trees         0.971631                  0.969533          0.977528       0.977528   0.977528             0.028369
-                   25          passive_aggressive         0.872340                  0.898876          1.000000       0.797753   0.887500             0.127660
+                   26          passive_aggressive         0.872340                  0.898876          1.000000       0.797753   0.887500             0.127660
                     2                 extra_trees         0.978723                  0.975151          0.977778       0.988764   0.983240             0.021277
                     6           gradient_boosting         0.971631                  0.965536          0.967033       0.988764   0.977778             0.028369
                    24                         mlp         0.943262                  0.939067          0.955056       0.955056   0.955056             0.056738
                    20               random_forest         0.957447                  0.942308          0.936842       1.000000   0.967391             0.042553
                    20                    adaboost         0.957447                  0.950303          0.956044       0.977528   0.966667             0.042553
                     2                 extra_trees         0.978723                  0.971154          0.967391       1.000000   0.983425             0.021277
+                   25                bernoulli_nb         0.921986                  0.926210          0.964286       0.910112   0.936416             0.078014
 
 
 
@@ -136,7 +137,7 @@ and self-defined metrics for a classification problem.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  4.411 seconds)
+   **Total running time of the script:** ( 1 minutes  57.248 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_calc_multiple_metrics.py:
