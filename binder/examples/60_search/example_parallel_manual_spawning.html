@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Parallel Usage with manual process spawning &#8212; AutoSklearn 0.12.2dev documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-rendered-html.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="../../_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+  
+  <a href="https://github.com/automl/auto-sklearn"
+     class="visible-desktop hidden-xs"><img
+    id="gh-banner"
+    style="position: absolute; top: 50px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"
+    alt="Fork me on GitHub"></a>
+  <script>
+    // Adjust banner height.
+    $(function () {
+      var navHeight = $(".navbar .container").css("height");
+      $("#gh-banner").css("top", navHeight);
+    });
+  </script>
+
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../index.html">
+          auto-sklearn</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.12.2dev</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../index.html">Start</a></li>
+                <li><a href="../../releases.html">Releases</a></li>
+                <li><a href="../../installation.html">Installation</a></li>
+                <li><a href="../../manual.html">Manual</a></li>
+                <li><a href="../index.html">Examples</a></li>
+                <li><a href="../../api.html">API</a></li>
+                <li><a href="../../extending.html">Extending</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">Parallel Usage with manual process spawning</a><ul>
+<li><a class="reference internal" href="#dask-configuration">Dask configuration</a></li>
+<li><a class="reference internal" href="#start-worker-python">Start worker - Python</a></li>
+<li><a class="reference internal" href="#start-worker-cli">Start worker - CLI</a></li>
+<li><a class="reference internal" href="#start-auto-sklearn">Start Auto-sklearn</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
+      
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-60-search-example-parallel-manual-spawning-py"><span class="std std-ref">here</span></a>
+to download the full example code or to run this example in your browser via Binder</p>
+</div>
+<div class="sphx-glr-example-title section" id="parallel-usage-with-manual-process-spawning">
+<span id="sphx-glr-examples-60-search-example-parallel-manual-spawning-py"></span><h1>Parallel Usage with manual process spawning<a class="headerlink" href="#parallel-usage-with-manual-process-spawning" title="Permalink to this headline">¶</a></h1>
+<p><em>Auto-sklearn</em> uses
+<cite>dask.distributed &lt;https://distributed.dask.org/en/latest/index.html</cite>&gt;_
+for parallel optimization.</p>
+<p>This example shows how to spawn workers for <em>Auto-sklearn</em> manually.
+Use this example as a starting point to parallelize <em>Auto-sklearn</em>
+across multiple machines. To run <em>Auto-sklearn</em> in parallel
+on a single machine check out the example
+<a class="reference external" href="example_parallel_n_jobs.html">Parallel Usage on a single machine</a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">import</span> <span class="nn">dask</span>
+<span class="kn">import</span> <span class="nn">dask.distributed</span>
+<span class="kn">import</span> <span class="nn">sklearn.datasets</span>
+<span class="kn">import</span> <span class="nn">sklearn.metrics</span>
+
+<span class="kn">from</span> <span class="nn">autosklearn.classification</span> <span class="kn">import</span> <span class="n">AutoSklearnClassifier</span>
+<span class="kn">from</span> <span class="nn">autosklearn.constants</span> <span class="kn">import</span> <span class="n">MULTICLASS_CLASSIFICATION</span>
+
+<span class="n">tmp_folder</span> <span class="o">=</span> <span class="s1">&#39;/tmp/autosklearn_parallel_2_example_tmp&#39;</span>
+<span class="n">output_folder</span> <span class="o">=</span> <span class="s1">&#39;/tmp/autosklearn_parallel_2_example_out&#39;</span>
+</pre></div>
+</div>
+<div class="section" id="dask-configuration">
+<h2>Dask configuration<a class="headerlink" href="#dask-configuration" title="Permalink to this headline">¶</a></h2>
+<p>Auto-sklearn uses threads in Dask to launch memory constrained jobs.
+This number of threads can be provided directly via the n_jobs argument
+when creating the AutoSklearnClassifier. Additionally, the user can provide
+a dask_client argument which can have processes=True.
+When using processes to True, we need to specify the below setting
+to allow internally generated processes.
+Optionally, you can choose to provide a dask client with processes=False
+and remove the following line.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dask</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">({</span><span class="s1">&#39;distributed.worker.daemon&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;dask.config.set object at 0x7f1af75a8460&gt;
+</pre></div>
+</div>
+</div>
+<div class="section" id="start-worker-python">
+<h2>Start worker - Python<a class="headerlink" href="#start-worker-python" title="Permalink to this headline">¶</a></h2>
+<p>This function demonstrates how to start a dask worker from python. This
+is a bit cumbersome and should ideally be done from the command line.
+We do it here for illustrational purpose, butalso start one worker from
+the command line below.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check the dask docs at</span>
+<span class="c1"># https://docs.dask.org/en/latest/setup/python-advanced.html for further</span>
+<span class="c1"># information.</span>
+
+
+<span class="k">def</span> <span class="nf">start_python_worker</span><span class="p">(</span><span class="n">scheduler_address</span><span class="p">):</span>
+    <span class="n">dask</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">({</span><span class="s1">&#39;distributed.worker.daemon&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">do_work</span><span class="p">():</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">dask</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">Nanny</span><span class="p">(</span>
+                <span class="n">scheduler_ip</span><span class="o">=</span><span class="n">scheduler_address</span><span class="p">,</span>
+                <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">lifetime</span><span class="o">=</span><span class="mi">35</span><span class="p">,</span>  <span class="c1"># automatically shut down the worker so this loop ends</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="n">worker</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">worker</span><span class="o">.</span><span class="n">finished</span><span class="p">()</span>
+
+    <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">do_work</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="start-worker-cli">
+<h2>Start worker - CLI<a class="headerlink" href="#start-worker-cli" title="Permalink to this headline">¶</a></h2>
+<p>It is also possible to start dask workers from the command line (in fact,
+one can also start a dask scheduler from the command line), see the
+<a class="reference external" href="https://docs.dask.org/en/latest/setup/cli.html">dask cli docs</a> for
+further information.
+Please not, that DASK_DISTRIBUTED__WORKER__DAEMON=False is required in this
+case as dask-worker creates a new process. That is, it is equivalent to the
+setting described above with dask.distributed.Client with processes=True</p>
+<p>Again, we need to make sure that we do not start the workers in a daemon
+mode.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">start_cli_worker</span><span class="p">(</span><span class="n">scheduler_address</span><span class="p">):</span>
+    <span class="n">call_string</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;DASK_DISTRIBUTED__WORKER__DAEMON=False &quot;</span>
+        <span class="s2">&quot;dask-worker </span><span class="si">%s</span><span class="s2"> --nthreads 1 --lifetime 35&quot;</span>
+    <span class="p">)</span> <span class="o">%</span> <span class="n">scheduler_address</span>
+    <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">call_string</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                          <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="start-auto-sklearn">
+<h2>Start Auto-sklearn<a class="headerlink" href="#start-auto-sklearn" title="Permalink to this headline">¶</a></h2>
+<p>We are now ready to start <a href="#id1"><span class="problematic" id="id2">*</span></a>auto-sklearn.</p>
+<p>To use auto-sklearn in parallel we must guard the code with
+<code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">__name__</span> <span class="pre">==</span> <span class="pre">'__main__'</span></code>. We then start a dask cluster as a context,
+which means that it is automatically stopped one all computation is done.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> \
+        <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Create a dask compute cluster and a client manually - the former can</span>
+    <span class="c1"># be done via command line, too.</span>
+    <span class="k">with</span> <span class="n">dask</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">LocalCluster</span><span class="p">(</span>
+        <span class="n">n_workers</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threads_per_worker</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">cluster</span><span class="p">,</span> <span class="n">dask</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">address</span><span class="o">=</span><span class="n">cluster</span><span class="o">.</span><span class="n">scheduler_address</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+
+        <span class="c1"># now we start the two workers, one from within Python, the other</span>
+        <span class="c1"># via the command line.</span>
+        <span class="n">process_python_worker</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span>
+            <span class="n">target</span><span class="o">=</span><span class="n">start_python_worker</span><span class="p">,</span>
+            <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">cluster</span><span class="o">.</span><span class="n">scheduler_address</span><span class="p">,),</span>
+        <span class="p">)</span>
+        <span class="n">process_python_worker</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="n">process_cli_worker</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span>
+            <span class="n">target</span><span class="o">=</span><span class="n">start_cli_worker</span><span class="p">,</span>
+            <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">cluster</span><span class="o">.</span><span class="n">scheduler_address</span><span class="p">,),</span>
+        <span class="p">)</span>
+        <span class="n">process_cli_worker</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="c1"># Wait a second for workers to become available</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">automl</span> <span class="o">=</span> <span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+            <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+            <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+            <span class="n">memory_limit</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span>
+            <span class="n">tmp_folder</span><span class="o">=</span><span class="n">tmp_folder</span><span class="p">,</span>
+            <span class="n">output_folder</span><span class="o">=</span><span class="n">output_folder</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="mi">777</span><span class="p">,</span>
+            <span class="c1"># n_jobs is ignored internally as we pass a dask client.</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="c1"># Pass a dask client which connects to the previously constructed cluster.</span>
+            <span class="n">dask_client</span><span class="o">=</span><span class="n">client</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+        <span class="n">automl</span><span class="o">.</span><span class="n">fit_ensemble</span><span class="p">(</span>
+            <span class="n">y_train</span><span class="p">,</span>
+            <span class="n">task</span><span class="o">=</span><span class="n">MULTICLASS_CLASSIFICATION</span><span class="p">,</span>
+            <span class="n">dataset_name</span><span class="o">=</span><span class="s1">&#39;digits&#39;</span><span class="p">,</span>
+            <span class="n">ensemble_size</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+            <span class="n">ensemble_nbest</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">sprint_statistics</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
+
+        <span class="c1"># Wait until all workers are closed</span>
+        <span class="n">process_python_worker</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+        <span class="n">process_cli_worker</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>auto-sklearn results:
+  Dataset name: d6d58dae5b02e07797da6d4d126ac9b6
+  Metric: accuracy
+  Best validation score: 0.985816
+  Number of target algorithm runs: 8
+  Number of successful target algorithm runs: 6
+  Number of crashed target algorithm runs: 0
+  Number of target algorithms that exceeded the time limit: 2
+  Number of target algorithms that exceeded the memory limit: 0
+
+Accuracy score 0.958041958041958
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  46.910 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-60-search-example-parallel-manual-spawning-py">
+<div class="binder-badge docutils container">
+<a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/60_search/example_parallel_manual_spawning.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo2.svg" width="150px" /></a>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/da17aeeaf222877617893f53916d7917/example_parallel_manual_spawning.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_parallel_manual_spawning.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/1a4d3be29b2c73f2b32eb66e01c802e4/example_parallel_manual_spawning.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">example_parallel_manual_spawning.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="../../_sources/examples/60_search/example_parallel_manual_spawning.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2014-2019, Machine Learning Professorship Freiburg.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.4.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
