@@ -25,7 +25,7 @@ cp -r examples .binder $TMP_CONTENT_DIR
 find . -delete
 
 # Generate notebooks and remove other files from examples folder
-GENERATED_NOTEBOOKS_DIR=generated-notebooks
+GENERATED_NOTEBOOKS_DIR=examples
 cp -r $TMP_CONTENT_DIR/examples $GENERATED_NOTEBOOKS_DIR
 
 find $GENERATED_NOTEBOOKS_DIR -name 'example_*.py' -exec sphx_glr_python_to_jupyter.py '{}' +
