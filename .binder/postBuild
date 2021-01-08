@@ -26,8 +26,9 @@ find . -delete
 GENERATED_NOTEBOOKS_DIR=generated-notebooks
 cp -r $TMP_CONTENT_DIR/examples $GENERATED_NOTEBOOKS_DIR
 
-find $GENERATED_NOTEBOOKS_DIR -name '*.py' -exec sphx_glr_python_to_jupyter.py '{}' +
-NON_NOTEBOOKS=$(find $GENERATED_NOTEBOOKS_DIR -type f | grep -v '\.ipynb')
+find $GENERATED_NOTEBOOKS_DIR -name 'example_*.py' -exec sphx_glr_python_to_jupyter.py '{}' +
+# Keep __init__.py
+NON_NOTEBOOKS=$(find $GENERATED_NOTEBOOKS_DIR -type f | grep -v '\.ipynb' | grep -v 'init' | grep -v 'custom_metrics')
 rm -f $NON_NOTEBOOKS
 
 # Modify path to be consistent by the path given by sphinx-gallery
