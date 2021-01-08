@@ -9,6 +9,7 @@ import os
 import sys
 import time
 from typing import Any, Dict, Optional, List, Union
+import uuid
 import unittest.mock
 import warnings
 import tempfile
@@ -51,7 +52,6 @@ from autosklearn.util import pipeline, RE_PATTERN
 from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.smbo import AutoMLSMBO
-from autosklearn.util.hash import hash_array_or_matrix
 from autosklearn.metrics import f1_macro, accuracy, r2
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
     REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION, \
@@ -217,7 +217,7 @@ class AutoML(BaseEstimator):
 
         self._debug_mode = debug_mode
 
-        self.InputValidator = InputValidator()
+        self.InputValidator = None  # type: Optional[InputValidator]
 
         # The ensemble performance history through time
         self.ensemble_performance_history = []
@@ -447,11 +447,22 @@ class AutoML(BaseEstimator):
         self._backend.save_start_time(self._seed)
         self._stopwatch = StopWatch()
 
+        if dataset_name is None:
+            dataset_name = str(uuid.uuid1(clock_seq=os.getpid()))
+
+        # By default try to use the TCP logging port or get a new port
+        self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
+        self._logger = self._get_logger(dataset_name)
+
         # Make sure that input is valid
         # Performs Ordinal one hot encoding to the target
         # both for train and test data
-        self.InputValidator.fit(X_train=X, y_train=y, X_test=X_test, y_test=y_test,
-                                is_classification=is_classification, feat_type=feat_type)
+        self.InputValidator = InputValidator(
+            is_classification=is_classification,
+            feat_type=feat_type,
+            logger=self._logger,
+        )
+        self.InputValidator.fit(X_train=X, y_train=y, X_test=X_test, y_test=y_test)
         X, y = self.InputValidator.transform(X, y)
 
         if X_test is not None:
@@ -493,8 +504,8 @@ class AutoML(BaseEstimator):
         self._dataset_name = dataset_name
         self._stopwatch.start_task(self._dataset_name)
 
-        if feat_type is None and self.InputValidator.feature_validator.feature_types:
-            feat_type = self.InputValidator.feature_validator.feature_types
+        if feat_type is None and self.InputValidator.feature_validator.feat_type:
+            feat_type = self.InputValidator.feature_validator.feat_type
 
         # Produce debug information to the logfile
         self._logger.debug('Starting to print environment information')
@@ -844,6 +855,9 @@ class AutoML(BaseEstimator):
     def refit(self, X, y):
 
         # Make sure input data is valid
+        if self.InputValidator is None or not self.InputValidator._is_fitted:
+            raise ValueError("refit() is only supported after calling fit. Kindly call first "
+                             "the estimator fit() method.")
         X, y = self.InputValidator.transform(X, y)
 
         if self.models_ is None or len(self.models_) == 0 or self.ensemble_ is None:
@@ -926,6 +940,9 @@ class AutoML(BaseEstimator):
                              "if 'ensemble_size != 0'")
 
         # Make sure that input is valid
+        if self.InputValidator is None or not self.InputValidator._is_fitted:
+            raise ValueError("predict() can only be called after performing fit(). Kindly call "
+                             "the estimator fit() method first.")
         X = self.InputValidator.feature_validator.transform(X)
 
         # Parallelize predictions across models with n_jobs processes.
@@ -984,6 +1001,9 @@ class AutoML(BaseEstimator):
             self._logger = self._get_logger(dataset_name)
 
         # Make sure that input is valid
+        if self.InputValidator is None or not self.InputValidator._is_fitted:
+            raise ValueError("fit_ensemble() can only be called after fit. Please call the "
+                             "estimator fit() method prior to fit_ensemble().")
         y = self.InputValidator.target_validator.transform(y)
 
         # Create a client if needed
@@ -1107,6 +1127,9 @@ class AutoML(BaseEstimator):
         prediction = self.predict(X)
 
         # Make sure that input is valid
+        if self.InputValidator is None or not self.InputValidator._is_fitted:
+            raise ValueError("score() is only supported after calling fit. Kindly call first "
+                             "the estimator fit() method.")
         y = self.InputValidator.target_validator.transform(y)
 
         # Encode the prediction using the input validator
@@ -1390,6 +1413,9 @@ class AutoMLClassifier(AutoML):
         predicted_probabilities = super().predict(X, batch_size=batch_size,
                                                   n_jobs=n_jobs)
 
+        if self.InputValidator is None or not self.InputValidator._is_fitted:
+            raise ValueError("predict() is only supported after calling fit. Kindly call first "
+                             "the estimator fit() method.")
         if self.InputValidator.target_validator.is_single_column_target():
             predicted_indexes = np.argmax(predicted_probabilities, axis=1)
         else:

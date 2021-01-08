@@ -122,10 +122,33 @@ def input_data_featuretest(request):
             ['a', np.nan, 3, 4],
             ['b', 6, 7, 8]
         ]
-    elif request.param == 'sparse':
+    elif 'sparse' in request.param:
+        # We expect the names to be of the type sparse_csc_nonan
+        sparse_, type_, nan_ = request.param.split('_')
+        if 'nonan' in nan_:
+            data = np.ones(3)
+        else:
+            data = np.array([1, 2, np.nan])
+
+        # Then the type of sparse
         row_ind = np.array([0, 1, 2])
         col_ind = np.array([1, 2, 1])
-        return sparse.csr_matrix((np.ones(3), (row_ind, col_ind)))
+        if 'csc' in type_:
+            return sparse.csc_matrix((data, (row_ind, col_ind)))
+        elif 'csr' in type_:
+            return sparse.csr_matrix((data, (row_ind, col_ind)))
+        elif 'coo' in type_:
+            return sparse.coo_matrix((data, (row_ind, col_ind)))
+        elif 'bsr' in type_:
+            return sparse.bsr_matrix((data, (row_ind, col_ind)))
+        elif 'lil' in type_:
+            return sparse.lil_matrix((data))
+        elif 'dok' in type_:
+            return sparse.dok_matrix(np.vstack((data, data, data)))
+        elif 'dia' in type_:
+            return sparse.dia_matrix(np.vstack((data, data, data)))
+        else:
+            ValueError("Unsupported indirect fixture {}".format(request.param))
     elif 'openml' in request.param:
         _, openml_id = request.param.split('_')
         X, y = sklearn.datasets.fetch_openml(data_id=int(openml_id),
@@ -151,7 +174,20 @@ def input_data_featuretest(request):
         'pandas_numericalonly_nan',
         'list_numericalonly_nonan',
         'list_numericalonly_nan',
-        'sparse',
+        'sparse_bsr_nonan',
+        'sparse_bsr_nan',
+        'sparse_coo_nonan',
+        'sparse_coo_nan',
+        'sparse_csc_nonan',
+        'sparse_csc_nan',
+        'sparse_csr_nonan',
+        'sparse_csr_nan',
+        'sparse_dia_nonan',
+        'sparse_dia_nan',
+        'sparse_dok_nonan',
+        'sparse_dok_nan',
+        'sparse_lil_nonan',
+        'sparse_lil_nan',
         'openml_40981',  # Australian
     ),
     indirect=True
@@ -181,7 +217,7 @@ def test_featurevalidator_supported_types(input_data_featuretest):
 )
 def test_featurevalidator_unsupported_list(input_data_featuretest):
     validator = FeatureValidator()
-    with pytest.raises(ValueError, match=r".*When providing a list of features.*Numpy failed"):
+    with pytest.raises(ValueError, match=r".*has invalid type object. Cast it to a valid dtype.*"):
         validator.fit(input_data_featuretest)
 
 
@@ -239,13 +275,16 @@ def test_featurevalidator_fitontypeA_transformtypeB(input_data_featuretest):
         complementary_type = input_data_featuretest.to_numpy()
     elif isinstance(input_data_featuretest, np.ndarray):
         complementary_type = pd.DataFrame(input_data_featuretest)
-    validator.transform(complementary_type)
+    transformed_X = validator.transform(complementary_type)
+    assert np.shape(input_data_featuretest) == np.shape(transformed_X)
+    assert np.issubdtype(transformed_X.dtype, np.number)
+    assert validator._is_fitted
 
 
 def test_featurevalidator_get_columns_to_encode():
     """
-    Check if we can fit in a given type (numpy) yet transform
-    if the user changes the type (pandas then)
+    Makes sure that encoded columns are returned by _get_columns_to_encode
+    whereas numerical columns are not returned
     """
     validator = FeatureValidator()
 
@@ -297,7 +336,20 @@ def test_dataframe_input_unsupported():
         'numpy_mixed_nonan',
         'numpy_categoricalonly_nan',
         'numpy_mixed_nan',
-        'sparse',
+        'sparse_bsr_nonan',
+        'sparse_bsr_nan',
+        'sparse_coo_nonan',
+        'sparse_coo_nan',
+        'sparse_csc_nonan',
+        'sparse_csc_nan',
+        'sparse_csr_nonan',
+        'sparse_csr_nan',
+        'sparse_dia_nonan',
+        'sparse_dia_nan',
+        'sparse_dok_nonan',
+        'sparse_dok_nan',
+        'sparse_lil_nonan',
+        'sparse_lil_nan',
     ),
     indirect=True
 )
@@ -331,6 +383,14 @@ def test_encoder_created(input_data_featuretest):
     # Make sure that the encoded features are actually encoded. Categorical columns are at
     # the start after transformation. In our fixtures, this is also honored prior encode
     enc_columns, feature_types = validator._get_columns_to_encode(input_data_featuretest)
+
+    # At least one categorical
+    assert 'categorical' in validator.feat_type
+
+    # Numerical if the original data has numerical only columns
+    if np.any([pd.api.types.is_numeric_dtype(input_data_featuretest[col]
+                                             ) for col in input_data_featuretest.columns]):
+        assert 'numerical' in validator.feat_type
     for i, feat_type in enumerate(feature_types):
         if 'numerical' in feat_type:
             np.testing.assert_array_equal(
@@ -343,6 +403,8 @@ def test_encoder_created(input_data_featuretest):
                 # Expect always 0, 1... because we use a ordinal encoder
                 np.array([0, 1])
             )
+        else:
+            raise ValueError(feat_type)
 
 
 def test_no_new_category_after_fit():

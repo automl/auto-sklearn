@@ -16,6 +16,7 @@ from smac.scenario.scenario import Scenario
 from smac.facade.roar_facade import ROAR
 
 from autosklearn.automl import AutoML
+from autosklearn.data.validation import InputValidator
 import autosklearn.automl
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.metrics import accuracy, log_loss, balanced_accuracy
@@ -123,6 +124,7 @@ def test_refit_shuffle_on_fail(backend, dask_client):
     ensemble_mock = unittest.mock.Mock()
     ensemble_mock.get_selected_model_identifiers.return_value = [(1, 1, 50.0)]
     auto.ensemble_ = ensemble_mock
+    auto.InputValidator = InputValidator()
     for budget_type in [None, 'iterations']:
         auto._budget_type = budget_type
 

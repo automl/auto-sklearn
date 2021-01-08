@@ -1,5 +1,5 @@
+import logging
 import typing
-import warnings
 
 import numpy as np
 
@@ -10,20 +10,47 @@ import scipy.sparse
 import sklearn.utils
 from sklearn import preprocessing
 from sklearn.base import BaseEstimator
-from sklearn.compose import make_column_transformer
+from sklearn.exceptions import NotFittedError
 from sklearn.utils.multiclass import type_of_target
+
+from autosklearn.util.logging_ import PickableLoggerAdapter
+
+
+SUPPORTED_TARGET_TYPES = typing.Union[
+    list,
+    pd.Series,
+    pd.DataFrame,
+    np.ndarray,
+    scipy.sparse.bsr_matrix,
+    scipy.sparse.coo_matrix,
+    scipy.sparse.csc_matrix,
+    scipy.sparse.csr_matrix,
+    scipy.sparse.dia_matrix,
+    scipy.sparse.dok_matrix,
+    scipy.sparse.lil_matrix,
+]
 
 
 class TargetValidator(BaseEstimator):
-
-    def __init__(self) -> None:
-        # If a dataframe was provided, we populate
-        # this attribute with the column types from the dataframe
-        # That is, this attribute contains whether autosklearn
-        # should treat a column as categorical or numerical
-        # During fit, if the user provided feat_types, the user
-        # constrain is honored. If not, this attribute is used.
-        self.feature_types = None  # type: typing.Optional[typing.List[str]]
+    """
+    A class to pre-process targets. It validates the data provided during fit (to make sure
+    it matches Sklearn expectation) as well as encoding the targets in case of classification
+    Attributes
+    ----------
+        is_classification: bool
+            A bool that indicates if the validator should operate in classification mode.
+            During classification, the targets are encoded.
+        encoder: typing.Optional[BaseEstimator]
+            Host a encoder object if the data requires transformation (for example,
+            if provided a categorical column in a pandas DataFrame)
+        enc_columns: typing.List[str]
+            List of columns that where encoded
+    """
+    def __init__(self,
+                 is_classification: bool = False,
+                 logger: typing.Optional[PickableLoggerAdapter] = None,
+                 ) -> None:
+        self.is_classification = is_classification
 
         self.data_type = None  # type: typing.Optional[type]
 
@@ -32,13 +59,14 @@ class TargetValidator(BaseEstimator):
         self.out_dimensionality = None  # type: typing.Optional[int]
         self.type_of_target = None  # type: typing.Optional[str]
 
+        self.logger = logger if logger is not None else logging.getLogger(__name__)
+
         self._is_fitted = False
 
     def fit(
         self,
-        y_train: typing.Union[np.ndarray, pd.DataFrame],
-        y_test: typing.Optional[typing.Union[np.ndarray, pd.DataFrame]] = None,
-        is_classification: bool = False,
+        y_train: SUPPORTED_TARGET_TYPES,
+        y_test: typing.Optional[SUPPORTED_TARGET_TYPES] = None,
     ) -> BaseEstimator:
         """
         Validates and fit a categorical encoder (if needed) to the targets
@@ -46,20 +74,51 @@ class TargetValidator(BaseEstimator):
 
         Parameters
         ----------
-            y_train: typing.Union[np.ndarray, pd.DataFrame]
+            y_train: SUPPORTED_TARGET_TYPES
                 A set of targets set aside for training
-            y_test: typing.Union[np.ndarray, pd.DataFrame]
+            y_test: typing.Union[SUPPORTED_TARGET_TYPES]
                 A hold out set of data used of the targets. It is also used to fit the
                 categories of the encoder.
-            is_classification: bool
-                A bool that indicates if the validator should operate in classification mode.
-                During classification, the targets are encoded.
         """
         # Check that the data is valid
-        self.check_data(y_train, y_test)
+        self._check_data(y_train)
+
+        shape = np.shape(y_train)
+        if y_test is not None:
+            self._check_data(y_test)
+
+            if len(shape) != len(np.shape(y_test)) or (
+                    len(shape) > 1 and (shape[1] != np.shape(y_test)[1])):
+                raise ValueError("The dimensionality of the train and test targets "
+                                 "does not match train({}) != test({})".format(
+                                     np.shape(y_train),
+                                     np.shape(y_test)
+                                 ))
+            if isinstance(y_train, pd.DataFrame):
+                y_train = typing.cast(pd.DataFrame, y_train)
+                y_test = typing.cast(pd.DataFrame, y_test)
+                if y_train.columns != y_test.columns:
+                    raise ValueError(
+                        "Train and test targets must both have the same columns, yet "
+                        "y={} and y_test={} ".format(
+                            y_train.columns,
+                            y_test.columns
+                        )
+                    )
+
+                if list(y_train.dtypes) != list(y_test.dtypes):
+                    raise ValueError("Train and test targets must both have the same dtypes")
+
+        if self.out_dimensionality is None:
+            self.out_dimensionality = 1 if len(shape) == 1 else shape[1]
+        else:
+            _n_outputs = 1 if len(shape) == 1 else shape[1]
+            if self.out_dimensionality != _n_outputs:
+                raise ValueError('Number of outputs changed from %d to %d!' %
+                                 (self.out_dimensionality, _n_outputs))
 
         # Fit on the training data
-        self._fit(y_train, y_test, is_classification)
+        self._fit(y_train, y_test)
 
         self._is_fitted = True
 
@@ -67,33 +126,24 @@ class TargetValidator(BaseEstimator):
 
     def _fit(
         self,
-        y_train: typing.Union[np.ndarray, pd.DataFrame],
-        y_test: typing.Optional[typing.Union[np.ndarray, pd.DataFrame]] = None,
-        is_classification: bool = False,
+        y_train: SUPPORTED_TARGET_TYPES,
+        y_test: typing.Optional[SUPPORTED_TARGET_TYPES] = None,
     ) -> BaseEstimator:
         """
         If dealing with classification, this utility encodes the targets.
 
-        It does so by also using the classes from the test data, to prevent enconding
+        It does so by also using the classes from the test data, to prevent encoding
         errors
 
         Parameters
         ----------
-            y_train: typing.Union[np.ndarray, pd.DataFrame]
+            y_train: SUPPORTED_TARGET_TYPES
                 The labels of the current task. They are going to be encoded in case
                 of classification
-            y_test: typing.Union[np.ndarray, pd.DataFrame]
+            y_test: typing.Optional[SUPPORTED_TARGET_TYPES]
                 A holdout set of labels
-            is_classification: bool
-                A bool that indicates if the validator should operate in classification mode.
-                During classification, the targets are encoded.
         """
-
-        if not hasattr(y_train, 'shape'):
-            # Make it numpy array for easier checking
-            y_train = np.array(y_train)
-
-        if not is_classification or self.type_of_target == 'multilabel-indicator':
+        if not self.is_classification or self.type_of_target == 'multilabel-indicator':
             # Only fit an encoder for classification tasks
             # Also, encoding multilabel indicator data makes the data multiclass
             # Let the user employ a MultiLabelBinarizer if needed
@@ -113,15 +163,20 @@ class TargetValidator(BaseEstimator):
             # 1 dimensional
             self.encoder = preprocessing.LabelEncoder()
         else:
-            self.encoder = make_column_transformer(
-                (preprocessing.OrdinalEncoder(), list(range(np.shape(y_train)[1]))),
-            )
+            # We should not reach this if statement as we check for type of targets before
+            raise ValueError("Multi-dimensional classification is not yet supported. "
+                             "Encoding multidimensional data converts multiple columns "
+                             "to a 1 dimensional encoding. Data involved = {}/{}".format(
+                                np.shape(y_train),
+                                self.type_of_target
+                             ))
 
         # Mypy redefinition
         assert self.encoder is not None
 
         # remove ravel warning from pandas Series
         if ndim > 1 and np.shape(y_train)[1] == 1 and hasattr(y_train, "to_numpy"):
+            y_train = typing.cast(pd.DataFrame, y_train)
             self.encoder.fit(y_train.to_numpy().ravel())
         else:
             self.encoder.fit(y_train)
@@ -130,7 +185,7 @@ class TargetValidator(BaseEstimator):
 
     def transform(
         self,
-        y: typing.Union[np.ndarray, pd.DataFrame],
+        y: typing.Union[SUPPORTED_TARGET_TYPES],
     ) -> np.ndarray:
         """
         Validates and fit a categorical encoder (if needed) to the features.
@@ -138,7 +193,7 @@ class TargetValidator(BaseEstimator):
 
         Parameters
         ----------
-            y: typing.Union[np.ndarray, pd.DataFrame]
+            y: SUPPORTED_TARGET_TYPES
                 A set of targets that are going to be encoded if the current task
                 is classification
         Return
@@ -147,13 +202,14 @@ class TargetValidator(BaseEstimator):
                 The transformed array
         """
         if not self._is_fitted:
-            raise ValueError("Cannot call transform on a validator that is not fitted")
+            raise NotFittedError("Cannot call transform on a validator that is not fitted")
 
         if self.encoder is not None:
             try:
                 # remove ravel warning from pandas Series
                 shape = np.shape(y)
                 if len(shape) > 1 and shape[1] == 1 and hasattr(y, "to_numpy"):
+                    y = typing.cast(pd.DataFrame, y)
                     y = self.encoder.transform(y.to_numpy().ravel())
                 else:
                     y = self.encoder.transform(y)
@@ -206,14 +262,14 @@ class TargetValidator(BaseEstimator):
 
     def inverse_transform(
         self,
-        y: typing.Union[np.ndarray, pd.DataFrame],
+        y: SUPPORTED_TARGET_TYPES,
     ) -> np.ndarray:
         """
         Revert any encoding transformation done on a target array
 
         Parameters
         ----------
-            y: typing.Union[np.ndarray, pd.DataFrame]
+            y: typing.Union[np.ndarray, pd.DataFrame, pd.Series]
                 Target array to be transformed back to original form before encoding
         Return
         ------
@@ -221,69 +277,12 @@ class TargetValidator(BaseEstimator):
                 The transformed array
         """
         if not self._is_fitted:
-            raise ValueError("Cannot call inverse_transform on a validator that is not fitted")
+            raise NotFittedError("Cannot call inverse_transform on a validator that is not fitted")
 
         if self.encoder is None:
             return y
 
-        # Handle different ndim encoder for target
-        if hasattr(self.encoder, 'inverse_transform'):
-            return self.encoder.inverse_transform(y)
-        else:
-            return self.encoder.named_transformers_['ordinalencoder'].inverse_transform(y)
-
-    def check_data(
-        self,
-        y_train: typing.Union[np.ndarray, pd.DataFrame],
-        y_test: typing.Optional[typing.Union[np.ndarray, pd.DataFrame]],
-    ) -> None:
-        """
-        Makes sure the targets comply with auto-sklearn data requirements and
-        checks y_train/y_test dimensionality
-
-        This method also stores metadata for future checks
-
-        Parameters
-        ----------
-            y_train: typing.Union[np.ndarray, pd.DataFrame]
-                A set of targets set aside for training
-            y_test: typing.Union[np.ndarray, pd.DataFrame]
-                A hold out set of data used for checking
-        """
-
-        self._check_data(y_train)
-
-        shape = np.shape(y_train)
-        if y_test is not None:
-            self._check_data(y_test)
-
-            if len(shape) != len(np.shape(y_test)) or (
-                    len(shape) > 1 and (shape[1] != np.shape(y_test)[1])):
-                raise ValueError("The dimensionality of the train and test targets "
-                                 "does not match train({}) != test({})".format(
-                                     np.shape(y_train),
-                                     np.shape(y_test)
-                                 ))
-            if isinstance(y_train, pd.DataFrame):
-                if y_train.columns != y_test.columns:
-                    raise ValueError(
-                        "Train and test targets must both have the same columns, yet "
-                        "y={} and y_test={} ".format(
-                            y_train.columns,
-                            y_test.columns
-                        )
-                    )
-
-                if list(y_train.dtypes) != list(y_test.dtypes):
-                    raise ValueError("Train and test targets must both have the same dtypes")
-
-        if self.out_dimensionality is None:
-            self.out_dimensionality = 1 if len(shape) == 1 else shape[1]
-        else:
-            _n_outputs = 1 if len(shape) == 1 else shape[1]
-            if self.out_dimensionality != _n_outputs:
-                raise ValueError('Number of outputs changed from %d to %d!' %
-                                 (self.out_dimensionality, _n_outputs))
+        return self.encoder.inverse_transform(y)
 
     def is_single_column_target(self) -> bool:
         """
@@ -293,49 +292,83 @@ class TargetValidator(BaseEstimator):
 
     def _check_data(
         self,
-        y: typing.Union[np.ndarray, pd.DataFrame],
+        y: SUPPORTED_TARGET_TYPES,
     ) -> None:
         """
         Perform dimensionality and data type checks on the targets
 
         Parameters
         ----------
-            y: typing.Union[np.ndarray, pd.DataFrame]
+            y: typing.Union[np.ndarray, pd.DataFrame, pd.Series]
                 A set of features whose dimensionality and data type is going to be checked
         """
 
-        if not isinstance(y, (np.ndarray, pd.DataFrame, list, pd.Series)):
+        if not isinstance(
+                y, (np.ndarray, pd.DataFrame, list, pd.Series)) and not scipy.sparse.issparse(y):
             raise ValueError("Auto-sklearn only supports Numpy arrays, Pandas DataFrames,"
-                             " pd.Series and Python Lists as targets, yet, the provided input is"
-                             " of type {}".format(
+                             " pd.Series, sparse data and Python Lists as targets, yet, "
+                             "the provided input is of type {}".format(
                                  type(y)
                              ))
+
+        # Sparse data muss be numerical
+        # Type ignore on attribute because sparse targets have a dtype
+        if scipy.sparse.issparse(y) and not np.issubdtype(y.dtype.type,  # type: ignore[union-attr]
+                                                          np.number):
+            raise ValueError("When providing a sparse matrix as targets, the only supported "
+                             "values are numerical. Please consider using a dense"
+                             " instead."
+                             )
 
         if self.data_type is None:
             self.data_type = type(y)
         if self.data_type != type(y):
-            warnings.warn("Auto-sklearn previously received features of type %s "
-                          "yet the current features have type %s. Changing the dtype "
-                          "of inputs to an estimator might cause problems" % (
-                                str(self.data_type),
-                                str(type(y)),
-                             ),
-                          )
+            self.logger.warning("Auto-sklearn previously received features of type %s "
+                                "yet the current features have type %s. Changing the dtype "
+                                "of inputs to an estimator might cause problems" % (
+                                      str(self.data_type),
+                                      str(type(y)),
+                                   ),
+                                )
 
         # No Nan is supported
-        if np.any(pd.isnull(y)):
+        has_nan_values = False
+        if hasattr(y, 'iloc'):
+            has_nan_values = typing.cast(pd.DataFrame, y).isnull().values.any()
+        if scipy.sparse.issparse(y):
+            y = typing.cast(scipy.sparse.spmatrix, y)
+            has_nan_values = not np.array_equal(y.data, y.data)
+        else:
+            # List and array like values are considered here
+            # np.isnan cannot work on strings, so we have to check for every element
+            # but NaN, are not equal to themselves:
+            has_nan_values = not np.array_equal(y, y)
+        if has_nan_values:
             raise ValueError("Target values cannot contain missing/NaN values. "
                              "This is not supported by scikit-learn. "
                              )
 
-        # Target data as sparse is not supported
-        if scipy.sparse.issparse(y):
-            raise ValueError("Unsupported target data provided"
-                             "Input targets to auto-sklearn must not be of "
-                             "type sparse. Please convert the target input (y) "
-                             "to a dense array via scipy.sparse.csr_matrix.todense(). "
-                             )
-
         # Pandas Series is not supported for multi-label indicator
         # This format checks are done by type of target
-        self.type_of_target = type_of_target(y)
+        try:
+            self.type_of_target = type_of_target(y)
+        except Exception as e:
+            raise ValueError("The provided data could not be interpreted by Sklearn. "
+                             "While determining the type of the targets via type_of_target "
+                             "run into exception: {}.".format(e))
+
+        supported_output_types = ('binary',
+                                  'continuous',
+                                  'continuous-multioutput',
+                                  'multiclass',
+                                  'multilabel-indicator',
+                                  # Notice unknown/multiclass-multioutput are not supported
+                                  # This can only happen during testing only as estimators
+                                  # should filter out unsupported types.
+                                  )
+        if self.type_of_target not in supported_output_types:
+            raise ValueError("Provided targets are not supported by Auto-Sklearn. "
+                             "Provided type is {} whereas supported types are {}.".format(
+                                 self.type_of_target,
+                                 supported_output_types
+                             ))
