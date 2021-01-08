@@ -136,7 +136,7 @@ and self-defined metrics for a classification problem.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  59.823 seconds)
+   **Total running time of the script:** ( 2 minutes  3.575 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_calc_multiple_metrics.py:
@@ -151,7 +151,7 @@ and self-defined metrics for a classification problem.
   .. container:: binder-badge
 
     .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/40_advanced/example_calc_multiple_metrics.ipynb
+      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/generated_notebooks/examples/40_advanced/example_calc_multiple_metrics.ipynb
       :alt: Launch binder
       :width: 150 px
 

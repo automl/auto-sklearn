@@ -556,7 +556,7 @@ but with different hyperparameters .
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  11.427 seconds)
+   **Total running time of the script:** ( 0 minutes  12.469 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_restrict_number_of_hyperparameters.py:
@@ -571,7 +571,7 @@ but with different hyperparameters .
   .. container:: binder-badge
 
     .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/80_extending/example_restrict_number_of_hyperparameters.ipynb
+      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/generated_notebooks/examples/80_extending/example_restrict_number_of_hyperparameters.ipynb
       :alt: Launch binder
       :width: 150 px
 

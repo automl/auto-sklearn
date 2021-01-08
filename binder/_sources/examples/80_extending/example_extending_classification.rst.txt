@@ -204,7 +204,7 @@ Create MLP classifier component for auto-sklearn
         num_nodes_per_layer, Type: UniformInteger, Range: [16, 216], Default: 32
         solver, Type: Categorical, Choices: {lbfgs, sgd, adam}, Default: adam
 
-    accuracy:  0.35664335664335667
+    accuracy:  0.40559440559440557
     [(1.000000, MyDummyClassifier(configuration=1, init_params={'instance': None},
                       random_state=1)),
     ]
@@ -215,7 +215,7 @@ Create MLP classifier component for auto-sklearn
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  18.075 seconds)
+   **Total running time of the script:** ( 0 minutes  19.979 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_classification.py:
@@ -230,7 +230,7 @@ Create MLP classifier component for auto-sklearn
   .. container:: binder-badge
 
     .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_classification.ipynb
+      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/generated_notebooks/examples/80_extending/example_extending_classification.ipynb
       :alt: Launch binder
       :width: 150 px
 
