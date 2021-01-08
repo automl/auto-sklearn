@@ -441,16 +441,15 @@ class AutoML(BaseEstimator):
         if dataset_name is None:
             dataset_name = str(uuid.uuid1(clock_seq=os.getpid()))
 
-        # The first thing we have to do is create the logger to update the backend
+        # By default try to use the TCP logging port or get a new port
+        self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
         self._logger = self._get_logger(dataset_name)
+
+        # The first thing we have to do is create the logger to update the backend
         self._backend.setup_logger(self._logger_port)
 
         self._backend.save_start_time(self._seed)
         self._stopwatch = StopWatch()
-
-        # By default try to use the TCP logging port or get a new port
-        self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
-        self._logger = self._get_logger(dataset_name)
 
         # Make sure that input is valid
         # Performs Ordinal one hot encoding to the target
