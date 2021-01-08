@@ -184,7 +184,7 @@ Create LDA component for auto-sklearn
       Conditions:
         shrinkage | solver in {'lsqr', 'eigen'}
 
-    accuracy:  0.43356643356643354
+    accuracy:  0.3986013986013986
     [(1.000000, MyDummyClassifier(configuration=1, init_params={'instance': None},
                       random_state=1)),
     ]
@@ -195,7 +195,7 @@ Create LDA component for auto-sklearn
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  22.127 seconds)
+   **Total running time of the script:** ( 0 minutes  20.314 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_preprocessor.py:

@@ -38,21 +38,21 @@ The following example shows how to fit a simple regression model with
 
     /opt/hostedtoolcache/Python/3.8.6/x64/lib/python3.8/site-packages/pyparsing.py:3190: FutureWarning: Possible set intersection at position 3
       self.re = re.compile(self.reString)
-    [(0.640000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'regressor:random_forest:bootstrap': 'True', 'regressor:random_forest:criterion': 'mse', 'regressor:random_forest:max_depth': 'None', 'regressor:random_forest:max_features': 1.0, 'regressor:random_forest:max_leaf_nodes': 'None', 'regressor:random_forest:min_impurity_decrease': 0.0, 'regressor:random_forest:min_samples_leaf': 1, 'regressor:random_forest:min_samples_split': 2, 'regressor:random_forest:min_weight_fraction_leaf': 0.0},
+    [(0.760000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'regressor:random_forest:bootstrap': 'True', 'regressor:random_forest:criterion': 'mse', 'regressor:random_forest:max_depth': 'None', 'regressor:random_forest:max_features': 1.0, 'regressor:random_forest:max_leaf_nodes': 'None', 'regressor:random_forest:min_impurity_decrease': 0.0, 'regressor:random_forest:min_samples_leaf': 1, 'regressor:random_forest:min_samples_split': 2, 'regressor:random_forest:min_weight_fraction_leaf': 0.0},
     dataset_properties={
       'task': 4,
       'sparse': False,
       'multioutput': False,
       'target_type': 'regression',
       'signed': False})),
-    (0.200000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'gaussian_process', 'feature_preprocessor:polynomial:degree': 2, 'feature_preprocessor:polynomial:include_bias': 'True', 'feature_preprocessor:polynomial:interaction_only': 'True', 'regressor:gaussian_process:alpha': 0.037731974209709904, 'regressor:gaussian_process:thetaL': 5.002213042554931e-07, 'regressor:gaussian_process:thetaU': 22409.945864393645},
+    (0.220000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'ard_regression', 'feature_preprocessor:polynomial:degree': 2, 'feature_preprocessor:polynomial:include_bias': 'True', 'feature_preprocessor:polynomial:interaction_only': 'False', 'regressor:ard_regression:alpha_1': 0.0003701926442639788, 'regressor:ard_regression:alpha_2': 2.2118001735899097e-07, 'regressor:ard_regression:fit_intercept': 'True', 'regressor:ard_regression:lambda_1': 1.2037591637980971e-06, 'regressor:ard_regression:lambda_2': 4.358378124977852e-09, 'regressor:ard_regression:n_iter': 300, 'regressor:ard_regression:threshold_lambda': 1136.5286041327277, 'regressor:ard_regression:tol': 0.021944240404849075},
     dataset_properties={
       'task': 4,
       'sparse': False,
       'multioutput': False,
       'target_type': 'regression',
       'signed': False})),
-    (0.160000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'ard_regression', 'feature_preprocessor:polynomial:degree': 2, 'feature_preprocessor:polynomial:include_bias': 'True', 'feature_preprocessor:polynomial:interaction_only': 'False', 'regressor:ard_regression:alpha_1': 0.0003701926442639788, 'regressor:ard_regression:alpha_2': 2.2118001735899097e-07, 'regressor:ard_regression:fit_intercept': 'True', 'regressor:ard_regression:lambda_1': 1.2037591637980971e-06, 'regressor:ard_regression:lambda_2': 4.358378124977852e-09, 'regressor:ard_regression:n_iter': 300, 'regressor:ard_regression:threshold_lambda': 1136.5286041327277, 'regressor:ard_regression:tol': 0.021944240404849075},
+    (0.020000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'feature_preprocessor:__choice__': 'select_rates_regression', 'regressor:__choice__': 'extra_trees', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.019566163649872924, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max': 0.7200608810425068, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min': 0.22968043330398744, 'feature_preprocessor:select_rates_regression:alpha': 0.18539282936320728, 'feature_preprocessor:select_rates_regression:mode': 'fwe', 'feature_preprocessor:select_rates_regression:score_func': 'f_regression', 'regressor:extra_trees:bootstrap': 'False', 'regressor:extra_trees:criterion': 'mae', 'regressor:extra_trees:max_depth': 'None', 'regressor:extra_trees:max_features': 0.9029989558220115, 'regressor:extra_trees:max_leaf_nodes': 'None', 'regressor:extra_trees:min_impurity_decrease': 0.0, 'regressor:extra_trees:min_samples_leaf': 1, 'regressor:extra_trees:min_samples_split': 2, 'regressor:extra_trees:min_weight_fraction_leaf': 0.0},
     dataset_properties={
       'task': 4,
       'sparse': False,
@@ -60,7 +60,7 @@ The following example shows how to fit a simple regression model with
       'target_type': 'regression',
       'signed': False})),
     ]
-    R2 score: 0.9040477219435149
+    R2 score: 0.9018056173149241
 
 
 
@@ -115,7 +115,7 @@ The following example shows how to fit a simple regression model with
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  59.978 seconds)
+   **Total running time of the script:** ( 1 minutes  58.162 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_regression.py:
