@@ -259,6 +259,21 @@ def test_featurevalidator_unsupported_pandas(input_data_featuretest):
         'numpy_mixed_nan',
         'pandas_categoricalonly_nonan',
         'pandas_mixed_nonan',
+        'list_numericalonly_nonan',
+        'list_numericalonly_nan',
+        'sparse_bsr_nonan',
+        'sparse_bsr_nan',
+        'sparse_coo_nonan',
+        'sparse_coo_nan',
+        'sparse_csc_nonan',
+        'sparse_csc_nan',
+        'sparse_csr_nonan',
+        'sparse_csr_nan',
+        'sparse_dia_nonan',
+        'sparse_dia_nan',
+        'sparse_dok_nonan',
+        'sparse_dok_nan',
+        'sparse_lil_nonan',
     ),
     indirect=True
 )
@@ -275,6 +290,12 @@ def test_featurevalidator_fitontypeA_transformtypeB(input_data_featuretest):
         complementary_type = input_data_featuretest.to_numpy()
     elif isinstance(input_data_featuretest, np.ndarray):
         complementary_type = pd.DataFrame(input_data_featuretest)
+    elif isinstance(input_data_featuretest, list):
+        complementary_type = pd.DataFrame(input_data_featuretest)
+    elif sparse.issparse(input_data_featuretest):
+        complementary_type = sparse.csr_matrix(input_data_featuretest.todense())
+    else:
+        raise ValueError(type(input_data_featuretest))
     transformed_X = validator.transform(complementary_type)
     assert np.shape(input_data_featuretest) == np.shape(transformed_X)
     assert np.issubdtype(transformed_X.dtype, np.number)
@@ -408,10 +429,13 @@ def test_encoder_created(input_data_featuretest):
 
 
 def test_no_new_category_after_fit():
+    """
+    This test makes sure that we can actually pass new categories to the estimator
+    without throwing an error
+    """
     # Then make sure we catch categorical extra categories
     x = pd.DataFrame({'A': [1, 2, 3, 4], 'B': [5, 6, 7, 8]}, dtype='category')
     validator = FeatureValidator()
     validator.fit(x)
     x['A'] = x['A'].apply(lambda x: x*x)
-    with pytest.raises(ValueError, match=r'During fit, the input features contained categorical'):
-        validator.transform(x)
+    validator.transform(x)

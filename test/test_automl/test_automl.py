@@ -559,8 +559,6 @@ def test_exceptions_inside_log_in_smbo(smbo_run_mock, backend, dask_client):
         )
 
     # make sure that the logfile was created
-    import shutil
-    shutil.copytree(backend.temporary_directory, '/tmp/trydebug')
     logger_name = 'AutoML(%d):%s' % (1, dataset_name)
     logfile = os.path.join(backend.temporary_directory, logger_name + '.log')
     assert os.path.exists(logfile), automl._clean_logger()

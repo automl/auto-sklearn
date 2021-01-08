@@ -370,6 +370,11 @@ def test_target_unsupported():
     validator = TargetValidator()
     with pytest.raises(ValueError, match=r"The dimensionality of the train and test targets"):
         validator.fit(
+            np.array([[0, 1, 0], [0, 1, 1]]),
+            np.array([[0, 1, 0, 0], [0, 1, 1, 1]]),
+        )
+    with pytest.raises(ValueError, match=r"Provided targets are not supported.*"):
+        validator.fit(
             np.array([[0, 1, 2], [0, 3, 4]]),
             np.array([[0, 1, 2, 5], [0, 3, 4, 6]]),
         )

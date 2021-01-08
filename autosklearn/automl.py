@@ -439,16 +439,14 @@ class AutoML(BaseEstimator):
         is_classification: bool = False,
     ):
         if dataset_name is None:
-            dataset_name = hash_array_or_matrix(X)
+            dataset_name = str(uuid.uuid1(clock_seq=os.getpid()))
+
         # The first thing we have to do is create the logger to update the backend
         self._logger = self._get_logger(dataset_name)
         self._backend.setup_logger(self._logger_port)
 
         self._backend.save_start_time(self._seed)
         self._stopwatch = StopWatch()
-
-        if dataset_name is None:
-            dataset_name = str(uuid.uuid1(clock_seq=os.getpid()))
 
         # By default try to use the TCP logging port or get a new port
         self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT

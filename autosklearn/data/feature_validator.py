@@ -170,7 +170,10 @@ class FeatureValidator(BaseEstimator):
             if len(self.enc_columns) > 0:
 
                 self.encoder = make_column_transformer(
-                    (preprocessing.OrdinalEncoder(), self.enc_columns),
+                    (preprocessing.OrdinalEncoder(
+                        handle_unknown='use_encoded_value',
+                        unknown_value=np.nan,
+                    ), self.enc_columns),
                     remainder="passthrough"
                 )
 
@@ -233,26 +236,7 @@ class FeatureValidator(BaseEstimator):
                 for column in X.columns:
                     if X[column].isna().all():
                         X[column] = pd.to_numeric(X[column])
-            try:
-                X = self.encoder.transform(X)
-            except ValueError as e:
-                if 'Found unknown categories' in e.args[0]:
-                    # Make the message more informative
-                    raise ValueError(
-                        "During fit, the input features contained categorical values in columns"
-                        "{}, with categories {} which were encoded by Auto-sklearn automatically."
-                        "Nevertheless, a new input contained new categories not seen during "
-                        "training = {}. The OrdinalEncoder used by Auto-sklearn cannot handle "
-                        "this yet (due to a limitation on scikit-learn being addressed via:"
-                        " https://github.com/scikit-learn/scikit-learn/issues/17123)"
-                        "".format(
-                            self.enc_columns,
-                            self.encoder.transformers_[0][1].categories_,
-                            e.args[0],
-                        )
-                    )
-                else:
-                    raise e
+            X = self.encoder.transform(X)
 
         # Sparse related transformations
         # Not all sparse format support index sorting
