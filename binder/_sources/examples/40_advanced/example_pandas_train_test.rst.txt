@@ -70,7 +70,7 @@ list or numpy arrays as there is no per-column dtype (further details in the exa
     A13     float64
     A14     float64
     dtype: object
-    Accuracy score 0.8724637681159421
+    Accuracy score 0.8608695652173913
 
 
 
@@ -216,7 +216,7 @@ list or numpy arrays as there is no per-column dtype (further details in the exa
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  59.570 seconds)
+   **Total running time of the script:** ( 2 minutes  0.610 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_pandas_train_test.py:
@@ -231,7 +231,7 @@ list or numpy arrays as there is no per-column dtype (further details in the exa
   .. container:: binder-badge
 
     .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/generated_notebooks/examples/40_advanced/example_pandas_train_test.ipynb
+      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/40_advanced/example_pandas_train_test.ipynb
       :alt: Launch binder
       :width: 150 px
 
