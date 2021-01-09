@@ -9,7 +9,7 @@ from sklearn.exceptions import NotFittedError
 
 from autosklearn.data.feature_validator import FeatureValidator, SUPPORTED_FEAT_TYPES
 from autosklearn.data.target_validator import SUPPORTED_TARGET_TYPES, TargetValidator
-from autosklearn.util.logging_ import PickableLoggerAdapter
+from autosklearn.util.logging_ import get_named_client_logger
 
 
 class InputValidator(BaseEstimator):
@@ -39,11 +39,19 @@ class InputValidator(BaseEstimator):
         self,
         feat_type: typing.Optional[typing.List[str]] = None,
         is_classification: bool = False,
-        logger: typing.Optional[PickableLoggerAdapter] = None,
+        logger_port: typing.Optional[int] = None,
     ) -> None:
         self.feat_type = feat_type
         self.is_classification = is_classification
-        self.logger = logger if logger is not None else logging.getLogger(__name__)
+        self.logger_port = logger_port
+        if self.logger_port is not None:
+            self.logger = get_named_client_logger(
+                name='Validation',
+                port=self.logger_port,
+            )
+        else:
+            self.logger = logging.getLogger('Validation')
+
         self.feature_validator = FeatureValidator(feat_type=self.feat_type,
                                                   logger=self.logger)
         self.target_validator = TargetValidator(is_classification=self.is_classification,

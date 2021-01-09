@@ -457,7 +457,7 @@ class AutoML(BaseEstimator):
         self.InputValidator = InputValidator(
             is_classification=is_classification,
             feat_type=feat_type,
-            logger=self._logger,
+            logger_port=self._logger_port,
         )
         self.InputValidator.fit(X_train=X, y_train=y, X_test=X_test, y_test=y_test)
         X, y = self.InputValidator.transform(X, y)
