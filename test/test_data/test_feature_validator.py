@@ -72,8 +72,8 @@ def input_data_featuretest(request):
         return frame
     elif request.param == 'pandas_categoricalonly_nan':
         return pd.DataFrame([
-            {'A': 1, 'B': 2},
-            {'A': 3},
+            {'A': 1, 'B': 2, 'C': np.nan},
+            {'A': 3, 'C': np.nan},
         ], dtype='category')
     elif request.param == 'pandas_numericalonly_nan':
         return pd.DataFrame([
@@ -194,7 +194,7 @@ def input_data_featuretest(request):
 )
 def test_featurevalidator_supported_types(input_data_featuretest):
     validator = FeatureValidator()
-    validator.fit(input_data_featuretest)
+    validator.fit(input_data_featuretest, input_data_featuretest)
     transformed_X = validator.transform(input_data_featuretest)
     if sparse.issparse(input_data_featuretest):
         assert sparse.issparse(transformed_X)
@@ -285,7 +285,7 @@ def test_featurevalidator_fitontypeA_transformtypeB(input_data_featuretest):
     This is problematic only in the case we create an encoder
     """
     validator = FeatureValidator()
-    validator.fit(input_data_featuretest)
+    validator.fit(input_data_featuretest, input_data_featuretest)
     if isinstance(input_data_featuretest, pd.DataFrame):
         complementary_type = input_data_featuretest.to_numpy()
     elif isinstance(input_data_featuretest, np.ndarray):
@@ -323,7 +323,7 @@ def test_featurevalidator_get_columns_to_encode():
     assert feature_types == ['numerical', 'numerical', 'categorical', 'categorical']
 
 
-def test_unsupported_calls_are_raised():
+def test_features_unsupported_calls_are_raised():
     """
     Makes sure we raise a proper message to the user,
     when providing not supported data input or using the validator in a way that is not
@@ -348,6 +348,17 @@ def test_unsupported_calls_are_raised():
                       )
     with pytest.raises(ValueError, match=r"Cannot call transform on a validator that is not fit"):
         validator.transform(np.array([[1, 2, 3], [4, 5, 6]]))
+    validator.feat_type = ['Numerical']
+    with pytest.raises(ValueError, match=r"providing the option feat_type to the fit method is.*"):
+        validator.fit(pd.DataFrame([[1, 2, 3], [4, 5, 6]]))
+    with pytest.raises(ValueError, match=r"Array feat_type does not have same number of.*"):
+        validator.fit(np.array([[1, 2, 3], [4, 5, 6]]))
+    validator.feat_type = [1, 2, 3]
+    with pytest.raises(ValueError, match=r"Array feat_type must only contain strings.*"):
+        validator.fit(np.array([[1, 2, 3], [4, 5, 6]]))
+    validator.feat_type = ['1', '2', '3']
+    with pytest.raises(ValueError, match=r"Only `Categorical` and `Numerical` are.*"):
+        validator.fit(np.array([[1, 2, 3], [4, 5, 6]]))
 
 
 @pytest.mark.parametrize(

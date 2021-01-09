@@ -72,7 +72,7 @@ def test_data_validation_for_regression(openmlid, as_frame):
     X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
         x, y, test_size=0.33, random_state=0)
 
-    validator.fit(X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test)
+    validator.fit(X_train=X_train, y_train=y_train)
 
     X_train_t, y_train_t = validator.transform(X_train, y_train)
     assert np.shape(X_train) == np.shape(X_train_t)

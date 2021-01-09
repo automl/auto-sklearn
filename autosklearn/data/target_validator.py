@@ -4,6 +4,7 @@ import typing
 import numpy as np
 
 import pandas as pd
+from pandas.api.types import is_numeric_dtype
 
 import scipy.sparse
 
@@ -60,6 +61,9 @@ class TargetValidator(BaseEstimator):
         self.type_of_target = None  # type: typing.Optional[str]
 
         self.logger = logger if logger is not None else logging.getLogger(__name__)
+
+        # Store the dtype for remapping to correct type
+        self.dtype = None  # type: typing.Optional[type]
 
         self._is_fitted = False
 
@@ -185,6 +189,19 @@ class TargetValidator(BaseEstimator):
             else:
                 self.encoder.fit(np.array(y_train).reshape(-1, 1))
 
+        # we leave objects unchanged, so no need to store dtype in this case
+        if hasattr(y_train, 'dtype'):
+            # Series and numpy arrays are checked here
+            # Cast is as numpy for mypy checks
+            y_train = typing.cast(np.ndarray, y_train)
+            if is_numeric_dtype(y_train.dtype):
+                self.dtype = y_train.dtype
+        elif hasattr(y_train, 'dtypes') and is_numeric_dtype(typing.cast(pd.DataFrame,
+                                                                         y_train).dtypes[0]):
+            # This case is for pandas array with a single column
+            y_train = typing.cast(pd.DataFrame, y_train)
+            self.dtype = y_train.dtypes[0]
+
         return self
 
     def transform(
@@ -262,14 +279,21 @@ class TargetValidator(BaseEstimator):
             return y
         shape = np.shape(y)
         if len(shape) > 1:
-            return self.encoder.inverse_transform(y)
+            y = self.encoder.inverse_transform(y)
         else:
             # The targets should be a flattened array, hence reshape with -1
             if hasattr(y, 'iloc'):
                 y = typing.cast(pd.DataFrame, y)
-                return self.encoder.inverse_transform(y.to_numpy().reshape(-1, 1)).reshape(-1)
+                y = self.encoder.inverse_transform(y.to_numpy().reshape(-1, 1)).reshape(-1)
             else:
-                return self.encoder.inverse_transform(np.array(y).reshape(-1, 1)).reshape(-1)
+                y = self.encoder.inverse_transform(np.array(y).reshape(-1, 1)).reshape(-1)
+
+        # Inverse transform returns a numpy array of type object
+        # This breaks certain metrics as accuracy, which makes type_of_target be unknown
+        # If while fit a dtype was observed, we try to honor that dtype
+        if self.dtype is not None:
+            y = y.astype(self.dtype)
+        return y
 
     def is_single_column_target(self) -> bool:
         """

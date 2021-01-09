@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 
 import pytest
+from pandas.api.types import is_numeric_dtype
 
 from scipy import sparse
 
@@ -214,7 +215,19 @@ def test_targetvalidator_supported_types_classification(input_data_targettest):
                 assert np.max(transformed_y[:, col]) == len(np.unique(transformed_y[:, col])) - 1
 
         # Make sure we can perform inverse transform
-        validator.inverse_transform(transformed_y)
+        y_inverse = validator.inverse_transform(transformed_y)
+        if hasattr(input_data_targettest, 'dtype'):
+            if is_numeric_dtype(input_data_targettest.dtype):
+                assert y_inverse.dtype == input_data_targettest.dtype
+            else:
+                # An object in this case, so make sure first elements are same
+                assert y_inverse[0] == input_data_targettest[0]
+        elif hasattr(input_data_targettest, 'dtypes'):
+            if is_numeric_dtype(input_data_targettest.dtypes[0]):
+                assert y_inverse.dtype == input_data_targettest.dtypes[0]
+            else:
+                # An object in this case, so make sure first elements are same
+                assert y_inverse[0] == input_data_targettest.to_list()[0]
     else:
         # Sparse is not encoded, mainly because the sparse data is expected
         # to be numpy of numerical type -- which currently does not require encoding
@@ -404,6 +417,8 @@ def test_target_unsupported():
         validator.fit(sparse.csr_matrix(np.array([1, 2, np.nan])))
     with pytest.raises(ValueError, match=r"Cannot call transform on a validator that is not fit"):
         validator.transform(np.array([1, 2, 3]))
+    with pytest.raises(ValueError, match=r"Cannot call inverse_transform on a validator that is"):
+        validator.inverse_transform(np.array([1, 2, 3]))
     with pytest.raises(ValueError, match=r"Multi-dimensional classification is not yet supported"):
         validator._fit(np.array([[1, 2, 3], [1, 5, 6]]))
 
@@ -475,3 +490,13 @@ def test_unknown_categories_in_targets(input_data_targettest):
 
     x_t = validator.transform(input_data_targettest)
     assert x_t[-1].item(0) == -1
+
+
+def test_is_single_column_target():
+    validator = TargetValidator(is_classification=True)
+    validator.fit(np.array([1, 2, 3, 4]))
+    assert validator.is_single_column_target()
+
+    validator = TargetValidator(is_classification=True)
+    validator.fit(np.array([[1, 0, 1, 0], [1, 1, 1, 1]]))
+    assert not validator.is_single_column_target()
