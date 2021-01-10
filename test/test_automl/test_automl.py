@@ -570,11 +570,12 @@ def test_exceptions_inside_log_in_smbo(smbo_run_mock, backend, dask_client):
     automl._clean_logger()
 
     if not any(message in line for line in lines):
-        pytest.fail("Did not find {} in the log file {} for logger {}/{}".format(
+        pytest.fail("Did not find {} in the log file {} for logger {}/{}/{}".format(
             message,
             print_debug_information(automl),
             vars(automl._logger.logger),
-            vars(logger)
+            vars(logger),
+            vars(logging.getLogger())
         ))
 
 
