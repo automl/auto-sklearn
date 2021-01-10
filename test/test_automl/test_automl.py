@@ -560,6 +560,7 @@ def test_exceptions_inside_log_in_smbo(smbo_run_mock, backend, dask_client):
 
     # make sure that the logfile was created
     logger_name = 'AutoML(%d):%s' % (1, dataset_name)
+    logger = logging.getLogger(logger_name)
     logfile = os.path.join(backend.temporary_directory, logger_name + '.log')
     assert os.path.exists(logfile), print_debug_information(automl) + str(automl._clean_logger())
     with open(logfile) as f:
@@ -569,9 +570,11 @@ def test_exceptions_inside_log_in_smbo(smbo_run_mock, backend, dask_client):
     automl._clean_logger()
 
     if not any(message in line for line in lines):
-        pytest.fail("Did not find {} in the log file {}".format(
+        pytest.fail("Did not find {} in the log file {} for logger {}/{}".format(
             message,
-            print_debug_information(automl)
+            print_debug_information(automl),
+            vars(automl._logger.logger),
+            vars(logger)
         ))
 
 
