@@ -1,0 +1,43 @@
+#!/bin/bash
+
+set -e
+
+python -m pip install .[docs,examples]
+
+# Taken from https://github.com/scikit-learn/scikit-learn/blob/22cd233e1932457947e9994285dc7fd4e93881e4/.binder/postBuild
+# under BSD3 license, copyright the scikit-learn contributors
+
+# This script is called in a binder context. When this script is called, we are
+# inside a git checkout of the automl/auto-sklearn repo. This script
+# generates notebooks from the auto-sklearn python examples.
+
+if [[ ! -f /.dockerenv ]]; then
+    echo "This script was written for repo2docker and is supposed to run inside a docker container."
+    echo "Exiting because this script can delete data if run outside of a docker container."
+    exit 1
+fi
+
+# Copy content we need from the auto-sklearn repo
+TMP_CONTENT_DIR=/tmp/auto-sklearn
+mkdir -p $TMP_CONTENT_DIR
+cp -r examples .binder $TMP_CONTENT_DIR
+# delete everything in current directory including dot files and dot folders
+find . -delete
+
+# Generate notebooks and remove other files from examples folder
+GENERATED_NOTEBOOKS_DIR=examples
+cp -r $TMP_CONTENT_DIR/examples $GENERATED_NOTEBOOKS_DIR
+
+find $GENERATED_NOTEBOOKS_DIR -name 'example_*.py' -exec sphx_glr_python_to_jupyter.py '{}' +
+# Keep __init__.py and custom_metrics.py
+NON_NOTEBOOKS=$(find $GENERATED_NOTEBOOKS_DIR -type f | grep -v '\.ipynb' | grep -v 'init' | grep -v 'custom_metrics')
+rm -f $NON_NOTEBOOKS
+
+# Modify path to be consistent by the path given by sphinx-gallery
+mkdir notebooks
+mv $GENERATED_NOTEBOOKS_DIR notebooks/
+
+# Put the .binder folder back (may be useful for debugging purposes)
+mv $TMP_CONTENT_DIR/.binder .
+# Final clean up
+rm -rf $TMP_CONTENT_DIR
