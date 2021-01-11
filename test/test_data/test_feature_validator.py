@@ -476,4 +476,5 @@ def test_unknown_encode_value():
     x.loc[0, 'c'] = 'NA'  # unknown value
     x_t = validator.transform(x)
     # The first row should have a -1 as we added a new categorical there
-    assert -1 in x_t[0].tolist()
+    expected_row = [-1, -41, -3, -987.2]
+    assert expected_row == x_t[0].tolist()

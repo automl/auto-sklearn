@@ -227,6 +227,9 @@ class FeatureValidator(BaseEstimator):
         if isinstance(X, list):
             X, _ = self.list_to_dataframe(X)
 
+        # Check the data here so we catch problems on new test data
+        self._check_data(X)
+
         # Pandas related transformations
         if hasattr(X, "iloc") and self.encoder is not None:
             if np.any(pd.isnull(X)):
@@ -294,6 +297,8 @@ class FeatureValidator(BaseEstimator):
 
         # Then for Pandas, we do not support Nan in categorical columns
         if hasattr(X, "iloc"):
+            # Define the column to be encoded here as the feature validator is fitted once
+            # per estimator
             self.enc_columns, _ = self._get_columns_to_encode(X)
             if len(self.enc_columns) > 0:
                 if np.any(pd.isnull(

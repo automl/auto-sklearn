@@ -217,17 +217,18 @@ def test_targetvalidator_supported_types_classification(input_data_targettest):
         # Make sure we can perform inverse transform
         y_inverse = validator.inverse_transform(transformed_y)
         if hasattr(input_data_targettest, 'dtype'):
+            # In case of numeric, we need to make sure dtype is preserved
             if is_numeric_dtype(input_data_targettest.dtype):
                 assert y_inverse.dtype == input_data_targettest.dtype
-            else:
-                # An object in this case, so make sure first elements are same
-                assert y_inverse[0] == input_data_targettest[0]
+            # Then make sure every value is properly inverse-transformed
+            np.testing.assert_array_equal(np.array(y_inverse), np.array(input_data_targettest))
         elif hasattr(input_data_targettest, 'dtypes'):
             if is_numeric_dtype(input_data_targettest.dtypes[0]):
                 assert y_inverse.dtype == input_data_targettest.dtypes[0]
-            else:
-                # An object in this case, so make sure first elements are same
-                assert y_inverse[0] == input_data_targettest.to_list()[0]
+            # Then make sure every value is properly inverse-transformed
+            np.testing.assert_array_equal(np.array(y_inverse),
+                                          # pandas is always (N, 1) but targets are ravel()
+                                          input_data_targettest.to_numpy().reshape(-1))
     else:
         # Sparse is not encoded, mainly because the sparse data is expected
         # to be numpy of numerical type -- which currently does not require encoding

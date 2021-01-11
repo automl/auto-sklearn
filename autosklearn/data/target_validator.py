@@ -225,6 +225,9 @@ class TargetValidator(BaseEstimator):
         if not self._is_fitted:
             raise NotFittedError("Cannot call transform on a validator that is not fitted")
 
+        # Check the data here so we catch problems on new test data
+        self._check_data(y)
+
         if self.encoder is not None:
             # remove ravel warning from pandas Series
             shape = np.shape(y)
