@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         Click :ref:`here <sphx_glr_download_examples_40_advanced_example_pandas_train_test.py>`
-        to download the full example code
+        to download the full example code or to run this example in your browser via Binder
 
 .. rst-class:: sphx-glr-example-title
 
@@ -216,7 +216,7 @@ list or numpy arrays as there is no per-column dtype (further details in the exa
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  1.551 seconds)
+   **Total running time of the script:** ( 2 minutes  5.066 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_pandas_train_test.py:
@@ -227,6 +227,13 @@ list or numpy arrays as there is no per-column dtype (further details in the exa
  .. container:: sphx-glr-footer
     :class: sphx-glr-footer-example
 
+
+  .. container:: binder-badge
+
+    .. image:: images/binder_badge_logo.svg
+      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/40_advanced/example_pandas_train_test.ipynb
+      :alt: Launch binder
+      :width: 150 px
 
 
   .. container:: sphx-glr-download sphx-glr-download-python

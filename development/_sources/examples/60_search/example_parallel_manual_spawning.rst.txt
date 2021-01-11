@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         Click :ref:`here <sphx_glr_download_examples_60_search_example_parallel_manual_spawning.py>`
-        to download the full example code
+        to download the full example code or to run this example in your browser via Binder
 
 .. rst-class:: sphx-glr-example-title
 
@@ -93,7 +93,7 @@ and remove the following line.
  .. code-block:: none
 
 
-    <dask.config.set object at 0x7f99f8a8ebb0>
+    <dask.config.set object at 0x7ff24c699880>
 
 
 
@@ -276,7 +276,7 @@ which means that it is automatically stopped one all computation is done.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  46.771 seconds)
+   **Total running time of the script:** ( 0 minutes  46.782 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_manual_spawning.py:
@@ -287,6 +287,13 @@ which means that it is automatically stopped one all computation is done.
  .. container:: sphx-glr-footer
     :class: sphx-glr-footer-example
 
+
+  .. container:: binder-badge
+
+    .. image:: images/binder_badge_logo.svg
+      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/60_search/example_parallel_manual_spawning.ipynb
+      :alt: Launch binder
+      :width: 150 px
 
 
   .. container:: sphx-glr-download sphx-glr-download-python
