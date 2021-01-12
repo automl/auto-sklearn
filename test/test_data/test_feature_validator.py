@@ -1,3 +1,6 @@
+import copy
+import random
+
 import numpy as np
 
 import pandas as pd
@@ -478,3 +481,67 @@ def test_unknown_encode_value():
     # The first row should have a -1 as we added a new categorical there
     expected_row = [-1, -41, -3, -987.2]
     assert expected_row == x_t[0].tolist()
+
+
+# Actual checks for the features
+@pytest.mark.parametrize(
+    'openml_id',
+    (
+        40981,  # Australian
+        3,  # kr-vs-kp
+        1468,  # cnae-9
+        40975,  # car
+        40984,  # Segment
+    ),
+)
+@pytest.mark.parametrize('train_data_type', ('numpy', 'pandas', 'list'))
+@pytest.mark.parametrize('test_data_type', ('numpy', 'pandas', 'list'))
+def test_featurevalidator_new_data_after_fit(openml_id,
+                                             train_data_type, test_data_type):
+
+    # List is currently not supported as infer_objects
+    # cast list objects to type objects
+    if train_data_type == 'list' or test_data_type == 'list':
+        pytest.skip()
+
+    validator = FeatureValidator()
+
+    if train_data_type == 'numpy':
+        X, y = sklearn.datasets.fetch_openml(data_id=openml_id,
+                                             return_X_y=True, as_frame=False)
+    elif train_data_type == 'pandas':
+        X, y = sklearn.datasets.fetch_openml(data_id=openml_id,
+                                             return_X_y=True, as_frame=True)
+    else:
+        X, y = sklearn.datasets.fetch_openml(data_id=openml_id,
+                                             return_X_y=True, as_frame=True)
+        X = X.values.tolist()
+        y = y.values.tolist()
+
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+        X, y, random_state=1)
+
+    validator.fit(X_train)
+
+    transformed_X = validator.transform(X_test)
+
+    # Basic Checking
+    if sparse.issparse(input_data_featuretest):
+        assert sparse.issparse(transformed_X)
+    else:
+        assert isinstance(transformed_X, np.ndarray)
+    assert np.shape(X_test) == np.shape(transformed_X)
+
+    # And then check proper error messages
+    if train_data_type == 'pandas':
+        old_dtypes = copy.deepcopy(validator.dtypes)
+        validator.dtypes = ['dummy' for dtype in X_train.dtypes]
+        with pytest.raises(ValueError, match=r"hanging the dtype of the features after fit"):
+            transformed_X = validator.transform(X_test)
+        validator.dtypes = old_dtypes
+        if test_data_type == 'pandas':
+            columns = X_test.columns.tolist()
+            random.shuffle(columns)
+            X_test = X_test[columns]
+            with pytest.raises(ValueError, match=r"Changing the column order of the features"):
+                transformed_X = validator.transform(X_test)

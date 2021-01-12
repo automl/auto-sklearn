@@ -563,6 +563,10 @@ def test_exceptions_inside_log_in_smbo(smbo_run_mock, backend, dask_client):
     logger = logging.getLogger(logger_name)
     logfile = os.path.join(backend.temporary_directory, logger_name + '.log')
     assert os.path.exists(logfile), print_debug_information(automl) + str(automl._clean_logger())
+
+    # Give some time for the error message to be printed in the
+    # log file
+    time.sleep(3)
     with open(logfile) as f:
         lines = f.readlines()
 

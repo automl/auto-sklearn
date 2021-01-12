@@ -61,7 +61,10 @@ class FeatureValidator(BaseEstimator):
         # constrain is honored. If not, this attribute is used.
         self.feat_type = feat_type  # type: typing.Optional[typing.List[str]]
 
+        # Register types to detect unsupported data format changes
         self.data_type = None  # type: typing.Optional[type]
+        self.dtypes = []  # type: typing.List[str]
+        self.column_order = []  # type: typing.List[str]
 
         self.encoder = None  # type: typing.Optional[BaseEstimator]
         self.enc_columns = []  # type: typing.List[str]
@@ -227,6 +230,13 @@ class FeatureValidator(BaseEstimator):
         if isinstance(X, list):
             X, _ = self.list_to_dataframe(X)
 
+        if hasattr(X, "iloc") and not scipy.sparse.issparse(X):
+            X = typing.cast(pd.DataFrame, X)
+            if np.any(pd.isnull(X)):
+                for column in X.columns:
+                    if X[column].isna().all():
+                        X[column] = pd.to_numeric(X[column])
+
         # Check the data here so we catch problems on new test data
         self._check_data(X)
 
@@ -297,12 +307,16 @@ class FeatureValidator(BaseEstimator):
 
         # Then for Pandas, we do not support Nan in categorical columns
         if hasattr(X, "iloc"):
+            # If entered here, we have a pandas dataframe
+            X = typing.cast(pd.DataFrame, X)
+
             # Define the column to be encoded here as the feature validator is fitted once
             # per estimator
-            self.enc_columns, _ = self._get_columns_to_encode(X)
-            if len(self.enc_columns) > 0:
+            enc_columns, _ = self._get_columns_to_encode(X)
+
+            if len(enc_columns) > 0:
                 if np.any(pd.isnull(
-                    X[self.enc_columns].dropna(  # type: ignore[call-overload]
+                    X[enc_columns].dropna(  # type: ignore[call-overload]
                         axis='columns', how='all')
                 )):
                     # Ignore all NaN columns, and if still a NaN
@@ -313,6 +327,28 @@ class FeatureValidator(BaseEstimator):
                                      "limitation on scikit-learn being addressed via: "
                                      "https://github.com/scikit-learn/scikit-learn/issues/17123)"
                                      )
+            column_order = [column for column in X.columns]
+            if len(self.column_order) > 0:
+                if self.column_order != column_order:
+                    raise ValueError("Changing the column order of the features after fit() is "
+                                     "not supported. Fit() method was called with "
+                                     "{} whereas the new features have {} as type".format(
+                                        self.column_order,
+                                        column_order,
+                                     ))
+            else:
+                self.column_order = column_order
+            dtypes = [dtype.name for dtype in X.dtypes]
+            if len(self.dtypes) > 0:
+                if self.dtypes != dtypes:
+                    raise ValueError("Changing the dtype of the features after fit() is "
+                                     "not supported. Fit() method was called with "
+                                     "{} whereas the new features have {} as type".format(
+                                        self.dtypes,
+                                        dtypes,
+                                     ))
+            else:
+                self.dtypes = dtypes
 
     def _get_columns_to_encode(
         self,
