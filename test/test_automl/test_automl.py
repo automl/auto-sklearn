@@ -566,14 +566,20 @@ def test_exceptions_inside_log_in_smbo(smbo_run_mock, backend, dask_client):
 
     # Give some time for the error message to be printed in the
     # log file
-    time.sleep(3)
-    with open(logfile) as f:
-        lines = f.readlines()
+    found_message = False
+    for incr_tolerance in range(5):
+        with open(logfile) as f:
+            lines = f.readlines()
+        if any(message in line for line in lines):
+            found_message = True
+            break
+        else:
+            time.sleep(incr_tolerance)
 
     # Speed up the closing after forced crash
     automl._clean_logger()
 
-    if not any(message in line for line in lines):
+    if not found_message:
         pytest.fail("Did not find {} in the log file {} for logger {}/{}/{}".format(
             message,
             print_debug_information(automl),
