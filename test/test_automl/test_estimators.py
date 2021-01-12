@@ -16,6 +16,7 @@ import sklearn
 import sklearn.dummy
 import sklearn.datasets
 
+from autosklearn.data.validation import InputValidator
 import autosklearn.pipeline.util as putil
 from autosklearn.ensemble_builder import MODEL_FN_RE
 import autosklearn.estimators  # noqa F401
@@ -303,10 +304,11 @@ def test_multiclass_prediction(predict_mock, backend, dask_client):
         backend=backend,
         dask_client=dask_client,
     )
-    classifier.InputValidator.validate_target(
+    classifier.InputValidator = InputValidator(is_classification=True)
+    classifier.InputValidator.target_validator.fit(
         pd.DataFrame(expected_result, dtype='category'),
-        is_classification=True,
     )
+    classifier.InputValidator._is_fitted = True
 
     actual_result = classifier.predict([None] * len(predicted_indexes))
 
@@ -321,7 +323,6 @@ def test_multilabel_prediction(predict_mock, backend, dask_client):
                                [0.99, 0.99],
                                [0.99, 0.99]]
     predicted_indexes = np.array([[1, 0], [1, 0], [0, 1], [1, 1], [1, 1]])
-    expected_result = np.array([[2, 13], [2, 13], [1, 17], [2, 17], [2, 17]])
 
     predict_mock.return_value = np.array(predicted_probabilities)
 
@@ -331,14 +332,17 @@ def test_multilabel_prediction(predict_mock, backend, dask_client):
         backend=backend,
         dask_client=dask_client,
     )
-    classifier.InputValidator.validate_target(
-        pd.DataFrame(expected_result, dtype='int64'),
-        is_classification=True,
+    classifier.InputValidator = InputValidator(is_classification=True)
+    classifier.InputValidator.target_validator.fit(
+        pd.DataFrame(predicted_indexes, dtype='int64'),
     )
+    classifier.InputValidator._is_fitted = True
+
+    assert classifier.InputValidator.target_validator.type_of_target == 'multilabel-indicator'
 
     actual_result = classifier.predict([None] * len(predicted_indexes))
 
-    np.testing.assert_array_equal(expected_result, actual_result)
+    np.testing.assert_array_equal(predicted_indexes, actual_result)
 
 
 def test_can_pickle_classifier(tmp_dir, output_dir, dask_client):
@@ -467,8 +471,7 @@ def test_classification_pandas_support(tmp_dir, output_dir, dask_client):
     # Make sure that at least better than random.
     # accuracy in sklearn needs valid data
     # It should be 0.555 as the dataset is unbalanced.
-    y = automl.automl_.InputValidator.encode_target(y)
-    prediction = automl.automl_.InputValidator.encode_target(automl.predict(X))
+    prediction = automl.predict(X)
     assert accuracy(y, prediction) > 0.555
     assert count_succeses(automl.cv_results_) > 0
 
