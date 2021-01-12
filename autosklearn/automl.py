@@ -222,6 +222,15 @@ class AutoML(BaseEstimator):
         # The ensemble performance history through time
         self.ensemble_performance_history = []
 
+        # Single core, local runs should use fork
+        # to prevent the __main__ requirements in
+        # examples. Nevertheless, multi-process runs
+        # have spawn as requirement to reduce the
+        # possibility of a deadlock
+        self._multiprocessing_context = 'fork'
+        if self._n_jobs != 1:
+            self._multiprocessing_context = 'spawn'
+
         if not isinstance(self._time_for_task, int):
             raise ValueError("time_left_for_this_task not of type integer, "
                              "but %s" % str(type(self._time_for_task)))
@@ -288,7 +297,8 @@ class AutoML(BaseEstimator):
         # under the above logging configuration setting
         # We need to specify the logger_name so that received records
         # are treated under the logger_name ROOT logger setting
-        context = multiprocessing.get_context('spawn')
+        context = multiprocessing.get_context(
+            self._multiprocessing_context)
         self.stop_logging_server = context.Event()
         port = context.Value('l')  # be safe by using a long
         port.value = -1
@@ -389,6 +399,7 @@ class AutoML(BaseEstimator):
                                     abort_on_first_run_crash=False,
                                     cost_for_crash=get_cost_of_crash(self._metric),
                                     port=self._logger_port,
+                                    pynisher_context=self._multiprocessing_context,
                                     **self._resampling_strategy_arguments)
 
         status, cost, runtime, additional_info = ta.run(num_run, cutoff=self._time_for_task)
@@ -553,6 +564,7 @@ class AutoML(BaseEstimator):
         self._logger.debug('  resampling_strategy_arguments: %s',
                            str(self._resampling_strategy_arguments))
         self._logger.debug('  n_jobs: %s', str(self._n_jobs))
+        self._logger.debug('  multiprocessing_context: %s', str(self._multiprocessing_context))
         self._logger.debug('  dask_client: %s', str(self._dask_client))
         self._logger.debug('  precision: %s', str(self.precision))
         self._logger.debug('  disable_evaluator_output: %s', str(self._disable_evaluator_output))
@@ -662,6 +674,7 @@ class AutoML(BaseEstimator):
                 ensemble_memory_limit=self._memory_limit,
                 random_state=self._seed,
                 logger_port=self._logger_port,
+                pynisher_context=self._multiprocessing_context,
             )
 
         self._stopwatch.stop_task(ensemble_task_name)
@@ -737,6 +750,7 @@ class AutoML(BaseEstimator):
                 smac_scenario_args=self._smac_scenario_args,
                 scoring_functions=self._scoring_functions,
                 port=self._logger_port,
+                pynisher_context=self._multiprocessing_context,
                 ensemble_callback=proc_ensemble,
             )
 
@@ -1015,6 +1029,7 @@ class AutoML(BaseEstimator):
             ensemble_memory_limit=self._memory_limit,
             random_state=self._seed,
             logger_port=self._logger_port,
+            pynisher_context=self._multiprocessing_context,
         )
         manager.build_ensemble(self._dask_client)
         future = manager.futures.pop()

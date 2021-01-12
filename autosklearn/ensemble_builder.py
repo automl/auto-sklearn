@@ -58,6 +58,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         ensemble_memory_limit: Optional[int],
         random_state: int,
         logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
+        pynisher_context: str = 'fork',
     ):
         """ SMAC callback to handle ensemble building
 
@@ -105,6 +106,8 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
             read at most n new prediction files in each iteration
         logger_port: int
             port that receives logging records
+        pynisher_context: str
+            The multiprocessing context for pynisher. One of spawn/fork/forkserver.
 
     Returns
     -------
@@ -128,6 +131,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         self.ensemble_memory_limit = ensemble_memory_limit
         self.random_state = random_state
         self.logger_port = logger_port
+        self.pynisher_context = pynisher_context
 
         # Store something similar to SMAC's runhistory
         self.history = []
@@ -155,7 +159,6 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
     def build_ensemble(
         self,
         dask_client: dask.distributed.Client,
-        pynisher_context: str = 'spawn',
         unit_test: bool = False
     ) -> None:
 
@@ -229,7 +232,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
                     iteration=self.iteration,
                     return_predictions=False,
                     priority=100,
-                    pynisher_context=pynisher_context,
+                    pynisher_context=self.pynisher_context,
                     logger_port=self.logger_port,
                     unit_test=unit_test,
                 ))
@@ -573,7 +576,7 @@ class EnsembleBuilder(object):
         end_at: Optional[float] = None,
         time_buffer=5,
         return_predictions: bool = False,
-        pynisher_context: str = 'spawn',  # only change for unit testing!
+        pynisher_context: str = 'spawn',
     ):
 
         if time_left is None and end_at is None:
