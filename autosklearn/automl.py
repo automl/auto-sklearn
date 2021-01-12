@@ -228,7 +228,7 @@ class AutoML(BaseEstimator):
         # have spawn as requirement to reduce the
         # possibility of a deadlock
         self._multiprocessing_context = 'fork'
-        if self._n_jobs != 1:
+        if self._n_jobs != 1 or self._dask_client is not None:
             self._multiprocessing_context = 'spawn'
 
         if not isinstance(self._time_for_task, int):
