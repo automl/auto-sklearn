@@ -118,35 +118,32 @@ autosklearn.pipeline.components.classification.add_classifier(MLPClassifier)
 cs = MLPClassifier.get_hyperparameter_search_space()
 print(cs)
 
+############################################################################
+# Data Loading
+# ============
 
-if __name__ == "__main__":
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y)
 
-    ############################################################################
-    # Data Loading
-    # ============
+############################################################################
+# Fit MLP classifier to the data
+# ==============================
 
-    X, y = load_breast_cancer(return_X_y=True)
-    X_train, X_test, y_train, y_test = train_test_split(X, y)
+clf = autosklearn.classification.AutoSklearnClassifier(
+    time_left_for_this_task=30,
+    per_run_time_limit=10,
+    include_estimators=['MLPClassifier'],
+    # Bellow two flags are provided to speed up calculations
+    # Not recommended for a real implementation
+    initial_configurations_via_metalearning=0,
+    smac_scenario_args={'runcount_limit': 5},
+)
+clf.fit(X_train, y_train)
 
-    ############################################################################
-    # Fit MLP classifier to the data
-    # ==============================
+############################################################################
+# Print test accuracy and statistics
+# ==================================
 
-    clf = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=30,
-        per_run_time_limit=10,
-        include_estimators=['MLPClassifier'],
-        # Bellow two flags are provided to speed up calculations
-        # Not recommended for a real implementation
-        initial_configurations_via_metalearning=0,
-        smac_scenario_args={'runcount_limit': 5},
-    )
-    clf.fit(X_train, y_train)
-
-    ############################################################################
-    # Print test accuracy and statistics
-    # ==================================
-
-    y_pred = clf.predict(X_test)
-    print("accuracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
-    print(clf.show_models())
+y_pred = clf.predict(X_test)
+print("accuracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
+print(clf.show_models())
