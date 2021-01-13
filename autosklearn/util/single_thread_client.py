@@ -9,7 +9,7 @@ class DummyFuture(dask.distributed.Future):
     A class that mimics a distributed Future, the outcome of
     performing submit on a distributed client.
     """
-    def __init__(self, result):
+    def __init__(self, result: typing.Any) -> None:
         self._result = result  # type: typing.Any
 
     def result(self, timeout: typing.Optional[int] = None) -> typing.Any:
@@ -33,15 +33,15 @@ class SingleThreadedClient(dask.distributed.Client):
     A class to Mock the Distributed Client class, in case
     Auto-Sklearn is meant to run in the current Thread.
     """
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     def submit(
         self,
         func: typing.Callable,
-        *args,
+        *args: typing.List,
         priority: int = 0,
-        **kwargs,
+        **kwargs: typing.Dict,
     ) -> typing.Any:
         return DummyFuture(func(*args, **kwargs))
 
