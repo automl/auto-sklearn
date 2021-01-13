@@ -1035,7 +1035,6 @@ class AutoML(BaseEstimator):
         )
         manager.build_ensemble(self._dask_client)
         future = manager.futures.pop()
-        dask.distributed.wait([future])  # wait for the ensemble process to finish
         result = future.result()
         if result is None:
             raise ValueError("Error building the ensemble - please check the log file and command "
