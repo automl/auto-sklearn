@@ -64,6 +64,7 @@ from autosklearn.pipeline.components.data_preprocessing.minority_coalescense imp
     CoalescenseChoice
 )
 from autosklearn.pipeline.components.data_preprocessing.rescaling import RescalingChoice
+from autosklearn.util.single_thread_client import SingleThreadedClient
 
 
 def _model_predict(model, X, batch_size, logger, task):
@@ -227,9 +228,10 @@ class AutoML(BaseEstimator):
         # examples. Nevertheless, multi-process runs
         # have spawn as requirement to reduce the
         # possibility of a deadlock
-        self._multiprocessing_context = 'fork'
-        if self._n_jobs != 1 or self._dask_client is not None:
-            self._multiprocessing_context = 'spawn'
+        self._multiprocessing_context = 'spawn'
+        if self._n_jobs == 1 and self._dask_client is None:
+            self._multiprocessing_context = 'fork'
+            self._dask_client = SingleThreadedClient()
 
         if not isinstance(self._time_for_task, int):
             raise ValueError("time_left_for_this_task not of type integer, "
