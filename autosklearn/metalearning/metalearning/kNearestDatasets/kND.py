@@ -139,8 +139,7 @@ class KNearestDatasets(object):
                 dataset_name]
 
             if best_configuration is None:
-                self.logger.warning("Found no best configuration for instance "
-                                    "%s" % dataset_name)
+                self.logger.info("Found no best configuration for instance %s" % dataset_name)
                 continue
 
             if exclude_double_configurations:
