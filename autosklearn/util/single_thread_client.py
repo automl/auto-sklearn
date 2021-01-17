@@ -34,7 +34,20 @@ class SingleThreadedClient(dask.distributed.Client):
     Auto-Sklearn is meant to run in the current Thread.
     """
     def __init__(self) -> None:
+
+        # Raise a not implemented error if using a method from Client
+        implemented_methods = ['submit', 'close', 'shutdown', 'write_scheduler_file',
+                               '_get_scheduler_info', 'nthreads']
+        method_list = [func for func in dir(dask.distributed.Client) if callable(
+            getattr(dask.distributed.Client, func)) and not func.startswith('__')]
+        for method in method_list:
+            if method in implemented_methods:
+                continue
+            setattr(self, method, self._unsupported_method)
         pass
+
+    def _unsupported_method(self) -> None:
+        raise NotImplementedError()
 
     def submit(
         self,

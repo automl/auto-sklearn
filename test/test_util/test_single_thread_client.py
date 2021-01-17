@@ -2,6 +2,8 @@ import dask.distributed
 
 from distributed.utils_test import inc
 
+import pytest
+
 from autosklearn.util.single_thread_client import SingleThreadedClient
 
 
@@ -20,3 +22,6 @@ def test_single_thread_client_like_dask_client():
     # str calls __rpr__ which is the purpose of below check
     assert str(future) != ""
     assert str(single_thread_client) != ""
+
+    with pytest.raises(NotImplementedError):
+        single_thread_client.get_scheduler_logs()
