@@ -75,3 +75,6 @@ coverage.xml
 *,cover
 .hypothesis/
 prof/
+
+# Mypy
+.mypy_cache/
