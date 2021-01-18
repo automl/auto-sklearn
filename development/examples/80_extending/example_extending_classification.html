@@ -107,6 +107,9 @@
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
 <li><a class="reference internal" href="#">Extending Auto-Sklearn with Classification Component</a><ul>
 <li><a class="reference internal" href="#create-mlp-classifier-component-for-auto-sklearn">Create MLP classifier component for auto-sklearn</a></li>
+<li><a class="reference internal" href="#data-loading">Data Loading</a></li>
+<li><a class="reference internal" href="#fit-mlp-classifier-to-the-data">Fit MLP classifier to the data</a></li>
+<li><a class="reference internal" href="#print-test-accuracy-and-statistics">Print test accuracy and statistics</a></li>
 </ul>
 </li>
 </ul>
@@ -232,39 +235,6 @@ component for using in auto-sklearn.</p>
 <span class="n">autosklearn</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">add_classifier</span><span class="p">(</span><span class="n">MLPClassifier</span><span class="p">)</span>
 <span class="n">cs</span> <span class="o">=</span> <span class="n">MLPClassifier</span><span class="o">.</span><span class="n">get_hyperparameter_search_space</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span>
-
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-
-    <span class="c1">############################################################################</span>
-    <span class="c1"># Data Loading</span>
-    <span class="c1"># ============</span>
-
-    <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-
-    <span class="c1">############################################################################</span>
-    <span class="c1"># Fit MLP classifier to the data</span>
-    <span class="c1"># ==============================</span>
-
-    <span class="n">clf</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
-        <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-        <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-        <span class="n">include_estimators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;MLPClassifier&#39;</span><span class="p">],</span>
-        <span class="c1"># Bellow two flags are provided to speed up calculations</span>
-        <span class="c1"># Not recommended for a real implementation</span>
-        <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">smac_scenario_args</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;runcount_limit&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
-    <span class="p">)</span>
-    <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
-
-    <span class="c1">############################################################################</span>
-    <span class="c1"># Print test accuracy and statistics</span>
-    <span class="c1"># ==================================</span>
-
-    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;accuracy: &quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y_test</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">clf</span><span class="o">.</span><span class="n">show_models</span><span class="p">())</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
@@ -275,14 +245,76 @@ component for using in auto-sklearn.</p>
     hidden_layer_depth, Type: UniformInteger, Range: [1, 3], Default: 1
     num_nodes_per_layer, Type: UniformInteger, Range: [16, 216], Default: 32
     solver, Type: Categorical, Choices: {lbfgs, sgd, adam}, Default: adam
-
-accuracy:  0.3706293706293706
-[(1.000000, MyDummyClassifier(configuration=1, init_params={&#39;instance&#39;: None},
-                  random_state=1)),
+</pre></div>
+</div>
+</div>
+<div class="section" id="data-loading">
+<h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="fit-mlp-classifier-to-the-data">
+<h2>Fit MLP classifier to the data<a class="headerlink" href="#fit-mlp-classifier-to-the-data" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">clf</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">include_estimators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;MLPClassifier&#39;</span><span class="p">],</span>
+    <span class="c1"># Bellow two flags are provided to speed up calculations</span>
+    <span class="c1"># Not recommended for a real implementation</span>
+    <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">smac_scenario_args</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;runcount_limit&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+<span class="p">)</span>
+<span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="print-test-accuracy-and-statistics">
+<h2>Print test accuracy and statistics<a class="headerlink" href="#print-test-accuracy-and-statistics" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">y_pred</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;accuracy: &quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y_test</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">clf</span><span class="o">.</span><span class="n">show_models</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.972027972027972
+[(0.360000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;MLPClassifier&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;classifier:MLPClassifier:activation&#39;: &#39;relu&#39;, &#39;classifier:MLPClassifier:alpha&#39;: 0.0001, &#39;classifier:MLPClassifier:hidden_layer_depth&#39;: 1, &#39;classifier:MLPClassifier:num_nodes_per_layer&#39;: 32, &#39;classifier:MLPClassifier:solver&#39;: &#39;adam&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01},
+dataset_properties={
+  &#39;task&#39;: 1,
+  &#39;sparse&#39;: False,
+  &#39;multilabel&#39;: False,
+  &#39;multiclass&#39;: False,
+  &#39;target_type&#39;: &#39;classification&#39;,
+  &#39;signed&#39;: False})),
+(0.360000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;MLPClassifier&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;minmax&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;extra_trees_preproc_for_classification&#39;, &#39;classifier:MLPClassifier:activation&#39;: &#39;tanh&#39;, &#39;classifier:MLPClassifier:alpha&#39;: 0.9264398101836582, &#39;classifier:MLPClassifier:hidden_layer_depth&#39;: 1, &#39;classifier:MLPClassifier:num_nodes_per_layer&#39;: 144, &#39;classifier:MLPClassifier:solver&#39;: &#39;adam&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:bootstrap&#39;: &#39;True&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:criterion&#39;: &#39;entropy&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:max_depth&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:max_features&#39;: 0.9063863139348133, &#39;feature_preprocessor:extra_trees_preproc_for_classification:max_leaf_nodes&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_impurity_decrease&#39;: 0.0, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_samples_leaf&#39;: 17, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_samples_split&#39;: 14, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_weight_fraction_leaf&#39;: 0.0, &#39;feature_preprocessor:extra_trees_preproc_for_classification:n_estimators&#39;: 100},
+dataset_properties={
+  &#39;task&#39;: 1,
+  &#39;sparse&#39;: False,
+  &#39;multilabel&#39;: False,
+  &#39;multiclass&#39;: False,
+  &#39;target_type&#39;: &#39;classification&#39;,
+  &#39;signed&#39;: False})),
+(0.140000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;MLPClassifier&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;robust_scaler&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;extra_trees_preproc_for_classification&#39;, &#39;classifier:MLPClassifier:activation&#39;: &#39;logistic&#39;, &#39;classifier:MLPClassifier:alpha&#39;: 0.8085399362082959, &#39;classifier:MLPClassifier:hidden_layer_depth&#39;: 2, &#39;classifier:MLPClassifier:num_nodes_per_layer&#39;: 87, &#39;classifier:MLPClassifier:solver&#39;: &#39;lbfgs&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max&#39;: 0.8956544191280793, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min&#39;: 0.03433346125068971, &#39;feature_preprocessor:extra_trees_preproc_for_classification:bootstrap&#39;: &#39;False&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:criterion&#39;: &#39;gini&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:max_depth&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:max_features&#39;: 0.8562110947570252, &#39;feature_preprocessor:extra_trees_preproc_for_classification:max_leaf_nodes&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_impurity_decrease&#39;: 0.0, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_samples_leaf&#39;: 19, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_samples_split&#39;: 4, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_weight_fraction_leaf&#39;: 0.0, &#39;feature_preprocessor:extra_trees_preproc_for_classification:n_estimators&#39;: 100},
+dataset_properties={
+  &#39;task&#39;: 1,
+  &#39;sparse&#39;: False,
+  &#39;multilabel&#39;: False,
+  &#39;multiclass&#39;: False,
+  &#39;target_type&#39;: &#39;classification&#39;,
+  &#39;signed&#39;: False})),
+(0.140000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;MLPClassifier&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;none&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;classifier:MLPClassifier:activation&#39;: &#39;logistic&#39;, &#39;classifier:MLPClassifier:alpha&#39;: 0.9521869738098419, &#39;classifier:MLPClassifier:hidden_layer_depth&#39;: 1, &#39;classifier:MLPClassifier:num_nodes_per_layer&#39;: 172, &#39;classifier:MLPClassifier:solver&#39;: &#39;lbfgs&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.007836973936351303},
+dataset_properties={
+  &#39;task&#39;: 1,
+  &#39;sparse&#39;: False,
+  &#39;multilabel&#39;: False,
+  &#39;multiclass&#39;: False,
+  &#39;target_type&#39;: &#39;classification&#39;,
+  &#39;signed&#39;: False})),
 ]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  19.940 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  14.366 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-extending-classification-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_classification.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>

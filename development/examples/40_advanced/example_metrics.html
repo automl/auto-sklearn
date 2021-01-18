@@ -106,7 +106,12 @@
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
 <li><a class="reference internal" href="#">Metrics</a><ul>
+<li><a class="reference internal" href="#custom-metrics">Custom Metrics</a></li>
 <li><a class="reference internal" href="#data-loading">Data Loading</a></li>
+<li><a class="reference internal" href="#print-a-list-of-available-metrics">Print a list of available metrics</a></li>
+<li><a class="reference internal" href="#first-example-use-predefined-accuracy-metric">First example: Use predefined accuracy metric</a></li>
+<li><a class="reference internal" href="#second-example-use-own-accuracy-metric">Second example: Use own accuracy metric</a></li>
+<li><a class="reference internal" href="#third-example-use-own-accuracy-metric-with-additional-argument">Third example: Use own accuracy metric with additional argument</a></li>
 </ul>
 </li>
 </ul>
@@ -137,199 +142,50 @@ classification problem.</p>
 <span class="kn">import</span> <span class="nn">autosklearn.metrics</span>
 </pre></div>
 </div>
+<div class="section" id="custom-metrics">
+<h2>Custom Metrics<a class="headerlink" href="#custom-metrics" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">accuracy</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">prediction</span><span class="p">):</span>
+    <span class="c1"># custom function defining accuracy</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">solution</span> <span class="o">==</span> <span class="n">prediction</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">prediction</span><span class="p">):</span>
+    <span class="c1"># custom function defining error</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">solution</span> <span class="o">!=</span> <span class="n">prediction</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">accuracy_wk</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">dummy</span><span class="p">):</span>
+    <span class="c1"># custom function defining accuracy and accepting an additional argument</span>
+    <span class="k">assert</span> <span class="n">dummy</span> <span class="ow">is</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">solution</span> <span class="o">==</span> <span class="n">prediction</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">error_wk</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">dummy</span><span class="p">):</span>
+    <span class="c1"># custom function defining error and accepting an additional argument</span>
+    <span class="k">assert</span> <span class="n">dummy</span> <span class="ow">is</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">solution</span> <span class="o">!=</span> <span class="n">prediction</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="data-loading">
 <h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
-<p>The custom metrics must be in a separate module to be usable together with
-Auto-sklearn. We also print the content of the module below with
-<code class="docutils literal notranslate"><span class="pre">inspect</span></code> to keep the example self-contained.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">custom_metrics</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> \
+    <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="print-a-list-of-available-metrics">
+<h2>Print a list of available metrics<a class="headerlink" href="#print-a-list-of-available-metrics" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Available CLASSIFICATION metrics autosklearn.metrics.*:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">*&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">*&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">autosklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">CLASSIFICATION_METRICS</span><span class="p">))</span>
 
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">inspect</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">custom_metrics</span><span class="p">))</span>
-
-    <span class="c1">############################################################################</span>
-    <span class="c1"># Data Loading</span>
-    <span class="c1"># ============</span>
-
-    <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> \
-        <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-    <span class="c1">############################################################################</span>
-    <span class="c1"># Print a list of available metrics</span>
-    <span class="c1"># =================================</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Available CLASSIFICATION metrics autosklearn.metrics.*:&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">*&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">*&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">autosklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">CLASSIFICATION_METRICS</span><span class="p">))</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Available REGRESSION autosklearn.metrics.*:&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">*&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">*&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">autosklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">REGRESSION_METRICS</span><span class="p">))</span>
-
-    <span class="c1">############################################################################</span>
-    <span class="c1"># First example: Use predefined accuracy metric</span>
-    <span class="c1"># =============================================</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Use predefined accuracy metric&quot;</span><span class="p">)</span>
-    <span class="bp">cls</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
-        <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
-        <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-        <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">metric</span><span class="o">=</span><span class="n">autosklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="bp">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
-
-    <span class="n">predictions</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score </span><span class="si">{:g}</span><span class="s2"> using </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span>
-          <span class="nb">format</span><span class="p">(</span><span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">),</span>
-                 <span class="bp">cls</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-
-    <span class="c1">############################################################################</span>
-    <span class="c1"># Second example: Use own accuracy metric</span>
-    <span class="c1"># =======================================</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Use self defined accuracy metric&quot;</span><span class="p">)</span>
-    <span class="n">accuracy_scorer</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">make_scorer</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;accu&quot;</span><span class="p">,</span>
-        <span class="n">score_func</span><span class="o">=</span><span class="n">custom_metrics</span><span class="o">.</span><span class="n">accuracy</span><span class="p">,</span>
-        <span class="n">optimum</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">needs_proba</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">needs_threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="bp">cls</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
-        <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
-        <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-        <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">metric</span><span class="o">=</span><span class="n">accuracy_scorer</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="bp">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
-
-    <span class="n">predictions</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score </span><span class="si">{:g}</span><span class="s2"> using </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span>
-          <span class="nb">format</span><span class="p">(</span><span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">),</span>
-                 <span class="bp">cls</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Use self defined error metric&quot;</span><span class="p">)</span>
-    <span class="n">error_rate</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">make_scorer</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;error&#39;</span><span class="p">,</span>
-        <span class="n">score_func</span><span class="o">=</span><span class="n">custom_metrics</span><span class="o">.</span><span class="n">error</span><span class="p">,</span>
-        <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">needs_proba</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">needs_threshold</span><span class="o">=</span><span class="kc">False</span>
-    <span class="p">)</span>
-    <span class="bp">cls</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
-        <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
-        <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-        <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">metric</span><span class="o">=</span><span class="n">error_rate</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="bp">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
-
-    <span class="bp">cls</span><span class="o">.</span><span class="n">predictions</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error rate </span><span class="si">{:g}</span><span class="s2"> using </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span>
-          <span class="nb">format</span><span class="p">(</span><span class="n">error_rate</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">),</span>
-                 <span class="bp">cls</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-
-    <span class="c1">############################################################################</span>
-    <span class="c1"># Third example: Use own accuracy metric with additional argument</span>
-    <span class="c1"># ===============================================================</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Use self defined accuracy with additional argument&quot;</span><span class="p">)</span>
-    <span class="n">accuracy_scorer</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">make_scorer</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;accu_add&quot;</span><span class="p">,</span>
-        <span class="n">score_func</span><span class="o">=</span><span class="n">custom_metrics</span><span class="o">.</span><span class="n">accuracy_wk</span><span class="p">,</span>
-        <span class="n">optimum</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">needs_proba</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">needs_threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">dummy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="bp">cls</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
-        <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
-        <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-        <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">metric</span><span class="o">=</span><span class="n">accuracy_scorer</span>
-    <span class="p">)</span>
-    <span class="bp">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
-
-    <span class="n">predictions</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span>
-        <span class="s2">&quot;Accuracy score </span><span class="si">{:g}</span><span class="s2"> using </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">),</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">name</span>
-        <span class="p">)</span>
-    <span class="p">)</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Use self defined error with additional argument&quot;</span><span class="p">)</span>
-    <span class="n">error_rate</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">make_scorer</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;error_add&quot;</span><span class="p">,</span>
-        <span class="n">score_func</span><span class="o">=</span><span class="n">custom_metrics</span><span class="o">.</span><span class="n">error_wk</span><span class="p">,</span>
-        <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">needs_proba</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">needs_threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">dummy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="bp">cls</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
-        <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
-        <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-        <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">metric</span><span class="o">=</span><span class="n">error_rate</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="bp">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
-
-    <span class="n">predictions</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span>
-        <span class="s2">&quot;Error rate </span><span class="si">{:g}</span><span class="s2"> using </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="n">error_rate</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">),</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">name</span>
-        <span class="p">)</span>
-    <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Available REGRESSION autosklearn.metrics.*:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">*&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">*&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">autosklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">REGRESSION_METRICS</span><span class="p">))</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;&quot;&quot;Custom metrics to be used by example_metrics.py
-
-They reside in a different file so they can be used by Auto-sklearn.&quot;&quot;&quot;
-
-import numpy as np
-
-
-############################################################################
-# Custom metrics definition
-# =========================
-
-def accuracy(solution, prediction):
-    # custom function defining accuracy
-    return np.mean(solution == prediction)
-
-
-def error(solution, prediction):
-    # custom function defining error
-    return np.mean(solution != prediction)
-
-
-def accuracy_wk(solution, prediction, dummy):
-    # custom function defining accuracy and accepting an additional argument
-    assert dummy is None
-    return np.mean(solution == prediction)
-
-
-def error_wk(solution, prediction, dummy):
-    # custom function defining error and accepting an additional argument
-    assert dummy is None
-    return np.mean(solution != prediction)
-
-Available CLASSIFICATION metrics autosklearn.metrics.*:
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Available CLASSIFICATION metrics autosklearn.metrics.*:
         *accuracy
         *balanced_accuracy
         *roc_auc
@@ -357,37 +213,173 @@ Available REGRESSION autosklearn.metrics.*:
         *mean_squared_log_error
         *median_absolute_error
         *r2
-################################################################################
+</pre></div>
+</div>
+</div>
+<div class="section" id="first-example-use-predefined-accuracy-metric">
+<h2>First example: Use predefined accuracy metric<a class="headerlink" href="#first-example-use-predefined-accuracy-metric" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Use predefined accuracy metric&quot;</span><span class="p">)</span>
+<span class="bp">cls</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+    <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">metric</span><span class="o">=</span><span class="n">autosklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="bp">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="n">predictions</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score </span><span class="si">{:g}</span><span class="s2"> using </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span>
+      <span class="nb">format</span><span class="p">(</span><span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">),</span>
+             <span class="bp">cls</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>################################################################################
 Use predefined accuracy metric
 Accuracy score 0.951049 using accuracy
-################################################################################
+</pre></div>
+</div>
+</div>
+<div class="section" id="second-example-use-own-accuracy-metric">
+<h2>Second example: Use own accuracy metric<a class="headerlink" href="#second-example-use-own-accuracy-metric" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Use self defined accuracy metric&quot;</span><span class="p">)</span>
+<span class="n">accuracy_scorer</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">make_scorer</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;accu&quot;</span><span class="p">,</span>
+    <span class="n">score_func</span><span class="o">=</span><span class="n">accuracy</span><span class="p">,</span>
+    <span class="n">optimum</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">needs_proba</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">needs_threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="bp">cls</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+    <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">metric</span><span class="o">=</span><span class="n">accuracy_scorer</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="bp">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="n">predictions</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score </span><span class="si">{:g}</span><span class="s2"> using </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span>
+      <span class="nb">format</span><span class="p">(</span><span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">),</span>
+             <span class="bp">cls</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Use self defined error metric&quot;</span><span class="p">)</span>
+<span class="n">error_rate</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">make_scorer</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;error&#39;</span><span class="p">,</span>
+    <span class="n">score_func</span><span class="o">=</span><span class="n">error</span><span class="p">,</span>
+    <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">needs_proba</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">needs_threshold</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
+<span class="bp">cls</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+    <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">metric</span><span class="o">=</span><span class="n">error_rate</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="bp">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="bp">cls</span><span class="o">.</span><span class="n">predictions</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error rate </span><span class="si">{:g}</span><span class="s2"> using </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span>
+      <span class="nb">format</span><span class="p">(</span><span class="n">error_rate</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">),</span>
+             <span class="bp">cls</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>################################################################################
 Use self defined accuracy metric
-Accuracy score 0.958042 using accu
+Accuracy score 0.937063 using accu
 ################################################################################
 Use self defined error metric
-Error rate -0.041958 using error
-################################################################################
+[WARNING] [2021-01-18 12:08:03,822:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-01-18 12:08:04,602:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-01-18 12:08:05,186:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+Error rate -0.0629371 using error
+</pre></div>
+</div>
+</div>
+<div class="section" id="third-example-use-own-accuracy-metric-with-additional-argument">
+<h2>Third example: Use own accuracy metric with additional argument<a class="headerlink" href="#third-example-use-own-accuracy-metric-with-additional-argument" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Use self defined accuracy with additional argument&quot;</span><span class="p">)</span>
+<span class="n">accuracy_scorer</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">make_scorer</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;accu_add&quot;</span><span class="p">,</span>
+    <span class="n">score_func</span><span class="o">=</span><span class="n">accuracy_wk</span><span class="p">,</span>
+    <span class="n">optimum</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">needs_proba</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">needs_threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">dummy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="bp">cls</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+    <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">metric</span><span class="o">=</span><span class="n">accuracy_scorer</span>
+<span class="p">)</span>
+<span class="bp">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="n">predictions</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="s2">&quot;Accuracy score </span><span class="si">{:g}</span><span class="s2"> using </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">),</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">name</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Use self defined error with additional argument&quot;</span><span class="p">)</span>
+<span class="n">error_rate</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">make_scorer</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;error_add&quot;</span><span class="p">,</span>
+    <span class="n">score_func</span><span class="o">=</span><span class="n">error_wk</span><span class="p">,</span>
+    <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">needs_proba</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">needs_threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">dummy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="bp">cls</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+    <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">metric</span><span class="o">=</span><span class="n">error_rate</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="bp">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="n">predictions</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="s2">&quot;Error rate </span><span class="si">{:g}</span><span class="s2"> using </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">error_rate</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">),</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">_metric</span><span class="o">.</span><span class="n">name</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>################################################################################
 Use self defined accuracy with additional argument
-Accuracy score 0.958042 using accu_add
+Accuracy score 0.937063 using accu_add
 ################################################################################
 Use self defined error with additional argument
-[WARNING] [2021-01-15 12:35:16,155:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-01-15 12:35:19,709:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-01-15 12:35:23,588:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-01-15 12:35:25,569:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-01-15 12:35:28,202:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-01-15 12:35:29,534:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-01-15 12:35:32,429:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-01-15 12:35:37,159:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-01-15 12:35:38,483:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-01-15 12:35:43,329:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-01-15 12:35:48,656:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-01-15 12:35:54,107:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-01-15 12:36:00,200:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-01-18 12:09:13,618:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-01-18 12:09:16,887:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-01-18 12:09:21,699:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-01-18 12:09:23,070:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-01-18 12:09:56,354:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-01-18 12:09:56,355:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-01-18 12:09:57,182:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-01-18 12:09:57,182:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-01-18 12:09:57,817:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-01-18 12:09:57,817:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
 Error rate 0.615385 using error_add
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 5 minutes  2.558 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 4 minutes  39.786 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-metrics-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/40_advanced/example_metrics.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
