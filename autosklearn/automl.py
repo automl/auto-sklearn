@@ -49,6 +49,7 @@ from autosklearn.util.logging_ import (
     get_named_client_logger,
 )
 from autosklearn.util import pipeline, RE_PATTERN
+from autosklearn.util.parallel import preload_modules
 from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.smbo import AutoMLSMBO
@@ -298,16 +299,8 @@ class AutoML(BaseEstimator):
         # under the above logging configuration setting
         # We need to specify the logger_name so that received records
         # are treated under the logger_name ROOT logger setting
-        context = multiprocessing.get_context(
-            self._multiprocessing_context)
-        all_loaded_modules = sys.modules.keys()
-        preload = [
-            loaded_module for loaded_module in all_loaded_modules
-            if loaded_module.split('.')[0] in (
-                'smac', 'autosklearn', 'numpy', 'scipy', 'pandas', 'pynisher', 'sklearn',
-            ) and 'logging' not in loaded_module
-        ]
-        context.set_forkserver_preload(preload)
+        context = multiprocessing.get_context(self._multiprocessing_context)
+        preload_modules(context)
         self.stop_logging_server = context.Event()
         port = context.Value('l')  # be safe by using a long
         port.value = -1

@@ -5,7 +5,6 @@ import json
 import math
 import multiprocessing
 from queue import Empty
-import sys
 import time
 import traceback
 from typing import Dict, List, Optional, Tuple, Union
@@ -25,6 +24,7 @@ import autosklearn.evaluation.train_evaluator
 import autosklearn.evaluation.test_evaluator
 import autosklearn.evaluation.util
 from autosklearn.util.logging_ import get_named_client_logger
+from autosklearn.util.parallel import preload_modules
 
 
 def fit_predict_try_except_decorator(ta, queue, cost_for_crash, **kwargs):
@@ -262,14 +262,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
     ) -> Tuple[StatusType, float, float, Dict[str, Union[int, float, str, Dict, List, Tuple]]]:
 
         context = multiprocessing.get_context(self.pynisher_context)
-        all_loaded_modules = sys.modules.keys()
-        preload = [
-            loaded_module for loaded_module in all_loaded_modules
-            if loaded_module.split('.')[0] in (
-                'smac', 'autosklearn', 'numpy', 'scipy', 'pandas', 'pynisher', 'sklearn',
-            ) and 'logging' not in loaded_module
-        ]
-        context.set_forkserver_preload(preload)
+        preload_modules(context)
         queue = context.Queue()
 
         if not (instance_specific is None or instance_specific == '0'):

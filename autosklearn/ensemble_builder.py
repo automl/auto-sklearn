@@ -9,7 +9,6 @@ import os
 import pickle
 import re
 import shutil
-import sys
 import time
 import traceback
 from typing import List, Optional, Tuple, Union
@@ -32,6 +31,7 @@ from autosklearn.metrics import calculate_score, Scorer
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.util.logging_ import get_named_client_logger
+from autosklearn.util.parallel import preload_modules
 
 Y_ENSEMBLE = 0
 Y_VALID = 1
@@ -607,14 +607,7 @@ class EnsembleBuilder(object):
             if wall_time_in_s < 1:
                 break
             context = multiprocessing.get_context(pynisher_context)
-            all_loaded_modules = sys.modules.keys()
-            preload = [
-                loaded_module for loaded_module in all_loaded_modules
-                if loaded_module.split('.')[0] in (
-                    'smac', 'autosklearn', 'numpy', 'scipy', 'pandas', 'pynisher', 'sklearn',
-                ) and 'logging' not in loaded_module
-            ]
-            context.set_forkserver_preload(preload)
+            preload_modules(context)
 
             safe_ensemble_script = pynisher.enforce_limits(
                 wall_time_in_s=wall_time_in_s,
