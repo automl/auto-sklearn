@@ -112,6 +112,7 @@ class EvaluationTest(unittest.TestCase):
                                     metric=accuracy,
                                     cost_for_crash=get_cost_of_crash(accuracy),
                                     abort_on_first_run_crash=False,
+                                    pynisher_context='forkserver',
                                     )
         self.scenario.wallclock_limit = 5
         self.stats.submitted_ta_runs += 1
@@ -130,6 +131,7 @@ class EvaluationTest(unittest.TestCase):
                                     metric=accuracy,
                                     cost_for_crash=get_cost_of_crash(accuracy),
                                     abort_on_first_run_crash=False,
+                                    pynisher_context='forkserver',
                                     )
         self.stats.ta_runs = 1
         ta.run_wrapper(RunInfo(config=config, cutoff=30, instance=None, instance_specific=None,
@@ -224,6 +226,7 @@ class EvaluationTest(unittest.TestCase):
                                     metric=accuracy,
                                     cost_for_crash=get_cost_of_crash(accuracy),
                                     abort_on_first_run_crash=False,
+                                    pynisher_context='forkserver',
                                     )
         info = ta.run_wrapper(RunInfo(config=config, cutoff=30, instance=None,
                                       instance_specific=None, seed=1, capped=False))
@@ -259,6 +262,7 @@ class EvaluationTest(unittest.TestCase):
                                     metric=accuracy,
                                     cost_for_crash=get_cost_of_crash(accuracy),
                                     abort_on_first_run_crash=False,
+                                    pynisher_context='forkserver',
                                     )
         info = ta.run_wrapper(RunInfo(config=config, cutoff=30, instance=None,
                                       instance_specific=None, seed=1, capped=False))
@@ -282,6 +286,7 @@ class EvaluationTest(unittest.TestCase):
                                     metric=accuracy,
                                     cost_for_crash=get_cost_of_crash(accuracy),
                                     abort_on_first_run_crash=False,
+                                    pynisher_context='forkserver',
                                     )
         info = ta.run_wrapper(RunInfo(config=config, cutoff=30, instance=None,
                                       instance_specific=None, seed=1, capped=False))

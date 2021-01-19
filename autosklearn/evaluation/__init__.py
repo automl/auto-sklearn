@@ -98,13 +98,12 @@ def _encode_exit_status(exit_status):
 class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
     def __init__(self, backend, autosklearn_seed, resampling_strategy, metric,
-                 cost_for_crash, abort_on_first_run_crash, port,
+                 cost_for_crash, abort_on_first_run_crash, port, pynisher_context,
                  initial_num_run=1, stats=None,
                  run_obj='quality', par_factor=1, scoring_functions=None,
                  output_y_hat_optimization=True, include=None, exclude=None,
                  memory_limit=None, disable_file_output=False, init_params=None,
-                 budget_type=None, ta=False, pynisher_context='forkserver',
-                 **resampling_strategy_args):
+                 budget_type=None, ta=False, **resampling_strategy_args):
 
         if resampling_strategy == 'holdout':
             eval_function = autosklearn.evaluation.train_evaluator.eval_holdout

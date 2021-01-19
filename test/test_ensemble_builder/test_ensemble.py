@@ -504,7 +504,7 @@ def test_run_end_at(ensemble_backend):
 
         current_time = time.time()
 
-        ensbuilder.run(end_at=current_time + 10, iteration=1)
+        ensbuilder.run(end_at=current_time + 10, iteration=1, pynisher_context='forkserver')
         # 4 seconds left because: 10 seconds - 5 seconds overhead - very little overhead,
         # but then rounded to an integer
         assert pynisher_mock.call_args_list[0][1]["wall_time_in_s"], 4
@@ -579,7 +579,7 @@ def testLimit(ensemble_backend):
 
         # And then it still runs, but basically won't do anything any more except for raising error
         # messages via the logger
-        ensbuilder.run(time_left=1000, iteration=0)
+        ensbuilder.run(time_left=1000, iteration=0, pynisher_context='fork')
         assert os.path.exists(read_scores_file)
         assert not os.path.exists(read_preds_file)
         assert logger_mock.warning.call_count == 4
