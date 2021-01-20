@@ -301,14 +301,14 @@ Examples of changing the search procedure of Auto-sklearn.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="*Auto-sklearn* uses dask.distributed &lt;https://distributed.dask.org/en/latest/index.html&gt;_ for p...">
+    <div class="sphx-glr-thumbcontainer" tooltip="*Auto-sklearn* uses `dask.distributed &lt;https://distributed.dask.org/en/latest/index.html&gt;`_ for...">
 
 .. only:: html
 
- .. figure:: /examples/60_search/images/thumb/sphx_glr_example_parallel_manual_spawning_thumb.png
-     :alt: Parallel Usage with manual process spawning
+ .. figure:: /examples/60_search/images/thumb/sphx_glr_example_parallel_manual_spawning_cli_thumb.png
+     :alt: Parallel Usage: Spawning workers from the command line
 
-     :ref:`sphx_glr_examples_60_search_example_parallel_manual_spawning.py`
+     :ref:`sphx_glr_examples_60_search_example_parallel_manual_spawning_cli.py`
 
 .. raw:: html
 
@@ -318,7 +318,28 @@ Examples of changing the search procedure of Auto-sklearn.
 .. toctree::
    :hidden:
 
-   /examples/60_search/example_parallel_manual_spawning
+   /examples/60_search/example_parallel_manual_spawning_cli
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="*Auto-sklearn* uses `dask.distributed &lt;https://distributed.dask.org/en/latest/index.html&gt;`_ for...">
+
+.. only:: html
+
+ .. figure:: /examples/60_search/images/thumb/sphx_glr_example_parallel_manual_spawning_python_thumb.png
+     :alt: Parallel Usage: Spawning workers from within Python
+
+     :ref:`sphx_glr_examples_60_search_example_parallel_manual_spawning_python.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/60_search/example_parallel_manual_spawning_python
 
 .. raw:: html
 
