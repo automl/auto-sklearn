@@ -166,6 +166,10 @@ def test_type_of_target(mock_estimator):
                                          ])
 
     cls = AutoSklearnClassifier(ensemble_size=0)
+    cls.automl_ = unittest.mock.Mock()
+    cls.automl_.InputValidator = unittest.mock.Mock()
+    cls.automl_.InputValidator.target_validator = unittest.mock.Mock()
+
     # Illegal target types for classification: continuous,
     # multiclass-multioutput, continuous-multioutput.
     expected_msg = r".*Classification with data of type"
