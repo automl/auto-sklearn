@@ -112,9 +112,6 @@ def testRead(ensemble_backend):
         task_type=MULTILABEL_CLASSIFICATION,
         metric=roc_auc,
         seed=0,  # important to find the test files
-        # Do not assume predictions in disc have been pre-processed for
-        # the metric at hand. We test multiple metrics in unit testing
-        enable_fast_predictions=False,
     )
 
     success = ensbuilder.score_ensemble_preds()
@@ -409,7 +406,6 @@ def testEntireEnsembleBuilder(ensemble_backend):
         metric=roc_auc,
         seed=0,  # important to find the test files
         ensemble_nbest=2,
-        enable_fast_predictions=False,
     )
     ensbuilder.SAVE2DISC = False
 

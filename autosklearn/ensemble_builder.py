@@ -27,7 +27,7 @@ from smac.tae.base import StatusType
 
 from autosklearn.util.backend import Backend
 from autosklearn.constants import BINARY_CLASSIFICATION
-from autosklearn.metrics import calculate_score, Scorer
+from autosklearn.metrics import CUSTOM_METRICS, calculate_score, Scorer
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.util.logging_ import get_named_client_logger
@@ -385,7 +385,6 @@ class EnsembleBuilder(object):
         read_at_most: int = 5,
         random_state: Optional[Union[int, np.random.RandomState]] = None,
         logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
-        enable_fast_predictions: bool = True,
         unit_test: bool = False,
     ):
         """
@@ -434,11 +433,6 @@ class EnsembleBuilder(object):
                 read at most n new prediction files in each iteration
             logger_port: int
                 port that receives logging records
-            enable_fast_predictions: bool
-                Enables fast predictions mode -- Ensemble construction will assume that the
-                predictions from the individual models have been corrected for the specific
-                optimization metric. This save significant processing time like data type,
-                format among other checks.
             unit_test: bool
                 Turn on unit testing mode. This currently makes fit_ensemble raise a MemoryError.
                 Having this is very bad coding style, but I did not find a way to make
@@ -451,7 +445,13 @@ class EnsembleBuilder(object):
         self.backend = backend  # communication with filesystem
         self.dataset_name = dataset_name
         self.task_type = task_type
-        self.metric = metric
+        if metric.name in CUSTOM_METRICS:
+            # If there is a fast implementation of the metric
+            # prefer it for ensemble selection, as it will be
+            # called multiple times
+            self.metric = CUSTOM_METRICS[metric.name]
+        else:
+            self.metric = metric
         self.ensemble_size = ensemble_size
         self.performance_range_threshold = performance_range_threshold
 
@@ -483,7 +483,6 @@ class EnsembleBuilder(object):
         self.read_at_most = read_at_most
         self.random_state = check_random_state(random_state)
         self.unit_test = unit_test
-        self.enable_fast_predictions = enable_fast_predictions
 
         # Setup the logger
         self.logger_port = logger_port
@@ -907,7 +906,6 @@ class EnsembleBuilder(object):
                                         prediction=y_ensemble,
                                         task_type=self.task_type,
                                         metric=self.metric,
-                                        fast_mode=self.enable_fast_predictions,
                                         scoring_functions=None)
                 if np.isfinite(self.read_scores[y_ens_fn]["ens_score"]):
                     self.logger.debug(
@@ -1374,7 +1372,6 @@ class EnsembleBuilder(object):
                 prediction=train_pred,
                 task_type=self.task_type,
                 metric=self.metric,
-                fast_mode=self.enable_fast_predictions,
                 scoring_functions=None
             )
         }
@@ -1386,7 +1383,6 @@ class EnsembleBuilder(object):
                 prediction=valid_pred,
                 task_type=self.task_type,
                 metric=self.metric,
-                fast_mode=self.enable_fast_predictions,
                 scoring_functions=None
             )
 
@@ -1397,7 +1393,6 @@ class EnsembleBuilder(object):
                 prediction=test_pred,
                 task_type=self.task_type,
                 metric=self.metric,
-                fast_mode=self.enable_fast_predictions,
                 scoring_functions=None
             )
 

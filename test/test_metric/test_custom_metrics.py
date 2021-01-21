@@ -5,45 +5,18 @@ import numpy as np
 import pytest
 
 from sklearn.utils.multiclass import type_of_target
-from sklearn.metrics import (
-    accuracy_score,
-    balanced_accuracy_score,
-    log_loss,
-    roc_auc_score,
-)
 
 from autosklearn.constants import (
-    MULTILABEL_CLASSIFICATION,
-    MULTICLASS_CLASSIFICATION,
     BINARY_CLASSIFICATION,
+    MULTICLASS_CLASSIFICATION,
+    MULTILABEL_CLASSIFICATION,
 )
-from autosklearn.metrics.custom_metrics import (
-    BalancedAccuracy,
-    Accuracy,
-    LogLoss,
-    ROCAUC,
+from autosklearn.metrics import (
+    CLASSIFICATION_METRICS,
+    CUSTOM_METRICS,
+    calculate_score,
+    clean_predictions,
 )
-import autosklearn.metrics
-
-
-@pytest.fixture
-def str_to_score_funct_dict():
-    return {
-        'balanced_accuracy': (balanced_accuracy_score, BalancedAccuracy),
-        'accuracy': (accuracy_score, Accuracy),
-        'log_loss': (log_loss, LogLoss),
-        'roc_auc': (roc_auc_score, ROCAUC),
-    }
-
-
-@pytest.fixture
-def str_to_scorer():
-    return {
-        'balanced_accuracy': autosklearn.metrics.balanced_accuracy,
-        'accuracy': autosklearn.metrics.accuracy,
-        'log_loss': autosklearn.metrics.log_loss,
-        'roc_auc': autosklearn.metrics.roc_auc,
-    }
 
 
 @pytest.fixture
@@ -100,9 +73,10 @@ def custom_metric_y_true_pred(request):
                           ],
                          indirect=True)
 @pytest.mark.parametrize("metric", ['accuracy', 'balanced_accuracy', 'log_loss', 'roc_auc'])
-def test_custom_metric_score(metric, custom_metric_y_true_pred, str_to_score_funct_dict):
+def test_custom_metric_score(metric, custom_metric_y_true_pred):
 
-    sklearn_score_func, custom_implementation = str_to_score_funct_dict[metric]
+    sklearn_score_func = CLASSIFICATION_METRICS[metric]
+    custom_implementation = CUSTOM_METRICS[metric]
     y_true, y_pred = custom_metric_y_true_pred
 
     if type_of_target(y_true) == 'multilabel-indicator' and metric == 'balanced_accuracy':
@@ -132,7 +106,9 @@ def test_custom_metric_score(metric, custom_metric_y_true_pred, str_to_score_fun
                           ],
                          indirect=True)
 @pytest.mark.parametrize("metric", ['accuracy', 'balanced_accuracy', 'log_loss', 'roc_auc'])
-def test_custom_metric_in_scorer(metric, custom_metric_y_true_pred, str_to_scorer):
+def test_custom_metric_in_scorer(metric, custom_metric_y_true_pred):
+    sklearn_score_func = CLASSIFICATION_METRICS[metric]
+    custom_implementation = CUSTOM_METRICS[metric]
     y_true, y_pred = custom_metric_y_true_pred
     if metric == 'log_loss':
         # In case of log loss, we need probabilities
@@ -149,19 +125,17 @@ def test_custom_metric_in_scorer(metric, custom_metric_y_true_pred, str_to_score
     if type_of_target(y_true) == 'multiclass' and metric == 'roc_auc':
         pytest.skip('ROC AUC not supported for multiclass')
 
-    sklearn_score = autosklearn.metrics.calculate_score(
+    sklearn_score = calculate_score(
         solution=y_true,
         prediction=y_pred,
         task_type=task_mapping[task_type],
-        metric=str_to_scorer[metric],
-        fast_mode=False,
+        metric=sklearn_score_func,
     )
-    predictions = str_to_scorer[metric].clean_predictions(y_pred, task_type)
-    fast_score = autosklearn.metrics.calculate_score(
+    predictions = clean_predictions(custom_implementation, y_pred, task_type)
+    fast_score = calculate_score(
         solution=y_true,
         prediction=predictions,
         task_type=task_mapping[task_type],
-        metric=str_to_scorer[metric],
-        fast_mode=True,
+        metric=custom_implementation,
     )
     assert sklearn_score == fast_score

@@ -138,8 +138,7 @@ class EnsembleSelection(AbstractEnsemble):
                         prediction=fant_ensemble_prediction,
                         task_type=self.task_type,
                         metric=self.metric,
-                        fast_mode=True,
-                        scoring_functions=None
+                        scoring_functions=None,
                     )
                 )
                 scores[j] = self.metric._optimum - calculated_score
@@ -189,7 +188,6 @@ class EnsembleSelection(AbstractEnsemble):
                         prediction=ensemble_prediction,
                         task_type=self.task_type,
                         metric=self.metric,
-                        fast_mode=True,
                         scoring_functions=None
                     )
                 )

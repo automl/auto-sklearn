@@ -20,7 +20,10 @@ from autosklearn.constants import (
 from autosklearn.pipeline.implementations.util import (
     convert_multioutput_multiclass_to_multilabel
 )
-from autosklearn.metrics import calculate_score
+from autosklearn.metrics import (
+    calculate_score,
+    clean_predictions,
+)
 from autosklearn.util.logging_ import get_named_client_logger
 
 from ConfigSpace import Configuration
@@ -429,11 +432,11 @@ class AbstractEvaluator(object):
         # This include operations like argmax and type change
         task_type = type_of_target(self.Y_optimization)
         if 'y_optimization' not in self.disable_file_output and Y_optimization_pred is not None:
-            Y_optimization_pred = self.metric.clean_predictions(Y_optimization_pred, task_type)
+            Y_optimization_pred = clean_predictions(self.metric, Y_optimization_pred, task_type)
         if 'y_valid' not in self.disable_file_output and Y_valid_pred is not None:
-            Y_valid_pred = self.metric.clean_predictions(Y_valid_pred, task_type)
+            Y_valid_pred = clean_predictions(self.metric, Y_valid_pred, task_type)
         if 'y_test' not in self.disable_file_output and Y_test_pred is not None:
-            Y_test_pred = self.metric.clean_predictions(Y_test_pred, task_type)
+            Y_test_pred = clean_predictions(self.metric, Y_test_pred, task_type)
 
         self.backend.save_numrun_to_dir(
             seed=self.seed,
