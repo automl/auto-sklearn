@@ -49,6 +49,7 @@ from autosklearn.util.logging_ import (
     get_named_client_logger,
 )
 from autosklearn.util import pipeline, RE_PATTERN
+from autosklearn.util.parallel import preload_modules
 from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.smbo import AutoMLSMBO
@@ -228,7 +229,7 @@ class AutoML(BaseEstimator):
         # examples. Nevertheless, multi-process runs
         # have spawn as requirement to reduce the
         # possibility of a deadlock
-        self._multiprocessing_context = 'spawn'
+        self._multiprocessing_context = 'forkserver'
         if self._n_jobs == 1 and self._dask_client is None:
             self._multiprocessing_context = 'fork'
             self._dask_client = SingleThreadedClient()
@@ -248,11 +249,10 @@ class AutoML(BaseEstimator):
 
     def _create_dask_client(self):
         self._is_dask_client_internally_created = True
-        dask.config.set({'distributed.worker.daemon': False})
         self._dask_client = dask.distributed.Client(
             dask.distributed.LocalCluster(
                 n_workers=self._n_jobs,
-                processes=True if self._n_jobs != 1 else False,
+                processes=False,
                 threads_per_worker=1,
                 # We use the temporal directory to save the
                 # dask workers, because deleting workers
@@ -299,8 +299,8 @@ class AutoML(BaseEstimator):
         # under the above logging configuration setting
         # We need to specify the logger_name so that received records
         # are treated under the logger_name ROOT logger setting
-        context = multiprocessing.get_context(
-            self._multiprocessing_context)
+        context = multiprocessing.get_context(self._multiprocessing_context)
+        preload_modules(context)
         self.stop_logging_server = context.Event()
         port = context.Value('l')  # be safe by using a long
         port.value = -1

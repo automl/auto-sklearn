@@ -31,6 +31,7 @@ from autosklearn.metrics import calculate_score, Scorer
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.util.logging_ import get_named_client_logger
+from autosklearn.util.parallel import preload_modules
 
 Y_ENSEMBLE = 0
 Y_VALID = 1
@@ -572,11 +573,11 @@ class EnsembleBuilder(object):
     def run(
         self,
         iteration: int,
+        pynisher_context: str,
         time_left: Optional[float] = None,
         end_at: Optional[float] = None,
         time_buffer=5,
         return_predictions: bool = False,
-        pynisher_context: str = 'spawn',
     ):
 
         if time_left is None and end_at is None:
@@ -606,6 +607,7 @@ class EnsembleBuilder(object):
             if wall_time_in_s < 1:
                 break
             context = multiprocessing.get_context(pynisher_context)
+            preload_modules(context)
 
             safe_ensemble_script = pynisher.enforce_limits(
                 wall_time_in_s=wall_time_in_s,

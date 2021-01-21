@@ -151,7 +151,8 @@ if __name__ == '__main__':
                                         include=include,
                                         metric=automl_arguments['metric'],
                                         cost_for_crash=get_cost_of_crash(automl_arguments['metric']),
-                                        abort_on_first_run_crash=False,)
+                                        abort_on_first_run_crash=False,
+                                        pynisher_context='fork')
             run_info, run_value = ta.run_wrapper(
                 RunInfo(
                     config=config,
