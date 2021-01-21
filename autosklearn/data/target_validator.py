@@ -386,3 +386,10 @@ class TargetValidator(BaseEstimator):
                                  self.type_of_target,
                                  supported_output_types
                              ))
+
+    @property
+    def classes(self) -> typing.List:
+        if self.encoder is None:
+            return []
+        else:
+            return self.encoder.categories_[0]

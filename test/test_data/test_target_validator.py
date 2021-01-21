@@ -450,6 +450,8 @@ def test_targetvalidator_inversetransform():
     y_decoded = validator.inverse_transform(y)
     assert ['a', 'a', 'b', 'c', 'a'] == y_decoded.tolist()
 
+    assert validator.classes.tolist() == ['a', 'b', 'c']
+
     validator = TargetValidator(is_classification=True)
     multi_label = pd.DataFrame(
         np.array([[1, 0, 0, 1], [0, 0, 1, 1], [0, 0, 0, 0]]),
@@ -460,6 +462,8 @@ def test_targetvalidator_inversetransform():
 
     y_decoded = validator.inverse_transform(y)
     np.testing.assert_array_almost_equal(y, y_decoded)
+
+    assert validator.classes == []
 
 
 # Actual checks for the targets
