@@ -20,8 +20,8 @@ if os.name != 'posix':
         sys.platform
     )
 
-if sys.version_info < (3, 5):
+if sys.version_info < (3, 6):
     raise ValueError(
         'Unsupported python version %s found. Auto-sklearn requires Python '
-        '3.5 or higher.' % sys.version_info
+        '3.6 or higher.' % sys.version_info
     )

@@ -22,9 +22,8 @@ import autosklearn.metrics
 
 
 ############################################################################
-# Custom metrics definition
-# =========================
-
+# Custom Metrics
+# ==============
 def accuracy(solution, prediction):
     # custom function defining accuracy
     return np.mean(solution == prediction)

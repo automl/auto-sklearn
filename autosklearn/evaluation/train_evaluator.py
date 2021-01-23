@@ -142,8 +142,9 @@ def _fit_with_budget(X_train, Y_train, budget, budget_type, logger, model, train
 
 class TrainEvaluator(AbstractEvaluator):
     def __init__(self, backend, queue, metric,
+                 port,
                  configuration=None,
-                 all_scoring_functions=False,
+                 scoring_functions=None,
                  seed=1,
                  output_y_hat_optimization=True,
                  resampling_strategy=None,
@@ -159,9 +160,10 @@ class TrainEvaluator(AbstractEvaluator):
         super().__init__(
             backend=backend,
             queue=queue,
+            port=port,
             configuration=configuration,
             metric=metric,
-            all_scoring_functions=all_scoring_functions,
+            scoring_functions=scoring_functions,
             seed=seed,
             output_y_hat_optimization=output_y_hat_optimization,
             num_run=num_run,
@@ -358,7 +360,7 @@ class TrainEvaluator(AbstractEvaluator):
 
                     # if all_scoring_function is true, return a dict of opt_loss.
                     # Otherwise, return a scalar.
-                    if self.all_scoring_functions is True:
+                    if self.scoring_functions:
                         opt_loss = {}
                         for metric in opt_losses[0].keys():
                             opt_loss[metric] = np.average(
@@ -534,7 +536,7 @@ class TrainEvaluator(AbstractEvaluator):
 
             # if all_scoring_function is true, return a dict of opt_loss. Otherwise,
             # return a scalar.
-            if self.all_scoring_functions is True:
+            if self.scoring_functions:
                 opt_loss = {}
                 for metric in opt_losses[0].keys():
                     opt_loss[metric] = np.average([opt_losses[i][metric]
@@ -1044,11 +1046,12 @@ def eval_holdout(
         seed,
         num_run,
         instance,
-        all_scoring_functions,
+        scoring_functions,
         output_y_hat_optimization,
         include,
         exclude,
         disable_file_output,
+        port,
         init_params=None,
         iterative=False,
         budget=100.0,
@@ -1056,6 +1059,7 @@ def eval_holdout(
 ):
     evaluator = TrainEvaluator(
         backend=backend,
+        port=port,
         queue=queue,
         resampling_strategy=resampling_strategy,
         resampling_strategy_args=resampling_strategy_args,
@@ -1063,7 +1067,7 @@ def eval_holdout(
         configuration=config,
         seed=seed,
         num_run=num_run,
-        all_scoring_functions=all_scoring_functions,
+        scoring_functions=scoring_functions,
         output_y_hat_optimization=output_y_hat_optimization,
         include=include,
         exclude=exclude,
@@ -1085,17 +1089,19 @@ def eval_iterative_holdout(
         seed,
         num_run,
         instance,
-        all_scoring_functions,
+        scoring_functions,
         output_y_hat_optimization,
         include,
         exclude,
         disable_file_output,
+        port,
         init_params=None,
         budget=100.0,
         budget_type=None,
 ):
     return eval_holdout(
         queue=queue,
+        port=port,
         config=config,
         backend=backend,
         metric=metric,
@@ -1103,7 +1109,7 @@ def eval_iterative_holdout(
         resampling_strategy_args=resampling_strategy_args,
         seed=seed,
         num_run=num_run,
-        all_scoring_functions=all_scoring_functions,
+        scoring_functions=scoring_functions,
         output_y_hat_optimization=output_y_hat_optimization,
         include=include,
         exclude=exclude,
@@ -1126,11 +1132,12 @@ def eval_partial_cv(
         seed,
         num_run,
         instance,
-        all_scoring_functions,
+        scoring_functions,
         output_y_hat_optimization,
         include,
         exclude,
         disable_file_output,
+        port,
         init_params=None,
         iterative=False,
         budget=None,
@@ -1143,6 +1150,7 @@ def eval_partial_cv(
 
     evaluator = TrainEvaluator(
         backend=backend,
+        port=port,
         queue=queue,
         metric=metric,
         configuration=config,
@@ -1150,7 +1158,7 @@ def eval_partial_cv(
         resampling_strategy_args=resampling_strategy_args,
         seed=seed,
         num_run=num_run,
-        all_scoring_functions=all_scoring_functions,
+        scoring_functions=scoring_functions,
         output_y_hat_optimization=False,
         include=include,
         exclude=exclude,
@@ -1173,14 +1181,15 @@ def eval_partial_cv_iterative(
         seed,
         num_run,
         instance,
-        all_scoring_functions,
+        scoring_functions,
         output_y_hat_optimization,
         include,
         exclude,
         disable_file_output,
+        port,
         init_params=None,
         budget=None,
-        budget_type=None
+        budget_type=None,
 ):
     if budget_type is not None:
         raise NotImplementedError()
@@ -1192,9 +1201,10 @@ def eval_partial_cv_iterative(
         resampling_strategy=resampling_strategy,
         resampling_strategy_args=resampling_strategy_args,
         seed=seed,
+        port=port,
         num_run=num_run,
         instance=instance,
-        all_scoring_functions=all_scoring_functions,
+        scoring_functions=scoring_functions,
         output_y_hat_optimization=output_y_hat_optimization,
         include=include,
         exclude=exclude,
@@ -1215,11 +1225,12 @@ def eval_cv(
         seed,
         num_run,
         instance,
-        all_scoring_functions,
+        scoring_functions,
         output_y_hat_optimization,
         include,
         exclude,
         disable_file_output,
+        port,
         init_params=None,
         budget=None,
         budget_type=None,
@@ -1227,6 +1238,7 @@ def eval_cv(
 ):
     evaluator = TrainEvaluator(
         backend=backend,
+        port=port,
         queue=queue,
         metric=metric,
         configuration=config,
@@ -1234,7 +1246,7 @@ def eval_cv(
         num_run=num_run,
         resampling_strategy=resampling_strategy,
         resampling_strategy_args=resampling_strategy_args,
-        all_scoring_functions=all_scoring_functions,
+        scoring_functions=scoring_functions,
         output_y_hat_optimization=output_y_hat_optimization,
         include=include,
         exclude=exclude,
@@ -1257,11 +1269,12 @@ def eval_iterative_cv(
         seed,
         num_run,
         instance,
-        all_scoring_functions,
+        scoring_functions,
         output_y_hat_optimization,
         include,
         exclude,
         disable_file_output,
+        port,
         init_params=None,
         budget=None,
         budget_type=None,
@@ -1276,11 +1289,12 @@ def eval_iterative_cv(
         num_run=num_run,
         resampling_strategy=resampling_strategy,
         resampling_strategy_args=resampling_strategy_args,
-        all_scoring_functions=all_scoring_functions,
+        scoring_functions=scoring_functions,
         output_y_hat_optimization=output_y_hat_optimization,
         include=include,
         exclude=exclude,
         disable_file_output=disable_file_output,
+        port=port,
         init_params=init_params,
         budget=budget,
         budget_type=budget_type,

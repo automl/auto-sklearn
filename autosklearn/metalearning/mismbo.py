@@ -6,20 +6,18 @@ from autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner \
     import MetaLearningOptimizer
 from autosklearn.constants \
     import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, TASK_TYPES_TO_STRING
-from autosklearn.util.logging_ import get_logger
 
 
 def suggest_via_metalearning(
         meta_base, dataset_name, metric, task, sparse,
-        num_initial_configurations):
-    logger = get_logger('autosklearn.metalearning.mismbo')
+        num_initial_configurations, logger):
 
     if task == MULTILABEL_CLASSIFICATION:
         task = MULTICLASS_CLASSIFICATION
 
     task = TASK_TYPES_TO_STRING[task]
 
-    logger.warning(task)
+    logger.info(task)
 
     start = time.time()
     ml = MetaLearningOptimizer(
@@ -27,7 +25,8 @@ def suggest_via_metalearning(
         configuration_space=meta_base.configuration_space,
         meta_base=meta_base,
         distance='l1',
-        seed=1,)
+        seed=1,
+        logger=logger,)
     logger.info('Reading meta-data took %5.2f seconds',
                 time.time() - start)
     runs = ml.metalearning_suggest_all(exclude_double_configurations=True)

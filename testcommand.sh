@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-pytest -n 8 --durations=300 --timeout=1800 --timeout-method=thread -v $1
+pytest -n 3 --durations=20 --timeout=300 --dist load --timeout-method=thread --fulltrace -v $1

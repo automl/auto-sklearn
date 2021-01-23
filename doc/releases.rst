@@ -7,9 +7,87 @@
     commit. From http://stackoverflow.com/questions/6482436/list-of-authors-in-git-since-a-given-commit
     git log 2e29eba.. --format="%aN <%aE>" --reverse | perl -e 'my %dedupe; while (<STDIN>) { print unless $dedupe{$_}++}'
 
+
 ========
 Releases
 ========
+
+Version 0.12.1
+==============
+
+* ADD: A new heuristic which gives a warning and subsamples the data if it is too large for the
+  given ``memory_limit``.
+* ADD #1024: Tune scikit-learn's ``MLPClassifier`` and ``MLPRegressor``.
+* MAINT #1017: Improve the logging server introduced in release 0.12.0.
+* MAINT #1024: Move to scikit-learn 0.24.X.
+* MAINT #1038: Use new datasets for regression and classification and also update the metadata
+  used for Auto-sklearn 1.0.
+* MAINT #1040: Minor speed improvements in the ensemble selection algorithm.
+
+Contributors v0.12.1
+********************
+
+* Matthias Feurer
+* Katharina Eggensperger
+* Francisco Rivera
+
+Version 0.12.0
+==============
+
+* BREAKING: Auto-sklearn must now be guarded by ``__name__ == "__main__"`` due to the use of the
+  ``spawn`` multiprocessing context.
+* ADD #1026: Adds improved meta-data for Auto-sklearn 2.0 which results in strong improved
+  performance.
+* MAINT #984 and #1008: Move to scikit-learn 0.23.X
+* MAINT #1004: Move from travis-ci to github actions.
+* MAINT 8b67af6: drop the requirement to the lockfile package.
+* FIX #990: Fixes a bug that made Auto-sklearn fail if there are missing values in a pandas
+  DataFrame.
+* FIX #1007, #1012 and #1014: Log multiprocessing output via a new log server. Remove several
+  potential deadlocks related to the joint use of multi-processing, multi-threading and logging.
+
+Contributors v0.12.0
+********************
+
+* Matthias Feurer
+* ROHIT AGARWAL
+* Francisco Rivera
+
+Version 0.11.1
+==============
+
+* FIX #989: Fixes a bug where `y` was not passed to all data preprocessors which made 3rd party
+  category encoders fail.
+* FIX #1001: Fixes a bug which could make Auto-sklearn fail at random.
+* MAINT #1000: Introduce a minimal version for ``dask.distributed``.
+
+Contributors v0.11.1
+********************
+
+* Matthias Feurer
+
+Version 0.11.0
+==============
+
+* ADD #992: Move ensemble building from being a separate process to a job submitted to the dask
+  cluster. This allows for better control of the memory used in multiprocessing settings.
+* FIX #905: Make ``AutoSklearn2Classifier`` picklable.
+* FIX #970: Fix a bug where Auto-sklearn would fail if categorical features are passed as a
+  Pandas Dataframe.
+* MAINT #772: Improve error message in case of dummy prediction failure.
+* MAINT #948: Finally use Pandas >= 1.0.
+* MAINT #973: Improve meta-data by running meta-data generation for more time and separately for
+  important metrics.
+* MAINT #997: Improve memory handling in the ensemble building process. This allows building
+  ensembles for larger datasets.
+
+Contributors v0.11.0
+********************
+
+* Matthias Feurer
+* Francisco Rivera
+* Karl Leswing
+* ROHIT AGARWAL
 
 Version 0.10.0
 ==============

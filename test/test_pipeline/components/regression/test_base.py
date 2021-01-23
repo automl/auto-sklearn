@@ -83,7 +83,7 @@ class BaseRegressionComponentTest(unittest.TestCase):
             if self.step_hyperparameter is not None:
                 self.assertEqual(
                     getattr(regressor.estimator, self.step_hyperparameter['name']),
-                    self.step_hyperparameter['value']
+                    self.res.get("boston_iterative_n_iter", self.step_hyperparameter['value'])
                 )
 
     def test_default_boston_iterative_sparse_fit(self):
@@ -189,7 +189,7 @@ class BaseRegressionComponentTest(unittest.TestCase):
             if self.step_hyperparameter is not None:
                 self.assertEqual(
                     getattr(regressor.estimator, self.step_hyperparameter['name']),
-                    self.step_hyperparameter['value']
+                    self.res.get("diabetes_iterative_n_iter", self.step_hyperparameter['value'])
                 )
 
     def test_default_diabetes_sparse(self):

@@ -1,3 +1,4 @@
+import logging
 import os
 import unittest
 
@@ -19,7 +20,8 @@ class MetaBaseTest(unittest.TestCase):
         cs = autosklearn.pipeline.classification.SimpleClassificationPipeline()\
             .get_hyperparameter_search_space()
 
-        self.base = MetaBase(cs, data_dir)
+        self.logger = logging.getLogger()
+        self.base = MetaBase(cs, data_dir, logger=self.logger)
 
     def tearDown(self):
         os.chdir(self.cwd)

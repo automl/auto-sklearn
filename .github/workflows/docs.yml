@@ -1,0 +1,43 @@
+name: Docs
+on: [pull_request, push]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install dependencies
+      run: |
+        pip install -e .[docs,examples,examples_unix]
+    - name: Make docs
+      run: |
+        cd doc
+        make html
+    - name: Pull latest gh-pages
+      if: (contains(github.ref, 'develop') || contains(github.ref, 'master')) && github.event_name == 'push'
+      run: |
+        cd ..
+        git clone https://github.com/automl/auto-sklearn.git --branch gh-pages --single-branch gh-pages
+    - name: Copy new doc into gh-pages
+      if: (contains(github.ref, 'develop') || contains(github.ref, 'master')) && github.event_name == 'push'
+      run: |
+        branch_name=${GITHUB_REF##*/}
+        cd ../gh-pages
+        rm -rf $branch_name
+        cp -r ../auto-sklearn/doc/build/html $branch_name
+    - name: Push to gh-pages
+      if: (contains(github.ref, 'develop') || contains(github.ref, 'master')) && github.event_name == 'push'
+      run: |
+        last_commit=$(git log --pretty=format:"%an: %s")
+        cd ../gh-pages
+        branch_name=${GITHUB_REF##*/}
+        git add $branch_name/
+        git config --global user.name 'Github Actions'
+        git config --global user.email 'not@mail.com'
+        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+        git commit -am "$last_commit"
+        git push

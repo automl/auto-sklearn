@@ -1,9 +1,11 @@
 # -*- encoding: utf-8 -*-
+import logging.handlers
 import os
 import shutil
 import sys
 import unittest
 import unittest.mock
+import tempfile
 
 import numpy as np
 import sklearn.dummy
@@ -37,13 +39,19 @@ class AbstractEvaluatorTest(unittest.TestCase):
         backend_mock.get_prediction_output_path.side_effect = dummy_pred_files
         D = get_multiclass_classification_datamanager()
         backend_mock.load_datamanager.return_value = D
+        backend_mock.temporary_directory = tempfile.gettempdir()
         self.backend_mock = backend_mock
+
+        self.port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
 
         self.working_directory = os.path.join(this_directory, '.tmp_%s' % self.id())
 
     def tearDown(self):
         if os.path.exists(self.ev_path):
-            os.rmdir(self.ev_path)
+            try:
+                os.rmdir(self.ev_path)
+            except:  # noqa E722
+                pass
 
     def test_finish_up_model_predicts_NaN(self):
         '''Tests by handing in predictions which contain NaNs'''
@@ -51,6 +59,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         queue_mock = unittest.mock.Mock()
         ae = AbstractEvaluator(backend=self.backend_mock,
+                               port=self.port,
                                output_y_hat_optimization=False,
                                queue=queue_mock, metric=accuracy)
         ae.Y_optimization = rs.rand(33, 3)
@@ -116,8 +125,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         self.assertEqual(self.backend_mock.save_predictions_as_npy.call_count, 0)
 
-    @unittest.mock.patch('os.path.exists')
-    def test_disable_file_output(self, exists_mock):
+    def test_disable_file_output(self):
         queue_mock = unittest.mock.Mock()
 
         rs = np.random.RandomState(1)
@@ -127,6 +135,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
             queue=queue_mock,
             disable_file_output=True,
             metric=accuracy,
+            port=self.port,
         )
 
         predictions_ensemble = rs.rand(33, 3)
@@ -143,32 +152,55 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         self.assertIsNone(loss_)
         self.assertEqual(additional_run_info_, {})
-        # This function is not guarded by an if statement
-        self.assertEqual(self.backend_mock.save_predictions_as_npy.call_count, 0)
-        self.assertEqual(self.backend_mock.save_model.call_count, 0)
+        # This function is never called as there is a return before
+        self.assertEqual(self.backend_mock.save_numrun_to_dir.call_count, 0)
 
-        ae = AbstractEvaluator(
-            backend=self.backend_mock,
-            output_y_hat_optimization=False,
-            queue=queue_mock,
-            disable_file_output=['model'],
-            metric=accuracy,
-        )
-        ae.Y_optimization = predictions_ensemble
-
-        loss_, additional_run_info_ = (
-            ae.file_output(
-                predictions_ensemble,
-                predictions_valid,
-                predictions_test,
+        for call_count, disable in enumerate(['model', 'cv_model'], start=1):
+            ae = AbstractEvaluator(
+                backend=self.backend_mock,
+                output_y_hat_optimization=False,
+                queue=queue_mock,
+                disable_file_output=[disable],
+                metric=accuracy,
+                port=self.port,
             )
-        )
+            ae.Y_optimization = predictions_ensemble
+            ae.model = unittest.mock.Mock()
+            ae.models = [unittest.mock.Mock()]
 
-        self.assertIsNone(loss_)
-        self.assertEqual(additional_run_info_, {})
-        # This function is not guarded by an if statement
-        self.assertEqual(self.backend_mock.save_predictions_as_npy.call_count, 3)
-        self.assertEqual(self.backend_mock.save_model.call_count, 0)
+            loss_, additional_run_info_ = (
+                ae.file_output(
+                    predictions_ensemble,
+                    predictions_valid,
+                    predictions_test,
+                )
+            )
+
+            self.assertIsNone(loss_)
+            self.assertEqual(additional_run_info_, {})
+            self.assertEqual(self.backend_mock.save_numrun_to_dir.call_count, call_count)
+            if disable == 'model':
+                self.assertIsNone(
+                    self.backend_mock.save_numrun_to_dir.call_args_list[-1][1]['model'])
+                self.assertIsNotNone(
+                    self.backend_mock.save_numrun_to_dir.call_args_list[-1][1]['cv_model'])
+            else:
+                self.assertIsNotNone(
+                    self.backend_mock.save_numrun_to_dir.call_args_list[-1][1]['model'])
+                self.assertIsNone(
+                    self.backend_mock.save_numrun_to_dir.call_args_list[-1][1]['cv_model'])
+            self.assertIsNotNone(
+                self.backend_mock.save_numrun_to_dir.call_args_list[-1][1][
+                    'ensemble_predictions']
+            )
+            self.assertIsNotNone(
+                self.backend_mock.save_numrun_to_dir.call_args_list[-1][1][
+                    'valid_predictions']
+            )
+            self.assertIsNotNone(
+                self.backend_mock.save_numrun_to_dir.call_args_list[-1][1][
+                    'test_predictions']
+            )
 
         ae = AbstractEvaluator(
             backend=self.backend_mock,
@@ -176,10 +208,11 @@ class AbstractEvaluatorTest(unittest.TestCase):
             queue=queue_mock,
             metric=accuracy,
             disable_file_output=['y_optimization'],
+            port=self.port,
         )
-        exists_mock.return_value = True
         ae.Y_optimization = predictions_ensemble
         ae.model = 'model'
+        ae.models = [unittest.mock.Mock()]
 
         loss_, additional_run_info_ = (
             ae.file_output(
@@ -191,9 +224,19 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         self.assertIsNone(loss_)
         self.assertEqual(additional_run_info_, {})
-        # This function is not guarded by an if statement
-        self.assertEqual(self.backend_mock.save_predictions_as_npy.call_count, 5)
-        self.assertEqual(self.backend_mock.save_model.call_count, 1)
+
+        self.assertIsNone(
+            self.backend_mock.save_numrun_to_dir.call_args_list[-1][1][
+                'ensemble_predictions']
+        )
+        self.assertIsNotNone(
+            self.backend_mock.save_numrun_to_dir.call_args_list[-1][1][
+                'valid_predictions']
+        )
+        self.assertIsNotNone(
+            self.backend_mock.save_numrun_to_dir.call_args_list[-1][1][
+                'test_predictions']
+        )
 
     def test_file_output(self):
         shutil.rmtree(self.working_directory, ignore_errors=True)
@@ -217,6 +260,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
                 output_y_hat_optimization=False,
                 queue=queue_mock,
                 metric=accuracy,
+                port=self.port,
             )
             ae.model = sklearn.dummy.DummyClassifier()
 
@@ -233,6 +277,6 @@ class AbstractEvaluatorTest(unittest.TestCase):
             )
 
             self.assertTrue(os.path.exists(os.path.join(self.working_directory, 'tmp',
-                                                        '.auto-sklearn', 'done', '1_0')))
+                                                        '.auto-sklearn', 'runs', '1_0_None')))
 
             shutil.rmtree(self.working_directory, ignore_errors=True)

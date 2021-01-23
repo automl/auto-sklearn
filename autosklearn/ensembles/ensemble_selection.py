@@ -1,6 +1,6 @@
 import random
 from collections import Counter
-from typing import List, Tuple, cast
+from typing import Any, Dict, List, Tuple, Union, cast
 
 import numpy as np
 
@@ -27,6 +27,17 @@ class EnsembleSelection(AbstractEnsemble):
         self.mode = mode
         self.random_state = random_state
 
+    def __getstate__(self) -> Dict[str, Any]:
+        # Cannot serialize a metric if
+        # it is user defined.
+        # That is, if doing pickle dump
+        # the metric won't be the same as the
+        # one in __main__. we don't use the metric
+        # in the EnsembleSelection so this should
+        # be fine
+        self.metric = None  # type: ignore
+        return self.__dict__
+
     def fit(
         self,
         predictions: List[np.ndarray],
@@ -39,7 +50,11 @@ class EnsembleSelection(AbstractEnsemble):
         if self.task_type not in TASK_TYPES:
             raise ValueError('Unknown task type %s.' % self.task_type)
         if not isinstance(self.metric, Scorer):
-            raise ValueError('Metric must be of type scorer')
+            raise ValueError("The provided metric must be an instance of Scorer, "
+                             "nevertheless it is {}({})".format(
+                                 self.metric,
+                                 type(self.metric),
+                             ))
         if self.mode not in ('fast', 'slow'):
             raise ValueError('Unknown mode %s' % self.mode)
 
@@ -90,45 +105,32 @@ class EnsembleSelection(AbstractEnsemble):
                 dtype=np.float64,
             )
             s = len(ensemble)
-            if s == 0:
-                weighted_ensemble_prediction.fill(0.0)
-            else:
-                weighted_ensemble_prediction.fill(0.0)
-                for pred in ensemble:
-                    np.add(
-                        weighted_ensemble_prediction,
-                        pred,
-                        out=weighted_ensemble_prediction,
-                    )
-                np.multiply(
+            if s > 0:
+                np.add(
                     weighted_ensemble_prediction,
-                    1/s,
-                    out=weighted_ensemble_prediction,
-                )
-                np.multiply(
-                    weighted_ensemble_prediction,
-                    (s / float(s + 1)),
+                    ensemble[-1],
                     out=weighted_ensemble_prediction,
                 )
 
             # Memory-efficient averaging!
             for j, pred in enumerate(predictions):
-                # TODO: this could potentially be vectorized! - let's profile
-                # the script first!
-                fant_ensemble_prediction.fill(0.0)
+                # fant_ensemble_prediction is the prediction of the current ensemble
+                # and should be ([predictions[selected_prev_iterations] + predictions[j])/(s+1)
+                # We overwrite the contents of fant_ensemble_prediction
+                # directly with weighted_ensemble_prediction + new_prediction and then scale for avg
                 np.add(
-                    fant_ensemble_prediction,
                     weighted_ensemble_prediction,
+                    pred,
                     out=fant_ensemble_prediction
                 )
-                np.add(
+                np.multiply(
                     fant_ensemble_prediction,
-                    (1. / float(s + 1)) * pred,
+                    (1. / float(s + 1)),
                     out=fant_ensemble_prediction
                 )
 
                 # Calculate score is versatile and can return a dict of score
-                # when all_scoring_functions=False, we know it will be a float
+                # when scoring_functions=None, we know it will be a float
                 calculated_score = cast(
                     float,
                     calculate_score(
@@ -136,7 +138,7 @@ class EnsembleSelection(AbstractEnsemble):
                         prediction=fant_ensemble_prediction,
                         task_type=self.task_type,
                         metric=self.metric,
-                        all_scoring_functions=False
+                        scoring_functions=None
                     )
                 )
                 scores[j] = self.metric._optimum - calculated_score
@@ -178,7 +180,7 @@ class EnsembleSelection(AbstractEnsemble):
                 ensemble.append(pred)
                 ensemble_prediction = np.mean(np.array(ensemble), axis=0)
                 # Calculate score is versatile and can return a dict of score
-                # when all_scoring_functions=False, we know it will be a float
+                # when scoring_functions=None, we know it will be a float
                 calculated_score = cast(
                     float,
                     calculate_score(
@@ -186,7 +188,7 @@ class EnsembleSelection(AbstractEnsemble):
                         prediction=ensemble_prediction,
                         task_type=self.task_type,
                         metric=self.metric,
-                        all_scoring_functions=False
+                        scoring_functions=None
                     )
                 )
                 scores[j] = self.metric._optimum - calculated_score
@@ -250,27 +252,32 @@ class EnsembleSelection(AbstractEnsemble):
             dtype=np.int64,
         )
 
-    def predict(self, predictions: np.ndarray) -> np.ndarray:
-        predictions = np.asarray(
-            predictions,
-            dtype=np.float64,
-        )
+    def predict(self, predictions: Union[np.ndarray, List[np.ndarray]]) -> np.ndarray:
+
+        average = np.zeros_like(predictions[0], dtype=np.float64)
+        tmp_predictions = np.empty_like(predictions[0], dtype=np.float64)
 
         # if predictions.shape[0] == len(self.weights_),
         # predictions include those of zero-weight models.
-        if predictions.shape[0] == len(self.weights_):
-            return np.average(predictions, axis=0, weights=self.weights_)
+        if len(predictions) == len(self.weights_):
+            for pred, weight in zip(predictions, self.weights_):
+                np.multiply(pred, weight, out=tmp_predictions)
+                np.add(average, tmp_predictions, out=average)
 
         # if prediction model.shape[0] == len(non_null_weights),
         # predictions do not include those of zero-weight models.
-        elif predictions.shape[0] == np.count_nonzero(self.weights_):
+        elif len(predictions) == np.count_nonzero(self.weights_):
             non_null_weights = [w for w in self.weights_ if w > 0]
-            return np.average(predictions, axis=0, weights=non_null_weights)
+            for pred, weight in zip(predictions, non_null_weights):
+                np.multiply(pred, weight, out=tmp_predictions)
+                np.add(average, tmp_predictions, out=average)
 
         # If none of the above applies, then something must have gone wrong.
         else:
             raise ValueError("The dimensions of ensemble predictions"
                              " and ensemble weights do not match!")
+        del tmp_predictions
+        return average
 
     def __str__(self) -> str:
         return 'Ensemble Selection:\n\tTrajectory: %s\n\tMembers: %s' \

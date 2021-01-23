@@ -182,7 +182,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertIsInstance(cls, SimpleClassificationPipeline)
 
     def test_multilabel(self):
-        cache = Memory(cachedir=tempfile.gettempdir())
+        cache = Memory(location=tempfile.gettempdir())
         cached_func = cache.cache(
             sklearn.datasets.make_multilabel_classification
         )
@@ -366,6 +366,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 cls.predict_proba(X_test)
             except MemoryError:
                 continue
+            except np.linalg.LinAlgError:
+                continue
             except ValueError as e:
                 if "Floating-point under-/overflow occurred at epoch" in \
                         e.args[0]:
@@ -380,6 +382,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     continue
                 elif 'The condensed distance matrix must contain only finite ' \
                      'values.' in e.args[0]:
+                    continue
+                elif 'Internal work array size computation failed' in e.args[0]:
                     continue
                 else:
                     print(config)
@@ -414,16 +418,17 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cs = SimpleClassificationPipeline().get_hyperparameter_search_space()
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
+        forbiddens = cs.get_forbiddens()
 
         self.assertEqual(len(cs.get_hyperparameter(
             'data_preprocessing:numerical_transformer:rescaling:__choice__').choices), 6)
         self.assertEqual(len(cs.get_hyperparameter(
-            'classifier:__choice__').choices), 15)
+            'classifier:__choice__').choices), 16)
         self.assertEqual(len(cs.get_hyperparameter(
             'feature_preprocessor:__choice__').choices), 13)
 
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(153, len(hyperparameters))
+        self.assertEqual(167, len(hyperparameters))
 
         # for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp
@@ -431,6 +436,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         # The four components which are always active are classifier,
         # feature preprocessor, balancing and data preprocessing pipeline.
         self.assertEqual(len(hyperparameters) - 7, len(conditions))
+
+        self.assertEqual(len(forbiddens), 53)
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
         cs = SimpleClassificationPipeline(include={'classifier': ['libsvm_svc']})\
@@ -826,11 +833,20 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         """Make sure that if a preprocessor is added, it's fit
         method is called"""
         preprocessing_components.add_preprocessor(CrashPreprocessor)
-        cls = SimpleClassificationPipeline()
+
+        # We reduce the search space as forbidden clauses prevent to instantiate
+        # the user defined preprocessor manually
+        cls = SimpleClassificationPipeline(include={'classifier': ['random_forest']})
         cs = cls.get_hyperparameter_search_space()
         self.assertIn('CrashPreprocessor', str(cs))
         config = cs.sample_configuration()
-        config['feature_preprocessor:__choice__'] = 'CrashPreprocessor'
+        try:
+            config['feature_preprocessor:__choice__'] = 'CrashPreprocessor'
+        except Exception as e:
+            # In case of failure clean up the components and print enough information
+            # to clean up with check in the future
+            del preprocessing_components._addons.components['CrashPreprocessor']
+            self.fail("cs={} config={} Exception={}".format(cs, config, e))
         cls.set_hyperparameters(config)
         with self.assertRaisesRegex(
             ValueError,

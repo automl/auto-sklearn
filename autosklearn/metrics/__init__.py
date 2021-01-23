@@ -1,4 +1,3 @@
-import copy
 from abc import ABCMeta, abstractmethod
 from functools import partial
 from typing import Any, Callable, Dict, List, Optional, Union
@@ -127,12 +126,28 @@ class _ProbaScorer(Scorer):
         score : float
             Score function applied to prediction of estimator on X.
         """
+
+        if self._score_func is sklearn.metrics.log_loss:
+            n_labels_pred = np.array(y_pred).reshape((len(y_pred), -1)).shape[1]
+            n_labels_test = len(np.unique(y_true))
+            if n_labels_pred != n_labels_test:
+                labels = list(range(n_labels_pred))
+                if sample_weight is not None:
+                    return self._sign * self._score_func(y_true, y_pred,
+                                                         sample_weight=sample_weight,
+                                                         labels=labels,
+                                                         **self._kwargs)
+                else:
+                    return self._sign * self._score_func(y_true, y_pred,
+                                                         labels=labels, **self._kwargs)
+
         if sample_weight is not None:
             return self._sign * self._score_func(y_true, y_pred,
                                                  sample_weight=sample_weight,
                                                  **self._kwargs)
         else:
-            return self._sign * self._score_func(y_true, y_pred, **self._kwargs)
+            return self._sign * self._score_func(y_true, y_pred,
+                                                 **self._kwargs)
 
 
 class _ThresholdScorer(Scorer):
@@ -325,33 +340,36 @@ def calculate_score(
     prediction: np.ndarray,
     task_type: int,
     metric: Scorer,
-    all_scoring_functions: bool = False
+    scoring_functions: Optional[List[Scorer]] = None
 ) -> Union[float, Dict[str, float]]:
     if task_type not in TASK_TYPES:
         raise NotImplementedError(task_type)
 
-    if all_scoring_functions:
+    if scoring_functions:
         score_dict = dict()
         if task_type in REGRESSION_TASKS:
             # TODO put this into the regression metric itself
             cprediction = sanitize_array(prediction)
-            metric_dict = copy.copy(REGRESSION_METRICS)
-            metric_dict[metric.name] = metric
-            for metric_ in REGRESSION_METRICS:
-                func = REGRESSION_METRICS[metric_]
-                score_dict[func.name] = func(solution, cprediction)
+            for metric_ in scoring_functions:
+
+                try:
+                    score_dict[metric_.name] = metric_(solution, cprediction)
+                except ValueError as e:
+                    print(e, e.args[0])
+                    if e.args[0] == "Mean Squared Logarithmic Error cannot be used when " \
+                                    "targets contain negative values.":
+                        continue
+                    else:
+                        raise e
 
         else:
-            metric_dict = copy.copy(CLASSIFICATION_METRICS)
-            metric_dict[metric.name] = metric
-            for metric_ in metric_dict:
-                func = CLASSIFICATION_METRICS[metric_]
+            for metric_ in scoring_functions:
 
                 # TODO maybe annotate metrics to define which cases they can
                 # handle?
 
                 try:
-                    score_dict[func.name] = func(solution, prediction)
+                    score_dict[metric_.name] = metric_(solution, prediction)
                 except ValueError as e:
                     if e.args[0] == 'multiclass format is not supported':
                         continue
@@ -364,14 +382,25 @@ def calculate_score(
                         continue
                     else:
                         raise e
+
+        if metric.name not in score_dict.keys():
+            score_dict[metric.name] = get_metric_score(metric, prediction, solution, task_type)
         return score_dict
 
     else:
-        if task_type in REGRESSION_TASKS:
-            # TODO put this into the regression metric itself
-            cprediction = sanitize_array(prediction)
-            score = metric(solution, cprediction)
-        else:
-            score = metric(solution, prediction)
+        return get_metric_score(metric, prediction, solution, task_type)
 
-        return score
+
+def get_metric_score(
+        metric_: Scorer,
+        prediction: np.ndarray,
+        solution: np.ndarray,
+        task_type: int
+) -> float:
+    if task_type in REGRESSION_TASKS:
+        # TODO put this into the regression metric itself
+        cprediction = sanitize_array(prediction)
+        score = metric_(solution, cprediction)
+    else:
+        score = metric_(solution, prediction)
+    return score

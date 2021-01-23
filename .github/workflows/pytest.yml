@@ -1,0 +1,101 @@
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  ubuntu:
+
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+        use-conda: [true, false]
+        use-dist: [false]
+        include:
+          - python-version: 3.8
+            code-cov: true
+          - python-version: 3.7
+            use-conda: false
+            use-dist: true
+      fail-fast:  false
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Conda Install test dependencies
+      if: matrix.use-conda == true
+      run: |
+        # Miniconda is available in $CONDA env var
+        $CONDA/bin/conda create -n testenv --yes pip wheel gxx_linux-64 gcc_linux-64 swig python=${{ matrix.python-version }}
+        $CONDA/envs/testenv/bin/python3 -m pip install --upgrade pip
+        $CONDA/envs/testenv/bin/pip3 install -e .[test]
+    - name: Install test dependencies
+      if: matrix.use-conda == false && matrix.use-dist == false
+      run: |
+        python -m pip install --upgrade pip
+        if [[ `python -c 'import platform; print(platform.python_version())' | cut -d '.' -f 2` -eq 6 ]]; then
+          # Numpy 1.20 dropped suppert for Python3.6
+          pip install "numpy<=1.19"
+        fi
+        pip install -e .[test]
+        sudo apt-get update
+        sudo apt-get remove swig
+        sudo apt-get install swig3.0
+        sudo ln -s /usr/bin/swig3.0 /usr/bin/swig
+    - name: Dist Install test dependencies
+      if: matrix.use-conda == false && matrix.use-dist == true
+      run: |
+        python -m pip install --upgrade pip
+        sudo apt-get update
+        sudo apt-get remove swig
+        sudo apt-get install swig3.0
+        sudo ln -s /usr/bin/swig3.0 /usr/bin/swig
+        # We need to install for the dependencies, like pytest
+        python setup.py sdist
+        last_dist=$(ls -t dist/auto-sklearn-*.tar.gz | head -n 1)
+        pip install $last_dist[test]
+    - name: Store repository status
+      id: status-before
+      run: |
+        echo "::set-output name=BEFORE::$(git status --porcelain -b)"
+    - name: Conda Run tests
+      timeout-minutes: 45
+      if: matrix.use-conda == true
+      run: |
+        export OPENBLAS_NUM_THREADS=1
+        export OMP_NUM_THREADS=1
+        export MKL_NUM_THREADS=1
+        # We activate conda as metalearning uses python directly, so we need
+        # to change the default python
+        export PATH="$CONDA/envs/testenv/bin:$PATH"
+        if [ ${{ matrix.code-cov }} ]; then codecov='--cov=autosklearn --cov-report=xml'; fi
+        $CONDA/envs/testenv/bin/python3 -m pytest --durations=20 --timeout=300 --timeout-method=thread -v $codecov test
+    - name: Run tests
+      timeout-minutes: 45
+      if: matrix.use-conda == false
+      run: |
+        export OPENBLAS_NUM_THREADS=1
+        export OMP_NUM_THREADS=1
+        export MKL_NUM_THREADS=1
+        if [ ${{ matrix.code-cov }} ]; then codecov='--cov=autosklearn --cov-report=xml'; fi
+        pytest --durations=20 --timeout=300 --timeout-method=thread -v $codecov test
+    - name: Check for files left behind by test
+      if: ${{ always() }}
+      run: |
+        before="${{ steps.status-before.outputs.BEFORE }}"
+        after="$(git status --porcelain -b)"
+        if [[ "$before" != "$after" ]]; then
+            echo "git status from before: $before"
+            echo "git status from after: $after"
+            echo "Not all generated files have been deleted!"
+            exit 1
+        fi
+    - name: Upload coverage
+      if: matrix.code-cov && always()
+      uses: codecov/codecov-action@v1
+      with:
+        fail_ci_if_error: true
+        verbose: true

@@ -97,7 +97,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                                   dataset_properties=dataset_properties)
 
     def test_multioutput(self):
-        cache = Memory(cachedir=tempfile.gettempdir())
+        cache = Memory(location=tempfile.gettempdir())
         cached_func = cache.cache(
             sklearn.datasets.make_regression
         )
@@ -193,6 +193,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 cls.predict(X_test)
             except MemoryError:
                 continue
+            except np.linalg.LinAlgError:
+                continue
             except ValueError as e:
                 if "Floating-point under-/overflow occurred at epoch" in \
                         e.args[0]:
@@ -275,8 +277,10 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(140, len(hyperparameters))
+        forbiddens = cs.get_forbiddens()
+        self.assertEqual(155, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 6, len(conditions))
+        self.assertEqual(len(forbiddens), 35)
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
         cs = SimpleRegressionPipeline(

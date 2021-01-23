@@ -59,6 +59,13 @@ autosummary_generate = True
 autosectionlabel_prefix_document = True
 
 # Sphinx-gallery configuration.
+
+# get current branch
+binder_branch = 'master'
+import autosklearn
+if "dev" in autosklearn.__version__:
+    binder_branch = "development"
+
 sphinx_gallery_conf = {
     # path to the examples
     'examples_dirs': '../examples',
@@ -71,6 +78,19 @@ sphinx_gallery_conf = {
     #},
     'backreferences_dir': None,
     'filename_pattern': 'example.*.py$',
+    'ignore_pattern': r'custom_metrics\.py|__init__\.py',
+    'binder': {
+         # Required keys
+         'org': 'automl',
+         'repo': 'auto-sklearn',
+         'branch': binder_branch,
+         'binderhub_url': 'https://mybinder.org',
+         'dependencies': ['../.binder/apt.txt', '../.binder/requirements.txt'],
+         #'filepath_prefix': '<prefix>' # A prefix to prepend to any filepaths in Binder links.
+         # Jupyter notebooks for Binder will be copied to this directory (relative to built documentation root).
+         'notebooks_dir': 'notebooks/',
+         'use_jupyter_lab': True, # Whether Binder links should start Jupyter Lab instead of the Jupyter Notebook interface.
+         },
 }
 
 # Add any paths that contain templates here, relative to this directory.

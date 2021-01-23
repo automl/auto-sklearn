@@ -1,63 +1,52 @@
 from argparse import ArgumentParser
 from collections import defaultdict, OrderedDict
 import copy
+import logging
 import os
 import sys
-import time
+import unittest.mock
 
 import arff
 import joblib
 import numpy as np
 import pandas as pd
-import pynisher
-import scipy.sparse
 
-from autosklearn.data.abstract_data_manager import perform_one_hot_encoding
-from autosklearn.metalearning.metafeatures import metafeatures, metafeature
-from autosklearn.smbo import EXCLUDE_META_FEATURES_CLASSIFICATION, EXCLUDE_META_FEATURES_REGRESSION
+from autosklearn.constants import BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, REGRESSION
+from autosklearn.metalearning.metafeatures import metafeatures
+from autosklearn.smbo import _calculate_metafeatures, _calculate_metafeatures_encoded, \
+    EXCLUDE_META_FEATURES_REGRESSION, EXCLUDE_META_FEATURES_CLASSIFICATION
+from autosklearn.util.stopwatch import StopWatch
 
 sys.path.append('.')
 from update_metadata_util import load_task, classification_tasks, \
     regression_tasks
 
+logger = logging.getLogger("03_calculate_metafeatures")
 
-def calculate_metafeatures(task_id, exclude):
-    print(task_id)
-    X_train, y_train, X_test, y_test, cat, _ = load_task(task_id)
-    categorical = [True if 'categorical' == c else False for c in cat]
 
-    _metafeatures_labels = metafeatures.calculate_all_metafeatures_with_labels(
-        X_train, y_train, [False] * X_train.shape[1], task_id, dont_calculate=exclude)
+def calculate_metafeatures(task_id):
+    X_train, y_train, X_test, y_test, cat, task_type, dataset_name = load_task(task_id)
+    watch = StopWatch()
 
-    X_train, sparse = perform_one_hot_encoding(scipy.sparse.issparse(X_train),
-                                               categorical, [X_train])
-    X_train = X_train[0]
-    categorical = [False] * X_train.shape[1]
+    if task_type == 'classification':
+        if len(np.unique(y_train)) == 2:
+            task_type = BINARY_CLASSIFICATION
+        else:
+            task_type = MULTICLASS_CLASSIFICATION
+    else:
+        task_type = REGRESSION
 
-    start_time = time.time()
-    obj = pynisher.enforce_limits(mem_in_mb=3072)(
-        metafeatures.calculate_all_metafeatures_encoded_labels)
-    _metafeatures_encoded_labels = obj(X_train, y_train,
-                                       categorical, task_id, dont_calculate=exclude)
-    end_time = time.time()
+    _metafeatures_labels = _calculate_metafeatures(
+        x_train=X_train, y_train=y_train, data_feat_type=cat,
+        data_info_task=task_type, basename=dataset_name, logger=logger,
+        watcher=watch,
+    )
 
-    if obj.exit_status == pynisher.MemorylimitException:
-        # During the conversion of the dataset (rescaling, etc...), it can
-        # happen that we run out of memory.
-        _metafeatures_encoded_labels = \
-            metafeature.DatasetMetafeatures(task_id, dict())
-
-        metafeature_calculation_time = (end_time - start_time) / \
-                                       len(metafeatures.npy_metafeatures)
-
-        for metafeature_name in metafeatures.npy_metafeatures:
-            type_ = "HELPERFUNCTION" if metafeature_name not in \
-                                        metafeatures.metafeatures.functions \
-                else "METAFEATURE"
-            _metafeatures_encoded_labels.metafeature_values[metafeature_name] = \
-                metafeature.MetaFeatureValue(metafeature_name, type_, 0, 0,
-                                             np.NaN, metafeature_calculation_time,
-                                             "Memory error during dataset scaling.")
+    _metafeatures_encoded_labels = _calculate_metafeatures_encoded(
+        x_train=X_train, y_train=y_train, data_feat_type=cat,
+        task=task_type, basename=dataset_name, logger=logger,
+        watcher=watch,
+    )
 
     mf = _metafeatures_labels
     mf.metafeature_values.update(
@@ -70,24 +59,20 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--working-directory", type=str, required=True)
     parser.add_argument("--memory-limit", type=int, default=3072)
-    parser.add_argument("--n-jobs",
-                        help="Compute metafeatures in parallel if possible.",
-                        type=int, default=1)
     parser.add_argument("--test-mode", action='store_true')
 
     args = parser.parse_args()
     working_directory = args.working_directory
     memory_limit = args.memory_limit
-    n_jobs = args.n_jobs
     test_mode = args.test_mode
 
-    output_directory = os.path.join(working_directory, 'metafeatures')
-    try:
-        os.makedirs(output_directory)
-    except:
-        pass
-
     for task_type in ('classification', 'regression'):
+        output_directory = os.path.join(working_directory, 'metafeatures', task_type)
+        try:
+            os.makedirs(output_directory)
+        except:
+            pass
+
         all_metafeatures = {}
 
         if task_type == 'classification':
@@ -98,9 +83,6 @@ if __name__ == "__main__":
         if test_mode:
             tasks = [tasks[0]]
 
-        EXCLUDE_META_FEATURES = EXCLUDE_META_FEATURES_CLASSIFICATION \
-            if task_type == 'classification' else EXCLUDE_META_FEATURES_REGRESSION
-
         tasks = copy.deepcopy(tasks)
         np.random.shuffle(tasks)
 
@@ -110,9 +92,10 @@ if __name__ == "__main__":
 
         memory = joblib.Memory(location='/tmp/joblib', verbose=10)
         cached_calculate_metafeatures = memory.cache(calculate_metafeatures)
-        mfs = joblib.Parallel(n_jobs=args.n_jobs) \
-            (joblib.delayed(cached_calculate_metafeatures)(task_id, EXCLUDE_META_FEATURES)
-             for task_id in producer())
+        mfs = [
+            cached_calculate_metafeatures(task_id)
+            for task_id in producer()
+        ]
 
         for mf in mfs:
             if mf is not None:
@@ -140,12 +123,14 @@ if __name__ == "__main__":
                         metafeature_value.value
 
         calculation_times = pd.DataFrame(calculation_times).transpose()
+        calculation_times = calculation_times.sort_index()
         with open(os.path.join(output_directory, "calculation_times.csv"),
                   "w") as fh:
             fh.write(calculation_times.to_csv())
 
         # Write all metafeatures in the aslib1.0 format
-        metafeature_values = pd.DataFrame(metafeature_values).transpose()
+        metafeature_values = metafeature_values = pd.DataFrame(metafeature_values).transpose()
+        metafeature_values = metafeature_values.sort_index()
         arff_object = dict()
         arff_object['attributes'] = [('instance_id', 'STRING'),
                                      ('repetition', 'NUMERIC')] + \
@@ -169,9 +154,15 @@ if __name__ == "__main__":
         # Feature steps and runtimes according to the aslib1.0 format
         feature_steps = defaultdict(list)
         metafeature_names = list()
+
+        exclude_metafeatures = (
+            EXCLUDE_META_FEATURES_CLASSIFICATION
+            if task_type == 'classification' else EXCLUDE_META_FEATURES_REGRESSION
+        )
+
         for metafeature_name in metafeatures.metafeatures.functions:
 
-            if metafeature_name in EXCLUDE_META_FEATURES:
+            if metafeature_name in exclude_metafeatures:
                 continue
 
             dependency = metafeatures.metafeatures.get_dependency(metafeature_name)
@@ -257,5 +248,5 @@ if __name__ == "__main__":
 
         with open(os.path.join(output_directory,
                                "description.features.txt"), "w") as fh:
-            for task_id in description:
-                fh.write("%s: %s\n" % (task_id, description[task_id]))
+            for entry in description:
+                fh.write("%s: %s\n" % (entry, description[entry]))

@@ -18,8 +18,9 @@ __all__ = [
 class TestEvaluator(AbstractEvaluator):
 
     def __init__(self, backend, queue, metric,
+                 port,
                  configuration=None,
-                 all_scoring_functions=False,
+                 scoring_functions=None,
                  seed=1,
                  include=None,
                  exclude=None,
@@ -28,9 +29,10 @@ class TestEvaluator(AbstractEvaluator):
         super(TestEvaluator, self).__init__(
             backend=backend,
             queue=queue,
+            port=port,
             configuration=configuration,
             metric=metric,
-            all_scoring_functions=all_scoring_functions,
+            scoring_functions=scoring_functions,
             seed=seed,
             output_y_hat_optimization=False,
             num_run=-1,
@@ -74,7 +76,7 @@ class TestEvaluator(AbstractEvaluator):
                 prediction=Y_pred,
                 task_type=self.task_type,
                 metric=self.metric,
-                all_scoring_functions=self.all_scoring_functions)
+                scoring_functions=self.scoring_functions)
         else:
             Y_pred = self.predict_function(self.X_test, self.model,
                                            self.task_type, self.Y_train)
@@ -83,7 +85,7 @@ class TestEvaluator(AbstractEvaluator):
                 prediction=Y_pred,
                 task_type=self.task_type,
                 metric=self.metric,
-                all_scoring_functions=self.all_scoring_functions)
+                scoring_functions=self.scoring_functions)
 
         if hasattr(score, '__len__'):
             if self.task_type in CLASSIFICATION_TASKS:
@@ -101,13 +103,14 @@ class TestEvaluator(AbstractEvaluator):
 # create closure for evaluating an algorithm
 # Has a stupid name so pytest doesn't regard it as a test
 def eval_t(queue, config, backend, metric, seed, num_run, instance,
-           all_scoring_functions, output_y_hat_optimization, include,
-           exclude, disable_file_output, init_params=None, budget_type=None,
+           scoring_functions, output_y_hat_optimization, include,
+           exclude, disable_file_output, port, init_params=None, budget_type=None,
            budget=None):
     evaluator = TestEvaluator(configuration=config,
                               backend=backend, metric=metric, seed=seed,
+                              port=port,
                               queue=queue,
-                              all_scoring_functions=all_scoring_functions,
+                              scoring_functions=scoring_functions,
                               include=include, exclude=exclude,
                               disable_file_output=disable_file_output,
                               init_params=init_params)

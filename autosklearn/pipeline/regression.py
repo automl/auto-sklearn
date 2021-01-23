@@ -188,9 +188,11 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
         # which would take too long
         # Combinations of tree-based models with feature learning:
-        regressors_ = ["adaboost", "decision_tree", "extra_trees",
-                       "gaussian_process", "gradient_boosting",
-                       "k_nearest_neighbors", "random_forest", "xgradient_boosting"]
+        regressors_ = [
+            "adaboost", "ard_regression", "decision_tree",
+            "extra_trees", "gaussian_process", "gradient_boosting",
+            "k_nearest_neighbors", "libsvm_svr", "mlp", "random_forest"
+        ]
         feature_learning_ = ["kitchen_sinks", "kernel_pca", "nystroem_sampler"]
 
         for r, f in product(regressors_, feature_learning_):

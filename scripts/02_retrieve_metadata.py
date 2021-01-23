@@ -29,25 +29,15 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
     configurations_to_ids = dict()
 
     try:
-        possible_experiment_directories = glob.glob(os.path.join(
-            validation_directory, '*', '*'
+        validation_trajectory_files = glob.glob(os.path.join(
+            validation_directory, '*', '*', 'validation_trajectory_*.json'
         ))
     except FileNotFoundError:
         return {}, {}
 
-    for ped in possible_experiment_directories:
+    for validation_trajectory_file in validation_trajectory_files:
         task_name = None
 
-        ped = os.path.join(validation_directory, ped)
-        if not os.path.exists(ped) or not os.path.isdir(ped):
-            continue
-        print("Going through directory %s" % ped)
-
-        validation_trajectory_file = os.path.join(ped, 'smac3-output', 'run_1',
-                                                  'validation_trajectory.json')
-        if not os.path.exists(validation_trajectory_file):
-            print('Could not find output file', validation_trajectory_file)
-            continue
         with open(validation_trajectory_file) as fh:
             validation_trajectory = json.load(fh)
 
@@ -78,7 +68,7 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
                     best_configuration = Configuration(
                         configuration_space=configuration_space, values=config)
                     best_value = score
-                    best_configuration_dir = ped
+                    best_configuration_dir = validation_trajectory_file
                 except Exception as e:
                     print(e)
                     n_broken += 1
