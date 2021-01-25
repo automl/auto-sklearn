@@ -32,6 +32,8 @@ class BasePipeline(Pipeline):
         else:
             self.steps = steps
 
+        self._validate_include_exclude_params()
+
         self.config_space = self.get_hyperparameter_search_space()
 
         if config is None:
@@ -453,3 +455,9 @@ class BasePipeline(Pipeline):
         the optimization algorithm.
         """
         return self._additional_run_info
+
+    def _validate_include_exclude_params(self):
+        steps = [step[0] for step in self.steps]
+        for node in list(self.include.keys()) + list(self.exclude):
+            if node not in steps:
+                raise ValueError("Component {0} in not part for pipeline steps {1}".format(node, str(steps)))

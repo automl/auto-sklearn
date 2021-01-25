@@ -25,54 +25,14 @@ __all__ = [
 
 
 def get_configuration_space(info: Dict[str, Any],
-                            include_estimators: Optional[List[str]] = None,
-                            exclude_estimators: Optional[List[str]] = None,
-                            include_preprocessors: Optional[List[str]] = None,
-                            exclude_preprocessors: Optional[List[str]] = None,
-                            include_data_preprocessor: Optional[List[str]] = None,
-                            exclude_data_preprocessor: Optional[List[str]] = None,
+                            include: Optional[dict] = None,
+                            exclude: Optional[dict] = None,
                             ) -> ConfigurationSpace:
-    exclude = dict()
-    include = dict()
 
-    if include_data_preprocessor is not None and \
-            exclude_data_preprocessor is not None:
-        raise ValueError('Cannot specify include_preprocessors and '
-                         'exclude_preprocessors.')
-    elif include_data_preprocessor is not None:
-        include['data_preprocessor'] = include_data_preprocessor
-    elif exclude_data_preprocessor is not None:
-        exclude['data_preprocessor'] = exclude_data_preprocessor
-    else:
-        exclude['data_preprocessor'] = ['no_preprocessing']
-
-    if include_preprocessors is not None and \
-            exclude_preprocessors is not None:
-        raise ValueError('Cannot specify include_preprocessors and '
-                         'exclude_preprocessors.')
-    elif include_preprocessors is not None:
-        include['feature_preprocessor'] = include_preprocessors
-    elif exclude_preprocessors is not None:
-        exclude['feature_preprocessor'] = exclude_preprocessors
-
-    if include_estimators is not None and \
-            exclude_estimators is not None:
-        raise ValueError('Cannot specify include_estimators and '
-                         'exclude_estimators.')
-    elif include_estimators is not None:
-        if info['task'] in CLASSIFICATION_TASKS:
-            include['classifier'] = include_estimators
-        elif info['task'] in REGRESSION_TASKS:
-            include['regressor'] = include_estimators
-        else:
-            raise ValueError(info['task'])
-    elif exclude_estimators is not None:
-        if info['task'] in CLASSIFICATION_TASKS:
-            exclude['classifier'] = exclude_estimators
-        elif info['task'] in REGRESSION_TASKS:
-            exclude['regressor'] = exclude_estimators
-        else:
-            raise ValueError(info['task'])
+    if include is not None and exclude is not None:
+        for node in include.keys():
+            if node in exclude.keys():
+                raise ValueError('Cannot specify include and exclude for same step {0}.'.format(node))
 
     if info['task'] in REGRESSION_TASKS:
         return _get_regression_configuration_space(info, include, exclude)
@@ -88,13 +48,14 @@ def _get_regression_configuration_space(info: Dict[str, Any], include: Dict[str,
     if task_type == MULTIOUTPUT_REGRESSION:
         multioutput = True
 
+    if info['is_sparse'] == 1:
+        sparse = True
+
     dataset_properties = {
         'multioutput': multioutput,
         'sparse': sparse
     }
 
-    if info['is_sparse'] == 1:
-        sparse = True
     configuration_space = SimpleRegressionPipeline(
         dataset_properties=dataset_properties,
         include=include,

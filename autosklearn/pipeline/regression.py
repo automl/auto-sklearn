@@ -102,31 +102,16 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
         Parameters
         ----------
-        include_estimators : list of str
-            If include_estimators is given, only the regressors specified
+        include : dict
+            If include is given, only the modules specified for nodes
             are used. Specify them by their module name; e.g., to include
-            only the SVM use :python:`include_regressors=['svr']`.
-            Cannot be used together with :python:`exclude_regressors`.
+            only the SVM use :python:`include={'regressor':['svr']}`.
 
-        exclude_estimators : list of str
-            If exclude_estimators is given, only the regressors specified
+        exclude : dict
+            If exclude is given, only the components specified for nodes
             are used. Specify them by their module name; e.g., to include
             all regressors except the SVM use
-            :python:`exclude_regressors=['svr']`.
-            Cannot be used together with :python:`include_regressors`.
-
-        include_preprocessors : list of str
-            If include_preprocessors is given, only the preprocessors specified
-            are used. Specify them by their module name; e.g., to include
-            only the PCA use :python:`include_preprocessors=['pca']`.
-            Cannot be used together with :python:`exclude_preprocessors`.
-
-        exclude_preprocessors : list of str
-            If include_preprocessors is given, only the preprocessors specified
-            are used. Specify them by their module name; e.g., to include
-            all preprocessors except the PCA use
-            :python:`exclude_preprocessors=['pca']`.
-            Cannot be used together with :python:`include_preprocessors`.
+            :python:`exclude=['regressor': 'svr']`.
 
         Returns
         -------

@@ -293,6 +293,8 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             'extra_trees', 'passive_aggressive', 'random_forest', 'sgd', 'gradient_boosting', 'mlp',
         ]
         include_preprocessors = ["no_preprocessing"]
+        include = {'classifier': include_estimators,
+                   'feature_preprocessor': include_preprocessors}
         super().__init__(
             time_left_for_this_task=time_left_for_this_task,
             initial_configurations_via_metalearning=0,
@@ -301,10 +303,8 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             max_models_on_disc=max_models_on_disc,
             seed=seed,
             memory_limit=memory_limit,
-            include_estimators=include_estimators,
-            exclude_estimators=None,
-            include_preprocessors=include_preprocessors,
-            exclude_preprocessors=None,
+            include=include,
+            exclude=None,
             resampling_strategy=None,
             resampling_strategy_arguments=None,
             tmp_folder=tmp_folder,

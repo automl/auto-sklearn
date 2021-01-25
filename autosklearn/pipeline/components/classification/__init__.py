@@ -78,8 +78,8 @@ class ClassifierChoice(AutoSklearnChoice):
             dataset_properties = {}
 
         if include is not None and exclude is not None:
-            raise ValueError("The arguments include_estimators and "
-                             "exclude_estimators cannot be used together.")
+            raise ValueError("The arguments include and "
+                             "exclude cannot be used together.")
 
         cs = ConfigurationSpace()
 

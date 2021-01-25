@@ -115,7 +115,7 @@ clf = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=30,
     per_run_time_limit=10,
     # Here we exclude auto-sklearn's default random forest component
-    exclude_estimators=['random_forest'],
+    exclude={'classifier': ['random_forest']},
     # Bellow two flags are provided to speed up calculations
     # Not recommended for a real implementation
     initial_configurations_via_metalearning=0,

@@ -216,12 +216,8 @@ class AutoMLSMBO(object):
                  metadata_directory=None,
                  resampling_strategy='holdout',
                  resampling_strategy_args=None,
-                 include_estimators=None,
-                 exclude_estimators=None,
-                 include_preprocessors=None,
-                 exclude_preprocessors=None,
-                 include_data_preprocessor=None,
-                 exclude_data_preprocessor=None,
+                 include=None,
+                 exclude=None,
                  disable_file_output=False,
                  smac_scenario_args=None,
                  get_smac_object_callback=None,
@@ -263,12 +259,8 @@ class AutoMLSMBO(object):
         self.seed = seed
         self.metadata_directory = metadata_directory
         self.start_num_run = start_num_run
-        self.include_estimators = include_estimators
-        self.exclude_estimators = exclude_estimators
-        self.include_preprocessors = include_preprocessors
-        self.exclude_preprocessors = exclude_preprocessors
-        self.include_data_preprocessor = include_data_preprocessor
-        self.exclude_data_preprocessor = exclude_data_preprocessor
+        self.include = include
+        self.exclude = exclude
         self.disable_file_output = disable_file_output
         self.smac_scenario_args = smac_scenario_args
         self.get_smac_object_callback = get_smac_object_callback
@@ -415,52 +407,18 @@ class AutoMLSMBO(object):
         # evaluator, which takes into account that a run can be killed prior
         # to the model being fully fitted; thus putting intermediate results
         # into a queue and querying them once the time is over
-        exclude = dict()
-        include = dict()
-        if self.include_data_preprocessor is not None and \
-                self.exclude_data_preprocessor is not None:
-            raise ValueError('Cannot specify include_preprocessors and '
-                             'exclude_preprocessors.')
-        elif self.include_data_preprocessor is not None:
-            include['data_preprocessor'] = self.include_data_preprocessor
-        elif self.exclude_data_preprocessor is not None:
-            exclude['data_preprocessor'] = self.exclude_data_preprocessor
-        else:
-            exclude['data_preprocessor'] = ['no_preprocessing']
-
-        if self.include_preprocessors is not None and self.exclude_preprocessors is not None:
-            raise ValueError('Cannot specify include_preprocessors and '
-                             'exclude_preprocessors.')
-        elif self.include_preprocessors is not None:
-            include['feature_preprocessor'] = self.include_preprocessors
-        elif self.exclude_preprocessors is not None:
-            exclude['feature_preprocessor'] = self.exclude_preprocessors
-
-        if self.include_estimators is not None and self.exclude_estimators is not None:
-            raise ValueError('Cannot specify include_estimators and '
-                             'exclude_estimators.')
-        elif self.include_estimators is not None:
-            if self.task in CLASSIFICATION_TASKS:
-                include['classifier'] = self.include_estimators
-            elif self.task in REGRESSION_TASKS:
-                include['regressor'] = self.include_estimators
-            else:
-                raise ValueError(self.task)
-        elif self.exclude_estimators is not None:
-            if self.task in CLASSIFICATION_TASKS:
-                exclude['classifier'] = self.exclude_estimators
-            elif self.task in REGRESSION_TASKS:
-                exclude['regressor'] = self.exclude_estimators
-            else:
-                raise ValueError(self.task)
+        if self.include is not None and self.exclude is not None:
+            for node in self.include.keys():
+                if node in self.exclude.keys():
+                    raise ValueError('Cannot specify include and exclude for same step {0}.'.format(node))
 
         ta_kwargs = dict(
             backend=copy.deepcopy(self.backend),
             autosklearn_seed=seed,
             resampling_strategy=self.resampling_strategy,
             initial_num_run=num_run,
-            include=include,
-            exclude=exclude,
+            include=self.include,
+            exclude=self.exclude,
             metric=self.metric,
             memory_limit=self.memory_limit,
             disable_file_output=self.disable_file_output,

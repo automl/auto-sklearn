@@ -38,7 +38,7 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     disable_evaluator_output=False,
     # To simplify querying the models in the final ensemble, we
     # restrict auto-sklearn to use only pca as a preprocessor
-    include_preprocessors=['pca'],
+    include={'feature_preprocessor': ['pca']},
 )
 automl.fit(X_train, y_train, dataset_name='breast_cancer')
 

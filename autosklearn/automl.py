@@ -117,12 +117,8 @@ class AutoML(BaseEstimator):
                  memory_limit=3072,
                  metadata_directory=None,
                  debug_mode=False,
-                 include_estimators=None,
-                 exclude_estimators=None,
-                 include_preprocessors=None,
-                 exclude_preprocessors=None,
-                 include_data_preprocessor=None,
-                 exclude_data_preprocessor=None,
+                 include=None,
+                 exclude=None,
                  resampling_strategy='holdout-iterative-fit',
                  resampling_strategy_arguments=None,
                  n_jobs=None,
@@ -150,12 +146,8 @@ class AutoML(BaseEstimator):
         self._memory_limit = memory_limit
         self._data_memory_limit = None
         self._metadata_directory = metadata_directory
-        self._include_estimators = include_estimators
-        self._exclude_estimators = exclude_estimators
-        self._include_preprocessors = include_preprocessors
-        self._include_data_preprocessor = include_data_preprocessor
-        self._exclude_data_preprocessor = exclude_data_preprocessor
-        self._exclude_preprocessors = exclude_preprocessors
+        self._include = include
+        self._exclude = exclude
         self._resampling_strategy = resampling_strategy
         self._scoring_functions = scoring_functions if scoring_functions is not None else []
         self._resampling_strategy_arguments = resampling_strategy_arguments \
@@ -567,10 +559,8 @@ class AutoML(BaseEstimator):
         self._logger.debug('  memory_limit: %s', str(self._memory_limit))
         self._logger.debug('  metadata_directory: %s', self._metadata_directory)
         self._logger.debug('  debug_mode: %s', self._debug_mode)
-        self._logger.debug('  include_estimators: %s', str(self._include_estimators))
-        self._logger.debug('  exclude_estimators: %s', str(self._exclude_estimators))
-        self._logger.debug('  include_preprocessors: %s', str(self._include_preprocessors))
-        self._logger.debug('  exclude_preprocessors: %s', str(self._exclude_preprocessors))
+        self._logger.debug('  include: %s', str(self._include))
+        self._logger.debug('  exclude: %s', str(self._exclude))
         self._logger.debug('  resampling_strategy: %s', str(self._resampling_strategy))
         self._logger.debug('  resampling_strategy_arguments: %s',
                            str(self._resampling_strategy_arguments))
@@ -637,12 +627,8 @@ class AutoML(BaseEstimator):
             self._backend.temporary_directory,
             self._backend,
             datamanager,
-            include_estimators=self._include_estimators,
-            exclude_estimators=self._exclude_estimators,
-            include_preprocessors=self._include_preprocessors,
-            exclude_preprocessors=self._exclude_preprocessors,
-            include_data_preprocessor=self._include_data_preprocessor,
-            exclude_data_preprocessor=self._exclude_data_preprocessor,
+            include=self._include,
+            exclude=self._exclude,
         )
         if only_return_configuration_space:
             self._close_dask_client()
@@ -755,12 +741,8 @@ class AutoML(BaseEstimator):
                 metric=self._metric,
                 resampling_strategy=self._resampling_strategy,
                 resampling_strategy_args=self._resampling_strategy_arguments,
-                include_estimators=self._include_estimators,
-                exclude_estimators=self._exclude_estimators,
-                include_preprocessors=self._include_preprocessors,
-                exclude_preprocessors=self._exclude_preprocessors,
-                include_data_preprocessor=self._include_data_preprocessor,
-                exclude_data_preprocessor=self._exclude_data_preprocessor,
+                include=self._include,
+                exclude=self._exclude,
                 disable_file_output=self._disable_evaluator_output,
                 get_smac_object_callback=self._get_smac_object_callback,
                 smac_scenario_args=self._smac_scenario_args,
@@ -1342,12 +1324,8 @@ class AutoML(BaseEstimator):
             return sio.getvalue()
 
     def _create_search_space(self, tmp_dir, backend, datamanager,
-                             include_estimators=None,
-                             exclude_estimators=None,
-                             include_preprocessors=None,
-                             exclude_preprocessors=None,
-                             include_data_preprocessor=None,
-                             exclude_data_preprocessor=None,
+                             include=None,
+                             exclude=None,
                              ):
         task_name = 'CreateConfigSpace'
 
@@ -1355,12 +1333,8 @@ class AutoML(BaseEstimator):
         configspace_path = os.path.join(tmp_dir, 'space.json')
         configuration_space = pipeline.get_configuration_space(
             datamanager.info,
-            include_estimators=include_estimators,
-            exclude_estimators=exclude_estimators,
-            include_preprocessors=include_preprocessors,
-            exclude_preprocessors=exclude_preprocessors,
-            include_data_preprocessor=include_data_preprocessor,
-            exclude_data_preprocessor=exclude_data_preprocessor
+            include=include,
+            exclude=exclude,
         )
         configuration_space = self.configuration_space_created_hook(
             datamanager, configuration_space)
