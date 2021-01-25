@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Releases &#8212; AutoSklearn 0.12.2dev documentation</title>
+    <title>Releases &#8212; AutoSklearn 0.12.2 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.12.2dev</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.12.2</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -106,6 +106,10 @@
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
 <li><a class="reference internal" href="#">Releases</a><ul>
+<li><a class="reference internal" href="#version-0-12-2">Version 0.12.2</a><ul>
+<li><a class="reference internal" href="#contributors-v0-12-2">Contributors v0.12.2</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#version-0-12-1">Version 0.12.1</a><ul>
 <li><a class="reference internal" href="#contributors-v0-12-1">Contributors v0.12.1</a></li>
 </ul>
@@ -196,6 +200,30 @@
       
   <span class="target" id="releases"></span><div class="section" id="id1">
 <h1>Releases<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="version-0-12-2">
+<h2>Version 0.12.2<a class="headerlink" href="#version-0-12-2" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ADD #1045: New example demonstrating how to log multiple metrics during a run of Auto-sklearn.</p></li>
+<li><p>DOC #1052: Add links to mybinder</p></li>
+<li><p>DOC #1059: Improved the example on manually starting workers for Auto-sklearn.</p></li>
+<li><p>FIX #1046: Add the final result of the ensemble builder to the ensemble builder trajectory.</p></li>
+<li><p>MAINT: Two log outputs of level warning about metadata were turned reduced to the info loglevel
+as they are not actionable for the user.</p></li>
+<li><p>MAINT #1062: Use threads for local dask workers and forkserver to start subprocesses to reduce
+overhead.</p></li>
+<li><p>MAINT #1053: Remove the restriction to guard single-core Auto-sklearn by
+<code class="docutils literal notranslate"><span class="pre">__main__</span> <span class="pre">==</span> <span class="pre">&quot;__name__&quot;</span></code> again.</p></li>
+</ul>
+<div class="section" id="contributors-v0-12-2">
+<h3>Contributors v0.12.2<a class="headerlink" href="#contributors-v0-12-2" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Matthias Feurer</p></li>
+<li><p>ROHIT AGARWAL</p></li>
+<li><p>Francisco Rivera</p></li>
+<li><p>Katharina Eggensperger</p></li>
+</ul>
+</div>
+</div>
 <div class="section" id="version-0-12-1">
 <h2>Version 0.12.1<a class="headerlink" href="#version-0-12-1" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
