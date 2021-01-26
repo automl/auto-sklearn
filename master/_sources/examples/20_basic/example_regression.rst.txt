@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         Click :ref:`here <sphx_glr_download_examples_20_basic_example_regression.py>`
-        to download the full example code
+        to download the full example code or to run this example in your browser via Binder
 
 .. rst-class:: sphx-glr-example-title
 
@@ -25,7 +25,16 @@ Regression
 The following example shows how to fit a simple regression model with
 *auto-sklearn*.
 
-.. GENERATED FROM PYTHON SOURCE LINES 10-50
+.. GENERATED FROM PYTHON SOURCE LINES 10-16
+
+.. code-block:: default
+
+    import sklearn.datasets
+    import sklearn.metrics
+
+    import autosklearn.regression
+
+
 
 
 
@@ -38,6 +47,79 @@ The following example shows how to fit a simple regression model with
 
     /opt/hostedtoolcache/Python/3.8.6/x64/lib/python3.8/site-packages/pyparsing.py:3190: FutureWarning: Possible set intersection at position 3
       self.re = re.compile(self.reString)
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 17-19
+
+Data Loading
+============
+
+.. GENERATED FROM PYTHON SOURCE LINES 19-25
+
+.. code-block:: default
+
+
+    X, y = sklearn.datasets.load_boston(return_X_y=True)
+
+    X_train, X_test, y_train, y_test = \
+        sklearn.model_selection.train_test_split(X, y, random_state=1)
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 26-28
+
+Build and fit a regressor
+=========================
+
+.. GENERATED FROM PYTHON SOURCE LINES 28-37
+
+.. code-block:: default
+
+
+    automl = autosklearn.regression.AutoSklearnRegressor(
+        time_left_for_this_task=120,
+        per_run_time_limit=30,
+        tmp_folder='/tmp/autosklearn_regression_example_tmp',
+        output_folder='/tmp/autosklearn_regression_example_out',
+    )
+    automl.fit(X_train, y_train, dataset_name='boston')
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 38-40
+
+Print the final ensemble constructed by auto-sklearn
+====================================================
+
+.. GENERATED FROM PYTHON SOURCE LINES 40-43
+
+.. code-block:: default
+
+
+    print(automl.show_models())
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
     [(0.640000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'regressor:random_forest:bootstrap': 'True', 'regressor:random_forest:criterion': 'mse', 'regressor:random_forest:max_depth': 'None', 'regressor:random_forest:max_features': 1.0, 'regressor:random_forest:max_leaf_nodes': 'None', 'regressor:random_forest:min_impurity_decrease': 0.0, 'regressor:random_forest:min_samples_leaf': 1, 'regressor:random_forest:min_samples_split': 2, 'regressor:random_forest:min_weight_fraction_leaf': 0.0},
     dataset_properties={
       'task': 4,
@@ -60,62 +142,41 @@ The following example shows how to fit a simple regression model with
       'target_type': 'regression',
       'signed': False})),
     ]
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 44-46
+
+Get the Score of the final ensemble
+===================================
+
+.. GENERATED FROM PYTHON SOURCE LINES 46-49
+
+.. code-block:: default
+
+
+    predictions = automl.predict(X_test)
+    print("R2 score:", sklearn.metrics.r2_score(y_test, predictions))
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
     R2 score: 0.9040477219435149
 
 
 
 
 
-
-|
-
-.. code-block:: default
-
-    import sklearn.datasets
-    import sklearn.metrics
-
-    import autosklearn.regression
-
-
-    if __name__ == "__main__":
-        ############################################################################
-        # Data Loading
-        # ============
-
-        X, y = sklearn.datasets.load_boston(return_X_y=True)
-
-        X_train, X_test, y_train, y_test = \
-            sklearn.model_selection.train_test_split(X, y, random_state=1)
-
-        ############################################################################
-        # Build and fit a regressor
-        # =========================
-
-        automl = autosklearn.regression.AutoSklearnRegressor(
-            time_left_for_this_task=120,
-            per_run_time_limit=30,
-            tmp_folder='/tmp/autosklearn_regression_example_tmp',
-            output_folder='/tmp/autosklearn_regression_example_out',
-        )
-        automl.fit(X_train, y_train, dataset_name='boston')
-
-        ############################################################################
-        # Print the final ensemble constructed by auto-sklearn
-        # ====================================================
-
-        print(automl.show_models())
-
-        ###########################################################################
-        # Get the Score of the final ensemble
-        # ===================================
-
-        predictions = automl.predict(X_test)
-        print("R2 score:", sklearn.metrics.r2_score(y_test, predictions))
-
-
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  59.427 seconds)
+   **Total running time of the script:** ( 1 minutes  56.527 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_regression.py:
@@ -126,6 +187,13 @@ The following example shows how to fit a simple regression model with
  .. container:: sphx-glr-footer
     :class: sphx-glr-footer-example
 
+
+  .. container:: binder-badge
+
+    .. image:: images/binder_badge_logo.svg
+      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/20_basic/example_regression.ipynb
+      :alt: Launch binder
+      :width: 150 px
 
 
   .. container:: sphx-glr-download sphx-glr-download-python

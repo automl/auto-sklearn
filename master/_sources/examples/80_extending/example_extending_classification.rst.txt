@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         Click :ref:`here <sphx_glr_download_examples_80_extending_example_extending_classification.py>`
-        to download the full example code
+        to download the full example code or to run this example in your browser via Binder
 
 .. rst-class:: sphx-glr-example-title
 
@@ -58,7 +58,7 @@ component for using in auto-sklearn.
 Create MLP classifier component for auto-sklearn
 ================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 29-153
+.. GENERATED FROM PYTHON SOURCE LINES 29-121
 
 .. code-block:: default
 
@@ -155,38 +155,6 @@ Create MLP classifier component for auto-sklearn
     print(cs)
 
 
-    if __name__ == "__main__":
-
-        ############################################################################
-        # Data Loading
-        # ============
-
-        X, y = load_breast_cancer(return_X_y=True)
-        X_train, X_test, y_train, y_test = train_test_split(X, y)
-
-        ############################################################################
-        # Fit MLP classifier to the data
-        # ==============================
-
-        clf = autosklearn.classification.AutoSklearnClassifier(
-            time_left_for_this_task=30,
-            per_run_time_limit=10,
-            include_estimators=['MLPClassifier'],
-            # Bellow two flags are provided to speed up calculations
-            # Not recommended for a real implementation
-            initial_configurations_via_metalearning=0,
-            smac_scenario_args={'runcount_limit': 5},
-        )
-        clf.fit(X_train, y_train)
-
-        ############################################################################
-        # Print test accuracy and statistics
-        # ==================================
-
-        y_pred = clf.predict(X_test)
-        print("accuracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
-        print(clf.show_models())
-
 
 
 
@@ -204,9 +172,122 @@ Create MLP classifier component for auto-sklearn
         num_nodes_per_layer, Type: UniformInteger, Range: [16, 216], Default: 32
         solver, Type: Categorical, Choices: {lbfgs, sgd, adam}, Default: adam
 
-    accuracy:  0.2937062937062937
-    [(1.000000, MyDummyClassifier(configuration=1, init_params={'instance': None},
-                      random_state=1)),
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 122-124
+
+Data Loading
+============
+
+.. GENERATED FROM PYTHON SOURCE LINES 124-128
+
+.. code-block:: default
+
+
+    X, y = load_breast_cancer(return_X_y=True)
+    X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 129-131
+
+Fit MLP classifier to the data
+==============================
+
+.. GENERATED FROM PYTHON SOURCE LINES 131-143
+
+.. code-block:: default
+
+
+    clf = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=30,
+        per_run_time_limit=10,
+        include_estimators=['MLPClassifier'],
+        # Bellow two flags are provided to speed up calculations
+        # Not recommended for a real implementation
+        initial_configurations_via_metalearning=0,
+        smac_scenario_args={'runcount_limit': 5},
+    )
+    clf.fit(X_train, y_train)
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 144-146
+
+Print test accuracy and statistics
+==================================
+
+.. GENERATED FROM PYTHON SOURCE LINES 146-150
+
+.. code-block:: default
+
+
+    y_pred = clf.predict(X_test)
+    print("accuracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
+    print(clf.show_models())
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    accuracy:  0.9440559440559441
+    [(0.400000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'extra_trees_preproc_for_classification', 'classifier:MLPClassifier:activation': 'tanh', 'classifier:MLPClassifier:alpha': 0.9264398101836582, 'classifier:MLPClassifier:hidden_layer_depth': 1, 'classifier:MLPClassifier:num_nodes_per_layer': 144, 'classifier:MLPClassifier:solver': 'adam', 'feature_preprocessor:extra_trees_preproc_for_classification:bootstrap': 'True', 'feature_preprocessor:extra_trees_preproc_for_classification:criterion': 'entropy', 'feature_preprocessor:extra_trees_preproc_for_classification:max_depth': 'None', 'feature_preprocessor:extra_trees_preproc_for_classification:max_features': 0.9063863139348133, 'feature_preprocessor:extra_trees_preproc_for_classification:max_leaf_nodes': 'None', 'feature_preprocessor:extra_trees_preproc_for_classification:min_impurity_decrease': 0.0, 'feature_preprocessor:extra_trees_preproc_for_classification:min_samples_leaf': 17, 'feature_preprocessor:extra_trees_preproc_for_classification:min_samples_split': 14, 'feature_preprocessor:extra_trees_preproc_for_classification:min_weight_fraction_leaf': 0.0, 'feature_preprocessor:extra_trees_preproc_for_classification:n_estimators': 100},
+    dataset_properties={
+      'task': 1,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'classification',
+      'signed': False})),
+    (0.380000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:MLPClassifier:activation': 'relu', 'classifier:MLPClassifier:alpha': 0.0001, 'classifier:MLPClassifier:hidden_layer_depth': 1, 'classifier:MLPClassifier:num_nodes_per_layer': 32, 'classifier:MLPClassifier:solver': 'adam', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01},
+    dataset_properties={
+      'task': 1,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'classification',
+      'signed': False})),
+    (0.100000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:__choice__': 'liblinear_svc_preprocessor', 'classifier:MLPClassifier:activation': 'relu', 'classifier:MLPClassifier:alpha': 0.12457759510694098, 'classifier:MLPClassifier:hidden_layer_depth': 3, 'classifier:MLPClassifier:num_nodes_per_layer': 99, 'classifier:MLPClassifier:solver': 'lbfgs', 'feature_preprocessor:liblinear_svc_preprocessor:C': 134.08608166517868, 'feature_preprocessor:liblinear_svc_preprocessor:dual': 'False', 'feature_preprocessor:liblinear_svc_preprocessor:fit_intercept': 'True', 'feature_preprocessor:liblinear_svc_preprocessor:intercept_scaling': 1, 'feature_preprocessor:liblinear_svc_preprocessor:loss': 'squared_hinge', 'feature_preprocessor:liblinear_svc_preprocessor:multi_class': 'ovr', 'feature_preprocessor:liblinear_svc_preprocessor:penalty': 'l1', 'feature_preprocessor:liblinear_svc_preprocessor:tol': 0.005053273024538863},
+    dataset_properties={
+      'task': 1,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'classification',
+      'signed': False})),
+    (0.080000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'feature_preprocessor:__choice__': 'extra_trees_preproc_for_classification', 'classifier:MLPClassifier:activation': 'logistic', 'classifier:MLPClassifier:alpha': 0.8085399362082959, 'classifier:MLPClassifier:hidden_layer_depth': 2, 'classifier:MLPClassifier:num_nodes_per_layer': 87, 'classifier:MLPClassifier:solver': 'lbfgs', 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max': 0.8956544191280793, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min': 0.03433346125068971, 'feature_preprocessor:extra_trees_preproc_for_classification:bootstrap': 'False', 'feature_preprocessor:extra_trees_preproc_for_classification:criterion': 'gini', 'feature_preprocessor:extra_trees_preproc_for_classification:max_depth': 'None', 'feature_preprocessor:extra_trees_preproc_for_classification:max_features': 0.8562110947570252, 'feature_preprocessor:extra_trees_preproc_for_classification:max_leaf_nodes': 'None', 'feature_preprocessor:extra_trees_preproc_for_classification:min_impurity_decrease': 0.0, 'feature_preprocessor:extra_trees_preproc_for_classification:min_samples_leaf': 19, 'feature_preprocessor:extra_trees_preproc_for_classification:min_samples_split': 4, 'feature_preprocessor:extra_trees_preproc_for_classification:min_weight_fraction_leaf': 0.0, 'feature_preprocessor:extra_trees_preproc_for_classification:n_estimators': 100},
+    dataset_properties={
+      'task': 1,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'classification',
+      'signed': False})),
+    (0.040000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:MLPClassifier:activation': 'logistic', 'classifier:MLPClassifier:alpha': 0.9521869738098419, 'classifier:MLPClassifier:hidden_layer_depth': 1, 'classifier:MLPClassifier:num_nodes_per_layer': 172, 'classifier:MLPClassifier:solver': 'lbfgs', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.007836973936351303},
+    dataset_properties={
+      'task': 1,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'classification',
+      'signed': False})),
     ]
 
 
@@ -215,7 +296,7 @@ Create MLP classifier component for auto-sklearn
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  20.836 seconds)
+   **Total running time of the script:** ( 0 minutes  19.524 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_classification.py:
@@ -226,6 +307,13 @@ Create MLP classifier component for auto-sklearn
  .. container:: sphx-glr-footer
     :class: sphx-glr-footer-example
 
+
+  .. container:: binder-badge
+
+    .. image:: images/binder_badge_logo.svg
+      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_classification.ipynb
+      :alt: Launch binder
+      :width: 150 px
 
 
   .. container:: sphx-glr-download sphx-glr-download-python

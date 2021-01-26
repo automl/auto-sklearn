@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         Click :ref:`here <sphx_glr_download_examples_80_extending_example_extending_regression.py>`
-        to download the full example code
+        to download the full example code or to run this example in your browser via Binder
 
 .. rst-class:: sphx-glr-example-title
 
@@ -58,7 +58,7 @@ component for using in auto-sklearn.
 Implement kernel ridge regression component for auto-sklearn
 ============================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 29-137
+.. GENERATED FROM PYTHON SOURCE LINES 29-106
 
 .. code-block:: default
 
@@ -140,37 +140,6 @@ Implement kernel ridge regression component for auto-sklearn
     print(cs)
 
 
-    if __name__ == "__main__":
-
-        ############################################################################
-        # Generate data
-        # =============
-
-        X, y = load_diabetes(return_X_y=True)
-        X_train, X_test, y_train, y_test = train_test_split(X, y)
-
-        ############################################################################
-        # Fit the model using KRR
-        # =======================
-
-        reg = autosklearn.regression.AutoSklearnRegressor(
-            time_left_for_this_task=30,
-            per_run_time_limit=10,
-            include_estimators=['KernelRidgeRegression'],
-            # Bellow two flags are provided to speed up calculations
-            # Not recommended for a real implementation
-            initial_configurations_via_metalearning=0,
-            smac_scenario_args={'runcount_limit': 5},
-        )
-        reg.fit(X_train, y_train)
-
-        ############################################################################
-        # Print prediction score and statistics
-        # =====================================
-        y_pred = reg.predict(X_test)
-        print("r2 score: ", sklearn.metrics.r2_score(y_pred, y_test))
-        print(reg.show_models())
-
 
 
 
@@ -191,9 +160,102 @@ Implement kernel ridge regression component for auto-sklearn
         coef0 | kernel == 'polynomial'
         degree | kernel == 'polynomial'
 
-    r2 score:  0.0
-    [(1.000000, MyDummyRegressor(configuration=1, init_params={'instance': None},
-                     random_state=1)),
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 107-109
+
+Generate data
+=============
+
+.. GENERATED FROM PYTHON SOURCE LINES 109-113
+
+.. code-block:: default
+
+
+    X, y = load_diabetes(return_X_y=True)
+    X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 114-116
+
+Fit the model using KRR
+=======================
+
+.. GENERATED FROM PYTHON SOURCE LINES 116-128
+
+.. code-block:: default
+
+
+    reg = autosklearn.regression.AutoSklearnRegressor(
+        time_left_for_this_task=30,
+        per_run_time_limit=10,
+        include_estimators=['KernelRidgeRegression'],
+        # Bellow two flags are provided to speed up calculations
+        # Not recommended for a real implementation
+        initial_configurations_via_metalearning=0,
+        smac_scenario_args={'runcount_limit': 5},
+    )
+    reg.fit(X_train, y_train)
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 129-131
+
+Print prediction score and statistics
+=====================================
+
+.. GENERATED FROM PYTHON SOURCE LINES 131-134
+
+.. code-block:: default
+
+    y_pred = reg.predict(X_test)
+    print("r2 score: ", sklearn.metrics.r2_score(y_pred, y_test))
+    print(reg.show_models())
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    r2 score:  -0.7604473650673693
+    [(0.480000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'KernelRidgeRegression', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'regressor:KernelRidgeRegression:alpha': 1.0, 'regressor:KernelRidgeRegression:gamma': 0.1, 'regressor:KernelRidgeRegression:kernel': 'polynomial', 'regressor:KernelRidgeRegression:coef0': 1.0, 'regressor:KernelRidgeRegression:degree': 3},
+    dataset_properties={
+      'task': 4,
+      'sparse': False,
+      'multioutput': False,
+      'target_type': 'regression',
+      'signed': False})),
+    (0.320000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'kitchen_sinks', 'regressor:__choice__': 'KernelRidgeRegression', 'feature_preprocessor:kitchen_sinks:gamma': 0.00473238660746417, 'feature_preprocessor:kitchen_sinks:n_components': 212, 'regressor:KernelRidgeRegression:alpha': 0.00504200052385338, 'regressor:KernelRidgeRegression:gamma': 0.00031588355920827163, 'regressor:KernelRidgeRegression:kernel': 'polynomial', 'regressor:KernelRidgeRegression:coef0': 0.0809011782758673, 'regressor:KernelRidgeRegression:degree': 2},
+    dataset_properties={
+      'task': 4,
+      'sparse': False,
+      'multioutput': False,
+      'target_type': 'regression',
+      'signed': False})),
+    (0.200000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'feature_preprocessor:__choice__': 'random_trees_embedding', 'regressor:__choice__': 'KernelRidgeRegression', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.001818729822644953, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 1701, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'normal', 'feature_preprocessor:random_trees_embedding:bootstrap': 'True', 'feature_preprocessor:random_trees_embedding:max_depth': 6, 'feature_preprocessor:random_trees_embedding:max_leaf_nodes': 'None', 'feature_preprocessor:random_trees_embedding:min_samples_leaf': 12, 'feature_preprocessor:random_trees_embedding:min_samples_split': 16, 'feature_preprocessor:random_trees_embedding:min_weight_fraction_leaf': 1.0, 'feature_preprocessor:random_trees_embedding:n_estimators': 100, 'regressor:KernelRidgeRegression:alpha': 0.02351257718197114, 'regressor:KernelRidgeRegression:gamma': 0.011972301608556113, 'regressor:KernelRidgeRegression:kernel': 'polynomial', 'regressor:KernelRidgeRegression:coef0': 0.010474650948262332, 'regressor:KernelRidgeRegression:degree': 3},
+    dataset_properties={
+      'task': 4,
+      'sparse': False,
+      'multioutput': False,
+      'target_type': 'regression',
+      'signed': False})),
     ]
 
 
@@ -202,7 +264,7 @@ Implement kernel ridge regression component for auto-sklearn
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  20.084 seconds)
+   **Total running time of the script:** ( 0 minutes  19.083 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_regression.py:
@@ -213,6 +275,13 @@ Implement kernel ridge regression component for auto-sklearn
  .. container:: sphx-glr-footer
     :class: sphx-glr-footer-example
 
+
+  .. container:: binder-badge
+
+    .. image:: images/binder_badge_logo.svg
+      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_regression.ipynb
+      :alt: Launch binder
+      :width: 150 px
 
 
   .. container:: sphx-glr-download sphx-glr-download-python

@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         Click :ref:`here <sphx_glr_download_examples_80_extending_example_extending_preprocessor.py>`
-        to download the full example code
+        to download the full example code or to run this example in your browser via Binder
 
 .. rst-class:: sphx-glr-example-title
 
@@ -60,7 +60,7 @@ in auto-sklearn.
 Create LDA component for auto-sklearn
 =====================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-133
+.. GENERATED FROM PYTHON SOURCE LINES 31-95
 
 .. code-block:: default
 
@@ -129,43 +129,45 @@ Create LDA component for auto-sklearn
     autosklearn.pipeline.components.feature_preprocessing.add_preprocessor(LDA)
 
 
-    if __name__ == "__main__":
 
-        ############################################################################
-        # Create dataset
-        # ==============
 
-        X, y = load_breast_cancer(return_X_y=True)
-        X_train, X_test, y_train, y_test = train_test_split(X, y)
 
-        ############################################################################
-        # Configuration space
-        # ===================
 
-        cs = LDA.get_hyperparameter_search_space()
-        print(cs)
 
-        ############################################################################
-        # Fit the model using LDA as preprocessor
-        # =======================================
 
-        clf = autosklearn.classification.AutoSklearnClassifier(
-            time_left_for_this_task=30,
-            include_preprocessors=['LDA'],
-            # Bellow two flags are provided to speed up calculations
-            # Not recommended for a real implementation
-            initial_configurations_via_metalearning=0,
-            smac_scenario_args={'runcount_limit': 5},
-        )
-        clf.fit(X_train, y_train)
+.. GENERATED FROM PYTHON SOURCE LINES 96-98
 
-        ############################################################################
-        # Print prediction score and statistics
-        # =====================================
+Create dataset
+==============
 
-        y_pred = clf.predict(X_test)
-        print("accuracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
-        print(clf.show_models())
+.. GENERATED FROM PYTHON SOURCE LINES 98-102
+
+.. code-block:: default
+
+
+    X, y = load_breast_cancer(return_X_y=True)
+    X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 103-105
+
+Configuration space
+===================
+
+.. GENERATED FROM PYTHON SOURCE LINES 105-109
+
+.. code-block:: default
+
+
+    cs = LDA.get_hyperparameter_search_space()
+    print(cs)
+
 
 
 
@@ -184,9 +186,93 @@ Create LDA component for auto-sklearn
       Conditions:
         shrinkage | solver in {'lsqr', 'eigen'}
 
-    accuracy:  0.3776223776223776
-    [(1.000000, MyDummyClassifier(configuration=1, init_params={'instance': None},
-                      random_state=1)),
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 110-112
+
+Fit the model using LDA as preprocessor
+=======================================
+
+.. GENERATED FROM PYTHON SOURCE LINES 112-123
+
+.. code-block:: default
+
+
+    clf = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=30,
+        include_preprocessors=['LDA'],
+        # Bellow two flags are provided to speed up calculations
+        # Not recommended for a real implementation
+        initial_configurations_via_metalearning=0,
+        smac_scenario_args={'runcount_limit': 5},
+    )
+    clf.fit(X_train, y_train)
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 124-126
+
+Print prediction score and statistics
+=====================================
+
+.. GENERATED FROM PYTHON SOURCE LINES 126-130
+
+.. code-block:: default
+
+
+    y_pred = clf.predict(X_test)
+    print("accuracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
+    print(clf.show_models())
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    accuracy:  0.965034965034965
+    [(0.420000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'LDA', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'feature_preprocessor:LDA:solver': 'svd', 'feature_preprocessor:LDA:tol': 0.0001},
+    dataset_properties={
+      'task': 1,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'classification',
+      'signed': False})),
+    (0.360000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'decision_tree', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'LDA', 'classifier:decision_tree:criterion': 'entropy', 'classifier:decision_tree:max_depth_factor': 0.24444152309162437, 'classifier:decision_tree:max_features': 1.0, 'classifier:decision_tree:max_leaf_nodes': 'None', 'classifier:decision_tree:min_impurity_decrease': 0.0, 'classifier:decision_tree:min_samples_leaf': 8, 'classifier:decision_tree:min_samples_split': 18, 'classifier:decision_tree:min_weight_fraction_leaf': 0.0, 'feature_preprocessor:LDA:solver': 'svd', 'feature_preprocessor:LDA:tol': 0.8460086013393683},
+    dataset_properties={
+      'task': 1,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'classification',
+      'signed': False})),
+    (0.120000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'adaboost', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'LDA', 'classifier:adaboost:algorithm': 'SAMME.R', 'classifier:adaboost:learning_rate': 1.4861471145659388, 'classifier:adaboost:max_depth': 10, 'classifier:adaboost:n_estimators': 84, 'feature_preprocessor:LDA:solver': 'eigen', 'feature_preprocessor:LDA:tol': 0.8734817422890115, 'feature_preprocessor:LDA:shrinkage': 0.7525111817759726},
+    dataset_properties={
+      'task': 1,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'classification',
+      'signed': False})),
+    (0.100000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'adaboost', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'feature_preprocessor:__choice__': 'LDA', 'classifier:adaboost:algorithm': 'SAMME.R', 'classifier:adaboost:learning_rate': 1.3647174429059878, 'classifier:adaboost:max_depth': 6, 'classifier:adaboost:n_estimators': 324, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 1761, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'normal', 'feature_preprocessor:LDA:solver': 'svd', 'feature_preprocessor:LDA:tol': 0.1377409740593341},
+    dataset_properties={
+      'task': 1,
+      'sparse': False,
+      'multilabel': False,
+      'multiclass': False,
+      'target_type': 'classification',
+      'signed': False})),
     ]
 
 
@@ -195,7 +281,7 @@ Create LDA component for auto-sklearn
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  23.125 seconds)
+   **Total running time of the script:** ( 0 minutes  12.469 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_preprocessor.py:
@@ -206,6 +292,13 @@ Create LDA component for auto-sklearn
  .. container:: sphx-glr-footer
     :class: sphx-glr-footer-example
 
+
+  .. container:: binder-badge
+
+    .. image:: images/binder_badge_logo.svg
+      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_preprocessor.ipynb
+      :alt: Launch binder
+      :width: 150 px
 
 
   .. container:: sphx-glr-download sphx-glr-download-python
