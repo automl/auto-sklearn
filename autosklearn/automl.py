@@ -9,6 +9,7 @@ import os
 import sys
 import time
 from typing import Any, Dict, Optional, List, Union
+import uuid
 import unittest.mock
 import warnings
 import tempfile
@@ -29,8 +30,8 @@ from smac.stats.stats import Stats
 import joblib
 import sklearn.utils
 import scipy.sparse
-from sklearn.metrics._classification import type_of_target
 from sklearn.utils.validation import check_is_fitted
+from sklearn.metrics._classification import type_of_target
 from sklearn.dummy import DummyClassifier, DummyRegressor
 
 from autosklearn.metrics import Scorer
@@ -48,10 +49,10 @@ from autosklearn.util.logging_ import (
     get_named_client_logger,
 )
 from autosklearn.util import pipeline, RE_PATTERN
+from autosklearn.util.parallel import preload_modules
 from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.smbo import AutoMLSMBO
-from autosklearn.util.hash import hash_array_or_matrix
 from autosklearn.metrics import f1_macro, accuracy, r2
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
     REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION, \
@@ -64,6 +65,7 @@ from autosklearn.pipeline.components.data_preprocessing.minority_coalescense imp
     CoalescenseChoice
 )
 from autosklearn.pipeline.components.data_preprocessing.rescaling import RescalingChoice
+from autosklearn.util.single_thread_client import SingleThreadedClient
 
 
 def _model_predict(model, X, batch_size, logger, task):
@@ -217,10 +219,20 @@ class AutoML(BaseEstimator):
 
         self._debug_mode = debug_mode
 
-        self.InputValidator = InputValidator()
+        self.InputValidator = None  # type: Optional[InputValidator]
 
         # The ensemble performance history through time
         self.ensemble_performance_history = []
+
+        # Single core, local runs should use fork
+        # to prevent the __main__ requirements in
+        # examples. Nevertheless, multi-process runs
+        # have spawn as requirement to reduce the
+        # possibility of a deadlock
+        self._multiprocessing_context = 'forkserver'
+        if self._n_jobs == 1 and self._dask_client is None:
+            self._multiprocessing_context = 'fork'
+            self._dask_client = SingleThreadedClient()
 
         if not isinstance(self._time_for_task, int):
             raise ValueError("time_left_for_this_task not of type integer, "
@@ -237,11 +249,10 @@ class AutoML(BaseEstimator):
 
     def _create_dask_client(self):
         self._is_dask_client_internally_created = True
-        dask.config.set({'distributed.worker.daemon': False})
         self._dask_client = dask.distributed.Client(
             dask.distributed.LocalCluster(
                 n_workers=self._n_jobs,
-                processes=True,
+                processes=False,
                 threads_per_worker=1,
                 # We use the temporal directory to save the
                 # dask workers, because deleting workers
@@ -288,7 +299,8 @@ class AutoML(BaseEstimator):
         # under the above logging configuration setting
         # We need to specify the logger_name so that received records
         # are treated under the logger_name ROOT logger setting
-        context = multiprocessing.get_context('spawn')
+        context = multiprocessing.get_context(self._multiprocessing_context)
+        preload_modules(context)
         self.stop_logging_server = context.Event()
         port = context.Value('l')  # be safe by using a long
         port.value = -1
@@ -389,6 +401,7 @@ class AutoML(BaseEstimator):
                                     abort_on_first_run_crash=False,
                                     cost_for_crash=get_cost_of_crash(self._metric),
                                     port=self._logger_port,
+                                    pynisher_context=self._multiprocessing_context,
                                     **self._resampling_strategy_arguments)
 
         status, cost, runtime, additional_info = ta.run(num_run, cutoff=self._time_for_task)
@@ -436,29 +449,34 @@ class AutoML(BaseEstimator):
         dataset_name: Optional[str] = None,
         only_return_configuration_space: Optional[bool] = False,
         load_models: bool = True,
+        is_classification: bool = False,
     ):
         if dataset_name is None:
-            dataset_name = hash_array_or_matrix(X)
-        # The first thing we have to do is create the logger to update the backend
+            dataset_name = str(uuid.uuid1(clock_seq=os.getpid()))
+
+        # By default try to use the TCP logging port or get a new port
+        self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
         self._logger = self._get_logger(dataset_name)
+
+        # The first thing we have to do is create the logger to update the backend
         self._backend.setup_logger(self._logger_port)
 
         self._backend.save_start_time(self._seed)
         self._stopwatch = StopWatch()
 
-        # Employ the user feature types if provided
-        self.InputValidator.register_user_feat_type(feat_type, X)
-
         # Make sure that input is valid
         # Performs Ordinal one hot encoding to the target
         # both for train and test data
-        X, y = self.InputValidator.validate(X, y)
+        self.InputValidator = InputValidator(
+            is_classification=is_classification,
+            feat_type=feat_type,
+            logger_port=self._logger_port,
+        )
+        self.InputValidator.fit(X_train=X, y_train=y, X_test=X_test, y_test=y_test)
+        X, y = self.InputValidator.transform(X, y)
 
         if X_test is not None:
-            X_test, y_test = self.InputValidator.validate(X_test, y_test)
-            if len(y.shape) != len(y_test.shape):
-                raise ValueError('Target value shapes do not match: %s vs %s'
-                                 % (y.shape, y_test.shape))
+            X_test, y_test = self.InputValidator.transform(X_test, y_test)
 
         X, y = self.subsample_if_too_large(
             X=X,
@@ -496,8 +514,8 @@ class AutoML(BaseEstimator):
         self._dataset_name = dataset_name
         self._stopwatch.start_task(self._dataset_name)
 
-        if feat_type is None and self.InputValidator.feature_types:
-            feat_type = self.InputValidator.feature_types
+        if feat_type is None and self.InputValidator.feature_validator.feat_type:
+            feat_type = self.InputValidator.feature_validator.feat_type
 
         # Produce debug information to the logfile
         self._logger.debug('Starting to print environment information')
@@ -553,6 +571,7 @@ class AutoML(BaseEstimator):
         self._logger.debug('  resampling_strategy_arguments: %s',
                            str(self._resampling_strategy_arguments))
         self._logger.debug('  n_jobs: %s', str(self._n_jobs))
+        self._logger.debug('  multiprocessing_context: %s', str(self._multiprocessing_context))
         self._logger.debug('  dask_client: %s', str(self._dask_client))
         self._logger.debug('  precision: %s', str(self.precision))
         self._logger.debug('  disable_evaluator_output: %s', str(self._disable_evaluator_output))
@@ -662,6 +681,7 @@ class AutoML(BaseEstimator):
                 ensemble_memory_limit=self._memory_limit,
                 random_state=self._seed,
                 logger_port=self._logger_port,
+                pynisher_context=self._multiprocessing_context,
             )
 
         self._stopwatch.stop_task(ensemble_task_name)
@@ -737,6 +757,7 @@ class AutoML(BaseEstimator):
                 smac_scenario_args=self._smac_scenario_args,
                 scoring_functions=self._scoring_functions,
                 port=self._logger_port,
+                pynisher_context=self._multiprocessing_context,
                 ensemble_callback=proc_ensemble,
             )
 
@@ -761,18 +782,20 @@ class AutoML(BaseEstimator):
         if proc_ensemble is not None:
             self.ensemble_performance_history = list(proc_ensemble.history)
 
+            if len(proc_ensemble.futures) > 0:
+                # Now we need to wait for the future to return as it cannot be cancelled while it
+                # is running: https://stackoverflow.com/a/49203129
+                self._logger.info("Ensemble script still running, waiting for it to finish.")
+                result = proc_ensemble.futures.pop().result()
+                if result:
+                    ensemble_history, _, _, _, _ = result
+                    self.ensemble_performance_history.extend(ensemble_history)
+                self._logger.info("Ensemble script finished, continue shutdown.")
+
             # save the ensemble performance history file
             if len(self.ensemble_performance_history) > 0:
                 pd.DataFrame(self.ensemble_performance_history).to_json(
                         os.path.join(self._backend.internals_directory, 'ensemble_history.json'))
-
-            if len(proc_ensemble.futures) > 0:
-                future = proc_ensemble.futures.pop()
-                # Now we need to wait for the future to return as it cannot be cancelled while it
-                # is running: https://stackoverflow.com/a/49203129
-                self._logger.info("Ensemble script still running, waiting for it to finish.")
-                future.result()
-                self._logger.info("Ensemble script finished, continue shutdown.")
 
         if load_models:
             self._logger.info("Loading models...")
@@ -845,7 +868,10 @@ class AutoML(BaseEstimator):
     def refit(self, X, y):
 
         # Make sure input data is valid
-        X, y = self.InputValidator.validate(X, y)
+        if self.InputValidator is None or not self.InputValidator._is_fitted:
+            raise ValueError("refit() is only supported after calling fit. Kindly call first "
+                             "the estimator fit() method.")
+        X, y = self.InputValidator.transform(X, y)
 
         if self.models_ is None or len(self.models_) == 0 or self.ensemble_ is None:
             self._load_models()
@@ -927,7 +953,10 @@ class AutoML(BaseEstimator):
                              "if 'ensemble_size != 0'")
 
         # Make sure that input is valid
-        X = self.InputValidator.validate_features(X)
+        if self.InputValidator is None or not self.InputValidator._is_fitted:
+            raise ValueError("predict() can only be called after performing fit(). Kindly call "
+                             "the estimator fit() method first.")
+        X = self.InputValidator.feature_validator.transform(X)
 
         # Parallelize predictions across models with n_jobs processes.
         # Each process computes predictions in chunks of batch_size rows.
@@ -985,7 +1014,10 @@ class AutoML(BaseEstimator):
             self._logger = self._get_logger(dataset_name)
 
         # Make sure that input is valid
-        y = self.InputValidator.validate_target(y, is_classification=True)
+        if self.InputValidator is None or not self.InputValidator._is_fitted:
+            raise ValueError("fit_ensemble() can only be called after fit. Please call the "
+                             "estimator fit() method prior to fit_ensemble().")
+        y = self.InputValidator.target_validator.transform(y)
 
         # Create a client if needed
         if self._dask_client is None:
@@ -1013,10 +1045,10 @@ class AutoML(BaseEstimator):
             ensemble_memory_limit=self._memory_limit,
             random_state=self._seed,
             logger_port=self._logger_port,
+            pynisher_context=self._multiprocessing_context,
         )
         manager.build_ensemble(self._dask_client)
         future = manager.futures.pop()
-        dask.distributed.wait([future])  # wait for the ensemble process to finish
         result = future.result()
         if result is None:
             raise ValueError("Error building the ensemble - please check the log file and command "
@@ -1108,7 +1140,10 @@ class AutoML(BaseEstimator):
         prediction = self.predict(X)
 
         # Make sure that input is valid
-        X, y = self.InputValidator.validate(X, y)
+        if self.InputValidator is None or not self.InputValidator._is_fitted:
+            raise ValueError("score() is only supported after calling fit. Kindly call first "
+                             "the estimator fit() method.")
+        y = self.InputValidator.target_validator.transform(y)
 
         # Encode the prediction using the input validator
         # We train autosklearn with a encoded version of y,
@@ -1116,7 +1151,7 @@ class AutoML(BaseEstimator):
         # Above call to validate() encodes the y given for score()
         # Below call encodes the prediction, so we compare in the
         # same representation domain
-        prediction = self.InputValidator.encode_target(prediction)
+        prediction = self.InputValidator.target_validator.transform(prediction)
 
         return calculate_score(solution=y,
                                prediction=prediction,
@@ -1364,15 +1399,7 @@ class AutoMLClassifier(AutoML):
         only_return_configuration_space: bool = False,
         load_models: bool = True,
     ):
-
-        # We first validate the dtype of the target provided by the user
-        # In doing so, we also fit the internal encoder for classification
-        # In case y_test is provided, we proactively check their type
-        # and make sure the enconding accounts for both y_test/y_train classes
-        input_y = self.InputValidator.join_and_check(y, y_test) if y_test is not None else y
-        y_task = type_of_target(
-            self.InputValidator.validate_target(input_y, is_classification=True)
-        )
+        y_task = type_of_target(y)
         task = self._task_mapping.get(y_task)
         if task is None:
             raise ValueError('Cannot work on data of type %s' % y_task)
@@ -1392,18 +1419,22 @@ class AutoMLClassifier(AutoML):
             dataset_name=dataset_name,
             only_return_configuration_space=only_return_configuration_space,
             load_models=load_models,
+            is_classification=True,
         )
 
     def predict(self, X, batch_size=None, n_jobs=1):
         predicted_probabilities = super().predict(X, batch_size=batch_size,
                                                   n_jobs=n_jobs)
 
-        if self.InputValidator.is_single_column_target() == 1:
+        if self.InputValidator is None or not self.InputValidator._is_fitted:
+            raise ValueError("predict() is only supported after calling fit. Kindly call first "
+                             "the estimator fit() method.")
+        if self.InputValidator.target_validator.is_single_column_target():
             predicted_indexes = np.argmax(predicted_probabilities, axis=1)
         else:
             predicted_indexes = (predicted_probabilities > 0.5).astype(int)
 
-        return self.InputValidator.decode_target(predicted_indexes)
+        return self.InputValidator.target_validator.inverse_transform(predicted_indexes)
 
     def predict_proba(self, X, batch_size=None, n_jobs=1):
         return super().predict(X, batch_size=batch_size, n_jobs=n_jobs)
@@ -1431,9 +1462,7 @@ class AutoMLRegressor(AutoML):
         # Check the data provided in y
         # After the y data type is validated,
         # check the task type
-        y_task = type_of_target(
-            self.InputValidator.validate_target(y)
-        )
+        y_task = type_of_target(y)
         task = self._task_mapping.get(y_task)
         if task is None:
             raise ValueError('Cannot work on data of type %s' % y_task)
@@ -1449,4 +1478,5 @@ class AutoMLRegressor(AutoML):
             dataset_name=dataset_name,
             only_return_configuration_space=only_return_configuration_space,
             load_models=load_models,
+            is_classification=False,
         )

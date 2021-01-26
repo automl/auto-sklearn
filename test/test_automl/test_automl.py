@@ -16,6 +16,7 @@ from smac.scenario.scenario import Scenario
 from smac.facade.roar_facade import ROAR
 
 from autosklearn.automl import AutoML
+from autosklearn.data.validation import InputValidator
 import autosklearn.automl
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.metrics import accuracy, log_loss, balanced_accuracy
@@ -123,6 +124,7 @@ def test_refit_shuffle_on_fail(backend, dask_client):
     ensemble_mock = unittest.mock.Mock()
     ensemble_mock.get_selected_model_identifiers.return_value = [(1, 1, 50.0)]
     auto.ensemble_ = ensemble_mock
+    auto.InputValidator = InputValidator()
     for budget_type in [None, 'iterations']:
         auto._budget_type = budget_type
 
@@ -131,6 +133,7 @@ def test_refit_shuffle_on_fail(backend, dask_client):
         # Make sure a valid 2D array is given to automl
         X = np.array([1, 2, 3]).reshape(-1, 1)
         y = np.array([1, 2, 3])
+        auto.InputValidator.fit(X, y)
         auto.refit(X, y)
 
         assert failing_model.fit.call_count == 3
@@ -556,16 +559,34 @@ def test_exceptions_inside_log_in_smbo(smbo_run_mock, backend, dask_client):
         )
 
     # make sure that the logfile was created
-    import shutil
-    shutil.copytree(backend.temporary_directory, '/tmp/trydebug')
     logger_name = 'AutoML(%d):%s' % (1, dataset_name)
+    logger = logging.getLogger(logger_name)
     logfile = os.path.join(backend.temporary_directory, logger_name + '.log')
-    assert os.path.exists(logfile), automl._clean_logger()
-    with open(logfile) as f:
-        assert message in f.read(), automl._clean_logger()
+    assert os.path.exists(logfile), print_debug_information(automl) + str(automl._clean_logger())
+
+    # Give some time for the error message to be printed in the
+    # log file
+    found_message = False
+    for incr_tolerance in range(5):
+        with open(logfile) as f:
+            lines = f.readlines()
+        if any(message in line for line in lines):
+            found_message = True
+            break
+        else:
+            time.sleep(incr_tolerance)
 
     # Speed up the closing after forced crash
     automl._clean_logger()
+
+    if not found_message:
+        pytest.fail("Did not find {} in the log file {} for logger {}/{}/{}".format(
+            message,
+            print_debug_information(automl),
+            vars(automl._logger.logger),
+            vars(logger),
+            vars(logging.getLogger())
+        ))
 
 
 @pytest.mark.parametrize("metric", [log_loss, balanced_accuracy])
@@ -634,31 +655,6 @@ def test_fail_if_feat_type_on_pandas_input(backend, dask_client):
             X_train, y_train,
             task=BINARY_CLASSIFICATION,
             feat_type=['Categorical', 'Numerical'],
-        )
-
-
-def test_fail_if_dtype_changes_automl(backend, dask_client):
-    """We do not support changes in the input type.
-    Once a estimator is fitted, it should not change data type
-    """
-    automl = autosklearn.automl.AutoML(
-        backend=backend,
-        time_left_for_this_task=30,
-        per_run_time_limit=5,
-        metric=accuracy,
-        dask_client=dask_client,
-    )
-
-    X_train = pd.DataFrame({'a': [1, 1], 'c': [1, 2]})
-    y_train = [1, 0]
-    automl.InputValidator.validate(X_train, y_train, is_classification=True)
-    with pytest.raises(
-        ValueError,
-        match="Auto-sklearn previously received features of type"
-    ):
-        automl.fit(
-            X_train.to_numpy(), y_train,
-            task=BINARY_CLASSIFICATION,
         )
 
 

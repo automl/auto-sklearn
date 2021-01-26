@@ -24,6 +24,7 @@ import autosklearn.evaluation.train_evaluator
 import autosklearn.evaluation.test_evaluator
 import autosklearn.evaluation.util
 from autosklearn.util.logging_ import get_named_client_logger
+from autosklearn.util.parallel import preload_modules
 
 
 def fit_predict_try_except_decorator(ta, queue, cost_for_crash, **kwargs):
@@ -97,12 +98,12 @@ def _encode_exit_status(exit_status):
 class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
     def __init__(self, backend, autosklearn_seed, resampling_strategy, metric,
-                 cost_for_crash, abort_on_first_run_crash, port,
+                 cost_for_crash, abort_on_first_run_crash, port, pynisher_context,
                  initial_num_run=1, stats=None,
                  run_obj='quality', par_factor=1, scoring_functions=None,
                  output_y_hat_optimization=True, include=None, exclude=None,
                  memory_limit=None, disable_file_output=False, init_params=None,
-                 budget_type=None, ta=False, pynisher_context='spawn', **resampling_strategy_args):
+                 budget_type=None, ta=False, **resampling_strategy_args):
 
         if resampling_strategy == 'holdout':
             eval_function = autosklearn.evaluation.train_evaluator.eval_holdout
@@ -261,6 +262,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
     ) -> Tuple[StatusType, float, float, Dict[str, Union[int, float, str, Dict, List, Tuple]]]:
 
         context = multiprocessing.get_context(self.pynisher_context)
+        preload_modules(context)
         queue = context.Queue()
 
         if not (instance_specific is None or instance_specific == '0'):

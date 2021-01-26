@@ -110,7 +110,7 @@ class MetaLearningOptimizer(object):
                     runs[task_id] = self.meta_base.get_runs(task_id)
                 except KeyError:
                     # TODO should I really except this?
-                    self.logger.warning("Could not find runs for instance %s" % task_id)
+                    self.logger.info("Could not find runs for instance %s" % task_id)
                     runs[task_id] = pd.Series([], name=task_id)
             runs = pd.DataFrame(runs)
 

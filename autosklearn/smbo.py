@@ -224,6 +224,7 @@ class AutoMLSMBO(object):
                  smac_scenario_args=None,
                  get_smac_object_callback=None,
                  scoring_functions=None,
+                 pynisher_context='spawn',
                  ensemble_callback: typing.Optional[EnsembleBuilderManager] = None,
                  ):
         super(AutoMLSMBO, self).__init__()
@@ -268,6 +269,8 @@ class AutoMLSMBO(object):
         self.smac_scenario_args = smac_scenario_args
         self.get_smac_object_callback = get_smac_object_callback
         self.scoring_functions = scoring_functions
+
+        self.pynisher_context = pynisher_context
 
         self.ensemble_callback = ensemble_callback
 
@@ -448,6 +451,7 @@ class AutoMLSMBO(object):
             disable_file_output=self.disable_file_output,
             scoring_functions=self.scoring_functions,
             port=self.port,
+            pynisher_context=self.pynisher_context,
             **self.resampling_strategy_args
         )
         ta = ExecuteTaFuncWithQueue

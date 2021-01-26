@@ -12,6 +12,28 @@
 Releases
 ========
 
+Version 0.12.2
+==============
+
+* ADD #1045: New example demonstrating how to log multiple metrics during a run of Auto-sklearn.
+* DOC #1052: Add links to mybinder
+* DOC #1059: Improved the example on manually starting workers for Auto-sklearn.
+* FIX #1046: Add the final result of the ensemble builder to the ensemble builder trajectory.
+* MAINT: Two log outputs of level warning about metadata were turned reduced to the info loglevel
+  as they are not actionable for the user.
+* MAINT #1062: Use threads for local dask workers and forkserver to start subprocesses to reduce
+  overhead.
+* MAINT #1053: Remove the restriction to guard single-core Auto-sklearn by
+  ``__main__ == "__name__"`` again.
+
+Contributors v0.12.2
+********************
+
+* Matthias Feurer
+* ROHIT AGARWAL
+* Francisco Rivera
+* Katharina Eggensperger
+
 Version 0.12.1
 ==============
 

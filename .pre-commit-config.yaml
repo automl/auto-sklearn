@@ -3,15 +3,19 @@ repos:
     rev: v0.761
     hooks:
       - id: mypy
+        args: [--show-error-codes]
         name: mypy auto-sklearn-ensembles
         files: autosklearn/ensembles
       - id: mypy
+        args: [--show-error-codes]
         name: mypy auto-sklearn-metrics
         files: autosklearn/metrics
       - id: mypy
+        args: [--show-error-codes]
         name: mypy auto-sklearn-data
         files: autosklearn/data
       - id: mypy
+        args: [--show-error-codes]
         name: mypy auto-sklearn-util
         files: autosklearn/util
   - repo: https://gitlab.com/pycqa/flake8
@@ -19,7 +23,7 @@ repos:
     hooks:
       - id: flake8
         name: flake8 auto-sklearn
-        files: autosklearn/*
+        files: autosklearn/.*
       - id: flake8
         name: flake8 file-order-data
         files: autosklearn/data
@@ -42,4 +46,4 @@ repos:
           - flake8-import-order
       - id: flake8
         name: flake8 autosklearn-test
-        files: test/*
+        files: test/.*
