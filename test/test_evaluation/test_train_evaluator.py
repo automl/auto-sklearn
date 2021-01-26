@@ -2403,7 +2403,7 @@ class FunctionsTest(unittest.TestCase):
 
     def test_eval_holdout_budget_iterations_converged(self):
         configuration = get_configuration_space(
-            exclude_estimators=['random_forest', 'liblinear_svc'],
+            exclude={'classifier': ['random_forest', 'liblinear_svc']},
             info={'task': MULTICLASS_CLASSIFICATION, 'is_sparse': False},
         ).get_default_configuration()
         eval_holdout(
@@ -2486,7 +2486,7 @@ class FunctionsTest(unittest.TestCase):
 
     def test_eval_holdout_budget_mixed_subsample(self):
         configuration = get_configuration_space(
-            exclude_estimators=['random_forest'],
+            exclude={'classifier': ['random_forest']},
             info={'task': MULTICLASS_CLASSIFICATION, 'is_sparse': False},
         ).get_default_configuration()
         self.assertEqual(configuration['classifier:__choice__'], 'liblinear_svc')

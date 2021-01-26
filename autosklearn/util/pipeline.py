@@ -7,7 +7,6 @@ from sklearn.pipeline import Pipeline
 
 from autosklearn.constants import (
     BINARY_CLASSIFICATION,
-    CLASSIFICATION_TASKS,
     MULTICLASS_CLASSIFICATION,
     MULTILABEL_CLASSIFICATION,
     MULTIOUTPUT_REGRESSION,
@@ -25,14 +24,15 @@ __all__ = [
 
 
 def get_configuration_space(info: Dict[str, Any],
-                            include: Optional[dict] = None,
-                            exclude: Optional[dict] = None,
+                            include: Optional[Dict[str, List[str]]] = None,
+                            exclude: Optional[Dict[str, List[str]]] = None,
                             ) -> ConfigurationSpace:
 
     if include is not None and exclude is not None:
         for node in include.keys():
             if node in exclude.keys():
-                raise ValueError('Cannot specify include and exclude for same step {0}.'.format(node))
+                raise ValueError('Cannot specify include and exclude for same step {0}.'
+                                 .format(node))
 
     if info['task'] in REGRESSION_TASKS:
         return _get_regression_configuration_space(info, include, exclude)
@@ -40,8 +40,10 @@ def get_configuration_space(info: Dict[str, Any],
         return _get_classification_configuration_space(info, include, exclude)
 
 
-def _get_regression_configuration_space(info: Dict[str, Any], include: Dict[str, List[str]],
-                                        exclude: Dict[str, List[str]]) -> ConfigurationSpace:
+def _get_regression_configuration_space(info: Dict[str, Any],
+                                        include: Optional[Dict[str, List[str]]],
+                                        exclude: Optional[Dict[str, List[str]]]
+                                        ) -> ConfigurationSpace:
     task_type = info['task']
     sparse = False
     multioutput = False
@@ -64,8 +66,10 @@ def _get_regression_configuration_space(info: Dict[str, Any], include: Dict[str,
     return configuration_space
 
 
-def _get_classification_configuration_space(info: Dict[str, Any], include: Dict[str, List[str]],
-                                            exclude: Dict[str, List[str]]) -> ConfigurationSpace:
+def _get_classification_configuration_space(info: Dict[str, Any],
+                                            include: Optional[Dict[str, List[str]]],
+                                            exclude: Optional[Dict[str, List[str]]]
+                                            ) -> ConfigurationSpace:
     task_type = info['task']
 
     multilabel = False

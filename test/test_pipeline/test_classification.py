@@ -255,15 +255,14 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 'X_test': X_test, 'Y_test': Y_test}
 
         init_params = {
-            'data_preprocessor:feature_type:categorical_features':
-                categorical
+            'data_preprocessor:categorical_features': categorical
         }
 
         self._test_configurations(configurations_space=cs, make_sparse=True,
                                   data=data, init_params=init_params)
 
     @unittest.mock.patch('autosklearn.pipeline.components.data_preprocessing'
-                         '.feature_type.FeatTypeSplit.set_hyperparameters')
+                         '.DataPreprocessorChoice.set_hyperparameters')
     def test_categorical_passed_to_one_hot_encoder(self, ohe_mock):
 
         # Mock the _check_init_params_honored as there is no object created,
@@ -271,7 +270,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         with unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline'
                                  '._check_init_params_honored'):
             cls = SimpleClassificationPipeline(
-                init_params={'data_preprocessor:feature_type:categorical_features': [True, False]}
+                init_params={'data_preprocessor:categorical_features': [True, False]}
             )
 
             self.assertEqual(
@@ -281,7 +280,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             default = cls.get_hyperparameter_search_space().get_default_configuration()
             cls.set_hyperparameters(
                 configuration=default,
-                init_params={'data_preprocessor:feature_type:categorical_features': [True, True, False]},
+                init_params={'data_preprocessor:categorical_features': [True, True, False]},
             )
             self.assertEqual(
                 ohe_mock.call_args[1]['init_params'],
@@ -420,22 +419,22 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         conditions = cs.get_conditions()
         forbiddens = cs.get_forbiddens()
 
-        self.assertEqual(len(cs.get_hyperparameter(
-            'data_preprocessing:numerical_transformer:rescaling:__choice__').choices), 6)
+        param = 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__'
+        self.assertEqual(len(cs.get_hyperparameter(param).choices), 6)
         self.assertEqual(len(cs.get_hyperparameter(
             'classifier:__choice__').choices), 16)
         self.assertEqual(len(cs.get_hyperparameter(
             'feature_preprocessor:__choice__').choices), 13)
 
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(167, len(hyperparameters))
+        self.assertEqual(168, len(hyperparameters))
 
         # for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp
 
         # The four components which are always active are classifier,
         # feature preprocessor, balancing and data preprocessing pipeline.
-        self.assertEqual(len(hyperparameters) - 7, len(conditions))
+        self.assertEqual(len(hyperparameters) - 4, len(conditions))
 
         self.assertEqual(len(forbiddens), 53)
 
@@ -696,6 +695,40 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         # A choice component might have attribute requirements that we need to check
         expected_sub_key = expected_key.replace(':__choice__', ':') + implementation_type
         expected_attributes = {}
+        if 'data_preprocessor:__choice__' in expected_key:
+            # We have to check both the numerical and categorical
+            to_check = {
+                'numerical_transformer': implementation.choice.numer_ppl.named_steps,
+                'categorical_transformer': implementation.choice.categ_ppl.named_steps,
+            }
+
+            for data_type, pipeline in to_check.items():
+                for sub_name, sub_step in pipeline.items():
+                    # If it is a Choice, make sure it is the correct one!
+                    if isinstance(sub_step, AutoSklearnChoice):
+                        key = "data_preprocessor:feature_type:{}:{}:__choice__".format(
+                            data_type,
+                            sub_name
+                        )
+                        keys_checked.extend(
+                            self._test_set_hyperparameter_choice(
+                                key, sub_step, config_dict
+                            )
+                        )
+                    # If it is a component, make sure it has the correct hyperparams
+                    elif isinstance(sub_step, AutoSklearnComponent):
+                        keys_checked.extend(
+                            self._test_set_hyperparameter_component(
+                                "data_preprocessor:feature_type:{}:{}".format(
+                                    data_type,
+                                    sub_name
+                                ),
+                                sub_step, config_dict
+                            )
+                        )
+                    else:
+                        raise ValueError("New type of pipeline component!")
+            return keys_checked
         for key, value in config_dict.items():
             if key != expected_key and expected_sub_key in key:
                 expected_attributes[key.split(':')[-1]] = value
@@ -771,39 +804,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             keys_checked = []
 
             for name, step in cls.named_steps.items():
-                if name == 'data_preprocessing':
-                    # We have to check both the numerical and categorical
-                    to_check = {
-                        'numerical_transformer': step.numer_ppl.named_steps,
-                        'categorical_transformer': step.categ_ppl.named_steps,
-                    }
-
-                    for data_type, pipeline in to_check.items():
-                        for sub_name, sub_step in pipeline.items():
-                            # If it is a Choice, make sure it is the correct one!
-                            if isinstance(sub_step, AutoSklearnChoice):
-                                key = "data_preprocessing:{}:{}:__choice__".format(
-                                    data_type,
-                                    sub_name
-                                )
-                                keys_checked.extend(
-                                    self._test_set_hyperparameter_choice(
-                                        key, sub_step, config_dict
-                                    )
-                                )
-                            # If it is a component, make sure it has the correct hyperparams
-                            elif isinstance(sub_step, AutoSklearnComponent):
-                                keys_checked.extend(
-                                    self._test_set_hyperparameter_component(
-                                        "data_preprocessing:{}:{}".format(
-                                            data_type,
-                                            sub_name
-                                        ),
-                                        sub_step, config_dict
-                                    )
-                                )
-                            else:
-                                raise ValueError("New type of pipeline component!")
+                if name == 'data_preprocessor':
+                    keys_checked.extend(
+                        self._test_set_hyperparameter_choice(
+                            'data_preprocessor:__choice__', step, config_dict
+                        )
+                    )
                 elif name == 'balancing':
                     keys_checked.extend(
                         self._test_set_hyperparameter_component(

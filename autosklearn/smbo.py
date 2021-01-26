@@ -22,8 +22,7 @@ from smac.tae.dask_runner import DaskParallelRunner
 import autosklearn.metalearning
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
     BINARY_CLASSIFICATION, TASK_TYPES_TO_STRING, CLASSIFICATION_TASKS, \
-    REGRESSION_TASKS, MULTICLASS_CLASSIFICATION, REGRESSION, \
-    MULTIOUTPUT_REGRESSION
+    MULTICLASS_CLASSIFICATION, REGRESSION, MULTIOUTPUT_REGRESSION
 from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.metalearning.mismbo import suggest_via_metalearning
 from autosklearn.data.abstract_data_manager import AbstractDataManager
@@ -410,7 +409,8 @@ class AutoMLSMBO(object):
         if self.include is not None and self.exclude is not None:
             for node in self.include.keys():
                 if node in self.exclude.keys():
-                    raise ValueError('Cannot specify include and exclude for same step {0}.'.format(node))
+                    raise ValueError('Cannot specify include and exclude for same step {0}.'
+                                     .format(node))
 
         ta_kwargs = dict(
             backend=copy.deepcopy(self.backend),

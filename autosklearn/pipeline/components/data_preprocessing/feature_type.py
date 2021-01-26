@@ -125,6 +125,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
+                'handles_multioutput': True,
                 # TODO find out of this is right!
                 'handles_sparse': True,
                 'handles_dense': True,

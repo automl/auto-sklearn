@@ -61,8 +61,8 @@ def test_fit_n_jobs(tmp_dir, output_dir):
         initial_configurations_via_metalearning=0,
         ensemble_size=5,
         n_jobs=2,
-        include_estimators=['sgd'],
-        include_preprocessors=['no_preprocessing'],
+        include={'classifier': ['sgd'],
+                 'feature_preprocessor': ['no_preprocessing']},
         get_smac_object_callback=get_smac_object_wrapper_instance,
         max_models_on_disc=None,
     )
@@ -453,7 +453,7 @@ def test_classification_pandas_support(tmp_dir, output_dir, dask_client):
     automl = AutoSklearnClassifier(
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        exclude_estimators=['libsvm_svc'],
+        exclude={'classifier': ['libsvm_svc']},
         dask_client=dask_client,
         seed=5,
         tmp_folder=tmp_dir,
@@ -561,7 +561,7 @@ def test_autosklearn_classification_methods_returns_self(dask_client):
                                    per_run_time_limit=10,
                                    ensemble_size=0,
                                    dask_client=dask_client,
-                                   exclude_preprocessors=['fast_ica'])
+                                   exclude={'feature_preprocessor': ['fast_ica']})
 
     automl_fitted = automl.fit(X_train, y_train)
     assert automl is automl_fitted

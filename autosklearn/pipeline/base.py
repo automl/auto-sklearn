@@ -460,4 +460,5 @@ class BasePipeline(Pipeline):
         steps = [step[0] for step in self.steps]
         for node in list(self.include.keys()) + list(self.exclude):
             if node not in steps:
-                raise ValueError("Component {0} in not part for pipeline steps {1}".format(node, str(steps)))
+                raise ValueError("Component {0} in not part for pipeline steps {1}"
+                                 .format(node, str(steps)))
