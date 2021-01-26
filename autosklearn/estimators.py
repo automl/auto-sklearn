@@ -601,7 +601,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
         # After fit, a classifier is expected to define classes_
         # A list of class labels known to the classifier, mapping each label
         # to a numerical index used in the model representation our output.
-        self.classes_ = self.automl_.InputValidator.target_validator.classes
+        self.classes_ = self.automl_.InputValidator.target_validator.classes_
 
         return self
 

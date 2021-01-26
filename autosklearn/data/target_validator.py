@@ -388,7 +388,7 @@ class TargetValidator(BaseEstimator):
                              ))
 
     @property
-    def classes(self) -> typing.List:
+    def classes_(self) -> typing.List:
         if self.encoder is None:
             return []
         else:
