@@ -177,7 +177,7 @@ print(automl.cv_results_)
 # The explained variance ratio per stage
 for i, (weight, pipeline) in enumerate(automl.get_models_with_weights()):
     for stage_name, component in pipeline.named_steps.items():
-        if 'preprocessor' in stage_name:
+        if 'feature_preprocessor' in stage_name:
             print(
                 "The {}th pipeline has a explained variance of {}".format(
                     i,
