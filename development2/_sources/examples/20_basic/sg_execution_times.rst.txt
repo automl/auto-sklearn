@@ -1,0 +1,16 @@
+
+:orphan:
+
+.. _sphx_glr_examples_20_basic_sg_execution_times:
+
+Computation times
+=================
+**04:25.267** total execution time for **examples_20_basic** files:
+
++-------------------------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_examples_20_basic_example_regression.py` (``example_regression.py``)                               | 02:12.176 | 0.0 MB |
++-------------------------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_examples_20_basic_example_classification.py` (``example_classification.py``)                       | 01:57.073 | 0.0 MB |
++-------------------------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_examples_20_basic_example_multilabel_classification.py` (``example_multilabel_classification.py``) | 00:16.018 | 0.0 MB |
++-------------------------------------------------------------------------------------------------------------------+-----------+--------+
