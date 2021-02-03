@@ -463,7 +463,9 @@ def test_targetvalidator_inversetransform():
     y_decoded = validator.inverse_transform(y)
     np.testing.assert_array_almost_equal(y, y_decoded)
 
-    assert validator.classes_ == []
+    # Multilabel classification is not encoded
+    # For this reason, classes_ attribute does not contain a class
+    np.testing.assert_array_almost_equal(validator.classes_, np.array([]))
 
 
 # Actual checks for the targets

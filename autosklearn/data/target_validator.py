@@ -388,8 +388,18 @@ class TargetValidator(BaseEstimator):
                              ))
 
     @property
-    def classes_(self) -> typing.List:
+    def classes_(self) -> np.ndarray:
+        """
+        Complies with scikit learn classes_ attribute,
+        which consist of a ndarray of shape (n_classes,)
+        where n_classes are the number of classes seen while fitting
+        a encoder to the targets.
+        Returns
+        -------
+            classes_: np.ndarray
+                The unique classes seen during encoding of a classifier
+        """
         if self.encoder is None:
-            return []
+            return np.array([])
         else:
             return self.encoder.categories_[0]
