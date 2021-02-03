@@ -25,15 +25,16 @@ with open(training_data_file) as fh:
     m = hashlib.md5()
     m.update(fh.read().encode('utf8'))
 training_data_hash = m.hexdigest()[:10]
-sklearn_version = sklearn.__version__
-autosklearn_version = autosklearn.__version__
-selector_file = pathlib.Path(
-    os.environ.get(
-        'XDG_CACHE_HOME',
-        '~/.cache/auto-sklearn/askl2_selector_%s_%s_%s.pkl'
-        % (autosklearn_version, sklearn_version, training_data_hash),
-    )
-).expanduser()
+selector_filename = "askl2_selector_%s_%s_%s.pkl" % (
+    autosklearn.__version__,
+    sklearn.__version__,
+    training_data_hash
+)
+selector_directory = os.environ.get('XDG_CACHE_HOME')
+if selector_directory is None or not os.access(selector_directory, os.W_OK):
+    selector_directory = pathlib.Path.home() / '.cache'
+selector_directory = pathlib.Path(selector_directory).joinpath('auto-sklearn').expanduser()
+selector_file = selector_directory / selector_filename
 metafeatures = pd.DataFrame(training_data['metafeatures'])
 y_values = np.array(training_data['y_values'])
 strategies = training_data['strategies']
@@ -255,7 +256,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
 
         smac_scenario_args : dict, optional (None)
             Additional arguments inserted into the scenario of SMAC. See the
-            `SMAC documentation 
+            `SMAC documentation
             <https://automl.github.io/SMAC3/master/options.html?highlight=scenario
             #scenario>`_
             for a list of available arguments.
@@ -272,7 +273,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             If None is provided, a default metric is selected depending on the task.
 
         scoring_functions : List[Scorer], optional (None)
-            List of scorers which will be calculated for each pipeline and results will be 
+            List of scorers which will be calculated for each pipeline and results will be
             available via ``cv_results``
 
         load_models : bool, optional (True)
