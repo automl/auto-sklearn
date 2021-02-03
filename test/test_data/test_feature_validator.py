@@ -35,7 +35,7 @@ def input_data_featuretest(request):
             ['a', 'b', 'd', 'r', 'b', 'c'],
         ])
     elif request.param == 'numpy_categoricalonly_nan':
-        array = np.random.randint(10, size=(100, 10))
+        array = np.random.randint(10, size=(100, 10)).astype('float')
         array[50, 0:5] = np.nan
         return array
     elif request.param == 'numpy_numericalonly_nan':
