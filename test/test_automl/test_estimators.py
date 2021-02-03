@@ -653,17 +653,6 @@ def test_autosklearn2_classification_methods_returns_self(dask_client):
     pickle.dumps(automl_fitted)
 
 
-@pytest.mark.parametrize("class_", [AutoSklearnClassifier, AutoSklearnRegressor,
-                                    AutoSklearn2Classifier])
-def test_check_estimator_signature(class_):
-    # Make sure signature is store in self
-    expected_subclass = ClassifierMixin if 'Classifier' in str(class_) else RegressorMixin
-    assert issubclass(class_, expected_subclass)
-    estimator = class_()
-    for expected in list(inspect.signature(class_).parameters):
-        assert hasattr(estimator, expected)
-
-
 @pytest.mark.parametrize("selector_path", [None,  # No XDG_CACHE_HOME provided
                                            '/',  # XDG_CACHE_HOME has no permission
                                            tempfile.gettempdir(),  # in the user cache
