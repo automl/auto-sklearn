@@ -165,6 +165,14 @@ settings for the <code class="docutils literal notranslate"><span class="pre">Au
 <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">dataset_name</span><span class="o">=</span><span class="s1">&#39;breast_cancer&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(output_folder=&#39;/tmp/autosklearn_resampling_example_out&#39;,
+                      per_run_time_limit=30,
+                      resampling_strategy_arguments={&#39;train_size&#39;: 0.67},
+                      time_left_for_this_task=120,
+                      tmp_folder=&#39;/tmp/autosklearn_resampling_example_tmp&#39;)
+</pre></div>
+</div>
 </div>
 <div class="section" id="get-the-score-of-the-final-ensemble">
 <h2>Get the Score of the final ensemble<a class="headerlink" href="#get-the-score-of-the-final-ensemble" title="Permalink to this headline">¶</a></h2>
@@ -246,9 +254,47 @@ to the use case at hand.</p>
 <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">dataset_name</span><span class="o">=</span><span class="s1">&#39;breast_cancer&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(output_folder=&#39;/tmp/autosklearn_resampling_example_out&#39;,
+                      per_run_time_limit=30,
+                      resampling_strategy=&lt;class &#39;sklearn.model_selection._split.PredefinedSplit&#39;&gt;,
+                      resampling_strategy_arguments={&#39;test_fold&#39;: array([  3,   4,   5,   7,   8,  10,  12,  14,  15,  16,  17,  18,  19,
+        21,  22,  26,  27,  28,  29,  31,  32,  33,  34,  36,  37,  38,
+        39,  40,  44,  46,  47,  48,  49,  52,  53,  54,  56,  58,  60,
+        63,  65,  67,  68,...
+       304, 307, 308, 309, 311, 312, 314, 315, 317, 319, 320, 321, 322,
+       325, 326, 327, 329, 332, 333, 334, 335, 337, 338, 339, 343, 345,
+       348, 349, 350, 351, 354, 355, 356, 357, 358, 361, 363, 364, 365,
+       366, 367, 370, 371, 372, 373, 374, 377, 378, 380, 381, 383, 384,
+       385, 387, 388, 389, 390, 391, 392, 393, 394, 395, 398, 400, 401,
+       402, 403, 407, 409, 410, 411, 414, 416, 417, 418, 419, 422, 424,
+       425])},
+                      time_left_for_this_task=120,
+                      tmp_folder=&#39;/tmp/autosklearn_resampling_example_tmp&#39;)
+</pre></div>
+</div>
 <p>For custom resampling strategies (i.e. resampling strategies that are not
 defined as strings by Auto-sklearn) it is necessary to perform a refit:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">automl</span><span class="o">.</span><span class="n">refit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(output_folder=&#39;/tmp/autosklearn_resampling_example_out&#39;,
+                      per_run_time_limit=30,
+                      resampling_strategy=&lt;class &#39;sklearn.model_selection._split.PredefinedSplit&#39;&gt;,
+                      resampling_strategy_arguments={&#39;test_fold&#39;: array([  3,   4,   5,   7,   8,  10,  12,  14,  15,  16,  17,  18,  19,
+        21,  22,  26,  27,  28,  29,  31,  32,  33,  34,  36,  37,  38,
+        39,  40,  44,  46,  47,  48,  49,  52,  53,  54,  56,  58,  60,
+        63,  65,  67,  68,...
+       304, 307, 308, 309, 311, 312, 314, 315, 317, 319, 320, 321, 322,
+       325, 326, 327, 329, 332, 333, 334, 335, 337, 338, 339, 343, 345,
+       348, 349, 350, 351, 354, 355, 356, 357, 358, 361, 363, 364, 365,
+       366, 367, 370, 371, 372, 373, 374, 377, 378, 380, 381, 383, 384,
+       385, 387, 388, 389, 390, 391, 392, 393, 394, 395, 398, 400, 401,
+       402, 403, 407, 409, 410, 411, 414, 416, 417, 418, 419, 422, 424,
+       425])},
+                      time_left_for_this_task=120,
+                      tmp_folder=&#39;/tmp/autosklearn_resampling_example_tmp&#39;)
 </pre></div>
 </div>
 </div>
@@ -264,7 +310,7 @@ splitting it on the first feature.</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score custom split 0.38461538461538464
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 6 minutes  11.144 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 6 minutes  29.064 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-resampling-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/40_advanced/example_resampling.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>

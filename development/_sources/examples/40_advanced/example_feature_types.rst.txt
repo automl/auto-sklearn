@@ -78,6 +78,16 @@ Load Australian dataset from https://www.openml.org/d/40981
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /home/runner/work/auto-sklearn/auto-sklearn/examples/40_advanced/example_feature_types.py:30: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
+    Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+      X = bunch['data'].to_numpy(np.float)
+
 
 
 
@@ -104,6 +114,17 @@ Build and fit a classifier
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    AutoSklearnClassifier(initial_configurations_via_metalearning=0,
+                          per_run_time_limit=3,
+                          smac_scenario_args={'runcount_limit': 1},
+                          time_left_for_this_task=30)
 
 
 
@@ -137,7 +158,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  13.775 seconds)
+   **Total running time of the script:** ( 0 minutes  13.744 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_feature_types.py:

@@ -96,6 +96,18 @@ Holdout
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    AutoSklearnClassifier(output_folder='/tmp/autosklearn_resampling_example_out',
+                          per_run_time_limit=30,
+                          resampling_strategy_arguments={'train_size': 0.67},
+                          time_left_for_this_task=120,
+                          tmp_folder='/tmp/autosklearn_resampling_example_tmp')
 
 
 
@@ -246,6 +258,29 @@ to the use case at hand.
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    AutoSklearnClassifier(output_folder='/tmp/autosklearn_resampling_example_out',
+                          per_run_time_limit=30,
+                          resampling_strategy=<class 'sklearn.model_selection._split.PredefinedSplit'>,
+                          resampling_strategy_arguments={'test_fold': array([  3,   4,   5,   7,   8,  10,  12,  14,  15,  16,  17,  18,  19,
+            21,  22,  26,  27,  28,  29,  31,  32,  33,  34,  36,  37,  38,
+            39,  40,  44,  46,  47,  48,  49,  52,  53,  54,  56,  58,  60,
+            63,  65,  67,  68,...
+           304, 307, 308, 309, 311, 312, 314, 315, 317, 319, 320, 321, 322,
+           325, 326, 327, 329, 332, 333, 334, 335, 337, 338, 339, 343, 345,
+           348, 349, 350, 351, 354, 355, 356, 357, 358, 361, 363, 364, 365,
+           366, 367, 370, 371, 372, 373, 374, 377, 378, 380, 381, 383, 384,
+           385, 387, 388, 389, 390, 391, 392, 393, 394, 395, 398, 400, 401,
+           402, 403, 407, 409, 410, 411, 414, 416, 417, 418, 419, 422, 424,
+           425])},
+                          time_left_for_this_task=120,
+                          tmp_folder='/tmp/autosklearn_resampling_example_tmp')
 
 
 
@@ -264,6 +299,29 @@ defined as strings by Auto-sklearn) it is necessary to perform a refit:
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    AutoSklearnClassifier(output_folder='/tmp/autosklearn_resampling_example_out',
+                          per_run_time_limit=30,
+                          resampling_strategy=<class 'sklearn.model_selection._split.PredefinedSplit'>,
+                          resampling_strategy_arguments={'test_fold': array([  3,   4,   5,   7,   8,  10,  12,  14,  15,  16,  17,  18,  19,
+            21,  22,  26,  27,  28,  29,  31,  32,  33,  34,  36,  37,  38,
+            39,  40,  44,  46,  47,  48,  49,  52,  53,  54,  56,  58,  60,
+            63,  65,  67,  68,...
+           304, 307, 308, 309, 311, 312, 314, 315, 317, 319, 320, 321, 322,
+           325, 326, 327, 329, 332, 333, 334, 335, 337, 338, 339, 343, 345,
+           348, 349, 350, 351, 354, 355, 356, 357, 358, 361, 363, 364, 365,
+           366, 367, 370, 371, 372, 373, 374, 377, 378, 380, 381, 383, 384,
+           385, 387, 388, 389, 390, 391, 392, 393, 394, 395, 398, 400, 401,
+           402, 403, 407, 409, 410, 411, 414, 416, 417, 418, 419, 422, 424,
+           425])},
+                          time_left_for_this_task=120,
+                          tmp_folder='/tmp/autosklearn_resampling_example_tmp')
 
 
 
@@ -299,7 +357,7 @@ splitting it on the first feature.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 6 minutes  11.144 seconds)
+   **Total running time of the script:** ( 6 minutes  29.064 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_resampling.py:

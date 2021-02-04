@@ -117,7 +117,7 @@
 <span class="kn">import</span> <span class="nn">dask.distributed</span>
 <span class="kn">import</span> <span class="nn">joblib</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span>
+<span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">ClassifierMixin</span><span class="p">,</span> <span class="n">RegressorMixin</span>
 <span class="kn">from</span> <span class="nn">sklearn.utils.multiclass</span> <span class="kn">import</span> <span class="n">type_of_target</span>
 
 <span class="kn">from</span> <span class="nn">autosklearn.automl</span> <span class="kn">import</span> <span class="n">AutoMLClassifier</span><span class="p">,</span> <span class="n">AutoMLRegressor</span><span class="p">,</span> <span class="n">AutoML</span>
@@ -331,11 +331,11 @@
 <span class="sd">            :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in</span>
 <span class="sd">            Metrics`_.</span>
 <span class="sd">            If None is provided, a default metric is selected depending on the task.</span>
-<span class="sd">            </span>
+
 <span class="sd">        scoring_functions : List[Scorer], optional (None)</span>
-<span class="sd">            List of scorers which will be calculated for each pipeline and results will be </span>
+<span class="sd">            List of scorers which will be calculated for each pipeline and results will be</span>
 <span class="sd">            available via ``cv_results``</span>
-<span class="sd">            </span>
+
 <span class="sd">        load_models : bool, optional (True)</span>
 <span class="sd">            Whether to load the models after fitting Auto-sklearn.</span>
 
@@ -378,13 +378,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">smac_scenario_args</span> <span class="o">=</span> <span class="n">smac_scenario_args</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logging_config</span> <span class="o">=</span> <span class="n">logging_config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata_directory</span> <span class="o">=</span> <span class="n">metadata_directory</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span> <span class="o">=</span> <span class="n">metric</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_scoring_functions</span> <span class="o">=</span> <span class="n">scoring_functions</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_load_models</span> <span class="o">=</span> <span class="n">load_models</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="n">metric</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scoring_functions</span> <span class="o">=</span> <span class="n">scoring_functions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_models</span> <span class="o">=</span> <span class="n">load_models</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[AutoML]</span>
         <span class="c1"># n_jobs after conversion to a number (b/c default is None)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -435,8 +436,8 @@
             <span class="n">smac_scenario_args</span><span class="o">=</span><span class="n">smac_scenario_args</span><span class="p">,</span>
             <span class="n">logging_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logging_config</span><span class="p">,</span>
             <span class="n">metadata_directory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_directory</span><span class="p">,</span>
-            <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">,</span>
-            <span class="n">scoring_functions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scoring_functions</span>
+            <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span>
+            <span class="n">scoring_functions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scoring_functions</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">automl</span>
@@ -465,7 +466,7 @@
             <span class="n">tmp_folder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tmp_folder</span><span class="p">,</span>
             <span class="n">output_folder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_folder</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">load_models</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_load_models</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">load_models</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">load_models</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span>
 
@@ -628,7 +629,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">configuration_space</span>
 
 
-<div class="viewcode-block" id="AutoSklearnClassifier"><a class="viewcode-back" href="../../api.html#autosklearn.classification.AutoSklearnClassifier">[docs]</a><span class="k">class</span> <span class="nc">AutoSklearnClassifier</span><span class="p">(</span><span class="n">AutoSklearnEstimator</span><span class="p">):</span>
+<div class="viewcode-block" id="AutoSklearnClassifier"><a class="viewcode-back" href="../../api.html#autosklearn.classification.AutoSklearnClassifier">[docs]</a><span class="k">class</span> <span class="nc">AutoSklearnClassifier</span><span class="p">(</span><span class="n">AutoSklearnEstimator</span><span class="p">,</span> <span class="n">ClassifierMixin</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class implements the classification task.</span>
 
@@ -709,6 +710,11 @@
             <span class="n">dataset_name</span><span class="o">=</span><span class="n">dataset_name</span><span class="p">,</span>
         <span class="p">)</span>
 
+        <span class="c1"># After fit, a classifier is expected to define classes_</span>
+        <span class="c1"># A list of class labels known to the classifier, mapping each label</span>
+        <span class="c1"># to a numerical index used in the model representation our output.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classes_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">InputValidator</span><span class="o">.</span><span class="n">target_validator</span><span class="o">.</span><span class="n">classes_</span>
+
         <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="AutoSklearnClassifier.predict"><a class="viewcode-back" href="../../api.html#autosklearn.classification.AutoSklearnClassifier.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
@@ -768,7 +774,7 @@
         <span class="k">return</span> <span class="n">AutoMLClassifier</span></div>
 
 
-<div class="viewcode-block" id="AutoSklearnRegressor"><a class="viewcode-back" href="../../api.html#autosklearn.classification.AutoSklearnRegressor">[docs]</a><span class="k">class</span> <span class="nc">AutoSklearnRegressor</span><span class="p">(</span><span class="n">AutoSklearnEstimator</span><span class="p">):</span>
+<div class="viewcode-block" id="AutoSklearnRegressor"><a class="viewcode-back" href="../../api.html#autosklearn.classification.AutoSklearnRegressor">[docs]</a><span class="k">class</span> <span class="nc">AutoSklearnRegressor</span><span class="p">(</span><span class="n">AutoSklearnEstimator</span><span class="p">,</span> <span class="n">RegressorMixin</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class implements the regression task.</span>
 

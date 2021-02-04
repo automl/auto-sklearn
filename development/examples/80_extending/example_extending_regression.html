@@ -223,7 +223,16 @@ component for using in auto-sklearn.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Configuration space object:
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/examples/80_extending/example_extending_regression.py:88: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  degree = UniformIntegerHyperparameter(
+/home/runner/work/auto-sklearn/auto-sklearn/examples/80_extending/example_extending_regression.py:94: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  cs.add_hyperparameters([alpha, kernel, gamma, degree, coef0])
+/home/runner/work/auto-sklearn/auto-sklearn/examples/80_extending/example_extending_regression.py:94: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  cs.add_hyperparameters([alpha, kernel, gamma, degree, coef0])
+Configuration space object:
   Hyperparameters:
     alpha, Type: UniformFloat, Range: [1e-05, 1.0], Default: 1.0, on log-scale
     coef0, Type: UniformFloat, Range: [0.01, 100.0], Default: 1.0, on log-scale
@@ -257,6 +266,24 @@ component for using in auto-sklearn.</p>
 <span class="n">reg</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 </pre></div>
 </div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/examples/80_extending/example_extending_regression.py:88: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  degree = UniformIntegerHyperparameter(
+/home/runner/work/auto-sklearn/auto-sklearn/examples/80_extending/example_extending_regression.py:94: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  cs.add_hyperparameters([alpha, kernel, gamma, degree, coef0])
+/home/runner/work/auto-sklearn/auto-sklearn/examples/80_extending/example_extending_regression.py:94: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  cs.add_hyperparameters([alpha, kernel, gamma, degree, coef0])
+
+AutoSklearnRegressor(include_estimators=[&#39;KernelRidgeRegression&#39;],
+                     initial_configurations_via_metalearning=0,
+                     per_run_time_limit=10,
+                     smac_scenario_args={&#39;runcount_limit&#39;: 5},
+                     time_left_for_this_task=30)
+</pre></div>
+</div>
 </div>
 <div class="section" id="print-prediction-score-and-statistics">
 <h2>Print prediction score and statistics<a class="headerlink" href="#print-prediction-score-and-statistics" title="Permalink to this headline">¶</a></h2>
@@ -266,22 +293,15 @@ component for using in auto-sklearn.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>r2 score:  -0.5594816316229312
-[(0.520000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;regressor:__choice__&#39;: &#39;KernelRidgeRegression&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01, &#39;regressor:KernelRidgeRegression:alpha&#39;: 1.0, &#39;regressor:KernelRidgeRegression:gamma&#39;: 0.1, &#39;regressor:KernelRidgeRegression:kernel&#39;: &#39;polynomial&#39;, &#39;regressor:KernelRidgeRegression:coef0&#39;: 1.0, &#39;regressor:KernelRidgeRegression:degree&#39;: 3},
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>r2 score:  -1.3513461468209123
+[(0.660000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;regressor:__choice__&#39;: &#39;KernelRidgeRegression&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01, &#39;regressor:KernelRidgeRegression:alpha&#39;: 1.0, &#39;regressor:KernelRidgeRegression:gamma&#39;: 0.1, &#39;regressor:KernelRidgeRegression:kernel&#39;: &#39;polynomial&#39;, &#39;regressor:KernelRidgeRegression:coef0&#39;: 1.0, &#39;regressor:KernelRidgeRegression:degree&#39;: 3},
 dataset_properties={
   &#39;task&#39;: 4,
   &#39;sparse&#39;: False,
   &#39;multioutput&#39;: False,
   &#39;target_type&#39;: &#39;regression&#39;,
   &#39;signed&#39;: False})),
-(0.280000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;quantile_transformer&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;random_trees_embedding&#39;, &#39;regressor:__choice__&#39;: &#39;KernelRidgeRegression&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.001818729822644953, &#39;data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles&#39;: 1701, &#39;data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution&#39;: &#39;normal&#39;, &#39;feature_preprocessor:random_trees_embedding:bootstrap&#39;: &#39;True&#39;, &#39;feature_preprocessor:random_trees_embedding:max_depth&#39;: 6, &#39;feature_preprocessor:random_trees_embedding:max_leaf_nodes&#39;: &#39;None&#39;, &#39;feature_preprocessor:random_trees_embedding:min_samples_leaf&#39;: 12, &#39;feature_preprocessor:random_trees_embedding:min_samples_split&#39;: 16, &#39;feature_preprocessor:random_trees_embedding:min_weight_fraction_leaf&#39;: 1.0, &#39;feature_preprocessor:random_trees_embedding:n_estimators&#39;: 100, &#39;regressor:KernelRidgeRegression:alpha&#39;: 0.02351257718197114, &#39;regressor:KernelRidgeRegression:gamma&#39;: 0.011972301608556113, &#39;regressor:KernelRidgeRegression:kernel&#39;: &#39;polynomial&#39;, &#39;regressor:KernelRidgeRegression:coef0&#39;: 0.010474650948262332, &#39;regressor:KernelRidgeRegression:degree&#39;: 3},
-dataset_properties={
-  &#39;task&#39;: 4,
-  &#39;sparse&#39;: False,
-  &#39;multioutput&#39;: False,
-  &#39;target_type&#39;: &#39;regression&#39;,
-  &#39;signed&#39;: False})),
-(0.200000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;minmax&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;kitchen_sinks&#39;, &#39;regressor:__choice__&#39;: &#39;KernelRidgeRegression&#39;, &#39;feature_preprocessor:kitchen_sinks:gamma&#39;: 0.00473238660746417, &#39;feature_preprocessor:kitchen_sinks:n_components&#39;: 212, &#39;regressor:KernelRidgeRegression:alpha&#39;: 0.00504200052385338, &#39;regressor:KernelRidgeRegression:gamma&#39;: 0.00031588355920827163, &#39;regressor:KernelRidgeRegression:kernel&#39;: &#39;polynomial&#39;, &#39;regressor:KernelRidgeRegression:coef0&#39;: 0.0809011782758673, &#39;regressor:KernelRidgeRegression:degree&#39;: 2},
+(0.340000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;minmax&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;kitchen_sinks&#39;, &#39;regressor:__choice__&#39;: &#39;KernelRidgeRegression&#39;, &#39;feature_preprocessor:kitchen_sinks:gamma&#39;: 0.00473238660746417, &#39;feature_preprocessor:kitchen_sinks:n_components&#39;: 212, &#39;regressor:KernelRidgeRegression:alpha&#39;: 0.00504200052385338, &#39;regressor:KernelRidgeRegression:gamma&#39;: 0.00031588355920827163, &#39;regressor:KernelRidgeRegression:kernel&#39;: &#39;polynomial&#39;, &#39;regressor:KernelRidgeRegression:coef0&#39;: 0.0809011782758673, &#39;regressor:KernelRidgeRegression:degree&#39;: 2},
 dataset_properties={
   &#39;task&#39;: 4,
   &#39;sparse&#39;: False,
@@ -291,7 +311,7 @@ dataset_properties={
 ]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  13.745 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  11.746 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-extending-regression-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_regression.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>
