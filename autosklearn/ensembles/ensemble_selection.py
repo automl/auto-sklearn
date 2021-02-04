@@ -6,7 +6,7 @@ import numpy as np
 
 from autosklearn.constants import TASK_TYPES
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
-from autosklearn.metrics import Scorer, calculate_score
+from autosklearn.metrics import Scorer, calculate_loss
 from autosklearn.pipeline.base import BasePipeline
 
 
@@ -131,9 +131,9 @@ class EnsembleSelection(AbstractEnsemble):
 
                 # Calculate score is versatile and can return a dict of score
                 # when scoring_functions=None, we know it will be a float
-                calculated_score = cast(
+                scores[j] = cast(
                     float,
-                    calculate_score(
+                    calculate_loss(
                         solution=labels,
                         prediction=fant_ensemble_prediction,
                         task_type=self.task_type,
@@ -141,7 +141,6 @@ class EnsembleSelection(AbstractEnsemble):
                         scoring_functions=None
                     )
                 )
-                scores[j] = self.metric._optimum - calculated_score
 
             all_best = np.argwhere(scores == np.nanmin(scores)).flatten()
             best = self.random_state.choice(all_best)
@@ -181,9 +180,9 @@ class EnsembleSelection(AbstractEnsemble):
                 ensemble_prediction = np.mean(np.array(ensemble), axis=0)
                 # Calculate score is versatile and can return a dict of score
                 # when scoring_functions=None, we know it will be a float
-                calculated_score = cast(
+                scores[j] = cast(
                     float,
-                    calculate_score(
+                    calculate_loss(
                         solution=labels,
                         prediction=ensemble_prediction,
                         task_type=self.task_type,
@@ -191,7 +190,6 @@ class EnsembleSelection(AbstractEnsemble):
                         scoring_functions=None
                     )
                 )
-                scores[j] = self.metric._optimum - calculated_score
                 ensemble.pop()
             best = np.nanargmin(scores)
             ensemble.append(predictions[best])

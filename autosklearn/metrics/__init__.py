@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from functools import partial
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union, cast
 
 import numpy as np
 
@@ -93,12 +93,12 @@ class _PredictScorer(Scorer):
             raise ValueError(type_true)
 
         if sample_weight is not None:
-            return self._sign * self._score_func(y_true, y_pred,
-                                                 sample_weight=sample_weight,
-                                                 **self._kwargs)
+            return self._score_func(y_true, y_pred,
+                                    sample_weight=sample_weight,
+                                    **self._kwargs)
         else:
-            return self._sign * self._score_func(y_true, y_pred,
-                                                 **self._kwargs)
+            return self._score_func(y_true, y_pred,
+                                    **self._kwargs)
 
 
 class _ProbaScorer(Scorer):
@@ -133,21 +133,21 @@ class _ProbaScorer(Scorer):
             if n_labels_pred != n_labels_test:
                 labels = list(range(n_labels_pred))
                 if sample_weight is not None:
-                    return self._sign * self._score_func(y_true, y_pred,
-                                                         sample_weight=sample_weight,
-                                                         labels=labels,
-                                                         **self._kwargs)
+                    return self._score_func(y_true, y_pred,
+                                            sample_weight=sample_weight,
+                                            labels=labels,
+                                            **self._kwargs)
                 else:
-                    return self._sign * self._score_func(y_true, y_pred,
-                                                         labels=labels, **self._kwargs)
+                    return self._score_func(y_true, y_pred,
+                                            labels=labels, **self._kwargs)
 
         if sample_weight is not None:
-            return self._sign * self._score_func(y_true, y_pred,
-                                                 sample_weight=sample_weight,
-                                                 **self._kwargs)
+            return self._score_func(y_true, y_pred,
+                                    sample_weight=sample_weight,
+                                    **self._kwargs)
         else:
-            return self._sign * self._score_func(y_true, y_pred,
-                                                 **self._kwargs)
+            return self._score_func(y_true, y_pred,
+                                    **self._kwargs)
 
 
 class _ThresholdScorer(Scorer):
@@ -186,11 +186,11 @@ class _ThresholdScorer(Scorer):
             y_pred = np.vstack([p[:, -1] for p in y_pred]).T
 
         if sample_weight is not None:
-            return self._sign * self._score_func(y_true, y_pred,
-                                                 sample_weight=sample_weight,
-                                                 **self._kwargs)
+            return self._score_func(y_true, y_pred,
+                                    sample_weight=sample_weight,
+                                    **self._kwargs)
         else:
-            return self._sign * self._score_func(y_true, y_pred, **self._kwargs)
+            return self._score_func(y_true, y_pred, **self._kwargs)
 
 
 def make_scorer(
@@ -404,3 +404,59 @@ def get_metric_score(
     else:
         score = metric_(solution, prediction)
     return score
+
+
+def calculate_loss(
+    solution: np.ndarray,
+    prediction: np.ndarray,
+    task_type: int,
+    metric: Scorer,
+    scoring_functions: Optional[List[Scorer]] = None
+) -> Union[float, Dict[str, float]]:
+    """
+    Returns a loss (a magnitude that allows casting the
+    optimization problem, as a minimization one) for the
+    given Auto-Sklearn Scorer object
+    Parameters
+    ----------
+        solution: np.ndarray
+            The ground truth of the targets
+        prediction: np.ndarray
+            The best estimate from the model, of the given targets
+        task_type: int
+            To understand if the problem task is classification
+            or regression
+        metric: Scorer
+            Object that host a function to calculate how good the
+            prediction is according to the solution.
+        scoring_functions: List[Scorer]
+            A list of metrics to calculate multiple losses
+    Returns
+    -------
+        float or Dict[str, float]
+            A loss function for each of the provided scorer objects
+    """
+    score = calculate_score(
+        solution=solution,
+        prediction=prediction,
+        task_type=task_type,
+        metric=metric,
+        scoring_functions=scoring_functions,
+    )
+
+    if scoring_functions:
+        score = cast(Dict, score)
+        # we expect a dict() object for which we should calculate the loss
+        loss_dict = dict()
+        for metric_ in scoring_functions + [metric]:
+            # TODO: When metrics are annotated with type_of_target support
+            # we can remove this check
+            if metric_.name not in score:
+                continue
+            # maybe metric argument is not in scoring_functions
+            # so append it to the list. Rather than check if such
+            # is the case, redefining loss_dict[metric] is less expensive
+            loss_dict[metric_.name] = metric_._optimum - metric_._sign * score[metric_.name]
+        return loss_dict
+    else:
+        return metric._optimum - metric._sign * cast(float, score)

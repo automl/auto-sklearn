@@ -5,8 +5,7 @@ from autosklearn.evaluation.abstract_evaluator import (
     AbstractEvaluator,
     _fit_and_suppress_warnings,
 )
-from autosklearn.metrics import calculate_score, CLASSIFICATION_METRICS, REGRESSION_METRICS
-from autosklearn.constants import CLASSIFICATION_TASKS
+from autosklearn.metrics import calculate_loss
 
 
 __all__ = [
@@ -71,7 +70,7 @@ class TestEvaluator(AbstractEvaluator):
         if train:
             Y_pred = self.predict_function(self.X_train, self.model,
                                            self.task_type, self.Y_train)
-            score = calculate_score(
+            err = calculate_loss(
                 solution=self.Y_train,
                 prediction=Y_pred,
                 task_type=self.task_type,
@@ -80,22 +79,12 @@ class TestEvaluator(AbstractEvaluator):
         else:
             Y_pred = self.predict_function(self.X_test, self.model,
                                            self.task_type, self.Y_train)
-            score = calculate_score(
+            err = calculate_loss(
                 solution=self.Y_test,
                 prediction=Y_pred,
                 task_type=self.task_type,
                 metric=self.metric,
                 scoring_functions=self.scoring_functions)
-
-        if hasattr(score, '__len__'):
-            if self.task_type in CLASSIFICATION_TASKS:
-                err = {key: metric._optimum - score[key] for key, metric in
-                       CLASSIFICATION_METRICS.items() if key in score}
-            else:
-                err = {key: metric._optimum - score[key] for key, metric in
-                       REGRESSION_METRICS.items() if key in score}
-        else:
-            err = self.metric._optimum - score
 
         return err, Y_pred, None, None
 

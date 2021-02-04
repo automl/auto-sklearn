@@ -114,19 +114,19 @@ def testRead(ensemble_backend):
     success = ensbuilder.score_ensemble_preds()
     assert success, str(ensbuilder.read_preds)
     assert len(ensbuilder.read_preds) == 3, ensbuilder.read_preds.keys()
-    assert len(ensbuilder.read_scores) == 3, ensbuilder.read_scores.keys()
+    assert len(ensbuilder.read_losses) == 3, ensbuilder.read_losses.keys()
 
     filename = os.path.join(
         ensemble_backend.temporary_directory,
         ".auto-sklearn/runs/0_1_0.0/predictions_ensemble_0_1_0.0.npy"
     )
-    assert ensbuilder.read_scores[filename]["ens_score"] == 0.5
+    assert ensbuilder.read_losses[filename]["ens_loss"] == 0.5
 
     filename = os.path.join(
         ensemble_backend.temporary_directory,
         ".auto-sklearn/runs/0_2_0.0/predictions_ensemble_0_2_0.0.npy"
     )
-    assert ensbuilder.read_scores[filename]["ens_score"] == 1.0
+    assert ensbuilder.read_losses[filename]["ens_loss"] == 0.0
 
 
 @pytest.mark.parametrize(
@@ -156,9 +156,12 @@ def testNBest(ensemble_backend, ensemble_nbest, max_models_on_disc, exp):
 
     assert len(sel_keys) == exp
 
+    # Sort by name, then score
+    # Num_run=2 and num_run=3 have same performance.
+    # Prefer run_3 over run_2 (more budget/advanced run)
     fixture = os.path.join(
         ensemble_backend.temporary_directory,
-        ".auto-sklearn/runs/0_2_0.0/predictions_ensemble_0_2_0.0.npy"
+        ".auto-sklearn/runs/0_3_100.0/predictions_ensemble_0_3_100.0.npy"
     )
     assert sel_keys[0] == fixture
 
@@ -211,8 +214,8 @@ def testMaxModelsOnDisc2(ensemble_backend):
     )
     ensbuilder.read_preds = {}
     for i in range(50):
-        ensbuilder.read_scores['pred'+str(i)] = {
-            'ens_score': i*10,
+        ensbuilder.read_losses['pred'+str(i)] = {
+            'ens_loss': -i*10,
             'num_run': i,
             'loaded': 1,
             "seed": 1,
@@ -242,16 +245,16 @@ def testPerformanceRangeThreshold(ensemble_backend, performance_range_threshold,
         ensemble_nbest=100,
         performance_range_threshold=performance_range_threshold
     )
-    ensbuilder.read_scores = {
-        'A': {'ens_score': 1, 'num_run': 1, 'loaded': -1, "seed": 1},
-        'B': {'ens_score': 2, 'num_run': 2, 'loaded': -1, "seed": 1},
-        'C': {'ens_score': 3, 'num_run': 3, 'loaded': -1, "seed": 1},
-        'D': {'ens_score': 4, 'num_run': 4, 'loaded': -1, "seed": 1},
-        'E': {'ens_score': 5, 'num_run': 5, 'loaded': -1, "seed": 1},
+    ensbuilder.read_losses = {
+        'A': {'ens_loss': -1, 'num_run': 1, 'loaded': -1, "seed": 1},
+        'B': {'ens_loss': -2, 'num_run': 2, 'loaded': -1, "seed": 1},
+        'C': {'ens_loss': -3, 'num_run': 3, 'loaded': -1, "seed": 1},
+        'D': {'ens_loss': -4, 'num_run': 4, 'loaded': -1, "seed": 1},
+        'E': {'ens_loss': -5, 'num_run': 5, 'loaded': -1, "seed": 1},
     }
     ensbuilder.read_preds = {
         key: {key_2: True for key_2 in (Y_ENSEMBLE, Y_VALID, Y_TEST)}
-        for key in ensbuilder.read_scores
+        for key in ensbuilder.read_losses
     }
     sel_keys = ensbuilder.get_n_best_preds()
 
@@ -277,16 +280,16 @@ def testPerformanceRangeThresholdMaxBest(ensemble_backend, performance_range_thr
         performance_range_threshold=performance_range_threshold,
         max_models_on_disc=None,
     )
-    ensbuilder.read_scores = {
-        'A': {'ens_score': 1, 'num_run': 1, 'loaded': -1, "seed": 1},
-        'B': {'ens_score': 2, 'num_run': 2, 'loaded': -1, "seed": 1},
-        'C': {'ens_score': 3, 'num_run': 3, 'loaded': -1, "seed": 1},
-        'D': {'ens_score': 4, 'num_run': 4, 'loaded': -1, "seed": 1},
-        'E': {'ens_score': 5, 'num_run': 5, 'loaded': -1, "seed": 1},
+    ensbuilder.read_losses = {
+        'A': {'ens_loss': -1, 'num_run': 1, 'loaded': -1, "seed": 1},
+        'B': {'ens_loss': -2, 'num_run': 2, 'loaded': -1, "seed": 1},
+        'C': {'ens_loss': -3, 'num_run': 3, 'loaded': -1, "seed": 1},
+        'D': {'ens_loss': -4, 'num_run': 4, 'loaded': -1, "seed": 1},
+        'E': {'ens_loss': -5, 'num_run': 5, 'loaded': -1, "seed": 1},
     }
     ensbuilder.read_preds = {
         key: {key_2: True for key_2 in (Y_ENSEMBLE, Y_VALID, Y_TEST)}
-        for key in ensbuilder.read_scores
+        for key in ensbuilder.read_losses
     }
     sel_keys = ensbuilder.get_n_best_preds()
 
@@ -306,26 +309,26 @@ def testFallBackNBest(ensemble_backend):
     ensbuilder.score_ensemble_preds()
     print()
     print(ensbuilder.read_preds.keys())
-    print(ensbuilder.read_scores.keys())
+    print(ensbuilder.read_losses.keys())
     print(ensemble_backend.temporary_directory)
 
     filename = os.path.join(
         ensemble_backend.temporary_directory,
         ".auto-sklearn/runs/0_2_0.0/predictions_ensemble_0_2_0.0.npy"
     )
-    ensbuilder.read_scores[filename]["ens_score"] = -1
+    ensbuilder.read_losses[filename]["ens_loss"] = -1
 
     filename = os.path.join(
         ensemble_backend.temporary_directory,
         ".auto-sklearn/runs/0_3_100.0/predictions_ensemble_0_3_100.0.npy"
     )
-    ensbuilder.read_scores[filename]["ens_score"] = -1
+    ensbuilder.read_losses[filename]["ens_loss"] = -1
 
     filename = os.path.join(
         ensemble_backend.temporary_directory,
         ".auto-sklearn/runs/0_1_0.0/predictions_ensemble_0_1_0.0.npy"
     )
-    ensbuilder.read_scores[filename]["ens_score"] = -1
+    ensbuilder.read_losses[filename]["ens_loss"] = -1
 
     sel_keys = ensbuilder.get_n_best_preds()
 
@@ -349,6 +352,8 @@ def testGetValidTestPreds(ensemble_backend):
 
     ensbuilder.score_ensemble_preds()
 
+    # d1 is a dummt prediction. d2 and d3 have the same prediction with
+    # different name. num_run=3 is selected when doing sorted()
     d1 = os.path.join(
         ensemble_backend.temporary_directory,
         ".auto-sklearn/runs/0_1_0.0/predictions_ensemble_0_1_0.0.npy"
@@ -377,12 +382,12 @@ def testGetValidTestPreds(ensemble_backend):
     # not selected --> should still be None
     assert ensbuilder.read_preds[d1][Y_VALID] is None
     assert ensbuilder.read_preds[d1][Y_TEST] is None
-    assert ensbuilder.read_preds[d3][Y_VALID] is None
-    assert ensbuilder.read_preds[d3][Y_TEST] is None
+    assert ensbuilder.read_preds[d2][Y_VALID] is None
+    assert ensbuilder.read_preds[d2][Y_TEST] is None
 
     # selected --> read valid and test predictions
-    assert ensbuilder.read_preds[d2][Y_VALID] is not None
-    assert ensbuilder.read_preds[d2][Y_TEST] is not None
+    assert ensbuilder.read_preds[d3][Y_VALID] is not None
+    assert ensbuilder.read_preds[d3][Y_TEST] is not None
 
 
 def testEntireEnsembleBuilder(ensemble_backend):
@@ -485,7 +490,7 @@ def test_main(ensemble_backend):
         os.path.join(ensemble_backend.internals_directory, 'ensemble_read_preds.pkl')
     ), os.listdir(ensemble_backend.internals_directory)
     assert os.path.exists(
-        os.path.join(ensemble_backend.internals_directory, 'ensemble_read_scores.pkl')
+        os.path.join(ensemble_backend.internals_directory, 'ensemble_read_losses.pkl')
     ), os.listdir(ensemble_backend.internals_directory)
 
 
@@ -522,9 +527,9 @@ def testLimit(ensemble_backend):
                                         )
     ensbuilder.SAVE2DISC = False
 
-    read_scores_file = os.path.join(
+    read_losses_file = os.path.join(
         ensemble_backend.internals_directory,
-        'ensemble_read_scores.pkl'
+        'ensemble_read_losses.pkl'
     )
     read_preds_file = os.path.join(
         ensemble_backend.internals_directory,
@@ -554,15 +559,15 @@ def testLimit(ensemble_backend):
         mtime.side_effect = mtime_mock
 
         ensbuilder.run(time_left=1000, iteration=0, pynisher_context='fork')
-        assert os.path.exists(read_scores_file)
+        assert os.path.exists(read_losses_file)
         assert not os.path.exists(read_preds_file)
         assert logger_mock.warning.call_count == 1
         ensbuilder.run(time_left=1000, iteration=0, pynisher_context='fork')
-        assert os.path.exists(read_scores_file)
+        assert os.path.exists(read_losses_file)
         assert not os.path.exists(read_preds_file)
         assert logger_mock.warning.call_count == 2
         ensbuilder.run(time_left=1000, iteration=0, pynisher_context='fork')
-        assert os.path.exists(read_scores_file)
+        assert os.path.exists(read_losses_file)
         assert not os.path.exists(read_preds_file)
         assert logger_mock.warning.call_count == 3
 
@@ -570,7 +575,7 @@ def testLimit(ensemble_backend):
         assert ensbuilder.ensemble_nbest == 1
 
         ensbuilder.run(time_left=1000, iteration=0, pynisher_context='fork')
-        assert os.path.exists(read_scores_file)
+        assert os.path.exists(read_losses_file)
         assert not os.path.exists(read_preds_file)
         assert logger_mock.warning.call_count == 4
 
@@ -580,7 +585,7 @@ def testLimit(ensemble_backend):
         # And then it still runs, but basically won't do anything any more except for raising error
         # messages via the logger
         ensbuilder.run(time_left=1000, iteration=0, pynisher_context='fork')
-        assert os.path.exists(read_scores_file)
+        assert os.path.exists(read_losses_file)
         assert not os.path.exists(read_preds_file)
         assert logger_mock.warning.call_count == 4
 
@@ -629,15 +634,15 @@ def test_read_pickle_read_preds(ensemble_backend):
 
     ensemble_memory_file = os.path.join(
         ensemble_backend.internals_directory,
-        'ensemble_read_scores.pkl'
+        'ensemble_read_losses.pkl'
     )
     assert os.path.exists(ensemble_memory_file)
 
     # Make sure we pickle the correct read scores
     with (open(ensemble_memory_file, "rb")) as memory:
-        read_scores = pickle.load(memory)
+        read_losses = pickle.load(memory)
 
-    compare_read_preds(read_scores, ensbuilder.read_scores)
+    compare_read_preds(read_losses, ensbuilder.read_losses)
 
     # Then create a new instance, which should automatically read this file
     ensbuilder2 = EnsembleBuilder(
@@ -650,7 +655,7 @@ def test_read_pickle_read_preds(ensemble_backend):
         max_models_on_disc=None,
         )
     compare_read_preds(ensbuilder2.read_preds, ensbuilder.read_preds)
-    compare_read_preds(ensbuilder2.read_scores, ensbuilder.read_scores)
+    compare_read_preds(ensbuilder2.read_losses, ensbuilder.read_losses)
     assert ensbuilder2.last_hash == ensbuilder.last_hash
 
 

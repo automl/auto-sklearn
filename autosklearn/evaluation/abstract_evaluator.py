@@ -19,7 +19,7 @@ from autosklearn.constants import (
 from autosklearn.pipeline.implementations.util import (
     convert_multioutput_multiclass_to_multilabel
 )
-from autosklearn.metrics import calculate_score
+from autosklearn.metrics import calculate_loss, Scorer
 from autosklearn.util.logging_ import get_named_client_logger
 
 from ConfigSpace import Configuration
@@ -236,17 +236,18 @@ class AbstractEvaluator(object):
                                      init_params=self._init_params)
         return model
 
-    def _loss(self, y_true, y_hat, scoring_functions=None):
-        """Auto-sklearn follows a minimization goal, so the make_scorer
-        sign is used as a guide to obtain the value to reduce.
+    def _loss(self, y_true: np.ndarray, y_hat: np.ndarray,
+              scoring_functions: typing.Optional[typing.List[Scorer]] = None
+              ) -> typing.Union[float, typing.Dict[str, float]]:
+        """Auto-sklearn follows a minimization goal.
+        The calculate_loss internally translate a score function to
+        a minimization problem.
 
-        On this regard, to optimize a metric:
-            1- score is calculared with calculate_score, with the caveat, that if
-            for the metric greater is not better, a negative score is returned.
-            2- the err (the optimization goal) is then:
-                optimum - (metric.sign * actual_score)
-                For accuracy for example: optimum(1) - (+1 * actual score)
-                For logloss for example: optimum(0) - (-1 * actual score)
+        For a dummy prediction, the worst result is assumed.
+
+        Parameters
+        ----------
+            y_true
         """
         scoring_functions = (
             self.scoring_functions
@@ -255,22 +256,13 @@ class AbstractEvaluator(object):
         )
         if not isinstance(self.configuration, Configuration):
             if scoring_functions:
-                return {self.metric.name: 1.0}
+                return {self.metric.name: self.metric._worst_possible_result}
             else:
-                return 1.0
+                return self.metric._worst_possible_result
 
-        score = calculate_score(
+        return calculate_loss(
             y_true, y_hat, self.task_type, self.metric,
             scoring_functions=scoring_functions)
-
-        if hasattr(score, '__len__'):
-            err = {metric.name: metric._optimum - score[metric.name]
-                   for metric in scoring_functions}
-            err[self.metric.name] = self.metric._optimum - score[self.metric.name]
-        else:
-            err = self.metric._optimum - score
-
-        return err
 
     def finish_up(self, loss, train_loss,  opt_pred, valid_pred, test_pred,
                   additional_run_info, file_output, final_call, status):
