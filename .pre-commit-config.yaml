@@ -18,6 +18,18 @@ repos:
         args: [--show-error-codes]
         name: mypy auto-sklearn-util
         files: autosklearn/util
+      - id: mypy
+        args: [--show-error-codes]
+        name: mypy auto-sklearn-evaluation-tae
+        files: autosklearn/evaluation/__init__.py
+      - id: mypy
+        args: [--show-error-codes]
+        name: mypy auto-sklearn-evaluation-abstract
+        files: autosklearn/evaluation/abstract_evaluator.py
+      - id: mypy
+        args: [--show-error-codes]
+        name: mypy auto-sklearn-evaluation-util
+        files: autosklearn/evaluation/util.py
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.8.3
     hooks:
