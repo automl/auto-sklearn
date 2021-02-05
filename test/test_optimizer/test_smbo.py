@@ -13,7 +13,7 @@ from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.util.stopwatch import StopWatch
 
 
-@pytest.mark.parametrize("context", ['fork', 'forkserver', 'spawn'])
+@pytest.mark.parametrize("context", ['fork', 'forkserver'])
 def test_smbo_metalearning_configurations(backend, context, dask_client):
 
     # Get the inputs to the optimizer
