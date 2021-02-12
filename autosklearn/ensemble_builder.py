@@ -76,7 +76,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         task_type: int
             type of ML task
         metric: str
-            name of metric to score predictions
+            name of metric to compute the loss of the given predictions
         ensemble_size: int
             maximal size of ensemble (passed to autosklearn.ensemble.ensemble_selection)
         ensemble_nbest: int/float
@@ -294,7 +294,7 @@ def fit_and_return_ensemble(
         dataset_name: str
             name of dataset
         metric: str
-            name of metric to score predictions
+            name of metric to compute the loss of the given predictions
         task_type: int
             type of ML task
         ensemble_size: int
@@ -399,7 +399,7 @@ class EnsembleBuilder(object):
             task_type: int
                 type of ML task
             metric: str
-                name of metric to score predictions
+                name of metric to compute the loss of the given predictions
             ensemble_size: int
                 maximal size of ensemble (passed to autosklearn.ensemble.ensemble_selection)
             ensemble_nbest: int/float
@@ -810,7 +810,7 @@ class EnsembleBuilder(object):
 
     def compute_loss_per_model(self):
         """
-            score predictions on ensemble building data set;
+            Compute the loss of the predictions on ensemble building data set;
             populates self.read_preds and self.read_losses
         """
 
@@ -893,7 +893,7 @@ class EnsembleBuilder(object):
                 # same time stamp; nothing changed;
                 continue
 
-            # actually read the predictions and score them
+            # actually read the predictions and compute their respective loss
             try:
                 y_ensemble = self._read_np_fn(y_ens_fn)
                 loss = calculate_loss(solution=self.y_true_ensemble,
@@ -916,7 +916,7 @@ class EnsembleBuilder(object):
                 self.read_losses[y_ens_fn]["ens_loss"] = loss
 
                 # It is not needed to create the object here
-                # To save memory, we just score the object.
+                # To save memory, we just compute the loss.
                 self.read_losses[y_ens_fn]["mtime_ens"] = os.path.getmtime(y_ens_fn)
                 self.read_losses[y_ens_fn]["loaded"] = 2
                 self.read_losses[y_ens_fn]["disc_space_cost_mb"] = self.get_disk_consumption(
@@ -944,7 +944,7 @@ class EnsembleBuilder(object):
     def get_n_best_preds(self):
         """
             get best n predictions (i.e., keys of self.read_losses)
-            according to score on "ensemble set"
+            according to the loss on the "ensemble set"
             n: self.ensemble_nbest
 
             Side effects:
@@ -1106,6 +1106,7 @@ class EnsembleBuilder(object):
                 self.read_losses[k]['loaded'] = 1
 
         # return best scored keys of self.read_losses
+        # That is, the one with the lowest loss
         return sorted_keys[:ensemble_n_best]
 
     def get_valid_test_preds(self, selected_keys: List[str]) -> Tuple[List[str], List[str]]:
@@ -1413,7 +1414,7 @@ class EnsembleBuilder(object):
     def _get_list_of_sorted_preds(self):
         """
             Returns a list of sorted predictions in descending order
-            Scores are taken from self.read_losses.
+            Losses are taken from self.read_losses.
 
             Parameters
             ----------
