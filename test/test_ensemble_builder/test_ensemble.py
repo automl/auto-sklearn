@@ -111,7 +111,7 @@ def testRead(ensemble_backend):
         seed=0,  # important to find the test files
     )
 
-    success = ensbuilder.score_ensemble_preds()
+    success = ensbuilder.compute_loss_per_model()
     assert success, str(ensbuilder.read_preds)
     assert len(ensbuilder.read_preds) == 3, ensbuilder.read_preds.keys()
     assert len(ensbuilder.read_losses) == 3, ensbuilder.read_losses.keys()
@@ -151,17 +151,14 @@ def testNBest(ensemble_backend, ensemble_nbest, max_models_on_disc, exp):
         max_models_on_disc=max_models_on_disc,
     )
 
-    ensbuilder.score_ensemble_preds()
+    ensbuilder.compute_loss_per_model()
     sel_keys = ensbuilder.get_n_best_preds()
 
     assert len(sel_keys) == exp
 
-    # Sort by name, then score
-    # Num_run=2 and num_run=3 have same performance.
-    # Prefer run_3 over run_2 (more budget/advanced run)
     fixture = os.path.join(
         ensemble_backend.temporary_directory,
-        ".auto-sklearn/runs/0_3_100.0/predictions_ensemble_0_3_100.0.npy"
+        ".auto-sklearn/runs/0_2_0.0/predictions_ensemble_0_2_0.0.npy"
     )
     assert sel_keys[0] == fixture
 
@@ -195,7 +192,7 @@ def testMaxModelsOnDisc(ensemble_backend, test_case, exp):
 
     with unittest.mock.patch('os.path.getsize') as mock:
         mock.return_value = 100*1024*1024
-        ensbuilder.score_ensemble_preds()
+        ensbuilder.compute_loss_per_model()
         sel_keys = ensbuilder.get_n_best_preds()
         assert len(sel_keys) == exp, test_case
 
@@ -306,7 +303,7 @@ def testFallBackNBest(ensemble_backend):
                                  ensemble_nbest=1
                                  )
 
-    ensbuilder.score_ensemble_preds()
+    ensbuilder.compute_loss_per_model()
     print()
     print(ensbuilder.read_preds.keys())
     print(ensbuilder.read_losses.keys())
@@ -350,10 +347,10 @@ def testGetValidTestPreds(ensemble_backend):
                                  ensemble_nbest=1
                                  )
 
-    ensbuilder.score_ensemble_preds()
+    ensbuilder.compute_loss_per_model()
 
     # d1 is a dummt prediction. d2 and d3 have the same prediction with
-    # different name. num_run=3 is selected when doing sorted()
+    # different name. num_run=2 is selected when doing sorted()
     d1 = os.path.join(
         ensemble_backend.temporary_directory,
         ".auto-sklearn/runs/0_1_0.0/predictions_ensemble_0_1_0.0.npy"
@@ -382,12 +379,12 @@ def testGetValidTestPreds(ensemble_backend):
     # not selected --> should still be None
     assert ensbuilder.read_preds[d1][Y_VALID] is None
     assert ensbuilder.read_preds[d1][Y_TEST] is None
-    assert ensbuilder.read_preds[d2][Y_VALID] is None
-    assert ensbuilder.read_preds[d2][Y_TEST] is None
+    assert ensbuilder.read_preds[d3][Y_VALID] is None
+    assert ensbuilder.read_preds[d3][Y_TEST] is None
 
     # selected --> read valid and test predictions
-    assert ensbuilder.read_preds[d3][Y_VALID] is not None
-    assert ensbuilder.read_preds[d3][Y_TEST] is not None
+    assert ensbuilder.read_preds[d2][Y_VALID] is not None
+    assert ensbuilder.read_preds[d2][Y_TEST] is not None
 
 
 def testEntireEnsembleBuilder(ensemble_backend):
@@ -402,7 +399,7 @@ def testEntireEnsembleBuilder(ensemble_backend):
     )
     ensbuilder.SAVE2DISC = False
 
-    ensbuilder.score_ensemble_preds()
+    ensbuilder.compute_loss_per_model()
 
     d2 = os.path.join(
         ensemble_backend.temporary_directory,

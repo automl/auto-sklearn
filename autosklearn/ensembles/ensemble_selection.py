@@ -100,7 +100,7 @@ class EnsembleSelection(AbstractEnsemble):
             dtype=np.float64,
         )
         for i in range(ensemble_size):
-            scores = np.zeros(
+            losses = np.zeros(
                 (len(predictions)),
                 dtype=np.float64,
             )
@@ -129,9 +129,9 @@ class EnsembleSelection(AbstractEnsemble):
                     out=fant_ensemble_prediction
                 )
 
-                # Calculate score is versatile and can return a dict of score
+                # calculate_loss is versatile and can return a dict of losses
                 # when scoring_functions=None, we know it will be a float
-                scores[j] = cast(
+                losses[j] = cast(
                     float,
                     calculate_loss(
                         solution=labels,
@@ -142,10 +142,10 @@ class EnsembleSelection(AbstractEnsemble):
                     )
                 )
 
-            all_best = np.argwhere(scores == np.nanmin(scores)).flatten()
+            all_best = np.argwhere(losses == np.nanmin(losses)).flatten()
             best = self.random_state.choice(all_best)
             ensemble.append(predictions[best])
-            trajectory.append(scores[best])
+            trajectory.append(losses[best])
             order.append(best)
 
             # Handle special case
@@ -154,7 +154,7 @@ class EnsembleSelection(AbstractEnsemble):
 
         self.indices_ = order
         self.trajectory_ = trajectory
-        self.train_score_ = trajectory[-1]
+        self.train_loss_ = trajectory[-1]
 
     def _slow(
         self,
@@ -171,16 +171,16 @@ class EnsembleSelection(AbstractEnsemble):
         ensemble_size = self.ensemble_size
 
         for i in range(ensemble_size):
-            scores = np.zeros(
+            losses = np.zeros(
                 [np.shape(predictions)[0]],
                 dtype=np.float64,
             )
             for j, pred in enumerate(predictions):
                 ensemble.append(pred)
                 ensemble_prediction = np.mean(np.array(ensemble), axis=0)
-                # Calculate score is versatile and can return a dict of score
+                # calculate_loss is versatile and can return a dict of losses
                 # when scoring_functions=None, we know it will be a float
-                scores[j] = cast(
+                losses[j] = cast(
                     float,
                     calculate_loss(
                         solution=labels,
@@ -191,9 +191,9 @@ class EnsembleSelection(AbstractEnsemble):
                     )
                 )
                 ensemble.pop()
-            best = np.nanargmin(scores)
+            best = np.nanargmin(losses)
             ensemble.append(predictions[best])
-            trajectory.append(scores[best])
+            trajectory.append(losses[best])
             order.append(best)
 
             # Handle special case
@@ -208,7 +208,7 @@ class EnsembleSelection(AbstractEnsemble):
             trajectory,
             dtype=np.float64,
         )
-        self.train_score_ = trajectory[-1]
+        self.train_loss_ = trajectory[-1]
 
     def _calculate_weights(self) -> None:
         ensemble_members = Counter(self.indices_).most_common()

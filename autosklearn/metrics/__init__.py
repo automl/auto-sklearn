@@ -93,12 +93,12 @@ class _PredictScorer(Scorer):
             raise ValueError(type_true)
 
         if sample_weight is not None:
-            return self._score_func(y_true, y_pred,
-                                    sample_weight=sample_weight,
-                                    **self._kwargs)
+            return self._sign * self._score_func(y_true, y_pred,
+                                                 sample_weight=sample_weight,
+                                                 **self._kwargs)
         else:
-            return self._score_func(y_true, y_pred,
-                                    **self._kwargs)
+            return self._sign * self._score_func(y_true, y_pred,
+                                                 **self._kwargs)
 
 
 class _ProbaScorer(Scorer):
@@ -133,21 +133,21 @@ class _ProbaScorer(Scorer):
             if n_labels_pred != n_labels_test:
                 labels = list(range(n_labels_pred))
                 if sample_weight is not None:
-                    return self._score_func(y_true, y_pred,
-                                            sample_weight=sample_weight,
-                                            labels=labels,
-                                            **self._kwargs)
+                    return self._sign * self._score_func(y_true, y_pred,
+                                                         sample_weight=sample_weight,
+                                                         labels=labels,
+                                                         **self._kwargs)
                 else:
-                    return self._score_func(y_true, y_pred,
-                                            labels=labels, **self._kwargs)
+                    return self._sign * self._score_func(y_true, y_pred,
+                                                         labels=labels, **self._kwargs)
 
         if sample_weight is not None:
-            return self._score_func(y_true, y_pred,
-                                    sample_weight=sample_weight,
-                                    **self._kwargs)
+            return self._sign * self._score_func(y_true, y_pred,
+                                                 sample_weight=sample_weight,
+                                                 **self._kwargs)
         else:
-            return self._score_func(y_true, y_pred,
-                                    **self._kwargs)
+            return self._sign * self._score_func(y_true, y_pred,
+                                                 **self._kwargs)
 
 
 class _ThresholdScorer(Scorer):
@@ -186,11 +186,11 @@ class _ThresholdScorer(Scorer):
             y_pred = np.vstack([p[:, -1] for p in y_pred]).T
 
         if sample_weight is not None:
-            return self._score_func(y_true, y_pred,
-                                    sample_weight=sample_weight,
-                                    **self._kwargs)
+            return self._sign * self._score_func(y_true, y_pred,
+                                                 sample_weight=sample_weight,
+                                                 **self._kwargs)
         else:
-            return self._score_func(y_true, y_pred, **self._kwargs)
+            return self._sign * self._score_func(y_true, y_pred, **self._kwargs)
 
 
 def make_scorer(
@@ -397,12 +397,19 @@ def get_metric_score(
         solution: np.ndarray,
         task_type: int
 ) -> float:
+    # We match the behaviour of GridSearchCV
+    # In scikit learn, the exact value of the score_func
+    # is returned (not that of the 'Scorer' which might be
+    # negative in functions like mse, as scikit learn
+    # maximizes.) If an user wants to use GridSearchCV
+    # They are expected to pass neg_mean_squared_error
+    # For this reason we multiply back by metric_._sign
     if task_type in REGRESSION_TASKS:
         # TODO put this into the regression metric itself
         cprediction = sanitize_array(prediction)
-        score = metric_(solution, cprediction)
+        score = metric_._sign * metric_(solution, cprediction)
     else:
-        score = metric_(solution, prediction)
+        score = metric_._sign * metric_(solution, prediction)
     return score
 
 

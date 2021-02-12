@@ -678,7 +678,7 @@ class EnsembleBuilder(object):
         )
 
         # populates self.read_preds and self.read_losses
-        if not self.score_ensemble_preds():
+        if not self.compute_loss_per_model():
             if return_predictions:
                 return self.ensemble_history, self.ensemble_nbest, train_pred, valid_pred, test_pred
             else:
@@ -808,7 +808,7 @@ class EnsembleBuilder(object):
         # get the megabytes
         return round(this_model_cost / math.pow(1024, 2), 2)
 
-    def score_ensemble_preds(self):
+    def compute_loss_per_model(self):
         """
             score predictions on ensemble building data set;
             populates self.read_preds and self.read_losses
@@ -939,7 +939,6 @@ class EnsembleBuilder(object):
             n_read_files,
             np.sum([pred["loaded"] > 0 for pred in self.read_losses.values()])
         )
-        print(f"self.read_losses={self.read_losses}")
         return True
 
     def get_n_best_preds(self):
@@ -956,7 +955,6 @@ class EnsembleBuilder(object):
         """
 
         sorted_keys = self._get_list_of_sorted_preds()
-        print(f"sorted_keys={sorted_keys}")
 
         # number of models available
         num_keys = len(sorted_keys)
@@ -1426,18 +1424,15 @@ class EnsembleBuilder(object):
             sorted_keys: list
         """
         # Sort by loss - smaller is better!
-        # First sort by num_run
-        sorted_keys = list(reversed(sorted(
+        sorted_keys = list(sorted(
             [
                 (k, v["ens_loss"], v["num_run"])
                 for k, v in self.read_losses.items()
             ],
-            key=lambda x: x[2],
-        )))
-        # We sort the loss on a ascending fashion. Smaller loss
-        # (that is better performance for the given task)
-        # will be first in the sorted_keys list
-        sorted_keys = list(sorted(sorted_keys, key=lambda x: x[1]))
+            # Sort by loss as priority 1 and then by num_run on a ascending order
+            # We want small num_run first
+            key=lambda x: (x[1], x[2]),
+        ))
         return sorted_keys
 
     def _delete_excess_models(self, selected_keys: List[str]):
