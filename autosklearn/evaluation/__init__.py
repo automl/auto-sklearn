@@ -7,7 +7,7 @@ import multiprocessing
 from queue import Empty
 import time
 import traceback
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
 from ConfigSpace import Configuration
 import numpy as np
@@ -72,7 +72,7 @@ def fit_predict_try_except_decorator(
         queue.close()
 
 
-def get_cost_of_crash(metric: Scorer) -> int:
+def get_cost_of_crash(metric: Scorer) -> float:
 
     # The metric must always be defined to extract optimum/worst
     if not isinstance(metric, Scorer):
@@ -91,9 +91,11 @@ def get_cost_of_crash(metric: Scorer) -> int:
     return worst_possible_result
 
 
-def _encode_exit_status(exit_status: multiprocessing.connection.Connection
-                        ) -> Union[multiprocessing.connection.Connection, str]:
+def _encode_exit_status(exit_status: Union[str, int, Type[BaseException]]
+                        ) -> Union[str, int]:
     try:
+        # If it can be dumped, then it is int
+        exit_status = cast(int, exit_status)
         json.dumps(exit_status)
         return exit_status
     except (TypeError, OverflowError):
@@ -286,6 +288,10 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         instance_specific: Optional[str] = None,
     ) -> Tuple[StatusType, float, float, Dict[str, Union[int, float, str, Dict, List, Tuple]]]:
 
+        # Additional information of each of the tae executions
+        # Defined upfront for mypy
+        additional_run_info: Dict[str, Union[int, float, str, Dict, List, Tuple]] = {}
+
         context = multiprocessing.get_context(self.pynisher_context)
         preload_modules(context)
         queue = context.Queue()
@@ -345,16 +351,11 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         except Exception as e:
             exception_traceback = traceback.format_exc()
             error_message = repr(e)
-            additional_info = {
+            additional_run_info.update({
                 'traceback': exception_traceback,
                 'error': error_message
-            }
-            return StatusType.CRASHED, self.worst_possible_result, 0.0, cast(
-                # Mypy requires casting to indicate that this Dict can have other
-                # types (specially for Dict, List, Tuple)
-                Dict[str, Union[int, float, str, Dict, List, Tuple]],
-                additional_info
-            )
+            })
+            return StatusType.CRASHED, self.worst_possible_result, 0.0, additional_run_info
 
         if obj.exit_status in (pynisher.TimeoutException, pynisher.MemorylimitException):
             # Even if the pynisher thinks that a timeout or memout occured,
@@ -389,7 +390,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                 elif obj.exit_status is pynisher.MemorylimitException:
                     status = StatusType.MEMOUT
                     additional_run_info = {
-                        "error': 'Memout (used more than {} MB).".format(self.memory_limit)
+                        "error": "Memout (used more than {} MB).".format(self.memory_limit)
                     }
                 else:
                     raise ValueError(obj.exit_status)

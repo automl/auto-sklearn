@@ -2,7 +2,7 @@ import logging
 import multiprocessing
 import time
 import warnings
-from typing import Any, Dict, List, Optional, TextIO, Tuple, Type, Union
+from typing import Any, Dict, List, Optional, TextIO, Tuple, Type, Union, cast
 
 import numpy as np
 
@@ -179,7 +179,7 @@ class AbstractEvaluator(object):
         num_run: Optional[int] = None,
         include: Optional[List[str]] = None,
         exclude: Optional[List[str]] = None,
-        disable_file_output: bool = False,
+        disable_file_output: Union[bool, List[str]] = False,
         init_params: Optional[Dict[str, Any]] = None,
         budget: Optional[float] = None,
         budget_type: Optional[str] = None,
@@ -209,7 +209,7 @@ class AbstractEvaluator(object):
         self.scoring_functions = scoring_functions
 
         if isinstance(disable_file_output, (bool, list)):
-            self.disable_file_output = disable_file_output
+            self.disable_file_output: Union[bool, List[str]] = disable_file_output
         else:
             raise ValueError('disable_file_output should be either a bool or a list')
 
@@ -260,11 +260,14 @@ class AbstractEvaluator(object):
                 port=self.port,
             )
 
-        self.Y_optimization = None
+        self.Y_optimization: Optional[Union[List, np.ndarray]] = None
         self.Y_actual_train = None
 
         self.budget = budget
         self.budget_type = budget_type
+
+        # Please mypy to prevent not defined attr
+        self.model = self._get_model()
 
     def _get_model(self) -> BaseEstimator:
         if not isinstance(self.configuration, Configuration):
@@ -325,7 +328,7 @@ class AbstractEvaluator(object):
     def finish_up(
         self,
         loss: Union[Dict[str, float], float],
-        train_loss: Optional[float],
+        train_loss: Optional[Union[float, Dict[str, float]]],
         opt_pred: np.ndarray,
         valid_pred: np.ndarray,
         test_pred: np.ndarray,
@@ -431,14 +434,14 @@ class AbstractEvaluator(object):
             return None, {}
 
         # Abort in case of shape misalignment
-        if self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
+        if np.shape(self.Y_optimization)[0] != Y_optimization_pred.shape[0]:
             return (
                 1.0,
                 {
                     'error':
                         "Targets %s and prediction %s don't have "
                         "the same length. Probably training didn't "
-                        "finish" % (self.Y_optimization.shape, Y_optimization_pred.shape)
+                        "finish" % (np.shape(self.Y_optimization), Y_optimization_pred.shape)
                  },
             )
 
@@ -469,23 +472,25 @@ class AbstractEvaluator(object):
         if self.disable_file_output is False:
             self.disable_file_output = []
 
+        # Here onwards, the self.disable_file_output can be treated as a list
+        self.disable_file_output = cast(List, self.disable_file_output)
+
         # This file can be written independently of the others down bellow
         if ('y_optimization' not in self.disable_file_output):
             if self.output_y_hat_optimization:
                 self.backend.save_targets_ensemble(self.Y_optimization)
 
-        if hasattr(self, 'models') and len(self.models) > 0 and self.models[0] is not None:
-            if ('models' not in self.disable_file_output):
+        models: Optional[BaseEstimator] = None
+        if hasattr(self, 'models'):
+            if len(self.models) > 0 and self.models[0] is not None:  # type: ignore[attr-defined]
+                if ('models' not in self.disable_file_output):
 
-                if self.task_type in CLASSIFICATION_TASKS:
-                    models = VotingClassifier(estimators=None, voting='soft', )
-                else:
-                    models = VotingRegressor(estimators=None)
-                models.estimators_ = self.models
-            else:
-                models = None
-        else:
-            models = None
+                    if self.task_type in CLASSIFICATION_TASKS:
+                        models = VotingClassifier(estimators=None, voting='soft', )
+                    else:
+                        models = VotingRegressor(estimators=None)
+                    # Mypy cannot understand hasattr yet
+                    models.estimators_ = self.models  # type: ignore[attr-defined]
 
         self.backend.save_numrun_to_dir(
             seed=self.seed,

@@ -10,7 +10,7 @@ __all__ = [
 
 
 def read_queue(queue_: multiprocessing.Queue
-               ) -> List[Union[str, int, float, List, Dict, Tuple]]:
+               ) -> List[Dict[str, Union[str, bool, int, float, List, Dict, Tuple]]]:
     stack = []
     while True:
         try:
@@ -47,7 +47,7 @@ def empty_queue(queue_: multiprocessing.Queue) -> None:
 
 
 def extract_learning_curve(stack: List[Dict[str, Any]],
-                           key: Optional[str] = None) -> List[Union[float, int]]:
+                           key: Optional[str] = None) -> List[float]:
     learning_curve = []
     for entry in stack:
         if key:
