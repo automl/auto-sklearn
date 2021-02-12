@@ -46,9 +46,7 @@ class TestScorer(unittest.TestCase):
 
         y_pred = np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]])
         score = scorer(y_true, y_pred)
-        # The scorer has negative sign, yet that is accounted when calculating a loss
-        # Not when producing a score
-        self.assertAlmostEqual(score, 1.0)
+        self.assertAlmostEqual(score, -1.0)
 
     def test_predict_scorer_multiclass(self):
         y_true = np.array([0, 1, 2])
@@ -80,9 +78,7 @@ class TestScorer(unittest.TestCase):
 
         y_pred = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
         score = scorer(y_true, y_pred)
-        # The scorer has negative sign, yet that is accounted when calculating a loss
-        # Not when producing a score
-        self.assertAlmostEqual(score, 1.0)
+        self.assertAlmostEqual(score, -1.0)
 
     def test_predict_scorer_multilabel(self):
         y_true = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
@@ -107,9 +103,7 @@ class TestScorer(unittest.TestCase):
 
         y_pred = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
         score = scorer(y_true, y_pred)
-        # The scorer has negative sign, yet that is accounted when calculating a loss
-        # Not when producing a score
-        self.assertAlmostEqual(score, 1.0)
+        self.assertAlmostEqual(score, -1.0)
 
     def test_predict_scorer_regression(self):
         y_true = np.arange(0, 1.01, 0.1)
@@ -148,7 +142,7 @@ class TestScorer(unittest.TestCase):
 
         y_pred = [[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]
         score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.69314718055994529)
+        self.assertAlmostEqual(score, -0.69314718055994529)
 
     def test_proba_scorer_multiclass(self):
         y_true = [0, 1, 2]
@@ -173,7 +167,7 @@ class TestScorer(unittest.TestCase):
 
         y_pred = [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
         score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0986122886681096)
+        self.assertAlmostEqual(score, -1.0986122886681096)
 
     def test_proba_scorer_multilabel(self):
         y_true = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
@@ -198,7 +192,7 @@ class TestScorer(unittest.TestCase):
 
         y_pred = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
         score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.34657359027997314)
+        self.assertAlmostEqual(score, -0.34657359027997314)
 
     def test_threshold_scorer_binary(self):
         y_true = [0, 0, 1, 1]
@@ -223,7 +217,7 @@ class TestScorer(unittest.TestCase):
 
         y_pred = np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]])
         score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0)
+        self.assertAlmostEqual(score, -1.0)
 
     def test_threshold_scorer_multilabel(self):
         y_true = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
@@ -248,7 +242,7 @@ class TestScorer(unittest.TestCase):
 
         y_pred = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
         score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0)
+        self.assertAlmostEqual(score, -1.0)
 
     def test_sign_flip(self):
         y_true = np.arange(0, 1.01, 0.1)
@@ -257,62 +251,26 @@ class TestScorer(unittest.TestCase):
         scorer = autosklearn.metrics.make_scorer(
             'r2', sklearn.metrics.r2_score, greater_is_better=True)
 
-        loss = calculate_loss(
-            solution=y_true,
-            prediction=y_pred + 1.0,
-            task_type=REGRESSION,
-            metric=scorer,
-        )
-        # Optimum - sign * score = 1.0 - (1) * (-9)
-        self.assertAlmostEqual(loss, 10.0)
+        score = scorer(y_true, y_pred + 1.0)
+        self.assertAlmostEqual(score, -9.0)
 
-        loss = calculate_loss(
-            solution=y_true,
-            prediction=y_pred + 0.5,
-            task_type=REGRESSION,
-            metric=scorer,
-        )
-        # Optimum - sign * score = 1.0 - (1) * (-1.5)
-        self.assertAlmostEqual(loss, 2.5)
+        score = scorer(y_true, y_pred + 0.5)
+        self.assertAlmostEqual(score, -1.5)
 
-        loss = calculate_loss(
-            solution=y_true,
-            prediction=y_pred,
-            task_type=REGRESSION,
-            metric=scorer,
-        )
-        # Optimum - sign * score = 1.0 - (1) * (1.0)
-        self.assertAlmostEqual(loss, 0.0)
+        score = scorer(y_true, y_pred)
+        self.assertAlmostEqual(score, 1.0)
 
         scorer = autosklearn.metrics.make_scorer(
             'r2', sklearn.metrics.r2_score, greater_is_better=False)
 
-        loss = calculate_loss(
-            solution=y_true,
-            prediction=y_pred + 1.0,
-            task_type=REGRESSION,
-            metric=scorer,
-        )
-        # Optimum - sign * score = 1.0 - (-1) * (-9)
-        self.assertAlmostEqual(loss, -8.0)
+        score = scorer(y_true, y_pred + 1.0)
+        self.assertAlmostEqual(score, 9.0)
 
-        loss = calculate_loss(
-            solution=y_true,
-            prediction=y_pred + 0.5,
-            task_type=REGRESSION,
-            metric=scorer,
-        )
-        # Optimum - sign * score = 1.0 - (-1) * (-1.5)
-        self.assertAlmostEqual(loss, -0.5)
+        score = scorer(y_true, y_pred + 0.5)
+        self.assertAlmostEqual(score, 1.5)
 
-        loss = calculate_loss(
-            solution=y_true,
-            prediction=y_pred,
-            task_type=REGRESSION,
-            metric=scorer,
-        )
-        # Optimum - sign * score = 1.0 - (-1) * (1.0)
-        self.assertAlmostEqual(loss, 2.0)
+        score = scorer(y_true, y_pred)
+        self.assertAlmostEqual(score, -1.0)
 
 
 class TestMetricsDoNotAlterInput(unittest.TestCase):
@@ -365,60 +323,25 @@ class TestMetric(unittest.TestCase):
             y_true = np.array([1, 2, 3, 4])
             y_pred = y_true.copy()
             previous_score = scorer._optimum
-            previous_loss = scorer._optimum
             current_score = scorer(y_true, y_pred)
             self.assertAlmostEqual(current_score, previous_score)
 
             y_pred = np.array([3, 4, 5, 6])
             current_score = scorer(y_true, y_pred)
-            if scorer._sign > 0:
-                self.assertLess(current_score, previous_score)
-            else:
-                self.assertGreater(current_score, previous_score)
-
-            # Loss should consistently be worst, the score is metric dependent
-            current_loss = calculate_loss(
-                solution=y_true,
-                prediction=y_pred,
-                task_type=REGRESSION,
-                metric=scorer,
-            )
-            self.assertGreater(current_loss, previous_loss)
+            self.assertLess(current_score, previous_score)
 
             if scorer.name == 'mean_squared_log_error':
                 continue
 
             y_pred = np.array([-1, 0, -1, 0])
             previous_score = current_score
-            previous_loss = current_loss
             current_score = scorer(y_true, y_pred)
-            if scorer._sign > 0:
-                self.assertLess(current_score, previous_score)
-            else:
-                self.assertGreater(current_score, previous_score)
-            current_loss = calculate_loss(
-                solution=y_true,
-                prediction=y_pred,
-                task_type=REGRESSION,
-                metric=scorer,
-            )
-            self.assertGreater(current_loss, previous_loss)
+            self.assertLess(current_score, previous_score)
 
             y_pred = np.array([-5, 10, 7, -3])
             previous_score = current_score
-            previous_loss = current_loss
             current_score = scorer(y_true, y_pred)
-            if scorer._sign > 0:
-                self.assertLess(current_score, previous_score)
-            else:
-                self.assertGreater(current_score, previous_score)
-            current_loss = calculate_loss(
-                solution=y_true,
-                prediction=y_pred,
-                task_type=REGRESSION,
-                metric=scorer,
-            )
-            self.assertGreater(current_loss, previous_loss)
+            self.assertLess(current_score, previous_score)
 
     def test_classification_binary(self):
 
@@ -436,70 +359,26 @@ class TestMetric(unittest.TestCase):
             y_pred = \
                 np.array([[0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [1.0, 0.0], [1.0, 0.0], [1.0, 0.0]])
             previous_score = scorer._optimum
-            previous_loss = 0  # Perfect result
             current_score = scorer(y_true, y_pred)
-            current_loss = calculate_loss(
-                solution=y_true,
-                prediction=y_pred,
-                task_type=REGRESSION,
-                metric=scorer,
-            )
             self.assertAlmostEqual(current_score, previous_score)
-            self.assertAlmostEqual(current_loss, previous_loss)
 
             y_pred = \
                 np.array([[0.0, 1.0], [1.0, 0.0], [0.0, 1.0], [1.0, 0.0], [0.0, 1.0], [1.0, 0.0]])
             previous_score = current_score
-            previous_loss = current_loss
             current_score = scorer(y_true, y_pred)
-            current_loss = calculate_loss(
-                solution=y_true,
-                prediction=y_pred,
-                task_type=REGRESSION,
-                metric=scorer,
-            )
-            # The score is metric dependent, the loss should consistently become worst
-            if scorer._sign > 0:
-                self.assertLess(current_score, previous_score)
-            else:
-                self.assertGreater(current_score, previous_score)
-            self.assertGreater(current_loss, previous_loss)
+            self.assertLess(current_score, previous_score)
 
             y_pred = \
                 np.array([[0.0, 1.0], [1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0]])
             previous_score = current_score
-            previous_loss = current_loss
             current_score = scorer(y_true, y_pred)
-            current_loss = calculate_loss(
-                solution=y_true,
-                prediction=y_pred,
-                task_type=REGRESSION,
-                metric=scorer,
-            )
-            # The score is metric dependent, the loss should consistently become worst
-            if scorer._sign > 0:
-                self.assertLess(current_score, previous_score)
-            else:
-                self.assertGreater(current_score, previous_score)
-            self.assertGreater(current_loss, previous_loss)
+            self.assertLess(current_score, previous_score)
 
             y_pred = \
                 np.array([[1.0, 0.0], [1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0]])
             previous_score = current_score
-            previous_loss = current_loss
             current_score = scorer(y_true, y_pred)
-            current_loss = calculate_loss(
-                solution=y_true,
-                prediction=y_pred,
-                task_type=REGRESSION,
-                metric=scorer,
-            )
-            # The score is metric dependent, the loss should consistently become worst
-            if scorer._sign > 0:
-                self.assertLess(current_score, previous_score)
-            else:
-                self.assertGreater(current_score, previous_score)
-            self.assertGreater(current_loss, previous_loss)
+            self.assertLess(current_score, previous_score)
 
     def test_classification_multiclass(self):
 
@@ -513,7 +392,6 @@ class TestMetric(unittest.TestCase):
             y_pred = np.array([[1.0, 0.0, 0.0], [1.0, 0.0, 0.0],
                               [0.0, 1.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
             previous_score = scorer._optimum
-            previous_loss = 0  # No loss as it is the perfect result
             current_score = scorer(y_true, y_pred)
             self.assertAlmostEqual(current_score, previous_score)
 
@@ -521,55 +399,19 @@ class TestMetric(unittest.TestCase):
                               [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
             previous_score = current_score
             current_score = scorer(y_true, y_pred)
-            current_loss = calculate_loss(
-                solution=y_true,
-                prediction=y_pred,
-                task_type=REGRESSION,
-                metric=scorer,
-            )
-
-            # The score is metric dependent, the loss should consistently become worst
-            if scorer._sign > 0:
-                self.assertLess(current_score, previous_score)
-            else:
-                self.assertGreater(current_score, previous_score)
-            self.assertGreater(current_loss, previous_loss)
+            self.assertLess(current_score, previous_score)
 
             y_pred = np.array([[0.0, 0.0, 1.0], [0.0, 1.0, 0.0],
                               [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 1.0, 0.0]])
             previous_score = current_score
-            previous_loss = current_loss
             current_score = scorer(y_true, y_pred)
-            current_loss = calculate_loss(
-                solution=y_true,
-                prediction=y_pred,
-                task_type=REGRESSION,
-                metric=scorer,
-            )
-            # The score is metric dependent, the loss should consistently become worst
-            if scorer._sign > 0:
-                self.assertLess(current_score, previous_score)
-            else:
-                self.assertGreater(current_score, previous_score)
-            self.assertGreater(current_loss, previous_loss)
+            self.assertLess(current_score, previous_score)
 
             y_pred = np.array([[0.0, 0.0, 1.0], [0.0, 0.0, 1.0],
                               [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
             previous_score = current_score
-            previous_loss = current_loss
             current_score = scorer(y_true, y_pred)
-            current_loss = calculate_loss(
-                solution=y_true,
-                prediction=y_pred,
-                task_type=REGRESSION,
-                metric=scorer,
-            )
-            # The score is metric dependent, the loss should consistently become worst
-            if scorer._sign > 0:
-                self.assertLess(current_score, previous_score)
-            else:
-                self.assertGreater(current_score, previous_score)
-            self.assertGreater(current_loss, previous_loss)
+            self.assertLess(current_score, previous_score)
 
             # less labels in the targets than in the predictions
             y_true = np.array([0.0, 0.0, 1.0, 1.0])

@@ -353,7 +353,7 @@ def calculate_score(
             for metric_ in scoring_functions:
 
                 try:
-                    score_dict[metric_.name] = metric_(solution, cprediction)
+                    score_dict[metric_.name] = metric_._sign * metric_(solution, cprediction)
                 except ValueError as e:
                     print(e, e.args[0])
                     if e.args[0] == "Mean Squared Logarithmic Error cannot be used when " \
@@ -369,7 +369,7 @@ def calculate_score(
                 # handle?
 
                 try:
-                    score_dict[metric_.name] = metric_(solution, prediction)
+                    score_dict[metric_.name] = metric_._sign * metric_(solution, prediction)
                 except ValueError as e:
                     if e.args[0] == 'multiclass format is not supported':
                         continue
