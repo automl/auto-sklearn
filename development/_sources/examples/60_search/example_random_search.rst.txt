@@ -625,7 +625,7 @@ Fit a classifier using Random Search
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  51.289 seconds)
+   **Total running time of the script:** ( 1 minutes  50.441 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_random_search.py:
