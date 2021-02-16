@@ -24,6 +24,7 @@ from autosklearn.metrics import Scorer
 import autosklearn.evaluation.train_evaluator
 import autosklearn.evaluation.test_evaluator
 import autosklearn.evaluation.util
+from autosklearn.evaluation.train_evaluator import TYPE_ADDITIONAL_INFO
 from autosklearn.util.backend import Backend
 from autosklearn.util.logging_ import PickableLoggerAdapter, get_named_client_logger
 from autosklearn.util.parallel import preload_modules
@@ -290,7 +291,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         # Additional information of each of the tae executions
         # Defined upfront for mypy
-        additional_run_info: Dict[str, Union[int, float, str, Dict, List, Tuple]] = {}
+        additional_run_info: TYPE_ADDITIONAL_INFO = {}
 
         context = multiprocessing.get_context(self.pynisher_context)
         preload_modules(context)

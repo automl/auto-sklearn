@@ -36,6 +36,10 @@ __all__ = [
 ]
 
 
+# General TYPE definitions for numpy
+TYPE_ADDITIONAL_INFO = Dict[str, Union[int, float, str, Dict, List, Tuple]]
+
+
 class MyDummyClassifier(DummyClassifier):
     def __init__(
         self,
@@ -85,8 +89,7 @@ class MyDummyClassifier(DummyClassifier):
     def estimator_supports_iterative_fit(self) -> bool:  # pylint: disable=R0201
         return False
 
-    def get_additional_run_info(self) -> Optional[
-            Dict[str, Union[str, int, float, Dict, List, Tuple]]]:  # pylint: disable=R0201
+    def get_additional_run_info(self) -> Optional[TYPE_ADDITIONAL_INFO]:  # pylint: disable=R0201
         return None
 
 
@@ -135,8 +138,7 @@ class MyDummyRegressor(DummyRegressor):
     def estimator_supports_iterative_fit(self) -> bool:  # pylint: disable=R0201
         return False
 
-    def get_additional_run_info(self) -> Optional[
-            Dict[str, Union[str, int, float, Dict, List, Tuple]]]:  # pylint: disable=R0201
+    def get_additional_run_info(self) -> Optional[TYPE_ADDITIONAL_INFO]:  # pylint: disable=R0201
         return None
 
 
@@ -332,7 +334,7 @@ class AbstractEvaluator(object):
         opt_pred: np.ndarray,
         valid_pred: np.ndarray,
         test_pred: np.ndarray,
-        additional_run_info: Optional[Dict[str, Union[str, int, float, Dict, List, Tuple]]],
+        additional_run_info: Optional[TYPE_ADDITIONAL_INFO],
         file_output: bool,
         final_call: bool,
         status: StatusType,

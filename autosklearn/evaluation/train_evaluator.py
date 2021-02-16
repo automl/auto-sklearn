@@ -17,6 +17,7 @@ from sklearn.model_selection._split import _RepeatedSplits, BaseShuffleSplit
 
 from autosklearn.evaluation.abstract_evaluator import (
     AbstractEvaluator,
+    TYPE_ADDITIONAL_INFO,
     _fit_and_suppress_warnings,
 )
 from autosklearn.data.abstract_data_manager import AbstractDataManager
@@ -238,8 +239,7 @@ class TrainEvaluator(AbstractEvaluator):
         holdout (both iterative and non-iterative)"""
 
         # Define beforehand for mypy
-        additional_run_info: Optional[
-            Dict[str, Union[str, int, float, Dict, List, Tuple]]] = None
+        additional_run_info: Optional[TYPE_ADDITIONAL_INFO] = None
 
         if iterative:
             if self.num_cv_folds == 1:
@@ -276,7 +276,7 @@ class TrainEvaluator(AbstractEvaluator):
                 iterations = [1] * self.num_cv_folds
                 total_n_iterations = [0] * self.num_cv_folds
                 # model.estimator_supports_iterative_fit -> true
-                # After the if above, we now estimator support iterative fit
+                # After the if above, we know estimator support iterative fit
                 model_max_iter = [cast(IterativeComponent, model).get_max_iter()
                                   for model in self.models]
 
@@ -859,7 +859,6 @@ class TrainEvaluator(AbstractEvaluator):
         else:
             self.models[fold] = model
 
-        train_indices, test_indices = ((train_indices, test_indices))
         self.Y_targets[fold] = self.Y_train[test_indices]
         self.Y_train_targets[train_indices] = self.Y_train[train_indices]
 
