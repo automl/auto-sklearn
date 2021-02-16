@@ -24,7 +24,7 @@ from autosklearn.constants import (
 from autosklearn.pipeline.implementations.util import (
     convert_multioutput_multiclass_to_multilabel
 )
-from autosklearn.metrics import Scorer, calculate_score
+from autosklearn.metrics import calculate_loss, Scorer
 from autosklearn.util.backend import Backend
 from autosklearn.util.logging_ import PicklableClientLogger, get_named_client_logger
 
@@ -299,8 +299,8 @@ class AbstractEvaluator(object):
         return model
 
     def _loss(self, y_true: np.ndarray, y_hat: np.ndarray,
-              scoring_functions: typing.Optional[typing.List[Scorer]] = None
-              ) -> typing.Union[float, typing.Dict[str, float]]:
+              scoring_functions: Optional[List[Scorer]] = None
+              ) -> Union[float, Dict[str, float]]:
         """Auto-sklearn follows a minimization goal.
         The calculate_loss internally translate a score function to
         a minimization problem.
@@ -325,7 +325,6 @@ class AbstractEvaluator(object):
         return calculate_loss(
             y_true, y_hat, self.task_type, self.metric,
             scoring_functions=scoring_functions)
-
 
     def finish_up(
         self,

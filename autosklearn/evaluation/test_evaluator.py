@@ -12,7 +12,7 @@ from autosklearn.evaluation.abstract_evaluator import (
     AbstractEvaluator,
     _fit_and_suppress_warnings,
 )
-from autosklearn.metrics import calculate_loss
+from autosklearn.metrics import calculate_loss, Scorer
 from autosklearn.util.backend import Backend
 
 
