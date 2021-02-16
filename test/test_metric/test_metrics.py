@@ -1,11 +1,13 @@
 import unittest
 
+import pytest
+
 import numpy as np
 import sklearn.metrics
 
 import autosklearn.metrics
 
-from autosklearn.metrics import calculate_score
+from autosklearn.metrics import calculate_score, calculate_loss
 from autosklearn.constants import BINARY_CLASSIFICATION, REGRESSION
 
 from smac.utils.constants import MAXINT
@@ -39,7 +41,8 @@ class TestScorer(unittest.TestCase):
         self.assertAlmostEqual(score, 0.5)
 
         scorer = autosklearn.metrics._PredictScorer(
-            'accuracy', sklearn.metrics.accuracy_score, 1, 0, -1, {})
+            name='accuracy', score_func=sklearn.metrics.accuracy_score,
+            optimum=1, worst_possible_result=0, sign=-1, kwargs={})
 
         y_pred = np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]])
         score = scorer(y_true, y_pred)
@@ -529,3 +532,66 @@ class TestCalculateScore(unittest.TestCase):
         score = calculate_score(y_true, y_pred, REGRESSION, scorer)
         previous_score = scorer._optimum
         self.assertAlmostEqual(score, previous_score)
+
+
+def test_calculate_loss():
+    # In a 0-1 ranged scorer, make sure that the loss
+    # has a expected positive value
+    y_pred = np.array([0, 1, 0, 1, 1, 1, 0, 0, 0, 0])
+    y_true = np.array([0, 1, 0, 1, 1, 0, 0, 0, 0, 0])
+    score = sklearn.metrics.accuracy_score(y_true, y_pred)
+    assert pytest.approx(score) == calculate_score(
+        solution=y_true,
+        prediction=y_pred,
+        task_type=BINARY_CLASSIFICATION,
+        metric=autosklearn.metrics.accuracy,
+    )
+    loss = 1.0 - score
+    assert pytest.approx(loss) == calculate_loss(
+        solution=y_true,
+        prediction=y_pred,
+        task_type=BINARY_CLASSIFICATION,
+        metric=autosklearn.metrics.accuracy,
+    )
+
+    # Test the dictionary case
+    score_dict = calculate_score(
+        solution=y_true,
+        prediction=y_pred,
+        task_type=BINARY_CLASSIFICATION,
+        metric=autosklearn.metrics.accuracy,
+        scoring_functions=[autosklearn.metrics.accuracy, autosklearn.metrics.balanced_accuracy]
+    )
+    expected_score_dict = {
+        'accuracy': 0.9,
+        'balanced_accuracy': 0.9285714285714286,
+    }
+    loss_dict = calculate_loss(
+        solution=y_true,
+        prediction=y_pred,
+        task_type=BINARY_CLASSIFICATION,
+        metric=autosklearn.metrics.accuracy,
+        scoring_functions=[autosklearn.metrics.accuracy, autosklearn.metrics.balanced_accuracy]
+    )
+    for expected_metric, expected_score in expected_score_dict.items():
+        assert pytest.approx(expected_score) == score_dict[expected_metric]
+        assert pytest.approx(1-expected_score) == loss_dict[expected_metric]
+
+    # Lastly make sure that metrics whose optimum is zero
+    # are also properly working
+    y_true = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+    y_pred = np.array([0.11, 0.22, 0.33, 0.44, 0.55, 0.66])
+    score = sklearn.metrics.mean_squared_error(y_true, y_pred)
+    assert pytest.approx(score) == calculate_score(
+        solution=y_true,
+        prediction=y_pred,
+        task_type=REGRESSION,
+        metric=autosklearn.metrics.mean_squared_error,
+    )
+    loss = score
+    assert pytest.approx(loss) == calculate_loss(
+        solution=y_true,
+        prediction=y_pred,
+        task_type=REGRESSION,
+        metric=autosklearn.metrics.mean_squared_error,
+    )

@@ -6,7 +6,7 @@ import numpy as np
 
 from autosklearn.constants import TASK_TYPES
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
-from autosklearn.metrics import Scorer, calculate_score
+from autosklearn.metrics import Scorer, calculate_loss
 from autosklearn.pipeline.base import BasePipeline
 
 
@@ -100,7 +100,7 @@ class EnsembleSelection(AbstractEnsemble):
             dtype=np.float64,
         )
         for i in range(ensemble_size):
-            scores = np.zeros(
+            losses = np.zeros(
                 (len(predictions)),
                 dtype=np.float64,
             )
@@ -129,11 +129,11 @@ class EnsembleSelection(AbstractEnsemble):
                     out=fant_ensemble_prediction
                 )
 
-                # Calculate score is versatile and can return a dict of score
+                # calculate_loss is versatile and can return a dict of losses
                 # when scoring_functions=None, we know it will be a float
-                calculated_score = cast(
+                losses[j] = cast(
                     float,
-                    calculate_score(
+                    calculate_loss(
                         solution=labels,
                         prediction=fant_ensemble_prediction,
                         task_type=self.task_type,
@@ -141,12 +141,11 @@ class EnsembleSelection(AbstractEnsemble):
                         scoring_functions=None
                     )
                 )
-                scores[j] = self.metric._optimum - calculated_score
 
-            all_best = np.argwhere(scores == np.nanmin(scores)).flatten()
+            all_best = np.argwhere(losses == np.nanmin(losses)).flatten()
             best = self.random_state.choice(all_best)
             ensemble.append(predictions[best])
-            trajectory.append(scores[best])
+            trajectory.append(losses[best])
             order.append(best)
 
             # Handle special case
@@ -155,7 +154,7 @@ class EnsembleSelection(AbstractEnsemble):
 
         self.indices_ = order
         self.trajectory_ = trajectory
-        self.train_score_ = trajectory[-1]
+        self.train_loss_ = trajectory[-1]
 
     def _slow(
         self,
@@ -172,18 +171,18 @@ class EnsembleSelection(AbstractEnsemble):
         ensemble_size = self.ensemble_size
 
         for i in range(ensemble_size):
-            scores = np.zeros(
+            losses = np.zeros(
                 [np.shape(predictions)[0]],
                 dtype=np.float64,
             )
             for j, pred in enumerate(predictions):
                 ensemble.append(pred)
                 ensemble_prediction = np.mean(np.array(ensemble), axis=0)
-                # Calculate score is versatile and can return a dict of score
+                # calculate_loss is versatile and can return a dict of losses
                 # when scoring_functions=None, we know it will be a float
-                calculated_score = cast(
+                losses[j] = cast(
                     float,
-                    calculate_score(
+                    calculate_loss(
                         solution=labels,
                         prediction=ensemble_prediction,
                         task_type=self.task_type,
@@ -191,11 +190,10 @@ class EnsembleSelection(AbstractEnsemble):
                         scoring_functions=None
                     )
                 )
-                scores[j] = self.metric._optimum - calculated_score
                 ensemble.pop()
-            best = np.nanargmin(scores)
+            best = np.nanargmin(losses)
             ensemble.append(predictions[best])
-            trajectory.append(scores[best])
+            trajectory.append(losses[best])
             order.append(best)
 
             # Handle special case
@@ -210,7 +208,7 @@ class EnsembleSelection(AbstractEnsemble):
             trajectory,
             dtype=np.float64,
         )
-        self.train_score_ = trajectory[-1]
+        self.train_loss_ = trajectory[-1]
 
     def _calculate_weights(self) -> None:
         ensemble_members = Counter(self.indices_).most_common()
