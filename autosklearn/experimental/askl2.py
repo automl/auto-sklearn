@@ -31,8 +31,8 @@ selector_filename = "askl2_selector_%s_%s_%s.pkl" % (
     training_data_hash
 )
 selector_directory = os.environ.get('XDG_CACHE_HOME')
-if selector_directory is None or not os.access(selector_directory, os.W_OK):
-    selector_directory = pathlib.Path.home() / '.cache'
+if selector_directory is None:
+    selector_directory = pathlib.Path.home()
 selector_directory = pathlib.Path(selector_directory).joinpath('auto-sklearn').expanduser()
 selector_file = selector_directory / selector_filename
 metafeatures = pd.DataFrame(training_data['metafeatures'])
@@ -54,8 +54,14 @@ if not selector_file.exists():
         maxima=maxima_for_methods,
     )
     selector_file.parent.mkdir(exist_ok=True, parents=True)
-    with open(selector_file, 'wb') as fh:
-        pickle.dump(selector, fh)
+    try:
+        with open(selector_file, 'wb') as fh:
+            pickle.dump(selector, fh)
+    except Exception as e:
+        print("AutoSklearn2Classifier needs to create a selector file under "
+              "the user's home directory or XDG_CACHE_HOME. Nevertheless "
+              "the path {} is not writable.".format(selector_file))
+        raise e
 
 
 class SmacObjectCallback:
