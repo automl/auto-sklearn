@@ -1,5 +1,7 @@
+import copy
 import glob
 import os
+import inspect
 import pickle
 import re
 import sys
@@ -15,6 +17,10 @@ import pandas as pd
 import sklearn
 import sklearn.dummy
 import sklearn.datasets
+from sklearn.base import clone
+from sklearn.base import ClassifierMixin, RegressorMixin
+from sklearn.base import is_classifier
+
 
 from autosklearn.data.validation import InputValidator
 import autosklearn.pipeline.util as putil
@@ -160,6 +166,10 @@ def test_type_of_target(mock_estimator):
                                          ])
 
     cls = AutoSklearnClassifier(ensemble_size=0)
+    cls.automl_ = unittest.mock.Mock()
+    cls.automl_.InputValidator = unittest.mock.Mock()
+    cls.automl_.InputValidator.target_validator = unittest.mock.Mock()
+
     # Illegal target types for classification: continuous,
     # multiclass-multioutput, continuous-multioutput.
     expected_msg = r".*Classification with data of type"
@@ -253,6 +263,10 @@ def test_cv_results(tmp_dir, output_dir):
                                 ensemble_size=0,
                                 scoring_functions=[autosklearn.metrics.precision,
                                                    autosklearn.metrics.roc_auc])
+
+    params = cls.get_params()
+    original_params = copy.deepcopy(params)
+
     cls.fit(X_train, Y_train)
     cv_results = cls.cv_results_
     assert isinstance(cv_results, dict), type(cv_results)
@@ -274,6 +288,27 @@ def test_cv_results(tmp_dir, output_dir):
     cv_result_items = [isinstance(val, npma.MaskedArray) for key, val in
                        cv_results.items() if key.startswith('param_')]
     assert all(cv_result_items), cv_results.items()
+
+    # Compare the state of the model parameters with the original parameters
+    new_params = clone(cls).get_params()
+    for param_name, original_value in original_params.items():
+        new_value = new_params[param_name]
+
+        # Taken from Sklearn code:
+        # We should never change or mutate the internal state of input
+        # parameters by default. To check this we use the joblib.hash function
+        # that introspects recursively any subobjects to compute a checksum.
+        # The only exception to this rule of immutable constructor parameters
+        # is possible RandomState instance but in this check we explicitly
+        # fixed the random_state params recursively to be integer seeds.
+        assert joblib.hash(new_value) == joblib.hash(original_value), (
+            "Estimator %s should not change or mutate "
+            " the parameter %s from %s to %s during fit."
+            % (cls, param_name, original_value, new_value))
+
+    # Comply with https://scikit-learn.org/dev/glossary.html#term-classes
+    is_classifier(cls)
+    assert hasattr(cls, 'classes_')
 
 
 @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.build_automl')
@@ -614,3 +649,14 @@ def test_autosklearn2_classification_methods_returns_self(dask_client):
     ) >= 2 / 3, print_debug_information(automl)
 
     pickle.dumps(automl_fitted)
+
+
+@pytest.mark.parametrize("class_", [AutoSklearnClassifier, AutoSklearnRegressor,
+                                    AutoSklearn2Classifier])
+def test_check_estimator_signature(class_):
+    # Make sure signature is store in self
+    expected_subclass = ClassifierMixin if 'Classifier' in str(class_) else RegressorMixin
+    assert issubclass(class_, expected_subclass)
+    estimator = class_()
+    for expected in list(inspect.signature(class_).parameters):
+        assert hasattr(estimator, expected)

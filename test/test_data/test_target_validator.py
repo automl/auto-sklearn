@@ -450,6 +450,8 @@ def test_targetvalidator_inversetransform():
     y_decoded = validator.inverse_transform(y)
     assert ['a', 'a', 'b', 'c', 'a'] == y_decoded.tolist()
 
+    assert validator.classes_.tolist() == ['a', 'b', 'c']
+
     validator = TargetValidator(is_classification=True)
     multi_label = pd.DataFrame(
         np.array([[1, 0, 0, 1], [0, 0, 1, 1], [0, 0, 0, 0]]),
@@ -460,6 +462,10 @@ def test_targetvalidator_inversetransform():
 
     y_decoded = validator.inverse_transform(y)
     np.testing.assert_array_almost_equal(y, y_decoded)
+
+    # Multilabel classification is not encoded
+    # For this reason, classes_ attribute does not contain a class
+    np.testing.assert_array_almost_equal(validator.classes_, np.array([]))
 
 
 # Actual checks for the targets

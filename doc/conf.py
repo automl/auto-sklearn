@@ -16,6 +16,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
+import datetime
 import os
 import sys
 import sphinx_bootstrap_theme
@@ -107,7 +108,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'AutoSklearn'
-copyright = u'2014-2019, Machine Learning Professorship Freiburg'
+copyright = u"2014-{}, Machine Learning Professorship Freiburg".format(
+    datetime.datetime.now().year)
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
