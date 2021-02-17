@@ -5,18 +5,18 @@
 
 Computation times
 =================
-**15:51.377** total execution time for **examples_40_advanced** files:
+**15:18.582** total execution time for **examples_40_advanced** files:
 
 +------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_40_advanced_example_resampling.py` (``example_resampling.py``)                           | 06:05.612 | 0.0 MB |
+| :ref:`sphx_glr_examples_40_advanced_example_resampling.py` (``example_resampling.py``)                           | 06:04.407 | 0.0 MB |
 +------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_40_advanced_example_metrics.py` (``example_metrics.py``)                                 | 05:06.013 | 0.0 MB |
+| :ref:`sphx_glr_examples_40_advanced_example_metrics.py` (``example_metrics.py``)                                 | 04:41.064 | 0.0 MB |
 +------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_40_advanced_example_calc_multiple_metrics.py` (``example_calc_multiple_metrics.py``)     | 02:00.596 | 0.0 MB |
+| :ref:`sphx_glr_examples_40_advanced_example_calc_multiple_metrics.py` (``example_calc_multiple_metrics.py``)     | 01:57.247 | 0.0 MB |
 +------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py` (``example_pandas_train_test.py``)             | 01:57.163 | 0.0 MB |
+| :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py` (``example_pandas_train_test.py``)             | 01:55.924 | 0.0 MB |
 +------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_40_advanced_example_get_pipeline_components.py` (``example_get_pipeline_components.py``) | 00:26.072 | 0.0 MB |
+| :ref:`sphx_glr_examples_40_advanced_example_get_pipeline_components.py` (``example_get_pipeline_components.py``) | 00:25.541 | 0.0 MB |
 +------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_40_advanced_example_feature_types.py` (``example_feature_types.py``)                     | 00:15.920 | 0.0 MB |
+| :ref:`sphx_glr_examples_40_advanced_example_feature_types.py` (``example_feature_types.py``)                     | 00:14.399 | 0.0 MB |
 +------------------------------------------------------------------------------------------------------------------+-----------+--------+
