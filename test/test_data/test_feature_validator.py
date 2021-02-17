@@ -41,7 +41,8 @@ def input_data_featuretest(request):
     elif request.param == 'numpy_numericalonly_nan':
         array = np.random.uniform(10, size=(100, 10))
         array[50, 0:5] = np.nan
-        return array
+        # Somehow array is changed to dtype object after np.nan
+        return array.astype('float')
     elif request.param == 'numpy_mixed_nan':
         array = np.column_stack([
             np.random.uniform(10, size=(100, 3)),
