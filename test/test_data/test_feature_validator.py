@@ -39,7 +39,7 @@ def input_data_featuretest(request):
         array[50, 0:5] = np.nan
         return array
     elif request.param == 'numpy_numericalonly_nan':
-        array = np.random.uniform(10, size=(100, 10))
+        array = np.random.uniform(10, size=(100, 10)).astype('float')
         array[50, 0:5] = np.nan
         # Somehow array is changed to dtype object after np.nan
         return array.astype('float')
