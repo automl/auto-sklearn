@@ -1,11 +1,19 @@
 # -*- encoding: utf-8 -*-
+import multiprocessing
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+from ConfigSpace import Configuration
+
+import numpy as np
+
 from smac.tae import StatusType
 
 from autosklearn.evaluation.abstract_evaluator import (
     AbstractEvaluator,
     _fit_and_suppress_warnings,
 )
-from autosklearn.metrics import calculate_loss
+from autosklearn.metrics import calculate_loss, Scorer
+from autosklearn.util.backend import Backend
 
 
 __all__ = [
@@ -16,15 +24,20 @@ __all__ = [
 
 class TestEvaluator(AbstractEvaluator):
 
-    def __init__(self, backend, queue, metric,
-                 port,
-                 configuration=None,
-                 scoring_functions=None,
-                 seed=1,
-                 include=None,
-                 exclude=None,
-                 disable_file_output=False,
-                 init_params=None):
+    def __init__(
+        self,
+        backend: Backend,
+        queue: multiprocessing.Queue,
+        metric: Scorer,
+        port: Optional[int],
+        configuration: Optional[Union[int, Configuration]] = None,
+        scoring_functions: Optional[List[Scorer]] = None,
+        seed: int = 1,
+        include: Optional[List[str]] = None,
+        exclude: Optional[List[str]] = None,
+        disable_file_output: bool = False,
+        init_params: Optional[Dict[str, Any]] = None,
+    ):
         super(TestEvaluator, self).__init__(
             backend=backend,
             queue=queue,
@@ -50,7 +63,7 @@ class TestEvaluator(AbstractEvaluator):
 
         self.model = self._get_model()
 
-    def fit_predict_and_loss(self):
+    def fit_predict_and_loss(self) -> None:
         _fit_and_suppress_warnings(self.logger, self.model, self.X_train, self.Y_train)
         loss, Y_pred, _, _ = self.predict_and_loss()
         self.finish_up(
@@ -65,7 +78,9 @@ class TestEvaluator(AbstractEvaluator):
             status=StatusType.SUCCESS,
         )
 
-    def predict_and_loss(self, train=False):
+    def predict_and_loss(
+        self, train: bool = False
+    ) -> Tuple[Union[Dict[str, float], float], np.array, Any, Any]:
 
         if train:
             Y_pred = self.predict_function(self.X_train, self.model,
@@ -91,10 +106,24 @@ class TestEvaluator(AbstractEvaluator):
 
 # create closure for evaluating an algorithm
 # Has a stupid name so pytest doesn't regard it as a test
-def eval_t(queue, config, backend, metric, seed, num_run, instance,
-           scoring_functions, output_y_hat_optimization, include,
-           exclude, disable_file_output, port, init_params=None, budget_type=None,
-           budget=None):
+def eval_t(
+    queue: multiprocessing.Queue,
+    config: Union[int, Configuration],
+    backend: Backend,
+    metric: Scorer,
+    seed: int,
+    num_run: int,
+    instance: Dict[str, Any],
+    scoring_functions: Optional[List[Scorer]],
+    output_y_hat_optimization: bool,
+    include: Optional[List[str]],
+    exclude: Optional[List[str]],
+    disable_file_output: bool,
+    port: Optional[int],
+    init_params: Optional[Dict[str, Any]] = None,
+    budget: Optional[float] = None,
+    budget_type: Optional[str] = None,
+) -> None:
     evaluator = TestEvaluator(configuration=config,
                               backend=backend, metric=metric, seed=seed,
                               port=port,
