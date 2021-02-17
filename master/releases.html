@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Releases &#8212; AutoSklearn 0.12.2 documentation</title>
+    <title>Releases &#8212; AutoSklearn 0.12.3 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.12.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.12.3</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -106,6 +106,13 @@
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
 <li><a class="reference internal" href="#">Releases</a><ul>
+<li><a class="reference internal" href="#version-0-12-3">Version 0.12.3</a><ul>
+<li><a class="reference internal" href="#contributors-v0-12-3">Contributors v0.12.3</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id2">Releases</a><ul>
 <li><a class="reference internal" href="#version-0-12-2">Version 0.12.2</a><ul>
 <li><a class="reference internal" href="#contributors-v0-12-2">Contributors v0.12.2</a></li>
 </ul>
@@ -200,6 +207,31 @@
       
   <span class="target" id="releases"></span><div class="section" id="id1">
 <h1>Releases<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="version-0-12-3">
+<h2>Version 0.12.3<a class="headerlink" href="#version-0-12-3" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>FIX #1061: Fixes a bug where the model could not be printed in a jupyter notebook.</p></li>
+<li><p>FIX #1075: Fixes a bug where the ensemble builder would wrongly prune good models for loss
+functions (i.e. functions that need to be minimized such as <code class="docutils literal notranslate"><span class="pre">logloss</span></code> or <code class="docutils literal notranslate"><span class="pre">mean_squared_error</span></code>.</p></li>
+<li><p>FIX #1079: Fixes a bug where <code class="docutils literal notranslate"><span class="pre">AutoMLClassifier.cv_results</span></code> and <code class="docutils literal notranslate"><span class="pre">AutoMLRegressor.cv_results</span></code>
+could rank results in opposite order for loss functions (i.e. functions that need to be minimized
+such as <code class="docutils literal notranslate"><span class="pre">logloss</span></code> or <code class="docutils literal notranslate"><span class="pre">mean_squared_error</span></code>.</p></li>
+<li><p>FIX: Fixes a bug in offline meta-data generation that could lead to a deadlock.</p></li>
+<li><p>MAINT #1076: Uses the correct multiprocessing context for computing meta-features</p></li>
+<li><p>MAINT: Cleanup readme and main directory</p></li>
+</ul>
+<div class="section" id="contributors-v0-12-3">
+<h3>Contributors v0.12.3<a class="headerlink" href="#contributors-v0-12-3" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Matthias Feurer</p></li>
+<li><p>ROHIT AGARWAL</p></li>
+<li><p>Francisco Rivera</p></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="id2">
+<h1>Releases<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="version-0-12-2">
 <h2>Version 0.12.2<a class="headerlink" href="#version-0-12-2" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -770,8 +802,8 @@ the pyninsher.</p></li>
       
     </p>
     <p>
-        &copy; Copyright 2014-2019, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.4.3.<br/>
+        &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.1.<br/>
     </p>
   </div>
 </footer>

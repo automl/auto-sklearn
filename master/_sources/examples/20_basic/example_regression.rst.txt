@@ -45,7 +45,7 @@ The following example shows how to fit a simple regression model with
 
  .. code-block:: none
 
-    /opt/hostedtoolcache/Python/3.8.6/x64/lib/python3.8/site-packages/pyparsing.py:3190: FutureWarning: Possible set intersection at position 3
+    /opt/hostedtoolcache/Python/3.8.7/x64/lib/python3.8/site-packages/pyparsing.py:3190: FutureWarning: Possible set intersection at position 3
       self.re = re.compile(self.reString)
 
 
@@ -95,6 +95,16 @@ Build and fit a regressor
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    AutoSklearnRegressor(output_folder='/tmp/autosklearn_regression_example_out',
+                         per_run_time_limit=30, time_left_for_this_task=120,
+                         tmp_folder='/tmp/autosklearn_regression_example_tmp')
 
 
 
@@ -168,7 +178,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.9040477219435149
+    R2 score: 0.904046583977308
 
 
 
@@ -176,7 +186,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  56.527 seconds)
+   **Total running time of the script:** ( 1 minutes  58.020 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_regression.py:

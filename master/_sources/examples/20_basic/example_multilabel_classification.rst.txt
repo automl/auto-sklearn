@@ -86,6 +86,9 @@ Data Loading
 
  .. code-block:: none
 
+    /home/runner/work/auto-sklearn/auto-sklearn/examples/20_basic/example_multilabel_classification.py:33: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
+    Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+      y = y.astype(np.int)
     type_of_target=multilabel-indicator
 
 
@@ -115,6 +118,17 @@ Building the classifier
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    AutoSklearnClassifier(initial_configurations_via_metalearning=0,
+                          per_run_time_limit=30,
+                          smac_scenario_args={'runcount_limit': 1},
+                          time_left_for_this_task=60)
 
 
 
@@ -221,7 +235,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  20.313 seconds)
+   **Total running time of the script:** ( 0 minutes  18.499 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multilabel_classification.py:
