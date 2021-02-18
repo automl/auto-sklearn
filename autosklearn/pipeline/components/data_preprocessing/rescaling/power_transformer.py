@@ -1,7 +1,8 @@
-from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, INPUT, SPARSE
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, INPUT
 from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_rescaling \
     import Rescaling
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
+
 
 class PowerTransformerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
     def __init__(self, random_state):
