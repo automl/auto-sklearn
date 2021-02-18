@@ -36,7 +36,7 @@ class GMeans(object):
 
                     if np.sum(indices) < self.minimum_samples_per_cluster*2:
                         cluster_centers.append(cluster_center)
-                        continue 
+                        continue
 
                     for i in range(10):
                         KMeans_ = sklearn.cluster.KMeans(n_clusters=2,
