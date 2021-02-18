@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Releases &#8212; AutoSklearn 0.12.4dev documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="_static/gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="_static/gallery-rendered-html.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+  
+  <a href="https://github.com/automl/auto-sklearn"
+     class="visible-desktop hidden-xs"><img
+    id="gh-banner"
+    style="position: absolute; top: 50px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"
+    alt="Fork me on GitHub"></a>
+  <script>
+    // Adjust banner height.
+    $(function () {
+      var navHeight = $(".navbar .container").css("height");
+      $("#gh-banner").css("top", navHeight);
+    });
+  </script>
+
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          auto-sklearn</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.12.4dev</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="index.html">Start</a></li>
+                <li><a href="#">Releases</a></li>
+                <li><a href="installation.html">Installation</a></li>
+                <li><a href="manual.html">Manual</a></li>
+                <li><a href="examples/index.html">Examples</a></li>
+                <li><a href="api.html">API</a></li>
+                <li><a href="extending.html">Extending</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">Releases</a><ul>
+<li><a class="reference internal" href="#version-0-12-3">Version 0.12.3</a><ul>
+<li><a class="reference internal" href="#contributors-v0-12-3">Contributors v0.12.3</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id2">Releases</a><ul>
+<li><a class="reference internal" href="#version-0-12-2">Version 0.12.2</a><ul>
+<li><a class="reference internal" href="#contributors-v0-12-2">Contributors v0.12.2</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-12-1">Version 0.12.1</a><ul>
+<li><a class="reference internal" href="#contributors-v0-12-1">Contributors v0.12.1</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-12-0">Version 0.12.0</a><ul>
+<li><a class="reference internal" href="#contributors-v0-12-0">Contributors v0.12.0</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-11-1">Version 0.11.1</a><ul>
+<li><a class="reference internal" href="#contributors-v0-11-1">Contributors v0.11.1</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-11-0">Version 0.11.0</a><ul>
+<li><a class="reference internal" href="#contributors-v0-11-0">Contributors v0.11.0</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-10-0">Version 0.10.0</a><ul>
+<li><a class="reference internal" href="#contributors-v0-10-0">Contributors v0.10.0</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-9-0">Version 0.9.0</a><ul>
+<li><a class="reference internal" href="#contributors-v0-9-0">Contributors v0.9.0</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-8">Version 0.8</a><ul>
+<li><a class="reference internal" href="#contributors-v0-8-0">Contributors v0.8.0</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-7-1">Version 0.7.1</a><ul>
+<li><a class="reference internal" href="#contributors-v0-7-1">Contributors v0.7.1</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-7-0">Version 0.7.0</a><ul>
+<li><a class="reference internal" href="#contributors-v0-7-0">Contributors v0.7.0</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-6-0">Version 0.6.0</a><ul>
+<li><a class="reference internal" href="#contributors-v0-6-0">Contributors v0.6.0</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-5-2">Version 0.5.2</a><ul>
+<li><a class="reference internal" href="#contributors-v0-5-2">Contributors v0.5.2</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-5-1">Version 0.5.1</a><ul>
+<li><a class="reference internal" href="#contributors-v0-5-1">Contributors v0.5.1</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-5-0">Version 0.5.0</a><ul>
+<li><a class="reference internal" href="#contributors-v0-5-0">Contributors v0.5.0</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-4-2">Version 0.4.2</a><ul>
+<li><a class="reference internal" href="#contributors-v0-4-2">Contributors v0.4.2</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-4-1">Version 0.4.1</a><ul>
+<li><a class="reference internal" href="#contributors-v0-4-1">Contributors v0.4.1</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-4-0">Version 0.4.0</a><ul>
+<li><a class="reference internal" href="#contributors-v0-4-0">Contributors v0.4.0</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-3-0">Version 0.3.0</a><ul>
+<li><a class="reference internal" href="#contributors-v0-3-0">Contributors v0.3.0</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-2-1">Version 0.2.1</a><ul>
+<li><a class="reference internal" href="#contributors-v0-2-1">Contributors v0.2.1</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-2-0">Version 0.2.0</a><ul>
+<li><a class="reference internal" href="#contributors-v0-2-0">Contributors v0.2.0</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-1-x">Version 0.1.x</a><ul>
+<li><a class="reference internal" href="#contributors-v0-1-x">Contributors v0.1.x</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
+      
+  <span class="target" id="releases"></span><div class="section" id="id1">
+<h1>Releases<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="version-0-12-3">
+<h2>Version 0.12.3<a class="headerlink" href="#version-0-12-3" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>FIX #1061: Fixes a bug where the model could not be printed in a jupyter notebook.</p></li>
+<li><p>FIX #1075: Fixes a bug where the ensemble builder would wrongly prune good models for loss
+functions (i.e. functions that need to be minimized such as <code class="docutils literal notranslate"><span class="pre">logloss</span></code> or <code class="docutils literal notranslate"><span class="pre">mean_squared_error</span></code>.</p></li>
+<li><p>FIX #1079: Fixes a bug where <code class="docutils literal notranslate"><span class="pre">AutoMLClassifier.cv_results</span></code> and <code class="docutils literal notranslate"><span class="pre">AutoMLRegressor.cv_results</span></code>
+could rank results in opposite order for loss functions (i.e. functions that need to be minimized
+such as <code class="docutils literal notranslate"><span class="pre">logloss</span></code> or <code class="docutils literal notranslate"><span class="pre">mean_squared_error</span></code>.</p></li>
+<li><p>FIX: Fixes a bug in offline meta-data generation that could lead to a deadlock.</p></li>
+<li><p>MAINT #1076: Uses the correct multiprocessing context for computing meta-features</p></li>
+<li><p>MAINT: Cleanup readme and main directory</p></li>
+</ul>
+<div class="section" id="contributors-v0-12-3">
+<h3>Contributors v0.12.3<a class="headerlink" href="#contributors-v0-12-3" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Matthias Feurer</p></li>
+<li><p>ROHIT AGARWAL</p></li>
+<li><p>Francisco Rivera</p></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="id2">
+<h1>Releases<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="version-0-12-2">
+<h2>Version 0.12.2<a class="headerlink" href="#version-0-12-2" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ADD #1045: New example demonstrating how to log multiple metrics during a run of Auto-sklearn.</p></li>
+<li><p>DOC #1052: Add links to mybinder</p></li>
+<li><p>DOC #1059: Improved the example on manually starting workers for Auto-sklearn.</p></li>
+<li><p>FIX #1046: Add the final result of the ensemble builder to the ensemble builder trajectory.</p></li>
+<li><p>MAINT: Two log outputs of level warning about metadata were turned reduced to the info loglevel
+as they are not actionable for the user.</p></li>
+<li><p>MAINT #1062: Use threads for local dask workers and forkserver to start subprocesses to reduce
+overhead.</p></li>
+<li><p>MAINT #1053: Remove the restriction to guard single-core Auto-sklearn by
+<code class="docutils literal notranslate"><span class="pre">__main__</span> <span class="pre">==</span> <span class="pre">&quot;__name__&quot;</span></code> again.</p></li>
+</ul>
+<div class="section" id="contributors-v0-12-2">
+<h3>Contributors v0.12.2<a class="headerlink" href="#contributors-v0-12-2" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Matthias Feurer</p></li>
+<li><p>ROHIT AGARWAL</p></li>
+<li><p>Francisco Rivera</p></li>
+<li><p>Katharina Eggensperger</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-12-1">
+<h2>Version 0.12.1<a class="headerlink" href="#version-0-12-1" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ADD: A new heuristic which gives a warning and subsamples the data if it is too large for the
+given <code class="docutils literal notranslate"><span class="pre">memory_limit</span></code>.</p></li>
+<li><p>ADD #1024: Tune scikit-learn’s <code class="docutils literal notranslate"><span class="pre">MLPClassifier</span></code> and <code class="docutils literal notranslate"><span class="pre">MLPRegressor</span></code>.</p></li>
+<li><p>MAINT #1017: Improve the logging server introduced in release 0.12.0.</p></li>
+<li><p>MAINT #1024: Move to scikit-learn 0.24.X.</p></li>
+<li><p>MAINT #1038: Use new datasets for regression and classification and also update the metadata
+used for Auto-sklearn 1.0.</p></li>
+<li><p>MAINT #1040: Minor speed improvements in the ensemble selection algorithm.</p></li>
+</ul>
+<div class="section" id="contributors-v0-12-1">
+<h3>Contributors v0.12.1<a class="headerlink" href="#contributors-v0-12-1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Matthias Feurer</p></li>
+<li><p>Katharina Eggensperger</p></li>
+<li><p>Francisco Rivera</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-12-0">
+<h2>Version 0.12.0<a class="headerlink" href="#version-0-12-0" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>BREAKING: Auto-sklearn must now be guarded by <code class="docutils literal notranslate"><span class="pre">__name__</span> <span class="pre">==</span> <span class="pre">&quot;__main__&quot;</span></code> due to the use of the
+<code class="docutils literal notranslate"><span class="pre">spawn</span></code> multiprocessing context.</p></li>
+<li><p>ADD #1026: Adds improved meta-data for Auto-sklearn 2.0 which results in strong improved
+performance.</p></li>
+<li><p>MAINT #984 and #1008: Move to scikit-learn 0.23.X</p></li>
+<li><p>MAINT #1004: Move from travis-ci to github actions.</p></li>
+<li><p>MAINT 8b67af6: drop the requirement to the lockfile package.</p></li>
+<li><p>FIX #990: Fixes a bug that made Auto-sklearn fail if there are missing values in a pandas
+DataFrame.</p></li>
+<li><p>FIX #1007, #1012 and #1014: Log multiprocessing output via a new log server. Remove several
+potential deadlocks related to the joint use of multi-processing, multi-threading and logging.</p></li>
+</ul>
+<div class="section" id="contributors-v0-12-0">
+<h3>Contributors v0.12.0<a class="headerlink" href="#contributors-v0-12-0" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Matthias Feurer</p></li>
+<li><p>ROHIT AGARWAL</p></li>
+<li><p>Francisco Rivera</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-11-1">
+<h2>Version 0.11.1<a class="headerlink" href="#version-0-11-1" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>FIX #989: Fixes a bug where <cite>y</cite> was not passed to all data preprocessors which made 3rd party
+category encoders fail.</p></li>
+<li><p>FIX #1001: Fixes a bug which could make Auto-sklearn fail at random.</p></li>
+<li><p>MAINT #1000: Introduce a minimal version for <code class="docutils literal notranslate"><span class="pre">dask.distributed</span></code>.</p></li>
+</ul>
+<div class="section" id="contributors-v0-11-1">
+<h3>Contributors v0.11.1<a class="headerlink" href="#contributors-v0-11-1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Matthias Feurer</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-11-0">
+<h2>Version 0.11.0<a class="headerlink" href="#version-0-11-0" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ADD #992: Move ensemble building from being a separate process to a job submitted to the dask
+cluster. This allows for better control of the memory used in multiprocessing settings.</p></li>
+<li><p>FIX #905: Make <code class="docutils literal notranslate"><span class="pre">AutoSklearn2Classifier</span></code> picklable.</p></li>
+<li><p>FIX #970: Fix a bug where Auto-sklearn would fail if categorical features are passed as a
+Pandas Dataframe.</p></li>
+<li><p>MAINT #772: Improve error message in case of dummy prediction failure.</p></li>
+<li><p>MAINT #948: Finally use Pandas &gt;= 1.0.</p></li>
+<li><p>MAINT #973: Improve meta-data by running meta-data generation for more time and separately for
+important metrics.</p></li>
+<li><p>MAINT #997: Improve memory handling in the ensemble building process. This allows building
+ensembles for larger datasets.</p></li>
+</ul>
+<div class="section" id="contributors-v0-11-0">
+<h3>Contributors v0.11.0<a class="headerlink" href="#contributors-v0-11-0" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Matthias Feurer</p></li>
+<li><p>Francisco Rivera</p></li>
+<li><p>Karl Leswing</p></li>
+<li><p>ROHIT AGARWAL</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-10-0">
+<h2>Version 0.10.0<a class="headerlink" href="#version-0-10-0" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ADD #325: Allow to separately optimize metrics for metadata generation.</p></li>
+<li><p>ADD #946: New dask backend for parallel Auto-sklearn.</p></li>
+<li><p>BREAKING #947: Drop Python3.5 support.</p></li>
+<li><p>BREAKING #946: Remove shared model mode for parallel Auto-sklearn.</p></li>
+<li><p>FIX #351: No longer pass un-picklable logger instances to the target function.</p></li>
+<li><p>FIX #840: Fixes a bug which prevented computing metadata for regression datasets. Also
+adds a unit test for regression metadata computation.</p></li>
+<li><p>FIX #897: Allow custom splitters to be used with multi-ouput regression.</p></li>
+<li><p>FIX #951: Fixes a lot of bugs in the regression pipeline that caused bad performance for
+regression datasets.</p></li>
+<li><p>FIX #953: Re-add <cite>liac-arff</cite> as a dependency.</p></li>
+<li><p>FIX #956: Fixes a bug which could cause Auto-sklearn not to find a model on disk which
+is part of the ensemble.</p></li>
+<li><p>FIX #961: Fixes a bug which caused Auto-sklearn to load bad meta-data for metrics which cannot
+be computed on multiclass datasets (especially ROC_AUC).</p></li>
+<li><p>DOC #498: Improve the example on resampling strategies by showing how to pass scikit-learn’s
+splitter objects to Auto-sklearn.</p></li>
+<li><p>DOC #670: Demonstrate how to give access to training accuracy.</p></li>
+<li><p>DOC #872: Improve an example on how obtain the best model.</p></li>
+<li><p>DOC #940: Improve documentation of the docker image.</p></li>
+<li><p>MAINT: Improve the docker file by setting environment variable that restrict BLAS and OMP to only
+use a single core.</p></li>
+<li><p>MAINT #949: Replace <cite>pip</cite> by <cite>pip3</cite> in the installation guidelines.</p></li>
+<li><p>MAINT #280, #535, #956: Update meta-data and include regression meta-data again.</p></li>
+</ul>
+<div class="section" id="contributors-v0-10-0">
+<h3>Contributors v0.10.0<a class="headerlink" href="#contributors-v0-10-0" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Francisco Rivera</p></li>
+<li><p>Matthias Feurer</p></li>
+<li><p>felixleungsc</p></li>
+<li><p>Chu-Cheng Fu</p></li>
+<li><p>Francois Berenger</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-9-0">
+<h2>Version 0.9.0<a class="headerlink" href="#version-0-9-0" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ADD #157,#889: Improve handling of pandas dataframes, including the possibility to use pandas’
+categorical column type.</p></li>
+<li><p>ADD #375: New <cite>SelectRates</cite> feature preprocessing component for regression.</p></li>
+<li><p>ADD #891: Improve the robustness of Auto-sklearn by using the single best model if no ensemble
+is found.</p></li>
+<li><p>ADD #902: Track performance of the ensemble over time.</p></li>
+<li><p>ADD #914: Add an example on using pandas dataframes as input to Auto-sklearn.</p></li>
+<li><p>ADD #919: Add an example for multilabel classification.</p></li>
+<li><p>MAINT #909: Fix broken links in the documentation.</p></li>
+<li><p>MAINT #907,#911: Add initial support for mypy.</p></li>
+<li><p>MAINT #881,#927: Automatically build docker images on pushes to the master and development
+branch and also push them to dockerhub and the github docker registry.</p></li>
+<li><p>MAINT #918: Remove old dependencies from requirements.txt.</p></li>
+<li><p>MAINT #931: Add information about the host system and installed packages to the log file.</p></li>
+<li><p>MAINT #933: Reduce the number of warnings raised when building the documentation by sphinx.</p></li>
+<li><p>MAINT #936: Completely restructure the examples section.</p></li>
+<li><p>FIX #558: Provide better error message when the ensemble process fails due to a memory issue.</p></li>
+<li><p>FIX #901: Allow custom resampling strategies again (was broken due to an upgrade of SMAC).</p></li>
+<li><p>FIX #916: Fixes a bug where the data preprocessing configurations were ignored.</p></li>
+<li><p>FIX #925: make internal data preprocessing objects clonable.</p></li>
+</ul>
+<div class="section" id="contributors-v0-9-0">
+<h3>Contributors v0.9.0<a class="headerlink" href="#contributors-v0-9-0" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Francisco Rivera</p></li>
+<li><p>Matthias Feurer</p></li>
+<li><p>felixleungsc</p></li>
+<li><p>Vladislav Skripniuk</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-8">
+<h2>Version 0.8<a class="headerlink" href="#version-0-8" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ADD #803: multi-output regression</p></li>
+<li><p>ADD #893: new Auto-sklearn mode Auto-sklearn 2.0</p></li>
+</ul>
+<div class="section" id="contributors-v0-8-0">
+<h3>Contributors v0.8.0<a class="headerlink" href="#contributors-v0-8-0" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Chu-Cheng Fu</p></li>
+<li><p>Matthias Feurer</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-7-1">
+<h2>Version 0.7.1<a class="headerlink" href="#version-0-7-1" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ADD #764: support for automatic per_run_time_limit selection</p></li>
+<li><p>ADD #864: add the possibility to predict with cross-validation</p></li>
+<li><p>ADD #874: support to limit the disk space consumption</p></li>
+<li><p>MAINT #862: improved documentation and render examples in web page</p></li>
+<li><p>MAINT #869: removal of competition data manager support</p></li>
+<li><p>MAINT #870: memory improvements when building ensemble</p></li>
+<li><p>MAINT #882: memory improvements when performing ensemble selection</p></li>
+<li><p>FIX #701: scaling factors for metafeatures should not be learned using test data</p></li>
+<li><p>FIX #715: allow unlimited ML memory</p></li>
+<li><p>FIX #771: improved worst possible result calculation</p></li>
+<li><p>FIX #843: default value for SelectPercentileRegression</p></li>
+<li><p>FIX #852: clip probabilities within [0-1]</p></li>
+<li><p>FIX #854: improved tmp file naming</p></li>
+<li><p>FIX #863: SMAC exceptions also registered in log file</p></li>
+<li><p>FIX #876: allow Auto-sklearn model to be cloned</p></li>
+<li><p>FIX #879: allow 1-D binary predictions</p></li>
+</ul>
+<div class="section" id="contributors-v0-7-1">
+<h3>Contributors v0.7.1<a class="headerlink" href="#contributors-v0-7-1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Matthias Feurer</p></li>
+<li><p>Xiaodong DENG</p></li>
+<li><p>Francisco Rivera</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-7-0">
+<h2>Version 0.7.0<a class="headerlink" href="#version-0-7-0" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ADD #785: user control to reduce the hard drive memory required to store ensembles</p></li>
+<li><p>ADD #794: iterative fit for gradient boosting</p></li>
+<li><p>ADD #795: add successive halving evaluation strategy</p></li>
+<li><p>ADD #814: new sklearn.metrics.balanced_accuracy_score instead of custom metric</p></li>
+<li><p>ADD #815: new experimental evaluation mode called iterative_cv</p></li>
+<li><p>MAINT #774: move from scikit-learn 0.21.X to 0.22.X</p></li>
+<li><p>MAINT #791: move from smac 0.8 to 0.12</p></li>
+<li><p>MAINT #822: make autosklearn modules PEP8 compliant</p></li>
+<li><p>FIX #733: fix for n_jobs=-1</p></li>
+<li><p>FIX #739: remove unnecessary warning</p></li>
+<li><p>FIX ##769: fixed error in calculation of meta features</p></li>
+<li><p>FIX #778: support for python 3.8</p></li>
+<li><p>FIX #781: support for pandas 1.x</p></li>
+</ul>
+<div class="section" id="contributors-v0-7-0">
+<h3>Contributors v0.7.0<a class="headerlink" href="#contributors-v0-7-0" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Andrew Nader</p></li>
+<li><p>Gui Miotto</p></li>
+<li><p>Julian Berman</p></li>
+<li><p>Katharina Eggensperger</p></li>
+<li><p>Matthias Feurer</p></li>
+<li><p>Maximilian Peters</p></li>
+<li><p>Rong-Inspur</p></li>
+<li><p>Valentin Geffrier</p></li>
+<li><p>Francisco Rivera</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-6-0">
+<h2>Version 0.6.0<a class="headerlink" href="#version-0-6-0" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>MAINT: move from scikit-learn 0.19.X to 0.21.X</p></li>
+<li><p>MAINT #688: allow for pyrfr version 0.8.X</p></li>
+<li><p>FIX #680: Remove unnecessary print statement</p></li>
+<li><p>FIX #600: Remove unnecessary warning</p></li>
+</ul>
+<div class="section" id="contributors-v0-6-0">
+<h3>Contributors v0.6.0<a class="headerlink" href="#contributors-v0-6-0" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Guilherme Miotto</p></li>
+<li><p>Matthias Feurer</p></li>
+<li><p>Jin Woo Ahn</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-5-2">
+<h2>Version 0.5.2<a class="headerlink" href="#version-0-5-2" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>FIX #669: Correctly handle arguments to the <code class="docutils literal notranslate"><span class="pre">AutoMLRegressor</span></code></p></li>
+<li><p>FIX #667: Auto-sklearn works with numpy 1.16.3 again.</p></li>
+<li><p>ADD #676: Allow brackets [ ] inside the temporary and output directory paths.</p></li>
+<li><p>ADD #424: (Experimental) scripts to reproduce the results from the original Auto-sklearn paper.</p></li>
+</ul>
+<div class="section" id="contributors-v0-5-2">
+<h3>Contributors v0.5.2<a class="headerlink" href="#contributors-v0-5-2" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Jin Woo Ahn</p></li>
+<li><p>Herilalaina Rakotoarison</p></li>
+<li><p>Matthias Feurer</p></li>
+<li><p>yazanobeidi</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-5-1">
+<h2>Version 0.5.1<a class="headerlink" href="#version-0-5-1" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ADD #650: Auto-sklearn will immediately stop if prediction using scikit-learn’s dummy predictor
+fail.</p></li>
+<li><p>ADD #537: Auto-sklearn will no longer start for time limits less than 30 seconds.</p></li>
+<li><p>FIX #655: Fixes an issue where predictions using models from parallel Auto-sklearn runs could
+be wrong.</p></li>
+<li><p>FIX #648: Fixes an issue with custom meta-data directories.</p></li>
+<li><p>FIX #626: Fixes an issue where losses were not minimized, but maximized.</p></li>
+<li><p>MAINT #646: Do no longer restrict the numpy version to be less than 1.14.5.</p></li>
+</ul>
+<div class="section" id="contributors-v0-5-1">
+<h3>Contributors v0.5.1<a class="headerlink" href="#contributors-v0-5-1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Jin Woo Ahn</p></li>
+<li><p>Taneli Mielikäinen</p></li>
+<li><p>Matthias Feurer</p></li>
+<li><p>jianswang</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-5-0">
+<h2>Version 0.5.0<a class="headerlink" href="#version-0-5-0" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ADD #593: Auto-sklearn supports the <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> argument for parallel
+computing on a single machine.</p></li>
+<li><p>DOC #618: Added links to several system requirements.</p></li>
+<li><p>Fixes #611: Improved installation from pip.</p></li>
+<li><p>TEST #614: Test installation with clean Ubuntu on travis-ci.</p></li>
+<li><p>MAINT: Fixed broken link and typo in the documentation.</p></li>
+</ul>
+<div class="section" id="contributors-v0-5-0">
+<h3>Contributors v0.5.0<a class="headerlink" href="#contributors-v0-5-0" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Mohd Shahril</p></li>
+<li><p>Adrian</p></li>
+<li><p>Matthias Feurer</p></li>
+<li><p>Jirka Borovec</p></li>
+<li><p>Pradeep Reddy Raamana</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-4-2">
+<h2>Version 0.4.2<a class="headerlink" href="#version-0-4-2" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Fixes #538: Remove rounding errors when giving a training set fraction for
+holdout.</p></li>
+<li><p>Fixes #558: Ensemble script now uses less memory and the memory limit can be
+given to Auto-sklearn.</p></li>
+<li><p>Fixes #585: Auto-sklearn’s ensemble script produced wrong results when
+called directly (and not via one of Auto-sklearn’s estimator classes).</p></li>
+<li><p>Fixes an error in the ensemble script which made it non-deterministic.</p></li>
+<li><p>MAINT #569: Rename hyperparameter to have a different name than a
+scikit-learn hyperparameter with different meaning.</p></li>
+<li><p>MAINT #592: backwards compatible requirements.txt</p></li>
+<li><p>MAINT #588: Fix SMAC version to 0.8.0</p></li>
+<li><p>MAINT: remove dependency on the six package</p></li>
+<li><p>MAINT: upgrade to XGBoost 0.80</p></li>
+</ul>
+<div class="section" id="contributors-v0-4-2">
+<h3>Contributors v0.4.2<a class="headerlink" href="#contributors-v0-4-2" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Taneli Mielikäinen</p></li>
+<li><p>Matthias Feurer</p></li>
+<li><p>Diogo Bastos</p></li>
+<li><p>Zeyi Wen</p></li>
+<li><p>Teresa Conceição</p></li>
+<li><p>Jin Woo Ahn</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-4-1">
+<h2>Version 0.4.1<a class="headerlink" href="#version-0-4-1" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Added documentation on <a class="reference external" href="https://github.com/automl/auto-sklearn/pull/510">how to extend Auto-sklearn</a>
+with custom classifier, regressor, and preprocessor.</p></li>
+<li><p>Auto-sklearn now requires numpy version between 1.9.0 and 1.14.5, due to higher versions
+causing travis failure.</p></li>
+<li><p>Examples now use <code class="docutils literal notranslate"><span class="pre">sklearn.datasets.load_breast_cancer()</span></code> instead of <code class="docutils literal notranslate"><span class="pre">sklearn.datasets.load_digits()</span></code>
+to reduce memory usage for travis build.</p></li>
+<li><p>Fixes future warnings on non-tuple sequence for indexing.</p></li>
+<li><p>Fixes <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/500">#500</a>: fixes
+ensemble builder to correctly evaluate model score with any metrics.
+See this <a class="reference external" href="https://github.com/automl/auto-sklearn/pull/522">PR</a>.</p></li>
+<li><p>Fixes <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/482">#482</a> and
+<a class="reference external" href="https://github.com/automl/auto-sklearn/issues/491">#491</a>: Users can now set up
+custom logger configuration by passing a dictionary created by a yaml file to
+<code class="docutils literal notranslate"><span class="pre">logging_config</span></code>.</p></li>
+<li><p>Fixes <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/566">#566</a>: ensembles are now sorted correctly.</p></li>
+<li><p>Fixes <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/293">#293</a>: Auto-sklearn checks if appropriate
+target type was given for classification and regression before call to <code class="docutils literal notranslate"><span class="pre">fit()</span></code>.</p></li>
+<li><p>Travis-ci now runs flake8 to enforce pep8 style guide, and uses travis-ci instead of circle-ci
+for deployment.</p></li>
+</ul>
+<div class="section" id="contributors-v0-4-1">
+<h3>Contributors v0.4.1<a class="headerlink" href="#contributors-v0-4-1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Matthias Feurer</p></li>
+<li><p>Manuel Streuhofer</p></li>
+<li><p>Taneli Mielikäinen</p></li>
+<li><p>Katharina Eggensperger</p></li>
+<li><p>Jin Woo Ahn</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-4-0">
+<h2>Version 0.4.0<a class="headerlink" href="#version-0-4-0" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Fixes <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/409">#409</a>: fixes
+<code class="docutils literal notranslate"><span class="pre">predict_proba</span></code> to no longer raise an <cite>AttributeError</cite>.</p></li>
+<li><p>Improved documentation of the parallel example.</p></li>
+<li><p>Classifiers are now tested to be idempotent as <a class="reference external" href="http://scikit-learn.org/stable/developers/contributing.html#estimated-attributes">required by scikit-learn</a>.</p></li>
+<li><p>Fixes the usage of the shrinkage parameter in LDA.</p></li>
+<li><p>Fixes <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/410">#410</a> and changes
+the SGD hyperparameters</p></li>
+<li><p>Fixes <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/425">#425</a> which
+caused the non-linear support vector machine to always crash on OSX.</p></li>
+<li><p>Implements <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/149">#149</a>: it
+is now possible to pass a custom cross-validation split following
+scikit-learn’s <code class="docutils literal notranslate"><span class="pre">model_selection</span></code> module.</p></li>
+<li><p>It is now possible to decide whether or not to shuffle the data in
+Auto-sklearn by passing a bool <cite>shuffle</cite> in the dictionary of
+<code class="docutils literal notranslate"><span class="pre">resampling_strategy_arguments</span></code>.</p></li>
+<li><p>Added functionality to track the test performance over time.</p></li>
+<li><p>Re-factored the ensemble building to be faster, read less data from the
+hard drive and perform random tie breaking in case of equally
+well-performing models.</p></li>
+<li><p>Implements <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/438">#438</a>: To
+be consistent with the output of SMAC (which minimizes the loss of a target
+function), the output of the ensemble builder is now also the output of a
+minimization problem.</p></li>
+<li><p>Implements <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/271">#271</a>:
+XGBoost is available again, even configuring the new dropout functionality.</p></li>
+<li><p>New documentation section <a class="reference external" href="http://automl.github.io/auto-sklearn/stable/manual.html#inspecting-the-results">inspecting the results</a>.</p></li>
+<li><p>Fixes <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/444">#444</a>:
+Auto-sklearn now only loads models for refit which are actually relevant
+for the ensemble.</p></li>
+<li><p>Adds an operating system check at import and installation time to make sure
+to not accidentaly run on a Windows machine.</p></li>
+<li><p>New examples gallery using sphinx gallery: <a class="reference external" href="http://automl.github.io/auto-sklearn/stable/examples/index.html">http://automl.github.io/auto-sklearn/stable/examples/index.html</a></p></li>
+<li><p>Safeguard Auto-sklearn against deleting directories it did not create (Issue
+<a class="reference external" href="https://github.com/automl/auto-sklearn/issues/317">#317</a>.</p></li>
+</ul>
+<div class="section" id="contributors-v0-4-0">
+<h3>Contributors v0.4.0<a class="headerlink" href="#contributors-v0-4-0" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Matthias Feurer</p></li>
+<li><p>kaa</p></li>
+<li><p>Josh Mabry</p></li>
+<li><p>Katharina Eggensperger</p></li>
+<li><p>Vladimir Glazachev</p></li>
+<li><p>Jesper van Engelen</p></li>
+<li><p>Jin Woo Ahn</p></li>
+<li><p>Enrico Testa</p></li>
+<li><p>Marius Lindauer</p></li>
+<li><p>Yassine Morakakam</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-3-0">
+<h2>Version 0.3.0<a class="headerlink" href="#version-0-3-0" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Upgrade to scikit-learn 0.19.1.</p></li>
+<li><p>Do not use the <code class="docutils literal notranslate"><span class="pre">DummyClassifier</span></code> or <code class="docutils literal notranslate"><span class="pre">DummyRegressor</span></code> as part of an
+ensemble. Fixes <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/140">#140</a>.</p></li>
+<li><p>Fixes #295 by loading the data in the subprocess instead of the main process.</p></li>
+<li><p>Fixes #326: refitting could result in a type error. This is now fixed by
+better type checking in the classification components.</p></li>
+<li><p>Updated search space for <code class="docutils literal notranslate"><span class="pre">RandomForestClassifier</span></code>, <code class="docutils literal notranslate"><span class="pre">ExtraTreesClassifier</span></code>
+and <code class="docutils literal notranslate"><span class="pre">GradientBoostingClassifier</span></code> (fixes #358).</p></li>
+<li><p>Removal of constant features is now a part of the pipeline.</p></li>
+<li><p>Allow passing an SMBO object into the <code class="docutils literal notranslate"><span class="pre">AutoSklearnClassifier</span></code> and
+<code class="docutils literal notranslate"><span class="pre">AutoSklearnRegressor</span></code>.</p></li>
+</ul>
+<div class="section" id="contributors-v0-3-0">
+<h3>Contributors v0.3.0<a class="headerlink" href="#contributors-v0-3-0" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Matthias Feurer</p></li>
+<li><p>Jesper van Engelen</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-2-1">
+<h2>Version 0.2.1<a class="headerlink" href="#version-0-2-1" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Allows the usage of scikit-learn 0.18.2.</p></li>
+<li><p>Upgrade to latest SMAC version (<code class="docutils literal notranslate"><span class="pre">0.6.0</span></code>) and latest random forest version
+(<code class="docutils literal notranslate"><span class="pre">0.6.1</span></code>).</p></li>
+<li><p>Added a Dockerfile.</p></li>
+<li><p>Added the possibility to change the size of the holdout set when
+using holdout resampling strategy.</p></li>
+<li><p>Fixed a bug in QDA’s hyperparameters.</p></li>
+<li><p>Typo fixes in print statements.</p></li>
+<li><p>New method to retrieve the models used in the final ensemble.</p></li>
+</ul>
+<div class="section" id="contributors-v0-2-1">
+<h3>Contributors v0.2.1<a class="headerlink" href="#contributors-v0-2-1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Matthias Feurer</p></li>
+<li><p>Katharina Eggensperger</p></li>
+<li><p>Felix Leung</p></li>
+<li><p>caoyi0905</p></li>
+<li><p>Young Ryul Bae</p></li>
+<li><p>Vicente Alencar</p></li>
+<li><p>Lukas Großberger</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-2-0">
+<h2>Version 0.2.0<a class="headerlink" href="#version-0-2-0" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><strong>auto-sklearn supports custom metrics and all metrics included in
+scikit-learn</strong>. Different metrics can now be passed to the <code class="docutils literal notranslate"><span class="pre">fit()</span></code>-method
+estimator objects, for example
+<code class="docutils literal notranslate"><span class="pre">AutoSklearnClassifier.fit(metric='roc_auc')</span></code>.</p></li>
+<li><p>Upgrade to scikit-learn 0.18.1.</p></li>
+<li><p>Drop XGBoost as the latest release (0.6a2) does not work when spawned by
+the pyninsher.</p></li>
+<li><p><em>auto-sklearn</em> can use multiprocessing in calls to <code class="docutils literal notranslate"><span class="pre">predict()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">predict_proba</span></code>. By <a class="reference external" href="https://github.com/lsorber">Laurent Sorber</a>.</p></li>
+</ul>
+<div class="section" id="contributors-v0-2-0">
+<h3>Contributors v0.2.0<a class="headerlink" href="#contributors-v0-2-0" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Matthias Feurer</p></li>
+<li><p>Katharina Eggensperger</p></li>
+<li><p>Laurent Sorber</p></li>
+<li><p>Rafael Calsaverini</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-1-x">
+<h2>Version 0.1.x<a class="headerlink" href="#version-0-1-x" title="Permalink to this headline">¶</a></h2>
+<p>There are no release notes for auto-sklearn prior to version 0.2.0.</p>
+<div class="section" id="contributors-v0-1-x">
+<h3>Contributors v0.1.x<a class="headerlink" href="#contributors-v0-1-x" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Matthias Feurer</p></li>
+<li><p>Katharina Eggensperger</p></li>
+<li><p>Aaron Klein</p></li>
+<li><p>Jost Tobias Springenberg</p></li>
+<li><p>Anatolii Domashnev</p></li>
+<li><p>Stefan Falkner</p></li>
+<li><p>Alexander Sapronov</p></li>
+<li><p>Manuel Blum</p></li>
+<li><p>Diego Kobylkin</p></li>
+<li><p>Jaidev Deshpande</p></li>
+<li><p>Jongheon Jeong</p></li>
+<li><p>Hector Mendoza</p></li>
+<li><p>Timothy J Laurent</p></li>
+<li><p>Marius Lindauer</p></li>
+<li><p>_329_</p></li>
+<li><p>Iver Jordal</p></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="_sources/releases.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.1.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
