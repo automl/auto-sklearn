@@ -104,12 +104,12 @@ Supported Inputs
 * Multioutput Regression
 
 You can provide feature and target training pairs (X_train/y_train) to *auto-sklearn* to fit an ensemble of pipelines as described in the next section. This X_train/y_train dataset must belong to one of the supported formats: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.
- Optionally, you can measure the ability of this fitted model to generalize to unseen data by providing an optional testing pair (X_test/Y_test). For further details, please refer to the example `Train and Test inputs <examples/example_pandas_train_test.html>`_. Supported formats for these training and testing pairs are: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.
+ Optionally, you can measure the ability of this fitted model to generalize to unseen data by providing an optional testing pair (X_test/Y_test). For further details, please refer to the example `Train and Test inputs <examples/40_advanced/example_pandas_train_test.html>`_. Supported formats for these training and testing pairs are: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.
 
 If your data contains categorical values (in the features or targets), autosklearn will automatically encode your data using a `sklearn.preprocessing.LabelEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_ for unidimensional data and a `sklearn.preprocessing.OrdinalEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html>`_ for multidimensional data.
 
 Regarding the features, there are two methods to guide *auto-sklearn* to properly encode categorical columns:
-* Providing a X_train/X_test numpy array with the optional flag feat_type. For further details, you can check the example `Feature Types <examples/example_feature_types.html>`_.
+* Providing a X_train/X_test numpy array with the optional flag feat_type. For further details, you can check the example `Feature Types <examples/40_advanced/example_feature_types.html>`_.
 * You can provide a pandas DataFrame, with properly formatted columns. If a column has numerical dtype, *auto-sklearn* will not encode it and it will be passed directly to scikit-learn. If the column has a categorical/boolean class, it will be encoded. If the column is of any other type (Object or Timeseries), an error will be raised. For further details on how to properly encode your data, you can check the example `Working with categorical data <https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html>`_). If you are working with time series, it is recommended that you follow this approach `Working with time data <https://stats.stackexchange.com/questions/311494/>`_.
 
 Regarding the targets (y_train/y_test), if the task involves a classification problem, such features will be automatically encoded. It is recommended to provide both y_train and y_test during fit, so that a common encoding is created between these splits (if only y_train is provided during fit, the categorical encoder will not be able to handle new classes that are exclusive to y_test). If the task is regression, no encoding happens on the targets.
@@ -143,28 +143,21 @@ obtained by running *auto-sklearn*. It additionally prints the number of both su
 algorithm runs.
 
 The results obtained from the final ensemble can be printed by calling ``show_models()``. *auto-sklearn* ensemble is composed of scikit-learn models that can be inspected as exemplified by
-`model inspection example <examples/example_get_pipeline_components.html>`_
+`model inspection example <examples/40_advanced/example_get_pipeline_components.html>`_
 .
 
 Parallel computation
 ====================
 
-*auto-sklearn* supports parallel execution by data sharing on a shared file
-system. In this mode, the SMAC algorithm shares the training data for it's
-model by writing it to disk after every iteration. At the beginning of each
-iteration, SMAC loads all newly found data points. We provide an example
-implementing
-`scikit-learn's n_jobs functionality <examples/example_parallel_n_jobs.html>`_
-and an example on how
-to
-`manually start multiple instances of auto-sklearn <examples/example_parallel_manual_spawning.html>`_
-.
-
 In it's default mode, *auto-sklearn* already uses two cores. The first one is
 used for model building, the second for building an ensemble every time a new
-machine learning model has finished training. The
-`sequential example <examples/example_sequential.html>`_
-shows how to run these tasks sequentially to use only a single core at a time.
+machine learning model has finished training. An example on how to do this sequentially (first searching for individual models, and then building an ensemble from them) can be seen in `sequential auto-sklearn example <examples/60_search/example_sequential.html>`_. 
+
+Nevertheless, *auto-sklearn* also supports parallel Bayesian optimization via the use of `Dask.distributed  <https://distributed.dask.org/>`_. By providing the arguments ``n_jobs`` to the estimator construction, one can control the number of cores available to *auto-sklearn* (As exemplified in `sequential auto-sklearn  example <examples/60_search/example_parallel_n_jobs>`_). Distributed processes are also supported by providing a custom client object to *auto-sklearn* like in the
+example: `sequential auto-sklearn  example <examples/60_search/example_parallel_manual_spawning_python>`_. When multiple cores are available, *auto-sklearn*
+will create a worker per core, and use the available workers to both search for better machine learning models as well as building an ensemble with them until the time resource is exhausted.
+
+**Note:** *auto-sklearn* requires all workers to have access to a shared file system for storing training data and models.
 
 Furthermore, depending on the installation of scikit-learn and numpy,
 the model building procedure may use up to all cores. Such behaviour is

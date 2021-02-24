@@ -276,7 +276,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  56.808 seconds)
+   **Total running time of the script:** ( 1 minutes  56.350 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_sequential.py:
