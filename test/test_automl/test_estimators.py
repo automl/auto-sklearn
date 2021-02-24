@@ -685,3 +685,22 @@ def test_selector_file_askl2_can_be_created(selector_path):
                 assert selector_path in str(autosklearn.experimental.askl2.selector_file)
     # Re import it at the end so we do not affect other test
     importlib.reload(autosklearn.experimental.askl2)
+
+
+def test_check_askl2_same_arguments_as_askl():
+    # In case a new attribute is created, make sure it is there also in
+    # ASKL2
+    extra_arguments = list(set(
+        inspect.getfullargspec(AutoSklearnEstimator.__init__).args) - set(
+            inspect.getfullargspec(AutoSklearn2Classifier.__init__).args))
+    expected_extra_args = ['exclude_estimators',
+                           'include_preprocessors',
+                           'resampling_strategy_arguments',
+                           'exclude_preprocessors',
+                           'include_estimators',
+                           'get_smac_object_callback',
+                           'initial_configurations_via_metalearning',
+                           'resampling_strategy',
+                           'metadata_directory']
+    unexpected_args = set(extra_arguments) - set(expected_extra_args)
+    assert len(unexpected_args) == 0, unexpected_args
