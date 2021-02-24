@@ -258,8 +258,8 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    accuracy:  0.958041958041958
-    [(0.400000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'adaboost', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'feature_preprocessor:__choice__': 'LDA', 'classifier:adaboost:algorithm': 'SAMME.R', 'classifier:adaboost:learning_rate': 1.3647174429059878, 'classifier:adaboost:max_depth': 6, 'classifier:adaboost:n_estimators': 324, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 1761, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'normal', 'feature_preprocessor:LDA:solver': 'svd', 'feature_preprocessor:LDA:tol': 0.1377409740593341},
+    accuracy:  0.965034965034965
+    [(0.400000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'adaboost', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'LDA', 'classifier:adaboost:algorithm': 'SAMME.R', 'classifier:adaboost:learning_rate': 1.4861471145659388, 'classifier:adaboost:max_depth': 10, 'classifier:adaboost:n_estimators': 84, 'feature_preprocessor:LDA:solver': 'eigen', 'feature_preprocessor:LDA:tol': 0.8734817422890115, 'feature_preprocessor:LDA:shrinkage': 0.7525111817759726},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -275,7 +275,7 @@ Print prediction score and statistics
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.200000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'decision_tree', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'LDA', 'classifier:decision_tree:criterion': 'entropy', 'classifier:decision_tree:max_depth_factor': 0.24444152309162437, 'classifier:decision_tree:max_features': 1.0, 'classifier:decision_tree:max_leaf_nodes': 'None', 'classifier:decision_tree:min_impurity_decrease': 0.0, 'classifier:decision_tree:min_samples_leaf': 8, 'classifier:decision_tree:min_samples_split': 18, 'classifier:decision_tree:min_weight_fraction_leaf': 0.0, 'feature_preprocessor:LDA:solver': 'svd', 'feature_preprocessor:LDA:tol': 0.8460086013393683},
+    (0.180000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'decision_tree', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'LDA', 'classifier:decision_tree:criterion': 'entropy', 'classifier:decision_tree:max_depth_factor': 0.24444152309162437, 'classifier:decision_tree:max_features': 1.0, 'classifier:decision_tree:max_leaf_nodes': 'None', 'classifier:decision_tree:min_impurity_decrease': 0.0, 'classifier:decision_tree:min_samples_leaf': 8, 'classifier:decision_tree:min_samples_split': 18, 'classifier:decision_tree:min_weight_fraction_leaf': 0.0, 'feature_preprocessor:LDA:solver': 'svd', 'feature_preprocessor:LDA:tol': 0.8460086013393683},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -283,7 +283,7 @@ Print prediction score and statistics
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.140000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'adaboost', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'LDA', 'classifier:adaboost:algorithm': 'SAMME.R', 'classifier:adaboost:learning_rate': 1.4861471145659388, 'classifier:adaboost:max_depth': 10, 'classifier:adaboost:n_estimators': 84, 'feature_preprocessor:LDA:solver': 'eigen', 'feature_preprocessor:LDA:tol': 0.8734817422890115, 'feature_preprocessor:LDA:shrinkage': 0.7525111817759726},
+    (0.160000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'adaboost', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'feature_preprocessor:__choice__': 'LDA', 'classifier:adaboost:algorithm': 'SAMME.R', 'classifier:adaboost:learning_rate': 1.3647174429059878, 'classifier:adaboost:max_depth': 6, 'classifier:adaboost:n_estimators': 324, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 1761, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'normal', 'feature_preprocessor:LDA:solver': 'svd', 'feature_preprocessor:LDA:tol': 0.1377409740593341},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -299,7 +299,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  11.507 seconds)
+   **Total running time of the script:** ( 0 minutes  15.712 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_preprocessor.py:
