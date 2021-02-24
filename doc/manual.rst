@@ -149,11 +149,13 @@ The results obtained from the final ensemble can be printed by calling ``show_mo
 Parallel computation
 ====================
 
+*auto-sklearn* supports parallel execution by data sharing on a shared file system. In this mode, the SMAC algorithm shares the training data for it’s model by writing it to disk after every iteration. At the beginning of each iteration, SMAC loads all newly found data points. We provide an example implementing scikit-learn’s n_jobs functionality and an example on how to manually start multiple instances of *auto-sklearn*.
+
 In it's default mode, *auto-sklearn* already uses two cores. The first one is
 used for model building, the second for building an ensemble every time a new
 machine learning model has finished training. An example on how to do this sequentially (first searching for individual models, and then building an ensemble from them) can be seen in `sequential auto-sklearn example <examples/60_search/example_sequential.html>`_. 
 
-Nevertheless, *auto-sklearn* also supports parallel Bayesian optimization via the use of `Dask <https://distributed.dask.org/>`_. By providing the arguments ``n_jobs`` to the estimator construction, one can control the number of cores available to *auto-sklearn* (As exemplified in `sequential auto-sklearn  example <examples/60_search/example_parallel_n_jobs>`_). Distributed processes are also supported by providing a custom client object to *auto-sklearn* like in the
+Nevertheless, *auto-sklearn* also supports parallel Bayesian optimization via the use of `Dask.distributed  <https://distributed.dask.org/>`_. By providing the arguments ``n_jobs`` to the estimator construction, one can control the number of cores available to *auto-sklearn* (As exemplified in `sequential auto-sklearn  example <examples/60_search/example_parallel_n_jobs>`_). Distributed processes are also supported by providing a custom client object to *auto-sklearn* like in the
 example: `sequential auto-sklearn  example <examples/60_search/example_parallel_manual_spawning_python>`_. When multiple cores are available, *auto-sklearn*
 will create a worker per core, and use the available workers to both search for better machine learning models as well as building an ensemble with them until the time resource is exhausted.
 
