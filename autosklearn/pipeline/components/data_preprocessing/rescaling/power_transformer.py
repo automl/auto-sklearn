@@ -22,7 +22,7 @@ class PowerTransformerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
-                'handles_multioutput': False,
+                'handles_multioutput': True,
                 'is_deterministic': True,
                 # TODO find out of this is right!
                 'handles_sparse': False,
