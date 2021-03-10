@@ -8,7 +8,11 @@ daysUntilStale: 60
 daysUntilClose: 7
 
 # Only issues or pull requests with all of these labels are check if stale. Defaults to `[]` (disabled)
-onlyLabels: []
+onlyLabels:
+  - Answered
+  - "Feedback Required"
+  - invalid
+  - wontfix
 
 # Issues or Pull Requests with these labels will never be considered stale. Set to `[]` to disable
 exemptLabels:
@@ -24,13 +28,13 @@ exemptMilestones: false
 exemptAssignees: false
 
 # Label to use when marking as stale
-staleLabel: wontfix
+staleLabel: stale
 
 # Comment to post when marking as stale. Set to `false` to disable
 markComment: >
   This issue has been automatically marked as stale because it has not had
-  recent activity. It will be closed if no further activity occurs. Thank you
-  for your contributions.
+  recent activity. It will be closed if no further activity occurs for the
+  next 7 days. Thank you for your contributions.
 
 # Comment to post when removing the stale label.
 # unmarkComment: >
