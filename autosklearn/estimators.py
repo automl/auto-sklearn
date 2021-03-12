@@ -1,13 +1,15 @@
 # -*- encoding: utf-8 -*-
 
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Tuple
 
 import dask.distributed
 import joblib
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.utils.multiclass import type_of_target
+from smac.runhistory.runhistory import RunInfo, RunValue
 
+from autosklearn.pipeline.base import BasePipeline
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, AutoML
 from autosklearn.metrics import Scorer
 from autosklearn.util.backend import create
@@ -271,8 +273,15 @@ class AutoSklearnEstimator(BaseEstimator):
         self.load_models = load_models
 
         self.automl_ = None  # type: Optional[AutoML]
-        # n_jobs after conversion to a number (b/c default is None)
+
+        # Handle the number of jobs and the time for them
         self._n_jobs = None
+        if self.n_jobs is None or self.n_jobs == 1:
+            self._n_jobs = 1
+        elif self.n_jobs == -1:
+            self._n_jobs = joblib.cpu_count()
+        else:
+            self._n_jobs = self.n_jobs
 
         super().__init__()
 
@@ -332,14 +341,6 @@ class AutoSklearnEstimator(BaseEstimator):
 
     def fit(self, **kwargs):
 
-        # Handle the number of jobs and the time for them
-        if self.n_jobs is None or self.n_jobs == 1:
-            self._n_jobs = 1
-        elif self.n_jobs == -1:
-            self._n_jobs = joblib.cpu_count()
-        else:
-            self._n_jobs = self.n_jobs
-
         # Automatically set the cutoff time per task
         if self.per_run_time_limit is None:
             self.per_run_time_limit = self._n_jobs * self.time_left_for_this_task // 10
@@ -357,6 +358,54 @@ class AutoSklearnEstimator(BaseEstimator):
         self.automl_.fit(load_models=self.load_models, **kwargs)
 
         return self
+
+    def fit_pipeline(
+        self,
+        *args,
+        **kwargs: Dict,
+    ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
+        """ Fits and individual pipeline configuration and returns
+        the result to the user.
+
+        The Estimator constraints are honored, for example the resampling
+        strategy, or memory constraints, unless directly provided to the method.
+        By default, this method supports the same signature as fit(), and any extra
+        arguments are redirected to the TAE evaluation function, which allows for
+        further customization while building a pipeline.
+
+        Parameters
+        ----------
+            X: array-like, shape = (n_samples, n_features)
+                The features used for training
+            y: array-like
+                The labels used for training
+            task: int
+                The type of task, taken from autosklearn.constants
+            is_classification: bool
+                Whether the task is for classification or regression. This affects
+                how the targets are treated
+
+        Returns
+        -------
+            pipeline: Optional[BasePipeline]
+                The fitted pipeline. In case of failure while fitting the pipeline,
+                a None is returned.
+            run_info: RunInFo
+                A named tuple that contains the configuration launched
+            run_value: RunValue
+                A named tuple that contains the result of the run
+        """
+        if self.automl_ is None:
+            self.automl_ = self.build_automl(
+                seed=self.seed,
+                ensemble_size=self.ensemble_size,
+                initial_configurations_via_metalearning=(
+                    self.initial_configurations_via_metalearning
+                ),
+                tmp_folder=self.tmp_folder,
+                output_folder=self.output_folder,
+            )
+        return self.automl_.fit_pipeline(*args, **kwargs)
 
     def fit_ensemble(self, y, task=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
@@ -514,6 +563,16 @@ class AutoSklearnEstimator(BaseEstimator):
         raise NotImplementedError()
 
     def get_configuration_space(self, X, y):
+        if self.automl_ is None:
+            self.automl_ = self.build_automl(
+                seed=self.seed,
+                ensemble_size=self.ensemble_size,
+                initial_configurations_via_metalearning=(
+                    self.initial_configurations_via_metalearning
+                ),
+                tmp_folder=self.tmp_folder,
+                output_folder=self.output_folder,
+            )
         return self.automl_.configuration_space
 
 

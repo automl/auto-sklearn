@@ -8,7 +8,7 @@ import multiprocessing
 import os
 import sys
 import time
-from typing import Any, Dict, Optional, List, Union
+from typing import Any, Dict, Optional, List, Tuple, Union
 import uuid
 import unittest.mock
 import warnings
@@ -25,6 +25,7 @@ import scipy.stats
 from sklearn.base import BaseEstimator
 from sklearn.model_selection._split import _RepeatedSplits, \
     BaseShuffleSplit, BaseCrossValidator
+from smac.runhistory.runhistory import RunInfo, RunValue
 from smac.tae import StatusType
 from smac.stats.stats import Stats
 import joblib
@@ -57,6 +58,7 @@ from autosklearn.metrics import f1_macro, accuracy, r2
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
     REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION, \
     CLASSIFICATION_TASKS
+from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.components.classification import ClassifierChoice
 from autosklearn.pipeline.components.regression import RegressorChoice
 from autosklearn.pipeline.components.feature_preprocessing import FeaturePreprocessorChoice
@@ -134,6 +136,7 @@ class AutoML(BaseEstimator):
                  scoring_functions=None
                  ):
         super(AutoML, self).__init__()
+        self.configuration_space = None
         self._backend = backend
         # self._tmp_dir = tmp_dir
         # self._output_dir = output_dir
@@ -917,6 +920,160 @@ class AutoML(BaseEstimator):
         self._can_predict = True
         return self
 
+    def fit_pipeline(
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        task: int,
+        is_classification: bool,
+        **kwargs: Dict,
+    ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
+        """ Fits and individual pipeline configuration and returns
+        the result to the user.
+
+        The Estimator constraints are honored, for example the resampling
+        strategy, or memory constraints, unless directly provided to the method.
+        By default, this method supports the same signature as fit(), and any extra
+        arguments are redirected to the TAE evaluation function, which allows for
+        further customization while building a pipeline.
+
+        Parameters
+        ----------
+            X: array-like, shape = (n_samples, n_features)
+                The features used for training
+            y: array-like
+                The labels used for training
+            task: int
+                The type of task, taken from autosklearn.constants
+            is_classification: bool
+                Whether the task is for classification or regression. This affects
+                how the targets are treated
+
+        Returns
+        -------
+            pipeline: Optional[BasePipeline]
+                The fitted pipeline. In case of failure while fitting the pipeline,
+                a None is returned.
+            run_info: RunInFo
+                A named tuple that contains the configuration launched
+            run_value: RunValue
+                A named tuple that contains the result of the run
+        """
+
+        # Get the configuration space
+        # This also ensures that the Backend has processed the
+        # dataset
+        if self.configuration_space is None:
+            self.configuration_space = self.fit(
+                X=X, y=y, task=task,
+                X_test=kwargs.pop('X_test', None),
+                y_test=kwargs.pop('y_test', None),
+                feat_type=kwargs.pop('feat_type', None),
+                dataset_name=kwargs.pop('dataset_name', None),
+                only_return_configuration_space=True)
+
+        # Get a configuration from the user or sample from the CS
+        config = kwargs.pop('config', self.configuration_space.sample_configuration())
+
+        # A config id is expected in the TAE evaluation
+        if config.config_id is None:
+            # We do not want to overwrite existing
+            config.config_id = self._backend.get_highest_num_run() + 1
+
+        exclude = dict()
+        include = dict()
+        if self._include_preprocessors is not None and self._exclude_preprocessors is not None:
+            raise ValueError('Cannot specify include_preprocessors and '
+                             'exclude_preprocessors.')
+        elif self._include_preprocessors is not None:
+            include['feature_preprocessor'] = self._include_preprocessors
+        elif self._exclude_preprocessors is not None:
+            exclude['feature_preprocessor'] = self._exclude_preprocessors
+
+        if self._include_estimators is not None and self._exclude_estimators is not None:
+            raise ValueError('Cannot specify include_estimators and '
+                             'exclude_estimators.')
+        elif self._include_estimators is not None:
+            if task in CLASSIFICATION_TASKS:
+                include['classifier'] = self._include_estimators
+            elif task in REGRESSION_TASKS:
+                include['regressor'] = self._include_estimators
+            else:
+                raise ValueError(task)
+        elif self._exclude_estimators is not None:
+            if task in CLASSIFICATION_TASKS:
+                exclude['classifier'] = self._exclude_estimators
+            elif task in REGRESSION_TASKS:
+                exclude['regressor'] = self._exclude_estimators
+            else:
+                raise ValueError(task)
+
+        # Prepare missing components to the TAE function call
+        if 'include' not in kwargs:
+            kwargs['include'] = include
+        if 'exclude' not in kwargs:
+            kwargs['exclude'] = exclude
+        if 'memory_limit' not in kwargs:
+            kwargs['memory_limit'] = self._memory_limit
+        if 'resampling_strategy' not in kwargs:
+            kwargs['resampling_strategy'] = self._resampling_strategy
+        if 'metric' not in kwargs:
+            kwargs['metric'] = self._metric
+        if 'disable_file_output' not in kwargs:
+            kwargs['disable_file_output'] = self._disable_evaluator_output
+        if 'pynisher_context' not in kwargs:
+            kwargs['pynisher_context'] = self._multiprocessing_context
+        if 'stats' not in kwargs:
+            scenario_mock = unittest.mock.Mock()
+            scenario_mock.wallclock_limit = self._time_for_task
+            kwargs['stats'] = Stats(scenario_mock)
+        kwargs['stats'].start_timing()
+
+        # Allow to pass the cutoff also as an argument
+        cutoff = kwargs.pop('cutoff', self._per_run_time_limit)
+
+        # Fit a pipeline, which will be stored on disk
+        # which we can later load via the backend
+        ta = ExecuteTaFuncWithQueue(
+            backend=self._backend,
+            autosklearn_seed=self._seed,
+            abort_on_first_run_crash=False,
+            cost_for_crash=get_cost_of_crash(kwargs['metric']),
+            port=self._logger_port,
+            **kwargs,
+            **self._resampling_strategy_arguments
+        )
+
+        run_info, run_value = ta.run_wrapper(
+            RunInfo(
+                config=config,
+                instance=None,
+                instance_specific=None,
+                seed=self._seed,
+                cutoff=cutoff,
+                capped=False,
+            )
+        )
+
+        pipeline = None
+        if run_value.status == StatusType.SUCCESS:
+            if kwargs['resampling_strategy'] in ('cv', 'cv-iterative-fit'):
+                load_function = self._backend.load_cv_model_by_seed_and_id_and_budget
+            else:
+                load_function = self._backend.load_model_by_seed_and_id_and_budget
+            try:
+                pipeline = load_function(
+                    seed=self._seed,
+                    idx=run_info.config.config_id + 1,
+                    budget=run_info.budget,
+                )
+            except Exception as e:
+                self._logger.warning(f"Cannot load pipeline because of {e}")
+
+        self._clean_logger()
+
+        return pipeline, run_info, run_value
+
     def predict(self, X, batch_size=None, n_jobs=1):
         """predict.
 
@@ -1398,6 +1555,8 @@ class AutoMLClassifier(AutoML):
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
+        task: Optional[int] = None,
+        is_classification: bool = True,
     ):
         y_task = type_of_target(y)
         task = self._task_mapping.get(y_task)
@@ -1420,6 +1579,30 @@ class AutoMLClassifier(AutoML):
             only_return_configuration_space=only_return_configuration_space,
             load_models=load_models,
             is_classification=True,
+        )
+
+    def fit_pipeline(
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        **kwargs,
+    ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
+        y_task = type_of_target(y)
+        task = self._task_mapping.get(y_task)
+        if task is None:
+            raise ValueError('Cannot work on data of type %s' % y_task)
+
+        if self._metric is None:
+            if task == MULTILABEL_CLASSIFICATION:
+                self._metric = f1_macro
+            else:
+                self._metric = accuracy
+
+        return super().fit_pipeline(
+            X=X, y=y,
+            task=task,
+            is_classification=True,
+            **kwargs,
         )
 
     def predict(self, X, batch_size=None, n_jobs=1):
@@ -1457,6 +1640,8 @@ class AutoMLRegressor(AutoML):
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
+        task: Optional[int] = None,
+        is_classification: bool = False,
     ):
 
         # Check the data provided in y
@@ -1479,4 +1664,28 @@ class AutoMLRegressor(AutoML):
             only_return_configuration_space=only_return_configuration_space,
             load_models=load_models,
             is_classification=False,
+        )
+
+    def fit_pipeline(
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        **kwargs: Dict,
+    ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
+
+        # Check the data provided in y
+        # After the y data type is validated,
+        # check the task type
+        y_task = type_of_target(y)
+        task = self._task_mapping.get(y_task)
+        if task is None:
+            raise ValueError('Cannot work on data of type %s' % y_task)
+        if self._metric is None:
+            self._metric = r2
+
+        return super().fit_pipeline(
+            X=X, y=y,
+            task=task,
+            is_classification=False,
+            **kwargs,
         )

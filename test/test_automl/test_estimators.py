@@ -11,6 +11,7 @@ import unittest
 import unittest.mock
 import pytest
 
+from ConfigSpace import Configuration
 import joblib
 from joblib import cpu_count
 import numpy as np
@@ -22,7 +23,7 @@ import sklearn.datasets
 from sklearn.base import clone
 from sklearn.base import ClassifierMixin, RegressorMixin
 from sklearn.base import is_classifier
-
+from smac.tae import StatusType
 
 from autosklearn.data.validation import InputValidator
 import autosklearn.pipeline.util as putil
@@ -704,3 +705,36 @@ def test_check_askl2_same_arguments_as_askl():
                            'metadata_directory']
     unexpected_args = set(extra_arguments) - set(expected_extra_args)
     assert len(unexpected_args) == 0, unexpected_args
+
+
+# which should return self actually return self.
+@pytest.mark.parametrize("task_type", ['classification',
+                                       'regression'])
+def test_fit_pipeline(dask_client, task_type):
+    X_train, y_train, X_test, y_test = putil.get_dataset(
+        'iris' if task_type == 'classification' else 'boston'
+    )
+    estimator = AutoSklearnClassifier if task_type == 'classification' else AutoSklearnRegressor
+    automl = estimator(
+        time_left_for_this_task=120,
+        # Time left for task plays no role
+        # only per run time limit
+        per_run_time_limit=30,
+        ensemble_size=0,
+        dask_client=dask_client,
+    )
+
+    pipeline, run_info, run_value = automl.fit_pipeline(X_train, y_train)
+
+    assert isinstance(run_info.config, Configuration)
+    assert run_info.cutoff == 30
+    assert run_value.status == StatusType.SUCCESS
+    # We should produce a decent result
+    assert run_value.cost < 0.5
+
+    dump_file = os.path.join(tempfile.gettempdir(), 'automl.dump.pkl')
+    with open(dump_file, 'wb') as f:
+        pickle.dump(pipeline, f)
+
+    # We should have fitted a pipeline with named_steps
+    assert hasattr(pipeline, 'named_steps')
