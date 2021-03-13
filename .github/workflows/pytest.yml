@@ -28,7 +28,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Setup Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
-      # A not on checkout: When checking out the repository that
+      # A note on checkout: When checking out the repository that
       # triggered a workflow, this defaults to the reference or SHA for that event.
       # Otherwise, uses the default branch (master) is used.
       with:
