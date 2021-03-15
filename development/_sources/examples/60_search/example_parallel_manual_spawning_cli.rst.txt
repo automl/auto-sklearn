@@ -301,13 +301,13 @@ Start Auto-sklearn
  .. code-block:: none
 
     auto-sklearn results:
-      Dataset name: b9d6bbcb-856d-11eb-8a55-000d3a8d1701
+      Dataset name: ddabf9ec-85aa-11eb-8a70-000d3aa42338
       Metric: accuracy
       Best validation score: 0.978723
-      Number of target algorithm runs: 11
+      Number of target algorithm runs: 12
       Number of successful target algorithm runs: 10
       Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 1
+      Number of target algorithms that exceeded the time limit: 2
       Number of target algorithms that exceeded the memory limit: 0
 
     Accuracy score 0.951048951048951
@@ -342,7 +342,7 @@ line.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  39.502 seconds)
+   **Total running time of the script:** ( 0 minutes  40.261 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_manual_spawning_cli.py:
@@ -357,7 +357,7 @@ line.
   .. container:: binder-badge
 
     .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/60_search/example_parallel_manual_spawning_cli.ipynb
+      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/60_search/example_parallel_manual_spawning_cli.ipynb
       :alt: Launch binder
       :width: 150 px
 

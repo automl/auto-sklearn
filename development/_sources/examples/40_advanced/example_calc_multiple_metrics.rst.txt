@@ -173,7 +173,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  59.449 seconds)
+   **Total running time of the script:** ( 1 minutes  55.869 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_calc_multiple_metrics.py:
@@ -188,7 +188,7 @@ Get the Score of the final ensemble
   .. container:: binder-badge
 
     .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/40_advanced/example_calc_multiple_metrics.ipynb
+      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_calc_multiple_metrics.ipynb
       :alt: Launch binder
       :width: 150 px
 
