@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>autosklearn.experimental.askl2 &#8212; AutoSklearn 0.12.3 documentation</title>
+    <title>autosklearn.experimental.askl2 &#8212; AutoSklearn 0.12.4 documentation</title>
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.12.3</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.12.4</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -137,15 +137,16 @@
     <span class="n">m</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
     <span class="n">m</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">fh</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">))</span>
 <span class="n">training_data_hash</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()[:</span><span class="mi">10</span><span class="p">]</span>
-<span class="n">sklearn_version</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">__version__</span>
-<span class="n">autosklearn_version</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">__version__</span>
-<span class="n">selector_file</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-        <span class="s1">&#39;XDG_CACHE_HOME&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;~/.cache/auto-sklearn/askl2_selector_</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">.pkl&#39;</span>
-        <span class="o">%</span> <span class="p">(</span><span class="n">autosklearn_version</span><span class="p">,</span> <span class="n">sklearn_version</span><span class="p">,</span> <span class="n">training_data_hash</span><span class="p">),</span>
-    <span class="p">)</span>
-<span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+<span class="n">selector_filename</span> <span class="o">=</span> <span class="s2">&quot;askl2_selector_</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">.pkl&quot;</span> <span class="o">%</span> <span class="p">(</span>
+    <span class="n">autosklearn</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span>
+    <span class="n">sklearn</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span>
+    <span class="n">training_data_hash</span>
+<span class="p">)</span>
+<span class="n">selector_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;XDG_CACHE_HOME&#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">selector_directory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">selector_directory</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span>
+<span class="n">selector_directory</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">selector_directory</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s1">&#39;auto-sklearn&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+<span class="n">selector_file</span> <span class="o">=</span> <span class="n">selector_directory</span> <span class="o">/</span> <span class="n">selector_filename</span>
 <span class="n">metafeatures</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;metafeatures&#39;</span><span class="p">])</span>
 <span class="n">y_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;y_values&#39;</span><span class="p">])</span>
 <span class="n">strategies</span> <span class="o">=</span> <span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;strategies&#39;</span><span class="p">]</span>
@@ -165,8 +166,14 @@
         <span class="n">maxima</span><span class="o">=</span><span class="n">maxima_for_methods</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">selector_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">selector_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
-        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">fh</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">selector_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">fh</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AutoSklearn2Classifier needs to create a selector file under &quot;</span>
+              <span class="s2">&quot;the user&#39;s home directory or XDG_CACHE_HOME. Nevertheless &quot;</span>
+              <span class="s2">&quot;the path </span><span class="si">{}</span><span class="s2"> is not writable.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selector_file</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="n">e</span>
 
 
 <span class="k">class</span> <span class="nc">SmacObjectCallback</span><span class="p">:</span>
@@ -268,6 +275,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">time_left_for_this_task</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3600</span><span class="p">,</span>
+        <span class="n">per_run_time_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">ensemble_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
         <span class="n">ensemble_nbest</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
         <span class="n">max_models_on_disc</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
@@ -294,6 +302,13 @@
 <span class="sd">            Time limit in seconds for the search of appropriate</span>
 <span class="sd">            models. By increasing this value, *auto-sklearn* has a higher</span>
 <span class="sd">            chance of finding better models.</span>
+
+<span class="sd">        per_run_time_limit : int, optional (default=1/10 of time_left_for_this_task)</span>
+<span class="sd">            Time limit for a single call to the machine learning model.</span>
+<span class="sd">            Model fitting will be terminated if the machine learning</span>
+<span class="sd">            algorithm runs over the time limit. Set this value high enough so</span>
+<span class="sd">            that typical machine learning algorithms can be fit on the</span>
+<span class="sd">            training data.</span>
 
 <span class="sd">        ensemble_size : int, optional (default=50)</span>
 <span class="sd">            Number of models added to the ensemble built by *Ensemble</span>
@@ -367,7 +382,7 @@
 
 <span class="sd">        smac_scenario_args : dict, optional (None)</span>
 <span class="sd">            Additional arguments inserted into the scenario of SMAC. See the</span>
-<span class="sd">            `SMAC documentation </span>
+<span class="sd">            `SMAC documentation</span>
 <span class="sd">            &lt;https://automl.github.io/SMAC3/master/options.html?highlight=scenario</span>
 <span class="sd">            #scenario&gt;`_</span>
 <span class="sd">            for a list of available arguments.</span>
@@ -384,7 +399,7 @@
 <span class="sd">            If None is provided, a default metric is selected depending on the task.</span>
 
 <span class="sd">        scoring_functions : List[Scorer], optional (None)</span>
-<span class="sd">            List of scorers which will be calculated for each pipeline and results will be </span>
+<span class="sd">            List of scorers which will be calculated for each pipeline and results will be</span>
 <span class="sd">            available via ``cv_results``</span>
 
 <span class="sd">        load_models : bool, optional (True)</span>
@@ -407,6 +422,7 @@
         <span class="n">include_preprocessors</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;no_preprocessing&quot;</span><span class="p">]</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="n">time_left_for_this_task</span><span class="p">,</span>
+            <span class="n">per_run_time_limit</span><span class="o">=</span><span class="n">per_run_time_limit</span><span class="p">,</span>
             <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="n">ensemble_size</span><span class="o">=</span><span class="n">ensemble_size</span><span class="p">,</span>
             <span class="n">ensemble_nbest</span><span class="o">=</span><span class="n">ensemble_nbest</span><span class="p">,</span>
@@ -534,7 +550,7 @@
     </p>
     <p>
         &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.2.<br/>
     </p>
   </div>
 </footer>

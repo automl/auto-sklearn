@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Restricting the number of hyperparameters for an existing component &#8212; AutoSklearn 0.12.3 documentation</title>
+    <title>Restricting the number of hyperparameters for an existing component &#8212; AutoSklearn 0.12.4 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.12.3</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.12.4</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -391,7 +391,7 @@ AutoSklearnClassifier(exclude_estimators=[&#39;random_forest&#39;],
     data_preprocessing:categorical_transformer:category_coalescence:__choice__, Type: Categorical, Choices: {minority_coalescer, no_coalescense}, Default: minority_coalescer
     data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Type: UniformFloat, Range: [0.0001, 0.5], Default: 0.01, on log-scale
     data_preprocessing:numerical_transformer:imputation:strategy, Type: Categorical, Choices: {mean, median, most_frequent}, Default: mean
-    data_preprocessing:numerical_transformer:rescaling:__choice__, Type: Categorical, Choices: {minmax, none, normalize, quantile_transformer, robust_scaler, standardize}, Default: standardize
+    data_preprocessing:numerical_transformer:rescaling:__choice__, Type: Categorical, Choices: {minmax, none, normalize, power_transformer, quantile_transformer, robust_scaler, standardize}, Default: standardize
     data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles, Type: UniformInteger, Range: [10, 2000], Default: 1000
     data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution, Type: Categorical, Choices: {uniform, normal}, Default: uniform
     data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max, Type: UniformFloat, Range: [0.7, 0.999], Default: 0.75
@@ -665,7 +665,7 @@ AutoSklearnClassifier(exclude_estimators=[&#39;random_forest&#39;],
     (Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  6.603 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  6.325 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-restrict-number-of-hyperparameters-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_restrict_number_of_hyperparameters.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>
@@ -701,7 +701,7 @@ AutoSklearnClassifier(exclude_estimators=[&#39;random_forest&#39;],
     </p>
     <p>
         &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.2.<br/>
     </p>
   </div>
 </footer>

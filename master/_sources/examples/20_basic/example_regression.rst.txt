@@ -45,7 +45,7 @@ The following example shows how to fit a simple regression model with
 
  .. code-block:: none
 
-    /opt/hostedtoolcache/Python/3.8.7/x64/lib/python3.8/site-packages/pyparsing.py:3190: FutureWarning: Possible set intersection at position 3
+    /opt/hostedtoolcache/Python/3.8.8/x64/lib/python3.8/site-packages/pyparsing.py:3190: FutureWarning: Possible set intersection at position 3
       self.re = re.compile(self.reString)
 
 
@@ -186,7 +186,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  58.020 seconds)
+   **Total running time of the script:** ( 1 minutes  57.461 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_regression.py:

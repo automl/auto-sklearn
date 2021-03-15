@@ -22,8 +22,8 @@ X_train, X_test, y_train, y_test = \
     sklearn.model_selection.train_test_split(X, y, random_state=1)
 
 ############################################################################
-# Build and fit a regressor
-# =========================
+# Build and fit a classifier
+# ==========================
 
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
