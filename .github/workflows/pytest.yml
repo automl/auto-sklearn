@@ -1,6 +1,11 @@
 name: Tests
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  schedule:
+    # Every Monday at 7AM UTC
+    - cron: '0 07 * * 1'
 
 jobs:
   ubuntu:
@@ -17,12 +22,15 @@ jobs:
           - python-version: 3.7
             use-conda: false
             use-dist: true
-      fail-fast:  false
+      fail-fast: false
 
     steps:
     - uses: actions/checkout@v2
     - name: Setup Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
+      # A note on checkout: When checking out the repository that
+      # triggered a workflow, this defaults to the reference or SHA for that event.
+      # Otherwise, uses the default branch (master) is used.
       with:
         python-version: ${{ matrix.python-version }}
     - name: Conda Install test dependencies

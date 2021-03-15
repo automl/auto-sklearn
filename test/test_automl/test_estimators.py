@@ -1,10 +1,12 @@
 import copy
 import glob
+import importlib
 import os
 import inspect
 import pickle
 import re
 import sys
+import tempfile
 import unittest
 import unittest.mock
 import pytest
@@ -660,3 +662,45 @@ def test_check_estimator_signature(class_):
     estimator = class_()
     for expected in list(inspect.signature(class_).parameters):
         assert hasattr(estimator, expected)
+
+
+@pytest.mark.parametrize("selector_path", [None,  # No XDG_CACHE_HOME provided
+                                           '/',  # XDG_CACHE_HOME has no permission
+                                           tempfile.gettempdir(),  # in the user cache
+                                           ])
+def test_selector_file_askl2_can_be_created(selector_path):
+    with unittest.mock.patch('os.environ.get') as mock_foo:
+        mock_foo.return_value = selector_path
+        if selector_path is not None and not os.access(selector_path, os.W_OK):
+            with pytest.raises(PermissionError):
+                importlib.reload(autosklearn.experimental.askl2)
+        else:
+            importlib.reload(autosklearn.experimental.askl2)
+            assert os.path.exists(autosklearn.experimental.askl2.selector_file)
+            if selector_path is None or not os.access(selector_path, os.W_OK):
+                # We default to home in worst case
+                assert os.path.expanduser("~") in str(autosklearn.experimental.askl2.selector_file)
+            else:
+                # a dir provided via XDG_CACHE_HOME
+                assert selector_path in str(autosklearn.experimental.askl2.selector_file)
+    # Re import it at the end so we do not affect other test
+    importlib.reload(autosklearn.experimental.askl2)
+
+
+def test_check_askl2_same_arguments_as_askl():
+    # In case a new attribute is created, make sure it is there also in
+    # ASKL2
+    extra_arguments = list(set(
+        inspect.getfullargspec(AutoSklearnEstimator.__init__).args) - set(
+            inspect.getfullargspec(AutoSklearn2Classifier.__init__).args))
+    expected_extra_args = ['exclude_estimators',
+                           'include_preprocessors',
+                           'resampling_strategy_arguments',
+                           'exclude_preprocessors',
+                           'include_estimators',
+                           'get_smac_object_callback',
+                           'initial_configurations_via_metalearning',
+                           'resampling_strategy',
+                           'metadata_directory']
+    unexpected_args = set(extra_arguments) - set(expected_extra_args)
+    assert len(unexpected_args) == 0, unexpected_args
