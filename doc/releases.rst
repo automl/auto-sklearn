@@ -8,6 +8,16 @@
     git log 2e29eba.. --format="%aN <%aE>" --reverse | perl -e 'my %dedupe; while (<STDIN>) { print unless $dedupe{$_}++}'
 
 
+Version 0.12.5
+==============
+
+* MAINT: Remove ``Cython`` and ``numpy`` as installation requirements.
+
+Contributors v0.12.5
+********************
+
+* Matthias Feurer
+
 ========
 Releases
 ========
@@ -16,11 +26,11 @@ Version 0.12.4
 ==============
 
 * ADD #660: Enable scikit-learn's power transformation for input features.
-* MAINT: Bump the `pyrfr` minimum dependency to 0.8.1 to automatically download wheels from pypi
+* MAINT: Bump the ``pyrfr`` minimum dependency to 0.8.1 to automatically download wheels from pypi
   if possible.
 * FIX #732: Add a missing size check into the GMEANS clustering used for the NeurIPS 2015 paper.
-* FIX #1050: Add missing arguments to the `AutoSklearn2Classifier` signature.
-* FIX #1072: Fixes a bug where the `AutoSklearn2Classifier` could not be created due to trying to
+* FIX #1050: Add missing arguments to the ``AutoSklearn2Classifier`` signature.
+* FIX #1072: Fixes a bug where the ``AutoSklearn2Classifier`` could not be created due to trying to
   cache to the wrong directory.
 
 Contributors v0.12.4
