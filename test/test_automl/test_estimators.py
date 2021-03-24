@@ -120,19 +120,24 @@ def test_fit_n_jobs(tmp_dir, output_dir):
 
 
 def test_feat_type_wrong_arguments():
-    cls = AutoSklearnClassifier(ensemble_size=0)
+
+    # Every Auto-Sklearn estimator has a backend, that allows a single
+    # call to fit
     X = np.zeros((100, 100))
     y = np.zeros((100, ))
 
+    cls = AutoSklearnClassifier(ensemble_size=0)
     expected_msg = r".*Array feat_type does not have same number of "
     "variables as X has features. 1 vs 100.*"
     with pytest.raises(ValueError, match=expected_msg):
         cls.fit(X=X, y=y, feat_type=[True])
 
+    cls = AutoSklearnClassifier(ensemble_size=0)
     expected_msg = r".*Array feat_type must only contain strings.*"
     with pytest.raises(ValueError, match=expected_msg):
         cls.fit(X=X, y=y, feat_type=[True]*100)
 
+    cls = AutoSklearnClassifier(ensemble_size=0)
     expected_msg = r".*Only `Categorical` and `Numerical` are"
     "valid feature types, you passed `Car`.*"
     with pytest.raises(ValueError, match=expected_msg):
@@ -723,8 +728,9 @@ def test_fit_pipeline(dask_client, task_type):
         ensemble_size=0,
         dask_client=dask_client,
     )
+    config = automl.get_configuration_space(X_train, y_train).sample_configuration()
 
-    pipeline, run_info, run_value = automl.fit_pipeline(X_train, y_train)
+    pipeline, run_info, run_value = automl.fit_pipeline(X=X_train, y=y_train, config=config)
 
     assert isinstance(run_info.config, Configuration)
     assert run_info.cutoff == 30

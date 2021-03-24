@@ -2,6 +2,7 @@
 
 from typing import Optional, Dict, List, Tuple
 
+from ConfigSpace.configuration_space import Configuration
 import dask.distributed
 import joblib
 import numpy as np
@@ -290,35 +291,24 @@ class AutoSklearnEstimator(BaseEstimator):
         self.dask_client = None
         return self.__dict__
 
-    def build_automl(
-        self,
-        seed: int,
-        ensemble_size: int,
-        initial_configurations_via_metalearning: int,
-        tmp_folder: str,
-        output_folder: str,
-        smac_scenario_args: Optional[Dict] = None,
-    ):
+    def build_automl(self):
 
         backend = create(
-            temporary_directory=tmp_folder,
-            output_directory=output_folder,
+            temporary_directory=self.tmp_folder,
+            output_directory=self.output_folder,
             delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
             delete_output_folder_after_terminate=self.delete_output_folder_after_terminate,
             )
-
-        if smac_scenario_args is None:
-            smac_scenario_args = self.smac_scenario_args
 
         automl = self._get_automl_class()(
             backend=backend,
             time_left_for_this_task=self.time_left_for_this_task,
             per_run_time_limit=self.per_run_time_limit,
-            initial_configurations_via_metalearning=initial_configurations_via_metalearning,
-            ensemble_size=ensemble_size,
+            initial_configurations_via_metalearning=self.initial_configurations_via_metalearning,
+            ensemble_size=self.ensemble_size,
             ensemble_nbest=self.ensemble_nbest,
             max_models_on_disc=self.max_models_on_disc,
-            seed=seed,
+            seed=self.seed,
             memory_limit=self.memory_limit,
             include_estimators=self.include_estimators,
             exclude_estimators=self.exclude_estimators,
@@ -330,7 +320,7 @@ class AutoSklearnEstimator(BaseEstimator):
             dask_client=self.dask_client,
             get_smac_object_callback=self.get_smac_object_callback,
             disable_evaluator_output=self.disable_evaluator_output,
-            smac_scenario_args=smac_scenario_args,
+            smac_scenario_args=self.smac_scenario_args,
             logging_config=self.logging_config,
             metadata_directory=self.metadata_directory,
             metric=self.metric,
@@ -345,22 +335,20 @@ class AutoSklearnEstimator(BaseEstimator):
         if self.per_run_time_limit is None:
             self.per_run_time_limit = self._n_jobs * self.time_left_for_this_task // 10
 
-        seed = self.seed
-        self.automl_ = self.build_automl(
-            seed=seed,
-            ensemble_size=self.ensemble_size,
-            initial_configurations_via_metalearning=(
-                self.initial_configurations_via_metalearning
-            ),
-            tmp_folder=self.tmp_folder,
-            output_folder=self.output_folder,
-        )
+        if self.automl_ is None:
+            self.automl_ = self.build_automl()
         self.automl_.fit(load_models=self.load_models, **kwargs)
 
         return self
 
     def fit_pipeline(
         self,
+        X: np.ndarray,
+        y: np.ndarray,
+        config: Configuration,
+        dataset_name: Optional[str] = None,
+        X_test: Optional[np.ndarray] = None,
+        y_test: Optional[np.ndarray] = None,
         *args,
         **kwargs: Dict,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
@@ -373,17 +361,23 @@ class AutoSklearnEstimator(BaseEstimator):
         arguments are redirected to the TAE evaluation function, which allows for
         further customization while building a pipeline.
 
+        Any additional argument provided is directly passed to the worker exercising the run.
+
         Parameters
         ----------
             X: array-like, shape = (n_samples, n_features)
                 The features used for training
             y: array-like
                 The labels used for training
-            task: int
-                The type of task, taken from autosklearn.constants
-            is_classification: bool
-                Whether the task is for classification or regression. This affects
-                how the targets are treated
+            X_test: Optionalarray-like, shape = (n_samples, n_features)
+                If provided, the testing performance will be tracked on this features.
+            y_test: array-like
+                If provided, the testing performance will be tracked on this labels
+            config: Configuration
+                A configuration object used to define a pipeline steps
+            dataset_name: Optional[str]
+                Name that will be used to tag the Auto-Sklearn run and identify the
+                Auto-Sklearn run
 
         Returns
         -------
@@ -396,16 +390,12 @@ class AutoSklearnEstimator(BaseEstimator):
                 A named tuple that contains the result of the run
         """
         if self.automl_ is None:
-            self.automl_ = self.build_automl(
-                seed=self.seed,
-                ensemble_size=self.ensemble_size,
-                initial_configurations_via_metalearning=(
-                    self.initial_configurations_via_metalearning
-                ),
-                tmp_folder=self.tmp_folder,
-                output_folder=self.output_folder,
-            )
-        return self.automl_.fit_pipeline(*args, **kwargs)
+            self.automl_ = self.build_automl()
+        return self.automl_.fit_pipeline(X=X, y=y,
+                                         dataset_name=dataset_name,
+                                         config=config,
+                                         X_test=X_test, y_test=y_test,
+                                         *args, **kwargs)
 
     def fit_ensemble(self, y, task=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
@@ -450,17 +440,9 @@ class AutoSklearnEstimator(BaseEstimator):
         """
         if self.automl_ is None:
             # Build a dummy automl object to call fit_ensemble
-            self.automl_ = self.build_automl(
-                seed=self.seed,
-                ensemble_size=(
-                    ensemble_size
-                    if ensemble_size is not None else
-                    self.ensemble_size
-                ),
-                initial_configurations_via_metalearning=0,
-                tmp_folder=self.tmp_folder,
-                output_folder=self.output_folder,
-            )
+            # The ensemble size is honored in the .automl_.fit_ensemble
+            # call
+            self.automl_ = self.build_automl()
         self.automl_.fit_ensemble(
             y=y,
             task=task,
@@ -562,18 +544,33 @@ class AutoSklearnEstimator(BaseEstimator):
     def _get_automl_class(self):
         raise NotImplementedError()
 
-    def get_configuration_space(self, X, y):
+    def get_configuration_space(
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        dataset_name: Optional[str] = None,
+    ):
+        """
+        Returns the Configuration Space object, from which Auto-Sklearn
+        will sample configurations and build pipelines.
+
+        Parameters
+        ----------
+        X: (np.ndarray)
+            Array with the training features, used to get characteristics like
+            data sparsity
+        y: (np.ndarray)
+            Array with the problem labels
+        dataset_name: Optional[str]
+            A string to tag the Auto-Sklearn run
+        """
         if self.automl_ is None:
-            self.automl_ = self.build_automl(
-                seed=self.seed,
-                ensemble_size=self.ensemble_size,
-                initial_configurations_via_metalearning=(
-                    self.initial_configurations_via_metalearning
-                ),
-                tmp_folder=self.tmp_folder,
-                output_folder=self.output_folder,
-            )
-        return self.automl_.configuration_space
+            self.automl_ = self.build_automl()
+        return self.automl_.fit(
+            X, y,
+            dataset_name=dataset_name,
+            only_return_configuration_space=True,
+        ) if self.automl_.configuration_space is None else self.automl_.configuration_space
 
 
 class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):

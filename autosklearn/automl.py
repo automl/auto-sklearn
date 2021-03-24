@@ -14,6 +14,7 @@ import unittest.mock
 import warnings
 import tempfile
 
+from ConfigSpace.configuration_space import Configuration
 from ConfigSpace.read_and_write import json as cs_json
 import dask
 import dask.distributed
@@ -250,6 +251,11 @@ class AutoML(BaseEstimator):
         # After assigning and checking variables...
         # self._backend = Backend(self._output_dir, self._tmp_dir)
 
+        # Num_run tell us how many runs have been launched
+        # It can be seen as an identifier for each configuration
+        # saved to disk
+        self.num_run = 0
+
     def _create_dask_client(self):
         self._is_dask_client_internally_created = True
         self._dask_client = dask.distributed.Client(
@@ -374,7 +380,7 @@ class AutoML(BaseEstimator):
                     (basename, time_left_after_reading))
         return time_for_load_data
 
-    def _do_dummy_prediction(self, datamanager, num_run):
+    def _do_dummy_prediction(self, datamanager: XYDataManager, num_run: int) -> int:
 
         # When using partial-cv it makes no sense to do dummy predictions
         if self._resampling_strategy in ['partial-cv',
@@ -440,6 +446,7 @@ class AutoML(BaseEstimator):
                     "Dummy prediction failed with run state %s and additional output: %s."
                     % (str(status), str(additional_info))
                 )
+        return num_run
 
     def fit(
         self,
@@ -464,7 +471,12 @@ class AutoML(BaseEstimator):
         # The first thing we have to do is create the logger to update the backend
         self._backend.setup_logger(self._logger_port)
 
-        self._backend.save_start_time(self._seed)
+        if not only_return_configuration_space:
+            # If only querying the configuration space, we do not save the start time
+            # The start time internally checks for the fit() method to execute only once
+            # But this does not apply when only querying the configuration space
+            self._backend.save_start_time(self._seed)
+
         self._stopwatch = StopWatch()
 
         # Make sure that input is valid
@@ -621,10 +633,6 @@ class AutoML(BaseEstimator):
                 time_for_load_data,
                 self._logger)
 
-        # == Perform dummy predictions
-        num_run = 1
-        self._do_dummy_prediction(datamanager, num_run)
-
         # = Create a searchspace
         # Do this before One Hot Encoding to make sure that it creates a
         # search space for a dense classifier even if one hot encoding would
@@ -641,8 +649,12 @@ class AutoML(BaseEstimator):
             include_preprocessors=self._include_preprocessors,
             exclude_preprocessors=self._exclude_preprocessors)
         if only_return_configuration_space:
-            self._close_dask_client()
+            self._fit_cleanup()
             return self.configuration_space
+
+        # == Perform dummy predictions
+        # Dummy prediction always have num_run set to 1
+        self.num_run += self._do_dummy_prediction(datamanager, num_run=1)
 
         # == RUN ensemble builder
         # Do this before calculating the meta-features to make sure that the
@@ -743,7 +755,7 @@ class AutoML(BaseEstimator):
                 watcher=self._stopwatch,
                 n_jobs=self._n_jobs,
                 dask_client=self._dask_client,
-                start_num_run=num_run,
+                start_num_run=self.num_run,
                 num_metalearning_cfgs=self._initial_configurations_via_metalearning,
                 config_file=configspace_path,
                 seed=self._seed,
@@ -805,6 +817,11 @@ class AutoML(BaseEstimator):
             self._load_models()
             self._logger.info("Finished loading models...")
 
+        self._fit_cleanup()
+
+        return self
+
+    def _fit_cleanup(self):
         self._logger.info("Closing the dask infrastructure")
         self._close_dask_client()
         self._logger.info("Finished closing the dask infrastructure")
@@ -812,8 +829,7 @@ class AutoML(BaseEstimator):
         # Clean up the logger
         self._logger.info("Starting to clean up the logger")
         self._clean_logger()
-
-        return self
+        return
 
     @staticmethod
     def subsample_if_too_large(X, y, logger, seed, memory_limit, task):
@@ -926,6 +942,9 @@ class AutoML(BaseEstimator):
         y: np.ndarray,
         task: int,
         is_classification: bool,
+        dataset_name: Optional[str] = None,
+        X_test: Optional[np.ndarray] = None,
+        y_test: Optional[np.ndarray] = None,
         **kwargs: Dict,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
         """ Fits and individual pipeline configuration and returns
@@ -939,25 +958,31 @@ class AutoML(BaseEstimator):
 
         Parameters
         ----------
-            X: array-like, shape = (n_samples, n_features)
-                The features used for training
-            y: array-like
-                The labels used for training
-            task: int
-                The type of task, taken from autosklearn.constants
-            is_classification: bool
-                Whether the task is for classification or regression. This affects
-                how the targets are treated
+        X: array-like, shape = (n_samples, n_features)
+            The features used for training
+        y: array-like
+            The labels used for training
+        X_test: Optionalarray-like, shape = (n_samples, n_features)
+            If provided, the testing performance will be tracked on this features.
+        y_test: array-like
+            If provided, the testing performance will be tracked on this labels
+        config: Configuration
+            A configuration object used to define a pipeline steps
+        dataset_name: Optional[str]
+            A string to tag and identify the Auto-Sklearn run
+        is_classification: bool
+            Whether the task is for classification or regression. This affects
+            how the targets are treated
 
         Returns
         -------
-            pipeline: Optional[BasePipeline]
-                The fitted pipeline. In case of failure while fitting the pipeline,
-                a None is returned.
-            run_info: RunInFo
-                A named tuple that contains the configuration launched
-            run_value: RunValue
-                A named tuple that contains the result of the run
+        pipeline: Optional[BasePipeline]
+            The fitted pipeline. In case of failure while fitting the pipeline,
+            a None is returned.
+        run_info: RunInFo
+            A named tuple that contains the configuration launched
+        run_value: RunValue
+            A named tuple that contains the result of the run
         """
 
         # Get the configuration space
@@ -966,19 +991,18 @@ class AutoML(BaseEstimator):
         if self.configuration_space is None:
             self.configuration_space = self.fit(
                 X=X, y=y, task=task,
+                dataset_name=dataset_name,
                 X_test=kwargs.pop('X_test', None),
                 y_test=kwargs.pop('y_test', None),
                 feat_type=kwargs.pop('feat_type', None),
-                dataset_name=kwargs.pop('dataset_name', None),
                 only_return_configuration_space=True)
 
         # Get a configuration from the user or sample from the CS
         config = kwargs.pop('config', self.configuration_space.sample_configuration())
 
-        # A config id is expected in the TAE evaluation
-        if config.config_id is None:
-            # We do not want to overwrite existing
-            config.config_id = self._backend.get_highest_num_run() + 1
+        # We do not want to overwrite existing runs
+        self.num_run += 1
+        config.config_id = self.num_run
 
         exclude = dict()
         include = dict()
@@ -1585,6 +1609,10 @@ class AutoMLClassifier(AutoML):
         self,
         X: np.ndarray,
         y: np.ndarray,
+        config: Configuration,
+        dataset_name: Optional[str] = None,
+        X_test: Optional[np.ndarray] = None,
+        y_test: Optional[np.ndarray] = None,
         **kwargs,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
         y_task = type_of_target(y)
@@ -1600,6 +1628,9 @@ class AutoMLClassifier(AutoML):
 
         return super().fit_pipeline(
             X=X, y=y,
+            X_test=X_test, y_test=y_test,
+            dataset_name=dataset_name,
+            config=config,
             task=task,
             is_classification=True,
             **kwargs,
@@ -1670,6 +1701,10 @@ class AutoMLRegressor(AutoML):
         self,
         X: np.ndarray,
         y: np.ndarray,
+        config: Configuration,
+        dataset_name: Optional[str] = None,
+        X_test: Optional[np.ndarray] = None,
+        y_test: Optional[np.ndarray] = None,
         **kwargs: Dict,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
 
@@ -1685,7 +1720,10 @@ class AutoMLRegressor(AutoML):
 
         return super().fit_pipeline(
             X=X, y=y,
+            X_test=X_test, y_test=y_test,
+            config=config,
             task=task,
+            dataset_name=dataset_name,
             is_classification=False,
             **kwargs,
         )

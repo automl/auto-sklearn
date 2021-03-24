@@ -30,7 +30,7 @@ import autosklearn.classification
 # Data Loading
 # ============
 
-X, y = sklearn.datasets.fetch_openml(data_id=3, return_X_y=True, as_frame=False)
+X, y = sklearn.datasets.fetch_openml(data_id=3, return_X_y=True, as_frame=True)
 X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
     X, y, test_size=0.5, random_state=3
 )
@@ -47,16 +47,27 @@ cls = autosklearn.classification.AutoSklearnClassifier(
     # have RandomForest as a valid model. We recommend enabling all
     # possible models to get a better performance.
     include_estimators=['random_forest'],
+    delete_tmp_folder_after_terminate=False,
 )
 
 ###########################################################################
-# Fit a random pipeline
-# =====================
+# Fit an user provided configuration
+# ==================================
 
-# First we fit a pipeline, product of a random configuration
-# The constrains set on the AutoSklearnClassifier will be honored.
-# In this case we requested to use 4096 Mb as a memory limit
+# We will create a configuration that has a user defined
+# min_samples_split in the Random Forest. We recommend you to look into
+# how the ConfigSpace package works here:
+# https://automl.github.io/ConfigSpace/master/
+cs = cls.get_configuration_space(X, y, dataset_name='kr-vs-kp')
+config = cs.sample_configuration()
+config._values['classifier:random_forest:min_samples_split'] = 11
+
+# Make sure that your changed configuration complies with the configuration space
+config.is_valid_configuration()
+
 pipeline, run_info, run_value = cls.fit_pipeline(X=X_train, y=y_train,
+                                                 dataset_name='kr-vs-kp',
+                                                 config=config,
                                                  X_test=X_test, y_test=y_test)
 
 # This object complies with Scikit-Learn Pipeline API.
@@ -64,33 +75,16 @@ pipeline, run_info, run_value = cls.fit_pipeline(X=X_train, y=y_train,
 print(pipeline.named_steps)
 
 # The fit_pipeline command also returns a named tuple with the pipeline constraints
-# Notice the random configuration that was sampled from the configuration space
 print(run_info)
 
-# The fit_pipeline command also returns a named tuple with the run results, for
-# example, run duration, train loss and test loss. Auto-Sklearn solves a minimization
-# problem, so metrics like accuracy are translated to a loss.
+# The fit_pipeline command also returns a named tuple with train/test performance
 print(run_value)
-
-############################################################################
-# Fit an user provided pipeline
-# =============================
-
-# We will create a configuration that has a user defined
-# min_samples_split in the Random Forest. We recommend you to look into
-# how the ConfigSpace package works here:
-# https://automl.github.io/ConfigSpace/master/
-cs = cls.get_configuration_space(X, y)
-config = cs.sample_configuration()
-print("Configuration before the change:", config)
-config_dict = config.get_dictionary()
-config_dict['classifier:random_forest:min_samples_split'] = 11
-config = Configuration(cs, config_dict)
-print("Configuration after the change:", config)
-
-# Fit the configuration
-pipeline = cls.fit_pipeline(X=X_train, y=y_train, config=config)[0]
 
 # We can make sure that our pipeline configuration was honored as follows
 print("Passed Configuration:", pipeline.config)
 print("Random Forest:", pipeline.named_steps['classifier'].choice.estimator)
+
+# We can also search for new configurations using the fit() method
+# Any configurations found by Auto-Sklearn -- even the ones created using
+# fit_pipeline() are stored to disk and can be used for Ensemble Selection
+cs = cls.fit(X, y, dataset_name='kr-vs-kp')

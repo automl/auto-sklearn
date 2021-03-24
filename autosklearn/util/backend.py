@@ -332,15 +332,6 @@ class Backend(object):
         )
         return model_files
 
-    def get_highest_num_run(self) -> int:
-        runs_directory = self.get_runs_directory()
-        run_files = glob.glob(os.path.join(glob.escape(runs_directory), '*'))
-        num_runs = [int(os.path.basename(run_file).split('_')[1]) for run_file in run_files]
-        if len(num_runs) == 0:
-            return 1
-        else:
-            return max(num_runs)
-
     def load_models_by_identifiers(self, identifiers: List[Tuple[int, int, float]]
                                    ) -> Dict:
         models = dict()
