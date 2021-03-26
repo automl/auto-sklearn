@@ -130,7 +130,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y)
 # ==============================
 
 clf = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=3600,
+    time_left_for_this_task=30,
     per_run_time_limit=10,
     include_estimators=['MLPClassifier'],
     # Bellow two flags are provided to speed up calculations
