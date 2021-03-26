@@ -184,6 +184,7 @@ html_theme_options = {
         ('Examples', 'examples/index'),
         ('API', 'api'),
         ('Extending', 'extending'),
+        ('FAQ', 'faq'),
     ],
 
     # Render the next and previous page links in navbar. (Default: true)

@@ -11,10 +11,15 @@ System requirements
 
 auto-sklearn has the following system requirements:
 
-* Linux operating system (for example Ubuntu) `(get Linux here) <https://www.wikihow.com/Install-Linux>`_,
-* Python (>=3.6) `(get Python here) <https://www.python.org/downloads/>`_.
-* C++ compiler (with C++11 supports) `(get GCC here) <https://www.tutorialspoint.com/How-to-Install-Cplusplus-Compiler-on-Linux>`_ and
-* SWIG (version 3.0.* is required; >=4.0.0 is not supported) `(get SWIG here) <http://www.swig.org/survey.html>`_.
+* Linux operating system (for example Ubuntu) (`get Linux here <https://www.wikihow.com/Install-Linux>`_)
+* Python (>=3.6) (`get Python here <https://www.python.org/downloads/>`_),
+* C++ compiler (with C++11 supports) (`get GCC here <https://www.tutorialspoint.com/How-to-Install-Cplusplus-Compiler-on-Linux>`_).
+
+In case you try to install Auto-sklearn on a system where no wheel files for the pyrfr package
+are provided (see `here <https://pypi.org/project/pyrfr/#files>`_ for available wheels) you also
+need:
+
+* SWIG (version 3.0.* is required; >=4.0.0 is not supported) (`get SWIG here <http://www.swig.org/survey.html>`_).
 
 For an explanation of missing Microsoft Windows and MAC OSX support please
 check the Section `Windows/OSX compatibility`_.
@@ -81,9 +86,10 @@ is part of Python's `Unix Specific Services <https://docs.python.org/3/library/u
 and not available on a Windows machine. Therefore, it is not possible to run
 *auto-sklearn* on a Windows machine.
 
-Possible solutions (not tested):
+Possible solutions:
 
-* Windows 10 bash shell
+* Windows 10 bash shell (see `431 <https://github.com/automl/auto-sklearn/issues/431>`_ and
+  `860 <https://github.com/automl/auto-sklearn/issues/860>`_ for suggestions)
 * virtual machine
 * docker image
 
@@ -95,21 +101,18 @@ issues holding us back from actively supporting OSX:
 
 * The ``resource`` module cannot enforce a memory limit on a Python process
   (see `SMAC3/issues/115 <https://github.com/automl/SMAC3/issues/115>`_).
-* OSX machines on `travis-ci <https://travis-ci.org/>`_ take more than 30
-  minutes to spawn. This makes it impossible for us to run unit tests for
-  *auto-sklearn* and its dependencies `SMAC3 <https://github.com/automl/SMAC3>`_
-  and `ConfigSpace <https://github.com/automl/ConfigSpace>`_.
+* Not all dependencies we are using are set up to work on OSX.
 
 In case you're having issues installing the `pyrfr package <https://github.com/automl/random_forest_run>`_, check out
 `this installation suggestion on github <https://github.com/automl/auto-sklearn/issues/360#issuecomment-335150470>`_.
 
-Possible other solutions (not tested):
+Possible other:
 
 * virtual machine
 * docker image
 
 Docker Image
-=========================
+============
 A Docker image is also provided on dockerhub. To download from dockerhub,
 use:
 

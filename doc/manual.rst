@@ -78,6 +78,8 @@ For a full list please have a look at the source code (in `autosklearn/pipeline/
   * `Regressors <https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/regression>`_
   * `Preprocessors <https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/feature_preprocessing>`_
 
+We do also provide an example `on how to restrict the classifiers to search over <examples/80_advanced/example_interpretable_models.html>`_.
+
 Turning off preprocessing
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -152,7 +154,7 @@ Parallel computation
 
 In it's default mode, *auto-sklearn* already uses two cores. The first one is
 used for model building, the second for building an ensemble every time a new
-machine learning model has finished training. An example on how to do this sequentially (first searching for individual models, and then building an ensemble from them) can be seen in `sequential auto-sklearn example <examples/60_search/example_sequential.html>`_. 
+machine learning model has finished training. An example on how to do this sequentially (first searching for individual models, and then building an ensemble from them) can be seen in `sequential auto-sklearn example <examples/60_search/example_sequential.html>`_.
 
 Nevertheless, *auto-sklearn* also supports parallel Bayesian optimization via the use of `Dask.distributed  <https://distributed.dask.org/>`_. By providing the arguments ``n_jobs`` to the estimator construction, one can control the number of cores available to *auto-sklearn* (As exemplified in `sequential auto-sklearn  example <examples/60_search/example_parallel_n_jobs>`_). Distributed processes are also supported by providing a custom client object to *auto-sklearn* like in the
 example: `sequential auto-sklearn  example <examples/60_search/example_parallel_manual_spawning_python>`_. When multiple cores are available, *auto-sklearn*
