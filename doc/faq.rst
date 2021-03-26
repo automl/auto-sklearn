@@ -106,20 +106,37 @@ how much memory is used as the models are removed from disk everytime the ensemb
 finishes an iteration. Especially when running in parallel it can happen that multiple models are
 constructed during one run of the ensemble builder.
 
-Extending
-=========
+Available machine learning models
+=================================
 
-* Will we add non-scikit-learn models?
-* How to add new models?
-* can the preprocessing be changed?
+Will non-scikit-learn models be added to Auto-sklearn?
+------------------------------------------------------
+
+The short answer is unfortunately no.
+
+The long answer answer is a bit more nuanced: maintaining Auto-sklearn requires a lot of time and
+effort, which would grow even larger when depending on more libraries. Also, adding more
+libraries would require us to generate meta-data more often. Lastly, having more choices does not
+guarantee a better performance for most users as having more choices demands a longer search for
+good models and can lead to more overfitting.
+
+Nevertheless, everyone can still add his or her favorite model to Auto-sklearn's search space by
+following the `examples on how to extend Auto-sklearn
+<https://automl.github.io/auto-sklearn/master/examples/index.html#extension-examples>`_.
+
+If there is interest in creating a auto-sklearn-contrib repository with 3rd-party models please
+open an issue for that.
+
+Can the preprocessing be disabled
+---------------------------------
+
+No, but we're working on that.
 
 Usage
 =====
 
 Only use interpretable models
 -----------------------------
-
-Issue #1033
 
 Auto-sklearn can be restricted to only use interpretable models and preprocessing algorithms.
 Please see the section :ref:`Restricting the searchspace` to learn how to restrict the models
@@ -144,7 +161,28 @@ models termination condition is reached.
 Ensemble contains only a dummy model
 ------------------------------------
 
+TODO
+
 3. How to set useful budgets: https://github.com/automl/auto-sklearn/issues/57
 
 Parallel processing and oversubscription
 ----------------------------------------
+
+TODO
+
+Meta-Learning
+=============
+
+Which datasets are used for meta-learning?
+------------------------------------------
+
+We updated the list of datasets used for meta-learning several times and this list now differes
+significantly from the original 140 datasets we used in 2015 when the paper and the package were
+released. An up-to-date list of `OpenML task IDs <https://docs.openml.org/#tasks>`_ can be found
+on `github <https://github.com/automl/auto-sklearn/blob/master/scripts/update_metadata_util.py>`_
+
+Which meta-features are used for meta-learning?
+-----------------------------------------------
+
+We do not have a user guide on meta-features but they are all pretty simple and can be found
+`in the source code <https://github.com/automl/auto-sklearn/blob/master/autosklearn/metalearning/metafeatures/metafeatures.py>`_.
