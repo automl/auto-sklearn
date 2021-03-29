@@ -8,7 +8,7 @@ import multiprocessing
 import os
 import sys
 import time
-from typing import Any, Dict, Optional, List, Tuple, Union
+from typing import Any, Dict, Optional, List, Tuple
 import uuid
 import unittest.mock
 import warnings
@@ -38,7 +38,11 @@ from sklearn.dummy import DummyClassifier, DummyRegressor
 
 from autosklearn.metrics import Scorer
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.data.validation import InputValidator
+from autosklearn.data.validation import (
+    InputValidator,
+    SUPPORTED_FEAT_TYPES,
+    SUPPORTED_TARGET_TYPES,
+)
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import _fit_with_budget
@@ -208,6 +212,7 @@ class AutoML(BaseEstimator):
 
         self._datamanager = None
         self._dataset_name = None
+        self._feat_type = None
         self._stopwatch = StopWatch()
         self._logger = None
         self._task = None
@@ -450,11 +455,11 @@ class AutoML(BaseEstimator):
 
     def fit(
         self,
-        X: np.ndarray,
-        y: np.ndarray,
+        X: SUPPORTED_FEAT_TYPES,
+        y: SUPPORTED_TARGET_TYPES,
         task: int,
-        X_test: Optional[np.ndarray] = None,
-        y_test: Optional[np.ndarray] = None,
+        X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
+        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
         feat_type: Optional[List[str]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: Optional[bool] = False,
@@ -530,7 +535,9 @@ class AutoML(BaseEstimator):
         self._stopwatch.start_task(self._dataset_name)
 
         if feat_type is None and self.InputValidator.feature_validator.feat_type:
-            feat_type = self.InputValidator.feature_validator.feat_type
+            self._feat_type = self.InputValidator.feature_validator.feat_type
+        elif feat_type is not None:
+            self._feat_type = feat_type
 
         # Produce debug information to the logfile
         self._logger.debug('Starting to print environment information')
@@ -612,7 +619,7 @@ class AutoML(BaseEstimator):
             X_test=X_test,
             y_test=y_test,
             task=task,
-            feat_type=feat_type,
+            feat_type=self._feat_type,
             dataset_name=dataset_name,
         )
 
@@ -938,13 +945,14 @@ class AutoML(BaseEstimator):
 
     def fit_pipeline(
         self,
-        X: np.ndarray,
-        y: np.ndarray,
+        X: SUPPORTED_FEAT_TYPES,
+        y: SUPPORTED_TARGET_TYPES,
         task: int,
         is_classification: bool,
+        config: Configuration,
         dataset_name: Optional[str] = None,
-        X_test: Optional[np.ndarray] = None,
-        y_test: Optional[np.ndarray] = None,
+        X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
+        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
         **kwargs: Dict,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
         """ Fits and individual pipeline configuration and returns
@@ -991,46 +999,19 @@ class AutoML(BaseEstimator):
         if self.configuration_space is None:
             self.configuration_space = self.fit(
                 X=X, y=y, task=task,
-                dataset_name=dataset_name,
-                X_test=kwargs.pop('X_test', None),
-                y_test=kwargs.pop('y_test', None),
-                feat_type=kwargs.pop('feat_type', None),
+                dataset_name=dataset_name if dataset_name is not None else self._dataset_name,
+                X_test=X_test,
+                y_test=y_test,
+                feat_type=kwargs.pop('feat_type', self._feat_type),
                 only_return_configuration_space=True)
-
-        # Get a configuration from the user or sample from the CS
-        config = kwargs.pop('config', self.configuration_space.sample_configuration())
 
         # We do not want to overwrite existing runs
         self.num_run += 1
         config.config_id = self.num_run
 
-        exclude = dict()
-        include = dict()
-        if self._include_preprocessors is not None and self._exclude_preprocessors is not None:
-            raise ValueError('Cannot specify include_preprocessors and '
-                             'exclude_preprocessors.')
-        elif self._include_preprocessors is not None:
-            include['feature_preprocessor'] = self._include_preprocessors
-        elif self._exclude_preprocessors is not None:
-            exclude['feature_preprocessor'] = self._exclude_preprocessors
-
-        if self._include_estimators is not None and self._exclude_estimators is not None:
-            raise ValueError('Cannot specify include_estimators and '
-                             'exclude_estimators.')
-        elif self._include_estimators is not None:
-            if task in CLASSIFICATION_TASKS:
-                include['classifier'] = self._include_estimators
-            elif task in REGRESSION_TASKS:
-                include['regressor'] = self._include_estimators
-            else:
-                raise ValueError(task)
-        elif self._exclude_estimators is not None:
-            if task in CLASSIFICATION_TASKS:
-                exclude['classifier'] = self._exclude_estimators
-            elif task in REGRESSION_TASKS:
-                exclude['regressor'] = self._exclude_estimators
-            else:
-                raise ValueError(task)
+        # Get the components to include and exclude on the configuration space
+        # from the estimator attributes
+        include, exclude = self._get_include_exclude_pipeline_dicts()
 
         # Prepare missing components to the TAE function call
         if 'include' not in kwargs:
@@ -1053,9 +1034,6 @@ class AutoML(BaseEstimator):
             kwargs['stats'] = Stats(scenario_mock)
         kwargs['stats'].start_timing()
 
-        # Allow to pass the cutoff also as an argument
-        cutoff = kwargs.pop('cutoff', self._per_run_time_limit)
-
         # Fit a pipeline, which will be stored on disk
         # which we can later load via the backend
         ta = ExecuteTaFuncWithQueue(
@@ -1074,29 +1052,58 @@ class AutoML(BaseEstimator):
                 instance=None,
                 instance_specific=None,
                 seed=self._seed,
-                cutoff=cutoff,
+                cutoff=kwargs.pop('cutoff', self._per_run_time_limit),
                 capped=False,
             )
         )
 
         pipeline = None
-        if run_value.status == StatusType.SUCCESS:
+        if kwargs['disable_file_output'] or kwargs['resampling_strategy'] == 'test':
+            self._logger.warning("File output is disabled. No pipeline can returned")
+        elif run_value.status == StatusType.SUCCESS:
             if kwargs['resampling_strategy'] in ('cv', 'cv-iterative-fit'):
                 load_function = self._backend.load_cv_model_by_seed_and_id_and_budget
             else:
                 load_function = self._backend.load_model_by_seed_and_id_and_budget
-            try:
-                pipeline = load_function(
-                    seed=self._seed,
-                    idx=run_info.config.config_id + 1,
-                    budget=run_info.budget,
-                )
-            except Exception as e:
-                self._logger.warning(f"Cannot load pipeline because of {e}")
+            pipeline = load_function(
+                seed=self._seed,
+                idx=run_info.config.config_id + 1,
+                budget=run_info.budget,
+            )
 
         self._clean_logger()
 
         return pipeline, run_info, run_value
+
+    def _get_include_exclude_pipeline_dicts(self):
+        exclude = dict()
+        include = dict()
+        if self._include_preprocessors is not None and self._exclude_preprocessors is not None:
+            raise ValueError('Cannot specify include_preprocessors and '
+                             'exclude_preprocessors.')
+        elif self._include_preprocessors is not None:
+            include['feature_preprocessor'] = self._include_preprocessors
+        elif self._exclude_preprocessors is not None:
+            exclude['feature_preprocessor'] = self._exclude_preprocessors
+
+        if self._include_estimators is not None and self._exclude_estimators is not None:
+            raise ValueError('Cannot specify include_estimators and '
+                             'exclude_estimators.')
+        elif self._include_estimators is not None:
+            if self._task in CLASSIFICATION_TASKS:
+                include['classifier'] = self._include_estimators
+            elif self._task in REGRESSION_TASKS:
+                include['regressor'] = self._include_estimators
+            else:
+                raise ValueError(self._task)
+        elif self._exclude_estimators is not None:
+            if self._task in CLASSIFICATION_TASKS:
+                exclude['classifier'] = self._exclude_estimators
+            elif self._task in REGRESSION_TASKS:
+                exclude['regressor'] = self._exclude_estimators
+            else:
+                raise ValueError(self._task)
+        return include, exclude
 
     def predict(self, X, batch_size=None, n_jobs=1):
         """predict.
@@ -1571,10 +1578,10 @@ class AutoMLClassifier(AutoML):
 
     def fit(
         self,
-        X: Union[np.ndarray, pd.DataFrame],
-        y: Union[np.ndarray, pd.DataFrame],
-        X_test: Optional[Union[np.ndarray, pd.DataFrame]] = None,
-        y_test: Optional[Union[np.ndarray, pd.DataFrame]] = None,
+        X: SUPPORTED_FEAT_TYPES,
+        y: SUPPORTED_TARGET_TYPES,
+        X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
+        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
         feat_type: Optional[List[bool]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
@@ -1607,12 +1614,12 @@ class AutoMLClassifier(AutoML):
 
     def fit_pipeline(
         self,
-        X: np.ndarray,
-        y: np.ndarray,
+        X: SUPPORTED_FEAT_TYPES,
+        y: SUPPORTED_TARGET_TYPES,
         config: Configuration,
         dataset_name: Optional[str] = None,
-        X_test: Optional[np.ndarray] = None,
-        y_test: Optional[np.ndarray] = None,
+        X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
+        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
         **kwargs,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
         y_task = type_of_target(y)
@@ -1663,10 +1670,10 @@ class AutoMLRegressor(AutoML):
 
     def fit(
         self,
-        X: Union[np.ndarray, pd.DataFrame],
-        y: Union[np.ndarray, pd.DataFrame],
-        X_test: Optional[Union[np.ndarray, pd.DataFrame]] = None,
-        y_test: Optional[Union[np.ndarray, pd.DataFrame]] = None,
+        X: SUPPORTED_FEAT_TYPES,
+        y: SUPPORTED_TARGET_TYPES,
+        X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
+        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
         feat_type: Optional[List[bool]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
@@ -1699,12 +1706,12 @@ class AutoMLRegressor(AutoML):
 
     def fit_pipeline(
         self,
-        X: np.ndarray,
-        y: np.ndarray,
+        X: SUPPORTED_FEAT_TYPES,
+        y: SUPPORTED_TARGET_TYPES,
         config: Configuration,
         dataset_name: Optional[str] = None,
-        X_test: Optional[np.ndarray] = None,
-        y_test: Optional[np.ndarray] = None,
+        X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
+        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
         **kwargs: Dict,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
 

@@ -141,8 +141,8 @@ if __name__ == '__main__':
             memory_lim = memory_limit_factor * automl_arguments['memory_limit']
 
             pipeline, run_info, run_value = automl.fit_pipeline(
-                X=X_train, y=y_train, dataset_name=dataset_name,
-                feat_type=cat, X_test=X_test, y_test=y_test,
+                X=X_train, y=y_train,
+                X_test=X_test, y_test=y_test,
                 resampling_strategy='test',
                 memory_limit=memory_lim,
                 disable_file_output=True,

@@ -10,6 +10,10 @@ from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.utils.multiclass import type_of_target
 from smac.runhistory.runhistory import RunInfo, RunValue
 
+from autosklearn.data.validation import (
+    SUPPORTED_FEAT_TYPES,
+    SUPPORTED_TARGET_TYPES,
+)
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, AutoML
 from autosklearn.metrics import Scorer
@@ -343,12 +347,12 @@ class AutoSklearnEstimator(BaseEstimator):
 
     def fit_pipeline(
         self,
-        X: np.ndarray,
-        y: np.ndarray,
+        X: SUPPORTED_FEAT_TYPES,
+        y: SUPPORTED_TARGET_TYPES,
         config: Configuration,
         dataset_name: Optional[str] = None,
-        X_test: Optional[np.ndarray] = None,
-        y_test: Optional[np.ndarray] = None,
+        X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
+        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
         *args,
         **kwargs: Dict,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
@@ -546,8 +550,10 @@ class AutoSklearnEstimator(BaseEstimator):
 
     def get_configuration_space(
         self,
-        X: np.ndarray,
-        y: np.ndarray,
+        X: SUPPORTED_FEAT_TYPES,
+        y: SUPPORTED_TARGET_TYPES,
+        X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
+        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
         dataset_name: Optional[str] = None,
     ):
         """
@@ -556,11 +562,15 @@ class AutoSklearnEstimator(BaseEstimator):
 
         Parameters
         ----------
-        X: (np.ndarray)
+        X : array-like or sparse matrix of shape = [n_samples, n_features]
             Array with the training features, used to get characteristics like
             data sparsity
-        y: (np.ndarray)
+        y : array-like, shape = [n_samples] or [n_samples, n_outputs]
             Array with the problem labels
+        X_test : array-like or sparse matrix of shape = [n_samples, n_features]
+            Array with features used for performance estimation
+        y_test : array-like, shape = [n_samples] or [n_samples, n_outputs]
+            Array with the problem labels for the testing split
         dataset_name: Optional[str]
             A string to tag the Auto-Sklearn run
         """
@@ -568,6 +578,7 @@ class AutoSklearnEstimator(BaseEstimator):
             self.automl_ = self.build_automl()
         return self.automl_.fit(
             X, y,
+            X_test=X_test, y_test=y_test,
             dataset_name=dataset_name,
             only_return_configuration_space=True,
         ) if self.automl_.configuration_space is None else self.automl_.configuration_space
