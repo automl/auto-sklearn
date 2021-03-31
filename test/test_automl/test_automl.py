@@ -664,16 +664,16 @@ def test_fail_if_feat_type_on_pandas_input(backend, dask_client):
     [
         (memory_limit, task)
         for task in itertools.chain(CLASSIFICATION_TASKS, REGRESSION_TASKS)
-        for memory_limit in (1, 10)
+        for memory_limit in (1, 10, None)
     ]
 )
 def test_subsample_if_too_large(memory_limit, task):
     fixture = {
-        BINARY_CLASSIFICATION: {1: 436, 10: 569},
-        MULTICLASS_CLASSIFICATION: {1: 204, 10: 1797},
-        MULTILABEL_CLASSIFICATION: {1: 204, 10: 1797},
-        REGRESSION: {1: 1310, 10: 1326},
-        MULTIOUTPUT_REGRESSION: {1: 1310, 10: 1326}
+        BINARY_CLASSIFICATION: {1: 436, 10: 569, None: 569},
+        MULTICLASS_CLASSIFICATION: {1: 204, 10: 1797, None: 1797},
+        MULTILABEL_CLASSIFICATION: {1: 204, 10: 1797, None: 1797},
+        REGRESSION: {1: 1310, 10: 1326, None: 1326},
+        MULTIOUTPUT_REGRESSION: {1: 1310, 10: 1326, None: 1326}
     }
     mock = unittest.mock.Mock()
     if task == BINARY_CLASSIFICATION:
