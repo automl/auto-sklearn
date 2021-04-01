@@ -186,3 +186,6 @@ Which meta-features are used for meta-learning?
 
 We do not have a user guide on meta-features but they are all pretty simple and can be found
 `in the source code <https://github.com/automl/auto-sklearn/blob/master/autosklearn/metalearning/metafeatures/metafeatures.py>`_.
+
+How is the meta-data generated?
+-------------------------------
