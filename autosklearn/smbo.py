@@ -666,3 +666,9 @@ class AutoMLSMBO(object):
         if meta_features is None:
             metalearning_configurations = []
         return metalearning_configurations
+
+    def __getstate__(self) -> typing.Dict[str, typing.Any]:
+        # Cannot serialize a client!
+        state_dict = {key: val for key, val in self.__dict__.items()
+                      if key not in ['dask_client', 'get_smac_object_callback']}
+        return state_dict
