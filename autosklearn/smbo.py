@@ -23,14 +23,14 @@ from smac.tae.dask_runner import DaskParallelRunner
 import autosklearn.metalearning
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
     BINARY_CLASSIFICATION, TASK_TYPES_TO_STRING, CLASSIFICATION_TASKS, \
-    REGRESSION_TASKS, MULTICLASS_CLASSIFICATION, REGRESSION, \
-    MULTIOUTPUT_REGRESSION
+    MULTICLASS_CLASSIFICATION, REGRESSION, MULTIOUTPUT_REGRESSION
 from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.metalearning.mismbo import suggest_via_metalearning
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.util.logging_ import get_named_client_logger
 from autosklearn.util.parallel import preload_modules
+from autosklearn.util.pipeline import parse_include_exclude_components
 from autosklearn.metalearning.metalearning.meta_base import MetaBase
 from autosklearn.metalearning.metafeatures.metafeatures import \
     calculate_all_metafeatures_with_labels, calculate_all_metafeatures_encoded_labels
@@ -416,33 +416,13 @@ class AutoMLSMBO(object):
         # evaluator, which takes into account that a run can be killed prior
         # to the model being fully fitted; thus putting intermediate results
         # into a queue and querying them once the time is over
-        exclude = dict()
-        include = dict()
-        if self.include_preprocessors is not None and self.exclude_preprocessors is not None:
-            raise ValueError('Cannot specify include_preprocessors and '
-                             'exclude_preprocessors.')
-        elif self.include_preprocessors is not None:
-            include['feature_preprocessor'] = self.include_preprocessors
-        elif self.exclude_preprocessors is not None:
-            exclude['feature_preprocessor'] = self.exclude_preprocessors
-
-        if self.include_estimators is not None and self.exclude_estimators is not None:
-            raise ValueError('Cannot specify include_estimators and '
-                             'exclude_estimators.')
-        elif self.include_estimators is not None:
-            if self.task in CLASSIFICATION_TASKS:
-                include['classifier'] = self.include_estimators
-            elif self.task in REGRESSION_TASKS:
-                include['regressor'] = self.include_estimators
-            else:
-                raise ValueError(self.task)
-        elif self.exclude_estimators is not None:
-            if self.task in CLASSIFICATION_TASKS:
-                exclude['classifier'] = self.exclude_estimators
-            elif self.task in REGRESSION_TASKS:
-                exclude['regressor'] = self.exclude_estimators
-            else:
-                raise ValueError(self.task)
+        include, exclude = parse_include_exclude_components(
+            task=self.task,
+            include_estimators=self.exclude_estimators,
+            exclude_estimators=self.include_estimators,
+            include_preprocessors=self.include_preprocessors,
+            exclude_preprocessors=self.exclude_preprocessors,
+        )
 
         ta_kwargs = dict(
             backend=copy.deepcopy(self.backend),

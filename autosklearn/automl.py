@@ -55,6 +55,7 @@ from autosklearn.util.logging_ import (
     get_named_client_logger,
 )
 from autosklearn.util import pipeline, RE_PATTERN
+from autosklearn.util.pipeline import parse_include_exclude_components
 from autosklearn.util.parallel import preload_modules
 from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
@@ -1011,7 +1012,13 @@ class AutoML(BaseEstimator):
 
         # Get the components to include and exclude on the configuration space
         # from the estimator attributes
-        include, exclude = self._get_include_exclude_pipeline_dicts()
+        include, exclude = parse_include_exclude_components(
+            task=self._task,
+            include_estimators=self._exclude_estimators,
+            exclude_estimators=self._include_estimators,
+            include_preprocessors=self._include_preprocessors,
+            exclude_preprocessors=self._exclude_preprocessors,
+        )
 
         # Prepare missing components to the TAE function call
         if 'include' not in kwargs:
@@ -1074,36 +1081,6 @@ class AutoML(BaseEstimator):
         self._clean_logger()
 
         return pipeline, run_info, run_value
-
-    def _get_include_exclude_pipeline_dicts(self):
-        exclude = dict()
-        include = dict()
-        if self._include_preprocessors is not None and self._exclude_preprocessors is not None:
-            raise ValueError('Cannot specify include_preprocessors and '
-                             'exclude_preprocessors.')
-        elif self._include_preprocessors is not None:
-            include['feature_preprocessor'] = self._include_preprocessors
-        elif self._exclude_preprocessors is not None:
-            exclude['feature_preprocessor'] = self._exclude_preprocessors
-
-        if self._include_estimators is not None and self._exclude_estimators is not None:
-            raise ValueError('Cannot specify include_estimators and '
-                             'exclude_estimators.')
-        elif self._include_estimators is not None:
-            if self._task in CLASSIFICATION_TASKS:
-                include['classifier'] = self._include_estimators
-            elif self._task in REGRESSION_TASKS:
-                include['regressor'] = self._include_estimators
-            else:
-                raise ValueError(self._task)
-        elif self._exclude_estimators is not None:
-            if self._task in CLASSIFICATION_TASKS:
-                exclude['classifier'] = self._exclude_estimators
-            elif self._task in REGRESSION_TASKS:
-                exclude['regressor'] = self._exclude_estimators
-            else:
-                raise ValueError(self._task)
-        return include, exclude
 
     def predict(self, X, batch_size=None, n_jobs=1):
         """predict.
@@ -1586,8 +1563,6 @@ class AutoMLClassifier(AutoML):
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
-        task: Optional[int] = None,
-        is_classification: bool = True,
     ):
         y_task = type_of_target(y)
         task = self._task_mapping.get(y_task)
@@ -1678,8 +1653,6 @@ class AutoMLRegressor(AutoML):
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
-        task: Optional[int] = None,
-        is_classification: bool = False,
     ):
 
         # Check the data provided in y
