@@ -44,7 +44,7 @@ If the ``pip3`` installation command fails, make sure you have the `System requi
 Ubuntu installation
 ===================
 
-To provide a C++11 building environment and the lateste SWIG version on Ubuntu,
+To provide a C++11 building environment and the latest SWIG version on Ubuntu,
 run:
 
 .. code:: bash
