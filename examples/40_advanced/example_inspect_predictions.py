@@ -1,8 +1,8 @@
 # -*- encoding: utf-8 -*-
 """
-==============
-Generating PD and ICE plots
-==============
+=================
+Model Explanation
+=================
 
 The following example shows how to fit a simple classification model with
 *auto-sklearn* and use the inspect `module <https://scikit-learn.org/stable/inspection.html>`_ from
@@ -50,8 +50,9 @@ print(f"Test score {s}")
 # =======================================
 #
 # Since auto-sklearn implements the scikit-learn interface, it can be used with the scikit-learn's
-# model inspection module. So, now we first look at the permutation importance, which defines the
-# increase in a model score when a given feature is randomly permutated. So, the higher the score,
+# inspection module. So, now we first look at the `permutation importance
+# <https://christophm.github.io/interpretable-ml-book/feature-importance.html>`_, which defines the
+# decrease in a model score when a given feature is randomly permutated. So, the higher the score,
 # the more does the model's predictions depend on this feature.
 #
 # **Note:** There are some pitfalls in interpreting these numbers, which can be found
@@ -61,7 +62,11 @@ r = permutation_importance(automl, X_test, y_test,
                            n_repeats=10,
                            random_state=0)
 
-for i in r.importances_mean.argsort()[::-1]:
+sort_idx = r.importances_mean.argsort()[::-1]
+plt.boxplot(r.importances[sort_idx].T, labels=[dataset.feature_names[i] for i in sort_idx])
+plt.xticks(rotation=90)
+
+for i in sort_idx[::-1]:
     print(f"{dataset.feature_names[i]:10s}: {r.importances_mean[i]:.3f} +/- "
           f"{r.importances_std[i]:.3f}")
 
@@ -69,10 +74,12 @@ for i in r.importances_mean.argsort()[::-1]:
 # Create partial dependence (PD) and individual conditional expectation (ICE) plots - part 2
 # ==========================================================================================
 #
-# ICE plots plot the relation between feature values and the response value for each sample
+# `ICE <https://christophm.github.io/interpretable-ml-book/ice.html>`_ plots plot the relation
+# between feature values and the response value for each sample
 # individually -- it shows how the response value changes if the value of one feature is changed.
 #
-# PD plots plot the relation between feature values and the response value, i.e. the expected
+# `PD <https://christophm.github.io/interpretable-ml-book/pdp.html>`_ plots plot the relation
+# between feature values and the response value, i.e. the expected
 # response value wrt. one or multiple input features. Since we use a classification dataset, this
 # corresponds to the predicted class probability.
 #
@@ -90,7 +97,7 @@ plt.show()
 # Create partial dependence (PDP) plots for more than one feature - part 3
 # ========================================================================
 #
-# PDP plot can also be generated for two features and thus allow to inspect the interaction between
+# A PD plot can also be generated for two features and thus allow to inspect the interaction between
 # these features. Again, we'll look at acceleration_y and acceleration_z.
 #
 # **Note:** This might take several minutes.
