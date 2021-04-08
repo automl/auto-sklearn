@@ -5,7 +5,7 @@ from typing import Optional, Dict, List
 import dask.distributed
 import joblib
 import numpy as np
-from sklearn.base import BaseEstimator
+from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.utils.multiclass import type_of_target
 
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, AutoML
@@ -209,11 +209,11 @@ class AutoSklearnEstimator(BaseEstimator):
             :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
             Metrics`_.
             If None is provided, a default metric is selected depending on the task.
-            
+
         scoring_functions : List[Scorer], optional (None)
-            List of scorers which will be calculated for each pipeline and results will be 
+            List of scorers which will be calculated for each pipeline and results will be
             available via ``cv_results``
-            
+
         load_models : bool, optional (True)
             Whether to load the models after fitting Auto-sklearn.
 
@@ -254,13 +254,14 @@ class AutoSklearnEstimator(BaseEstimator):
         self.smac_scenario_args = smac_scenario_args
         self.logging_config = logging_config
         self.metadata_directory = metadata_directory
-        self._metric = metric
-        self._scoring_functions = scoring_functions
-        self._load_models = load_models
+        self.metric = metric
+        self.scoring_functions = scoring_functions
+        self.load_models = load_models
 
         self.automl_ = None  # type: Optional[AutoML]
         # n_jobs after conversion to a number (b/c default is None)
         self._n_jobs = None
+
         super().__init__()
 
     def __getstate__(self):
@@ -309,8 +310,8 @@ class AutoSklearnEstimator(BaseEstimator):
             smac_scenario_args=smac_scenario_args,
             logging_config=self.logging_config,
             metadata_directory=self.metadata_directory,
-            metric=self._metric,
-            scoring_functions=self._scoring_functions
+            metric=self.metric,
+            scoring_functions=self.scoring_functions
         )
 
         return automl
@@ -339,7 +340,7 @@ class AutoSklearnEstimator(BaseEstimator):
             tmp_folder=self.tmp_folder,
             output_folder=self.output_folder,
         )
-        self.automl_.fit(load_models=self._load_models, **kwargs)
+        self.automl_.fit(load_models=self.load_models, **kwargs)
 
         return self
 
@@ -502,7 +503,7 @@ class AutoSklearnEstimator(BaseEstimator):
         return self.automl_.configuration_space
 
 
-class AutoSklearnClassifier(AutoSklearnEstimator):
+class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
     """
     This class implements the classification task.
 
@@ -583,6 +584,11 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
             dataset_name=dataset_name,
         )
 
+        # After fit, a classifier is expected to define classes_
+        # A list of class labels known to the classifier, mapping each label
+        # to a numerical index used in the model representation our output.
+        self.classes_ = self.automl_.InputValidator.target_validator.classes_
+
         return self
 
     def predict(self, X, batch_size=None, n_jobs=1):
@@ -642,7 +648,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         return AutoMLClassifier
 
 
-class AutoSklearnRegressor(AutoSklearnEstimator):
+class AutoSklearnRegressor(AutoSklearnEstimator, RegressorMixin):
     """
     This class implements the regression task.
 

@@ -1259,8 +1259,8 @@ class AutoML(BaseEstimator):
 
         results['mean_fit_time'] = np.array(mean_fit_time)
         results['params'] = params
-        results['rank_test_scores'] = scipy.stats.rankdata(1 - results['mean_test_score'],
-                                                           method='min')
+        rank_order = -1 * self._metric._sign * results['mean_test_score']
+        results['rank_test_scores'] = scipy.stats.rankdata(rank_order, method='min')
         results['status'] = status
         results['budgets'] = budgets
 

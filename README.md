@@ -24,17 +24,3 @@ Auto-Sklearn 2.0: The Next Generation
 Authors: Matthias Feurer, Katharina Eggensperger, Stefan Falkner, Marius Lindauer and Frank Hutter  
 arXiv:2007.04074 [cs.LG], 2020
 https://arxiv.org/abs/2007.04074
-
-## Status
-
-Status for master branch
-
-[![Build Status](https://travis-ci.org/automl/auto-sklearn.svg?branch=master)](https://travis-ci.org/automl/auto-sklearn)
-[![Code Health](https://landscape.io/github/automl/auto-sklearn/master/landscape.png)](https://landscape.io/github/automl/auto-sklearn/master)
-[![codecov](https://codecov.io/gh/automl/auto-sklearn/branch/master/graph/badge.svg)](https://codecov.io/gh/automl/auto-sklearn)
-
-Status for development branch
-
-[![Build Status](https://travis-ci.org/automl/auto-sklearn.svg?branch=development)](https://travis-ci.org/automl/auto-sklearn)
-[![Code Health](https://landscape.io/github/automl/auto-sklearn/development/landscape.png)](https://landscape.io/github/automl/auto-sklearn/development)
-[![codecov](https://codecov.io/gh/automl/auto-sklearn/branch/development/graph/badge.svg)](https://codecov.io/gh/automl/auto-sklearn)

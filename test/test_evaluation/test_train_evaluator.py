@@ -545,7 +545,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(pipeline_mock.predict_proba.call_count, 36)
 
     @unittest.mock.patch.object(TrainEvaluator, '_loss')
-    def test_file_output(self, loss_mock):
+    @unittest.mock.patch.object(TrainEvaluator, '_get_model')
+    def test_file_output(self, loss_mock, model_mock):
 
         D = get_regression_datamanager()
         D.name = 'test'
@@ -553,6 +554,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         configuration = unittest.mock.Mock(spec=Configuration)
         queue_ = multiprocessing.Queue()
         loss_mock.return_value = None
+        model_mock.return_value = None
 
         evaluator = TrainEvaluator(self.backend_mock, queue=queue_,
                                    port=self.port,

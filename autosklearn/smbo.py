@@ -1,6 +1,7 @@
 import copy
 import json
 import logging
+import multiprocessing
 import os
 import time
 import traceback
@@ -28,6 +29,7 @@ from autosklearn.metalearning.mismbo import suggest_via_metalearning
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.util.logging_ import get_named_client_logger
+from autosklearn.util.parallel import preload_modules
 from autosklearn.metalearning.metalearning.meta_base import MetaBase
 from autosklearn.metalearning.metafeatures.metafeatures import \
     calculate_all_metafeatures_with_labels, calculate_all_metafeatures_encoded_labels
@@ -334,9 +336,12 @@ class AutoMLSMBO(object):
         res = None
         time_limit = max(time_limit, 1)
         try:
+            context = multiprocessing.get_context(self.pynisher_context)
+            preload_modules(context)
             safe_mf = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
                                               wall_time_in_s=int(time_limit),
                                               grace_period_in_s=30,
+                                              context=context,
                                               logger=self.logger)(
                 self._calculate_metafeatures)
             res = safe_mf()

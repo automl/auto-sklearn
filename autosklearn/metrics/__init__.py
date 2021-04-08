@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from functools import partial
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union, cast
 
 import numpy as np
 
@@ -353,7 +353,7 @@ def calculate_score(
             for metric_ in scoring_functions:
 
                 try:
-                    score_dict[metric_.name] = metric_(solution, cprediction)
+                    score_dict[metric_.name] = metric_._sign * metric_(solution, cprediction)
                 except ValueError as e:
                     print(e, e.args[0])
                     if e.args[0] == "Mean Squared Logarithmic Error cannot be used when " \
@@ -369,7 +369,7 @@ def calculate_score(
                 # handle?
 
                 try:
-                    score_dict[metric_.name] = metric_(solution, prediction)
+                    score_dict[metric_.name] = metric_._sign * metric_(solution, prediction)
                 except ValueError as e:
                     if e.args[0] == 'multiclass format is not supported':
                         continue
@@ -397,10 +397,73 @@ def get_metric_score(
         solution: np.ndarray,
         task_type: int
 ) -> float:
+    # We match the behaviour of GridSearchCV
+    # In scikit learn, the exact value of the score_func
+    # is returned (not that of the 'Scorer' which might be
+    # negative in functions like mse, as scikit learn
+    # maximizes.) If an user wants to use GridSearchCV
+    # They are expected to pass neg_mean_squared_error
+    # For this reason we multiply back by metric_._sign
     if task_type in REGRESSION_TASKS:
         # TODO put this into the regression metric itself
         cprediction = sanitize_array(prediction)
-        score = metric_(solution, cprediction)
+        score = metric_._sign * metric_(solution, cprediction)
     else:
-        score = metric_(solution, prediction)
+        score = metric_._sign * metric_(solution, prediction)
     return score
+
+
+def calculate_loss(
+    solution: np.ndarray,
+    prediction: np.ndarray,
+    task_type: int,
+    metric: Scorer,
+    scoring_functions: Optional[List[Scorer]] = None
+) -> Union[float, Dict[str, float]]:
+    """
+    Returns a loss (a magnitude that allows casting the
+    optimization problem, as a minimization one) for the
+    given Auto-Sklearn Scorer object
+    Parameters
+    ----------
+        solution: np.ndarray
+            The ground truth of the targets
+        prediction: np.ndarray
+            The best estimate from the model, of the given targets
+        task_type: int
+            To understand if the problem task is classification
+            or regression
+        metric: Scorer
+            Object that host a function to calculate how good the
+            prediction is according to the solution.
+        scoring_functions: List[Scorer]
+            A list of metrics to calculate multiple losses
+    Returns
+    -------
+        float or Dict[str, float]
+            A loss function for each of the provided scorer objects
+    """
+    score = calculate_score(
+        solution=solution,
+        prediction=prediction,
+        task_type=task_type,
+        metric=metric,
+        scoring_functions=scoring_functions,
+    )
+
+    if scoring_functions:
+        score = cast(Dict, score)
+        # we expect a dict() object for which we should calculate the loss
+        loss_dict = dict()
+        for metric_ in scoring_functions + [metric]:
+            # TODO: When metrics are annotated with type_of_target support
+            # we can remove this check
+            if metric_.name not in score:
+                continue
+            # maybe metric argument is not in scoring_functions
+            # so append it to the list. Rather than check if such
+            # is the case, redefining loss_dict[metric] is less expensive
+            loss_dict[metric_.name] = metric_._optimum - metric_._sign * score[metric_.name]
+        return loss_dict
+    else:
+        return metric._optimum - metric._sign * cast(float, score)

@@ -14,5 +14,5 @@ liac-arff
 
 ConfigSpace>=0.4.14,<0.5
 pynisher>=0.6.3
-pyrfr>=0.7,<0.9
+pyrfr>=0.8.1,<0.9
 smac>=0.13.1,<0.14

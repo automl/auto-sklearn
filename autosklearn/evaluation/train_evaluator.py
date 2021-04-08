@@ -1,60 +1,75 @@
+import logging
+import multiprocessing
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
+
 import copy
 import json
 
+from ConfigSpace import Configuration
+
 import numpy as np
 from smac.tae import TAEAbortException, StatusType
+
+from sklearn.base import BaseEstimator
 from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit, KFold, \
     StratifiedKFold, train_test_split, BaseCrossValidator, PredefinedSplit
 from sklearn.model_selection._split import _RepeatedSplits, BaseShuffleSplit
 
 from autosklearn.evaluation.abstract_evaluator import (
     AbstractEvaluator,
+    TYPE_ADDITIONAL_INFO,
     _fit_and_suppress_warnings,
 )
+from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.constants import (
     CLASSIFICATION_TASKS,
     MULTILABEL_CLASSIFICATION,
     REGRESSION_TASKS,
     MULTIOUTPUT_REGRESSION
 )
+from autosklearn.pipeline.components.base import IterativeComponent
+from autosklearn.metrics import Scorer
+from autosklearn.util.backend import Backend
+from autosklearn.util.logging_ import PicklableClientLogger
 
 
 __all__ = ['TrainEvaluator', 'eval_holdout', 'eval_iterative_holdout',
            'eval_cv', 'eval_partial_cv', 'eval_partial_cv_iterative']
 
-__baseCrossValidator_defaults__ = {'GroupKFold': {'n_splits': 3},
-                                   'KFold': {'n_splits': 3,
-                                             'shuffle': False,
-                                             'random_state': None},
-                                   'LeaveOneGroupOut': {},
-                                   'LeavePGroupsOut': {'n_groups': 2},
-                                   'LeaveOneOut': {},
-                                   'LeavePOut': {'p': 2},
-                                   'PredefinedSplit': {},
-                                   'RepeatedKFold': {'n_splits': 5,
-                                                     'n_repeats': 10,
-                                                     'random_state': None},
-                                   'RepeatedStratifiedKFold': {'n_splits': 5,
-                                                               'n_repeats': 10,
-                                                               'random_state': None},
-                                   'StratifiedKFold': {'n_splits': 3,
-                                                       'shuffle': False,
-                                                       'random_state': None},
-                                   'TimeSeriesSplit': {'n_splits': 3,
-                                                       'max_train_size': None},
-                                   'GroupShuffleSplit': {'n_splits': 5,
-                                                         'test_size': None,
-                                                         'random_state': None},
-                                   'StratifiedShuffleSplit': {'n_splits': 10,
-                                                              'test_size': None,
-                                                              'random_state': None},
-                                   'ShuffleSplit': {'n_splits': 10,
-                                                    'test_size': None,
-                                                    'random_state': None}
-                                   }
+baseCrossValidator_defaults: Dict[str, Dict[str, Optional[Union[int, float, str]]]] = {
+    'GroupKFold': {'n_splits': 3},
+    'KFold': {'n_splits': 3,
+              'shuffle': False,
+              'random_state': None},
+    'LeaveOneGroupOut': {},
+    'LeavePGroupsOut': {'n_groups': 2},
+    'LeaveOneOut': {},
+    'LeavePOut': {'p': 2},
+    'PredefinedSplit': {},
+    'RepeatedKFold': {'n_splits': 5,
+                      'n_repeats': 10,
+                      'random_state': None},
+    'RepeatedStratifiedKFold': {'n_splits': 5,
+                                'n_repeats': 10,
+                                'random_state': None},
+    'StratifiedKFold': {'n_splits': 3,
+                        'shuffle': False,
+                        'random_state': None},
+    'TimeSeriesSplit': {'n_splits': 3,
+                        'max_train_size': None},
+    'GroupShuffleSplit': {'n_splits': 5,
+                          'test_size': None,
+                          'random_state': None},
+    'StratifiedShuffleSplit': {'n_splits': 10,
+                               'test_size': None,
+                               'random_state': None},
+    'ShuffleSplit': {'n_splits': 10,
+                     'test_size': None,
+                     'random_state': None}
+    }
 
 
-def _get_y_array(y, task_type):
+def _get_y_array(y: np.ndarray, task_type: int) -> np.ndarray:
     if task_type in CLASSIFICATION_TASKS and task_type != \
             MULTILABEL_CLASSIFICATION:
         return y.ravel()
@@ -62,7 +77,12 @@ def _get_y_array(y, task_type):
         return y
 
 
-def subsample_indices(train_indices, subsample, task_type, Y_train):
+def subsample_indices(
+    train_indices: List[int],
+    subsample: Optional[float],
+    task_type: int,
+    Y_train: np.ndarray
+) -> List[int]:
 
     if not isinstance(subsample, float):
         raise ValueError(
@@ -98,8 +118,16 @@ def subsample_indices(train_indices, subsample, task_type, Y_train):
     return train_indices
 
 
-def _fit_with_budget(X_train, Y_train, budget, budget_type, logger, model, train_indices,
-                     task_type):
+def _fit_with_budget(
+    X_train: np.ndarray,
+    Y_train: np.ndarray,
+    budget: float,
+    budget_type: Optional[str],
+    logger: Union[logging.Logger, PicklableClientLogger],
+    model: BaseEstimator,
+    train_indices: List[int],
+    task_type: int,
+) -> None:
     if (
             budget_type == 'iterations'
             or budget_type == 'mixed' and model.estimator_supports_iterative_fit()
@@ -141,22 +169,29 @@ def _fit_with_budget(X_train, Y_train, budget, budget_type, logger, model, train
 
 
 class TrainEvaluator(AbstractEvaluator):
-    def __init__(self, backend, queue, metric,
-                 port,
-                 configuration=None,
-                 scoring_functions=None,
-                 seed=1,
-                 output_y_hat_optimization=True,
-                 resampling_strategy=None,
-                 resampling_strategy_args=None,
-                 num_run=None,
-                 budget=None,
-                 budget_type=None,
-                 keep_models=False,
-                 include=None,
-                 exclude=None,
-                 disable_file_output=False,
-                 init_params=None,):
+    def __init__(
+        self,
+        backend: Backend,
+        queue: multiprocessing.Queue,
+        metric: Scorer,
+        port: Optional[int],
+        configuration: Optional[Union[int, Configuration]] = None,
+        scoring_functions: Optional[List[Scorer]] = None,
+        seed: int = 1,
+        output_y_hat_optimization: bool = True,
+        resampling_strategy: Optional[Union[str, BaseCrossValidator,
+                                            _RepeatedSplits, BaseShuffleSplit]] = None,
+        resampling_strategy_args: Optional[Dict[str, Optional[Union[float, int, str]]]] = None,
+        num_run: Optional[int] = None,
+        budget: Optional[float] = None,
+        budget_type: Optional[str] = None,
+        keep_models: bool = False,
+        include: Optional[List[str]] = None,
+        exclude: Optional[List[str]] = None,
+        disable_file_output: bool = False,
+        init_params: Optional[Dict[str, Any]] = None,
+    ):
+
         super().__init__(
             backend=backend,
             queue=queue,
@@ -186,11 +221,11 @@ class TrainEvaluator(AbstractEvaluator):
         )
         self.X_train = self.datamanager.data['X_train']
         self.Y_train = self.datamanager.data['Y_train']
-        self.Y_optimization = None
+        self.Y_optimization: Optional[Union[List, np.ndarray]] = None
         self.Y_targets = [None] * self.num_cv_folds
         self.Y_train_targets = np.ones(self.Y_train.shape) * np.NaN
         self.models = [None] * self.num_cv_folds
-        self.indices = [None] * self.num_cv_folds
+        self.indices: List[Optional[Tuple[List[int], List[int]]]] = [None] * self.num_cv_folds
 
         # Necessary for full CV. Makes full CV not write predictions if only
         # a subset of folds is evaluated but time is up. Complicated, because
@@ -199,9 +234,12 @@ class TrainEvaluator(AbstractEvaluator):
         self.partial = True
         self.keep_models = keep_models
 
-    def fit_predict_and_loss(self, iterative=False):
+    def fit_predict_and_loss(self, iterative: bool = False) -> None:
         """Fit, predict and compute the loss for cross-validation and
         holdout (both iterative and non-iterative)"""
+
+        # Define beforehand for mypy
+        additional_run_info: Optional[TYPE_ADDITIONAL_INFO] = None
 
         if iterative:
             if self.num_cv_folds == 1:
@@ -232,17 +270,23 @@ class TrainEvaluator(AbstractEvaluator):
                 Y_optimization_pred = [None] * self.num_cv_folds
                 Y_valid_pred = [None] * self.num_cv_folds
                 Y_test_pred = [None] * self.num_cv_folds
-                additional_run_info = None
                 train_splits = [None] * self.num_cv_folds
 
                 self.models = [self._get_model() for i in range(self.num_cv_folds)]
                 iterations = [1] * self.num_cv_folds
                 total_n_iterations = [0] * self.num_cv_folds
-                model_max_iter = [model.get_max_iter() for model in self.models]
+                # model.estimator_supports_iterative_fit -> true
+                # After the if above, we know estimator support iterative fit
+                model_max_iter = [cast(IterativeComponent, model).get_max_iter()
+                                  for model in self.models]
 
-                if self.budget_type in ['iterations', 'mixed'] and self.budget > 0:
+                if self.budget_type in ['iterations', 'mixed'] and self.budget is None:
+                    raise ValueError(f"When budget type is {self.budget_type} the budget "
+                                     "can not be None")
+
+                if self.budget_type in ['iterations', 'mixed'] and cast(float, self.budget) > 0:
                     max_n_iter_budget = int(
-                        np.ceil(self.budget / 100 * model_max_iter[0]))
+                        np.ceil(cast(float, self.budget) / 100 * model_max_iter[0]))
                     max_iter = min(model_max_iter[0], max_n_iter_budget)
                 else:
                     max_iter = model_max_iter[0]
@@ -250,7 +294,7 @@ class TrainEvaluator(AbstractEvaluator):
                 models_current_iters = [0] * self.num_cv_folds
 
                 Xt_array = [None] * self.num_cv_folds
-                fit_params_array = [{}] * self.num_cv_folds
+                fit_params_array = [{}] * self.num_cv_folds  # type: List[Dict[str, Any]]
 
                 y = _get_y_array(self.Y_train, self.task_type)
 
@@ -432,7 +476,6 @@ class TrainEvaluator(AbstractEvaluator):
             Y_optimization_pred = [None] * self.num_cv_folds
             Y_valid_pred = [None] * self.num_cv_folds
             Y_test_pred = [None] * self.num_cv_folds
-            additional_run_info = None
             train_splits = [None] * self.num_cv_folds
 
             y = _get_y_array(self.Y_train, self.task_type)
@@ -560,20 +603,16 @@ class TrainEvaluator(AbstractEvaluator):
                                          for i in range(self.num_cv_folds)
                                          if Y_valid_pred[i] is not None])
                 # Average the predictions of several models
-                if len(Y_valid_pred.shape) == 3:
+                if len(np.shape(Y_valid_pred)) == 3:
                     Y_valid_pred = np.nanmean(Y_valid_pred, axis=0)
-            else:
-                Y_valid_pred = None
 
             if self.X_test is not None:
                 Y_test_pred = np.array([Y_test_pred[i]
                                         for i in range(self.num_cv_folds)
                                         if Y_test_pred[i] is not None])
                 # Average the predictions of several models
-                if len(Y_test_pred.shape) == 3:
+                if len(np.shape(Y_test_pred)) == 3:
                     Y_test_pred = np.nanmean(Y_test_pred, axis=0)
-            else:
-                Y_test_pred = None
 
             self.Y_optimization = Y_targets
             self.Y_actual_train = Y_train_targets
@@ -591,7 +630,8 @@ class TrainEvaluator(AbstractEvaluator):
                 and self.model.estimator_supports_iterative_fit()
             ):
                 budget_factor = self.model.get_max_iter()
-                n_iter = int(np.ceil(self.budget / 100 * budget_factor))
+                # We check for budget being None in initialization
+                n_iter = int(np.ceil(cast(float, self.budget) / 100 * budget_factor))
                 model_current_iter = self.model.get_current_iter()
                 if model_current_iter < n_iter:
                     status = StatusType.DONOTADVANCE
@@ -612,15 +652,15 @@ class TrainEvaluator(AbstractEvaluator):
                 loss=opt_loss,
                 train_loss=train_loss,
                 opt_pred=Y_optimization_pred,
-                valid_pred=Y_valid_pred,
-                test_pred=Y_test_pred,
+                valid_pred=Y_valid_pred if self.X_valid is not None else None,
+                test_pred=Y_test_pred if self.X_test is not None else None,
                 additional_run_info=additional_run_info,
                 file_output=True,
                 final_call=True,
                 status=status,
             )
 
-    def partial_fit_predict_and_loss(self, fold, iterative=False):
+    def partial_fit_predict_and_loss(self, fold: int, iterative: bool = False) -> None:
         """Fit, predict and compute the loss for eval_partial_cv (both iterative and normal)"""
 
         if fold > self.num_cv_folds:
@@ -683,8 +723,9 @@ class TrainEvaluator(AbstractEvaluator):
                 status=status
             )
 
-    def _partial_fit_and_predict_iterative(self, fold, train_indices, test_indices,
-                                           add_model_to_self):
+    def _partial_fit_and_predict_iterative(self, fold: int, train_indices: List[int],
+                                           test_indices: List[int],
+                                           add_model_to_self: bool) -> None:
         model = self._get_model()
 
         self.indices[fold] = ((train_indices, test_indices))
@@ -704,7 +745,7 @@ class TrainEvaluator(AbstractEvaluator):
             total_n_iteration = 0
             model_max_iter = model.get_max_iter()
 
-            if self.budget > 0:
+            if self.budget is not None and self.budget > 0:
                 max_n_iter_budget = int(np.ceil(self.budget / 100 * model_max_iter))
                 max_iter = min(model_max_iter, max_n_iter_budget)
             else:
@@ -795,8 +836,13 @@ class TrainEvaluator(AbstractEvaluator):
             )
             return
 
-    def _partial_fit_and_predict_standard(self, fold, train_indices, test_indices,
-                                          add_model_to_self=False):
+    def _partial_fit_and_predict_standard(
+        self,
+        fold: int, train_indices: List[int],
+        test_indices: List[int],
+        add_model_to_self: bool = False
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray,
+               Dict[str, Union[str, int, float, Dict, List, Tuple]]]:
         model = self._get_model()
 
         self.indices[fold] = ((train_indices, test_indices))
@@ -813,7 +859,6 @@ class TrainEvaluator(AbstractEvaluator):
         else:
             self.models[fold] = model
 
-        train_indices, test_indices = self.indices[fold]
         self.Y_targets[fold] = self.Y_train[test_indices]
         self.Y_train_targets[train_indices] = self.Y_train[train_indices]
 
@@ -831,8 +876,17 @@ class TrainEvaluator(AbstractEvaluator):
             additional_run_info,
         )
 
-    def _partial_fit_and_predict_budget(self, fold, train_indices, test_indices,
-                                        add_model_to_self=False):
+    def _partial_fit_and_predict_budget(
+        self,
+        fold: int, train_indices: List[int],
+        test_indices: List[int],
+        add_model_to_self: bool = False,
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray,
+               Dict[str, Union[str, int, float, Dict, List, Tuple]]]:
+
+        # This function is only called in the event budget is not None
+        # Add this statement for mypy
+        assert self.budget is not None
 
         model = self._get_model()
         self.indices[fold] = ((train_indices, test_indices))
@@ -870,7 +924,9 @@ class TrainEvaluator(AbstractEvaluator):
             additional_run_info,
         )
 
-    def _predict(self, model, test_indices, train_indices):
+    def _predict(self, model: BaseEstimator, test_indices: List[int],
+                 train_indices: List[int]) -> Tuple[np.ndarray, np.ndarray,
+                                                    np.ndarray, np.ndarray]:
         train_pred = self.predict_function(self.X_train[train_indices],
                                            model, self.task_type,
                                            self.Y_train[train_indices])
@@ -897,21 +953,22 @@ class TrainEvaluator(AbstractEvaluator):
 
         return train_pred, opt_pred, valid_pred, test_pred
 
-    def get_splitter(self, D):
+    def get_splitter(self, D: AbstractDataManager) -> Union[BaseCrossValidator, _RepeatedSplits,
+                                                            BaseShuffleSplit]:
 
         if self.resampling_strategy_args is None:
             self.resampling_strategy_args = {}
 
-        if not isinstance(self.resampling_strategy, str):
+        if self.resampling_strategy is not None and not isinstance(self.resampling_strategy, str):
 
             if issubclass(self.resampling_strategy, BaseCrossValidator) or \
                issubclass(self.resampling_strategy, _RepeatedSplits) or \
                issubclass(self.resampling_strategy, BaseShuffleSplit):
 
                 class_name = self.resampling_strategy.__name__
-                if class_name not in __baseCrossValidator_defaults__:
+                if class_name not in baseCrossValidator_defaults:
                     raise ValueError('Unknown CrossValidator.')
-                ref_arg_dict = __baseCrossValidator_defaults__[class_name]
+                ref_arg_dict = baseCrossValidator_defaults[class_name]
 
                 y = D.data['Y_train']
                 if (D.info['task'] in CLASSIFICATION_TASKS and
@@ -932,7 +989,7 @@ class TrainEvaluator(AbstractEvaluator):
                         raise ValueError('Must provide parameter groups '
                                          'for chosen CrossValidator.')
                     try:
-                        if self.resampling_strategy_args['groups'].shape[0] != y.shape[0]:
+                        if np.shape(self.resampling_strategy_args['groups'])[0] != y.shape[0]:
                             raise ValueError('Groups must be array-like '
                                              'with shape (n_samples,).')
                     except Exception:
@@ -940,7 +997,7 @@ class TrainEvaluator(AbstractEvaluator):
                                          'with shape (n_samples,).')
                 else:
                     if 'groups' in self.resampling_strategy_args:
-                        if self.resampling_strategy_args['groups'].shape[0] != y.shape[0]:
+                        if np.shape(self.resampling_strategy_args['groups'])[0] != y.shape[0]:
                             raise ValueError('Groups must be array-like'
                                              ' with shape (n_samples,).')
 
@@ -958,6 +1015,7 @@ class TrainEvaluator(AbstractEvaluator):
                 init_dict.pop('groups', None)
                 if 'folds' in init_dict:
                     init_dict['n_splits'] = init_dict.pop('folds', None)
+                assert self.resampling_strategy is not None
                 cv = copy.deepcopy(self.resampling_strategy)(**init_dict)
 
                 if 'groups' not in self.resampling_strategy_args:
@@ -969,8 +1027,9 @@ class TrainEvaluator(AbstractEvaluator):
         shuffle = self.resampling_strategy_args.get('shuffle', True)
         train_size = 0.67
         if self.resampling_strategy_args:
-            train_size = self.resampling_strategy_args.get('train_size',
-                                                           train_size)
+            train_size_from_user = self.resampling_strategy_args.get('train_size')
+            if train_size_from_user is not None:
+                train_size = float(train_size_from_user)
         test_size = float("%.4f" % (1 - train_size))
 
         if D.info['task'] in CLASSIFICATION_TASKS and D.info['task'] != MULTILABEL_CLASSIFICATION:
@@ -1037,26 +1096,26 @@ class TrainEvaluator(AbstractEvaluator):
 
 # create closure for evaluating an algorithm
 def eval_holdout(
-        queue,
-        config,
-        backend,
-        resampling_strategy,
-        resampling_strategy_args,
-        metric,
-        seed,
-        num_run,
-        instance,
-        scoring_functions,
-        output_y_hat_optimization,
-        include,
-        exclude,
-        disable_file_output,
-        port,
-        init_params=None,
-        iterative=False,
-        budget=100.0,
-        budget_type=None,
-):
+    queue: multiprocessing.Queue,
+    config: Union[int, Configuration],
+    backend: Backend,
+    resampling_strategy: Union[str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit],
+    resampling_strategy_args: Dict[str, Optional[Union[float, int, str]]],
+    metric: Scorer,
+    seed: int,
+    num_run: int,
+    instance: str,
+    scoring_functions: Optional[List[Scorer]],
+    output_y_hat_optimization: bool,
+    include: Optional[List[str]],
+    exclude: Optional[List[str]],
+    disable_file_output: bool,
+    port: Optional[int],
+    init_params: Optional[Dict[str, Any]] = None,
+    budget: Optional[float] = 100.0,
+    budget_type: Optional[str] = None,
+    iterative: bool = False,
+) -> None:
     evaluator = TrainEvaluator(
         backend=backend,
         port=port,
@@ -1080,25 +1139,25 @@ def eval_holdout(
 
 
 def eval_iterative_holdout(
-        queue,
-        config,
-        backend,
-        resampling_strategy,
-        resampling_strategy_args,
-        metric,
-        seed,
-        num_run,
-        instance,
-        scoring_functions,
-        output_y_hat_optimization,
-        include,
-        exclude,
-        disable_file_output,
-        port,
-        init_params=None,
-        budget=100.0,
-        budget_type=None,
-):
+    queue: multiprocessing.Queue,
+    config: Union[int, Configuration],
+    backend: Backend,
+    resampling_strategy: Union[str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit],
+    resampling_strategy_args: Dict[str, Optional[Union[float, int, str]]],
+    metric: Scorer,
+    seed: int,
+    num_run: int,
+    instance: str,
+    scoring_functions: Optional[List[Scorer]],
+    output_y_hat_optimization: bool,
+    include: Optional[List[str]],
+    exclude: Optional[List[str]],
+    disable_file_output: bool,
+    port: Optional[int],
+    init_params: Optional[Dict[str, Any]] = None,
+    budget: Optional[float] = 100.0,
+    budget_type: Optional[str] = None,
+) -> None:
     return eval_holdout(
         queue=queue,
         port=port,
@@ -1123,30 +1182,30 @@ def eval_iterative_holdout(
 
 
 def eval_partial_cv(
-        queue,
-        config,
-        backend,
-        resampling_strategy,
-        resampling_strategy_args,
-        metric,
-        seed,
-        num_run,
-        instance,
-        scoring_functions,
-        output_y_hat_optimization,
-        include,
-        exclude,
-        disable_file_output,
-        port,
-        init_params=None,
-        iterative=False,
-        budget=None,
-        budget_type=None,
-):
+    queue: multiprocessing.Queue,
+    config: Union[int, Configuration],
+    backend: Backend,
+    resampling_strategy: Union[str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit],
+    resampling_strategy_args: Dict[str, Optional[Union[float, int, str]]],
+    metric: Scorer,
+    seed: int,
+    num_run: int,
+    instance: str,
+    scoring_functions: Optional[List[Scorer]],
+    output_y_hat_optimization: bool,
+    include: Optional[List[str]],
+    exclude: Optional[List[str]],
+    disable_file_output: bool,
+    port: Optional[int],
+    init_params: Optional[Dict[str, Any]] = None,
+    budget: Optional[float] = None,
+    budget_type: Optional[str] = None,
+    iterative: bool = False,
+) -> None:
     if budget_type is not None:
         raise NotImplementedError()
-    instance = json.loads(instance) if instance is not None else {}
-    fold = instance['fold']
+    instance_dict: Dict[str, int] = json.loads(instance) if instance is not None else {}
+    fold = instance_dict['fold']
 
     evaluator = TrainEvaluator(
         backend=backend,
@@ -1172,25 +1231,25 @@ def eval_partial_cv(
 
 
 def eval_partial_cv_iterative(
-        queue,
-        config,
-        backend,
-        resampling_strategy,
-        resampling_strategy_args,
-        metric,
-        seed,
-        num_run,
-        instance,
-        scoring_functions,
-        output_y_hat_optimization,
-        include,
-        exclude,
-        disable_file_output,
-        port,
-        init_params=None,
-        budget=None,
-        budget_type=None,
-):
+    queue: multiprocessing.Queue,
+    config: Union[int, Configuration],
+    backend: Backend,
+    resampling_strategy: Union[str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit],
+    resampling_strategy_args: Dict[str, Optional[Union[float, int, str]]],
+    metric: Scorer,
+    seed: int,
+    num_run: int,
+    instance: str,
+    scoring_functions: Optional[List[Scorer]],
+    output_y_hat_optimization: bool,
+    include: Optional[List[str]],
+    exclude: Optional[List[str]],
+    disable_file_output: bool,
+    port: Optional[int],
+    init_params: Optional[Dict[str, Any]] = None,
+    budget: Optional[float] = None,
+    budget_type: Optional[str] = None,
+) -> None:
     if budget_type is not None:
         raise NotImplementedError()
     return eval_partial_cv(
@@ -1216,26 +1275,26 @@ def eval_partial_cv_iterative(
 
 # create closure for evaluating an algorithm
 def eval_cv(
-        queue,
-        config,
-        backend,
-        resampling_strategy,
-        resampling_strategy_args,
-        metric,
-        seed,
-        num_run,
-        instance,
-        scoring_functions,
-        output_y_hat_optimization,
-        include,
-        exclude,
-        disable_file_output,
-        port,
-        init_params=None,
-        budget=None,
-        budget_type=None,
-        iterative=False,
-):
+    queue: multiprocessing.Queue,
+    config: Union[int, Configuration],
+    backend: Backend,
+    resampling_strategy: Union[str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit],
+    resampling_strategy_args: Dict[str, Optional[Union[float, int, str]]],
+    metric: Scorer,
+    seed: int,
+    num_run: int,
+    instance: str,
+    scoring_functions: Optional[List[Scorer]],
+    output_y_hat_optimization: bool,
+    include: Optional[List[str]],
+    exclude: Optional[List[str]],
+    disable_file_output: bool,
+    port: Optional[int],
+    init_params: Optional[Dict[str, Any]] = None,
+    budget: Optional[float] = None,
+    budget_type: Optional[str] = None,
+    iterative: bool = False,
+) -> None:
     evaluator = TrainEvaluator(
         backend=backend,
         port=port,
@@ -1260,26 +1319,26 @@ def eval_cv(
 
 
 def eval_iterative_cv(
-        queue,
-        config,
-        backend,
-        resampling_strategy,
-        resampling_strategy_args,
-        metric,
-        seed,
-        num_run,
-        instance,
-        scoring_functions,
-        output_y_hat_optimization,
-        include,
-        exclude,
-        disable_file_output,
-        port,
-        init_params=None,
-        budget=None,
-        budget_type=None,
-        iterative=True,
-):
+    queue: multiprocessing.Queue,
+    config: Union[int, Configuration],
+    backend: Backend,
+    resampling_strategy: Union[str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit],
+    resampling_strategy_args: Dict[str, Optional[Union[float, int, str]]],
+    metric: Scorer,
+    seed: int,
+    num_run: int,
+    instance: str,
+    scoring_functions: Optional[List[Scorer]],
+    output_y_hat_optimization: bool,
+    include: Optional[List[str]],
+    exclude: Optional[List[str]],
+    disable_file_output: bool,
+    port: Optional[int],
+    init_params: Optional[Dict[str, Any]] = None,
+    budget: Optional[float] = None,
+    budget_type: Optional[str] = None,
+    iterative: bool = True,
+) -> None:
     eval_cv(
         backend=backend,
         queue=queue,

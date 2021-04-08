@@ -8,6 +8,11 @@ the SMAC callback and get relevant information from the run, like
 the number of iterations. Particularly, it exemplifies how to select
 the intensification strategy to use in smac, in this case:
 `SuccessiveHalving <http://proceedings.mlr.press/v80/falkner18a/falkner18a-supp.pdf>`_.
+
+This results in an adaptation of the `BOHB algorithm <http://proceedings.mlr.press/v80/falkner18a/falkner18a.pdf>`_.
+It uses Successive Halving instead of `Hyperband <https://jmlr.org/papers/volume18/16-558/16-558.pdf>`_, and could be abbreviated as BOSH.
+To get the BOHB algorithm, simply import Hyperband and use it as the intensification strategy.
+
 """  # noqa (links are too long)
 
 

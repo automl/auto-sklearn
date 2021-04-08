@@ -1,3 +1,6 @@
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+import multiprocessing
 import queue
 
 
@@ -6,7 +9,8 @@ __all__ = [
 ]
 
 
-def read_queue(queue_):
+def read_queue(queue_: multiprocessing.Queue
+               ) -> List[Dict[str, Union[str, bool, int, float, List, Dict, Tuple]]]:
     stack = []
     while True:
         try:
@@ -32,7 +36,7 @@ def read_queue(queue_):
         return stack
 
 
-def empty_queue(queue_):
+def empty_queue(queue_: multiprocessing.Queue) -> None:
     while True:
         try:
             queue_.get(block=False)
@@ -42,7 +46,8 @@ def empty_queue(queue_):
     queue_.close()
 
 
-def extract_learning_curve(stack, key=None):
+def extract_learning_curve(stack: List[Dict[str, Any]],
+                           key: Optional[str] = None) -> List[float]:
     learning_curve = []
     for entry in stack:
         if key:

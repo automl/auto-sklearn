@@ -20,7 +20,6 @@ if sys.version_info < (3, 6):
     )
 
 HERE = os.path.abspath(os.path.dirname(__file__))
-setup_reqs = ['Cython', 'numpy']
 with open(os.path.join(HERE, 'requirements.txt')) as fp:
     install_reqs = [r.rstrip() for r in fp.readlines()
                     if not r.startswith('#') and not r.startswith('git+')]
@@ -62,7 +61,6 @@ setup(
     long_description_content_type='text/markdown',
     version=version,
     packages=find_packages(exclude=['test', 'scripts', 'examples']),
-    setup_requires=setup_reqs,
     extras_require=extras_reqs,
     install_requires=install_reqs,
     include_package_data=True,
