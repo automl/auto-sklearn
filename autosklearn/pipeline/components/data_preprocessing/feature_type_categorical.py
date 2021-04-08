@@ -21,7 +21,7 @@ class CategoricalPreprocessingPipeline(BasePipeline):
     The steps of this pipeline are:
         1 - Category shift: Adds 3 to every category value
         2 - Imputation: Assign category 2 to missing values (NaN).
-        3 - Minority coalescence: Assign category 1 to all categories whose occurence
+        3 - Minority coalescence: Assign category 1 to all categories whose occurrence
             don't sum-up to a certain minimum fraction
         4 - One hot encoding: usual sklearn one hot encoding
 

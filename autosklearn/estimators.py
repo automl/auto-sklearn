@@ -95,12 +95,14 @@ class AutoSklearnEstimator(BaseEstimator):
 
         include : dict, optional (None)
             If None, all possible algorithms are used. Otherwise specifies
-            set of algorithms for each added component is used.
+            set of algorithms for each added component is used. Include and 
+            exclude are incompatible if used together on the same component
 
         exclude : dict, optional (None)
             If None, all possible algorithms are used. Otherwise specifies
             set of algorithms for each added component is not used.
-            Incompatible with include.
+            Incompatible with include. Include and exclude are incompatible
+            if used together on the same component
 
         resampling_strategy : string or object, optional ('holdout')
             how to to handle overfitting, might need 'resampling_strategy_arguments'

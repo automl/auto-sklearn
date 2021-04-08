@@ -458,7 +458,7 @@ class BasePipeline(Pipeline):
 
     def _validate_include_exclude_params(self):
         steps = [step[0] for step in self.steps]
-        for node in list(self.include.keys()) + list(self.exclude):
+        for node in list(self.include.keys()) + list(self.exclude.keys()):
             if node not in steps:
                 raise ValueError("Component {0} in not part for pipeline steps {1}"
                                  .format(node, str(steps)))

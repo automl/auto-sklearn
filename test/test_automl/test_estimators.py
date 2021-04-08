@@ -693,11 +693,9 @@ def test_check_askl2_same_arguments_as_askl():
     extra_arguments = list(set(
         inspect.getfullargspec(AutoSklearnEstimator.__init__).args) - set(
             inspect.getfullargspec(AutoSklearn2Classifier.__init__).args))
-    expected_extra_args = ['exclude_estimators',
-                           'include_preprocessors',
+    expected_extra_args = ['exclude',
+                           'include',
                            'resampling_strategy_arguments',
-                           'exclude_preprocessors',
-                           'include_estimators',
                            'get_smac_object_callback',
                            'initial_configurations_via_metalearning',
                            'resampling_strategy',
