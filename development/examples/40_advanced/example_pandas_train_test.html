@@ -3,7 +3,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
     <title>Test and Train data with Pandas &#8212; AutoSklearn 0.12.5 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
@@ -123,7 +124,7 @@
 <p>Click <a class="reference internal" href="#sphx-glr-download-examples-40-advanced-example-pandas-train-test-py"><span class="std std-ref">here</span></a>
 to download the full example code or to run this example in your browser via Binder</p>
 </div>
-<div class="sphx-glr-example-title section" id="test-and-train-data-with-pandas">
+<section class="sphx-glr-example-title" id="test-and-train-data-with-pandas">
 <span id="sphx-glr-examples-40-advanced-example-pandas-train-test-py"></span><h1>Test and Train data with Pandas<a class="headerlink" href="#test-and-train-data-with-pandas" title="Permalink to this headline">¶</a></h1>
 <p><em>auto-sklearn</em> can automatically encode categorical columns using a label/ordinal encoder.
 This example highlights how to properly set the dtype in a DataFrame for this to happen,
@@ -178,7 +179,7 @@ list or numpy arrays as there is no per-column dtype (further details in the exa
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">performance_list</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="section" id="data-loading">
+<section id="data-loading">
 <h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Using Australian dataset https://www.openml.org/d/40981.</span>
 <span class="c1"># This example will use the command fetch_openml, which will</span>
@@ -232,8 +233,8 @@ A14     float64
 dtype: object
 </pre></div>
 </div>
-</div>
-<div class="section" id="build-and-fit-a-classifier">
+</section>
+<section id="build-and-fit-a-classifier">
 <h2>Build and fit a classifier<a class="headerlink" href="#build-and-fit-a-classifier" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">cls</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
     <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
@@ -246,8 +247,8 @@ dtype: object
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(per_run_time_limit=30, time_left_for_this_task=120)
 </pre></div>
 </div>
-</div>
-<div class="section" id="get-the-score-of-the-final-ensemble">
+</section>
+<section id="get-the-score-of-the-final-ensemble">
 <h2>Get the Score of the final ensemble<a class="headerlink" href="#get-the-score-of-the-final-ensemble" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">predictions</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
@@ -257,8 +258,8 @@ dtype: object
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score 0.881159420289855
 </pre></div>
 </div>
-</div>
-<div class="section" id="plot-the-ensemble-performance">
+</section>
+<section id="plot-the-ensemble-performance">
 <h2>Plot the ensemble performance<a class="headerlink" href="#plot-the-ensemble-performance" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ensemble_performance_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">ensemble_performance_history</span><span class="p">)</span>
 <span class="n">best_values</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="s1">&#39;ensemble_optimization_score&#39;</span><span class="p">:</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
@@ -298,7 +299,7 @@ dtype: object
 </pre></div>
 </div>
 <img alt="Auto-sklearn accuracy over time" class="sphx-glr-single-img" src="../../_images/sphx_glr_example_pandas_train_test_001.png" />
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  56.074 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  57.932 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-pandas-train-test-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_pandas_train_test.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
@@ -311,8 +312,8 @@ dtype: object
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
-</div>
-</div>
+</section>
+</section>
 
 
     </div>

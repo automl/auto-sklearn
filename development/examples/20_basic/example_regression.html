@@ -3,7 +3,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
     <title>Regression &#8212; AutoSklearn 0.12.5 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
@@ -123,7 +124,7 @@
 <p>Click <a class="reference internal" href="#sphx-glr-download-examples-20-basic-example-regression-py"><span class="std std-ref">here</span></a>
 to download the full example code or to run this example in your browser via Binder</p>
 </div>
-<div class="sphx-glr-example-title section" id="regression">
+<section class="sphx-glr-example-title" id="regression">
 <span id="sphx-glr-examples-20-basic-example-regression-py"></span><h1>Regression<a class="headerlink" href="#regression" title="Permalink to this headline">¶</a></h1>
 <p>The following example shows how to fit a simple regression model with
 <em>auto-sklearn</em>.</p>
@@ -138,7 +139,7 @@ to download the full example code or to run this example in your browser via Bin
   self.re = re.compile(self.reString)
 </pre></div>
 </div>
-<div class="section" id="data-loading">
+<section id="data-loading">
 <h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_boston</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -146,8 +147,8 @@ to download the full example code or to run this example in your browser via Bin
     <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="build-and-fit-a-regressor">
+</section>
+<section id="build-and-fit-a-regressor">
 <h2>Build and fit a regressor<a class="headerlink" href="#build-and-fit-a-regressor" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">regression</span><span class="o">.</span><span class="n">AutoSklearnRegressor</span><span class="p">(</span>
     <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
@@ -164,8 +165,8 @@ to download the full example code or to run this example in your browser via Bin
                      tmp_folder=&#39;/tmp/autosklearn_regression_example_tmp&#39;)
 </pre></div>
 </div>
-</div>
-<div class="section" id="print-the-final-ensemble-constructed-by-auto-sklearn">
+</section>
+<section id="print-the-final-ensemble-constructed-by-auto-sklearn">
 <h2>Print the final ensemble constructed by auto-sklearn<a class="headerlink" href="#print-the-final-ensemble-constructed-by-auto-sklearn" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">())</span>
 </pre></div>
@@ -195,8 +196,8 @@ dataset_properties={
 ]
 </pre></div>
 </div>
-</div>
-<div class="section" id="get-the-score-of-the-final-ensemble">
+</section>
+<section id="get-the-score-of-the-final-ensemble">
 <h2>Get the Score of the final ensemble<a class="headerlink" href="#get-the-score-of-the-final-ensemble" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;R2 score:&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
@@ -206,7 +207,7 @@ dataset_properties={
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.9018056173149241
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  4.205 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  1.213 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-20-basic-example-regression-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/20_basic/example_regression.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo.svg" width="150px" /></a>
@@ -219,8 +220,8 @@ dataset_properties={
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
-</div>
-</div>
+</section>
+</section>
 
 
     </div>
