@@ -116,7 +116,7 @@ class DataPreprocessorChoice(AutoSklearnChoice):
         cs.add_hyperparameter(preprocessor)
         for name in available_preprocessors:
             preprocessor_configuration_space = available_preprocessors[name](
-                dataset_properties=dataset_properties, include=include, exclude=exclude). \
+                dataset_properties=dataset_properties). \
                 get_hyperparameter_search_space(dataset_properties)
             parent_hyperparameter = {'parent': preprocessor, 'value': name}
             cs.add_configuration_space(name, preprocessor_configuration_space,
