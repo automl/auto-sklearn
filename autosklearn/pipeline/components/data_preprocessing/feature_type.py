@@ -55,8 +55,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         # pipeline if needed
         self.categ_ppl = CategoricalPreprocessingPipeline(
             config=None, steps=pipeline, dataset_properties=dataset_properties,
-            include=include, exclude=exclude, random_state=random_state,
-            init_params=init_params)
+            random_state=random_state, init_params=init_params)
         # The pipeline that will be applied to the numerical features (i.e. columns)
         # of the dataset
         # Configuration of the data-preprocessor is different from the configuration of
@@ -66,8 +65,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         # pipeline if needed
         self.numer_ppl = NumericalPreprocessingPipeline(
             config=None, steps=pipeline, dataset_properties=dataset_properties,
-            include=include, exclude=exclude, random_state=random_state,
-            init_params=init_params)
+            random_state=random_state, init_params=init_params)
         self._transformers = [
             ["categorical_transformer", self.categ_ppl],
             ["numerical_transformer", self.numer_ppl],
