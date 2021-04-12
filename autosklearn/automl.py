@@ -40,7 +40,7 @@ from autosklearn.data.validation import InputValidator
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import _fit_with_budget
-from autosklearn.metrics import calculate_score
+from autosklearn.metrics import calculate_metric
 from autosklearn.util.backend import Backend
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import (
@@ -1153,11 +1153,10 @@ class AutoML(BaseEstimator):
         # same representation domain
         prediction = self.InputValidator.target_validator.transform(prediction)
 
-        return calculate_score(solution=y,
-                               prediction=prediction,
-                               task_type=self._task,
-                               metric=self._metric,
-                               scoring_functions=None)
+        return calculate_metric(solution=y,
+                                prediction=prediction,
+                                task_type=self._task,
+                                metric=self._metric, )
 
     @property
     def cv_results_(self):
