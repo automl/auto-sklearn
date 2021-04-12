@@ -637,7 +637,7 @@ def test_load_best_individual_model(metric, backend, dask_client):
         assert automl.score(X_test, Y_test) > 0.9
     elif metric.name == 'log_loss':
         # Seen values in github actions of 0.6978304740364537
-        assert automl.score(X_test, Y_test) <= 0.72
+        assert automl.score(X_test, Y_test) < 0.7
     else:
         raise ValueError(metric.name)
 

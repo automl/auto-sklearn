@@ -7,7 +7,7 @@ import sklearn.metrics
 
 import autosklearn.metrics
 
-from autosklearn.metrics import calculate_score, calculate_loss
+from autosklearn.metrics import calculate_score, calculate_loss, calculate_metric
 from autosklearn.constants import BINARY_CLASSIFICATION, REGRESSION
 
 from smac.utils.constants import MAXINT
@@ -536,7 +536,7 @@ class TestCalculateScore(unittest.TestCase):
 
 def test_calculate_loss():
     # In a 0-1 ranged scorer, make sure that the loss
-    # has a expected positive value
+    # has an expected positive value
     y_pred = np.array([0, 1, 0, 1, 1, 1, 0, 0, 0, 0])
     y_true = np.array([0, 1, 0, 1, 1, 0, 0, 0, 0, 0])
     score = sklearn.metrics.accuracy_score(y_true, y_pred)
@@ -546,8 +546,7 @@ def test_calculate_loss():
         task_type=BINARY_CLASSIFICATION,
         metric=autosklearn.metrics.accuracy,
     )
-    loss = 1.0 - score
-    assert pytest.approx(loss) == calculate_loss(
+    assert pytest.approx(1.0 - score) == calculate_loss(
         solution=y_true,
         prediction=y_pred,
         task_type=BINARY_CLASSIFICATION,
@@ -582,14 +581,37 @@ def test_calculate_loss():
     y_true = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
     y_pred = np.array([0.11, 0.22, 0.33, 0.44, 0.55, 0.66])
     score = sklearn.metrics.mean_squared_error(y_true, y_pred)
-    assert pytest.approx(score) == calculate_score(
+    assert pytest.approx(0 - score) == calculate_score(
         solution=y_true,
         prediction=y_pred,
         task_type=REGRESSION,
         metric=autosklearn.metrics.mean_squared_error,
     )
-    loss = score
-    assert pytest.approx(loss) == calculate_loss(
+    assert pytest.approx(score) == calculate_loss(
+        solution=y_true,
+        prediction=y_pred,
+        task_type=REGRESSION,
+        metric=autosklearn.metrics.mean_squared_error,
+    )
+
+
+def test_calculate_metric():
+    # metric to be maximized
+    y_pred = np.array([0, 1, 0, 1, 1, 1, 0, 0, 0, 0])
+    y_true = np.array([0, 1, 0, 1, 1, 0, 0, 0, 0, 0])
+    score = sklearn.metrics.accuracy_score(y_true, y_pred)
+    assert pytest.approx(score) == calculate_metric(
+        solution=y_true,
+        prediction=y_pred,
+        task_type=BINARY_CLASSIFICATION,
+        metric=autosklearn.metrics.accuracy,
+    )
+
+    # metric to be minimized
+    y_true = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+    y_pred = np.array([0.11, 0.22, 0.33, 0.44, 0.55, 0.66])
+    score = sklearn.metrics.mean_squared_error(y_true, y_pred)
+    assert pytest.approx(score) == calculate_metric(
         solution=y_true,
         prediction=y_pred,
         task_type=REGRESSION,
