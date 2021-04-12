@@ -371,13 +371,11 @@ def calculate_score(
     if scoring_functions:
         score_dict = dict()
         if task_type in REGRESSION_TASKS:
-            # TODO put this into the regression metric itself
-            cprediction = sanitize_array(prediction)
-            for metric_ in scoring_functions:
+            for metric_ in scoring_functions + [metric]:
 
                 try:
                     score_dict[metric_.name] = _compute_scorer(
-                        metric_, cprediction, solution, task_type)
+                        metric_, prediction, solution, task_type)
                 except ValueError as e:
                     print(e, e.args[0])
                     if e.args[0] == "Mean Squared Logarithmic Error cannot be used when " \
@@ -387,7 +385,7 @@ def calculate_score(
                         raise e
 
         else:
-            for metric_ in scoring_functions:
+            for metric_ in scoring_functions + [metric]:
 
                 # TODO maybe annotate metrics to define which cases they can
                 # handle?
@@ -408,8 +406,6 @@ def calculate_score(
                     else:
                         raise e
 
-        if metric.name not in score_dict.keys():
-            score_dict[metric.name] = _compute_scorer(metric, prediction, solution, task_type)
         return score_dict
 
     else:
@@ -502,22 +498,12 @@ def calculate_metric(
     -------
     float
     """
-    if task_type in REGRESSION_TASKS:
-        # TODO put this into the regression metric itself
-        cprediction = sanitize_array(prediction)
-        score = _compute_scorer(
-            solution=solution,
-            prediction=cprediction,
-            metric=metric,
-            task_type=task_type,
-        )
-    else:
-        score = _compute_scorer(
-            solution=solution,
-            prediction=prediction,
-            metric=metric,
-            task_type=task_type,
-        )
+    score = _compute_scorer(
+        solution=solution,
+        prediction=prediction,
+        metric=metric,
+        task_type=task_type,
+    )
     return metric._sign * score
 
 
