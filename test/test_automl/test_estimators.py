@@ -732,6 +732,7 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
         per_run_time_limit=30,
         ensemble_size=0,
         dask_client=dask_client,
+        include_estimators=['random_forest'],
         seed=seed,
         # We cannot get the configuration space with 'test' not fit with it
         resampling_strategy=resampling_strategy if resampling_strategy != 'test' else 'holdout',
@@ -765,6 +766,7 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
     else:
         # We should have fitted a pipeline with named_steps
         assert hasattr(pipeline, 'named_steps')
+        assert 'RandomForest' in pipeline.steps[-1][-1].choice.__class__.__name__
 
     # Num run should be 2, as 1 is for dummy classifier and we have not launch
     # another pipeline

@@ -418,8 +418,8 @@ class AutoMLSMBO(object):
         # into a queue and querying them once the time is over
         include, exclude = parse_include_exclude_components(
             task=self.task,
-            include_estimators=self.exclude_estimators,
-            exclude_estimators=self.include_estimators,
+            include_estimators=self.include_estimators,
+            exclude_estimators=self.exclude_estimators,
             include_preprocessors=self.include_preprocessors,
             exclude_preprocessors=self.exclude_preprocessors,
         )

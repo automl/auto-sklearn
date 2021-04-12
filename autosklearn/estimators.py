@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 
-from typing import Optional, Dict, List, Tuple
+from typing import Optional, Dict, List, Tuple, Union
 
 from ConfigSpace.configuration_space import Configuration
 import dask.distributed
@@ -349,10 +349,11 @@ class AutoSklearnEstimator(BaseEstimator):
         self,
         X: SUPPORTED_FEAT_TYPES,
         y: SUPPORTED_TARGET_TYPES,
-        config: Configuration,
+        config: Union[Configuration,  Dict[str, Union[str, float, int]]],
         dataset_name: Optional[str] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
         y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        feat_type: Optional[List[str]] = None,
         *args,
         **kwargs: Dict,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
@@ -369,35 +370,44 @@ class AutoSklearnEstimator(BaseEstimator):
 
         Parameters
         ----------
-            X: array-like, shape = (n_samples, n_features)
-                The features used for training
-            y: array-like
-                The labels used for training
-            X_test: Optionalarray-like, shape = (n_samples, n_features)
-                If provided, the testing performance will be tracked on this features.
-            y_test: array-like
-                If provided, the testing performance will be tracked on this labels
-            config: Configuration
-                A configuration object used to define a pipeline steps
-            dataset_name: Optional[str]
-                Name that will be used to tag the Auto-Sklearn run and identify the
-                Auto-Sklearn run
+        X: array-like, shape = (n_samples, n_features)
+            The features used for training
+        y: array-like
+            The labels used for training
+        X_test: Optionalarray-like, shape = (n_samples, n_features)
+            If provided, the testing performance will be tracked on this features.
+        y_test: array-like
+            If provided, the testing performance will be tracked on this labels
+        config: Union[Configuration,  Dict[str, Union[str, float, int]]]
+            A configuration object used to define the pipeline steps.
+            If a dictionary is passed, a configuration is created based on this dictionary.
+        dataset_name: Optional[str]
+            Name that will be used to tag the Auto-Sklearn run and identify the
+            Auto-Sklearn run
+        feat_type : list, optional (default=None)
+            List of str of `len(X.shape[1])` describing the attribute type.
+            Possible types are `Categorical` and `Numerical`. `Categorical`
+            attributes will be automatically One-Hot encoded. The values
+            used for a categorical attribute must be integers, obtained for
+            example by `sklearn.preprocessing.LabelEncoder
+            <http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_.
 
         Returns
         -------
-            pipeline: Optional[BasePipeline]
-                The fitted pipeline. In case of failure while fitting the pipeline,
-                a None is returned.
-            run_info: RunInFo
-                A named tuple that contains the configuration launched
-            run_value: RunValue
-                A named tuple that contains the result of the run
+        pipeline: Optional[BasePipeline]
+            The fitted pipeline. In case of failure while fitting the pipeline,
+            a None is returned.
+        run_info: RunInFo
+            A named tuple that contains the configuration launched
+        run_value: RunValue
+            A named tuple that contains the result of the run
         """
         if self.automl_ is None:
             self.automl_ = self.build_automl()
         return self.automl_.fit_pipeline(X=X, y=y,
                                          dataset_name=dataset_name,
                                          config=config,
+                                         feat_type=feat_type,
                                          X_test=X_test, y_test=y_test,
                                          *args, **kwargs)
 

@@ -8,7 +8,7 @@ import multiprocessing
 import os
 import sys
 import time
-from typing import Any, Dict, Optional, List, Tuple
+from typing import Any, Dict, Optional, List, Tuple, Union
 import uuid
 import unittest.mock
 import warnings
@@ -950,10 +950,11 @@ class AutoML(BaseEstimator):
         y: SUPPORTED_TARGET_TYPES,
         task: int,
         is_classification: bool,
-        config: Configuration,
+        config: Union[Configuration,  Dict[str, Union[str, float, int]]],
         dataset_name: Optional[str] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
         y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        feat_type: Optional[List[str]] = None,
         **kwargs: Dict,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
         """ Fits and individual pipeline configuration and returns
@@ -975,13 +976,21 @@ class AutoML(BaseEstimator):
             If provided, the testing performance will be tracked on this features.
         y_test: array-like
             If provided, the testing performance will be tracked on this labels
-        config: Configuration
-            A configuration object used to define a pipeline steps
+        config: Union[Configuration,  Dict[str, Union[str, float, int]]]
+            A configuration object used to define the pipeline steps. If a dictionary is passed,
+            a configuration is created based on this dictionary.
         dataset_name: Optional[str]
             A string to tag and identify the Auto-Sklearn run
         is_classification: bool
             Whether the task is for classification or regression. This affects
             how the targets are treated
+        feat_type : list, optional (default=None)
+            List of str of `len(X.shape[1])` describing the attribute type.
+            Possible types are `Categorical` and `Numerical`. `Categorical`
+            attributes will be automatically One-Hot encoded. The values
+            used for a categorical attribute must be integers, obtained for
+            example by `sklearn.preprocessing.LabelEncoder
+            <http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_.
 
         Returns
         -------
@@ -999,23 +1008,25 @@ class AutoML(BaseEstimator):
         # dataset
         if self.configuration_space is None:
             self.configuration_space = self.fit(
-                X=X, y=y, task=task,
+                X=X, y=y,
                 dataset_name=dataset_name if dataset_name is not None else self._dataset_name,
                 X_test=X_test,
                 y_test=y_test,
-                feat_type=kwargs.pop('feat_type', self._feat_type),
+                feat_type=feat_type,
                 only_return_configuration_space=True)
 
         # We do not want to overwrite existing runs
         self.num_run += 1
+        if isinstance(config, dict):
+            config = Configuration(self.configuration_space, config)
         config.config_id = self.num_run
 
         # Get the components to include and exclude on the configuration space
         # from the estimator attributes
         include, exclude = parse_include_exclude_components(
             task=self._task,
-            include_estimators=self._exclude_estimators,
-            exclude_estimators=self._include_estimators,
+            include_estimators=self._include_estimators,
+            exclude_estimators=self._exclude_estimators,
             include_preprocessors=self._include_preprocessors,
             exclude_preprocessors=self._exclude_preprocessors,
         )
@@ -1591,10 +1602,11 @@ class AutoMLClassifier(AutoML):
         self,
         X: SUPPORTED_FEAT_TYPES,
         y: SUPPORTED_TARGET_TYPES,
-        config: Configuration,
+        config: Union[Configuration,  Dict[str, Union[str, float, int]]],
         dataset_name: Optional[str] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
         y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        feat_type: Optional[List[str]] = None,
         **kwargs,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
         y_task = type_of_target(y)
@@ -1615,6 +1627,7 @@ class AutoMLClassifier(AutoML):
             config=config,
             task=task,
             is_classification=True,
+            feat_type=feat_type,
             **kwargs,
         )
 
@@ -1681,10 +1694,11 @@ class AutoMLRegressor(AutoML):
         self,
         X: SUPPORTED_FEAT_TYPES,
         y: SUPPORTED_TARGET_TYPES,
-        config: Configuration,
+        config: Union[Configuration,  Dict[str, Union[str, float, int]]],
         dataset_name: Optional[str] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
         y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        feat_type: Optional[List[str]] = None,
         **kwargs: Dict,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
 
@@ -1703,6 +1717,7 @@ class AutoMLRegressor(AutoML):
             X_test=X_test, y_test=y_test,
             config=config,
             task=task,
+            feat_type=feat_type,
             dataset_name=dataset_name,
             is_classification=False,
             **kwargs,
