@@ -55,7 +55,6 @@ from autosklearn.util.logging_ import (
     get_named_client_logger,
 )
 from autosklearn.util import pipeline, RE_PATTERN
-from autosklearn.util.pipeline import parse_include_exclude_components
 from autosklearn.util.parallel import preload_modules
 from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.ensembles.singlebest_ensemble import SingleBest

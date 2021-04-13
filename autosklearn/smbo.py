@@ -30,7 +30,6 @@ from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.util.logging_ import get_named_client_logger
 from autosklearn.util.parallel import preload_modules
-from autosklearn.util.pipeline import parse_include_exclude_components
 from autosklearn.metalearning.metalearning.meta_base import MetaBase
 from autosklearn.metalearning.metafeatures.metafeatures import \
     calculate_all_metafeatures_with_labels, calculate_all_metafeatures_encoded_labels
