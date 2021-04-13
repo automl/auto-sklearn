@@ -5,8 +5,32 @@
 ..
     The following command allows to retrieve all commiters since a specified
     commit. From http://stackoverflow.com/questions/6482436/list-of-authors-in-git-since-a-given-commit
-    git log 2e29eba.. --format="%aN <%aE>" --reverse | perl -e 'my %dedupe; while (<STDIN>) { print unless $dedupe{$_}++}'
+    git log 25d680d4e9520a661aae48ea4c7295c663b64df3.. --format="%aN <%aE>" --reverse | perl -e 'my %dedupe; while (<STDIN>) { print unless $dedupe{$_}++}'
 
+Version 0.12.6
+==============
+
+* ADD #886: Provide new function which allows fitting only a single configuration.
+* DOC #1070: Clarify example on how successive halving and Bayesian optimization play together.
+* DOC #1112: Fix type.
+* DOC #1122: Add Python 3 to the installation command for Ubuntu.
+* FIX #1114: Fix a bug which made printing dummy models fail.
+* FIX #1117: Fix a bug previously made `memory_limit=None` fail.
+* FIX #1121: Fix an edge case which could decrease performance in Auto-sklearn 2.0 when using
+  cross-validation with iterative fitting.
+* FIX #1123: Fix a bug `autosklearn.metrics.calculate_score` for metrics/scores which need
+  to be minimized where the function previously returned the loss and not the score.
+* FIX #1115/#1124: Fix a bug which would prevent Auto-sklearn from computing meta-features in the
+  multiprocessing case.
+
+Contributors v0.12.6
+********************
+
+* Francisco Rivera Valverde
+* stock90975
+* Lucas Nildaimon dos Santos Silva
+* Matthias Feurer
+* Rohit Agarwal
 
 Version 0.12.5
 ==============
