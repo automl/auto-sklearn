@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 
@@ -24,12 +24,13 @@ __all__ = [
 ]
 
 
-def get_configuration_space(info: Dict[str, Any],
-                            include_estimators: Optional[List[str]] = None,
-                            exclude_estimators: Optional[List[str]] = None,
-                            include_preprocessors: Optional[List[str]] = None,
-                            exclude_preprocessors: Optional[List[str]] = None
-                            ) -> ConfigurationSpace:
+def parse_include_exclude_components(
+    task: int,
+    include_estimators: Optional[List[str]] = None,
+    exclude_estimators: Optional[List[str]] = None,
+    include_preprocessors: Optional[List[str]] = None,
+    exclude_preprocessors: Optional[List[str]] = None
+) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
     exclude = dict()
     include = dict()
     if include_preprocessors is not None and \
@@ -46,19 +47,35 @@ def get_configuration_space(info: Dict[str, Any],
         raise ValueError('Cannot specify include_estimators and '
                          'exclude_estimators.')
     elif include_estimators is not None:
-        if info['task'] in CLASSIFICATION_TASKS:
+        if task in CLASSIFICATION_TASKS:
             include['classifier'] = include_estimators
-        elif info['task'] in REGRESSION_TASKS:
+        elif task in REGRESSION_TASKS:
             include['regressor'] = include_estimators
         else:
-            raise ValueError(info['task'])
+            raise ValueError(task)
     elif exclude_estimators is not None:
-        if info['task'] in CLASSIFICATION_TASKS:
+        if task in CLASSIFICATION_TASKS:
             exclude['classifier'] = exclude_estimators
-        elif info['task'] in REGRESSION_TASKS:
+        elif task in REGRESSION_TASKS:
             exclude['regressor'] = exclude_estimators
         else:
-            raise ValueError(info['task'])
+            raise ValueError(task)
+    return include, exclude
+
+
+def get_configuration_space(info: Dict[str, Any],
+                            include_estimators: Optional[List[str]] = None,
+                            exclude_estimators: Optional[List[str]] = None,
+                            include_preprocessors: Optional[List[str]] = None,
+                            exclude_preprocessors: Optional[List[str]] = None
+                            ) -> ConfigurationSpace:
+    include, exclude = parse_include_exclude_components(
+        task=info['task'],
+        include_estimators=include_estimators,
+        exclude_estimators=exclude_estimators,
+        include_preprocessors=include_preprocessors,
+        exclude_preprocessors=exclude_preprocessors,
+    )
 
     if info['task'] in REGRESSION_TASKS:
         return _get_regression_configuration_space(info, include, exclude)

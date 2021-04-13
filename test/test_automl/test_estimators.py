@@ -11,6 +11,7 @@ import unittest
 import unittest.mock
 import pytest
 
+from ConfigSpace import Configuration
 import joblib
 from joblib import cpu_count
 import numpy as np
@@ -22,7 +23,7 @@ import sklearn.datasets
 from sklearn.base import clone
 from sklearn.base import ClassifierMixin, RegressorMixin
 from sklearn.base import is_classifier
-
+from smac.tae import StatusType
 
 from autosklearn.data.validation import InputValidator
 import autosklearn.pipeline.util as putil
@@ -119,19 +120,24 @@ def test_fit_n_jobs(tmp_dir, output_dir):
 
 
 def test_feat_type_wrong_arguments():
-    cls = AutoSklearnClassifier(ensemble_size=0)
+
+    # Every Auto-Sklearn estimator has a backend, that allows a single
+    # call to fit
     X = np.zeros((100, 100))
     y = np.zeros((100, ))
 
+    cls = AutoSklearnClassifier(ensemble_size=0)
     expected_msg = r".*Array feat_type does not have same number of "
     "variables as X has features. 1 vs 100.*"
     with pytest.raises(ValueError, match=expected_msg):
         cls.fit(X=X, y=y, feat_type=[True])
 
+    cls = AutoSklearnClassifier(ensemble_size=0)
     expected_msg = r".*Array feat_type must only contain strings.*"
     with pytest.raises(ValueError, match=expected_msg):
         cls.fit(X=X, y=y, feat_type=[True]*100)
 
+    cls = AutoSklearnClassifier(ensemble_size=0)
     expected_msg = r".*Only `Categorical` and `Numerical` are"
     "valid feature types, you passed `Car`.*"
     with pytest.raises(ValueError, match=expected_msg):
@@ -590,9 +596,11 @@ def test_regression_pandas_support(tmp_dir, output_dir, dask_client):
     assert count_succeses(automl.cv_results_) > 0, print_debug_information(automl)
 
 
-# Currently this class only tests that the methods of AutoSklearnClassifier
-# which should return self actually return self.
 def test_autosklearn_classification_methods_returns_self(dask_client):
+    """
+    Currently this method only tests that the methods of AutoSklearnClassifier
+    is able to fit using fit(), fit_ensemble() and refit()
+    """
     X_train, y_train, X_test, y_test = putil.get_dataset('iris')
     automl = AutoSklearnClassifier(time_left_for_this_task=60,
                                    per_run_time_limit=10,
@@ -629,8 +637,6 @@ def test_autosklearn_regression_methods_returns_self(dask_client):
     assert automl is automl_refitted
 
 
-# Currently this class only tests that the methods of AutoSklearnClassifier
-# which should return self actually return self.
 def test_autosklearn2_classification_methods_returns_self(dask_client):
     X_train, y_train, X_test, y_test = putil.get_dataset('iris')
     automl = AutoSklearn2Classifier(time_left_for_this_task=60, ensemble_size=0,
@@ -704,3 +710,83 @@ def test_check_askl2_same_arguments_as_askl():
                            'metadata_directory']
     unexpected_args = set(extra_arguments) - set(expected_extra_args)
     assert len(unexpected_args) == 0, unexpected_args
+
+
+@pytest.mark.parametrize("task_type", ['classification', 'regression'])
+@pytest.mark.parametrize("resampling_strategy", ['test', 'cv', 'holdout'])
+@pytest.mark.parametrize("disable_file_output", [True, False])
+def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_output):
+    """
+    Tests that we can query the configuration space, and from the default configuration
+    space, fit a classification pipeline with an acceptable score
+    """
+    X_train, y_train, X_test, y_test = putil.get_dataset(
+        'iris' if task_type == 'classification' else 'boston'
+    )
+    estimator = AutoSklearnClassifier if task_type == 'classification' else AutoSklearnRegressor
+    seed = 3
+    automl = estimator(
+        time_left_for_this_task=120,
+        # Time left for task plays no role
+        # only per run time limit
+        per_run_time_limit=30,
+        ensemble_size=0,
+        dask_client=dask_client,
+        include_estimators=['random_forest'],
+        seed=seed,
+        # We cannot get the configuration space with 'test' not fit with it
+        resampling_strategy=resampling_strategy if resampling_strategy != 'test' else 'holdout',
+    )
+    config = automl.get_configuration_space(X_train, y_train,
+                                            X_test=X_test, y_test=y_test,
+                                            ).get_default_configuration()
+
+    pipeline, run_info, run_value = automl.fit_pipeline(X=X_train, y=y_train, config=config,
+                                                        X_test=X_test, y_test=y_test,
+                                                        disable_file_output=disable_file_output,
+                                                        resampling_strategy=resampling_strategy)
+
+    assert isinstance(run_info.config, Configuration)
+    assert run_info.cutoff == 30
+    assert run_value.status == StatusType.SUCCESS, f"{run_info}->{run_value}"
+    # We should produce a decent result
+    assert run_value.cost < 0.2
+
+    # Make sure that the pipeline can be pickled
+    dump_file = os.path.join(tempfile.gettempdir(), 'automl.dump.pkl')
+    with open(dump_file, 'wb') as f:
+        pickle.dump(pipeline, f)
+
+    if resampling_strategy == 'test' or disable_file_output:
+        # We do not produce a pipeline in 'test'
+        assert pipeline is None
+    elif resampling_strategy == 'cv':
+        # We should have fitted a Voting estimator
+        assert hasattr(pipeline, 'estimators_')
+    else:
+        # We should have fitted a pipeline with named_steps
+        assert hasattr(pipeline, 'named_steps')
+        assert 'RandomForest' in pipeline.steps[-1][-1].choice.__class__.__name__
+
+    # Num run should be 2, as 1 is for dummy classifier and we have not launch
+    # another pipeline
+    num_run = 2
+
+    # Check the re-sampling strategy
+    num_run_dir = automl.automl_._backend.get_numrun_directory(
+        seed, num_run, budget=0.0)
+    cv_model_path = os.path.join(num_run_dir, automl.automl_._backend.get_cv_model_filename(
+        seed, num_run, budget=0.0))
+    model_path = os.path.join(num_run_dir, automl.automl_._backend.get_model_filename(
+        seed, num_run, budget=0.0))
+    if resampling_strategy == 'test' or disable_file_output:
+        # No file output is expected
+        assert not os.path.exists(num_run_dir)
+    else:
+        # We expect the model path always
+        # And the cv model only on 'cv'
+        assert os.path.exists(model_path)
+        if resampling_strategy == 'cv':
+            assert os.path.exists(cv_model_path)
+        elif resampling_strategy == 'holdout':
+            assert not os.path.exists(cv_model_path)

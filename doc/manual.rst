@@ -22,6 +22,7 @@ aspects of its usage:
 * `Iterating over the models <examples/40_advanced/example_get_pipeline_components.html>`_
 * `Using custom metrics <examples/40_advanced/example_metrics.html>`_
 * `Pandas Train and Test inputs <examples/40_advanced/example_pandas_train_test.html>`_
+* `Train a single configuration <examples/40_advanced/example_single_configuration.html>`_
 * `Resampling strategies <examples/40_advanced/example_resampling.html>`_
 * `Parallel usage (manual) <examples/60_search/example_parallel_manual_spawning.html>`_
 * `Parallel usage (n_jobs) <examples/60_search/example_parallel_n_jobs.html>`_
