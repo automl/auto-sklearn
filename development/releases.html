@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Version 0.12.5 &#8212; AutoSklearn 0.12.5 documentation</title>
+    <title>Version 0.12.6 &#8212; AutoSklearn 0.12.6 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.12.5</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.12.6</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -105,7 +105,11 @@
   <div class="row">
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
-<li><a class="reference internal" href="#">Version 0.12.5</a><ul>
+<li><a class="reference internal" href="#">Version 0.12.6</a><ul>
+<li><a class="reference internal" href="#contributors-v0-12-6">Contributors v0.12.6</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-12-5">Version 0.12.5</a><ul>
 <li><a class="reference internal" href="#contributors-v0-12-5">Contributors v0.12.5</a><ul>
 <li><a class="reference internal" href="#id1">Releases</a></li>
 </ul>
@@ -213,7 +217,34 @@
       </div>
     <div class="body col-md-9 content" role="main">
       
-  <span class="target" id="releases"></span><div class="section" id="version-0-12-5">
+  <span class="target" id="releases"></span><div class="section" id="version-0-12-6">
+<h1>Version 0.12.6<a class="headerlink" href="#version-0-12-6" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p>ADD #886: Provide new function which allows fitting only a single configuration.</p></li>
+<li><p>DOC #1070: Clarify example on how successive halving and Bayesian optimization play together.</p></li>
+<li><p>DOC #1112: Fix type.</p></li>
+<li><p>DOC #1122: Add Python 3 to the installation command for Ubuntu.</p></li>
+<li><p>FIX #1114: Fix a bug which made printing dummy models fail.</p></li>
+<li><p>FIX #1117: Fix a bug previously made <cite>memory_limit=None</cite> fail.</p></li>
+<li><p>FIX #1121: Fix an edge case which could decrease performance in Auto-sklearn 2.0 when using
+cross-validation with iterative fitting.</p></li>
+<li><p>FIX #1123: Fix a bug <cite>autosklearn.metrics.calculate_score</cite> for metrics/scores which need
+to be minimized where the function previously returned the loss and not the score.</p></li>
+<li><p>FIX #1115/#1124: Fix a bug which would prevent Auto-sklearn from computing meta-features in the
+multiprocessing case.</p></li>
+</ul>
+<div class="section" id="contributors-v0-12-6">
+<h2>Contributors v0.12.6<a class="headerlink" href="#contributors-v0-12-6" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Francisco Rivera Valverde</p></li>
+<li><p>stock90975</p></li>
+<li><p>Lucas Nildaimon dos Santos Silva</p></li>
+<li><p>Matthias Feurer</p></li>
+<li><p>Rohit Agarwal</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-12-5">
 <h1>Version 0.12.5<a class="headerlink" href="#version-0-12-5" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><p>MAINT: Remove <code class="docutils literal notranslate"><span class="pre">Cython</span></code> and <code class="docutils literal notranslate"><span class="pre">numpy</span></code> as installation requirements.</p></li>
