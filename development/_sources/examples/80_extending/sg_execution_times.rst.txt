@@ -5,14 +5,14 @@
 
 Computation times
 =================
-**01:04.744** total execution time for **examples_80_extending** files:
+**00:54.714** total execution time for **examples_80_extending** files:
 
 +-----------------------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_80_extending_example_extending_classification.py` (``example_extending_classification.py``)                     | 00:21.608 | 0.0 MB |
+| :ref:`sphx_glr_examples_80_extending_example_extending_preprocessor.py` (``example_extending_preprocessor.py``)                         | 00:19.072 | 0.0 MB |
 +-----------------------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_80_extending_example_extending_preprocessor.py` (``example_extending_preprocessor.py``)                         | 00:17.678 | 0.0 MB |
+| :ref:`sphx_glr_examples_80_extending_example_extending_classification.py` (``example_extending_classification.py``)                     | 00:15.933 | 0.0 MB |
 +-----------------------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_80_extending_example_extending_regression.py` (``example_extending_regression.py``)                             | 00:17.307 | 0.0 MB |
+| :ref:`sphx_glr_examples_80_extending_example_extending_regression.py` (``example_extending_regression.py``)                             | 00:13.046 | 0.0 MB |
 +-----------------------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_80_extending_example_restrict_number_of_hyperparameters.py` (``example_restrict_number_of_hyperparameters.py``) | 00:08.152 | 0.0 MB |
+| :ref:`sphx_glr_examples_80_extending_example_restrict_number_of_hyperparameters.py` (``example_restrict_number_of_hyperparameters.py``) | 00:06.663 | 0.0 MB |
 +-----------------------------------------------------------------------------------------------------------------------------------------+-----------+--------+
