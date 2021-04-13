@@ -723,10 +723,10 @@ subsamples otherwise
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.985816
-      Number of target algorithm runs: 15
+      Number of target algorithm runs: 16
       Number of successful target algorithm runs: 14
       Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 1
+      Number of target algorithms that exceeded the time limit: 2
       Number of target algorithms that exceeded the memory limit: 0
 
     Accuracy score 0.9440559440559441
@@ -737,7 +737,7 @@ subsamples otherwise
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  55.645 seconds)
+   **Total running time of the script:** ( 2 minutes  57.567 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_successive_halving.py:

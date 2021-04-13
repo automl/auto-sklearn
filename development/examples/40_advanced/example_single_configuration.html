@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fit a single configuration &#8212; AutoSklearn 0.12.5 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-rendered-html.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="../../_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+  
+  <a href="https://github.com/automl/auto-sklearn"
+     class="visible-desktop hidden-xs"><img
+    id="gh-banner"
+    style="position: absolute; top: 50px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"
+    alt="Fork me on GitHub"></a>
+  <script>
+    // Adjust banner height.
+    $(function () {
+      var navHeight = $(".navbar .container").css("height");
+      $("#gh-banner").css("top", navHeight);
+    });
+  </script>
+
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../index.html">
+          auto-sklearn</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.12.5</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../index.html">Start</a></li>
+                <li><a href="../../releases.html">Releases</a></li>
+                <li><a href="../../installation.html">Installation</a></li>
+                <li><a href="../../manual.html">Manual</a></li>
+                <li><a href="../index.html">Examples</a></li>
+                <li><a href="../../api.html">API</a></li>
+                <li><a href="../../extending.html">Extending</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">Fit a single configuration</a><ul>
+<li><a class="reference internal" href="#data-loading">Data Loading</a></li>
+<li><a class="reference internal" href="#define-an-estimator">Define an estimator</a></li>
+<li><a class="reference internal" href="#fit-an-user-provided-configuration">Fit an user provided configuration</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
+      
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-40-advanced-example-single-configuration-py"><span class="std std-ref">here</span></a>
+to download the full example code or to run this example in your browser via Binder</p>
+</div>
+<div class="sphx-glr-example-title section" id="fit-a-single-configuration">
+<span id="sphx-glr-examples-40-advanced-example-single-configuration-py"></span><h1>Fit a single configuration<a class="headerlink" href="#fit-a-single-configuration" title="Permalink to this headline">¶</a></h1>
+<p><em>Auto-sklearn</em> searches for the best combination of machine learning algorithms
+and their hyper-parameter configuration for a given task, using Scikit-Learn Pipelines.
+To further improve performance, this pipelines are ensemble together using Ensemble
+Selection from Caruana (2004).</p>
+<p>This example shows how one can fit one of this pipelines, both, with an user defined
+configuration, and a randomly sampled one form the configuration space.</p>
+<p>The pipelines that Auto-Sklearn fits are compatible with Scikit-Learn API. You can
+get further documentation about Scikit-Learn models here: &lt;<a class="reference external" href="https://scikit-learn.org/stable/getting_started">https://scikit-learn.org/stable/getting_started</a>.html`&gt;_</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sklearn.model_selection</span>
+<span class="kn">import</span> <span class="nn">sklearn.datasets</span>
+<span class="kn">import</span> <span class="nn">sklearn.metrics</span>
+
+<span class="kn">from</span> <span class="nn">ConfigSpace.configuration_space</span> <span class="kn">import</span> <span class="n">Configuration</span>
+
+<span class="kn">import</span> <span class="nn">autosklearn.classification</span>
+</pre></div>
+</div>
+<div class="section" id="data-loading">
+<h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">fetch_openml</span><span class="p">(</span><span class="n">data_id</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">3</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="define-an-estimator">
+<h2>Define an estimator<a class="headerlink" href="#define-an-estimator" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">cls</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
+    <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+    <span class="n">memory_limit</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span>
+    <span class="c1"># We will limit the configuration space only to</span>
+    <span class="c1"># have RandomForest as a valid model. We recommend enabling all</span>
+    <span class="c1"># possible models to get a better performance.</span>
+    <span class="n">include_estimators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;random_forest&#39;</span><span class="p">],</span>
+    <span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="fit-an-user-provided-configuration">
+<h2>Fit an user provided configuration<a class="headerlink" href="#fit-an-user-provided-configuration" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># We will create a configuration that has a user defined</span>
+<span class="c1"># min_samples_split in the Random Forest. We recommend you to look into</span>
+<span class="c1"># how the ConfigSpace package works here:</span>
+<span class="c1"># https://automl.github.io/ConfigSpace/master/</span>
+<span class="n">cs</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_configuration_space</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dataset_name</span><span class="o">=</span><span class="s1">&#39;kr-vs-kp&#39;</span><span class="p">)</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">sample_configuration</span><span class="p">()</span>
+<span class="n">config</span><span class="o">.</span><span class="n">_values</span><span class="p">[</span><span class="s1">&#39;classifier:random_forest:min_samples_split&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">11</span>
+
+<span class="c1"># Make sure that your changed configuration complies with the configuration space</span>
+<span class="n">config</span><span class="o">.</span><span class="n">is_valid_configuration</span><span class="p">()</span>
+
+<span class="n">pipeline</span><span class="p">,</span> <span class="n">run_info</span><span class="p">,</span> <span class="n">run_value</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">fit_pipeline</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_train</span><span class="p">,</span>
+                                                 <span class="n">dataset_name</span><span class="o">=</span><span class="s1">&#39;kr-vs-kp&#39;</span><span class="p">,</span>
+                                                 <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+                                                 <span class="n">X_test</span><span class="o">=</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="o">=</span><span class="n">y_test</span><span class="p">)</span>
+
+<span class="c1"># This object complies with Scikit-Learn Pipeline API.</span>
+<span class="c1"># https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">named_steps</span><span class="p">)</span>
+
+<span class="c1"># The fit_pipeline command also returns a named tuple with the pipeline constraints</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">run_info</span><span class="p">)</span>
+
+<span class="c1"># The fit_pipeline command also returns a named tuple with train/test performance</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">run_value</span><span class="p">)</span>
+
+<span class="c1"># We can make sure that our pipeline configuration was honored as follows</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Passed Configuration:&quot;</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Random Forest:&quot;</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">named_steps</span><span class="p">[</span><span class="s1">&#39;classifier&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">choice</span><span class="o">.</span><span class="n">estimator</span><span class="p">)</span>
+
+<span class="c1"># We can also search for new configurations using the fit() method</span>
+<span class="c1"># Any configurations found by Auto-Sklearn -- even the ones created using</span>
+<span class="c1"># fit_pipeline() are stored to disk and can be used for Ensemble Selection</span>
+<span class="n">cs</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dataset_name</span><span class="o">=</span><span class="s1">&#39;kr-vs-kp&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{&#39;data_preprocessing&#39;: DataPreprocessor(categorical_features=[True, True, True, True, True, True, True,
+                                       True, True, True, True, True, True, True,
+                                       True, True, True, True, True, True, True,
+                                       True, True, True, True, True, True, True,
+                                       True, True, ...],
+                 column_transformer=ColumnTransformer(sparse_threshold=0.0,
+                                                      transformers=[[&#39;categorical_transformer&#39;,
+                                                                     CategoricalPreprocessingPipeline(config=Configuration:
+  cat...
+  categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Value: 0.0058861616832788805
+  numerical_transformer:imputation:strategy, Value: &#39;median&#39;
+  numerical_transformer:rescaling:__choice__, Value: &#39;normalize&#39;
+,
+                 dataset_properties={&#39;multiclass&#39;: False, &#39;multilabel&#39;: False,
+                                     &#39;signed&#39;: False, &#39;sparse&#39;: False,
+                                     &#39;target_type&#39;: &#39;classification&#39;,
+                                     &#39;task&#39;: 1}), &#39;balancing&#39;: Balancing(), &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fe22878a850&gt;, &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fe22878a100&gt;}
+RunInfo(config=Configuration:
+  balancing:strategy, Value: &#39;none&#39;
+  classifier:__choice__, Value: &#39;random_forest&#39;
+  classifier:random_forest:bootstrap, Value: &#39;True&#39;
+  classifier:random_forest:criterion, Value: &#39;gini&#39;
+  classifier:random_forest:max_depth, Constant: &#39;None&#39;
+  classifier:random_forest:max_features, Value: 0.8587555448775175
+  classifier:random_forest:max_leaf_nodes, Constant: &#39;None&#39;
+  classifier:random_forest:min_impurity_decrease, Constant: 0.0
+  classifier:random_forest:min_samples_leaf, Value: 18
+  classifier:random_forest:min_samples_split, Value: 11
+  classifier:random_forest:min_weight_fraction_leaf, Constant: 0.0
+  data_preprocessing:categorical_transformer:categorical_encoding:__choice__, Value: &#39;one_hot_encoding&#39;
+  data_preprocessing:categorical_transformer:category_coalescence:__choice__, Value: &#39;minority_coalescer&#39;
+  data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Value: 0.0058861616832788805
+  data_preprocessing:numerical_transformer:imputation:strategy, Value: &#39;median&#39;
+  data_preprocessing:numerical_transformer:rescaling:__choice__, Value: &#39;normalize&#39;
+  feature_preprocessor:__choice__, Value: &#39;pca&#39;
+  feature_preprocessor:pca:keep_variance, Value: 0.6467333928550365
+  feature_preprocessor:pca:whiten, Value: &#39;False&#39;
+, instance=None, instance_specific=None, seed=1, cutoff=60, capped=False, budget=0.0, source_id=0)
+RunValue(cost=0.1080568720379147, time=4.890284538269043, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1618303959.7865906, endtime=1618303964.6960573, additional_info={&#39;duration&#39;: 4.8417136669158936, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.07519850537132178, &#39;configuration_origin&#39;: None})
+Passed Configuration: Configuration:
+  balancing:strategy, Value: &#39;none&#39;
+  classifier:__choice__, Value: &#39;random_forest&#39;
+  classifier:random_forest:bootstrap, Value: &#39;True&#39;
+  classifier:random_forest:criterion, Value: &#39;gini&#39;
+  classifier:random_forest:max_depth, Constant: &#39;None&#39;
+  classifier:random_forest:max_features, Value: 0.8587555448775175
+  classifier:random_forest:max_leaf_nodes, Constant: &#39;None&#39;
+  classifier:random_forest:min_impurity_decrease, Constant: 0.0
+  classifier:random_forest:min_samples_leaf, Value: 18
+  classifier:random_forest:min_samples_split, Value: 11
+  classifier:random_forest:min_weight_fraction_leaf, Constant: 0.0
+  data_preprocessing:categorical_transformer:categorical_encoding:__choice__, Value: &#39;one_hot_encoding&#39;
+  data_preprocessing:categorical_transformer:category_coalescence:__choice__, Value: &#39;minority_coalescer&#39;
+  data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Value: 0.0058861616832788805
+  data_preprocessing:numerical_transformer:imputation:strategy, Value: &#39;median&#39;
+  data_preprocessing:numerical_transformer:rescaling:__choice__, Value: &#39;normalize&#39;
+  feature_preprocessor:__choice__, Value: &#39;pca&#39;
+  feature_preprocessor:pca:keep_variance, Value: 0.6467333928550365
+  feature_preprocessor:pca:whiten, Value: &#39;False&#39;
+
+Random Forest: RandomForestClassifier(max_features=6, min_samples_leaf=18,
+                       min_samples_split=11, n_estimators=512, n_jobs=1,
+                       random_state=RandomState(MT19937) at 0x7FE2286B0740,
+                       warm_start=True)
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  14.793 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-single-configuration-py">
+<div class="binder-badge docutils container">
+<a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_single_configuration.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/b71f91b170d4a46b842cd9568511ced2/example_single_configuration.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_single_configuration.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/83b132442a977189d27fd09560b2bd34/example_single_configuration.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">example_single_configuration.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="../../_sources/examples/40_advanced/example_single_configuration.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
