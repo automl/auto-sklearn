@@ -723,6 +723,10 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
     )
     estimator = AutoSklearnClassifier if task_type == 'classification' else AutoSklearnRegressor
     seed = 3
+    if task_type == "classification":
+        include = {'classifier': ['random_forest']}
+    else:
+        include = {'regressor': ['random_forest']}
     automl = estimator(
         time_left_for_this_task=120,
         # Time left for task plays no role
@@ -730,7 +734,7 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
         per_run_time_limit=30,
         ensemble_size=0,
         dask_client=dask_client,
-        include={'classifier': ['random_forest']},
+        include=include,
         seed=seed,
         # We cannot get the configuration space with 'test' not fit with it
         resampling_strategy=resampling_strategy if resampling_strategy != 'test' else 'holdout',
