@@ -420,7 +420,7 @@ class EnsembleBuilder(object):
             performance_range_threshold: float
                 Keep only models that are better than:
                     dummy + (best - dummy)*performance_range_threshold
-                E.g dummy=2, best=4, thresh=0.5 --> only consider models with score > 3
+                E.g dummy=2, best=4, thresh=0.5 --> only consider models with loss > 3
                 Will at most return the minimum between ensemble_nbest models,
                 and max_models_on_disc. Might return less
             seed: int
@@ -978,7 +978,7 @@ class EnsembleBuilder(object):
             # no model left; try to use dummy loss (num_run==0)
             # log warning when there are other models but not better than dummy model
             if num_keys > num_dummy:
-                self.logger.warning("No models better than random - using Dummy Score!"
+                self.logger.warning("No models better than random - using Dummy loss!"
                                     "Number of models besides current dummy model: %d. "
                                     "Number of dummy models: %d",
                                     num_keys - 1,
@@ -1105,8 +1105,7 @@ class EnsembleBuilder(object):
                 #  only if the model ends up in the ensemble
                 self.read_losses[k]['loaded'] = 1
 
-        # return best scored keys of self.read_losses
-        # That is, the one with the lowest loss
+        # return keys of self.read_losses with lowest losses
         return sorted_keys[:ensemble_n_best]
 
     def get_valid_test_preds(self, selected_keys: List[str]) -> Tuple[List[str], List[str]]:

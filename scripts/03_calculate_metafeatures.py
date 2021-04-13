@@ -38,13 +38,13 @@ def calculate_metafeatures(task_id):
 
     _metafeatures_labels = _calculate_metafeatures(
         x_train=X_train, y_train=y_train, data_feat_type=cat,
-        data_info_task=task_type, basename=dataset_name, logger=logger,
+        data_info_task=task_type, basename=dataset_name, logger_=logger,
         watcher=watch,
     )
 
     _metafeatures_encoded_labels = _calculate_metafeatures_encoded(
         x_train=X_train, y_train=y_train, data_feat_type=cat,
-        task=task_type, basename=dataset_name, logger=logger,
+        task=task_type, basename=dataset_name, logger_=logger,
         watcher=watch,
     )
 
