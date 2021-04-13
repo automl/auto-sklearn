@@ -814,7 +814,7 @@ class AutoML(BaseEstimator):
 
     @staticmethod
     def subsample_if_too_large(X, y, logger, seed, memory_limit, task):
-        if isinstance(X, np.ndarray):
+        if memory_limit and isinstance(X, np.ndarray):
             if X.dtype == np.float32:
                 multiplier = 4
             elif X.dtype in (np.float64, np.float):
