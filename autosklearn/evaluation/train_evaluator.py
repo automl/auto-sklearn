@@ -386,10 +386,12 @@ class TrainEvaluator(AbstractEvaluator):
 
                     # Compute weights of each fold based on the number of samples in each
                     # fold.
-                    train_fold_weights = [w / sum(train_fold_weights)
-                                          for w in train_fold_weights]
-                    opt_fold_weights = [w / sum(opt_fold_weights)
-                                        for w in opt_fold_weights]
+                    train_fold_weights_percentage = [
+                        w / sum(train_fold_weights) for w in train_fold_weights
+                    ]
+                    opt_fold_weights_percentage = [
+                        w / sum(opt_fold_weights) for w in opt_fold_weights
+                    ]
 
                     # train_losses is a list of either scalars or dicts. If it contains
                     # dicts, then train_loss is computed using the target metric
@@ -397,10 +399,10 @@ class TrainEvaluator(AbstractEvaluator):
                     if all(isinstance(elem, dict) for elem in train_losses):
                         train_loss = np.average([train_losses[i][str(self.metric)]
                                                  for i in range(self.num_cv_folds)],
-                                                weights=train_fold_weights,
+                                                weights=train_fold_weights_percentage,
                                                 )
                     else:
-                        train_loss = np.average(train_losses, weights=train_fold_weights)
+                        train_loss = np.average(train_losses, weights=train_fold_weights_percentage)
 
                     # if all_scoring_function is true, return a dict of opt_loss.
                     # Otherwise, return a scalar.
@@ -412,10 +414,10 @@ class TrainEvaluator(AbstractEvaluator):
                                     opt_losses[i][metric]
                                     for i in range(self.num_cv_folds)
                                 ],
-                                weights=opt_fold_weights,
+                                weights=opt_fold_weights_percentage,
                             )
                     else:
-                        opt_loss = np.average(opt_losses, weights=opt_fold_weights)
+                        opt_loss = np.average(opt_losses, weights=opt_fold_weights_percentage)
 
                     Y_targets = self.Y_targets
                     Y_train_targets = self.Y_train_targets

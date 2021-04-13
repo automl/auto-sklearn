@@ -57,6 +57,9 @@ class MyDummyClassifier(DummyClassifier):
             super(MyDummyClassifier, self).__init__(strategy="most_frequent")
         self.random_state = random_state
         self.init_params = init_params
+        self.dataset_properties = dataset_properties
+        self.include = include
+        self.exclude = exclude
 
     def pre_transform(
         self,
@@ -110,6 +113,9 @@ class MyDummyRegressor(DummyRegressor):
             super(MyDummyRegressor, self).__init__(strategy='median')
         self.random_state = random_state
         self.init_params = init_params
+        self.dataset_properties = dataset_properties
+        self.include = include
+        self.exclude = exclude
 
     def pre_transform(
         self,

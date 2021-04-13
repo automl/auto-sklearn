@@ -3,7 +3,6 @@ import unittest
 import numpy as np
 
 import scipy.sparse
-import openml
 import sklearn.tree
 import sklearn.datasets
 import sklearn.model_selection
@@ -91,8 +90,8 @@ class TestSparseOneHotEncoder(unittest.TestCase):
         self.assertEqual(3, np.sum(output))
 
     def test_classification_workflow(self):
-        task = openml.tasks.get_task(254)
-        X, y = task.get_X_and_y()
+        X, y = sklearn.datasets.fetch_openml(data_id=24, as_frame=False, return_X_y=True)
+        print(type(X))
 
         X_train, X_test, y_train, y_test = \
             sklearn.model_selection.train_test_split(X, y, random_state=3,
