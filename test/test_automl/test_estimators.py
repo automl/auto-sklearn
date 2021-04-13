@@ -730,7 +730,7 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
         per_run_time_limit=30,
         ensemble_size=0,
         dask_client=dask_client,
-        include_estimators=['random_forest'],
+        include={'classifier': ['random_forest']},
         seed=seed,
         # We cannot get the configuration space with 'test' not fit with it
         resampling_strategy=resampling_strategy if resampling_strategy != 'test' else 'holdout',
