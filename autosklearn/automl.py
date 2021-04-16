@@ -499,6 +499,8 @@ class AutoML(BaseEstimator):
         if X_test is not None:
             X_test, y_test = self.InputValidator.transform(X_test, y_test)
 
+        self._task = task
+
         X, y = self.subsample_if_too_large(
             X=X,
             y=y,
@@ -625,8 +627,6 @@ class AutoML(BaseEstimator):
         )
 
         self._backend._make_internals_directory()
-
-        self._task = datamanager.info['task']
         self._label_num = datamanager.info['label_num']
 
         # == Pickle the data manager to speed up loading
@@ -840,7 +840,14 @@ class AutoML(BaseEstimator):
         return
 
     @staticmethod
-    def subsample_if_too_large(X, y, logger, seed, memory_limit, task):
+    def subsample_if_too_large(
+        X: SUPPORTED_FEAT_TYPES,
+        y: SUPPORTED_TARGET_TYPES,
+        logger,
+        seed: int,
+        memory_limit: int,
+        task: int,
+    ):
         if memory_limit and isinstance(X, np.ndarray):
             if X.dtype == np.float32:
                 multiplier = 4
@@ -884,12 +891,14 @@ class AutoML(BaseEstimator):
                             train_size=new_num_samples,
                             random_state=seed,
                         )
-                else:
+                elif task in REGRESSION_TASKS:
                     X, _, y, _ = sklearn.model_selection.train_test_split(
                         X, y,
                         train_size=new_num_samples,
                         random_state=seed,
                     )
+                else:
+                    raise ValueError(task)
         return X, y
 
     def refit(self, X, y):
