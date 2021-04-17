@@ -44,12 +44,12 @@ If the ``pip3`` installation command fails, make sure you have the `System requi
 Ubuntu installation
 ===================
 
-To provide a C++11 building environment and the lateste SWIG version on Ubuntu,
+To provide Python 3, a C++11 building environment and the latest SWIG version on Ubuntu,
 run:
 
 .. code:: bash
 
-    sudo apt-get install build-essential swig
+    sudo apt-get install build-essential swig python3-dev
 
 
 Anaconda installation

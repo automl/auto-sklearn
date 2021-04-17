@@ -139,29 +139,21 @@ if __name__ == '__main__':
             stats.submitted_ta_runs += 1
             stats.finished_ta_runs += 1
             memory_lim = memory_limit_factor * automl_arguments['memory_limit']
-            ta = ExecuteTaFuncWithQueue(backend=automl.automl_._backend,
-                                        port=None,
-                                        autosklearn_seed=seed,
-                                        resampling_strategy='test',
-                                        memory_limit=memory_lim,
-                                        disable_file_output=True,
-                                        logger=logger,
-                                        stats=stats,
-                                        scoring_functions=scoring_functions,
-                                        include=include,
-                                        metric=automl_arguments['metric'],
-                                        cost_for_crash=get_cost_of_crash(automl_arguments['metric']),
-                                        abort_on_first_run_crash=False,
-                                        pynisher_context='spawn')
-            run_info, run_value = ta.run_wrapper(
-                RunInfo(
-                    config=config,
-                    instance=None,
-                    instance_specific=None,
-                    seed=1,
-                    cutoff=per_run_time_limit*3,
-                    capped=False,
-                )
+
+            pipeline, run_info, run_value = automl.fit_pipeline(
+                X=X_train, y=y_train,
+                X_test=X_test, y_test=y_test,
+                resampling_strategy='test',
+                memory_limit=memory_lim,
+                disable_file_output=True,
+                logger=logger,
+                stats=stats,
+                scoring_functions=scoring_functions,
+                include=include,
+                metric=automl_arguments['metric'],
+                pynisher_context='spawn',
+                cutoff=per_run_time_limit*3,
+                config=config,
             )
 
             if run_value.status == StatusType.SUCCESS:
