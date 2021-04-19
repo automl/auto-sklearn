@@ -74,7 +74,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         self._output_dtype = np.int32
         super().__init__(
             config, steps, dataset_properties, include, exclude,
-            random_state, init_params)
+            random_state, init_params, 'classification')
 
     def fit_transformer(self, X, y, fit_params=None):
 

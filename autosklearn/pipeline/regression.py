@@ -73,7 +73,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
             config=config, steps=steps,
             dataset_properties=dataset_properties,
             include=include, exclude=exclude, random_state=random_state,
-            init_params=init_params)
+            init_params=init_params, target_type='regression')
 
     def fit_estimator(self, X, y, **fit_params):
         self.y_max_ = np.nanmax(y)

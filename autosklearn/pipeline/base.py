@@ -19,13 +19,15 @@ class BasePipeline(Pipeline):
 
     def __init__(self, config=None, steps=None, dataset_properties=None,
                  include=None, exclude=None, random_state=None,
-                 init_params=None):
+                 init_params=None, target_type=None):
 
         self.init_params = init_params if init_params is not None else {}
         self.include = include if include is not None else {}
         self.exclude = exclude if exclude is not None else {}
         self.dataset_properties = dataset_properties if \
             dataset_properties is not None else {}
+        if target_type and 'target_type' not in self.dataset_properties:
+            self.dataset_properties['target_type'] = target_type
 
         if steps is None:
             self.steps = self._get_pipeline_steps(dataset_properties=dataset_properties)
@@ -457,8 +459,35 @@ class BasePipeline(Pipeline):
         return self._additional_run_info
 
     def _validate_include_exclude_params(self):
-        steps = [step[0] for step in self.steps]
-        for node in list(self.include.keys()) + list(self.exclude.keys()):
-            if node not in steps:
-                raise ValueError("Component {0} in not part for pipeline steps {1}"
-                                 .format(node, str(steps)))
+        if self.include is not None and self.exclude is not None:
+            for key in self.include.keys():
+                if key in self.exclude.keys():
+                    raise ValueError("Cannot specify include and exclude for same step '{}'."
+                                     .format(key))
+
+        supported_steps = {step[0]: step[1] for step in self.steps
+                           if isinstance(step[1], AutoSklearnChoice)}
+        for arg in ['include', 'exclude']:
+            argument = getattr(self, arg)
+            if not argument:
+                continue
+            for key in list(argument.keys()):
+                if key not in supported_steps:
+                    raise ValueError("The provided key '{}' in the '{}' argument is not valid. The "
+                                     "only supported keys for this task are {}"
+                                     .format(key, arg, list(supported_steps.keys())))
+
+                candidate_components = argument[key]
+                if not (isinstance(candidate_components, list) and candidate_components):
+                    raise ValueError("The provided value of the key '{}' in the '{}' argument is not "
+                                     "valid. The value must be a non-empty list."
+                                     .format(key, arg))
+
+                available_components = list(supported_steps[key].get_available_components(
+                    dataset_properties=self.dataset_properties).keys())
+                for component in candidate_components:
+                    if component not in available_components:
+                        raise ValueError("The provided component '{}' for the key '{}' in the '{}'"
+                                         " argument is not valid. The supported components for the "
+                                         "step '{}' for this task are {}"
+                                         .format(component, key, arg, key, available_components))

@@ -28,12 +28,6 @@ def get_configuration_space(info: Dict[str, Any],
                             exclude: Optional[Dict[str, List[str]]] = None,
                             ) -> ConfigurationSpace:
 
-    if include is not None and exclude is not None:
-        for node in include.keys():
-            if node in exclude.keys():
-                raise ValueError('Cannot specify include and exclude for same step {0}.'
-                                 .format(node))
-
     if info['task'] in REGRESSION_TASKS:
         return _get_regression_configuration_space(info, include, exclude)
     else:
@@ -78,8 +72,6 @@ def _get_classification_configuration_space(info: Dict[str, Any],
 
     if task_type == MULTILABEL_CLASSIFICATION:
         multilabel = True
-    if task_type == REGRESSION:
-        raise NotImplementedError()
     if task_type == MULTICLASS_CLASSIFICATION:
         multiclass = True
     if task_type == BINARY_CLASSIFICATION:

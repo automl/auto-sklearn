@@ -409,11 +409,6 @@ class AutoMLSMBO(object):
         # evaluator, which takes into account that a run can be killed prior
         # to the model being fully fitted; thus putting intermediate results
         # into a queue and querying them once the time is over
-        if self.include is not None and self.exclude is not None:
-            for node in self.include.keys():
-                if node in self.exclude.keys():
-                    raise ValueError('Cannot specify include and exclude for same step {0}.'
-                                     .format(node))
 
         ta_kwargs = dict(
             backend=copy.deepcopy(self.backend),
