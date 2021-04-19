@@ -426,10 +426,6 @@ def test_do_dummy_prediction(backend, dask_client, datasets):
         'predictions_ensemble_1_1_0.0.npy')
     )
 
-    model_path = os.path.join(backend.temporary_directory, '.auto-sklearn',
-                              'runs', '1_1_0.0',
-                              '1.1.0.0.model')
-
     auto._clean_logger()
 
     del auto
