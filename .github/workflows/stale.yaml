@@ -18,5 +18,5 @@ jobs:
           close-issue-message: >
             This issue has been automatically closed due to inactivity.
           stale-issue-label: 'stale'
-          only-issue-labels: 'Answered,Feedback-Required,invalid,wontfix'
+          exempt-issue-labels: 'bug,document-this,enhancement,help-wanted,Need-contributor'
           exempt-all-milestones: true
