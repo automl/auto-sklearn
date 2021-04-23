@@ -50,7 +50,9 @@ class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest,
         X_sparse[NaNs] = 0
         X_sparse = sparse.csr_matrix(X_sparse)
 
-        ohe = DataPreprocessor(categorical_features=self.categorical)
+        ohe = DataPreprocessor(feat_type={
+            i: 'categorical' if feat else 'numerical' for i, feat in enumerate(self.categorical)
+        })
         X_transformed = X_sparse.copy()
         X_transformed = ohe.fit_transform(X_transformed)
         imp = SimpleImputer(copy=False)

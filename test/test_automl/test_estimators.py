@@ -790,3 +790,65 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
             assert os.path.exists(cv_model_path)
         elif resampling_strategy == 'holdout':
             assert not os.path.exists(cv_model_path)
+
+
+@pytest.mark.parametrize("data_type", ['pandas', 'numpy'])
+@pytest.mark.parametrize("include_categorical", [True, False])
+def test_pass_categorical_and_numeric_columns_to_pipeline(
+        dask_client, data_type, include_categorical):
+
+    # Prepare the training data
+    X, y = sklearn.datasets.make_classification()
+    feat_type = None
+    if 'pandas' in data_type:
+        X = pd.DataFrame(X)
+        y = pd.DataFrame(y, dtype="category")
+        if include_categorical:
+            cat_name = X.shape[1]
+            X[cat_name] = 'A'
+            X[cat_name] = X[cat_name].astype('category')
+    elif 'numpy' in data_type:
+        if include_categorical:
+            feat_type = ['numerical' for x in range(np.shape(X)[1])]
+            feat_type.append('categorical')
+            temporal = np.zeros((X.shape[0], X.shape[1]+1))
+            temporal[:, :-1] = X
+            X = temporal
+    else:
+        pytest.fail()
+
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+        X, y, test_size=0.5, random_state=3
+    )
+
+    seed = 3
+    automl = AutoSklearnClassifier(
+        time_left_for_this_task=120,
+        # Time left for task plays no role
+        # only per run time limit
+        per_run_time_limit=30,
+        ensemble_size=0,
+        dask_client=dask_client,
+        include_estimators=['random_forest'],
+        seed=seed,
+    )
+    config = automl.get_configuration_space(X_train, y_train,
+                                            feat_type=feat_type,
+                                            X_test=X_test, y_test=y_test,
+                                            ).get_default_configuration()
+
+    pipeline, run_info, run_value = automl.fit_pipeline(X=X_train, y=y_train, config=config,
+                                                        feat_type=feat_type,
+                                                        X_test=X_test, y_test=y_test)
+
+    # We should produce a decent result
+    assert run_value.cost < 0.4, f"{run_value}/{run_value.additional_info}"
+    prediction = pipeline.predict(automl.automl_.InputValidator.feature_validator.transform(X))
+    print(prediction)
+    assert np.shape(prediction)[0], np.shape(y)[0]
+
+    print(vars(pipeline.named_steps['data_preprocessing']))
+    if include_categorical:
+        expected_dict = {i: 'numerical' for i in range(np.shape(X)[1] - 1)}
+        expected_dict[X.shape[1] - 1] = 'categorical'
+        assert expected_dict == pipeline.named_steps['data_preprocessing'].categorical_features

@@ -439,7 +439,7 @@ def test_fail_if_dummy_prediction_fails(ta_run_mock, backend, dask_client):
         X_train, Y_train,
         X_test, Y_test,
         task=2,
-        feat_type=['Numerical' for i in range(X_train.shape[1])],
+        feat_type={i: 'Numerical' for i in range(X_train.shape[1])},
         dataset_name='iris',
     )
 

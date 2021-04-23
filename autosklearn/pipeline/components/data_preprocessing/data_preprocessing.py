@@ -1,5 +1,3 @@
-import numpy as np
-
 import sklearn.compose
 from scipy import sparse
 
@@ -22,17 +20,12 @@ class DataPreprocessor(AutoSklearnComponent):
 
     def __init__(self, config=None, pipeline=None, dataset_properties=None, include=None,
                  exclude=None, random_state=None, init_params=None,
-                 categorical_features=None, force_sparse_output=False,
+                 feat_type=None, force_sparse_output=False,
                  column_transformer=None):
 
         if pipeline is not None:
             raise ValueError("DataPreprocessor's argument 'pipeline' should be None")
 
-        if categorical_features is not None:
-            categorical_features = np.array(categorical_features)
-            if categorical_features.dtype != 'bool':
-                raise ValueError('Parameter categorical_features must'
-                                 ' only contain booleans.')
         self.config = config
         self.pipeline = pipeline
         self.dataset_properties = dataset_properties
@@ -40,7 +33,7 @@ class DataPreprocessor(AutoSklearnComponent):
         self.exclude = exclude
         self.random_state = random_state
         self.init_params = init_params
-        self.categorical_features = categorical_features
+        self.feat_type = feat_type
         self.force_sparse_output = force_sparse_output
 
         # The pipeline that will be applied to the categorical features (i.e. columns)
@@ -75,26 +68,30 @@ class DataPreprocessor(AutoSklearnComponent):
 
     def fit(self, X, y=None):
 
+        categorical_features = []
+        numerical_features = []
+        if self.feat_type is not None:
+            categorical_features = [key for key, value in self.feat_type.items()
+                                    if value.lower() == 'categorical']
+            numerical_features = [key for key, value in self.feat_type.items()
+                                  if value.lower() == 'numerical']
+
         n_feats = X.shape[1]
-        # If categorical_features is none or an array made just of False booleans, then
-        # only the numerical transformer is used
-        numerical_features = np.logical_not(self.categorical_features)
-        if self.categorical_features is None or np.all(numerical_features):
+        # If no categorical features, assume we have a numerical only pipeline
+        if len(categorical_features) == 0:
             sklearn_transf_spec = [
                 ["numerical_transformer", self.numer_ppl, [True] * n_feats]
             ]
         # If all features are categorical, then just the categorical transformer is used
-        elif np.all(self.categorical_features):
+        elif len(numerical_features) == 0:
             sklearn_transf_spec = [
                 ["categorical_transformer", self.categ_ppl, [True] * n_feats]
             ]
         # For the other cases, both transformers are used
         else:
-            cat_feats = self.categorical_features
-            num_feats = np.logical_not(self.categorical_features)
             sklearn_transf_spec = [
-                ["categorical_transformer", self.categ_ppl, cat_feats],
-                ["numerical_transformer", self.numer_ppl, num_feats]
+                ["categorical_transformer", self.categ_ppl, categorical_features],
+                ["numerical_transformer", self.numer_ppl, numerical_features]
             ]
 
         self.sparse_ = sparse.issparse(X) or self.force_sparse_output
@@ -131,8 +128,8 @@ class DataPreprocessor(AutoSklearnComponent):
                 'output': (INPUT,), }
 
     def set_hyperparameters(self, configuration, init_params=None):
-        if init_params is not None and 'categorical_features' in init_params.keys():
-            self.categorical_features = init_params['categorical_features']
+        if init_params is not None and 'feat_type' in init_params.keys():
+            self.feat_type = init_params['feat_type']
 
         self.config = configuration
 

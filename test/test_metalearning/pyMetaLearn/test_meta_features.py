@@ -39,7 +39,9 @@ class MetaFeaturesTest(TestCase):
         X = data[:, :-1]
         y = data[:, -1].reshape((-1,))
 
-        DPP = DataPreprocessor(categorical_features=self.categorical)
+        DPP = DataPreprocessor(feat_type={
+            i: 'categorical' if feat else 'numerical' for i, feat in enumerate(self.categorical)
+        })
         X_transformed = DPP.fit_transform(X)
 
         # Transform the array which indicates the categorical metafeatures

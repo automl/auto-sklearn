@@ -10,6 +10,9 @@ from autosklearn.pipeline.components.data_preprocessing.minority_coalescense \
     import CoalescenseChoice
 from autosklearn.pipeline.components.data_preprocessing.categorical_encoding \
     import OHEChoice
+from autosklearn.pipeline.components.data_preprocessing.categorical_encoding.encoding import (
+    OrdinalEncoding
+)
 
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
@@ -93,8 +96,9 @@ class CategoricalPreprocessingPipeline(BasePipeline):
             default_dataset_properties.update(dataset_properties)
 
         steps.extend([
-            ["category_shift", CategoryShift()],
             ["imputation", CategoricalImputation()],
+            ["encoding", OrdinalEncoding()],
+            ["category_shift", CategoryShift()],
             ["category_coalescence", CoalescenseChoice(default_dataset_properties)],
             ["categorical_encoding", OHEChoice(default_dataset_properties)],
             ])

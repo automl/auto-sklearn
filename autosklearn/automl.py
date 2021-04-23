@@ -537,10 +537,8 @@ class AutoML(BaseEstimator):
         self._dataset_name = dataset_name
         self._stopwatch.start_task(self._dataset_name)
 
-        if feat_type is None and self.InputValidator.feature_validator.feat_type:
-            self._feat_type = self.InputValidator.feature_validator.feat_type
-        elif feat_type is not None:
-            self._feat_type = feat_type
+        # Take the feature types from the validator
+        self._feat_type = self.InputValidator.feature_validator.feat_type
 
         # Produce debug information to the logfile
         self._logger.debug('Starting to print environment information')

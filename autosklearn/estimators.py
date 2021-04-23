@@ -565,6 +565,7 @@ class AutoSklearnEstimator(BaseEstimator):
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
         y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
         dataset_name: Optional[str] = None,
+        feat_type: Optional[List[str]] = None,
     ):
         """
         Returns the Configuration Space object, from which Auto-Sklearn
@@ -590,6 +591,7 @@ class AutoSklearnEstimator(BaseEstimator):
             X, y,
             X_test=X_test, y_test=y_test,
             dataset_name=dataset_name,
+            feat_type=feat_type,
             only_return_configuration_space=True,
         ) if self.automl_.configuration_space is None else self.automl_.configuration_space
 

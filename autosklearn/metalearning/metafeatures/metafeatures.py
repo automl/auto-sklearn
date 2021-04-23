@@ -1002,7 +1002,9 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name, logger,
                 # sparse matrices because of wrong sparse format)
                 sparse = scipy.sparse.issparse(X)
                 DPP = DataPreprocessor(
-                    categorical_features=categorical, force_sparse_output=True)
+                    feat_type={i: 'categorical' if feat else 'numerical'
+                               for i, feat in enumerate(categorical)},
+                    force_sparse_output=True)
                 X_transformed = DPP.fit_transform(X)
                 categorical_transformed = [False] * X_transformed.shape[1]
 

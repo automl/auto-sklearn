@@ -244,6 +244,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                        True, True, True, True, True, True, True, True, True,
                        True, True, True, True, True, True, True, False,
                        False, False, True, True, True]
+        categorical = {i: 'categorical' if bool_cat else 'numerical'
+                       for i, bool_cat in enumerate(categorical)}
         this_directory = os.path.dirname(__file__)
         X = np.loadtxt(os.path.join(this_directory, "components",
                                     "data_preprocessing", "dataset.pkl"))
@@ -255,7 +257,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 'X_test': X_test, 'Y_test': Y_test}
 
         init_params = {
-            'data_preprocessing:categorical_features':
+            'data_preprocessing:feat_type':
                 categorical
         }
 
@@ -271,21 +273,25 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         with unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline'
                                  '._check_init_params_honored'):
             cls = SimpleClassificationPipeline(
-                init_params={'data_preprocessing:categorical_features': [True, False]}
+                init_params={'data_preprocessing:feat_type': {0: 'categorical',
+                                                              1: 'numerical'}}
             )
 
             self.assertEqual(
                 ohe_mock.call_args[1]['init_params'],
-                {'categorical_features': [True, False]}
+                {'feat_type': {0: 'categorical', 1: 'numerical'}}
             )
             default = cls.get_hyperparameter_search_space().get_default_configuration()
             cls.set_hyperparameters(
                 configuration=default,
-                init_params={'data_preprocessing:categorical_features': [True, True, False]},
+                init_params={'data_preprocessing:feat_type': {0: 'categorical',
+                                                              1: 'categorical',
+                                                              2: 'numerical'}},
             )
             self.assertEqual(
                 ohe_mock.call_args[1]['init_params'],
-                {'categorical_features': [True, True, False]}
+                {'feat_type': {0: 'categorical', 1: 'categorical',
+                               2: 'numerical'}}
             )
 
     def _test_configurations(self, configurations_space, make_sparse=False,
