@@ -1,6 +1,3 @@
-import copy
-import random
-
 import numpy as np
 
 import pandas as pd
@@ -202,10 +199,11 @@ def test_featurevalidator_supported_types(input_data_featuretest):
     transformed_X = validator.transform(input_data_featuretest)
     if sparse.issparse(input_data_featuretest):
         assert sparse.issparse(transformed_X)
+    elif isinstance(input_data_featuretest, list):
+        assert isinstance(transformed_X, pd.DataFrame)
     else:
-        assert isinstance(transformed_X, np.ndarray)
+        assert isinstance(transformed_X, type(input_data_featuretest))
     assert np.shape(input_data_featuretest) == np.shape(transformed_X)
-    assert np.issubdtype(transformed_X.dtype, np.number)
     assert validator._is_fitted
 
 
@@ -285,8 +283,6 @@ def test_featurevalidator_fitontypeA_transformtypeB(input_data_featuretest):
     """
     Check if we can fit in a given type (numpy) yet transform
     if the user changes the type (pandas then)
-
-    This is problematic only in the case we create an encoder
     """
     validator = FeatureValidator()
     validator.fit(input_data_featuretest, input_data_featuretest)
@@ -302,13 +298,12 @@ def test_featurevalidator_fitontypeA_transformtypeB(input_data_featuretest):
         raise ValueError(type(input_data_featuretest))
     transformed_X = validator.transform(complementary_type)
     assert np.shape(input_data_featuretest) == np.shape(transformed_X)
-    assert np.issubdtype(transformed_X.dtype, np.number)
     assert validator._is_fitted
 
 
-def test_featurevalidator_get_columns_to_encode():
+def test_featurevalidatorget_feat_type_from_columns():
     """
-    Makes sure that encoded columns are returned by _get_columns_to_encode
+    Makes sure that encoded columns are returned by get_feat_type_from_columns
     whereas numerical columns are not returned
     """
     validator = FeatureValidator()
@@ -321,10 +316,12 @@ def test_featurevalidator_get_columns_to_encode():
     for col in df.columns:
         df[col] = df[col].astype(col)
 
-    enc_columns, feature_types = validator._get_columns_to_encode(df)
+    feature_types = validator.get_feat_type_from_columns(df)
 
-    assert enc_columns == ['category', 'bool']
-    assert feature_types == ['numerical', 'numerical', 'categorical', 'categorical']
+    assert feature_types == {'int': 'numerical',
+                             'float': 'numerical',
+                             'category': 'categorical',
+                             'bool': 'categorical'}
 
 
 def test_features_unsupported_calls_are_raised():
@@ -352,102 +349,17 @@ def test_features_unsupported_calls_are_raised():
                       )
     with pytest.raises(ValueError, match=r"Cannot call transform on a validator that is not fit"):
         validator.transform(np.array([[1, 2, 3], [4, 5, 6]]))
-    validator.feat_type = ['Numerical']
+    validator = FeatureValidator(feat_type=['Numerical'])
     with pytest.raises(ValueError, match=r"providing the option feat_type to the fit method is.*"):
         validator.fit(pd.DataFrame([[1, 2, 3], [4, 5, 6]]))
     with pytest.raises(ValueError, match=r"Array feat_type does not have same number of.*"):
         validator.fit(np.array([[1, 2, 3], [4, 5, 6]]))
-    validator.feat_type = [1, 2, 3]
+    validator = FeatureValidator(feat_type=[1, 2, 3])
     with pytest.raises(ValueError, match=r"Array feat_type must only contain strings.*"):
         validator.fit(np.array([[1, 2, 3], [4, 5, 6]]))
-    validator.feat_type = ['1', '2', '3']
+    validator = FeatureValidator(feat_type=['1', '2', '3'])
     with pytest.raises(ValueError, match=r"Only `Categorical` and `Numerical` are.*"):
         validator.fit(np.array([[1, 2, 3], [4, 5, 6]]))
-
-
-@pytest.mark.parametrize(
-    'input_data_featuretest',
-    (
-        'numpy_numericalonly_nonan',
-        'numpy_numericalonly_nan',
-        'pandas_numericalonly_nonan',
-        'pandas_numericalonly_nan',
-        'list_numericalonly_nonan',
-        'list_numericalonly_nan',
-        # Category in numpy is handled via feat_type
-        'numpy_categoricalonly_nonan',
-        'numpy_mixed_nonan',
-        'numpy_categoricalonly_nan',
-        'numpy_mixed_nan',
-        'sparse_bsr_nonan',
-        'sparse_bsr_nan',
-        'sparse_coo_nonan',
-        'sparse_coo_nan',
-        'sparse_csc_nonan',
-        'sparse_csc_nan',
-        'sparse_csr_nonan',
-        'sparse_csr_nan',
-        'sparse_dia_nonan',
-        'sparse_dia_nan',
-        'sparse_dok_nonan',
-        'sparse_dok_nan',
-        'sparse_lil_nonan',
-        'sparse_lil_nan',
-    ),
-    indirect=True
-)
-def test_no_encoder_created(input_data_featuretest):
-    """
-    Makes sure that for numerical only features, no encoder is created
-    """
-    validator = FeatureValidator()
-    validator.fit(input_data_featuretest)
-    validator.transform(input_data_featuretest)
-    assert validator.encoder is None
-
-
-@pytest.mark.parametrize(
-    'input_data_featuretest',
-    (
-        'pandas_categoricalonly_nonan',
-        'pandas_mixed_nonan',
-    ),
-    indirect=True
-)
-def test_encoder_created(input_data_featuretest):
-    """
-    This test ensures an encoder is created if categorical data is provided
-    """
-    validator = FeatureValidator()
-    validator.fit(input_data_featuretest)
-    transformed_X = validator.transform(input_data_featuretest)
-    assert validator.encoder is not None
-
-    # Make sure that the encoded features are actually encoded. Categorical columns are at
-    # the start after transformation. In our fixtures, this is also honored prior encode
-    enc_columns, feature_types = validator._get_columns_to_encode(input_data_featuretest)
-
-    # At least one categorical
-    assert 'categorical' in validator.feat_type
-
-    # Numerical if the original data has numerical only columns
-    if np.any([pd.api.types.is_numeric_dtype(input_data_featuretest[col]
-                                             ) for col in input_data_featuretest.columns]):
-        assert 'numerical' in validator.feat_type
-    for i, feat_type in enumerate(feature_types):
-        if 'numerical' in feat_type:
-            np.testing.assert_array_equal(
-                transformed_X[:, i],
-                input_data_featuretest[input_data_featuretest.columns[i]].to_numpy()
-            )
-        elif 'categorical' in feat_type:
-            np.testing.assert_array_equal(
-                transformed_X[:, i],
-                # Expect always 0, 1... because we use a ordinal encoder
-                np.array([0, 1])
-            )
-        else:
-            raise ValueError(feat_type)
 
 
 def test_no_new_category_after_fit():
@@ -461,27 +373,6 @@ def test_no_new_category_after_fit():
     validator.fit(x)
     x['A'] = x['A'].apply(lambda x: x*x)
     validator.transform(x)
-
-
-def test_unknown_encode_value():
-    x = pd.DataFrame([
-        {'a': -41, 'b': -3, 'c': 'a', 'd': -987.2},
-        {'a': -21, 'b': -3, 'c': 'a', 'd': -9.2},
-        {'a': 0, 'b': -4, 'c': 'b', 'd': -97.2},
-        {'a': -51, 'b': -3, 'c': 'a', 'd': 987.2},
-        {'a': 500, 'b': -3, 'c': 'a', 'd': -92},
-    ])
-    x['c'] = x['c'].astype('category')
-    validator = FeatureValidator()
-
-    # Make sure that this value is honored
-    validator.fit(x)
-    x['c'].cat.add_categories(['NA'], inplace=True)
-    x.loc[0, 'c'] = 'NA'  # unknown value
-    x_t = validator.transform(x)
-    # The first row should have a -1 as we added a new categorical there
-    expected_row = [-1, -41, -3, -987.2]
-    assert expected_row == x_t[0].tolist()
 
 
 # Actual checks for the features
@@ -529,20 +420,8 @@ def test_featurevalidator_new_data_after_fit(openml_id,
     # Basic Checking
     if sparse.issparse(input_data_featuretest):
         assert sparse.issparse(transformed_X)
+    elif isinstance(input_data_featuretest, list):
+        assert isinstance(transformed_X, pd.DataFrame)
     else:
-        assert isinstance(transformed_X, np.ndarray)
+        assert isinstance(transformed_X, type(X_train))
     assert np.shape(X_test) == np.shape(transformed_X)
-
-    # And then check proper error messages
-    if train_data_type == 'pandas':
-        old_dtypes = copy.deepcopy(validator.dtypes)
-        validator.dtypes = ['dummy' for dtype in X_train.dtypes]
-        with pytest.raises(ValueError, match=r"hanging the dtype of the features after fit"):
-            transformed_X = validator.transform(X_test)
-        validator.dtypes = old_dtypes
-        if test_data_type == 'pandas':
-            columns = X_test.columns.tolist()
-            random.shuffle(columns)
-            X_test = X_test[columns]
-            with pytest.raises(ValueError, match=r"Changing the column order of the features"):
-                transformed_X = validator.transform(X_test)

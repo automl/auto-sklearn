@@ -851,4 +851,4 @@ def test_pass_categorical_and_numeric_columns_to_pipeline(
     if include_categorical:
         expected_dict = {i: 'numerical' for i in range(np.shape(X)[1] - 1)}
         expected_dict[X.shape[1] - 1] = 'categorical'
-        assert expected_dict == pipeline.named_steps['data_preprocessing'].categorical_features
+        assert expected_dict == pipeline.named_steps['data_preprocessing'].feat_type

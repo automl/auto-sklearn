@@ -93,6 +93,8 @@ class FeatureValidator(BaseEstimator):
         if isinstance(X_train, list):
             X_train, X_test = self.list_to_dataframe(X_train, X_test)
 
+        self._check_data(X_train)
+
         # Handle categorical feature identification for the pipeline
         if hasattr(X_train, "iloc"):
             if self.feat_type is not None:
@@ -125,8 +127,6 @@ class FeatureValidator(BaseEstimator):
                     if ft.lower() not in ['categorical', 'numerical']:
                         raise ValueError('Only `Categorical` and `Numerical` are '
                                          'valid feature types, you passed `%s`' % ft)
-
-        self._check_data(X_train)
 
         if X_test is not None:
             self._check_data(X_test)
@@ -249,7 +249,8 @@ class FeatureValidator(BaseEstimator):
 
             if len(feat_type) > 0:
                 if np.any(pd.isnull(
-                    X[list(feat_type.keys())].dropna(  # type: ignore[call-overload]
+                    X[[key for key, value in feat_type.items() if value == 'categorical']
+                      ].dropna(  # type: ignore[call-overload]
                         axis='columns', how='all')
                 )):
                     # Ignore all NaN columns, and if still a NaN
