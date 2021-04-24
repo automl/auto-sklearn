@@ -4,4 +4,4 @@
 Basic Examples
 ==============
 
-Examples for basic classification, regression and multi-label classification datasets.
+Examples for basic classification, regression, multi-output regression, and multi-label classification datasets.
