@@ -473,14 +473,14 @@ class BasePipeline(Pipeline):
                 continue
             for key in list(argument.keys()):
                 if key not in supported_steps:
-                    raise ValueError("The provided key '{}' in the '{}' argument is not valid. The "
-                                     "only supported keys for this task are {}"
+                    raise ValueError("The provided key '{}' in the '{}' argument is not valid. The"
+                                     " only supported keys for this task are {}"
                                      .format(key, arg, list(supported_steps.keys())))
 
                 candidate_components = argument[key]
                 if not (isinstance(candidate_components, list) and candidate_components):
-                    raise ValueError("The provided value of the key '{}' in the '{}' argument is not "
-                                     "valid. The value must be a non-empty list."
+                    raise ValueError("The provided value of the key '{}' in the '{}' argument is "
+                                     "not valid. The value must be a non-empty list."
                                      .format(key, arg))
 
                 available_components = list(supported_steps[key].get_available_components(
@@ -488,6 +488,6 @@ class BasePipeline(Pipeline):
                 for component in candidate_components:
                     if component not in available_components:
                         raise ValueError("The provided component '{}' for the key '{}' in the '{}'"
-                                         " argument is not valid. The supported components for the "
-                                         "step '{}' for this task are {}"
+                                         " argument is not valid. The supported components for the"
+                                         " step '{}' for this task are {}"
                                          .format(component, key, arg, key, available_components))
