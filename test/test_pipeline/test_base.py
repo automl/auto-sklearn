@@ -155,7 +155,8 @@ class BaseTest(unittest.TestCase):
 
     def test_include_exclude_validation(self):
         """
-        Makes sure include and exclude arguments are validated and raises expected exception on error
+        Makes sure include and exclude arguments are validated and raises expected exception
+        on error
         """
         base = BasePipelineMock()
         dataset_properties = {'target_type': 'classification'}

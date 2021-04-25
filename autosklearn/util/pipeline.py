@@ -10,7 +10,6 @@ from autosklearn.constants import (
     MULTICLASS_CLASSIFICATION,
     MULTILABEL_CLASSIFICATION,
     MULTIOUTPUT_REGRESSION,
-    REGRESSION,
     REGRESSION_TASKS
 )
 from autosklearn.pipeline.classification import SimpleClassificationPipeline
