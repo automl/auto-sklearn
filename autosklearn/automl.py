@@ -1397,6 +1397,66 @@ class AutoML(BaseEstimator):
                                 task_type=self._task,
                                 metric=self._metric, )
 
+    def _get_runhistory_models_performance(self):
+        metric = self._metric
+        data = self.runhistory_.data
+        performance_list = []
+        for run_key, run_value in data.items():
+            if run_value.status != StatusType.SUCCESS:
+                # Ignore crashed runs
+                continue
+            # Alternatively, it is possible to also obtain the start time with ``run_value.starttime``
+            endtime = pd.Timestamp(time.strftime('%Y-%m-%d %H:%M:%S',
+                                                time.localtime(run_value.endtime)))
+            val_score = metric._optimum - (metric._sign * run_value.cost)
+            train_score = metric._optimum - (metric._sign * run_value.additional_info['train_loss'])
+            performance_list.append({
+                'Timestamp': endtime,
+                'single_best_optimization_score': val_score,
+                'single_best_train_score': train_score,
+            })
+            #append test-scores, if data for test_loss are available. This is the case, if X_test and y_test where provided.
+            if 'test_loss' in run_value.additional_info:
+                test_score = metric._optimum - (metric._sign * run_value.additional_info['test_loss'])
+                performance_list.append({
+                    'single_best_test_score': test_score,
+                })
+        return pd.DataFrame(performance_list)
+    
+    @property
+    def performance_over_time_(self):
+        ensemble_performance_frame = pd.DataFrame(self.ensemble_performance_history)
+        best_values = pd.Series({'ensemble_optimization_score': -np.inf,
+                                 'ensemble_test_score': -np.inf})
+        for idx in ensemble_performance_frame.index:
+            if (
+                ensemble_performance_frame.loc[idx, 'ensemble_optimization_score']
+                > best_values['ensemble_optimization_score']
+            ):
+                best_values = ensemble_performance_frame.loc[idx]
+            ensemble_performance_frame.loc[idx] = best_values
+
+        individual_performance_frame = self._get_runhistory_models_performance()
+        best_values = pd.Series({'single_best_optimization_score': -np.inf,
+                                'single_best_test_score': -np.inf,
+                                'single_best_train_score': -np.inf})
+        for idx in individual_performance_frame.index:
+            if (
+                individual_performance_frame.loc[idx, 'single_best_optimization_score']
+                > best_values['single_best_optimization_score']
+            ):
+                best_values = individual_performance_frame.loc[idx]
+            individual_performance_frame.loc[idx] = best_values
+
+        performance_over_time = pd.merge(
+            ensemble_performance_frame,
+            individual_performance_frame,
+            on="Timestamp", how='outer'
+        ).sort_values('Timestamp').fillna(method='ffill')
+
+        return performance_over_time
+
+    
     @property
     def cv_results_(self):
         results = dict()
