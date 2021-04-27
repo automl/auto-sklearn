@@ -532,7 +532,7 @@ class AutoSklearnEstimator(BaseEstimator):
     @property
     def performance_over_time_(self):
         return self.automl_.performance_over_time_
-    
+
     @property
     def cv_results_(self):
         return self.automl_.cv_results_
