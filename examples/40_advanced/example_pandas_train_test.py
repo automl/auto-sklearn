@@ -93,7 +93,7 @@ print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 # The *performance_over_time_* attribute returns a pandas dataframe, which can 
 # be directly used for plotting
 
-poT = automl.performance_over_time_
+poT = cls.performance_over_time_
 poT.plot(
     x='Timestamp',
     kind='line',
