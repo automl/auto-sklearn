@@ -19,16 +19,15 @@
 import datetime
 import os
 import sys
-import sphinx_bootstrap_theme
-import autosklearn
 # Add the parent directory of this file to the PYTHONPATH
-import os
 
 current_directory = os.path.dirname(__file__)
 parent_directory = os.path.join(current_directory, '..')
 parent_directory = os.path.abspath(parent_directory)
 sys.path.append(parent_directory)
+sys.path.append("/home/olive/miniconda3/envs/autosklearn-dev/lib/python3.8/site-packages")
 
+import sphinx_bootstrap_theme
 import autosklearn
 
 # -- General configuration ------------------------------------------------
