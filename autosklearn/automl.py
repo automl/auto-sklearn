@@ -1418,11 +1418,10 @@ class AutoML(BaseEstimator):
             })
             # Append test-scores, if data for test_loss are available.
             # This is the case, if X_test and y_test where provided.
-            test_score = np.nan
             if 'test_loss' in run_value.additional_info:
                 test_score = metric._optimum - (metric._sign *
                                                 run_value.additional_info['test_loss'])
-            performance_list.append({'single_best_test_score': test_score})
+                performance_list.append({'single_best_test_score': test_score})
         return pd.DataFrame(performance_list)
 
     @property
