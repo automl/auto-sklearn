@@ -11,6 +11,10 @@ over train time.  *performance_over_time_* **can** contain multiple metrics, nam
 - single_best_test_score
 - single_best_train_score
 
+*auto-sklearn* can automatically encode categorical columns using a label/ordinal encoder.
+This example highlights how to properly set the dtype in a DataFrame for this to happen,
+and showcase how to input also testing data to autosklearn.
+
 The X_train/y_train arguments to the fit function will be used to fit the scikit-learn model,
 whereas the X_test/y_test will be used to evaluate how good this scikit-learn model generalizes
 to unseen data (i.e. data not in X_train/y_train). Using test data is a good mechanism to measure

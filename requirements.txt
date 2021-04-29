@@ -2,7 +2,7 @@ setuptools
 typing_extensions
 
 numpy>=1.9.0
-scipy>=1.7.0
+scipy>=0.14.1
 
 joblib
 scikit-learn>=0.24.0,<0.25.0
