@@ -4,12 +4,13 @@
 Performance-over-time plot
 ===============================
 This example shows, how to use the *performance_over_time_* attribute to plot the performance
-over train time.  *performance_over_time_* **can** contain multiple metrics, namely:
-- ensemble_optimization_score
-- ensemble_test_score
-- single_best_optimization_score
-- single_best_test_score
-- single_best_train_score
+over train time.  *performance_over_time_* can contain multiple metrics within a pandas dataframe, namely:
+
+    - ensemble_optimization_score
+    - ensemble_test_score
+    - single_best_optimization_score
+    - single_best_test_score
+    - single_best_train_score
 
 *auto-sklearn* can automatically encode categorical columns using a label/ordinal encoder.
 This example highlights how to properly set the dtype in a DataFrame for this to happen,
@@ -21,7 +22,7 @@ to unseen data (i.e. data not in X_train/y_train). Using test data is a good mec
 if the trained model suffers from overfit, and more details can be found on `evaluating estimator
 performance <https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation>`_.
 
-In order to provide *_test_score, X_test and y_test must be provided to the AutoML-Model, as 
+In order to provide *\*_test_score* metrics, X_test and y_test must be provided to the AutoML-Model, as 
 shown in this example.
 """
 import time
