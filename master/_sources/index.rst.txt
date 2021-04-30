@@ -96,7 +96,7 @@ reference to the following paper:
 If you are using Auto-sklearn 2.0, please also cite
 
 
- Auto-Sklearn 2.0: The Next Generation, Feurer *et al.*, to appear (2020).
+ `Auto-Sklearn 2.0: The Next Generation <https://arxiv.org/abs/2007.04074>`_, Feurer *et al.*, (arXiv, 2020).
 
  Bibtex entry::
 
@@ -106,7 +106,7 @@ If you are using Auto-sklearn 2.0, please also cite
                   Falkner, Stefan and Lindauer, Marius and Hutter, Frank},
         booktitle = {Advances in Neural Information Processing Systems 28},
         year = {2020},
-        journal = {arXiv:2006.???? [cs.LG]},
+        journal = {arXiv:2007.04074 [cs.LG]},
      }
 
 Contributing
