@@ -24,6 +24,11 @@ performance <https://scikit-learn.org/stable/modules/cross_validation.html#cross
 
 In order to provide *\*_test_score* metrics, X_test and y_test must be provided to the AutoML-Model, as 
 shown in this example.
+
+There is also support to manually indicate the feature types (whether a column is categorical
+or numerical) via the argument feat_types from fit(). This is important when working with
+list or numpy arrays as there is no per-column dtype (further details in the example
+`Continuous and categorical data <example_feature_types.html>`_).
 """
 import time
 
