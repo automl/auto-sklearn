@@ -41,7 +41,7 @@ from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 from autosklearn.smbo import get_smac_object
 
 sys.path.append(os.path.dirname(__file__))
-from automl_utils import print_debug_information, count_succeses  # noqa (E402: module level import not at top of file)
+from automl_utils import print_debug_information, count_succeses, includes_train_scores, includes_all_scores, include_single_scores  # noqa (E402: module level import not at top of file)
 
 
 def test_fit_n_jobs(tmp_dir):
@@ -118,6 +118,7 @@ def test_fit_n_jobs(tmp_dir):
     assert len(seeds) == 1
 
     assert count_succeses(automl.cv_results_) > 0
+    assert includes_train_scores(automl.performance_over_time_.columns) is True
     # For travis-ci it is important that the client no longer exists
     assert automl.automl_._dask_client is None
 
@@ -260,7 +261,43 @@ def test_type_of_target(mock_estimator):
                     "binary targets")
 
 
-def test_cv_results(tmp_dir):
+def test_performance_over_time(tmp_dir, output_dir):
+    X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+
+    cls = AutoSklearnClassifier(time_left_for_this_task=30,
+                                per_run_time_limit=5,
+                                tmp_folder=tmp_dir,
+                                output_folder=output_dir,
+                                seed=1,)
+
+    cls.fit(X_train, Y_train, X_test, Y_test)
+    performance_over_time = cls.performance_over_time_
+    assert includes_all_scores(performance_over_time.columns) is True
+
+    cls = AutoSklearnClassifier(time_left_for_this_task=30,
+                                per_run_time_limit=5,
+                                tmp_folder=tmp_dir,
+                                output_folder=output_dir,
+                                seed=1,)
+
+    cls.fit(X_train, Y_train)
+    performance_over_time = cls.performance_over_time_
+    assert includes_train_scores(performance_over_time.columns) is True
+
+    cls = AutoSklearnClassifier(time_left_for_this_task=30,
+                                per_run_time_limit=5,
+                                tmp_folder=tmp_dir,
+                                output_folder=output_dir,
+                                seed=1,
+                                initial_configurations_via_metalearning=0,
+                                ensemble_size=0,)
+
+    cls.fit(X_train, Y_train, X_test, Y_test)
+    performance_over_time = cls.performance_over_time_
+    assert include_single_scores(performance_over_time.columns) is True
+
+
+def test_cv_results(tmp_dir, output_dir):
     # TODO restructure and actually use real SMAC output from a long run
     # to do this unittest!
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
@@ -528,6 +565,7 @@ def test_can_pickle_classifier(tmp_dir, dask_client):
                                                       initial_predictions)
     assert initial_accuracy >= 0.75
     assert count_succeses(automl.cv_results_) > 0
+    assert includes_train_scores(automl.performance_over_time_.columns) is True
 
     # Test pickle
     dump_file = os.path.join(tmp_dir, 'automl.dump.pkl')
@@ -573,6 +611,7 @@ def test_multilabel(tmp_dir, dask_client):
     predictions = automl.predict(X_test)
     assert predictions.shape == (50, 3), print_debug_information(automl)
     assert count_succeses(automl.cv_results_) > 0,  print_debug_information(automl)
+    assert includes_train_scores(automl.performance_over_time_.columns) is True
 
     score = f1_macro(Y_test, predictions)
     assert score >= 0.9, print_debug_information(automl)
@@ -601,6 +640,7 @@ def test_binary(tmp_dir, dask_client):
     score = accuracy(Y_test, predictions)
     assert score > 0.9, print_debug_information(automl)
     assert count_succeses(automl.cv_results_) > 0, print_debug_information(automl)
+    assert includes_all_scores(automl.performance_over_time_.columns) is True
 
 
 def test_classification_pandas_support(tmp_dir, dask_client):
@@ -640,6 +680,7 @@ def test_classification_pandas_support(tmp_dir, dask_client):
     prediction = automl.predict(X)
     assert accuracy(y, prediction) > 0.555
     assert count_succeses(automl.cv_results_) > 0
+    assert includes_train_scores(automl.performance_over_time_.columns) is True
 
 
 def test_regression(tmp_dir, dask_client):
@@ -662,6 +703,7 @@ def test_regression(tmp_dir, dask_client):
     # constraint. With more time_left_for_this_task this is no longer an issue
     assert score >= -37, print_debug_information(automl)
     assert count_succeses(automl.cv_results_) > 0
+    assert includes_train_scores(automl.performance_over_time_.columns) is True
 
 
 def test_cv_regression(tmp_dir, dask_client):
@@ -685,6 +727,7 @@ def test_cv_regression(tmp_dir, dask_client):
     score = r2(Y_test, predictions)
     assert score >= 0.1, print_debug_information(automl)
     assert count_succeses(automl.cv_results_) > 0, print_debug_information(automl)
+    assert includes_train_scores(automl.performance_over_time_.columns) is True
 
 
 def test_regression_pandas_support(tmp_dir, dask_client):
@@ -716,6 +759,7 @@ def test_regression_pandas_support(tmp_dir, dask_client):
     # Make sure that at least better than random.
     assert r2(y, automl.predict(X)) > 0.5, print_debug_information(automl)
     assert count_succeses(automl.cv_results_) > 0, print_debug_information(automl)
+    assert includes_train_scores(automl.performance_over_time_.columns) is True
 
 
 def test_autosklearn_classification_methods_returns_self(dask_client):
