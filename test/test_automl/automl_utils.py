@@ -66,7 +66,7 @@ def _includes(scores, all_scores):
 
     for score in all_scores:
         if score not in scores:
-            return score
+            return False
 
     return True
 
