@@ -34,7 +34,7 @@ from autosklearn.constants import (
 from smac.tae import StatusType
 
 sys.path.append(os.path.dirname(__file__))
-from automl_utils import print_debug_information, count_succeses, AutoMLLogParser  # noqa (E402: module level import not at top of file)
+from automl_utils import print_debug_information, count_succeses, AutoMLLogParser, includes_all_scores, includes_train_scores  # noqa (E402: module level import not at top of file)
 
 
 class AutoMLStub(AutoML):
@@ -64,6 +64,7 @@ def test_fit(dask_client, backend):
     score = automl.score(X_test, Y_test)
     assert score > 0.8
     assert count_succeses(automl.cv_results_) > 0
+    assert includes_train_scores(automl.performance_over_time_.columns) is True
     assert automl._task == MULTICLASS_CLASSIFICATION
 
     del automl
@@ -108,6 +109,7 @@ def test_fit_roar(dask_client_single_worker, backend):
     score = automl.score(X_test, Y_test)
     assert score > 0.8
     assert count_succeses(automl.cv_results_) > 0
+    assert includes_train_scores(automl.performance_over_time_.columns) is True
     assert automl._task == MULTICLASS_CLASSIFICATION
 
     del automl
