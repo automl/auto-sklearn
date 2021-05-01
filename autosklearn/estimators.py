@@ -50,6 +50,7 @@ class AutoSklearnEstimator(BaseEstimator):
         metric=None,
         scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
+        get_trials_callback=None
     ):
         """
         Parameters
@@ -264,6 +265,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.metric = metric
         self.scoring_functions = scoring_functions
         self.load_models = load_models
+        self.get_trials_callback = get_trials_callback
 
         self.automl_ = None  # type: Optional[AutoML]
 
@@ -314,7 +316,8 @@ class AutoSklearnEstimator(BaseEstimator):
             logging_config=self.logging_config,
             metadata_directory=self.metadata_directory,
             metric=self.metric,
-            scoring_functions=self.scoring_functions
+            scoring_functions=self.scoring_functions,
+            get_trials_callback=self.get_trials_callback
         )
 
         return automl

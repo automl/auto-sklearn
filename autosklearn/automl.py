@@ -139,7 +139,8 @@ class AutoML(BaseEstimator):
                  smac_scenario_args=None,
                  logging_config=None,
                  metric=None,
-                 scoring_functions=None
+                 scoring_functions=None,
+                 get_trials_callback=None
                  ):
         super(AutoML, self).__init__()
         self.configuration_space = None
@@ -207,6 +208,7 @@ class AutoML(BaseEstimator):
                                      "'disable_evaluator_output' must be one "
                                      "of " + str(allowed_elements))
         self._get_smac_object_callback = get_smac_object_callback
+        self._get_trials_callback = get_trials_callback
         self._smac_scenario_args = smac_scenario_args
         self.logging_config = logging_config
 
@@ -775,6 +777,7 @@ class AutoML(BaseEstimator):
                 port=self._logger_port,
                 pynisher_context=self._multiprocessing_context,
                 ensemble_callback=proc_ensemble,
+                trials_callback=self._get_trials_callback
             )
 
             try:
