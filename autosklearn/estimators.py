@@ -9,11 +9,13 @@ import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.utils.multiclass import type_of_target
 from smac.runhistory.runhistory import RunInfo, RunValue
+from smac.callbacks import IncorporateRunResultCallback
 
 from autosklearn.data.validation import (
     SUPPORTED_FEAT_TYPES,
     SUPPORTED_TARGET_TYPES,
 )
+from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, AutoML
 from autosklearn.metrics import Scorer
@@ -50,7 +52,7 @@ class AutoSklearnEstimator(BaseEstimator):
         metric=None,
         scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
-        get_trials_callback=None
+        get_trials_callback: Optional[IncorporateRunResultCallback] = None
     ):
         """
         Parameters
