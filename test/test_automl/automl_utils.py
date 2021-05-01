@@ -94,6 +94,16 @@ def includes_train_scores(scores):
     return _includes(scores, all_scores)
 
 
+def performance_over_time_is_plausible(poT):
+    if len(poT) < 1:
+        return False
+    if len(poT.drop(columns=["Timestamp"]).dropna()) < 1:
+        return False
+    if not poT["Timestamp"].is_monotonic:
+        return False
+    return True
+
+
 class AutoMLLogParser(object):
     def __init__(self, logfile: str):
         self.logfile = logfile
