@@ -48,3 +48,10 @@ print(automl.show_models())
 
 predictions = automl.predict(X_test)
 print("R2 score:", r2_score(y_test, predictions))
+
+###########################################################################
+# Get the configuration space
+# ===========================
+
+# The configuration space is reduced, i.e. no SVM.
+print(automl.get_configuration_space(X_train, y_train))
