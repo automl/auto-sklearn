@@ -69,11 +69,15 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
                  include=None, exclude=None, random_state=None,
                  init_params=None):
         self._output_dtype = np.float32
+        if dataset_properties is None:
+            dataset_properties = dict()
+        if 'target_type' not in dataset_properties:
+            dataset_properties['target_type'] = 'regression'
         super().__init__(
             config=config, steps=steps,
             dataset_properties=dataset_properties,
             include=include, exclude=exclude, random_state=random_state,
-            init_params=init_params, target_type='regression')
+            init_params=init_params)
 
     def fit_estimator(self, X, y, **fit_params):
         self.y_max_ = np.nanmax(y)

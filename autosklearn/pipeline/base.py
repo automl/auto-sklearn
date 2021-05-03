@@ -19,15 +19,13 @@ class BasePipeline(Pipeline):
 
     def __init__(self, config=None, steps=None, dataset_properties=None,
                  include=None, exclude=None, random_state=None,
-                 init_params=None, target_type=None):
+                 init_params=None):
 
         self.init_params = init_params if init_params is not None else {}
         self.include = include if include is not None else {}
         self.exclude = exclude if exclude is not None else {}
         self.dataset_properties = dataset_properties if \
             dataset_properties is not None else {}
-        if target_type and 'target_type' not in self.dataset_properties:
-            self.dataset_properties['target_type'] = target_type
 
         if steps is None:
             self.steps = self._get_pipeline_steps(dataset_properties=dataset_properties)
