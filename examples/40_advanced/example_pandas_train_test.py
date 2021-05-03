@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 """
-===============================
+==========================
 Performance-over-time plot
 ==========================
 This example shows, how to use the *performance_over_time_* attribute to plot the performance
