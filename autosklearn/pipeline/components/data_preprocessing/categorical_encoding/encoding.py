@@ -1,6 +1,12 @@
+from typing import Dict, Optional, Tuple, Union
+
+import numpy as np
+
 from ConfigSpace.configuration_space import ConfigurationSpace
 
 import scipy.sparse
+
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
 
 from sklearn.preprocessing import OrdinalEncoder
 
@@ -9,10 +15,12 @@ from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 
 
 class OrdinalEncoding(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, random_state=None):
+    def __init__(self,
+                 random_state: Optional[np.random.RandomState] = None,
+                 ):
         self.random_state = random_state
 
-    def fit(self, X, y=None):
+    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'OrdinalEncoding':
         if not scipy.sparse.issparse(X):
             self.preprocessor = OrdinalEncoder(
                 categories='auto', handle_unknown='use_encoded_value', unknown_value=-1,
@@ -20,7 +28,7 @@ class OrdinalEncoding(AutoSklearnPreprocessingAlgorithm):
             self.preprocessor.fit(X, y)
         return self
 
-    def transform(self, X):
+    def transform(self, X: np.ndarray) -> np.ndarray:
         if scipy.sparse.issparse(X):
             return X
         if self.preprocessor is None:
@@ -31,11 +39,13 @@ class OrdinalEncoding(AutoSklearnPreprocessingAlgorithm):
         # Consider removing this if that step is removed
         return self.preprocessor.transform(X) + 1
 
-    def fit_transform(self, X, y=None):
+    def fit_transform(self, X: np.ndarray, y: Optional[np.ndarray] = None
+                      ) -> 'OrdinalEncoding':
         return self.fit(X, y).transform(X)
 
     @staticmethod
-    def get_properties(dataset_properties=None):
+    def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+                       ) -> Dict[str, Optional[Union[str, int, bool, Tuple]]]:
         return {'shortname': 'OrdinalEncoder',
                 'name': 'Ordinal Encoder',
                 'handles_regression': True,
@@ -50,5 +60,7 @@ class OrdinalEncoding(AutoSklearnPreprocessingAlgorithm):
                 'output': (INPUT,), }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+    ) -> ConfigurationSpace:
         return ConfigurationSpace()

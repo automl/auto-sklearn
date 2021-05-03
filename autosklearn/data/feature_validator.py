@@ -37,9 +37,15 @@ class FeatureValidator(BaseEstimator):
 
     Attributes
     ----------
-        feat_type: typing.Optional[typing.Dict[Union[str, int], str]]
-            In case the data is not a pandas DataFrame, this list indicates
-            which columns should be treated as categorical
+        feat_type: typing.Optional[typing.List[str]]
+            In case the dataset is not a pandas DataFrame:
+                + If provided, this list indicates which columns should be treated as categorical
+                  it is internally transformed into a dictionary that indicates a mapping from
+                  column index to categorical/numerical
+                + If not provided, by default all columns are treated as numerical
+            If the input dataset is of type pandas dataframe, this argument
+            must be none, as the column type will be inferred from the pandas dtypes.
+
         data_type:
             Class name of the data type provided during fit.
     """

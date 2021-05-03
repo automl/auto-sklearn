@@ -1,16 +1,29 @@
+from typing import Any, List, Dict, Optional, Tuple, Union
+
 import sklearn.compose
 from scipy import sparse
 
 from ConfigSpace import Configuration
 from ConfigSpace.configuration_space import ConfigurationSpace
 
-from autosklearn.pipeline.base import BasePipeline
+import numpy as np
+
+from sklearn.base import BaseEstimator
+
+from autosklearn.pipeline.base import (
+     BasePipeline,
+     DATASET_PROPERTIES_TYPE,
+ )
 from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_categorical \
     import CategoricalPreprocessingPipeline
 from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_numerical \
     import NumericalPreprocessingPipeline
 from autosklearn.pipeline.components.base import AutoSklearnComponent, AutoSklearnChoice
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
+from autosklearn.data.validation import (
+    SUPPORTED_FEAT_TYPES,
+    SUPPORTED_TARGET_TYPES,
+)
 
 
 class DataPreprocessor(AutoSklearnComponent):
@@ -18,10 +31,19 @@ class DataPreprocessor(AutoSklearnComponent):
     numerical features of a dataset. It is built on top of sklearn's ColumnTransformer.
     """
 
-    def __init__(self, config=None, pipeline=None, dataset_properties=None, include=None,
-                 exclude=None, random_state=None, init_params=None,
-                 feat_type=None, force_sparse_output=False,
-                 column_transformer=None):
+    def __init__(
+        self,
+        config: Optional[Configuration] = None,
+        pipeline: Optional[BasePipeline] = None,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+        include: Optional[Dict[str, str]] = None,
+        exclude: Optional[Dict[str, str]] = None,
+        random_state: Optional[np.random.RandomState] = None,
+        init_params: Optional[Dict[str, Any]] = None,
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        force_sparse_output: bool = False,
+        column_transformer: Optional[sklearn.compose.ColumnTransformer] = None,
+    ):
 
         if pipeline is not None:
             raise ValueError("DataPreprocessor's argument 'pipeline' should be None")
@@ -58,15 +80,16 @@ class DataPreprocessor(AutoSklearnComponent):
             config=None, steps=pipeline, dataset_properties=dataset_properties,
             include=include, exclude=exclude, random_state=random_state,
             init_params=init_params)
-        self._transformers = [
-            ["categorical_transformer", self.categ_ppl],
-            ["numerical_transformer", self.numer_ppl],
+        self._transformers: List[Tuple[str, AutoSklearnComponent]] = [
+            ("categorical_transformer", self.categ_ppl),
+            ("numerical_transformer", self.numer_ppl),
         ]
         if self.config:
             self.set_hyperparameters(self.config, init_params=init_params)
         self.column_transformer = column_transformer
 
-    def fit(self, X, y=None):
+    def fit(self, X: SUPPORTED_FEAT_TYPES, y: Optional[SUPPORTED_TARGET_TYPES] = None
+            ) -> 'DataPreprocessor':
 
         categorical_features = []
         numerical_features = []
@@ -102,7 +125,7 @@ class DataPreprocessor(AutoSklearnComponent):
         self.column_transformer.fit(X, y)
         return self
 
-    def transform(self, X):
+    def transform(self, X: SUPPORTED_FEAT_TYPES) -> np.ndarray:
         if self.column_transformer is None:
             raise ValueError("Cannot call transform on a Datapreprocessor that has not"
                              "yet been fit. Please check the log files for errors "
@@ -110,11 +133,13 @@ class DataPreprocessor(AutoSklearnComponent):
                              )
         return self.column_transformer.transform(X)
 
-    def fit_transform(self, X, y=None):
+    def fit_transform(self, X: SUPPORTED_FEAT_TYPES, y: Optional[SUPPORTED_TARGET_TYPES] = None
+                      ) -> 'DataPreprocessor':
         return self.fit(X, y).transform(X)
 
     @staticmethod
-    def get_properties(dataset_properties=None):
+    def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+                       ) -> Dict[str, Optional[Union[str, int, bool, Tuple]]]:
         return {'shortname': 'FeatTypeSplit',
                 'name': 'Feature Type Splitter',
                 'handles_regression': True,
@@ -127,7 +152,8 @@ class DataPreprocessor(AutoSklearnComponent):
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (INPUT,), }
 
-    def set_hyperparameters(self, configuration, init_params=None):
+    def set_hyperparameters(self, configuration: Configuration,
+                            init_params: Optional[Dict[str, Any]] = None) -> 'DataPreprocessor':
         if init_params is not None and 'feat_type' in init_params.keys():
             self.feat_type = init_params['feat_type']
 
@@ -147,6 +173,7 @@ class DataPreprocessor(AutoSklearnComponent):
             sub_configuration = Configuration(sub_configuration_space,
                                               values=sub_config_dict)
 
+            sub_init_params_dict: Optional[Dict[str, Any]] = None
             if init_params is not None:
                 sub_init_params_dict = {}
                 for param in init_params:
@@ -154,8 +181,6 @@ class DataPreprocessor(AutoSklearnComponent):
                         value = init_params[param]
                         new_name = param.replace('%s:' % transf_name, '', 1)
                         sub_init_params_dict[new_name] = value
-            else:
-                sub_init_params_dict = None
 
             if isinstance(transf_op, (
                     AutoSklearnChoice, AutoSklearnComponent, BasePipeline)):
@@ -166,7 +191,10 @@ class DataPreprocessor(AutoSklearnComponent):
 
         return self
 
-    def get_hyperparameter_search_space(self, dataset_properties=None):
+    def get_hyperparameter_search_space(
+        self,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+    ) -> ConfigurationSpace:
         self.dataset_properties = dataset_properties
         cs = ConfigurationSpace()
         cs = DataPreprocessor._get_hyperparameter_search_space_recursevely(
@@ -174,7 +202,11 @@ class DataPreprocessor(AutoSklearnComponent):
         return cs
 
     @staticmethod
-    def _get_hyperparameter_search_space_recursevely(dataset_properties, cs, transformer):
+    def _get_hyperparameter_search_space_recursevely(
+        dataset_properties: DATASET_PROPERTIES_TYPE,
+        cs: ConfigurationSpace,
+        transformer: BaseEstimator,
+    ) -> ConfigurationSpace:
         for st_name, st_operation in transformer:
             if hasattr(st_operation, "get_hyperparameter_search_space"):
                 cs.add_configuration_space(

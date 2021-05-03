@@ -1,4 +1,12 @@
+from typing import Dict, Optional, Tuple, Union
+
+import numpy as np
+
 from scipy import sparse
+
+from sklearn.exceptions import NotFittedError
+
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_rescaling \
     import Rescaling
@@ -7,12 +15,13 @@ from autosklearn.pipeline.components.base import \
 
 
 class StandardScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, random_state):
+    def __init__(self, random_state: Optional[np.random.RandomState] = None):
         from sklearn.preprocessing import StandardScaler
         self.preprocessor = StandardScaler(copy=False)
 
     @staticmethod
-    def get_properties(dataset_properties=None):
+    def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+                       ) -> Dict[str, Optional[Union[str, int, bool, Tuple]]]:
         return {'shortname': 'StandardScaler',
                 'name': 'StandardScaler',
                 'handles_missing_values': False,
@@ -33,7 +42,10 @@ class StandardScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
                 'output': (INPUT,),
                 'preferred_dtype': None}
 
-    def fit(self, X, y=None):
+    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None
+            ) -> 'AutoSklearnPreprocessingAlgorithm':
+        if self.preprocessor is None:
+            raise NotFittedError()
         if sparse.isspmatrix(X):
             self.preprocessor.set_params(with_mean=False)
 

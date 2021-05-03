@@ -1,7 +1,10 @@
+from typing import Dict, Optional, Tuple, Union
+
 from ConfigSpace.configuration_space import ConfigurationSpace
 
 import numpy as np
 
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
@@ -15,10 +18,10 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
         numerical data and “missing_value” for strings or object data types.
     """
 
-    def __init__(self, random_state=None):
+    def __init__(self, random_state: Optional[np.random.RandomState] = None):
         self.random_state = random_state
 
-    def fit(self, X, y=None):
+    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'CategoricalImputation':
         import sklearn.impute
 
         fill_value = None
@@ -42,17 +45,19 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
         self.preprocessor.fit(X)
         return self
 
-    def transform(self, X):
+    def transform(self, X: np.ndarray) -> np.ndarray:
         if self.preprocessor is None:
             raise NotImplementedError()
         X = self.preprocessor.transform(X)
         return X
 
-    def fit_transform(self, X, y=None):
+    def fit_transform(self, X: np.ndarray, y: Optional[np.ndarray] = None
+                      ) -> np.ndarray:
         return self.fit(X, y).transform(X)
 
     @staticmethod
-    def get_properties(dataset_properties=None):
+    def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+                       ) -> Dict[str, Optional[Union[str, int, bool, Tuple]]]:
         return {'shortname': 'CategoricalImputation',
                 'name': 'Categorical Imputation',
                 'handles_missing_values': True,
@@ -74,5 +79,6 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
                 'preferred_dtype': None}
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+                                        ) -> ConfigurationSpace:
         return ConfigurationSpace()

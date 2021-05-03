@@ -1,4 +1,5 @@
 from abc import ABCMeta
+from typing import Dict, Union
 
 import numpy as np
 from ConfigSpace import Configuration
@@ -7,6 +8,8 @@ from sklearn.utils.validation import check_random_state
 
 from .components.base import AutoSklearnChoice, AutoSklearnComponent
 import autosklearn.pipeline.create_searchspace_util
+
+DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
 
 
 class BasePipeline(Pipeline):

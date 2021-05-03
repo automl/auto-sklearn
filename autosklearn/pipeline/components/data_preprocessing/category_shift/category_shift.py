@@ -1,3 +1,9 @@
+from typing import Dict, Optional, Tuple, Union
+
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
+
+import numpy as np
+
 import autosklearn.pipeline.implementations.CategoryShift
 
 from ConfigSpace.configuration_space import ConfigurationSpace
@@ -12,25 +18,28 @@ class CategoryShift(AutoSklearnPreprocessingAlgorithm):
     is not used, so to provide compatibility with sparse matrices.
     """
 
-    def __init__(self, random_state=None):
+    def __init__(self, random_state: Optional[np.random.RandomState] = None):
         self.random_state = random_state
 
-    def fit(self, X, y=None):
+    def fit(self, X: np.ndarray, y: np.ndarray[Optional] = None
+            ) -> 'CategoryShift':
         self.preprocessor = autosklearn.pipeline.implementations.CategoryShift\
             .CategoryShift()
         self.preprocessor.fit(X, y)
         return self
 
-    def transform(self, X):
+    def transform(self, X: np.ndarray) -> np.ndarray:
         if self.preprocessor is None:
             raise NotImplementedError()
         return self.preprocessor.transform(X)
 
-    def fit_transform(self, X, y=None):
+    def fit_transform(self, X: np.ndarray, y: Optional[np.ndarray] = None
+                      ) -> 'CategoryShift':
         return self.fit(X, y).transform(X)
 
     @staticmethod
-    def get_properties(dataset_properties=None):
+    def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+                       ) -> Dict[str, Optional[Union[str, int, bool, Tuple]]]:
         return {'shortname': 'CategShift',
                 'name': 'Category Shift',
                 'handles_missing_values': True,
@@ -52,5 +61,6 @@ class CategoryShift(AutoSklearnPreprocessingAlgorithm):
                 'preferred_dtype': None}
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(dataset_properties: Optional[DATASET_PROPERTIES_TYPE]
+                                        ) -> ConfigurationSpace:
         return ConfigurationSpace()

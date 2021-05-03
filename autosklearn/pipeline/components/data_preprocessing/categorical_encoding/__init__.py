@@ -1,9 +1,20 @@
 from collections import OrderedDict
 import os
-from ...base import AutoSklearnPreprocessingAlgorithm, find_components, \
-    ThirdPartyComponents, AutoSklearnChoice
+
+from typing import Any, Dict, Optional
+
+from ConfigSpace import Configuration
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
+
+import numpy as np
+
+from sklearn.base import BaseEstimator
+
+from ...base import AutoSklearnPreprocessingAlgorithm, find_components, \
+    ThirdPartyComponents, AutoSklearnChoice
+
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
 
 ohe_directory = os.path.split(__file__)[0]
 _ohes = find_components(__package__,
@@ -12,23 +23,26 @@ _ohes = find_components(__package__,
 _addons = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
 
 
-def add_ohe(ohe):
+def add_ohe(ohe: 'OHEChoice') -> None:
     _addons.add_component(ohe)
 
 
 class OHEChoice(AutoSklearnChoice):
 
     @classmethod
-    def get_components(cls):
-        components = OrderedDict()
+    def get_components(cls: BaseEstimator) -> Dict[str, BaseEstimator]:
+        components: Dict[str, BaseEstimator] = OrderedDict()
         components.update(_ohes)
         components.update(_addons.components)
         return components
 
-    def get_hyperparameter_search_space(self, dataset_properties=None,
-                                        default=None,
-                                        include=None,
-                                        exclude=None):
+    def get_hyperparameter_search_space(
+        self,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+        default: Optional[str] = None,
+        include: Optional[Dict[str, str]] = None,
+        exclude: Optional[Dict[str, str]] = None,
+    ) -> ConfigurationSpace:
         cs = ConfigurationSpace()
 
         if dataset_properties is None:
@@ -67,7 +81,9 @@ class OHEChoice(AutoSklearnChoice):
         self.dataset_properties = dataset_properties
         return cs
 
-    def set_hyperparameters(self, configuration, init_params=None):
+    def set_hyperparameters(self, configuration: Configuration,
+                            init_params: Optional[Dict[str, Any]] = None
+                            ) -> 'OHEChoice':
         new_params = {}
 
         params = configuration.get_dictionary()
@@ -95,5 +111,5 @@ class OHEChoice(AutoSklearnChoice):
 
         return self
 
-    def transform(self, X):
+    def transform(self, X: np.ndarray) -> np.ndarray:
         return self.choice.transform(X)

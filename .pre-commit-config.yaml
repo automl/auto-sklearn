@@ -22,6 +22,10 @@ repos:
         args: [--show-error-codes]
         name: mypy auto-sklearn-evaluation
         files: autosklearn/evaluation
+      - id: mypy
+        args: [--show-error-codes]
+        name: mypy auto-sklearn-datapreprocessing
+        files: autosklearn/pipeline/components/data_preprocessing/
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.8.3
     hooks:

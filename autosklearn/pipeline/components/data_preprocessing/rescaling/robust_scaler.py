@@ -1,7 +1,14 @@
+from typing import Dict, Optional, Tuple, Union
+
+import numpy as np
+
+
 from scipy import sparse
+from sklearn.exceptions import NotFittedError
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter
 
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, SIGNED_DATA, INPUT, SPARSE
 from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_rescaling \
     import Rescaling
@@ -10,7 +17,8 @@ from autosklearn.pipeline.components.base import \
 
 
 class RobustScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, q_min, q_max, random_state):
+    def __init__(self, q_min: float, q_max: float,
+                 random_state: Optional[np.random.RandomState] = None):
         from sklearn.preprocessing import RobustScaler
         self.q_min = q_min
         self.q_max = q_max
@@ -19,7 +27,8 @@ class RobustScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
         )
 
     @staticmethod
-    def get_properties(dataset_properties=None):
+    def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+                       ) -> Dict[str, Optional[Union[str, int, bool, Tuple]]]:
         return {'shortname': 'RobustScaler',
                 'name': 'RobustScaler',
                 'handles_regression': True,
@@ -35,7 +44,9 @@ class RobustScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
                 'output': (INPUT, SIGNED_DATA),
                 'preferred_dtype': None}
 
-    def get_hyperparameter_search_space(dataset_properties=None):
+    @staticmethod
+    def get_hyperparameter_search_space(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+                                        ) -> ConfigurationSpace:
         cs = ConfigurationSpace()
         q_min = UniformFloatHyperparameter(
             'q_min', 0.001, 0.3, default_value=0.25
@@ -46,7 +57,10 @@ class RobustScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
         cs.add_hyperparameters((q_min, q_max))
         return cs
 
-    def fit(self, X, y=None):
+    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None
+            ) -> 'AutoSklearnPreprocessingAlgorithm':
+        if self.preprocessor is None:
+            raise NotFittedError()
         if sparse.isspmatrix(X):
             self.preprocessor.set_params(with_centering=False)
 
