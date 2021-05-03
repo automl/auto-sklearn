@@ -2,7 +2,7 @@
 """
 ===============================
 Performance-over-time plot
-===============================
+==========================
 This example shows, how to use the *performance_over_time_* attribute to plot the performance
 over train time.  *performance_over_time_* can contain multiple metrics within a pandas dataframe, namely:
 
