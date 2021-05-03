@@ -118,7 +118,7 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
                 'preferred_dtype': None}
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties: DATASET_PROPERTIES_TYPE
+    def get_hyperparameter_search_space(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
                                         ) -> ConfigurationSpace:
         # TODO add replace by zero!
         strategy = CategoricalHyperparameter(

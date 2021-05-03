@@ -16,7 +16,7 @@ class VarianceThreshold(AutoSklearnPreprocessingAlgorithm):
         # VarianceThreshold does not support fit_transform (as of 0.19.1)!
         self.random_state = random_state
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarrray] = None) -> 'VarianceThreshold':
+    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'VarianceThreshold':
         self.preprocessor = sklearn.feature_selection.VarianceThreshold(
             threshold=0.0
         )

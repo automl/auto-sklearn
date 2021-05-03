@@ -21,7 +21,7 @@ class CategoryShift(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, random_state: Optional[np.random.RandomState] = None):
         self.random_state = random_state
 
-    def fit(self, X: np.ndarray, y: np.ndarray[Optional] = None
+    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None
             ) -> 'CategoryShift':
         self.preprocessor = autosklearn.pipeline.implementations.CategoryShift\
             .CategoryShift()
@@ -61,6 +61,6 @@ class CategoryShift(AutoSklearnPreprocessingAlgorithm):
                 'preferred_dtype': None}
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties: Optional[DATASET_PROPERTIES_TYPE]
+    def get_hyperparameter_search_space(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
                                         ) -> ConfigurationSpace:
         return ConfigurationSpace()

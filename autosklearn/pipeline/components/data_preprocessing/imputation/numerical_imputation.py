@@ -12,7 +12,8 @@ from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
 class NumericalImputation(AutoSklearnPreprocessingAlgorithm):
 
-    def __init__(self, random_state: Optional[np.random.RandomState] = None):
+    def __init__(self, strategy: str ='mean', random_state: Optional[np.random.RandomState] = None):
+        self.strategy = strategy
         self.random_state = random_state
 
     def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'NumericalImputation':
