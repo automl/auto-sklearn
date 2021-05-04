@@ -12,7 +12,6 @@ import numpy as np
 import pandas as pd
 import pytest
 import sklearn.datasets
-from sklearn.base import clone
 from smac.scenario.scenario import Scenario
 from smac.facade.roar_facade import ROAR
 
@@ -426,16 +425,6 @@ def test_do_dummy_prediction(backend, dask_client, datasets):
         backend.temporary_directory, '.auto-sklearn', 'runs', '1_1_0.0',
         'predictions_ensemble_1_1_0.0.npy')
     )
-
-    model_path = os.path.join(backend.temporary_directory, '.auto-sklearn',
-                              'runs', '1_1_0.0',
-                              '1.1.0.0.model')
-
-    # Make sure the dummy model complies with scikit learn
-    # get/set params
-    assert os.path.exists(model_path)
-    with open(model_path, 'rb') as model_handler:
-        clone(pickle.load(model_handler))
 
     auto._clean_logger()
 
