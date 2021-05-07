@@ -1,22 +1,20 @@
 from io import StringIO
 import logging
 import os
-import sys
+import tempfile
 import unittest
 
 import arff
+from joblib import Memory
 import numpy as np
 from scipy import sparse
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
+from sklearn.datasets import make_multilabel_classification
 
 from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
     import DataPreprocessor
 import autosklearn.metalearning.metafeatures.metafeatures as meta_features
-
-# Make the super class importable
-sys.path.append(os.path.dirname(__file__))
-import test_meta_features  # noqa: E402
 
 
 class SparseMetaFeaturesTest(unittest.TestCase):
@@ -104,6 +102,7 @@ class SparseMetaFeaturesTest(unittest.TestCase):
             self.helpers["Kurtosisses"](self.X_transformed, self.y, self.logger,
                                         self.categorical_transformed),
             )
+
     def tearDown(self):
         os.chdir(self.cwd)
 
