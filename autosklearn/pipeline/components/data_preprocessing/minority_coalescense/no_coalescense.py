@@ -4,7 +4,7 @@ from typing import Dict, Optional, Tuple, Union
 from ConfigSpace.configuration_space import ConfigurationSpace
 
 import numpy as np
-from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
@@ -14,17 +14,13 @@ class NoCoalescence(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, random_state: Optional[np.random.RandomState] = None):
         pass
 
-    def fit(self, X: np.array, y: Optional[np.ndarray] = None
-            ) -> np.ndarray:
+    def fit(self, X: np.array, y: Optional[PIPELINE_DATA_DTYPE] = None
+            ) -> PIPELINE_DATA_DTYPE:
         self.preprocessor = 'passthrough'
         return self
 
-    def transform(self, X: np.ndarray) -> np.ndarray:
+    def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         return X
-
-    def fit_transform(self, X: np.ndarray, y: Optional[np.ndarray] = None
-                      ) -> np.ndarray:
-        return self.fit(X, y).transform(X)
 
     @staticmethod
     def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None

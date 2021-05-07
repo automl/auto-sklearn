@@ -7,14 +7,12 @@ from ConfigSpace import Configuration
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
-import numpy as np
-
 from ...base import AutoSklearnPreprocessingAlgorithm, find_components, \
     ThirdPartyComponents, AutoSklearnChoice
 
 from sklearn.base import BaseEstimator
 
-from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 
 mc_directory = os.path.split(__file__)[0]
 _mcs = find_components(
@@ -108,5 +106,5 @@ class CoalescenseChoice(AutoSklearnChoice):
 
         return self
 
-    def transform(self, X: np.ndarray) -> np.ndarray:
+    def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         return self.choice.transform(X)

@@ -6,10 +6,9 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 
 import scipy.sparse
 
-from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
-
 from sklearn.preprocessing import OrdinalEncoder
 
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 
@@ -20,7 +19,8 @@ class OrdinalEncoding(AutoSklearnPreprocessingAlgorithm):
                  ):
         self.random_state = random_state
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'OrdinalEncoding':
+    def fit(self, X: PIPELINE_DATA_DTYPE,
+            y: Optional[PIPELINE_DATA_DTYPE] = None) -> 'OrdinalEncoding':
         if not scipy.sparse.issparse(X):
             self.preprocessor = OrdinalEncoder(
                 categories='auto', handle_unknown='use_encoded_value', unknown_value=-1,
@@ -28,7 +28,7 @@ class OrdinalEncoding(AutoSklearnPreprocessingAlgorithm):
             self.preprocessor.fit(X, y)
         return self
 
-    def transform(self, X: np.ndarray) -> np.ndarray:
+    def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         if scipy.sparse.issparse(X):
             return X
         if self.preprocessor is None:
@@ -38,10 +38,6 @@ class OrdinalEncoding(AutoSklearnPreprocessingAlgorithm):
         # This is done because Category shift requires non negative integers
         # Consider removing this if that step is removed
         return self.preprocessor.transform(X) + 1
-
-    def fit_transform(self, X: np.ndarray, y: Optional[np.ndarray] = None
-                      ) -> 'OrdinalEncoding':
-        return self.fit(X, y).transform(X)
 
     @staticmethod
     def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None

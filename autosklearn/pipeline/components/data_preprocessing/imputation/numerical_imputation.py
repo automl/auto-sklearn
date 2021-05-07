@@ -5,18 +5,20 @@ from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
 import numpy as np
 
-from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
 
 class NumericalImputation(AutoSklearnPreprocessingAlgorithm):
 
-    def __init__(self, strategy: str ='mean', random_state: Optional[np.random.RandomState] = None):
+    def __init__(self, strategy: str = 'mean',
+                 random_state: Optional[np.random.RandomState] = None):
         self.strategy = strategy
         self.random_state = random_state
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'NumericalImputation':
+    def fit(self, X: PIPELINE_DATA_DTYPE,
+            y: Optional[PIPELINE_DATA_DTYPE] = None) -> 'NumericalImputation':
         import sklearn.impute
 
         self.preprocessor = sklearn.impute.SimpleImputer(
@@ -24,7 +26,7 @@ class NumericalImputation(AutoSklearnPreprocessingAlgorithm):
         self.preprocessor.fit(X)
         return self
 
-    def transform(self, X: np.ndarray) -> np.ndarray:
+    def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         if self.preprocessor is None:
             raise NotImplementedError()
         return self.preprocessor.transform(X)

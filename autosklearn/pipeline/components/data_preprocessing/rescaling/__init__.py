@@ -6,13 +6,14 @@ from typing import Dict, Optional
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
-import numpy as np
-
 from sklearn.base import BaseEstimator
 
 from ...base import AutoSklearnPreprocessingAlgorithm, find_components, \
     ThirdPartyComponents, AutoSklearnChoice
-from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
+from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_rescaling import (
+    Rescaling
+)
 
 rescaling_directory = os.path.split(__file__)[0]
 _rescalers = find_components(__package__,
@@ -21,7 +22,7 @@ _rescalers = find_components(__package__,
 _addons = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
 
 
-def add_rescaler(rescaler: 'RescalingChoice') -> None:
+def add_rescaler(rescaler: Rescaling) -> None:
     _addons.add_component(rescaler)
 
 
@@ -78,5 +79,5 @@ class RescalingChoice(AutoSklearnChoice):
         self.dataset_properties = dataset_properties
         return cs
 
-    def transform(self, X: np.ndarray) -> np.ndarray:
+    def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         return self.choice.transform(X)

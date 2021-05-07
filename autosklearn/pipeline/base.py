@@ -1,8 +1,12 @@
 from abc import ABCMeta
 from typing import Dict, Union
 
-import numpy as np
 from ConfigSpace import Configuration
+
+import numpy as np
+
+import scipy.sparse
+
 from sklearn.pipeline import Pipeline
 from sklearn.utils.validation import check_random_state
 
@@ -10,6 +14,16 @@ from .components.base import AutoSklearnChoice, AutoSklearnComponent
 import autosklearn.pipeline.create_searchspace_util
 
 DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
+PIPELINE_DATA_DTYPE = Union[
+    np.ndarray,
+    scipy.sparse.bsr_matrix,
+    scipy.sparse.coo_matrix,
+    scipy.sparse.csc_matrix,
+    scipy.sparse.csr_matrix,
+    scipy.sparse.dia_matrix,
+    scipy.sparse.dok_matrix,
+    scipy.sparse.lil_matrix,
+]
 
 
 class BasePipeline(Pipeline):

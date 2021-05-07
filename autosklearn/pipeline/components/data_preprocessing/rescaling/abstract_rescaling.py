@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.exceptions import NotFittedError
 
-from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 
 
@@ -16,14 +16,14 @@ class Rescaling(object):
     def __init__(self, random_state: Optional[np.random.RandomState] = None):
         self.preprocessor: Optional[BaseEstimator] = None
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None
+    def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
             ) -> 'AutoSklearnPreprocessingAlgorithm':
         if self.preprocessor is None:
             raise NotFittedError()
         self.preprocessor.fit(X)
         return self
 
-    def transform(self, X: np.ndarray) -> np.ndarray:
+    def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         if self.preprocessor is None:
             raise NotImplementedError()
         return self.preprocessor.transform(X)

@@ -7,7 +7,7 @@ from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
 from sklearn.base import BaseEstimator
 
-from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, SIGNED_DATA, INPUT
@@ -19,14 +19,15 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
         self.strategy = strategy
         self.random_state = random_state
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'Balancing':
+    def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None) -> 'Balancing':
         self.fitted_ = True
         return self
 
-    def transform(self, X: np.ndarray) -> np.ndarray:
+    def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         return X
 
-    def get_weights(self, Y: np.ndarray, classifier: BaseEstimator, preprocessor: BaseEstimator,
+    def get_weights(self, Y: PIPELINE_DATA_DTYPE,
+                    classifier: BaseEstimator, preprocessor: BaseEstimator,
                     init_params: Optional[Dict[str, Any]], fit_params: Optional[Dict[str, Any]],
                     ) -> Tuple[Optional[Dict[str, Any]], Optional[Dict[str, Any]]]:
         if init_params is None:

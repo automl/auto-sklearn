@@ -6,7 +6,7 @@ from scipy import sparse
 
 from sklearn.exceptions import NotFittedError
 
-from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_rescaling \
     import Rescaling
@@ -42,7 +42,7 @@ class StandardScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
                 'output': (INPUT,),
                 'preferred_dtype': None}
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None
+    def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
             ) -> 'AutoSklearnPreprocessingAlgorithm':
         if self.preprocessor is None:
             raise NotFittedError()

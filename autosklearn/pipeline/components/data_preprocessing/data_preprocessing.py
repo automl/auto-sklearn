@@ -8,11 +8,12 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 
 import numpy as np
 
-from sklearn.base import BaseEstimator
+from sklearn.base import BaseEstimator, TransformerMixin
 
 from autosklearn.pipeline.base import (
      BasePipeline,
      DATASET_PROPERTIES_TYPE,
+     PIPELINE_DATA_DTYPE,
  )
 from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_categorical \
     import CategoricalPreprocessingPipeline
@@ -26,7 +27,7 @@ from autosklearn.data.validation import (
 )
 
 
-class DataPreprocessor(AutoSklearnComponent):
+class DataPreprocessor(TransformerMixin, AutoSklearnComponent):
     """ This component is used to apply distinct transformations to categorical and
     numerical features of a dataset. It is built on top of sklearn's ColumnTransformer.
     """
@@ -91,31 +92,53 @@ class DataPreprocessor(AutoSklearnComponent):
     def fit(self, X: SUPPORTED_FEAT_TYPES, y: Optional[SUPPORTED_TARGET_TYPES] = None
             ) -> 'DataPreprocessor':
 
+        n_feats = X.shape[1]
         categorical_features = []
         numerical_features = []
         if self.feat_type is not None:
+            # Make sure that we are not missing any column!
+            expected = set(self.feat_type.keys())
+            if hasattr(X, 'columns'):
+                columns = set(X.columns)
+            else:
+                columns = set(range(n_feats))
+            if expected != columns:
+                raise ValueError("Train data has columns={} yet the feat_types are feat={}".format(
+                    expected,
+                    columns
+                ))
             categorical_features = [key for key, value in self.feat_type.items()
                                     if value.lower() == 'categorical']
             numerical_features = [key for key, value in self.feat_type.items()
                                   if value.lower() == 'numerical']
 
-        n_feats = X.shape[1]
         # If no categorical features, assume we have a numerical only pipeline
         if len(categorical_features) == 0:
-            sklearn_transf_spec = [
-                ["numerical_transformer", self.numer_ppl, [True] * n_feats]
+            sklearn_transf_spec: List[Tuple[str, BaseEstimator, List[Union[str, bool, int]]]] = [
+                ("numerical_transformer", self.numer_ppl, [True] * n_feats)
             ]
         # If all features are categorical, then just the categorical transformer is used
         elif len(numerical_features) == 0:
             sklearn_transf_spec = [
-                ["categorical_transformer", self.categ_ppl, [True] * n_feats]
+                ("categorical_transformer", self.categ_ppl, [True] * n_feats)
             ]
         # For the other cases, both transformers are used
         else:
             sklearn_transf_spec = [
-                ["categorical_transformer", self.categ_ppl, categorical_features],
-                ["numerical_transformer", self.numer_ppl, numerical_features]
+                ("categorical_transformer", self.categ_ppl, categorical_features),
+                ("numerical_transformer", self.numer_ppl, numerical_features)
             ]
+
+        # And one last check in case feat type is None
+        # And to make sure the final specification has all the columns
+        # considered in the column transformer
+        total_columns = sum([len(features) for name, ppl, features in sklearn_transf_spec])
+        if total_columns != n_feats:
+            raise ValueError("Missing columns in the specification of the data validator"
+                             " for train data={} and spec={}".format(
+                                 np.shape(X),
+                                 sklearn_transf_spec,
+                             ))
 
         self.sparse_ = sparse.issparse(X) or self.force_sparse_output
         self.column_transformer = sklearn.compose.ColumnTransformer(
@@ -125,17 +148,13 @@ class DataPreprocessor(AutoSklearnComponent):
         self.column_transformer.fit(X, y)
         return self
 
-    def transform(self, X: SUPPORTED_FEAT_TYPES) -> np.ndarray:
+    def transform(self, X: SUPPORTED_FEAT_TYPES) -> PIPELINE_DATA_DTYPE:
         if self.column_transformer is None:
             raise ValueError("Cannot call transform on a Datapreprocessor that has not"
                              "yet been fit. Please check the log files for errors "
                              "while trying to fit the model."
                              )
         return self.column_transformer.transform(X)
-
-    def fit_transform(self, X: SUPPORTED_FEAT_TYPES, y: Optional[SUPPORTED_TARGET_TYPES] = None
-                      ) -> 'DataPreprocessor':
-        return self.fit(X, y).transform(X)
 
     @staticmethod
     def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None

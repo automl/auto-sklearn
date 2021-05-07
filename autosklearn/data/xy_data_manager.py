@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-from typing import List, Optional
+from typing import Dict, List, Optional, Union, cast
 
 import numpy as np
 
@@ -24,7 +24,7 @@ class XYDataManager(AbstractDataManager):
         X_test: Optional[np.ndarray],
         y_test: Optional[np.ndarray],
         task: int,
-        feat_type: List[str],
+        feat_type: Optional[Union[List[str], Dict[Union[str, int], str]]],
         dataset_name: str
     ):
         super(XYDataManager, self).__init__(dataset_name)
@@ -57,10 +57,17 @@ class XYDataManager(AbstractDataManager):
         if y_test is not None:
             self.data['Y_test'] = y_test
 
-        if feat_type is None:
-            self.feat_type = {i: 'Numerical' for i in range(np.shape(X)[1])}
+        if feat_type is None or len(feat_type) == 0:
+            self.feat_type: Dict[Union[str, int], str] = {
+                i: 'Numerical' for i in range(np.shape(X)[1])}
+        elif isinstance(feat_type, dict):
+            self.feat_type = cast(Dict, feat_type)
         else:
-            self.feat_type = feat_type
+            raise ValueError("Unsupported feat_type provided. We expect the user to "
+                             "provide a List[str] that will internally be converted to "
+                             "a Dict that states the numerical/categorical type per column. "
+                             "Such dictionary, that provides a mapping from column->type "
+                             "can also be provided. Any other format is not supported.")
 
         # TODO: try to guess task type!
 

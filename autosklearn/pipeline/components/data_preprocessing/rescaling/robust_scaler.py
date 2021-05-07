@@ -8,7 +8,7 @@ from sklearn.exceptions import NotFittedError
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter
 
-from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, SIGNED_DATA, INPUT, SPARSE
 from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_rescaling \
     import Rescaling
@@ -57,7 +57,7 @@ class RobustScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
         cs.add_hyperparameters((q_min, q_max))
         return cs
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None
+    def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
             ) -> 'AutoSklearnPreprocessingAlgorithm':
         if self.preprocessor is None:
             raise NotFittedError()

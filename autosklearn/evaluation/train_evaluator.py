@@ -9,8 +9,6 @@ from ConfigSpace import Configuration
 
 import numpy as np
 
-import pandas as pd
-
 from smac.tae import TAEAbortException, StatusType
 
 from sklearn.base import BaseEstimator
@@ -30,6 +28,11 @@ from autosklearn.constants import (
     REGRESSION_TASKS,
     MULTIOUTPUT_REGRESSION
 )
+from autosklearn.data.validation import (
+     SUPPORTED_FEAT_TYPES,
+     SUPPORTED_TARGET_TYPES,
+ )
+from autosklearn.pipeline.base import PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import IterativeComponent
 from autosklearn.metrics import Scorer
 from autosklearn.util.backend import Backend
@@ -72,7 +75,7 @@ baseCrossValidator_defaults: Dict[str, Dict[str, Optional[Union[int, float, str]
     }
 
 
-def _get_y_array(y: np.ndarray, task_type: int) -> np.ndarray:
+def _get_y_array(y: SUPPORTED_TARGET_TYPES, task_type: int) -> SUPPORTED_TARGET_TYPES:
     if task_type in CLASSIFICATION_TASKS and task_type != \
             MULTILABEL_CLASSIFICATION:
         return y.ravel()
@@ -84,7 +87,7 @@ def subsample_indices(
     train_indices: List[int],
     subsample: Optional[float],
     task_type: int,
-    Y_train: np.ndarray
+    Y_train: SUPPORTED_TARGET_TYPES
 ) -> List[int]:
 
     if not isinstance(subsample, float):
@@ -104,7 +107,7 @@ def subsample_indices(
 
         if task_type in CLASSIFICATION_TASKS and task_type != MULTILABEL_CLASSIFICATION:
             stratify: Optional[
-                Union[pd.DataFrame, np.ndarray]
+                SUPPORTED_TARGET_TYPES
             ] = Y_train.iloc[train_indices] if hasattr(
                 Y_train, 'iloc') else Y_train[train_indices]
         else:
@@ -125,8 +128,8 @@ def subsample_indices(
 
 
 def _fit_with_budget(
-    X_train: np.ndarray,
-    Y_train: np.ndarray,
+    X_train: SUPPORTED_FEAT_TYPES,
+    Y_train: SUPPORTED_TARGET_TYPES,
     budget: float,
     budget_type: Optional[str],
     logger: Union[logging.Logger, PicklableClientLogger],
@@ -234,7 +237,7 @@ class TrainEvaluator(AbstractEvaluator):
         )
         self.X_train = self.datamanager.data['X_train']
         self.Y_train = self.datamanager.data['Y_train']
-        self.Y_optimization: Optional[Union[List, np.ndarray]] = None
+        self.Y_optimization: Optional[SUPPORTED_TARGET_TYPES] = None
         self.Y_targets = [None] * self.num_cv_folds
         self.Y_train_targets = np.ones(self.Y_train.shape) * np.NaN
         self.models = [None] * self.num_cv_folds
@@ -882,8 +885,11 @@ class TrainEvaluator(AbstractEvaluator):
         fold: int, train_indices: List[int],
         test_indices: List[int],
         add_model_to_self: bool = False
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray,
-               Dict[str, Union[str, int, float, Dict, List, Tuple]]]:
+    ) -> Tuple[PIPELINE_DATA_DTYPE,  # train_pred
+               PIPELINE_DATA_DTYPE,  # opt_pred
+               PIPELINE_DATA_DTYPE,  # valid_pred
+               PIPELINE_DATA_DTYPE,  # test_pred
+               TYPE_ADDITIONAL_INFO]:
         model = self._get_model()
 
         self.indices[fold] = ((train_indices, test_indices))
@@ -926,8 +932,11 @@ class TrainEvaluator(AbstractEvaluator):
         fold: int, train_indices: List[int],
         test_indices: List[int],
         add_model_to_self: bool = False,
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray,
-               Dict[str, Union[str, int, float, Dict, List, Tuple]]]:
+    ) -> Tuple[PIPELINE_DATA_DTYPE,  # train_pred
+               PIPELINE_DATA_DTYPE,  # opt_pred
+               PIPELINE_DATA_DTYPE,  # valid_pred
+               PIPELINE_DATA_DTYPE,  # test_pred
+               TYPE_ADDITIONAL_INFO]:
 
         # This function is only called in the event budget is not None
         # Add this statement for mypy
@@ -971,8 +980,10 @@ class TrainEvaluator(AbstractEvaluator):
         )
 
     def _predict(self, model: BaseEstimator, test_indices: List[int],
-                 train_indices: List[int]) -> Tuple[np.ndarray, np.ndarray,
-                                                    np.ndarray, np.ndarray]:
+                 train_indices: List[int]) -> Tuple[PIPELINE_DATA_DTYPE,
+                                                    PIPELINE_DATA_DTYPE,
+                                                    PIPELINE_DATA_DTYPE,
+                                                    PIPELINE_DATA_DTYPE]:
         train_pred = self.predict_function(
             self.X_train.iloc[train_indices] if hasattr(
                 self.X_train, 'iloc') else self.X_train[train_indices],

@@ -844,11 +844,11 @@ def test_pass_categorical_and_numeric_columns_to_pipeline(
     # We should produce a decent result
     assert run_value.cost < 0.4, f"{run_value}/{run_value.additional_info}"
     prediction = pipeline.predict(automl.automl_.InputValidator.feature_validator.transform(X))
-    print(prediction)
     assert np.shape(prediction)[0], np.shape(y)[0]
 
-    print(vars(pipeline.named_steps['data_preprocessing']))
     if include_categorical:
         expected_dict = {i: 'numerical' for i in range(np.shape(X)[1] - 1)}
         expected_dict[X.shape[1] - 1] = 'categorical'
-        assert expected_dict == pipeline.named_steps['data_preprocessing'].feat_type
+    else:
+        expected_dict = {i: 'numerical' for i in range(np.shape(X)[1])}
+    assert expected_dict == pipeline.named_steps['data_preprocessing'].feat_type

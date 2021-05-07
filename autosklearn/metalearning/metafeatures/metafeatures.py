@@ -235,7 +235,7 @@ class PercentageOfFeaturesWithMissingValues(MetaFeature):
 @metafeatures.define("NumberOfMissingValues", dependency="MissingValues")
 class NumberOfMissingValues(MetaFeature):
     def _calculate(self, X, y, logger, categorical):
-        return float(helper_functions.get_value("MissingValues").sum())
+        return float(np.count_nonzero(helper_functions.get_value("MissingValues")))
 
 
 @metafeatures.define("PercentageOfMissingValues",
@@ -411,8 +411,10 @@ class ClassProbabilitySTD(MetaFeature):
 class NumSymbols(HelperFunction):
     def _calculate(self, X, y, logger, categorical):
         symbols_per_column = []
-        for i, column in enumerate(X.T):
+        columns = X.columns if hasattr(X, 'columns') else range(np.shape(X)[1])
+        for i, column in enumerate(columns):
             if categorical[i]:
+                column = X[column] if hasattr(X, 'columns') else X[:, i]
                 unique_values = np.unique(column)
                 num_unique = np.sum(np.isfinite(unique_values))
                 symbols_per_column.append(num_unique)
@@ -487,9 +489,12 @@ class SymbolsSum(MetaFeature):
 class Kurtosisses(HelperFunction):
     def _calculate(self, X, y, logger, categorical):
         kurts = []
-        for i in range(X.shape[1]):
+        columns = X.columns if hasattr(X, 'columns') else range(X.shape[1])
+        for i, col in enumerate(columns):
             if not categorical[i]:
-                kurts.append(scipy.stats.kurtosis(X[:, i]))
+                kurts.append(scipy.stats.kurtosis(
+                    X[col] if hasattr(X, 'columns') else X[:, i]
+                ))
         return kurts
 
     def _calculate_sparse(self, X, y, logger, categorical):
@@ -539,9 +544,12 @@ class KurtosisSTD(MetaFeature):
 class Skewnesses(HelperFunction):
     def _calculate(self, X, y, logger, categorical):
         skews = []
-        for i in range(X.shape[1]):
+        columns = X.columns if hasattr(X, 'columns') else range(X.shape[1])
+        for i, col in enumerate(columns):
             if not categorical[i]:
-                skews.append(scipy.stats.skew(X[:, i]))
+                skews.append(scipy.stats.skew(
+                    X[col] if hasattr(X, 'columns') else X[:, i]
+                ))
         return skews
 
     def _calculate_sparse(self, X, y, logger, categorical):
@@ -664,12 +672,20 @@ class LandmarkLDA(MetaFeature):
                 lda = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
 
                 if len(y.shape) == 1 or y.shape[1] == 1:
-                    lda.fit(X[train], y[train])
+                    lda.fit(
+                        X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                        y.iloc[train] if hasattr(y, 'iloc') else y[train],
+                    )
                 else:
                     lda = OneVsRestClassifier(lda)
-                    lda.fit(X[train], y[train])
+                    lda.fit(
+                        X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                        y.iloc[train] if hasattr(y, 'iloc') else y[train],
+                    )
 
-                predictions = lda.predict(X[test])
+                predictions = lda.predict(
+                    X.iloc[test] if hasattr(X, 'iloc') else X[test],
+                )
                 accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
             return accuracy / 5
         except scipy.linalg.LinAlgError as e:
@@ -699,12 +715,20 @@ class LandmarkNaiveBayes(MetaFeature):
             nb = sklearn.naive_bayes.GaussianNB()
 
             if len(y.shape) == 1 or y.shape[1] == 1:
-                nb.fit(X[train], y[train])
+                nb.fit(
+                    X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                    y.iloc[train] if hasattr(y, 'iloc') else y[train],
+                )
             else:
                 nb = OneVsRestClassifier(nb)
-                nb.fit(X[train], y[train])
+                nb.fit(
+                    X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                    y.iloc[train] if hasattr(y, 'iloc') else y[train],
+                )
 
-            predictions = nb.predict(X[test])
+            predictions = nb.predict(
+                X.iloc[test] if hasattr(X, 'iloc') else X[test],
+            )
             accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
         return accuracy / 5
 
@@ -729,12 +753,20 @@ class LandmarkDecisionTree(MetaFeature):
             tree = sklearn.tree.DecisionTreeClassifier(random_state=random_state)
 
             if len(y.shape) == 1 or y.shape[1] == 1:
-                tree.fit(X[train], y[train])
+                tree.fit(
+                    X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                    y.iloc[train] if hasattr(y, 'iloc') else y[train],
+                )
             else:
                 tree = OneVsRestClassifier(tree)
-                tree.fit(X[train], y[train])
+                tree.fit(
+                    X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                    y.iloc[train] if hasattr(y, 'iloc') else y[train],
+                )
 
-            predictions = tree.predict(X[test])
+            predictions = tree.predict(
+                X.iloc[test] if hasattr(X, 'iloc') else X[test],
+            )
             accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
         return accuracy / 5
 
@@ -766,11 +798,19 @@ class LandmarkDecisionNodeLearner(MetaFeature):
                 criterion="entropy", max_depth=1, random_state=random_state,
                 min_samples_split=2, min_samples_leaf=1,  max_features=None)
             if len(y.shape) == 1 or y.shape[1] == 1:
-                node.fit(X[train], y[train])
+                node.fit(
+                    X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                    y.iloc[train] if hasattr(y, 'iloc') else y[train],
+                )
             else:
                 node = OneVsRestClassifier(node)
-                node.fit(X[train], y[train])
-            predictions = node.predict(X[test])
+                node.fit(
+                    X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                    y.iloc[train] if hasattr(y, 'iloc') else y[train],
+                )
+            predictions = node.predict(
+                X.iloc[test] if hasattr(X, 'iloc') else X[test],
+            )
             accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
         return accuracy / 5
 
@@ -794,8 +834,13 @@ class LandmarkRandomNodeLearner(MetaFeature):
             node = sklearn.tree.DecisionTreeClassifier(
                 criterion="entropy", max_depth=1, random_state=random_state,
                 min_samples_split=2, min_samples_leaf=1, max_features=1)
-            node.fit(X[train], y[train])
-            predictions = node.predict(X[test])
+            node.fit(
+                X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                y.iloc[train] if hasattr(y, 'iloc') else y[train],
+            )
+            predictions = node.predict(
+                X.iloc[test] if hasattr(X, 'iloc') else X[test],
+            )
             accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
         return accuracy / 5
 
@@ -844,11 +889,19 @@ class Landmark1NN(MetaFeature):
         for train, test in kf.split(X, y):
             kNN = sklearn.neighbors.KNeighborsClassifier(n_neighbors=1)
             if len(y.shape) == 1 or y.shape[1] == 1:
-                kNN.fit(X[train], y[train])
+                kNN.fit(
+                    X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                    y.iloc[train] if hasattr(y, 'iloc') else y[train],
+                )
             else:
                 kNN = OneVsRestClassifier(kNN)
-                kNN.fit(X[train], y[train])
-            predictions = kNN.predict(X[test])
+                kNN.fit(
+                    X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                    y.iloc[train] if hasattr(y, 'iloc') else y[train],
+                )
+            predictions = kNN.predict(
+                X.iloc[test] if hasattr(X, 'iloc') else X[test],
+            )
             accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
         return accuracy / 5
 
@@ -872,7 +925,9 @@ class PCA(HelperFunction):
         for i in range(10):
             try:
                 rs.shuffle(indices)
-                pca.fit(X[indices])
+                pca.fit(
+                    X.iloc[indices] if hasattr(X, 'iloc') else X[indices],
+                )
                 return pca
             except LinAlgError:
                 pass

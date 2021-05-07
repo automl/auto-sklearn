@@ -1,8 +1,6 @@
 from typing import Dict, Optional, Tuple, Union
 
-import numpy as np
-
-from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, INPUT, SPARSE
 from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_rescaling \
     import Rescaling
@@ -11,12 +9,12 @@ from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorit
 
 class NoRescalingComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None
+    def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
             ) -> 'AutoSklearnPreprocessingAlgorithm':
         self.preprocessor = 'passthrough'
         return self
 
-    def transform(self, X: np.ndarray) -> np.ndarray:
+    def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         return X
 
     @staticmethod

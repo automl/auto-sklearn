@@ -3,7 +3,7 @@ import numpy as np
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 
-from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
@@ -13,13 +13,13 @@ class NoEncoding(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, random_state: Optional[np.random.RandomState] = None):
         pass
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None
+    def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
             ) -> 'NoEncoding':
         self.preprocessor = 'passthrough'
         self.fitted_ = True
         return self
 
-    def transform(self, X: np.ndarray) -> np.ndarray:
+    def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         return X
 
     @staticmethod

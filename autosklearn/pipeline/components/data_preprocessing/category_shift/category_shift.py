@@ -1,12 +1,11 @@
 from typing import Dict, Optional, Tuple, Union
 
-from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
+from ConfigSpace.configuration_space import ConfigurationSpace
 
 import numpy as np
 
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 import autosklearn.pipeline.implementations.CategoryShift
-
-from ConfigSpace.configuration_space import ConfigurationSpace
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
@@ -21,21 +20,17 @@ class CategoryShift(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, random_state: Optional[np.random.RandomState] = None):
         self.random_state = random_state
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None
+    def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
             ) -> 'CategoryShift':
         self.preprocessor = autosklearn.pipeline.implementations.CategoryShift\
             .CategoryShift()
         self.preprocessor.fit(X, y)
         return self
 
-    def transform(self, X: np.ndarray) -> np.ndarray:
+    def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         if self.preprocessor is None:
             raise NotImplementedError()
         return self.preprocessor.transform(X)
-
-    def fit_transform(self, X: np.ndarray, y: Optional[np.ndarray] = None
-                      ) -> 'CategoryShift':
-        return self.fit(X, y).transform(X)
 
     @staticmethod
     def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None

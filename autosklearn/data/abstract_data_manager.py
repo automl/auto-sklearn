@@ -1,5 +1,5 @@
 import abc
-from typing import Any, Dict, List
+from typing import Any, Dict, Union
 
 import numpy as np
 
@@ -31,11 +31,11 @@ class AbstractDataManager():
         return self._info
 
     @property
-    def feat_type(self) -> List[str]:
+    def feat_type(self) -> Dict[Union[str, int], str]:
         return self._feat_type
 
     @feat_type.setter
-    def feat_type(self, value: List[str]) -> None:
+    def feat_type(self, value: Dict[Union[str, int], str]) -> None:
         self._feat_type = value
 
     @property

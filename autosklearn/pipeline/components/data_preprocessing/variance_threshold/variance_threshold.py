@@ -4,7 +4,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 
 import numpy as np
 
-from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
@@ -16,14 +16,15 @@ class VarianceThreshold(AutoSklearnPreprocessingAlgorithm):
         # VarianceThreshold does not support fit_transform (as of 0.19.1)!
         self.random_state = random_state
 
-    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> 'VarianceThreshold':
+    def fit(self, X: PIPELINE_DATA_DTYPE,
+            y: Optional[PIPELINE_DATA_DTYPE] = None) -> 'VarianceThreshold':
         self.preprocessor = sklearn.feature_selection.VarianceThreshold(
             threshold=0.0
         )
         self.preprocessor = self.preprocessor.fit(X)
         return self
 
-    def transform(self, X: np.ndarray) -> np.ndarray:
+    def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         if self.preprocessor is None:
             raise NotImplementedError()
         return self.preprocessor.transform(X)
