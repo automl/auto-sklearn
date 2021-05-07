@@ -19,8 +19,7 @@ sys.path.append(os.path.dirname(__file__))
 import test_meta_features  # noqa: E402
 
 
-class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest,
-                             unittest.TestCase):
+class SparseMetaFeaturesTest(unittest.TestCase):
     _multiprocess_can_split_ = True
 
     def setUp(self):
@@ -105,6 +104,20 @@ class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest,
             self.helpers["Kurtosisses"](self.X_transformed, self.y, self.logger,
                                         self.categorical_transformed),
             )
+    def tearDown(self):
+        os.chdir(self.cwd)
+
+    def get_multilabel(self):
+        cache = Memory(location=tempfile.gettempdir())
+        cached_func = cache.cache(make_multilabel_classification)
+        return cached_func(
+            n_samples=100,
+            n_features=10,
+            n_classes=5,
+            n_labels=5,
+            return_indicator=True,
+            random_state=1
+        )
 
     def test_missing_values(self):
         mf = self.helpers["MissingValues"](self.X, self.y, self.logger, self.categorical)

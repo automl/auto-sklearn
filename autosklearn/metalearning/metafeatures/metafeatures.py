@@ -235,7 +235,10 @@ class PercentageOfFeaturesWithMissingValues(MetaFeature):
 @metafeatures.define("NumberOfMissingValues", dependency="MissingValues")
 class NumberOfMissingValues(MetaFeature):
     def _calculate(self, X, y, logger, categorical):
-        return float(np.count_nonzero(helper_functions.get_value("MissingValues")))
+        if scipy.sparse.issparse(X):
+            return float(helper_functions.get_value("MissingValues").sum())
+        else:
+            return float(np.count_nonzero(helper_functions.get_value("MissingValues")))
 
 
 @metafeatures.define("PercentageOfMissingValues",
