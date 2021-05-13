@@ -87,6 +87,32 @@ Possible solutions (not tested):
 * virtual machine
 * docker image
 
+Conda
+~~~~~
+
+Installing `auto-sklearn` from the `conda-forge` channel can be achieved by adding `conda-forge` to your channels with:
+
+.. code:: bash
+
+    conda config --add channels conda-forge
+
+    conda config --set channel_priority strict
+
+
+Once the `conda-forge` channel has been enabled, `auto-sklearn` can be installed with:
+
+.. code:: bash
+
+    conda install auto-sklearn
+
+
+It is possible to list all of the versions of `auto-sklearn` available on your platform with:
+
+.. code:: bash
+
+    conda search auto-sklearn --channel conda-forge
+
+
 Mac OSX
 ~~~~~~~
 
