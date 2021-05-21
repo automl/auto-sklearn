@@ -18,9 +18,10 @@ import autosklearn.classification
 # Load Data and Build a Model
 # ==============================
 #
-# We use the Run or walk dataset as given by OpenML. The goal is to predict whether a person is
-# running or walking based on accelerometer and gyroscope data collected by a phone. For more
-# information see `here <https://www.openml.org/d/40922>`_.
+# We start by loading the "Run or walk" dataset from OpenML and train an auto-sklearn model on it.
+# For this dataset, the goal is to predict whether a person is running or walking based on
+# accelerometer and gyroscope data collected by a phone. For more information see
+# `here <https://www.openml.org/d/40922>`_.
 
 dataset = sklearn.datasets.fetch_openml(data_id=40922)
 
@@ -65,6 +66,8 @@ r = permutation_importance(automl, X_test, y_test,
 sort_idx = r.importances_mean.argsort()[::-1]
 plt.boxplot(r.importances[sort_idx].T, labels=[dataset.feature_names[i] for i in sort_idx])
 plt.xticks(rotation=90)
+plt.tight_layout()
+plt.show()
 
 for i in sort_idx[::-1]:
     print(f"{dataset.feature_names[i]:10s}: {r.importances_mean[i]:.3f} +/- "
@@ -74,11 +77,11 @@ for i in sort_idx[::-1]:
 # Create partial dependence (PD) and individual conditional expectation (ICE) plots - part 2
 # ==========================================================================================
 #
-# `ICE <https://christophm.github.io/interpretable-ml-book/ice.html>`_ plots plot the relation
+# `ICE <https://christophm.github.io/interpretable-ml-book/ice.html>`_ plots describe the relation
 # between feature values and the response value for each sample
 # individually -- it shows how the response value changes if the value of one feature is changed.
 #
-# `PD <https://christophm.github.io/interpretable-ml-book/pdp.html>`_ plots plot the relation
+# `PD <https://christophm.github.io/interpretable-ml-book/pdp.html>`_ plots describe the relation
 # between feature values and the response value, i.e. the expected
 # response value wrt. one or multiple input features. Since we use a classification dataset, this
 # corresponds to the predicted class probability.
@@ -91,6 +94,7 @@ features = [1, 2]
 plot_partial_dependence(automl, dataset.data, features=features, grid_resolution=5,
                         kind="both", feature_names=dataset.feature_names,
                         )
+plt.tight_layout()
 plt.show()
 
 ##########################################################################
@@ -106,4 +110,5 @@ features = [[1, 2]]
 plot_partial_dependence(automl, dataset.data, features=features, grid_resolution=5,
                         feature_names=dataset.feature_names,
                         )
+plt.tight_layout()
 plt.show()
