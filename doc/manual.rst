@@ -78,7 +78,8 @@ For a full list please have a look at the source code (in `autosklearn/pipeline/
   * `Regressors <https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/regression>`_
   * `Preprocessors <https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/feature_preprocessing>`_
 
-We do also provide an example `on how to restrict the classifiers to search over <examples/80_advanced/example_interpretable_models.html>`_.
+We do also provide an example
+`on how to restrict the classifiers to search over <examples/40_advanced/example_interpretable_models.html>`_.
 
 Turning off preprocessing
 ~~~~~~~~~~~~~~~~~~~~~~~~~
