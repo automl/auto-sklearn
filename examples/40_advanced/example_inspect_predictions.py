@@ -57,7 +57,7 @@ print(f"Test score {s}")
 # the more does the model's predictions depend on this feature.
 #
 # **Note:** There are some pitfalls in interpreting these numbers, which can be found
-# `here <https://scikit-learn.org/stable/modules/permutation_importance.html>`_.
+# in the `scikit-learn docs <https://scikit-learn.org/stable/modules/permutation_importance.html>`_.
 
 r = permutation_importance(automl, X_test, y_test,
                            n_repeats=10,
