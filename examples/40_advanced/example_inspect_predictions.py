@@ -5,7 +5,7 @@ Model Explanation
 =================
 
 The following example shows how to fit a simple classification model with
-*auto-sklearn* and use the inspect `module <https://scikit-learn.org/stable/inspection.html>`_ from
+*auto-sklearn* and use the `inspect module <https://scikit-learn.org/stable/inspection.html>`_ from
 scikit-learn to understand what affects the predictions.
 """
 import sklearn.datasets
