@@ -86,7 +86,7 @@ for i in sort_idx[::-1]:
 # response value wrt. one or multiple input features. Since we use a classification dataset, this
 # corresponds to the predicted class probability.
 #
-# Since acceleration_y and acceleration_z turned out to have the largest impact on the response
+# Since ``acceleration_y`` and ``acceleration_z`` turned out to have the largest impact on the response
 # value according to the permutation dependence, we'll first look at them and generate a plot
 # combining ICE (thin lines) and PD (thick line)
 
