@@ -53,7 +53,7 @@ print(f"Test score {s}")
 # Since auto-sklearn implements the scikit-learn interface, it can be used with the scikit-learn's
 # inspection module. So, now we first look at the `permutation importance
 # <https://christophm.github.io/interpretable-ml-book/feature-importance.html>`_, which defines the
-# decrease in a model score when a given feature is randomly permutated. So, the higher the score,
+# decrease in a model score when a given feature is randomly permuted. So, the higher the score,
 # the more does the model's predictions depend on this feature.
 #
 # **Note:** There are some pitfalls in interpreting these numbers, which can be found
