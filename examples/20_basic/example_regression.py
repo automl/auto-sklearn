@@ -13,7 +13,7 @@ import sklearn.metrics
 import autosklearn.regression
 import matplotlib.pyplot as plt
 
-############################################################################
+############################
 # Data Loading
 # ============
 
@@ -22,25 +22,25 @@ X, y = sklearn.datasets.load_diabetes(return_X_y=True)
 X_train, X_test, y_train, y_test = \
     sklearn.model_selection.train_test_split(X, y, random_state=1)
 
-############################################################################
+###########################
 # Build and fit a regressor
 # =========================
 
 automl = autosklearn.regression.AutoSklearnRegressor(
-    time_left_for_this_task=300,
+    time_left_for_this_task=120,
     per_run_time_limit=30,
     tmp_folder='/tmp/autosklearn_regression_example_tmp',
     output_folder='/tmp/autosklearn_regression_example_out',
 )
 automl.fit(X_train, y_train, dataset_name='diabetes')
 
-############################################################################
+######################################################
 # Print the final ensemble constructed by auto-sklearn
 # ====================================================
 
 print(automl.show_models())
 
-###########################################################################
+#####################################
 # Get the Score of the final ensemble
 # ===================================
 # After training the estimator, we can now quantify the goodness of fit. One possibility for
@@ -53,9 +53,9 @@ print("Train R2 score:", sklearn.metrics.r2_score(y_train, train_predictions))
 test_predictions = automl.predict(X_test)
 print("Test R2 score:", sklearn.metrics.r2_score(y_test, test_predictions))
 
-###########################################################################
+######################
 # Plot the predictions
-# ===================================
+# ====================
 # Furthermore, we can now visually inspect the predictions. We plot the true value against the
 # predictions and show results on train and test data. Points on the diagonal depict perfect
 # predictions. Points below the diagonal were overestimated by the model (predicted value is higher

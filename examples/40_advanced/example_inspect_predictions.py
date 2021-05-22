@@ -14,9 +14,9 @@ import matplotlib.pyplot as plt
 import autosklearn.classification
 
 
-################################
+#############################
 # Load Data and Build a Model
-# ==============================
+# ===========================
 #
 # We start by loading the "Run or walk" dataset from OpenML and train an auto-sklearn model on it.
 # For this dataset, the goal is to predict whether a person is running or walking based on
@@ -33,7 +33,7 @@ X_train, X_test, y_train, y_test = \
                                              random_state=1)
 
 automl = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=360,
+    time_left_for_this_task=120,
     per_run_time_limit=30,
     tmp_folder='/tmp/autosklearn_classification_example_tmp',
     output_folder='/tmp/autosklearn_classification_example_out',
@@ -103,8 +103,6 @@ plt.show()
 #
 # A PD plot can also be generated for two features and thus allow to inspect the interaction between
 # these features. Again, we'll look at acceleration_y and acceleration_z.
-#
-# **Note:** This might take several minutes.
 
 features = [[1, 2]]
 plot_partial_dependence(automl, dataset.data, features=features, grid_resolution=5,
