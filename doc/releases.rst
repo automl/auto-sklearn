@@ -1,11 +1,13 @@
 :orphan:
 
-.. _releases:
-
 ..
     The following command allows to retrieve all commiters since a specified
-    commit. From http://stackoverflow.com/questions/6482436/list-of-authors-in-git-since-a-given-commit
+    commit. From https://stackoverflow.com/questions/6482436/list-of-authors-in-git-since-a-given-commit
     git log 25d680d4e9520a661aae48ea4c7295c663b64df3.. --format="%aN <%aE>" --reverse | perl -e 'my %dedupe; while (<STDIN>) { print unless $dedupe{$_}++}'
+
+========
+Releases
+========
 
 Version 0.12.6
 ==============
@@ -41,10 +43,6 @@ Contributors v0.12.5
 ********************
 
 * Matthias Feurer
-
-========
-Releases
-========
 
 Version 0.12.4
 ==============
@@ -84,10 +82,6 @@ Contributors v0.12.3
 * Matthias Feurer
 * ROHIT AGARWAL
 * Francisco Rivera
-
-========
-Releases
-========
 
 Version 0.12.2
 ==============
@@ -463,7 +457,7 @@ Version 0.4.0
   ``predict_proba`` to no longer raise an `AttributeError`.
 * Improved documentation of the parallel example.
 * Classifiers are now tested to be idempotent as `required by scikit-learn
-  <http://scikit-learn.org/stable/developers/contributing.html#estimated-attributes>`_.
+  <https://scikit-learn.org/stable/developers/contributing.html#estimated-attributes>`_.
 * Fixes the usage of the shrinkage parameter in LDA.
 * Fixes `#410 <https://github.com/automl/auto-sklearn/issues/410>`_ and changes
   the SGD hyperparameters
@@ -485,13 +479,13 @@ Version 0.4.0
   minimization problem.
 * Implements `#271 <https://github.com/automl/auto-sklearn/issues/271>`_:
   XGBoost is available again, even configuring the new dropout functionality.
-* New documentation section `inspecting the results <http://automl.github.io/auto-sklearn/stable/manual.html#inspecting-the-results>`_.
+* New documentation section `inspecting the results <https://automl.github.io/auto-sklearn/stable/manual.html#inspecting-the-results>`_.
 * Fixes `#444 <https://github.com/automl/auto-sklearn/issues/444>`_:
   Auto-sklearn now only loads models for refit which are actually relevant
   for the ensemble.
 * Adds an operating system check at import and installation time to make sure
   to not accidentaly run on a Windows machine.
-* New examples gallery using sphinx gallery: `http://automl.github.io/auto-sklearn/stable/examples/index.html <http://automl.github.io/auto-sklearn/stable/examples/index.html>`_
+* New examples gallery using sphinx gallery: `https://automl.github.io/auto-sklearn/stable/examples/index.html <https://automl.github.io/auto-sklearn/stable/examples/index.html>`_
 * Safeguard Auto-sklearn against deleting directories it did not create (Issue
   `#317 <https://github.com/automl/auto-sklearn/issues/317>`_.
 

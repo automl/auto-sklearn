@@ -91,7 +91,7 @@ def start_python_worker(scheduler_address):
 # Start Auto-sklearn
 # ==================
 #
-# We are now ready to start *auto-sklearn and all dask related processes.
+# We are now ready to start *auto-sklearn* and all dask related processes.
 #
 # To use auto-sklearn in parallel we must guard the code with
 # ``if __name__ == '__main__'``. We then start a dask cluster as a context,

@@ -155,18 +155,25 @@ Parallel computation
 
 In it's default mode, *auto-sklearn* already uses two cores. The first one is
 used for model building, the second for building an ensemble every time a new
-machine learning model has finished training. An example on how to do this sequentially (first searching for individual models, and then building an ensemble from them) can be seen in `sequential auto-sklearn example <examples/60_search/example_sequential.html>`_.
+machine learning model has finished training. An example on how to do this sequentially (first searching for individual models, and then building an ensemble from them) can be seen in
+:ref:`sphx_glr_examples_60_search_example_sequential.py`.
 
-Nevertheless, *auto-sklearn* also supports parallel Bayesian optimization via the use of `Dask.distributed  <https://distributed.dask.org/>`_. By providing the arguments ``n_jobs`` to the estimator construction, one can control the number of cores available to *auto-sklearn* (As exemplified in `sequential auto-sklearn  example <examples/60_search/example_parallel_n_jobs>`_). Distributed processes are also supported by providing a custom client object to *auto-sklearn* like in the
-example: `sequential auto-sklearn  example <examples/60_search/example_parallel_manual_spawning_python>`_. When multiple cores are available, *auto-sklearn*
-will create a worker per core, and use the available workers to both search for better machine learning models as well as building an ensemble with them until the time resource is exhausted.
+Nevertheless, *auto-sklearn* also supports parallel Bayesian optimization via the use of
+`Dask.distributed  <https://distributed.dask.org/>`_. By providing the arguments ``n_jobs``
+to the estimator construction, one can control the number of cores available to *auto-sklearn*
+(As exemplified in :ref:`sphx_glr_examples_60_search_example_parallel_n_jobs.py`).
+Distributed processes are also supported by providing a custom client object to *auto-sklearn* like
+in the example: :ref:`sphx_glr_examples_60_search_example_parallel_manual_spawning_cli.py`. When multiple cores are
+available, *auto-sklearn* will create a worker per core, and use the available workers to both search
+for better machine learning models as well as building an ensemble with them until the time resource
+is exhausted.
 
 **Note:** *auto-sklearn* requires all workers to have access to a shared file system for storing training data and models.
 
 Furthermore, depending on the installation of scikit-learn and numpy,
 the model building procedure may use up to all cores. Such behaviour is
 unintended by *auto-sklearn* and is most likely due to numpy being installed
-from `pypi` as a binary wheel (`see here <http://scikit-learn-general.narkive
+from `pypi` as a binary wheel (`see here <https://scikit-learn-general.narkive
 .com/44ywvAHA/binary-wheel-packages-for-linux-are-coming>`_). Executing
 ``export OPENBLAS_NUM_THREADS=1`` should disable such behaviours and make numpy
 only use a single core at a time.
@@ -176,7 +183,7 @@ Model persistence
 
 *auto-sklearn* is mostly a wrapper around scikit-learn. Therefore, it is
 possible to follow the `persistence example
-<http://scikit-learn.org/stable/modules/model_persistence.html#persistence-example>`_
+<https://scikit-learn.org/stable/modules/model_persistence.html#persistence-example>`_
 from scikit-learn.
 
 Vanilla auto-sklearn
