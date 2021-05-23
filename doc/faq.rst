@@ -6,7 +6,7 @@
 FAQ
 ===
 
-Errors
+Issues
 ======
 
 Auto-sklearn is extremely memory hungry in a sequential setting
@@ -15,7 +15,7 @@ Auto-sklearn is extremely memory hungry in a sequential setting
 Auto-sklearn can appear very memory hungry (i.e. requiring a lot of memory for small datasets) due
 to the use of ``fork`` for creating new processes when running in sequential manner (if this
 happens in a parallel setting or if you pass your own dask client this is due to a different
-issue).
+issue, see the other issues below).
 
 Let's go into some more detail and discuss how to fix it:
 Auto-sklearn executes each machine learning algorithm in its own process to be able to apply a
@@ -28,8 +28,8 @@ copy only relevant data into the subprocess and thereby alleaviate the issue of 
 of your main memory
 (and also do not suffer from potential deadlocks as ``fork`` does, see
 `here <https://pythonspeed.com/articles/python-multiprocessing/>`_),
-but they require the Auto-sklearn code to be guarded by ``if __name__ == "__main__"`` or executed
-in a notebook and we decided that we do not want to require this by default.
+but they have the downside that code must be guarded by ``if __name__ == "__main__"`` or executed
+in a notebook, and we decided that we do not want to require this by default.
 
 There are now two possible solutions:
 
@@ -40,9 +40,17 @@ There are now two possible solutions:
    1. :ref:`sphx_glr_examples_60_search_example_parallel_n_jobs.py`
    2. :ref:`sphx_glr_examples_60_search_example_parallel_manual_spawning_cli.py`
 
+   .. note::
+
+       This requires all code to be guarded by ``if __name__ == "__main__"``.
+
 2. Pass a `dask client <https://distributed.dask.org/en/latest/client.html>`_. If the user passes
    a dask client, Auto-sklearn can no longer assume that it runs in sequential mode and will use
    a ``forkserver`` to start new processes.
+
+   .. note::
+
+       This requires all code to be guarded by ``if __name__ == "__main__"``.
 
 We therefore suggest using one of the above settings by default.
 
@@ -50,12 +58,12 @@ Auto-sklearn is extremely memory hungry in a parallel setting
 -------------------------------------------------------------
 
 When running Auto-sklearn in a parallel setting it starts new processes for evaluating machine
-learning models using the ``forkserver`` mechanism. If not all code in the main script is guarded
-by ``if __name__ == "__main__"`` it is executed for each subprocess. If such code is for example
-loading your dataset, it is executed for every evaluation of a machine learning algorithm,
-blocking your RAM.
+learning models using the ``forkserver`` mechanism. Code that is in the main script and that is
+not guarded by ``if __name__ == "__main__"`` will be executed for each subprocess. If, for example,
+you are loading your dataset outside of the guarded code, your dataset will be loaded for each
+evaluation of a machine learning algorithm and thus blocking your RAM.
 
-We therefore suggest moving all code inside the main block or functions.
+We therefore suggest moving all code inside function or the main block.
 
 Auto-sklearn crashes with a segmentation fault
 ----------------------------------------------
@@ -76,7 +84,9 @@ following:
 1. Check if you can use a pre-compiled version of the pyrfr to avoid compiling it yourself. We
    provide pre-compiled versions of the pyrfr on `pypi <https://pypi.org/project/pyrfr/#files>`_.
 3. Check if the dependencies specified under :ref:`installation` are correctly installed,
-   especially that you have ``swig`` and a ``C++`` compiler.
+   especially that you have ``swig`` and a ``C++`` compiler. If you are using an older version of
+   the pyrfr (``<=0.8.0``) the dependency on SWIG as stricter and you actually need SWIG3 to
+   compile the pyrfr..
 2. If you are not yet using Conda, consider using it; it simplifies installation of the correct
    dependencies.
 4. Install correct build dependencies before installing the pyrfr, you can check the following
@@ -93,7 +103,9 @@ Where does Auto-sklearn output files by default?
 be used to inspect the behavior of Auto-sklearn. Each run of Auto-sklearn requires
 its own directory. If not provided by the user, *Auto-sklearn* requests a temporary directory from
 Python, which by default is located under ``/tmp`` and starts with ``autosklearn_tmp_`` followed
-by a random string.
+by a random string. By default, this directory is deleted when the *Auto-sklearn* object is
+destroyed. If you want to keep these files you can pass the argument
+``delete_tmp_folder_after_terminate=True`` to the *Auto-sklearn* object.
 
 The :class:`autosklearn.classification.AutoSklearnClassifier` and all other *auto-sklearn*
 estimators accept the argument ``tmp_directory`` which change where such output is written to.
@@ -108,21 +120,28 @@ Auto-sklearn eats up all my disk space
 be used to inspect the behavior of Auto-sklearn. By default, *Auto-sklearn* stores 50
 models and their predictions on the validation data (which is a subset of the training data in
 case of holdout and the full training data in case of cross-validation) on the hard drive.
-Redundant models (i.e. when we have more than 50 models) are removed everytime the ensemble builder
-finishes an iteration, which means that the number of models stored on disk can temporarily be
-higher if a model is output while the ensemble builder is running. One can therefore change the
-number of models that will be stored on disk by passing an integer for the argument
-``max_models_on_disc``.
+Redundant models and their predictions (i.e. when we have more than 50 models) are removed
+everytime the ensemble builder finishes an iteration, which means that the number of models stored
+on disk can temporarily be higher if a model is output while the ensemble builder is running.
+
+One can therefore change the number of models that will be stored on disk by passing an integer
+for the argument ``max_models_on_disc`` to *Auto-sklearn*, for example reduce the number of models
+stored on disk if you have space issues.
 
 As the number of models is only an indicator of the disk space used it is also possible to pass
-the memory in MB the models are allowed to use as a ``float``. As above this is rather a
+the memory in MB the models are allowed to use as a ``float``. As above, this is rather a
 guideline on how much memory is used as redundant models are only removed from disk when the
 ensemble builder finishes an iteration.
 
 .. note::
 
     Especially when running in parallel it can happen that multiple models are constructed during
-    one run of the ensemble builder and thus exceed the disk limit.
+    one run of the ensemble builder and thus *Auto-sklearn* can exceed the given limit.
+
+.. note::
+
+   These limits do only apply to models and their predictions, but not to other files stored in
+   the temporary directory such as the log files.
 
 Available machine learning models
 =================================
@@ -138,7 +157,7 @@ libraries would require us to generate meta-data more often. Lastly, having more
 guarantee a better performance for most users as having more choices demands a longer search for
 good models and can lead to more overfitting.
 
-Nevertheless, everyone can still add his or her favorite model to Auto-sklearn's search space by
+Nevertheless, everyone can still add their favorite model to Auto-sklearn's search space by
 following the `examples on how to extend Auto-sklearn
 <https://automl.github.io/auto-sklearn/master/examples/index.html#extension-examples>`_.
 
@@ -181,14 +200,32 @@ models termination condition is reached.
 Ensemble contains only a dummy model
 ------------------------------------
 
-TODO
-
-3. How to set useful budgets: https://github.com/automl/auto-sklearn/issues/57
+This is a symptom of the problem that all runs started by Auto-sklearn failed. Usually, the issue
+is that the runtime or memory limit were too tight. Please check the output of
+``sprint_statistics`` to see the distribution of why runs failed. If there are mostly crashed
+runs, please check the log file for further details. If there are mostly runs that exceed the
+memory or time limit, please increase the respective limit and rerun the optimization.
 
 Parallel processing and oversubscription
 ----------------------------------------
 
-TODO
+Auto-sklearn wraps scikit-learn and therefore inherits its parallelism implementation. In short,
+scikit-learn uses two modes of parallelizing computations:
+
+1. By using joblib to distribute independent function calls on multiple cores.
+2. By using lower level libraries such as OpenML and numpy to distribute more fine-grained
+   computation.
+
+This means that Auto-sklearn can use more resources than expected by the user. For technical
+reasons we can only control the 1st way of parallel execution, but not the 2nd. Thus, the user
+needs to make sure that the lower level parallelization libraries only use as many cores as
+allocated (on a laptop or workstation running a single copy of Auto-sklearn it can be fine to not
+adjust this, but when using a compute cluster it is necessary to align the parallelism setting
+with the number of requested CPUs). This can be done by setting the following environment
+variables: ``MKL_NUM_THREADS``, ``OPENBLAS_NUM_THREADS``, ``BLIS_NUM_THREADS`` and
+``OMP_NUM_THREADS``.
+
+More details can be found in the `scikit-learn docs <https://scikit-learn.org/stable/computing/parallelism.html?highlight=joblib#parallelism>`
 
 Meta-Learning
 =============
@@ -219,6 +256,9 @@ We do not have a user guide on meta-features but they are all pretty simple and 
 How is the meta-data generated?
 -------------------------------
 
+Auto-sklearn 1.0
+~~~~~~~~~~~~~~~~
+
 We currently generate meta-data the following way. First, for each of the datasets mentioned
 above, we run Auto-sklearn without meta-learning for a total of two days on multiple metrics (for
 classification these are accuracy, balanced accuracy, log loss and the area under the curce).
@@ -227,3 +267,8 @@ trajectory of the best known model at a time, and refit it on the whole training
 each of these models we then compute all scores we're interested in, these also include other
 ones such F1 and precision. Finally, for each combination of dataset and metric we store the best
 model we know of.
+
+Auto-sklearn 2.0
+~~~~~~~~~~~~~~~~
+
+Please check `our paper <https://arxiv.org/abs/2007.04074>`_ for details.
