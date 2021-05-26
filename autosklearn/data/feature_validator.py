@@ -59,14 +59,17 @@ class FeatureValidator(BaseEstimator):
             typing.Dict[typing.Union[str, int], str]
         ] = None
         if feat_type is not None:
-            if not isinstance(feat_type, list):
+            if isinstance(feat_type, dict):
+                self.feat_type = feat_type
+            elif not isinstance(feat_type, list):
                 raise ValueError("Auto-Sklearn expects a list of categorical/"
                                  "numerical feature types, yet a"
                                  " {} was provided".format(type(feat_type)))
+            else:
 
-            # Convert to a dictionary which will be passed to the ColumnTransformer
-            # Column Transformer supports strings or integer indexes
-            self.feat_type = {i: feat for i, feat in enumerate(feat_type)}
+                # Convert to a dictionary which will be passed to the ColumnTransformer
+                # Column Transformer supports strings or integer indexes
+                self.feat_type = {i: feat for i, feat in enumerate(feat_type)}
 
         # Register types to detect unsupported data format changes
         self.data_type = None  # type: typing.Optional[type]
@@ -127,7 +130,9 @@ class FeatureValidator(BaseEstimator):
                                      'variables as X has features. %d vs %d.' %
                                      (len(self.feat_type), np.shape(X_train)[1]))
                 if not all([isinstance(f, str) for f in self.feat_type.values()]):
-                    raise ValueError('Array feat_type must only contain strings.')
+                    raise ValueError("feat_type must only contain strings: {}".format(
+                        list(self.feat_type.values()),
+                    ))
 
                 for ft in self.feat_type.values():
                     if ft.lower() not in ['categorical', 'numerical']:
