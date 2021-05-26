@@ -10,7 +10,7 @@ from sklearn.preprocessing import OrdinalEncoder
 
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
+from autosklearn.pipeline.constants import DENSE, INPUT, UNSIGNED_DATA
 
 
 class OrdinalEncoding(AutoSklearnPreprocessingAlgorithm):
@@ -30,6 +30,8 @@ class OrdinalEncoding(AutoSklearnPreprocessingAlgorithm):
 
     def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         if scipy.sparse.issparse(X):
+            # Sparse data should be float dtype, which means we do not need
+            # to further encode it.
             return X
         if self.preprocessor is None:
             raise NotImplementedError()
@@ -50,9 +52,9 @@ class OrdinalEncoding(AutoSklearnPreprocessingAlgorithm):
                 'handles_multilabel': True,
                 'handles_multioutput': True,
                 # TODO find out of this is right!
-                'handles_sparse': True,
+                'handles_sparse': False,
                 'handles_dense': True,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
+                'input': (DENSE, UNSIGNED_DATA),
                 'output': (INPUT,), }
 
     @staticmethod

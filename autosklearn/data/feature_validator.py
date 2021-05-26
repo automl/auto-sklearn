@@ -70,7 +70,7 @@ class FeatureValidator(BaseEstimator):
 
         # Register types to detect unsupported data format changes
         self.data_type = None  # type: typing.Optional[type]
-        self.dtypes = []  # type: typing.List[str]
+        self.dtypes = {}  # type: typing.Dict[str, str]
 
         self.logger = logger if logger is not None else logging.getLogger(__name__)
 
@@ -174,25 +174,8 @@ class FeatureValidator(BaseEstimator):
         if isinstance(X, list):
             X, _ = self.list_to_dataframe(X)
 
-        if hasattr(X, "iloc") and not scipy.sparse.issparse(X):
-            X = typing.cast(pd.DataFrame, X)
-            if np.any(pd.isnull(X)):
-                for column in X.columns:
-                    if X[column].isna().all():
-                        X[column] = pd.to_numeric(X[column])
-
         # Check the data here so we catch problems on new test data
         self._check_data(X)
-
-        # Pandas related transformations
-        if hasattr(X, "iloc"):
-            if np.any(pd.isnull(X)):
-                # After above check it means that if there is a NaN
-                # the whole column must be NaN
-                # Make sure it is numerical and let the pipeline handle it
-                for column in X.columns:
-                    if X[column].isna().all():
-                        X[column] = pd.to_numeric(X[column])
 
         # Sparse related transformations
         # Not all sparse format support index sorting
@@ -249,26 +232,7 @@ class FeatureValidator(BaseEstimator):
             # If entered here, we have a pandas dataframe
             X = typing.cast(pd.DataFrame, X)
 
-            # Define the column to be encoded here as the feature validator is fitted once
-            # per estimator
-            feat_type = self.get_feat_type_from_columns(X)
-
-            if len(feat_type) > 0:
-                if np.any(pd.isnull(
-                    X[[key for key, value in feat_type.items() if value == 'categorical']
-                      ].dropna(  # type: ignore[call-overload]
-                        axis='columns', how='all')
-                )):
-                    # Ignore all NaN columns, and if still a NaN
-                    # Error out
-                    raise ValueError("Categorical features in a dataframe cannot contain "
-                                     "missing/NaN values. The OrdinalEncoder used by "
-                                     "Auto-sklearn cannot handle this yet (due to a "
-                                     "limitation on scikit-learn being addressed via: "
-                                     "https://github.com/scikit-learn/scikit-learn/issues/17123)"
-                                     )
-
-            dtypes = [dtype.name for dtype in X.dtypes]
+            dtypes = {col: X[col].dtype.name for col in X.columns}
             if len(self.dtypes) > 0:
                 if self.dtypes != dtypes:
                     raise ValueError("Changing the dtype of the features after fit() is "
@@ -298,17 +262,6 @@ class FeatureValidator(BaseEstimator):
             feat_type:
                 dictionary with column to feature type mapping
         """
-
-        # Treat a column with all instances a NaN as numerical
-        # This will prevent doing encoding to a categorical column made completely
-        # out of nan values -- which will trigger a fail, as encoding is not supported
-        # with nan values.
-        # Columns that are completely made of NaN values are provided to the pipeline
-        # so that later stages decide how to handle them
-        if np.any(pd.isnull(X)):
-            for column in X.columns:
-                if X[column].isna().all():
-                    X[column] = pd.to_numeric(X[column])
 
         # Also, register the feature types for the estimator
         feat_type = {}

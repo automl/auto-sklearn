@@ -2,12 +2,17 @@ from collections import defaultdict, OrderedDict, deque
 import copy
 
 import numpy as np
+
+import pandas as pd
+
 import scipy.stats
 from scipy.linalg import LinAlgError
 import scipy.sparse
+
 # TODO use balanced accuracy!
-from sklearn.utils import check_array
 from sklearn.multiclass import OneVsRestClassifier
+from sklearn.utils import check_array
+from sklearn.utils.multiclass import type_of_target
 
 from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
     import DataPreprocessor
@@ -147,6 +152,10 @@ class NumberOfClasses(MetaFeature):
     does this for each label seperately and returns the mean.
     """
     def _calculate(self, X, y, logger, categorical):
+        if type_of_target(y) == 'multilabel-indicator':
+            # We have a label binary indicator array:
+            # each sample is one row of a 2d array of shape (n_samples, n_classes)
+            return y.shape[1]
         if len(y.shape) == 2:
             return np.mean([len(np.unique(y[:, i])) for i in range(y.shape[1])])
         else:
@@ -169,7 +178,7 @@ class LogNumberOfFeatures(MetaFeature):
 @helper_functions.define("MissingValues")
 class MissingValues(HelperFunction):
     def _calculate(self, X, y, logger, categorical):
-        missing = ~np.isfinite(X)
+        missing = pd.isna(X)
         return missing
 
     def _calculate_sparse(self, X, y, logger, categorical):
@@ -253,13 +262,13 @@ class PercentageOfMissingValues(MetaFeature):
 @metafeatures.define("NumberOfNumericFeatures")
 class NumberOfNumericFeatures(MetaFeature):
     def _calculate(self, X, y, logger, categorical):
-        return len(categorical) - np.sum(categorical)
+        return len(categorical) - np.sum(list(categorical.values()))
 
 
 @metafeatures.define("NumberOfCategoricalFeatures")
 class NumberOfCategoricalFeatures(MetaFeature):
     def _calculate(self, X, y, logger, categorical):
-        return np.sum(categorical)
+        return np.sum(list(categorical.values()))
 
 
 @metafeatures.define("RatioNumericalToNominal")
@@ -414,12 +423,12 @@ class ClassProbabilitySTD(MetaFeature):
 class NumSymbols(HelperFunction):
     def _calculate(self, X, y, logger, categorical):
         symbols_per_column = []
-        columns = X.columns if hasattr(X, 'columns') else range(np.shape(X)[1])
-        for i, column in enumerate(columns):
-            if categorical[i]:
-                column = X[column] if hasattr(X, 'columns') else X[:, i]
-                unique_values = np.unique(column)
-                num_unique = np.sum(np.isfinite(unique_values))
+        for i in range(X.shape[1]):
+            if categorical[X.columns[i] if hasattr(X, 'columns') else i]:
+                column = X.iloc[:, i] if hasattr(X, 'iloc') else X[:, i]
+                unique_values = column.unique() if hasattr(
+                    column, 'unique') else np.unique(column)
+                num_unique = np.sum(pd.notna(unique_values))
                 symbols_per_column.append(num_unique)
         return symbols_per_column
 
@@ -427,7 +436,7 @@ class NumSymbols(HelperFunction):
         symbols_per_column = []
         new_X = X.tocsc()
         for i in range(new_X.shape[1]):
-            if categorical[i]:
+            if categorical[X.columns[i] if hasattr(X, 'columns') else i]:
                 unique_values = np.unique(new_X.getcol(i).data)
                 num_unique = np.sum(np.isfinite(unique_values))
                 symbols_per_column.append(num_unique)
@@ -492,11 +501,10 @@ class SymbolsSum(MetaFeature):
 class Kurtosisses(HelperFunction):
     def _calculate(self, X, y, logger, categorical):
         kurts = []
-        columns = X.columns if hasattr(X, 'columns') else range(X.shape[1])
-        for i, col in enumerate(columns):
-            if not categorical[i]:
+        for i in range(X.shape[1]):
+            if not categorical[X.columns[i] if hasattr(X, 'columns') else i]:
                 kurts.append(scipy.stats.kurtosis(
-                    X[col] if hasattr(X, 'columns') else X[:, i]
+                    X.iloc[:, i] if hasattr(X, 'iloc') else X[:, i]
                 ))
         return kurts
 
@@ -504,7 +512,7 @@ class Kurtosisses(HelperFunction):
         kurts = []
         X_new = X.tocsc()
         for i in range(X_new.shape[1]):
-            if not categorical[i]:
+            if not categorical[X.columns[i] if hasattr(X, 'columns') else i]:
                 start = X_new.indptr[i]
                 stop = X_new.indptr[i+1]
                 kurts.append(scipy.stats.kurtosis(X_new.data[start:stop]))
@@ -547,11 +555,10 @@ class KurtosisSTD(MetaFeature):
 class Skewnesses(HelperFunction):
     def _calculate(self, X, y, logger, categorical):
         skews = []
-        columns = X.columns if hasattr(X, 'columns') else range(X.shape[1])
-        for i, col in enumerate(columns):
-            if not categorical[i]:
+        for i in range(X.shape[1]):
+            if not categorical[X.columns[i] if hasattr(X, 'columns') else i]:
                 skews.append(scipy.stats.skew(
-                    X[col] if hasattr(X, 'columns') else X[:, i]
+                    X.iloc[:, i] if hasattr(X, 'iloc') else X[:, i]
                 ))
         return skews
 
@@ -559,7 +566,7 @@ class Skewnesses(HelperFunction):
         skews = []
         X_new = X.tocsc()
         for i in range(X_new.shape[1]):
-            if not categorical[i]:
+            if not categorical[X.columns[i] if hasattr(X, 'columns') else i]:
                 start = X_new.indptr[i]
                 stop = X_new.indptr[i + 1]
                 skews.append(scipy.stats.skew(X_new.data[start:stop]))
@@ -615,13 +622,11 @@ def cancor2(X, y):
 class ClassEntropy(MetaFeature):
     def _calculate(self, X, y, logger, categorical):
         labels = 1 if len(y.shape) == 1 else y.shape[1]
-        if labels == 1:
-            y = y.reshape((-1, 1))
 
         entropies = []
         for i in range(labels):
             occurence_dict = defaultdict(float)
-            for value in y[:, i]:
+            for value in y if labels == 1 else y[:, i]:
                 occurence_dict[value] += 1
             entropies.append(scipy.stats.entropy([occurence_dict[key] for key in
                                                  occurence_dict], base=2))
@@ -1060,11 +1065,13 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name, logger,
                 # sparse matrices because of wrong sparse format)
                 sparse = scipy.sparse.issparse(X)
                 DPP = DataPreprocessor(
-                    feat_type={i: 'categorical' if feat else 'numerical'
-                               for i, feat in enumerate(categorical)},
+                    # The difference between feat_type and categorical, is that
+                    # categorical has True/False instead of categorical/numerical
+                    feat_type={key: 'categorical' if value else 'numerical'
+                               for key, value in categorical.items()},
                     force_sparse_output=True)
                 X_transformed = DPP.fit_transform(X)
-                categorical_transformed = [False] * X_transformed.shape[1]
+                categorical_transformed = {i: False for i in range(X_transformed.shape[1])}
 
                 # Densify the transformed matrix
                 if not sparse and scipy.sparse.issparse(X_transformed):
@@ -1112,7 +1119,8 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name, logger,
                     dependency):
                 logger.info("%s: Going to calculate: %s", dataset_name,
                             dependency)
-                value = helper_functions[dependency](X_, y_, categorical_)
+                value = helper_functions[dependency](
+                    X_, y_, categorical=categorical_, logger=logger)
                 helper_functions.set_value(dependency, value)
                 mf_[dependency] = value
 

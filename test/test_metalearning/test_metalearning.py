@@ -81,7 +81,7 @@ class Test(unittest.TestCase):
                     include_preprocessors=['no_preprocessing'])
 
                 X_train, Y_train, X_test, Y_test = get_dataset(dataset_name)
-                categorical = [False] * X_train.shape[1]
+                categorical = {i: False for i in range(X_train.shape[1])}
 
                 meta_features_label = _calculate_metafeatures(
                     X_train, Y_train, categorical, dataset_name, task)

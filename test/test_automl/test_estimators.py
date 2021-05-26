@@ -852,3 +852,27 @@ def test_pass_categorical_and_numeric_columns_to_pipeline(
     else:
         expected_dict = {i: 'numerical' for i in range(np.shape(X)[1])}
     assert expected_dict == pipeline.named_steps['data_preprocessing'].feat_type
+
+
+@pytest.mark.parametrize("as_frame", [True, False])
+def test_autosklearn_anneal(as_frame):
+    """
+    This test makes sure that anneal dataset can be fitted and scored.
+    This dataset is quite complex, with NaN, categorical and numerical columns
+    so is a good testcase for unit-testing
+    """
+    X, y = sklearn.datasets.fetch_openml(data_id=2, return_X_y=True, as_frame=False)
+    automl = AutoSklearnClassifier(time_left_for_this_task=60, ensemble_size=0,
+                                   resampling_strategy='holdout-iterative-fit')
+
+    automl_fitted = automl.fit(X, y)
+    assert automl is automl_fitted
+
+    automl_ensemble_fitted = automl.fit_ensemble(y, ensemble_size=5)
+    assert automl is automl_ensemble_fitted
+
+    # We want to make sure we can learn from this data.
+    # This is a test to make sure the data format (numpy/pandas)
+    # can be used in a meaningful way -- not meant for generalization,
+    # hence we use the train dataset
+    assert automl_fitted.score(X, y) > 0.9

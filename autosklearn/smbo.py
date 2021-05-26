@@ -85,10 +85,8 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
         task_name = 'CalculateMetafeatures'
         watcher.start_task(task_name)
 
-        # data_feat_type is used by both smbo and metafeature calculation
-        feat_types = data_feat_type.values() if isinstance(data_feat_type, dict) else data_feat_type
-        categorical = [True if feat_type.lower() in ['categorical'] else False
-                       for feat_type in feat_types]
+        categorical = {col: True if feat_type.lower() == 'categorical' else False
+                       for col, feat_type in data_feat_type.items()}
 
         EXCLUDE_META_FEATURES = EXCLUDE_META_FEATURES_CLASSIFICATION \
             if data_info_task in CLASSIFICATION_TASKS else EXCLUDE_META_FEATURES_REGRESSION
@@ -125,9 +123,8 @@ def _calculate_metafeatures_encoded(data_feat_type, basename, x_train, y_train, 
 
         task_name = 'CalculateMetafeaturesEncoded'
         watcher.start_task(task_name)
-        feat_types = data_feat_type.values() if isinstance(data_feat_type, dict) else data_feat_type
-        categorical = [True if feat_type.lower() in ['categorical'] else False
-                       for feat_type in feat_types]
+        categorical = {col: True if feat_type.lower() == 'categorical' else False
+                       for col, feat_type in data_feat_type.items()}
 
         result = calculate_all_metafeatures_encoded_labels(
             x_train, y_train, categorical=categorical,
