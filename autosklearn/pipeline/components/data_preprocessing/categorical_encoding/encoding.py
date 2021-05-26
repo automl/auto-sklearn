@@ -10,7 +10,7 @@ from sklearn.preprocessing import OrdinalEncoder
 
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import DENSE, INPUT, UNSIGNED_DATA
+from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
 
 class OrdinalEncoding(AutoSklearnPreprocessingAlgorithm):
@@ -52,9 +52,9 @@ class OrdinalEncoding(AutoSklearnPreprocessingAlgorithm):
                 'handles_multilabel': True,
                 'handles_multioutput': True,
                 # TODO find out of this is right!
-                'handles_sparse': False,
+                'handles_sparse': True,
                 'handles_dense': True,
-                'input': (DENSE, UNSIGNED_DATA),
+                'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (INPUT,), }
 
     @staticmethod

@@ -240,21 +240,6 @@ def test_featurevalidator_unsupported_numpy(input_data_featuretest):
 @pytest.mark.parametrize(
     'input_data_featuretest',
     (
-        'pandas_categoricalonly_nan',
-        'pandas_mixed_nan',
-        'openml_179',  # adult workclass has NaN in columns
-    ),
-    indirect=True
-)
-def test_featurevalidator_unsupported_pandas(input_data_featuretest):
-    validator = FeatureValidator()
-    with pytest.raises(ValueError, match=r"Categorical features in a dataframe.*missing/NaN"):
-        validator.fit(input_data_featuretest)
-
-
-@pytest.mark.parametrize(
-    'input_data_featuretest',
-    (
         'numpy_categoricalonly_nonan',
         'numpy_mixed_nonan',
         'numpy_categoricalonly_nan',
@@ -335,12 +320,9 @@ def test_features_unsupported_calls_are_raised():
         validator.fit(
             pd.DataFrame({'datetime': [pd.Timestamp('20180310')]})
         )
-    with pytest.raises(ValueError, match="has invalid type object"):
-        validator.fit(
-            pd.DataFrame({'string': ['foo']})
-        )
     with pytest.raises(ValueError, match=r"Auto-sklearn only supports.*yet, the provided input"):
         validator.fit({'input1': 1, 'input2': 2})
+    validator = FeatureValidator()
     with pytest.raises(ValueError, match=r"has unsupported dtype string"):
         validator.fit(pd.DataFrame([{'A': 1, 'B': 2}], dtype='string'))
     with pytest.raises(ValueError, match=r"The feature dimensionality of the train and test"):
