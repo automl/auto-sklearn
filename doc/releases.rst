@@ -457,7 +457,7 @@ Version 0.4.0
   ``predict_proba`` to no longer raise an `AttributeError`.
 * Improved documentation of the parallel example.
 * Classifiers are now tested to be idempotent as `required by scikit-learn
-  <https://scikit-learn.org/stable/developers/contributing.html#estimated-attributes>`_.
+  <https://scikit-learn.org/stable/developers/develop.html#fitting>`_.
 * Fixes the usage of the shrinkage parameter in LDA.
 * Fixes `#410 <https://github.com/automl/auto-sklearn/issues/410>`_ and changes
   the SGD hyperparameters
@@ -479,13 +479,13 @@ Version 0.4.0
   minimization problem.
 * Implements `#271 <https://github.com/automl/auto-sklearn/issues/271>`_:
   XGBoost is available again, even configuring the new dropout functionality.
-* New documentation section `inspecting the results <https://automl.github.io/auto-sklearn/stable/manual.html#inspecting-the-results>`_.
+* New documentation section :ref:`inspecting_the_results`.
 * Fixes `#444 <https://github.com/automl/auto-sklearn/issues/444>`_:
   Auto-sklearn now only loads models for refit which are actually relevant
   for the ensemble.
 * Adds an operating system check at import and installation time to make sure
   to not accidentaly run on a Windows machine.
-* New examples gallery using sphinx gallery: `https://automl.github.io/auto-sklearn/stable/examples/index.html <https://automl.github.io/auto-sklearn/stable/examples/index.html>`_
+* New examples gallery using sphinx gallery: :ref:`sphx_glr_examples`
 * Safeguard Auto-sklearn against deleting directories it did not create (Issue
   `#317 <https://github.com/automl/auto-sklearn/issues/317>`_.
 

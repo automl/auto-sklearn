@@ -1,6 +1,6 @@
 :orphan:
 
-.. _manual:
+.. _faq:
 
 ===
 FAQ
@@ -83,11 +83,11 @@ following:
 
 1. Check if you can use a pre-compiled version of the pyrfr to avoid compiling it yourself. We
    provide pre-compiled versions of the pyrfr on `pypi <https://pypi.org/project/pyrfr/#files>`_.
-3. Check if the dependencies specified under :ref:`installation` are correctly installed,
+2. Check if the dependencies specified under :ref:`installation` are correctly installed,
    especially that you have ``swig`` and a ``C++`` compiler. If you are using an older version of
    the pyrfr (``<=0.8.0``) the dependency on SWIG as stricter and you actually need SWIG3 to
    compile the pyrfr.
-2. If you are not yet using Conda, consider using it; it simplifies installation of the correct
+3. If you are not yet using Conda, consider using it; it simplifies installation of the correct
    dependencies.
 4. Install correct build dependencies before installing the pyrfr, you can check the following
    github issues for suggestions: `1025 <https://github.com/automl/auto-sklearn/issues/1025>`_,
@@ -167,7 +167,7 @@ open an issue for that.
 Can the preprocessing be disabled
 ---------------------------------
 
-Feature preprocessing can be disabled as discussed und :ref:`Restricting the searchspace`. Other
+Feature preprocessing can be disabled as discussed und :ref:`restricting_the_searchspace`. Other
 preprocessing steps such as one hot encoding, missing feature imputation and normalization cannot
 yet be disabled, but we're working on that.
 
@@ -178,9 +178,9 @@ Only use interpretable models
 -----------------------------
 
 Auto-sklearn can be restricted to only use interpretable models and preprocessing algorithms.
-Please see the section :ref:`Restricting the searchspace` to learn how to restrict the models
+Please see the section :ref:`restricting_the_searchspace` to learn how to restrict the models
 which are searched over or see
-`this example <examples/40_advanced/example_interpretable_models.html>`_.
+:ref:`sphx_glr_examples_40_advanced_example_interpretable_models.py`.
 
 We don't provide a judgement which of the models are interpretable as this is very much up to the
 specific use case, but would like to note that decision trees and linear models usually most

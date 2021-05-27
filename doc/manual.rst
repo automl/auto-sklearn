@@ -12,28 +12,9 @@ references the examples where possible or explains certain configurations.
 Examples
 ========
 
-*auto-sklearn* comes with the following examples which demonstrate several
-aspects of its usage:
-
-* `Classification <examples/20_basic/example_classification.html>`_
-* `Multi-label Classification <examples/20_basic/example_multilabel_classification.html>`_
-* `Regression <examples/20_basic/example_regression.html>`_
-* `Continuous and categorical data <examples/40_advanced/example_feature_types.html>`_
-* `Iterating over the models <examples/40_advanced/example_get_pipeline_components.html>`_
-* `Using custom metrics <examples/40_advanced/example_metrics.html>`_
-* `Pandas Train and Test inputs <examples/40_advanced/example_pandas_train_test.html>`_
-* `Train a single configuration <examples/40_advanced/example_single_configuration.html>`_
-* `Resampling strategies <examples/40_advanced/example_resampling.html>`_
-* `Parallel usage (manual) <examples/60_search/example_parallel_manual_spawning.html>`_
-* `Parallel usage (n_jobs) <examples/60_search/example_parallel_n_jobs.html>`_
-* `Random search <examples/60_search/example_random_search.html>`_
-* `Sequential usage <examples/60_search/example_sequential.html>`_
-* `Successive Halving <examples/60_search/example_successive_halving.html>`_
-* `Extending with a new classifier <examples/80_extending/example_extending_classification.html>`_
-* `Extending with a new regressor <examples/80_extending/example_extending_regression.html>`_
-* `Extending with a new preprocessor <examples/80_extending/example_extending_preprocessor.html>`_
-* `Restrict hyperparameters for a component <examples/80_extending/example_restrict_number_of_hyperparameters.html>`_
-
+We provide examples on using *auto-sklearn* for multiple use cases ranging from
+simple classification to advanced uses such as feature importance, parallel runs
+and customization. They can be found in the :ref:`sphx_glr_examples`.
 
 Time and memory limits
 ======================
@@ -54,6 +35,8 @@ time limit of one day, and a time limit of 30 minutes for a single run.
 
 Further guidelines can be found in
 `auto-sklearn/issues/142 <https://github.com/automl/auto-sklearn/issues/142>`_.
+
+.. _restricting_the_searchspace:
 
 Restricting the searchspace
 ===========================
@@ -78,8 +61,8 @@ For a full list please have a look at the source code (in `autosklearn/pipeline/
   * `Regressors <https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/regression>`_
   * `Preprocessors <https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/feature_preprocessing>`_
 
-We do also provide an example
-`on how to restrict the classifiers to search over <examples/40_advanced/example_interpretable_models.html>`_.
+We do also provide an example on how to restrict the classifiers to search over
+:ref:`sphx_glr_examples_40_advanced_example_interpretable_models.py`.
 
 Turning off preprocessing
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -107,13 +90,20 @@ Supported Inputs
 * Regression
 * Multioutput Regression
 
-You can provide feature and target training pairs (X_train/y_train) to *auto-sklearn* to fit an ensemble of pipelines as described in the next section. This X_train/y_train dataset must belong to one of the supported formats: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.
- Optionally, you can measure the ability of this fitted model to generalize to unseen data by providing an optional testing pair (X_test/Y_test). For further details, please refer to the example `Train and Test inputs <examples/40_advanced/example_pandas_train_test.html>`_. Supported formats for these training and testing pairs are: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.
+You can provide feature and target training pairs (X_train/y_train) to *auto-sklearn* to fit an
+ensemble of pipelines as described in the next section. This X_train/y_train dataset must belong
+to one of the supported formats: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.
+Optionally, you can measure the ability of this fitted model to generalize to unseen data by
+providing an optional testing pair (X_test/Y_test). For further details, please refer to the
+example :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py`.
+Supported formats for these training and testing pairs are: np.ndarray,
+pd.DataFrame, scipy.sparse.csr_matrix and python lists.
 
 If your data contains categorical values (in the features or targets), autosklearn will automatically encode your data using a `sklearn.preprocessing.LabelEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_ for unidimensional data and a `sklearn.preprocessing.OrdinalEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html>`_ for multidimensional data.
 
 Regarding the features, there are two methods to guide *auto-sklearn* to properly encode categorical columns:
-* Providing a X_train/X_test numpy array with the optional flag feat_type. For further details, you can check the example `Feature Types <examples/40_advanced/example_feature_types.html>`_.
+* Providing a X_train/X_test numpy array with the optional flag feat_type. For further details, you
+can check the example :ref:`sphx_glr_examples_40_advanced_example_feature_types.py`.
 * You can provide a pandas DataFrame, with properly formatted columns. If a column has numerical dtype, *auto-sklearn* will not encode it and it will be passed directly to scikit-learn. If the column has a categorical/boolean class, it will be encoded. If the column is of any other type (Object or Timeseries), an error will be raised. For further details on how to properly encode your data, you can check the example `Working with categorical data <https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html>`_). If you are working with time series, it is recommended that you follow this approach `Working with time data <https://stats.stackexchange.com/questions/311494/>`_.
 
 Regarding the targets (y_train/y_test), if the task involves a classification problem, such features will be automatically encoded. It is recommended to provide both y_train and y_test during fit, so that a common encoding is created between these splits (if only y_train is provided during fit, the categorical encoder will not be able to handle new classes that are exclusive to y_test). If the task is regression, no encoding happens on the targets.
@@ -127,6 +117,8 @@ to build an ensemble based on the models’ prediction for the validation set. T
 * ``ensemble_size`` determines the maximal size of the ensemble. If it is set to zero, no ensemble will be constructed.
 * ``ensemble_nbest`` allows the user to directly specify the number of models considered for the ensemble.  This hyperparameter can be an integer *n*, such that only the best *n* models are used in the final ensemble. If a float between 0.0 and 1.0 is provided, ``ensemble_nbest`` would be interpreted as a fraction suggesting the percentage of models to use in the ensemble building process (namely, if ensemble_nbest is a float, library pruning is implemented as described in `Caruana et al. (2006) <https://dl.acm.org/doi/10.1109/ICDM.2006.76>`_).
 * ``max_models_on_disc`` defines the maximum number of models that are kept on the disc, as a mechanism to control the amount of disc space consumed by *auto-sklearn*. Throughout the automl process, different individual models are optimized, and their predictions (and other metadata) is stored on disc. The user can set the upper bound on how many models are acceptable to keep on disc, yet this variable takes priority in the definition of the number of models used by the ensemble builder (that is, the minimum of ``ensemble_size``, ``ensemble_nbest`` and ``max_models_on_disc`` determines the maximal amount of models used in the ensemble). If set to None, this feature is disabled.
+
+.. _inspecting_the_results:
 
 Inspecting the results
 ======================
@@ -147,8 +139,7 @@ obtained by running *auto-sklearn*. It additionally prints the number of both su
 algorithm runs.
 
 The results obtained from the final ensemble can be printed by calling ``show_models()``. *auto-sklearn* ensemble is composed of scikit-learn models that can be inspected as exemplified by
-`model inspection example <examples/40_advanced/example_get_pipeline_components.html>`_
-.
+:ref:`sphx_glr_examples_40_advanced_example_get_pipeline_components.py`.
 
 Parallel computation
 ====================
@@ -182,8 +173,8 @@ Model persistence
 =================
 
 *auto-sklearn* is mostly a wrapper around scikit-learn. Therefore, it is
-possible to follow the `persistence example
-<https://scikit-learn.org/stable/modules/model_persistence.html#persistence-example>`_
+possible to follow the
+`persistence example <https://scikit-learn.org/stable/modules/model_persistence.html>`_
 from scikit-learn.
 
 Vanilla auto-sklearn
