@@ -77,7 +77,7 @@ for i in sort_idx[::-1]:
 # Create partial dependence (PD) and individual conditional expectation (ICE) plots - part 2
 # ==========================================================================================
 #
-# `ICE <https://christophm.github.io/interpretable-ml-book/ice.html>`_ plots describe the relation
+# `ICE plots <https://christophm.github.io/interpretable-ml-book/ice.html>`_ describe the relation
 # between feature values and the response value for each sample
 # individually -- it shows how the response value changes if the value of one feature is changed.
 #
