@@ -444,3 +444,10 @@ def test_sparse_output_is_csr(input_data_featuretest):
     transformed_X = validator.transform(input_data_featuretest)
     assert sparse.issparse(transformed_X)
     assert isinstance(transformed_X, sparse.csr_matrix)
+
+
+def test_unsupported_dataframe_sparse():
+    df = pd.DataFrame({'A': pd.Series(pd.arrays.SparseArray(np.random.randn(10)))})
+    validator = FeatureValidator()
+    with pytest.raises(ValueError, match=r"Auto-sklearn does not yet support sparse pandas"):
+        validator.fit(df)

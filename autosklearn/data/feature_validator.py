@@ -4,7 +4,7 @@ import typing
 import numpy as np
 
 import pandas as pd
-from pandas.api.types import is_numeric_dtype
+from pandas.api.types import is_numeric_dtype, is_sparse
 
 import scipy.sparse
 
@@ -285,6 +285,9 @@ class FeatureValidator(BaseEstimator):
             if X[column].dtype.name in ['category', 'bool']:
 
                 feat_type[column] = 'categorical'
+            elif is_sparse(X[column]):
+                raise ValueError("Auto-sklearn does not yet support sparse pandas Series."
+                                 f" Please convert {column} to a dense format.")
             # Move away from np.issubdtype as it causes
             # TypeError: data type not understood in certain pandas types
             elif not is_numeric_dtype(X[column]):

@@ -526,7 +526,6 @@ def test_pca(meta_train_data_transformed):
 
 def test_pca_95percent(meta_train_data_transformed):
     X_transformed, y, categorical_transformed = meta_train_data_transformed
-    print(f"X_transformed={X_transformed} y={y} categorical_transformed={categorical_transformed}")
     mf = meta_features.metafeatures["PCAFractionOfComponentsFor95PercentVariance"](
         X_transformed, y, logging.getLogger('Meta'))
     assert pytest.approx(0.2716049382716049) == mf.value
@@ -723,14 +722,35 @@ def test_calculate_all_metafeatures_same_results_across_datatypes():
         'LogNumberOfFeatures': 3.6375861597263857,
         'LogNumberOfInstances': 6.8001700683022,
     }
-    for key, value in expected.items():
-        assert mf[key].value == pytest.approx(value)
+    assert {k: mf[k].value for k in expected.keys()} == pytest.approx(expected)
+
+    expected_landmark_pandas = {
+        'Landmark1NN': 0.6091806331471135,
+        'LandmarkRandomNodeLearner': 0.7617070142768466,
+        'LandmarkDecisionNodeLearner':  0.6502358783364369,
+        'LandmarkDecisionTree': 0.6047175667287399,
+        'LandmarkNaiveBayes': 0.5534698944754811,
+    }
+    assert {k: mf[k].value for k in expected_landmark_pandas.keys()} == pytest.approx(
+        expected_landmark_pandas, rel=1e-5)
 
     # Then do numpy!
     X, y = fetch_openml(data_id=2, return_X_y=True, as_frame=False)
-    categorical = {i: True if categorical else False
-                   for i, categorical in enumerate(categorical.values())}
+    categorical = {i: True if category else False
+                   for i, category in enumerate(categorical.values())}
     mf = meta_features.calculate_all_metafeatures(
         X, y, categorical, "2", logger=logging.getLogger('Meta'))
-    for key, value in expected.items():
-        assert mf[key].value == pytest.approx(value)
+    assert {k: mf[k].value for k in expected.keys()} == pytest.approx(expected)
+
+    # The column-reorder of pandas and numpy array are different after
+    # the data preprocessing. So we cannot directly compare, and landmarking is
+    # sensible to column order
+    expected_landmark_numpy = {
+        'Landmark1NN': 0.9721601489757914,
+        'LandmarkRandomNodeLearner': 0.7616945996275606,
+        'LandmarkDecisionNodeLearner': 0.7827932960893855,
+        'LandmarkDecisionTree': 0.9922098075729361,
+        'LandmarkNaiveBayes': 0.9287150837988827
+    }
+    assert {k: mf[k].value for k in expected_landmark_numpy.keys()} == pytest.approx(
+        expected_landmark_numpy, rel=1e-5)
