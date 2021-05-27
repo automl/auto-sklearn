@@ -53,7 +53,7 @@ def test_smbo_metalearning_configurations(backend, context, dask_client):
         X_test, Y_test,
         task=BINARY_CLASSIFICATION,
         dataset_name='iris',
-        feat_type=None,
+        feat_type={i: 'numerical' for i in range(X_train.shape[1])},
     )
     backend.save_datamanager(datamanager)
     smbo.task = BINARY_CLASSIFICATION
