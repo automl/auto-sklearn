@@ -63,7 +63,7 @@ not guarded by ``if __name__ == "__main__"`` will be executed for each subproces
 you are loading your dataset outside of the guarded code, your dataset will be loaded for each
 evaluation of a machine learning algorithm and thus blocking your RAM.
 
-We therefore suggest moving all code inside function or the main block.
+We therefore suggest moving all code inside functions or the main block.
 
 Auto-sklearn crashes with a segmentation fault
 ----------------------------------------------
@@ -86,7 +86,7 @@ following:
 3. Check if the dependencies specified under :ref:`installation` are correctly installed,
    especially that you have ``swig`` and a ``C++`` compiler. If you are using an older version of
    the pyrfr (``<=0.8.0``) the dependency on SWIG as stricter and you actually need SWIG3 to
-   compile the pyrfr..
+   compile the pyrfr.
 2. If you are not yet using Conda, consider using it; it simplifies installation of the correct
    dependencies.
 4. Install correct build dependencies before installing the pyrfr, you can check the following
@@ -129,9 +129,9 @@ for the argument ``max_models_on_disc`` to *Auto-sklearn*, for example reduce th
 stored on disk if you have space issues.
 
 As the number of models is only an indicator of the disk space used it is also possible to pass
-the memory in MB the models are allowed to use as a ``float``. As above, this is rather a
-guideline on how much memory is used as redundant models are only removed from disk when the
-ensemble builder finishes an iteration.
+the memory in MB the models are allowed to use as a ``float`` (also via the ``max_models_on_disc``
+arguments). As above, this is rather a guideline on how much memory is used as redundant models
+are only removed from disk when the ensemble builder finishes an iteration.
 
 .. note::
 
