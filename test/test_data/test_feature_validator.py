@@ -334,10 +334,10 @@ def test_features_unsupported_calls_are_raised():
     validator = FeatureValidator(feat_type=['Numerical'])
     with pytest.raises(ValueError, match=r"providing the option feat_type to the fit method is.*"):
         validator.fit(pd.DataFrame([[1, 2, 3], [4, 5, 6]]))
-    with pytest.raises(ValueError, match=r"Array feat_type does not have same number of.*"):
+    with pytest.raises(ValueError, match=r"feat_type does not have same number of.*"):
         validator.fit(np.array([[1, 2, 3], [4, 5, 6]]))
     validator = FeatureValidator(feat_type=[1, 2, 3])
-    with pytest.raises(ValueError, match=r"Array feat_type must only contain strings.*"):
+    with pytest.raises(ValueError, match=r"feat_type must only contain strings.*"):
         validator.fit(np.array([[1, 2, 3], [4, 5, 6]]))
     validator = FeatureValidator(feat_type=['1', '2', '3'])
     with pytest.raises(ValueError, match=r"Only `Categorical` and `Numerical` are.*"):

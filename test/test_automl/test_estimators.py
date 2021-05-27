@@ -127,13 +127,13 @@ def test_feat_type_wrong_arguments():
     y = np.zeros((100, ))
 
     cls = AutoSklearnClassifier(ensemble_size=0)
-    expected_msg = r".*Array feat_type does not have same number of "
+    expected_msg = r".*feat_type does not have same number of "
     "variables as X has features. 1 vs 100.*"
     with pytest.raises(ValueError, match=expected_msg):
         cls.fit(X=X, y=y, feat_type=[True])
 
     cls = AutoSklearnClassifier(ensemble_size=0)
-    expected_msg = r".*Array feat_type must only contain strings.*"
+    expected_msg = r".*feat_type must only contain strings.*"
     with pytest.raises(ValueError, match=expected_msg):
         cls.fit(X=X, y=y, feat_type=[True]*100)
 
