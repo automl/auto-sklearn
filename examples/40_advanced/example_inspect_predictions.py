@@ -36,8 +36,6 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
     per_run_time_limit=30,
     tmp_folder='/tmp/autosklearn_inspect_predictions_example_tmp',
-    output_folder='/tmp/autosklearn_classification_example_out',
-    n_jobs=1,
 )
 automl.fit(X_train, y_train, dataset_name='Run_or_walk_information')
 
