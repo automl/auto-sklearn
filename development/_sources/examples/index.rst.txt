@@ -27,7 +27,7 @@ Practical examples for using *auto-sklearn*.
 Basic Examples
 ==============
 
-Examples for basic classification, regression and multi-label classification datasets.
+Examples for basic classification, regression, multi-output regression, and multi-label classification datasets.
 
 
 
@@ -72,6 +72,27 @@ Examples for basic classification, regression and multi-label classification dat
    :hidden:
 
    /examples/20_basic/example_classification
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to fit a multioutput regression model with *auto-sklearn*.">
+
+.. only:: html
+
+ .. figure:: /examples/20_basic/images/thumb/sphx_glr_example_multioutput_regression_thumb.png
+     :alt: Multi-output Regression
+
+     :ref:`sphx_glr_examples_20_basic_example_multioutput_regression.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/20_basic/example_multioutput_regression
 
 .. raw:: html
 

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Multi-output Regression &#8212; AutoSklearn 0.12.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-rendered-html.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="../../_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+  
+  <a href="https://github.com/automl/auto-sklearn"
+     class="visible-desktop hidden-xs"><img
+    id="gh-banner"
+    style="position: absolute; top: 50px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"
+    alt="Fork me on GitHub"></a>
+  <script>
+    // Adjust banner height.
+    $(function () {
+      var navHeight = $(".navbar .container").css("height");
+      $("#gh-banner").css("top", navHeight);
+    });
+  </script>
+
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../index.html">
+          auto-sklearn</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.12.6</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../index.html">Start</a></li>
+                <li><a href="../../releases.html">Releases</a></li>
+                <li><a href="../../installation.html">Installation</a></li>
+                <li><a href="../../manual.html">Manual</a></li>
+                <li><a href="../index.html">Examples</a></li>
+                <li><a href="../../api.html">API</a></li>
+                <li><a href="../../extending.html">Extending</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">Multi-output Regression</a><ul>
+<li><a class="reference internal" href="#data-loading">Data Loading</a></li>
+<li><a class="reference internal" href="#build-and-fit-a-regressor">Build and fit a regressor</a></li>
+<li><a class="reference internal" href="#print-the-final-ensemble-constructed-by-auto-sklearn">Print the final ensemble constructed by auto-sklearn</a></li>
+<li><a class="reference internal" href="#get-the-score-of-the-final-ensemble">Get the Score of the final ensemble</a></li>
+<li><a class="reference internal" href="#get-the-configuration-space">Get the configuration space</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
+      
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-20-basic-example-multioutput-regression-py"><span class="std std-ref">here</span></a>
+to download the full example code or to run this example in your browser via Binder</p>
+</div>
+<section class="sphx-glr-example-title" id="multi-output-regression">
+<span id="sphx-glr-examples-20-basic-example-multioutput-regression-py"></span><h1>Multi-output Regression<a class="headerlink" href="#multi-output-regression" title="Permalink to this headline">¶</a></h1>
+<p>The following example shows how to fit a multioutput regression model with
+<em>auto-sklearn</em>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">make_regression</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">r2_score</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="kn">from</span> <span class="nn">autosklearn.regression</span> <span class="kn">import</span> <span class="n">AutoSklearnRegressor</span>
+</pre></div>
+</div>
+<section id="data-loading">
+<h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">make_regression</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_informative</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">n_targets</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="build-and-fit-a-regressor">
+<h2>Build and fit a regressor<a class="headerlink" href="#build-and-fit-a-regressor" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">automl</span> <span class="o">=</span> <span class="n">AutoSklearnRegressor</span><span class="p">(</span>
+    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
+    <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">tmp_folder</span><span class="o">=</span><span class="s1">&#39;/tmp/autosklearn_multioutput_regression_example_tmp&#39;</span><span class="p">,</span>
+    <span class="n">output_folder</span><span class="o">=</span><span class="s1">&#39;/tmp/autosklearn_multioutput_regression_example_out&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">dataset_name</span><span class="o">=</span><span class="s1">&#39;synthetic&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnRegressor(output_folder=&#39;/tmp/autosklearn_multioutput_regression_example_out&#39;,
+                     per_run_time_limit=30, time_left_for_this_task=120,
+                     tmp_folder=&#39;/tmp/autosklearn_multioutput_regression_example_tmp&#39;)
+</pre></div>
+</div>
+</section>
+<section id="print-the-final-ensemble-constructed-by-auto-sklearn">
+<h2>Print the final ensemble constructed by auto-sklearn<a class="headerlink" href="#print-the-final-ensemble-constructed-by-auto-sklearn" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(0.940000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;extra_trees_preproc_for_regression&#39;, &#39;regressor:__choice__&#39;: &#39;k_nearest_neighbors&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.07461708512446319, &#39;feature_preprocessor:extra_trees_preproc_for_regression:bootstrap&#39;: &#39;False&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:criterion&#39;: &#39;friedman_mse&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:max_depth&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:max_features&#39;: 0.11155581450643696, &#39;feature_preprocessor:extra_trees_preproc_for_regression:max_leaf_nodes&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:min_samples_leaf&#39;: 9, &#39;feature_preprocessor:extra_trees_preproc_for_regression:min_samples_split&#39;: 16, &#39;feature_preprocessor:extra_trees_preproc_for_regression:min_weight_fraction_leaf&#39;: 0.0, &#39;feature_preprocessor:extra_trees_preproc_for_regression:n_estimators&#39;: 100, &#39;regressor:k_nearest_neighbors:n_neighbors&#39;: 10, &#39;regressor:k_nearest_neighbors:p&#39;: 2, &#39;regressor:k_nearest_neighbors:weights&#39;: &#39;distance&#39;},
+dataset_properties={
+  &#39;task&#39;: 5,
+  &#39;sparse&#39;: False,
+  &#39;multioutput&#39;: True,
+  &#39;target_type&#39;: &#39;regression&#39;,
+  &#39;signed&#39;: False})),
+(0.020000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;power_transformer&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;extra_trees_preproc_for_regression&#39;, &#39;regressor:__choice__&#39;: &#39;k_nearest_neighbors&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.17991915054704827, &#39;feature_preprocessor:extra_trees_preproc_for_regression:bootstrap&#39;: &#39;True&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:criterion&#39;: &#39;friedman_mse&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:max_depth&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:max_features&#39;: 0.8059419617387933, &#39;feature_preprocessor:extra_trees_preproc_for_regression:max_leaf_nodes&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:min_samples_leaf&#39;: 10, &#39;feature_preprocessor:extra_trees_preproc_for_regression:min_samples_split&#39;: 9, &#39;feature_preprocessor:extra_trees_preproc_for_regression:min_weight_fraction_leaf&#39;: 0.0, &#39;feature_preprocessor:extra_trees_preproc_for_regression:n_estimators&#39;: 100, &#39;regressor:k_nearest_neighbors:n_neighbors&#39;: 6, &#39;regressor:k_nearest_neighbors:p&#39;: 2, &#39;regressor:k_nearest_neighbors:weights&#39;: &#39;distance&#39;},
+dataset_properties={
+  &#39;task&#39;: 5,
+  &#39;sparse&#39;: False,
+  &#39;multioutput&#39;: True,
+  &#39;target_type&#39;: &#39;regression&#39;,
+  &#39;signed&#39;: False})),
+(0.020000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;robust_scaler&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;regressor:__choice__&#39;: &#39;decision_tree&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max&#39;: 0.7587182166651569, &#39;data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min&#39;: 0.013086785968827803, &#39;regressor:decision_tree:criterion&#39;: &#39;mae&#39;, &#39;regressor:decision_tree:max_depth_factor&#39;: 1.472101899363813, &#39;regressor:decision_tree:max_features&#39;: 1.0, &#39;regressor:decision_tree:max_leaf_nodes&#39;: &#39;None&#39;, &#39;regressor:decision_tree:min_impurity_decrease&#39;: 0.0, &#39;regressor:decision_tree:min_samples_leaf&#39;: 8, &#39;regressor:decision_tree:min_samples_split&#39;: 9, &#39;regressor:decision_tree:min_weight_fraction_leaf&#39;: 0.0},
+dataset_properties={
+  &#39;task&#39;: 5,
+  &#39;sparse&#39;: False,
+  &#39;multioutput&#39;: True,
+  &#39;target_type&#39;: &#39;regression&#39;,
+  &#39;signed&#39;: False})),
+(0.020000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;none&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;regressor:__choice__&#39;: &#39;decision_tree&#39;, &#39;regressor:decision_tree:criterion&#39;: &#39;mse&#39;, &#39;regressor:decision_tree:max_depth_factor&#39;: 1.241977204753711, &#39;regressor:decision_tree:max_features&#39;: 1.0, &#39;regressor:decision_tree:max_leaf_nodes&#39;: &#39;None&#39;, &#39;regressor:decision_tree:min_impurity_decrease&#39;: 0.0, &#39;regressor:decision_tree:min_samples_leaf&#39;: 2, &#39;regressor:decision_tree:min_samples_split&#39;: 4, &#39;regressor:decision_tree:min_weight_fraction_leaf&#39;: 0.0},
+dataset_properties={
+  &#39;task&#39;: 5,
+  &#39;sparse&#39;: False,
+  &#39;multioutput&#39;: True,
+  &#39;target_type&#39;: &#39;regression&#39;,
+  &#39;signed&#39;: False})),
+]
+</pre></div>
+</div>
+</section>
+<section id="get-the-score-of-the-final-ensemble">
+<h2>Get the Score of the final ensemble<a class="headerlink" href="#get-the-score-of-the-final-ensemble" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;R2 score:&quot;</span><span class="p">,</span> <span class="n">r2_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.9108169854091305
+</pre></div>
+</div>
+</section>
+<section id="get-the-configuration-space">
+<h2>Get the configuration space<a class="headerlink" href="#get-the-configuration-space" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># The configuration space is reduced, i.e. no SVM.</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">get_configuration_space</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">))</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Configuration space object:
+  Hyperparameters:
+    data_preprocessing:categorical_transformer:categorical_encoding:__choice__, Type: Categorical, Choices: {no_encoding, one_hot_encoding}, Default: one_hot_encoding
+    data_preprocessing:categorical_transformer:category_coalescence:__choice__, Type: Categorical, Choices: {minority_coalescer, no_coalescense}, Default: minority_coalescer
+    data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Type: UniformFloat, Range: [0.0001, 0.5], Default: 0.01, on log-scale
+    data_preprocessing:numerical_transformer:imputation:strategy, Type: Categorical, Choices: {mean, median, most_frequent}, Default: mean
+    data_preprocessing:numerical_transformer:rescaling:__choice__, Type: Categorical, Choices: {minmax, none, normalize, power_transformer, quantile_transformer, robust_scaler, standardize}, Default: standardize
+    data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles, Type: UniformInteger, Range: [10, 2000], Default: 1000
+    data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution, Type: Categorical, Choices: {uniform, normal}, Default: uniform
+    data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max, Type: UniformFloat, Range: [0.7, 0.999], Default: 0.75
+    data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min, Type: UniformFloat, Range: [0.001, 0.3], Default: 0.25
+    feature_preprocessor:__choice__, Type: Categorical, Choices: {extra_trees_preproc_for_regression, fast_ica, feature_agglomeration, kernel_pca, kitchen_sinks, no_preprocessing, nystroem_sampler, pca, polynomial, random_trees_embedding}, Default: no_preprocessing
+    feature_preprocessor:extra_trees_preproc_for_regression:bootstrap, Type: Categorical, Choices: {True, False}, Default: False
+    feature_preprocessor:extra_trees_preproc_for_regression:criterion, Type: Categorical, Choices: {mse, friedman_mse, mae}, Default: mse
+    feature_preprocessor:extra_trees_preproc_for_regression:max_depth, Type: Constant, Value: None
+    feature_preprocessor:extra_trees_preproc_for_regression:max_features, Type: UniformFloat, Range: [0.1, 1.0], Default: 1.0
+    feature_preprocessor:extra_trees_preproc_for_regression:max_leaf_nodes, Type: Constant, Value: None
+    feature_preprocessor:extra_trees_preproc_for_regression:min_samples_leaf, Type: UniformInteger, Range: [1, 20], Default: 1
+    feature_preprocessor:extra_trees_preproc_for_regression:min_samples_split, Type: UniformInteger, Range: [2, 20], Default: 2
+    feature_preprocessor:extra_trees_preproc_for_regression:min_weight_fraction_leaf, Type: Constant, Value: 0.0
+    feature_preprocessor:extra_trees_preproc_for_regression:n_estimators, Type: Constant, Value: 100
+    feature_preprocessor:fast_ica:algorithm, Type: Categorical, Choices: {parallel, deflation}, Default: parallel
+    feature_preprocessor:fast_ica:fun, Type: Categorical, Choices: {logcosh, exp, cube}, Default: logcosh
+    feature_preprocessor:fast_ica:n_components, Type: UniformInteger, Range: [10, 2000], Default: 100
+    feature_preprocessor:fast_ica:whiten, Type: Categorical, Choices: {False, True}, Default: False
+    feature_preprocessor:feature_agglomeration:affinity, Type: Categorical, Choices: {euclidean, manhattan, cosine}, Default: euclidean
+    feature_preprocessor:feature_agglomeration:linkage, Type: Categorical, Choices: {ward, complete, average}, Default: ward
+    feature_preprocessor:feature_agglomeration:n_clusters, Type: UniformInteger, Range: [2, 400], Default: 25
+    feature_preprocessor:feature_agglomeration:pooling_func, Type: Categorical, Choices: {mean, median, max}, Default: mean
+    feature_preprocessor:kernel_pca:coef0, Type: UniformFloat, Range: [-1.0, 1.0], Default: 0.0
+    feature_preprocessor:kernel_pca:degree, Type: UniformInteger, Range: [2, 5], Default: 3
+    feature_preprocessor:kernel_pca:gamma, Type: UniformFloat, Range: [3.0517578125e-05, 8.0], Default: 0.01, on log-scale
+    feature_preprocessor:kernel_pca:kernel, Type: Categorical, Choices: {poly, rbf, sigmoid, cosine}, Default: rbf
+    feature_preprocessor:kernel_pca:n_components, Type: UniformInteger, Range: [10, 2000], Default: 100
+    feature_preprocessor:kitchen_sinks:gamma, Type: UniformFloat, Range: [3.0517578125e-05, 8.0], Default: 1.0, on log-scale
+    feature_preprocessor:kitchen_sinks:n_components, Type: UniformInteger, Range: [50, 10000], Default: 100, on log-scale
+    feature_preprocessor:nystroem_sampler:coef0, Type: UniformFloat, Range: [-1.0, 1.0], Default: 0.0
+    feature_preprocessor:nystroem_sampler:degree, Type: UniformInteger, Range: [2, 5], Default: 3
+    feature_preprocessor:nystroem_sampler:gamma, Type: UniformFloat, Range: [3.0517578125e-05, 8.0], Default: 0.1, on log-scale
+    feature_preprocessor:nystroem_sampler:kernel, Type: Categorical, Choices: {poly, rbf, sigmoid, cosine}, Default: rbf
+    feature_preprocessor:nystroem_sampler:n_components, Type: UniformInteger, Range: [50, 10000], Default: 100, on log-scale
+    feature_preprocessor:pca:keep_variance, Type: UniformFloat, Range: [0.5, 0.9999], Default: 0.9999
+    feature_preprocessor:pca:whiten, Type: Categorical, Choices: {False, True}, Default: False
+    feature_preprocessor:polynomial:degree, Type: UniformInteger, Range: [2, 3], Default: 2
+    feature_preprocessor:polynomial:include_bias, Type: Categorical, Choices: {True, False}, Default: True
+    feature_preprocessor:polynomial:interaction_only, Type: Categorical, Choices: {False, True}, Default: False
+    feature_preprocessor:random_trees_embedding:bootstrap, Type: Categorical, Choices: {True, False}, Default: True
+    feature_preprocessor:random_trees_embedding:max_depth, Type: UniformInteger, Range: [2, 10], Default: 5
+    feature_preprocessor:random_trees_embedding:max_leaf_nodes, Type: Constant, Value: None
+    feature_preprocessor:random_trees_embedding:min_samples_leaf, Type: UniformInteger, Range: [1, 20], Default: 1
+    feature_preprocessor:random_trees_embedding:min_samples_split, Type: UniformInteger, Range: [2, 20], Default: 2
+    feature_preprocessor:random_trees_embedding:min_weight_fraction_leaf, Type: Constant, Value: 1.0
+    feature_preprocessor:random_trees_embedding:n_estimators, Type: UniformInteger, Range: [10, 100], Default: 10
+    regressor:__choice__, Type: Categorical, Choices: {decision_tree, extra_trees, gaussian_process, k_nearest_neighbors, random_forest}, Default: random_forest
+    regressor:decision_tree:criterion, Type: Categorical, Choices: {mse, friedman_mse, mae}, Default: mse
+    regressor:decision_tree:max_depth_factor, Type: UniformFloat, Range: [0.0, 2.0], Default: 0.5
+    regressor:decision_tree:max_features, Type: Constant, Value: 1.0
+    regressor:decision_tree:max_leaf_nodes, Type: Constant, Value: None
+    regressor:decision_tree:min_impurity_decrease, Type: Constant, Value: 0.0
+    regressor:decision_tree:min_samples_leaf, Type: UniformInteger, Range: [1, 20], Default: 1
+    regressor:decision_tree:min_samples_split, Type: UniformInteger, Range: [2, 20], Default: 2
+    regressor:decision_tree:min_weight_fraction_leaf, Type: Constant, Value: 0.0
+    regressor:extra_trees:bootstrap, Type: Categorical, Choices: {True, False}, Default: False
+    regressor:extra_trees:criterion, Type: Categorical, Choices: {mse, friedman_mse, mae}, Default: mse
+    regressor:extra_trees:max_depth, Type: Constant, Value: None
+    regressor:extra_trees:max_features, Type: UniformFloat, Range: [0.1, 1.0], Default: 1.0
+    regressor:extra_trees:max_leaf_nodes, Type: Constant, Value: None
+    regressor:extra_trees:min_impurity_decrease, Type: Constant, Value: 0.0
+    regressor:extra_trees:min_samples_leaf, Type: UniformInteger, Range: [1, 20], Default: 1
+    regressor:extra_trees:min_samples_split, Type: UniformInteger, Range: [2, 20], Default: 2
+    regressor:extra_trees:min_weight_fraction_leaf, Type: Constant, Value: 0.0
+    regressor:gaussian_process:alpha, Type: UniformFloat, Range: [1e-14, 1.0], Default: 1e-08, on log-scale
+    regressor:gaussian_process:thetaL, Type: UniformFloat, Range: [1e-10, 0.001], Default: 1e-06, on log-scale
+    regressor:gaussian_process:thetaU, Type: UniformFloat, Range: [1.0, 100000.0], Default: 100000.0, on log-scale
+    regressor:k_nearest_neighbors:n_neighbors, Type: UniformInteger, Range: [1, 100], Default: 1, on log-scale
+    regressor:k_nearest_neighbors:p, Type: Categorical, Choices: {1, 2}, Default: 2
+    regressor:k_nearest_neighbors:weights, Type: Categorical, Choices: {uniform, distance}, Default: uniform
+    regressor:random_forest:bootstrap, Type: Categorical, Choices: {True, False}, Default: True
+    regressor:random_forest:criterion, Type: Categorical, Choices: {mse, friedman_mse, mae}, Default: mse
+    regressor:random_forest:max_depth, Type: Constant, Value: None
+    regressor:random_forest:max_features, Type: UniformFloat, Range: [0.1, 1.0], Default: 1.0
+    regressor:random_forest:max_leaf_nodes, Type: Constant, Value: None
+    regressor:random_forest:min_impurity_decrease, Type: Constant, Value: 0.0
+    regressor:random_forest:min_samples_leaf, Type: UniformInteger, Range: [1, 20], Default: 1
+    regressor:random_forest:min_samples_split, Type: UniformInteger, Range: [2, 20], Default: 2
+    regressor:random_forest:min_weight_fraction_leaf, Type: Constant, Value: 0.0
+  Conditions:
+    data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction | data_preprocessing:categorical_transformer:category_coalescence:__choice__ == &#39;minority_coalescer&#39;
+    data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles | data_preprocessing:numerical_transformer:rescaling:__choice__ == &#39;quantile_transformer&#39;
+    data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution | data_preprocessing:numerical_transformer:rescaling:__choice__ == &#39;quantile_transformer&#39;
+    data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max | data_preprocessing:numerical_transformer:rescaling:__choice__ == &#39;robust_scaler&#39;
+    data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min | data_preprocessing:numerical_transformer:rescaling:__choice__ == &#39;robust_scaler&#39;
+    feature_preprocessor:extra_trees_preproc_for_regression:bootstrap | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_regression&#39;
+    feature_preprocessor:extra_trees_preproc_for_regression:criterion | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_regression&#39;
+    feature_preprocessor:extra_trees_preproc_for_regression:max_depth | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_regression&#39;
+    feature_preprocessor:extra_trees_preproc_for_regression:max_features | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_regression&#39;
+    feature_preprocessor:extra_trees_preproc_for_regression:max_leaf_nodes | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_regression&#39;
+    feature_preprocessor:extra_trees_preproc_for_regression:min_samples_leaf | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_regression&#39;
+    feature_preprocessor:extra_trees_preproc_for_regression:min_samples_split | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_regression&#39;
+    feature_preprocessor:extra_trees_preproc_for_regression:min_weight_fraction_leaf | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_regression&#39;
+    feature_preprocessor:extra_trees_preproc_for_regression:n_estimators | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_regression&#39;
+    feature_preprocessor:fast_ica:algorithm | feature_preprocessor:__choice__ == &#39;fast_ica&#39;
+    feature_preprocessor:fast_ica:fun | feature_preprocessor:__choice__ == &#39;fast_ica&#39;
+    feature_preprocessor:fast_ica:n_components | feature_preprocessor:fast_ica:whiten == &#39;True&#39;
+    feature_preprocessor:fast_ica:whiten | feature_preprocessor:__choice__ == &#39;fast_ica&#39;
+    feature_preprocessor:feature_agglomeration:affinity | feature_preprocessor:__choice__ == &#39;feature_agglomeration&#39;
+    feature_preprocessor:feature_agglomeration:linkage | feature_preprocessor:__choice__ == &#39;feature_agglomeration&#39;
+    feature_preprocessor:feature_agglomeration:n_clusters | feature_preprocessor:__choice__ == &#39;feature_agglomeration&#39;
+    feature_preprocessor:feature_agglomeration:pooling_func | feature_preprocessor:__choice__ == &#39;feature_agglomeration&#39;
+    feature_preprocessor:kernel_pca:coef0 | feature_preprocessor:kernel_pca:kernel in {&#39;poly&#39;, &#39;sigmoid&#39;}
+    feature_preprocessor:kernel_pca:degree | feature_preprocessor:kernel_pca:kernel == &#39;poly&#39;
+    feature_preprocessor:kernel_pca:gamma | feature_preprocessor:kernel_pca:kernel in {&#39;poly&#39;, &#39;rbf&#39;}
+    feature_preprocessor:kernel_pca:kernel | feature_preprocessor:__choice__ == &#39;kernel_pca&#39;
+    feature_preprocessor:kernel_pca:n_components | feature_preprocessor:__choice__ == &#39;kernel_pca&#39;
+    feature_preprocessor:kitchen_sinks:gamma | feature_preprocessor:__choice__ == &#39;kitchen_sinks&#39;
+    feature_preprocessor:kitchen_sinks:n_components | feature_preprocessor:__choice__ == &#39;kitchen_sinks&#39;
+    feature_preprocessor:nystroem_sampler:coef0 | feature_preprocessor:nystroem_sampler:kernel in {&#39;poly&#39;, &#39;sigmoid&#39;}
+    feature_preprocessor:nystroem_sampler:degree | feature_preprocessor:nystroem_sampler:kernel == &#39;poly&#39;
+    feature_preprocessor:nystroem_sampler:gamma | feature_preprocessor:nystroem_sampler:kernel in {&#39;poly&#39;, &#39;rbf&#39;, &#39;sigmoid&#39;}
+    feature_preprocessor:nystroem_sampler:kernel | feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;
+    feature_preprocessor:nystroem_sampler:n_components | feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;
+    feature_preprocessor:pca:keep_variance | feature_preprocessor:__choice__ == &#39;pca&#39;
+    feature_preprocessor:pca:whiten | feature_preprocessor:__choice__ == &#39;pca&#39;
+    feature_preprocessor:polynomial:degree | feature_preprocessor:__choice__ == &#39;polynomial&#39;
+    feature_preprocessor:polynomial:include_bias | feature_preprocessor:__choice__ == &#39;polynomial&#39;
+    feature_preprocessor:polynomial:interaction_only | feature_preprocessor:__choice__ == &#39;polynomial&#39;
+    feature_preprocessor:random_trees_embedding:bootstrap | feature_preprocessor:__choice__ == &#39;random_trees_embedding&#39;
+    feature_preprocessor:random_trees_embedding:max_depth | feature_preprocessor:__choice__ == &#39;random_trees_embedding&#39;
+    feature_preprocessor:random_trees_embedding:max_leaf_nodes | feature_preprocessor:__choice__ == &#39;random_trees_embedding&#39;
+    feature_preprocessor:random_trees_embedding:min_samples_leaf | feature_preprocessor:__choice__ == &#39;random_trees_embedding&#39;
+    feature_preprocessor:random_trees_embedding:min_samples_split | feature_preprocessor:__choice__ == &#39;random_trees_embedding&#39;
+    feature_preprocessor:random_trees_embedding:min_weight_fraction_leaf | feature_preprocessor:__choice__ == &#39;random_trees_embedding&#39;
+    feature_preprocessor:random_trees_embedding:n_estimators | feature_preprocessor:__choice__ == &#39;random_trees_embedding&#39;
+    regressor:decision_tree:criterion | regressor:__choice__ == &#39;decision_tree&#39;
+    regressor:decision_tree:max_depth_factor | regressor:__choice__ == &#39;decision_tree&#39;
+    regressor:decision_tree:max_features | regressor:__choice__ == &#39;decision_tree&#39;
+    regressor:decision_tree:max_leaf_nodes | regressor:__choice__ == &#39;decision_tree&#39;
+    regressor:decision_tree:min_impurity_decrease | regressor:__choice__ == &#39;decision_tree&#39;
+    regressor:decision_tree:min_samples_leaf | regressor:__choice__ == &#39;decision_tree&#39;
+    regressor:decision_tree:min_samples_split | regressor:__choice__ == &#39;decision_tree&#39;
+    regressor:decision_tree:min_weight_fraction_leaf | regressor:__choice__ == &#39;decision_tree&#39;
+    regressor:extra_trees:bootstrap | regressor:__choice__ == &#39;extra_trees&#39;
+    regressor:extra_trees:criterion | regressor:__choice__ == &#39;extra_trees&#39;
+    regressor:extra_trees:max_depth | regressor:__choice__ == &#39;extra_trees&#39;
+    regressor:extra_trees:max_features | regressor:__choice__ == &#39;extra_trees&#39;
+    regressor:extra_trees:max_leaf_nodes | regressor:__choice__ == &#39;extra_trees&#39;
+    regressor:extra_trees:min_impurity_decrease | regressor:__choice__ == &#39;extra_trees&#39;
+    regressor:extra_trees:min_samples_leaf | regressor:__choice__ == &#39;extra_trees&#39;
+    regressor:extra_trees:min_samples_split | regressor:__choice__ == &#39;extra_trees&#39;
+    regressor:extra_trees:min_weight_fraction_leaf | regressor:__choice__ == &#39;extra_trees&#39;
+    regressor:gaussian_process:alpha | regressor:__choice__ == &#39;gaussian_process&#39;
+    regressor:gaussian_process:thetaL | regressor:__choice__ == &#39;gaussian_process&#39;
+    regressor:gaussian_process:thetaU | regressor:__choice__ == &#39;gaussian_process&#39;
+    regressor:k_nearest_neighbors:n_neighbors | regressor:__choice__ == &#39;k_nearest_neighbors&#39;
+    regressor:k_nearest_neighbors:p | regressor:__choice__ == &#39;k_nearest_neighbors&#39;
+    regressor:k_nearest_neighbors:weights | regressor:__choice__ == &#39;k_nearest_neighbors&#39;
+    regressor:random_forest:bootstrap | regressor:__choice__ == &#39;random_forest&#39;
+    regressor:random_forest:criterion | regressor:__choice__ == &#39;random_forest&#39;
+    regressor:random_forest:max_depth | regressor:__choice__ == &#39;random_forest&#39;
+    regressor:random_forest:max_features | regressor:__choice__ == &#39;random_forest&#39;
+    regressor:random_forest:max_leaf_nodes | regressor:__choice__ == &#39;random_forest&#39;
+    regressor:random_forest:min_impurity_decrease | regressor:__choice__ == &#39;random_forest&#39;
+    regressor:random_forest:min_samples_leaf | regressor:__choice__ == &#39;random_forest&#39;
+    regressor:random_forest:min_samples_split | regressor:__choice__ == &#39;random_forest&#39;
+    regressor:random_forest:min_weight_fraction_leaf | regressor:__choice__ == &#39;random_forest&#39;
+  Forbidden Clauses:
+    (Forbidden: feature_preprocessor:feature_agglomeration:affinity in {&#39;cosine&#39;, &#39;manhattan&#39;} &amp;&amp; Forbidden: feature_preprocessor:feature_agglomeration:linkage == &#39;ward&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;random_trees_embedding&#39; &amp;&amp; Forbidden: regressor:__choice__ == &#39;gaussian_process&#39;)
+    (Forbidden: regressor:__choice__ == &#39;decision_tree&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kitchen_sinks&#39;)
+    (Forbidden: regressor:__choice__ == &#39;decision_tree&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kernel_pca&#39;)
+    (Forbidden: regressor:__choice__ == &#39;decision_tree&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
+    (Forbidden: regressor:__choice__ == &#39;extra_trees&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kitchen_sinks&#39;)
+    (Forbidden: regressor:__choice__ == &#39;extra_trees&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kernel_pca&#39;)
+    (Forbidden: regressor:__choice__ == &#39;extra_trees&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
+    (Forbidden: regressor:__choice__ == &#39;gaussian_process&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kitchen_sinks&#39;)
+    (Forbidden: regressor:__choice__ == &#39;gaussian_process&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kernel_pca&#39;)
+    (Forbidden: regressor:__choice__ == &#39;gaussian_process&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
+    (Forbidden: regressor:__choice__ == &#39;k_nearest_neighbors&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kitchen_sinks&#39;)
+    (Forbidden: regressor:__choice__ == &#39;k_nearest_neighbors&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kernel_pca&#39;)
+    (Forbidden: regressor:__choice__ == &#39;k_nearest_neighbors&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
+    (Forbidden: regressor:__choice__ == &#39;random_forest&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kitchen_sinks&#39;)
+    (Forbidden: regressor:__choice__ == &#39;random_forest&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kernel_pca&#39;)
+    (Forbidden: regressor:__choice__ == &#39;random_forest&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  58.973 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-20-basic-example-multioutput-regression-py">
+<div class="binder-badge docutils container">
+<a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/20_basic/example_multioutput_regression.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo.svg" width="150px" /></a>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/49577cbea6f814a2c9a5167f35be2814/example_multioutput_regression.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_multioutput_regression.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/d9369ef2377e1dc469a08a83d0887d1b/example_multioutput_regression.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">example_multioutput_regression.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="../../_sources/examples/20_basic/example_multioutput_regression.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.0.2.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
