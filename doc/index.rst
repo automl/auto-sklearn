@@ -61,6 +61,7 @@ Manual
 * :ref:`manual`
 * :ref:`api`
 * :ref:`extending`
+* :ref:`faq`
 
 
 License
