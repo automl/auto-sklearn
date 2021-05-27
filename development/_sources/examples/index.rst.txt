@@ -33,27 +33,6 @@ Examples for basic classification, regression, multi-output regression, and mult
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to fit a simple regression model with *auto-sklearn*.">
-
-.. only:: html
-
- .. figure:: /examples/20_basic/images/thumb/sphx_glr_example_regression_thumb.png
-     :alt: Regression
-
-     :ref:`sphx_glr_examples_20_basic_example_regression.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/20_basic/example_regression
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to fit a simple classification model with *auto-sklearn*.">
 
 .. only:: html
@@ -93,6 +72,27 @@ Examples for basic classification, regression, multi-output regression, and mult
    :hidden:
 
    /examples/20_basic/example_multioutput_regression
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to fit a simple regression model with *auto-sklearn*.">
+
+.. only:: html
+
+ .. figure:: /examples/20_basic/images/thumb/sphx_glr_example_regression_thumb.png
+     :alt: Regression
+
+     :ref:`sphx_glr_examples_20_basic_example_regression.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/20_basic/example_regression
 
 .. raw:: html
 
@@ -197,6 +197,27 @@ procedure.
    :hidden:
 
    /examples/40_advanced/example_calc_multiple_metrics
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to fit a simple classification model with *auto-sklearn* and us...">
+
+.. only:: html
+
+ .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_inspect_predictions_thumb.png
+     :alt: Model Explanation
+
+     :ref:`sphx_glr_examples_40_advanced_example_inspect_predictions.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/40_advanced/example_inspect_predictions
 
 .. raw:: html
 
