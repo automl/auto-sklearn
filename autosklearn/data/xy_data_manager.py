@@ -1,7 +1,9 @@
 # -*- encoding: utf-8 -*-
-from typing import Dict, List, Optional, Union, cast
+from typing import Dict, Optional, Union, cast
 
 import numpy as np
+
+import pandas as pd
 
 from scipy import sparse
 
@@ -13,18 +15,22 @@ from autosklearn.constants import (
     REGRESSION,
 )
 from autosklearn.data.abstract_data_manager import AbstractDataManager
+from autosklearn.data.validation import (
+    SUPPORTED_FEAT_TYPES,
+    SUPPORTED_TARGET_TYPES,
+)
 
 
 class XYDataManager(AbstractDataManager):
 
     def __init__(
         self,
-        X: np.ndarray,
-        y: np.ndarray,
-        X_test: Optional[np.ndarray],
-        y_test: Optional[np.ndarray],
+        X: SUPPORTED_FEAT_TYPES,
+        y: SUPPORTED_TARGET_TYPES,
+        X_test: Optional[SUPPORTED_FEAT_TYPES],
+        y_test: Optional[SUPPORTED_TARGET_TYPES],
         task: int,
-        feat_type: Optional[Union[List[str], Dict[Union[str, int], str]]],
+        feat_type: Dict[Union[str, int], str],
         dataset_name: str
     ):
         super(XYDataManager, self).__init__(dataset_name)
@@ -32,20 +38,20 @@ class XYDataManager(AbstractDataManager):
         self.info['task'] = task
         if sparse.issparse(X):
             self.info['is_sparse'] = 1
-            self.info['has_missing'] = np.all(np.isfinite(X.data))
+            self.info['has_missing'] = np.all(np.isfinite(cast(sparse.csr_matrix, X).data))
         else:
             self.info['is_sparse'] = 0
             if hasattr(X, 'iloc'):
-                self.info['has_missing'] = X.isnull().values.any()
+                self.info['has_missing'] = cast(pd.DataFrame, X).isnull().values.any()
             else:
                 self.info['has_missing'] = np.all(np.isfinite(X))
 
         label_num = {
             REGRESSION: 1,
             BINARY_CLASSIFICATION: 2,
-            MULTIOUTPUT_REGRESSION: y.shape[-1],
+            MULTIOUTPUT_REGRESSION: np.shape(y)[-1],
             MULTICLASS_CLASSIFICATION: len(np.unique(y)),
-            MULTILABEL_CLASSIFICATION: y.shape[-1]
+            MULTILABEL_CLASSIFICATION: np.shape(y)[-1]
         }
 
         self.info['label_num'] = label_num[task]
@@ -57,25 +63,20 @@ class XYDataManager(AbstractDataManager):
         if y_test is not None:
             self.data['Y_test'] = y_test
 
-        if feat_type is None or len(feat_type) == 0:
-            self.feat_type: Dict[Union[str, int], str] = {
-                i: 'Numerical' for i in range(np.shape(X)[1])}
-        elif isinstance(feat_type, dict):
-            self.feat_type = cast(Dict, feat_type)
+        if isinstance(feat_type, dict):
+            self.feat_type = feat_type
         else:
             raise ValueError("Unsupported feat_type provided. We expect the user to "
-                             "provide a List[str] that will internally be converted to "
-                             "a Dict that states the numerical/categorical type per column. "
-                             "Such dictionary, that provides a mapping from column->type "
-                             "can also be provided. Any other format is not supported.")
+                             "provide a Dict[str, str] mapping from column to categorical/ "
+                             "numerical.")
 
         # TODO: try to guess task type!
 
-        if len(y.shape) > 2:
+        if len(np.shape(y)) > 2:
             raise ValueError('y must not have more than two dimensions, '
-                             'but has %d.' % len(y.shape))
+                             'but has %d.' % len(np.shape(y)))
 
-        if X.shape[0] != y.shape[0]:
+        if np.shape(X)[0] != np.shape(y)[0]:
             raise ValueError('X and y must have the same number of '
-                             'datapoints, but have %d and %d.' % (X.shape[0],
-                                                                  y.shape[0]))
+                             'datapoints, but have %d and %d.' % (np.shape(X)[0],
+                                                                  np.shape(y)[0]))

@@ -1,7 +1,6 @@
 import logging
 import os
 import tempfile
-from io import StringIO
 import unittest
 
 import pandas as pd
@@ -400,8 +399,6 @@ def test_calculate_all_metafeatures(meta_train_data):
         X, y, categorical, "2", logger=logging.getLogger('Meta'))
     assert 52 == len(mf.metafeature_values)
     assert mf.metafeature_values['NumberOfCategoricalFeatures'].value == 32
-    sio = StringIO()
-    mf.dump(sio)
 
 
 def test_kurtosisses(meta_train_data_transformed):
@@ -670,8 +667,6 @@ def test_calculate_all_metafeatures_multilabel(multilabel_train_data):
     mf = meta_features.calculate_all_metafeatures(
         X, y,  categorical, "Generated", logger=logging.getLogger('TestMeta'))
     assert 52 == len(mf.metafeature_values)
-    sio = StringIO()
-    mf.dump(sio)
 
 
 def test_calculate_all_metafeatures_same_results_across_datatypes():
@@ -687,11 +682,6 @@ def test_calculate_all_metafeatures_same_results_across_datatypes():
         X, y, categorical, "2", logger=logging.getLogger('Meta'))
     assert 52 == len(mf.metafeature_values)
     expected = {
-        # TODO: sync-up with matthias on landmarking
-        # Check all metafeatures, except landmarking
-        # which gives not approximate results. For example:
-        # 0.7616945996275606 == 0.7617070142768466 ± 7.6e-07
-        # among runs
         'PCASkewnessFirstPC': 0.41897660337677867,
         'PCAKurtosisFirstPC': -0.677692541156901,
         'PCAFractionOfComponentsFor95PercentVariance': 0.2716049382716049,
@@ -744,6 +734,3 @@ def test_calculate_all_metafeatures_same_results_across_datatypes():
         X, y, categorical, "2", logger=logging.getLogger('Meta'))
     for key, value in expected.items():
         assert mf[key].value == pytest.approx(value)
-
-    sio = StringIO()
-    mf.dump(sio)

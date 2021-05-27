@@ -184,8 +184,14 @@ class FeatureValidator(BaseEstimator):
 
         # Sparse related transformations
         # Not all sparse format support index sorting
-        if scipy.sparse.issparse(X) and hasattr(X, 'sort_indices'):
-            X.sort_indices()
+        if scipy.sparse.issparse(X):
+            if not isinstance(X, scipy.sparse.csr_matrix):
+                self.logger.warning(f"Original features provided where of type {type(X)} "
+                                    "yet Auto-Sklearn support csr_matrix. Auto-sklearn "
+                                    "will convert the provide features to csr_matrix format.")
+                X = X.tocsr(copy=False)
+            if hasattr(X, 'sort_indices'):
+                X.sort_indices()
         return X
 
     def _check_data(
@@ -237,15 +243,18 @@ class FeatureValidator(BaseEstimator):
             # If entered here, we have a pandas dataframe
             X = typing.cast(pd.DataFrame, X)
 
-            dtypes = {col: X[col].dtype.name for col in X.columns}
+            dtypes = {col: X[col].dtype.name.lower() for col in X.columns}
             if len(self.dtypes) > 0:
                 if self.dtypes != dtypes:
-                    raise ValueError("Changing the dtype of the features after fit() is "
-                                     "not supported. Fit() method was called with "
-                                     "{} whereas the new features have {} as type".format(
-                                        self.dtypes,
-                                        dtypes,
-                                     ))
+                    # To support list, we need to support object inference.
+                    # In extreme cases, the train column might be all integer,
+                    # and the test column might be float.
+                    self.logger.warning("Changing the dtype of the features after fit() is "
+                                        "not recommended. Fit() method was called with "
+                                        "{} whereas the new features have {} as type".format(
+                                            self.dtypes,
+                                            dtypes,
+                                        ))
             else:
                 self.dtypes = dtypes
 
@@ -343,7 +352,28 @@ class FeatureValidator(BaseEstimator):
         """
 
         # If a list was provided, it will be converted to pandas
-        X_train = pd.DataFrame(data=X_train).infer_objects()
+        X_train = pd.DataFrame(data=X_train).convert_dtypes()
+
+        # Store the dtypes and use in case of re-fit
+        if len(self.dtypes) == 0:
+            # Categorical data is inferred as string. Convert to categorical.
+            # Warn the user about dtypes or request him to use a dataframe
+            for col in X_train.columns:
+                if X_train[col].dtype.name == 'string':
+                    X_train[col] = X_train[col].astype('category')
+
+            self.dtypes = {col: X_train[col].dtype.name.lower() for col in X_train.columns}
+        else:
+            for col in X_train.columns:
+                # Try to convert to the original dtype used to fit the validator
+                # But also be robust to extreme cases (for example, the train data for a
+                # column was all np.int-like and the test data is np.float-type)
+                try:
+                    X_train[col] = X_train[col].astype(self.dtypes[col])
+                except Exception as e:
+                    self.logger.warning(f"Failed to format column {col} as {self.dtypes[col]}: {e}")
+                    self.dtypes[col] = X_train[col].dtype.name.lower()
+
         self.logger.warning("The provided feature types to autosklearn are of type list."
                             "Features have been interpreted as: {}".format(
                                 [(col, t) for col, t in zip(X_train.columns, X_train.dtypes)]
@@ -354,5 +384,12 @@ class FeatureValidator(BaseEstimator):
                                     "is {}. X_test will be casted as DataFrame.".format(
                                         type(X_test)
                                     ))
-            X_test = pd.DataFrame(data=X_test).infer_objects()
+            X_test = pd.DataFrame(data=X_test)
+            for col in X_test.columns:
+                try:
+                    X_test[col] = X_test[col].astype(self.dtypes[col])
+                except Exception as e:
+                    self.logger.warning(f"Failed to format column {col} as {self.dtypes[col]}: {e}")
+                    self.dtypes[col] = X_test[col].dtype.name.lower()
+
         return X_train, X_test

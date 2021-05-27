@@ -1,6 +1,7 @@
 import numpy as np
 
 import pandas as pd
+from pandas.api.types import is_numeric_dtype
 
 import pytest
 
@@ -210,22 +211,6 @@ def test_featurevalidator_supported_types(input_data_featuretest):
 @pytest.mark.parametrize(
     'input_data_featuretest',
     (
-        'list_categoricalonly_nonan',
-        'list_categoricalonly_nan',
-        'list_mixed_nonan',
-        'list_mixed_nan',
-    ),
-    indirect=True
-)
-def test_featurevalidator_unsupported_list(input_data_featuretest):
-    validator = FeatureValidator()
-    with pytest.raises(ValueError, match=r".*has invalid type object. Cast it to a valid dtype.*"):
-        validator.fit(input_data_featuretest)
-
-
-@pytest.mark.parametrize(
-    'input_data_featuretest',
-    (
         'numpy_string_nonan',
         'numpy_string_nan',
     ),
@@ -246,8 +231,6 @@ def test_featurevalidator_unsupported_numpy(input_data_featuretest):
         'numpy_mixed_nan',
         'pandas_categoricalonly_nonan',
         'pandas_mixed_nonan',
-        'list_numericalonly_nonan',
-        'list_numericalonly_nan',
         'sparse_bsr_nonan',
         'sparse_bsr_nan',
         'sparse_coo_nonan',
@@ -407,3 +390,57 @@ def test_featurevalidator_new_data_after_fit(openml_id,
     else:
         assert isinstance(transformed_X, type(X_train))
     assert np.shape(X_test) == np.shape(transformed_X)
+
+
+@pytest.mark.parametrize(
+    'openml_id',
+    (
+        40981,  # Australian
+        3,  # kr-vs-kp
+        1468,  # cnae-9
+        40975,  # car
+        40984,  # Segment
+    ),
+)
+def test_list_to_dataframe(openml_id):
+
+    X_pandas, y_pandas = sklearn.datasets.fetch_openml(data_id=openml_id,
+                                                       return_X_y=True, as_frame=True)
+    X_list = X_pandas.values.tolist()
+    validator = FeatureValidator()
+    validator.fit(X_list)
+    transformed_X = validator.transform(X_list)
+    for i, col in enumerate(X_pandas.columns):
+        if is_numeric_dtype(X_pandas[col].dtype):
+            # convert dtype translates 72.0 to 72. Be robust against this!
+            assert is_numeric_dtype(transformed_X[i].dtype)
+        else:
+            assert X_pandas[col].dtype.name == transformed_X[i].dtype.name
+
+
+@pytest.mark.parametrize(
+    'input_data_featuretest',
+    (
+        'sparse_bsr_nonan',
+        'sparse_bsr_nan',
+        'sparse_coo_nonan',
+        'sparse_coo_nan',
+        'sparse_csc_nonan',
+        'sparse_csc_nan',
+        'sparse_csr_nonan',
+        'sparse_csr_nan',
+        'sparse_dia_nonan',
+        'sparse_dia_nan',
+        'sparse_dok_nonan',
+        'sparse_dok_nan',
+        'sparse_lil_nonan',
+        'sparse_lil_nan',
+    ),
+    indirect=True
+)
+def test_sparse_output_is_csr(input_data_featuretest):
+    validator = FeatureValidator()
+    validator.fit(input_data_featuretest, input_data_featuretest)
+    transformed_X = validator.transform(input_data_featuretest)
+    assert sparse.issparse(transformed_X)
+    assert isinstance(transformed_X, sparse.csr_matrix)

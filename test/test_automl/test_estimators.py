@@ -861,11 +861,20 @@ def test_autosklearn_anneal(as_frame):
     This dataset is quite complex, with NaN, categorical and numerical columns
     so is a good testcase for unit-testing
     """
-    X, y = sklearn.datasets.fetch_openml(data_id=2, return_X_y=True, as_frame=False)
+    X, y = sklearn.datasets.fetch_openml(data_id=2, return_X_y=True, as_frame=as_frame)
     automl = AutoSklearnClassifier(time_left_for_this_task=60, ensemble_size=0,
+                                   initial_configurations_via_metalearning=0,
+                                   smac_scenario_args={'runcount_limit': 3},
                                    resampling_strategy='holdout-iterative-fit')
 
-    automl_fitted = automl.fit(X, y)
+    if as_frame:
+        # Let autosklearn calculate the feat types
+        automl_fitted = automl.fit(X, y)
+    else:
+        X_, y_ = sklearn.datasets.fetch_openml(data_id=2, return_X_y=True, as_frame=True)
+        feat_type = ['categorical' if X_[col].dtype.name == 'category' else 'numerical'
+                     for col in X_.columns]
+        automl_fitted = automl.fit(X, y, feat_type=feat_type)
     assert automl is automl_fitted
 
     automl_ensemble_fitted = automl.fit_ensemble(y, ensemble_size=5)
@@ -875,4 +884,4 @@ def test_autosklearn_anneal(as_frame):
     # This is a test to make sure the data format (numpy/pandas)
     # can be used in a meaningful way -- not meant for generalization,
     # hence we use the train dataset
-    assert automl_fitted.score(X, y) > 0.9
+    assert automl_fitted.score(X, y) > 0.75
