@@ -81,7 +81,7 @@ for i in sort_idx[::-1]:
 # between feature values and the response value for each sample
 # individually -- it shows how the response value changes if the value of one feature is changed.
 #
-# `PD <https://christophm.github.io/interpretable-ml-book/pdp.html>`_ plots describe the relation
+# `PD plots <https://christophm.github.io/interpretable-ml-book/pdp.html>`_ describe the relation
 # between feature values and the response value, i.e. the expected
 # response value wrt. one or multiple input features. Since we use a classification dataset, this
 # corresponds to the predicted class probability.
