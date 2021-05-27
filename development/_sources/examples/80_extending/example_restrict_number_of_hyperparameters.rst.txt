@@ -146,15 +146,6 @@ Subclass auto-sklearn's random forest classifier
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/examples/80_extending/example_restrict_number_of_hyperparameters.py:92: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
-    Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
-      n_estimators = UniformIntegerHyperparameter("n_estimators", 10, 1000, default_value=100)
-    /home/runner/work/auto-sklearn/auto-sklearn/examples/80_extending/example_restrict_number_of_hyperparameters.py:94: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
-    Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
-      cs.add_hyperparameters([max_features, n_estimators])
-    /home/runner/work/auto-sklearn/auto-sklearn/examples/80_extending/example_restrict_number_of_hyperparameters.py:94: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
-    Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
-      cs.add_hyperparameters([max_features, n_estimators])
     Configuration space object:
       Hyperparameters:
         max_features, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.5
@@ -216,18 +207,6 @@ Fit Random forest classifier to the data
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/examples/80_extending/example_extending_preprocessor.py:86: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
-    Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
-      cs.add_hyperparameters([solver, shrinkage, tol])
-    /home/runner/work/auto-sklearn/auto-sklearn/examples/80_extending/example_restrict_number_of_hyperparameters.py:92: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
-    Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
-      n_estimators = UniformIntegerHyperparameter("n_estimators", 10, 1000, default_value=100)
-    /home/runner/work/auto-sklearn/auto-sklearn/examples/80_extending/example_restrict_number_of_hyperparameters.py:94: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
-    Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
-      cs.add_hyperparameters([max_features, n_estimators])
-    /home/runner/work/auto-sklearn/auto-sklearn/examples/80_extending/example_restrict_number_of_hyperparameters.py:94: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
-    Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
-      cs.add_hyperparameters([max_features, n_estimators])
 
     AutoSklearnClassifier(exclude_estimators=['random_forest'],
                           initial_configurations_via_metalearning=0,
@@ -643,7 +622,7 @@ Print the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  6.298 seconds)
+   **Total running time of the script:** ( 0 minutes  7.889 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_restrict_number_of_hyperparameters.py:

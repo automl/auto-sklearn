@@ -68,6 +68,7 @@
                 <li><a href="../index.html">Examples</a></li>
                 <li><a href="../../api.html">API</a></li>
                 <li><a href="../../extending.html">Extending</a></li>
+                <li><a href="../../faq.html">FAQ</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -224,16 +225,7 @@ component for using in auto-sklearn.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/examples/80_extending/example_extending_regression.py:88: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
-Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
-  degree = UniformIntegerHyperparameter(
-/home/runner/work/auto-sklearn/auto-sklearn/examples/80_extending/example_extending_regression.py:94: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
-Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
-  cs.add_hyperparameters([alpha, kernel, gamma, degree, coef0])
-/home/runner/work/auto-sklearn/auto-sklearn/examples/80_extending/example_extending_regression.py:94: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
-Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
-  cs.add_hyperparameters([alpha, kernel, gamma, degree, coef0])
-Configuration space object:
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Configuration space object:
   Hyperparameters:
     alpha, Type: UniformFloat, Range: [1e-05, 1.0], Default: 1.0, on log-scale
     coef0, Type: UniformFloat, Range: [0.01, 100.0], Default: 1.0, on log-scale
@@ -268,17 +260,7 @@ Configuration space object:
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/examples/80_extending/example_extending_regression.py:88: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
-Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
-  degree = UniformIntegerHyperparameter(
-/home/runner/work/auto-sklearn/auto-sklearn/examples/80_extending/example_extending_regression.py:94: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
-Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
-  cs.add_hyperparameters([alpha, kernel, gamma, degree, coef0])
-/home/runner/work/auto-sklearn/auto-sklearn/examples/80_extending/example_extending_regression.py:94: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
-Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
-  cs.add_hyperparameters([alpha, kernel, gamma, degree, coef0])
-
-AutoSklearnRegressor(include_estimators=[&#39;KernelRidgeRegression&#39;],
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnRegressor(include_estimators=[&#39;KernelRidgeRegression&#39;],
                      initial_configurations_via_metalearning=0,
                      per_run_time_limit=10,
                      smac_scenario_args={&#39;runcount_limit&#39;: 5},
@@ -294,7 +276,7 @@ AutoSklearnRegressor(include_estimators=[&#39;KernelRidgeRegression&#39;],
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>r2 score:  0.02668988768816083
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>r2 score:  -0.09632815426502761
 [(1.000000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;regressor:__choice__&#39;: &#39;KernelRidgeRegression&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01, &#39;regressor:KernelRidgeRegression:alpha&#39;: 1.0, &#39;regressor:KernelRidgeRegression:gamma&#39;: 0.1, &#39;regressor:KernelRidgeRegression:kernel&#39;: &#39;polynomial&#39;, &#39;regressor:KernelRidgeRegression:coef0&#39;: 1.0, &#39;regressor:KernelRidgeRegression:degree&#39;: 3},
 dataset_properties={
   &#39;task&#39;: 4,
@@ -305,7 +287,7 @@ dataset_properties={
 ]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  10.762 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  12.141 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-extending-regression-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_regression.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>

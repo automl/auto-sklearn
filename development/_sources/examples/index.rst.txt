@@ -137,6 +137,27 @@ procedure.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to inspect the models which *auto-sklearn* optimizes over and h...">
+
+.. only:: html
+
+ .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_interpretable_models_thumb.png
+     :alt: Interpretable models
+
+     :ref:`sphx_glr_examples_40_advanced_example_interpretable_models.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/40_advanced/example_interpretable_models
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="In *auto-sklearn* it is possible to specify the feature types of a dataset when calling the met...">
 
 .. only:: html

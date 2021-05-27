@@ -123,28 +123,14 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    [(0.940000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'extra_trees_preproc_for_regression', 'regressor:__choice__': 'k_nearest_neighbors', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.07461708512446319, 'feature_preprocessor:extra_trees_preproc_for_regression:bootstrap': 'False', 'feature_preprocessor:extra_trees_preproc_for_regression:criterion': 'friedman_mse', 'feature_preprocessor:extra_trees_preproc_for_regression:max_depth': 'None', 'feature_preprocessor:extra_trees_preproc_for_regression:max_features': 0.11155581450643696, 'feature_preprocessor:extra_trees_preproc_for_regression:max_leaf_nodes': 'None', 'feature_preprocessor:extra_trees_preproc_for_regression:min_samples_leaf': 9, 'feature_preprocessor:extra_trees_preproc_for_regression:min_samples_split': 16, 'feature_preprocessor:extra_trees_preproc_for_regression:min_weight_fraction_leaf': 0.0, 'feature_preprocessor:extra_trees_preproc_for_regression:n_estimators': 100, 'regressor:k_nearest_neighbors:n_neighbors': 10, 'regressor:k_nearest_neighbors:p': 2, 'regressor:k_nearest_neighbors:weights': 'distance'},
+    [(0.860000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'extra_trees_preproc_for_regression', 'regressor:__choice__': 'gaussian_process', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.03817879348353232, 'feature_preprocessor:extra_trees_preproc_for_regression:bootstrap': 'False', 'feature_preprocessor:extra_trees_preproc_for_regression:criterion': 'friedman_mse', 'feature_preprocessor:extra_trees_preproc_for_regression:max_depth': 'None', 'feature_preprocessor:extra_trees_preproc_for_regression:max_features': 0.9315656292676362, 'feature_preprocessor:extra_trees_preproc_for_regression:max_leaf_nodes': 'None', 'feature_preprocessor:extra_trees_preproc_for_regression:min_samples_leaf': 16, 'feature_preprocessor:extra_trees_preproc_for_regression:min_samples_split': 5, 'feature_preprocessor:extra_trees_preproc_for_regression:min_weight_fraction_leaf': 0.0, 'feature_preprocessor:extra_trees_preproc_for_regression:n_estimators': 100, 'regressor:gaussian_process:alpha': 1.5382337616625793e-07, 'regressor:gaussian_process:thetaL': 0.0009878792260431147, 'regressor:gaussian_process:thetaU': 7784.13715948759},
     dataset_properties={
       'task': 5,
       'sparse': False,
       'multioutput': True,
       'target_type': 'regression',
       'signed': False})),
-    (0.020000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'power_transformer', 'feature_preprocessor:__choice__': 'extra_trees_preproc_for_regression', 'regressor:__choice__': 'k_nearest_neighbors', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.17991915054704827, 'feature_preprocessor:extra_trees_preproc_for_regression:bootstrap': 'True', 'feature_preprocessor:extra_trees_preproc_for_regression:criterion': 'friedman_mse', 'feature_preprocessor:extra_trees_preproc_for_regression:max_depth': 'None', 'feature_preprocessor:extra_trees_preproc_for_regression:max_features': 0.8059419617387933, 'feature_preprocessor:extra_trees_preproc_for_regression:max_leaf_nodes': 'None', 'feature_preprocessor:extra_trees_preproc_for_regression:min_samples_leaf': 10, 'feature_preprocessor:extra_trees_preproc_for_regression:min_samples_split': 9, 'feature_preprocessor:extra_trees_preproc_for_regression:min_weight_fraction_leaf': 0.0, 'feature_preprocessor:extra_trees_preproc_for_regression:n_estimators': 100, 'regressor:k_nearest_neighbors:n_neighbors': 6, 'regressor:k_nearest_neighbors:p': 2, 'regressor:k_nearest_neighbors:weights': 'distance'},
-    dataset_properties={
-      'task': 5,
-      'sparse': False,
-      'multioutput': True,
-      'target_type': 'regression',
-      'signed': False})),
-    (0.020000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'decision_tree', 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max': 0.7587182166651569, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min': 0.013086785968827803, 'regressor:decision_tree:criterion': 'mae', 'regressor:decision_tree:max_depth_factor': 1.472101899363813, 'regressor:decision_tree:max_features': 1.0, 'regressor:decision_tree:max_leaf_nodes': 'None', 'regressor:decision_tree:min_impurity_decrease': 0.0, 'regressor:decision_tree:min_samples_leaf': 8, 'regressor:decision_tree:min_samples_split': 9, 'regressor:decision_tree:min_weight_fraction_leaf': 0.0},
-    dataset_properties={
-      'task': 5,
-      'sparse': False,
-      'multioutput': True,
-      'target_type': 'regression',
-      'signed': False})),
-    (0.020000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'decision_tree', 'regressor:decision_tree:criterion': 'mse', 'regressor:decision_tree:max_depth_factor': 1.241977204753711, 'regressor:decision_tree:max_features': 1.0, 'regressor:decision_tree:max_leaf_nodes': 'None', 'regressor:decision_tree:min_impurity_decrease': 0.0, 'regressor:decision_tree:min_samples_leaf': 2, 'regressor:decision_tree:min_samples_split': 4, 'regressor:decision_tree:min_weight_fraction_leaf': 0.0},
+    (0.140000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'gaussian_process', 'feature_preprocessor:polynomial:degree': 2, 'feature_preprocessor:polynomial:include_bias': 'False', 'feature_preprocessor:polynomial:interaction_only': 'False', 'regressor:gaussian_process:alpha': 1.9597741334062347e-07, 'regressor:gaussian_process:thetaL': 0.00017585981648794033, 'regressor:gaussian_process:thetaU': 376.52625608356},
     dataset_properties={
       'task': 5,
       'sparse': False,
@@ -179,7 +165,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.9108169854091305
+    R2 score: 0.9999999233628157
 
 
 
@@ -397,7 +383,7 @@ Get the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  58.973 seconds)
+   **Total running time of the script:** ( 1 minutes  55.702 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multioutput_regression.py:
