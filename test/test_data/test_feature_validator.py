@@ -432,7 +432,6 @@ def test_list_to_dataframe(openml_id):
             assert X_pandas[col].dtype.name == transformed_X[i].dtype.name, col
 
 
-
 @pytest.mark.parametrize(
     'input_data_featuretest',
     (

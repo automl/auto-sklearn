@@ -210,7 +210,7 @@ class FeatureValidator(BaseEstimator):
 
         # We consider columns that are all nan in a pandas frame as category
         if hasattr(X, 'columns'):
-            for column in X.columns:
+            for column in typing.cast(pd.DataFrame, X).columns:
                 if X[column].isna().all():
                     X[column] = X[column].astype('category')
 
