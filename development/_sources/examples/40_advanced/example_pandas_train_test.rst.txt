@@ -38,7 +38,7 @@ performing models (under ensemble_optimization_score and ensemble_test_score res
 There is also support to manually indicate the feature types (whether a column is categorical
 or numerical) via the argument feat_types from fit(). This is important when working with
 list or numpy arrays as there is no per-column dtype (further details in the example
-`Continuous and categorical data <example_feature_types.html>`_).
+:ref:`sphx_glr_examples_40_advanced_example_feature_types.py`).
 
 .. GENERATED FROM PYTHON SOURCE LINES 25-62
 
@@ -278,7 +278,7 @@ Plot the ensemble performance
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  59.682 seconds)
+   **Total running time of the script:** ( 1 minutes  55.330 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_pandas_train_test.py:

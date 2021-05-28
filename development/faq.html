@@ -151,7 +151,7 @@
     <div class="body col-md-9 content" role="main">
       
   <section id="faq">
-<span id="manual"></span><h1>FAQ<a class="headerlink" href="#faq" title="Permalink to this headline">¶</a></h1>
+<span id="id1"></span><h1>FAQ<a class="headerlink" href="#faq" title="Permalink to this headline">¶</a></h1>
 <section id="issues">
 <h2>Issues<a class="headerlink" href="#issues" title="Permalink to this headline">¶</a></h2>
 <section id="auto-sklearn-is-extremely-memory-hungry-in-a-sequential-setting">
@@ -222,18 +222,12 @@ following:</p>
 <ol class="arabic simple">
 <li><p>Check if you can use a pre-compiled version of the pyrfr to avoid compiling it yourself. We
 provide pre-compiled versions of the pyrfr on <a class="reference external" href="https://pypi.org/project/pyrfr/#files">pypi</a>.</p></li>
-</ol>
-<ol class="arabic simple" start="3">
 <li><p>Check if the dependencies specified under <a class="reference internal" href="installation.html#installation"><span class="std std-ref">Installation</span></a> are correctly installed,
 especially that you have <code class="docutils literal notranslate"><span class="pre">swig</span></code> and a <code class="docutils literal notranslate"><span class="pre">C++</span></code> compiler. If you are using an older version of
 the pyrfr (<code class="docutils literal notranslate"><span class="pre">&lt;=0.8.0</span></code>) the dependency on SWIG as stricter and you actually need SWIG3 to
 compile the pyrfr.</p></li>
-</ol>
-<ol class="arabic simple" start="2">
 <li><p>If you are not yet using Conda, consider using it; it simplifies installation of the correct
 dependencies.</p></li>
-</ol>
-<ol class="arabic simple" start="4">
 <li><p>Install correct build dependencies before installing the pyrfr, you can check the following
 github issues for suggestions: <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/1025">1025</a>,
 <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/856">856</a></p></li>
@@ -301,9 +295,9 @@ open an issue for that.</p>
 </section>
 <section id="can-the-preprocessing-be-disabled">
 <h3>Can the preprocessing be disabled<a class="headerlink" href="#can-the-preprocessing-be-disabled" title="Permalink to this headline">¶</a></h3>
-<p>Feature preprocessing can be disabled as discussed und <span class="xref std std-ref">Restricting the searchspace</span>. Other
-preprocessing steps such as one hot encoding, missing feature imputation and normalization cannot
-yet be disabled, but we’re working on that.</p>
+<p>Feature preprocessing can be disabled as discussed in the example
+<a class="reference internal" href="manual.html#restricting-the-searchspace"><span class="std std-ref">Restricting the searchspace</span></a>. Other preprocessing steps such as one hot encoding, missing
+feature imputation and normalization cannot yet be disabled, but we’re working on that.</p>
 </section>
 </section>
 <section id="usage">
@@ -311,9 +305,9 @@ yet be disabled, but we’re working on that.</p>
 <section id="only-use-interpretable-models">
 <h3>Only use interpretable models<a class="headerlink" href="#only-use-interpretable-models" title="Permalink to this headline">¶</a></h3>
 <p>Auto-sklearn can be restricted to only use interpretable models and preprocessing algorithms.
-Please see the section <span class="xref std std-ref">Restricting the searchspace</span> to learn how to restrict the models
-which are searched over or see
-<a class="reference external" href="examples/40_advanced/example_interpretable_models.html">this example</a>.</p>
+Please see the Section <a class="reference internal" href="manual.html#restricting-the-searchspace"><span class="std std-ref">Restricting the searchspace</span></a> to learn how to restrict the models
+which are searched over or see the Example
+<a class="reference internal" href="examples/40_advanced/example_interpretable_models.html#sphx-glr-examples-40-advanced-example-interpretable-models-py"><span class="std std-ref">Interpretable models</span></a>.</p>
 <p>We don’t provide a judgement which of the models are interpretable as this is very much up to the
 specific use case, but would like to note that decision trees and linear models usually most
 interpretable.</p>

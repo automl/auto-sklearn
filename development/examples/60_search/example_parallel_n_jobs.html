@@ -133,7 +133,7 @@ single machine. Using this mode, <em>Auto-sklearn</em> starts a dask cluster,
 manages the workers and takes care of shutting down the cluster once the
 computation is done.
 To run <em>Auto-sklearn</em> on multiple machines check the example
-<a class="reference external" href="example_parallel_manual_spawning.html">Parallel Usage with manual process spawning</a>.</p>
+<a class="reference internal" href="example_parallel_manual_spawning_cli.html#sphx-glr-examples-60-search-example-parallel-manual-spawning-cli-py"><span class="std std-ref">Parallel Usage: Spawning workers from the command line</span></a>.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sklearn.model_selection</span>
 <span class="kn">import</span> <span class="nn">sklearn.datasets</span>
 <span class="kn">import</span> <span class="nn">sklearn.metrics</span>
@@ -176,14 +176,14 @@ To run <em>Auto-sklearn</em> on multiple machines check the example
   Dataset name: breast_cancer
   Metric: accuracy
   Best validation score: 0.985816
-  Number of target algorithm runs: 36
-  Number of successful target algorithm runs: 36
+  Number of target algorithm runs: 46
+  Number of successful target algorithm runs: 44
   Number of crashed target algorithm runs: 0
-  Number of target algorithms that exceeded the time limit: 0
+  Number of target algorithms that exceeded the time limit: 2
   Number of target algorithms that exceeded the memory limit: 0
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  9.157 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  5.845 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-60-search-example-parallel-n-jobs-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/60_search/example_parallel_n_jobs.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo2.svg" width="150px" /></a>
