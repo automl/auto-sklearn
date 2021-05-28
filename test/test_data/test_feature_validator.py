@@ -407,7 +407,10 @@ def test_list_to_dataframe(openml_id):
 
     X_pandas, y_pandas = sklearn.datasets.fetch_openml(data_id=openml_id,
                                                        return_X_y=True, as_frame=True)
-    X_list = X_pandas.values.tolist()
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+        X_pandas, y_pandas, random_state=1)
+
+    X_list = X_train.values.tolist()
     validator = FeatureValidator()
     validator.fit(X_list)
     transformed_X = validator.transform(X_list)
@@ -416,13 +419,18 @@ def test_list_to_dataframe(openml_id):
             # convert dtype translates 72.0 to 72. Be robust against this!
             assert is_numeric_dtype(transformed_X[i].dtype)
         else:
-            # For anneal, the pandas has the knowledge of a int column
-            # being categorical. We cannot know that from just a list
-            # for this reason, this check considers categorical and numerical
-            # as equivalent
-            if X_pandas[col].dtype.name == 'category' and 'Int' in transformed_X[i].dtype.name:
-                continue
-            assert X_pandas[col].dtype.name == transformed_X[i].dtype.name
+            assert X_pandas[col].dtype.name == transformed_X[i].dtype.name, col
+
+    # Also make sure that at testing time
+    # this work
+    transformed_X = validator.transform(X_test.values.tolist())
+    for i, col in enumerate(X_pandas.columns):
+        if is_numeric_dtype(X_pandas[col].dtype):
+            # convert dtype translates 72.0 to 72. Be robust against this!
+            assert is_numeric_dtype(transformed_X[i].dtype)
+        else:
+            assert X_pandas[col].dtype.name == transformed_X[i].dtype.name, col
+
 
 
 @pytest.mark.parametrize(

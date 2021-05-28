@@ -208,6 +208,12 @@ class FeatureValidator(BaseEstimator):
                 checks) and a encoder fitted in the case the data needs encoding
         """
 
+        # We consider columns that are all nan in a pandas frame as category
+        if hasattr(X, 'columns'):
+            for column in X.columns:
+                if X[column].isna().all():
+                    X[column] = X[column].astype('category')
+
         if not isinstance(X, (np.ndarray, pd.DataFrame)) and not scipy.sparse.issparse(X):
             raise ValueError("Auto-sklearn only supports Numpy arrays, Pandas DataFrames,"
                              " scipy sparse and Python Lists, yet, the provided input is"
