@@ -724,15 +724,16 @@ def test_calculate_all_metafeatures_same_results_across_datatypes():
     }
     assert {k: mf[k].value for k in expected.keys()} == pytest.approx(expected)
 
-    expected_landmark_pandas = {
-        'Landmark1NN': 0.6091806331471135,
-        'LandmarkRandomNodeLearner': 0.7617070142768466,
-        'LandmarkDecisionNodeLearner':  0.6502358783364369,
-        'LandmarkDecisionTree': 0.6047175667287399,
-        'LandmarkNaiveBayes': 0.5534698944754811,
+    expected_landmarks = {
+        'Landmark1NN': 0.9721601489757914,
+        'LandmarkRandomNodeLearner': 0.7616945996275606,
+        'LandmarkDecisionNodeLearner':  0.7827932960893855,
+        'LandmarkDecisionTree': 0.9899875853507139,
+        'LandmarkNaiveBayes': 0.9287150837988827,
+        'LandmarkLDA': 0.9610242085661079,
     }
-    assert {k: mf[k].value for k in expected_landmark_pandas.keys()} == pytest.approx(
-        expected_landmark_pandas, rel=1e-5)
+    assert {k: mf[k].value for k in expected_landmarks.keys()} == pytest.approx(
+        expected_landmarks, rel=1e-5)
 
     # Then do numpy!
     X, y = fetch_openml(data_id=2, return_X_y=True, as_frame=False)
@@ -745,12 +746,6 @@ def test_calculate_all_metafeatures_same_results_across_datatypes():
     # The column-reorder of pandas and numpy array are different after
     # the data preprocessing. So we cannot directly compare, and landmarking is
     # sensible to column order
-    expected_landmark_numpy = {
-        'Landmark1NN': 0.9721601489757914,
-        'LandmarkRandomNodeLearner': 0.7616945996275606,
-        'LandmarkDecisionNodeLearner': 0.7827932960893855,
-        'LandmarkDecisionTree': 0.9922098075729361,
-        'LandmarkNaiveBayes': 0.9287150837988827
-    }
-    assert {k: mf[k].value for k in expected_landmark_numpy.keys()} == pytest.approx(
-        expected_landmark_numpy, rel=1e-5)
+    expected_landmarks['LandmarkDecisionTree'] = 0.9922098075729361
+    assert {k: mf[k].value for k in expected_landmarks.keys()} == pytest.approx(
+        expected_landmarks, rel=1e-5)

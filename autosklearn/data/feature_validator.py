@@ -186,9 +186,9 @@ class FeatureValidator(BaseEstimator):
         # Not all sparse format support index sorting
         if scipy.sparse.issparse(X):
             if not isinstance(X, scipy.sparse.csr_matrix):
-                self.logger.warning(f"Original features provided where of type {type(X)} "
-                                    "yet Auto-Sklearn support csr_matrix. Auto-sklearn "
-                                    "will convert the provide features to csr_matrix format.")
+                self.logger.warning(f"Sparse data provided is of type {type(X)} "
+                                    "yet Auto-Sklearn only support csr_matrix. Auto-sklearn "
+                                    "will convert the provided data to the csr_matrix format.")
                 X = X.tocsr(copy=False)
             if hasattr(X, 'sort_indices'):
                 X.sort_indices()

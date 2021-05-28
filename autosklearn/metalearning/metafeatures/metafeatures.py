@@ -694,7 +694,10 @@ class LandmarkLDA(MetaFeature):
                 predictions = lda.predict(
                     X.iloc[test] if hasattr(X, 'iloc') else X[test],
                 )
-                accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
+                accuracy += sklearn.metrics.accuracy_score(
+                    predictions,
+                    y.iloc[test] if hasattr(y, 'iloc') else y[test],
+                )
             return accuracy / 5
         except scipy.linalg.LinAlgError as e:
             self.logger.warning("LDA failed: %s Returned 0 instead!" % e)
@@ -737,7 +740,10 @@ class LandmarkNaiveBayes(MetaFeature):
             predictions = nb.predict(
                 X.iloc[test] if hasattr(X, 'iloc') else X[test],
             )
-            accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
+            accuracy += sklearn.metrics.accuracy_score(
+                predictions,
+                y.iloc[test] if hasattr(y, 'iloc') else y[test],
+            )
         return accuracy / 5
 
     def _calculate_sparse(self, X, y, logger, categorical):
@@ -775,7 +781,10 @@ class LandmarkDecisionTree(MetaFeature):
             predictions = tree.predict(
                 X.iloc[test] if hasattr(X, 'iloc') else X[test],
             )
-            accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
+            accuracy += sklearn.metrics.accuracy_score(
+                predictions,
+                y.iloc[test] if hasattr(y, 'iloc') else y[test],
+            )
         return accuracy / 5
 
     def _calculate_sparse(self, X, y, logger, categorical):
@@ -819,7 +828,10 @@ class LandmarkDecisionNodeLearner(MetaFeature):
             predictions = node.predict(
                 X.iloc[test] if hasattr(X, 'iloc') else X[test],
             )
-            accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
+            accuracy += sklearn.metrics.accuracy_score(
+                predictions,
+                y.iloc[test] if hasattr(y, 'iloc') else y[test],
+            )
         return accuracy / 5
 
     def _calculate_sparse(self, X, y, logger, categorical):
@@ -849,7 +861,10 @@ class LandmarkRandomNodeLearner(MetaFeature):
             predictions = node.predict(
                 X.iloc[test] if hasattr(X, 'iloc') else X[test],
             )
-            accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
+            accuracy += sklearn.metrics.accuracy_score(
+                predictions,
+                y.iloc[test] if hasattr(y, 'iloc') else y[test],
+            )
         return accuracy / 5
 
     def _calculate_sparse(self, X, y, logger, categorical):
@@ -910,7 +925,10 @@ class Landmark1NN(MetaFeature):
             predictions = kNN.predict(
                 X.iloc[test] if hasattr(X, 'iloc') else X[test],
             )
-            accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
+            accuracy += sklearn.metrics.accuracy_score(
+                predictions,
+                y.iloc[test] if hasattr(y, 'iloc') else y[test],
+            )
         return accuracy / 5
 
 
