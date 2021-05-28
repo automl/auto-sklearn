@@ -84,6 +84,7 @@ Examples for using holdout and cross-validation can be found in `auto-sklearn/ex
 Supported Inputs
 ================
 *auto-sklearn* can accept targets for the following tasks (more details on `Sklearn algorithms <https://scikit-learn.org/stable/modules/multiclass.html>`_):
+
 * Binary Classification
 * Multiclass Classification
 * Multilabel Classification
@@ -95,16 +96,24 @@ ensemble of pipelines as described in the next section. This X_train/y_train dat
 to one of the supported formats: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.
 Optionally, you can measure the ability of this fitted model to generalize to unseen data by
 providing an optional testing pair (X_test/Y_test). For further details, please refer to the
-example :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py`.
+Example :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py`.
 Supported formats for these training and testing pairs are: np.ndarray,
 pd.DataFrame, scipy.sparse.csr_matrix and python lists.
 
 If your data contains categorical values (in the features or targets), autosklearn will automatically encode your data using a `sklearn.preprocessing.LabelEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_ for unidimensional data and a `sklearn.preprocessing.OrdinalEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html>`_ for multidimensional data.
 
 Regarding the features, there are two methods to guide *auto-sklearn* to properly encode categorical columns:
+
 * Providing a X_train/X_test numpy array with the optional flag feat_type. For further details, you
-can check the example :ref:`sphx_glr_examples_40_advanced_example_feature_types.py`.
-* You can provide a pandas DataFrame, with properly formatted columns. If a column has numerical dtype, *auto-sklearn* will not encode it and it will be passed directly to scikit-learn. If the column has a categorical/boolean class, it will be encoded. If the column is of any other type (Object or Timeseries), an error will be raised. For further details on how to properly encode your data, you can check the example `Working with categorical data <https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html>`_). If you are working with time series, it is recommended that you follow this approach `Working with time data <https://stats.stackexchange.com/questions/311494/>`_.
+  can check the Example :ref:`sphx_glr_examples_40_advanced_example_feature_types.py`.
+* You can provide a pandas DataFrame, with properly formatted columns. If a column has numerical
+  dtype, *auto-sklearn* will not encode it and it will be passed directly to scikit-learn. If the
+  column has a categorical/boolean class, it will be encoded. If the column is of any other type
+  (Object or Timeseries), an error will be raised. For further details on how to properly encode
+  your data, you can check the Pandas Example
+  `Working with categorical data <https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html>`_).
+  If you are working with time series, it is recommended that you follow this approach
+  `Working with time data <https://stats.stackexchange.com/questions/311494/>`_.
 
 Regarding the targets (y_train/y_test), if the task involves a classification problem, such features will be automatically encoded. It is recommended to provide both y_train and y_test during fit, so that a common encoding is created between these splits (if only y_train is provided during fit, the categorical encoder will not be able to handle new classes that are exclusive to y_test). If the task is regression, no encoding happens on the targets.
 
@@ -138,8 +147,9 @@ statistics can be printed for the inspection.
 obtained by running *auto-sklearn*. It additionally prints the number of both successful and unsuccessful
 algorithm runs.
 
-The results obtained from the final ensemble can be printed by calling ``show_models()``. *auto-sklearn* ensemble is composed of scikit-learn models that can be inspected as exemplified by
-:ref:`sphx_glr_examples_40_advanced_example_get_pipeline_components.py`.
+The results obtained from the final ensemble can be printed by calling ``show_models()``.
+*auto-sklearn* ensemble is composed of scikit-learn models that can be inspected as exemplified
+in the Example :ref:`sphx_glr_examples_40_advanced_example_get_pipeline_components.py`.
 
 Parallel computation
 ====================
@@ -152,9 +162,10 @@ machine learning model has finished training. An example on how to do this seque
 Nevertheless, *auto-sklearn* also supports parallel Bayesian optimization via the use of
 `Dask.distributed  <https://distributed.dask.org/>`_. By providing the arguments ``n_jobs``
 to the estimator construction, one can control the number of cores available to *auto-sklearn*
-(As exemplified in :ref:`sphx_glr_examples_60_search_example_parallel_n_jobs.py`).
+(As shown in the Example :ref:`sphx_glr_examples_60_search_example_parallel_n_jobs.py`).
 Distributed processes are also supported by providing a custom client object to *auto-sklearn* like
-in the example: :ref:`sphx_glr_examples_60_search_example_parallel_manual_spawning_cli.py`. When multiple cores are
+in the Example: :ref:`sphx_glr_examples_60_search_example_parallel_manual_spawning_cli.py`. When
+multiple cores are
 available, *auto-sklearn* will create a worker per core, and use the available workers to both search
 for better machine learning models as well as building an ensemble with them until the time resource
 is exhausted.
@@ -174,7 +185,7 @@ Model persistence
 
 *auto-sklearn* is mostly a wrapper around scikit-learn. Therefore, it is
 possible to follow the
-`persistence example <https://scikit-learn.org/stable/modules/model_persistence.html>`_
+`persistence Example <https://scikit-learn.org/stable/modules/model_persistence.html>`_
 from scikit-learn.
 
 Vanilla auto-sklearn
