@@ -282,12 +282,12 @@ class FeatureValidator(BaseEstimator):
 
         # Make sure each column is a valid type
         for i, column in enumerate(X.columns):
-            if X[column].dtype.name in ['category', 'bool']:
-
-                feat_type[column] = 'categorical'
-            elif is_sparse(X[column]):
+            if is_sparse(X[column]):
                 raise ValueError("Auto-sklearn does not yet support sparse pandas Series."
                                  f" Please convert {column} to a dense format.")
+            elif X[column].dtype.name in ['category', 'bool']:
+
+                feat_type[column] = 'categorical'
             # Move away from np.issubdtype as it causes
             # TypeError: data type not understood in certain pandas types
             elif not is_numeric_dtype(X[column]):

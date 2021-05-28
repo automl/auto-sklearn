@@ -400,6 +400,7 @@ def test_featurevalidator_new_data_after_fit(openml_id,
         1468,  # cnae-9
         40975,  # car
         40984,  # Segment
+        2,  # anneal
     ),
 )
 def test_list_to_dataframe(openml_id):
@@ -415,6 +416,12 @@ def test_list_to_dataframe(openml_id):
             # convert dtype translates 72.0 to 72. Be robust against this!
             assert is_numeric_dtype(transformed_X[i].dtype)
         else:
+            # For anneal, the pandas has the knowledge of a int column
+            # being categorical. We cannot know that from just a list
+            # for this reason, this check considers categorical and numerical
+            # as equivalent
+            if X_pandas[col].dtype.name == 'category' and 'Int' in transformed_X[i].dtype.name:
+                continue
             assert X_pandas[col].dtype.name == transformed_X[i].dtype.name
 
 
