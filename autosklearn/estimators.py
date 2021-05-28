@@ -390,7 +390,7 @@ class AutoSklearnEstimator(BaseEstimator):
             attributes will be automatically One-Hot encoded. The values
             used for a categorical attribute must be integers, obtained for
             example by `sklearn.preprocessing.LabelEncoder
-            <http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_.
+            <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_.
 
         Returns
         -------
@@ -635,7 +635,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
             attributes will be automatically One-Hot encoded. The values
             used for a categorical attribute must be integers, obtained for
             example by `sklearn.preprocessing.LabelEncoder
-            <http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_.
+            <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_.
 
         dataset_name : str, optional (default=None)
             Create nicer output. If None, a string will be determined by the

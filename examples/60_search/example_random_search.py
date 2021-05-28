@@ -4,10 +4,11 @@ Random Search
 =============
 
 A crucial feature of *auto-sklearn* is automatically optimizing the hyperparameters through SMAC,
-introduced `here <http://ml.informatik.uni-freiburg.de/papers/11-LION5-SMAC.pdf>`_. Additionally, it
-is possible to use `random search <http://www.jmlr.org/papers/v13/bergstra12a.html>`_ instead of
+introduced `here <https://ml.informatik.uni-freiburg.de/papers/11-LION5-SMAC.pdf>`_. 
+Additionally, it is possible to use 
+`random search <https://www.jmlr.org/papers/v13/bergstra12a.html>`_ instead of
 SMAC, as demonstrated in the example below. Furthermore, the example also demonstrates how to use
-`Random Online Aggressive Racing (ROAR) <http://ml.informatik.uni-freiburg.de/papers/11-LION5-SMAC.pdf>`_
+`Random Online Aggressive Racing (ROAR) <https://ml.informatik.uni-freiburg.de/papers/11-LION5-SMAC.pdf>`_
 as yet another alternative optimizatino strategy.
 Both examples are intended to show how the optimization strategy in *auto-sklearn* can be adapted.
 """  # noqa (links are too long)

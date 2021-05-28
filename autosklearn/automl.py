@@ -999,7 +999,7 @@ class AutoML(BaseEstimator):
             attributes will be automatically One-Hot encoded. The values
             used for a categorical attribute must be integers, obtained for
             example by `sklearn.preprocessing.LabelEncoder
-            <http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_.
+            <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_.
 
         Returns
         -------

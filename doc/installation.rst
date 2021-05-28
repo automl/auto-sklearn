@@ -40,7 +40,7 @@ Then install *auto-sklearn*:
     pip3 install auto-sklearn
 
 We recommend installing *auto-sklearn* into a
-`virtual environment <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_
+`virtual environment <https://docs.python-guide.org/dev/virtualenvs/>`_
 or an
 `Anaconda environment <https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_.
 

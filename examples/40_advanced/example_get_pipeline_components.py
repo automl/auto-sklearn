@@ -80,7 +80,7 @@ print(automl.sprint_statistics())
 # Auto-sklearn also keeps detailed statistics of the hyperparameter
 # optimization procedurce, which are stored in a so-called
 # `run history <https://automl.github.io/SMAC3/master/apidoc/smac.
-# runhistory.runhistory.html#smac.runhistory# .runhistory.RunHistory>`_.
+# runhistory.runhistory.html#smac.runhistory.runhistory.RunHistory>`_.
 
 print(automl.automl_.runhistory_)
 
@@ -119,7 +119,7 @@ print(automl.automl_.runhistory_.ids_config[run_key.config_id])
 ############################################################################
 # The only other important entry is the budget in case you are using
 # auto-sklearn with
-# `successive halving <../60_search/example_successive_halving.html>`_.
+# :ref:`sphx_glr_examples_60_search_example_successive_halving.py`.
 # The remaining parts of the key can be ignored for auto-sklearn and are
 # only there because the underlying optimizer, SMAC, can handle more general
 # problems, too.

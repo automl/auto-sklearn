@@ -10,7 +10,7 @@ In *auto-sklearn* it is possible to specify the feature types of a dataset when 
 
 Additionally, you can provide a properly formatted pandas DataFrame, and the feature
 types will be automatically inferred, as demonstrated in
-`Pandas Train and Test inputs <example_pandas_train_test.html>`_.
+:ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py`.
 """
 import numpy as np
 

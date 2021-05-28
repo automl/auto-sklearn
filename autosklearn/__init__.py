@@ -15,7 +15,7 @@ dependencies.verify_packages(requirements)
 if os.name != 'posix':
     raise ValueError(
         'Detected unsupported operating system: %s. Please check '
-        'the compability information of auto-sklearn: http://automl.github.io'
+        'the compability information of auto-sklearn: https://automl.github.io'
         '/auto-sklearn/stable/installation.html#windows-osx-compability' %
         sys.platform
     )
