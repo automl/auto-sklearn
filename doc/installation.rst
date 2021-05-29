@@ -70,25 +70,8 @@ be solved by installing the *gcc* compiler shipped with AnaConda (as well as
     conda install gxx_linux-64 gcc_linux-64 swig
 
 
-Windows/OSX compatibility
-=========================
-
-Windows
-~~~~~~~
-
-*auto-sklearn* relies heavily on the Python module ``resource``. ``resource``
-is part of Python's `Unix Specific Services <https://docs.python.org/3/library/unix.html>`_
-and not available on a Windows machine. Therefore, it is not possible to run
-*auto-sklearn* on a Windows machine.
-
-Possible solutions (not tested):
-
-* Windows 10 bash shell
-* virtual machine
-* docker image
-
-Conda
-~~~~~
+Conda-forge
+~~~~~~~~~~~
 
 Installing `auto-sklearn` from the `conda-forge` channel can be achieved by adding `conda-forge` to your channels with:
 
@@ -111,6 +94,30 @@ It is possible to list all of the versions of `auto-sklearn` available on your p
 .. code:: bash
 
     conda search auto-sklearn --channel conda-forge
+
+to read in more details check
+`auto sklearn feedstock <https://github.com/conda-forge/auto-sklearn-feedstock>`_.
+
+for more information about Conda forge check
+`conda-forge documentations <https://conda-forge.org/docs/>`_.
+
+
+Windows/OSX compatibility
+=========================
+
+Windows
+~~~~~~~
+
+*auto-sklearn* relies heavily on the Python module ``resource``. ``resource``
+is part of Python's `Unix Specific Services <https://docs.python.org/3/library/unix.html>`_
+and not available on a Windows machine. Therefore, it is not possible to run
+*auto-sklearn* on a Windows machine.
+
+Possible solutions (not tested):
+
+* Windows 10 bash shell
+* virtual machine
+* docker image
 
 
 Mac OSX
