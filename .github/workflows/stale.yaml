@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/stale@v3
         with:
-          days-before-stale: 60
+          days-before-stale: 30
           days-before-close: 7
           stale-issue-message: >
             This issue has been automatically marked as stale because it has not had
