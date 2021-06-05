@@ -9,7 +9,7 @@ import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.utils.multiclass import type_of_target
 from smac.runhistory.runhistory import RunInfo, RunValue
-from smac.callbacks import IncorporateRunResultCallback
+import smac.callbacks
 
 from autosklearn.data.validation import (
     SUPPORTED_FEAT_TYPES,
@@ -52,7 +52,7 @@ class AutoSklearnEstimator(BaseEstimator):
         metric=None,
         scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
-        get_trials_callback: Optional[IncorporateRunResultCallback] = None
+        get_trials_callback=None
     ):
         """
         Parameters
@@ -226,6 +226,12 @@ class AutoSklearnEstimator(BaseEstimator):
 
         load_models : bool, optional (True)
             Whether to load the models after fitting Auto-sklearn.
+           
+        get_trials_callback: callable
+            Callback function to create an object of subclass defined in module
+            `smac.callbacks <https://automl.github.io/SMAC3/master/apidoc/smac.callbacks.html>`_.
+            This is an advanced feature. Use only if you are familiar with
+            `SMAC <https://automl.github.io/SMAC3/master/index.html>`_.
 
         Attributes
         ----------
