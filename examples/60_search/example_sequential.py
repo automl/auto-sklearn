@@ -37,6 +37,7 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     # finished fitting all machine learning models.
     ensemble_size=0,
     delete_tmp_folder_after_terminate=False,
+    delete_output_folder_after_terminate=False,
 )
 automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
