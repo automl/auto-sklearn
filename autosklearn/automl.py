@@ -47,7 +47,7 @@ from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import _fit_with_budget
 from autosklearn.metrics import calculate_metric
-from autosklearn.util.backend import Backend
+from autosklearn.util.backend import Backend, create
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import (
     setup_logger,
@@ -114,9 +114,12 @@ def _model_predict(model, X, batch_size, logger, task):
 class AutoML(BaseEstimator):
 
     def __init__(self,
-                 backend: Backend,
                  time_left_for_this_task,
                  per_run_time_limit,
+                 temporary_directory: Optional[str] = None,
+                 output_directory: Optional[str] = None,
+                 delete_tmp_folder_after_terminate: bool = True,
+                 delete_output_folder_after_terminate: bool = True,
                  initial_configurations_via_metalearning=25,
                  ensemble_size=1,
                  ensemble_nbest=1,
@@ -143,7 +146,11 @@ class AutoML(BaseEstimator):
                  ):
         super(AutoML, self).__init__()
         self.configuration_space = None
-        self._backend = backend
+        self._backend: Optional[Backend] = None
+        self._temporary_directory = temporary_directory
+        self._output_directory = output_directory
+        self._delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
+        self._delete_output_folder_after_terminate = delete_output_folder_after_terminate
         # self._tmp_dir = tmp_dir
         self._time_for_task = time_left_for_this_task
         self._per_run_time_limit = per_run_time_limit
@@ -257,6 +264,14 @@ class AutoML(BaseEstimator):
         # It can be seen as an identifier for each configuration
         # saved to disk
         self.num_run = 0
+
+    def _create_backend(self) -> Backend:
+        return create(
+            temporary_directory=self._temporary_directory,
+            output_directory=self._output_directory,
+            delete_tmp_folder_after_terminate=self._delete_tmp_folder_after_terminate,
+            delete_output_folder_after_terminate=self._delete_output_folder_after_terminate,
+        )
 
     def _create_dask_client(self):
         self._is_dask_client_internally_created = True
@@ -465,6 +480,9 @@ class AutoML(BaseEstimator):
     ):
         if dataset_name is None:
             dataset_name = str(uuid.uuid1(clock_seq=os.getpid()))
+
+        # Create the backend
+        self._backend = self._create_backend()
 
         # By default try to use the TCP logging port or get a new port
         self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
@@ -830,6 +848,10 @@ class AutoML(BaseEstimator):
         # Clean up the logger
         self._logger.info("Starting to clean up the logger")
         self._clean_logger()
+
+        # Clean up the backend
+        if self._delete_tmp_folder_after_terminate or self._delete_output_folder_after_terminate:
+            self._backend.context.delete_directories(force=False)
         return
 
     @staticmethod
@@ -1557,11 +1579,6 @@ class AutoML(BaseEstimator):
         self._clean_logger()
 
         self._close_dask_client()
-
-        # When a multiprocessing work is done, the
-        # objects are deleted. We don't want to delete run areas
-        # until the estimator is deleted
-        self._backend.context.delete_directories(force=False)
 
 
 class AutoMLClassifier(AutoML):

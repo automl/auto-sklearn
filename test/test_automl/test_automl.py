@@ -47,11 +47,10 @@ class AutoMLStub(AutoML):
         pass
 
 
-def test_fit(dask_client, backend):
+def test_fit(dask_client):
 
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
     automl = autosklearn.automl.AutoML(
-        backend=backend,
         time_left_for_this_task=30,
         per_run_time_limit=5,
         metric=accuracy,
@@ -68,7 +67,7 @@ def test_fit(dask_client, backend):
     del automl
 
 
-def test_fit_roar(dask_client_single_worker, backend):
+def test_fit_roar(dask_client_single_worker):
     def get_roar_object_callback(
             scenario_dict,
             seed,
@@ -93,7 +92,6 @@ def test_fit_roar(dask_client_single_worker, backend):
 
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
     automl = autosklearn.automl.AutoML(
-        backend=backend,
         time_left_for_this_task=30,
         per_run_time_limit=5,
         initial_configurations_via_metalearning=0,
@@ -112,7 +110,7 @@ def test_fit_roar(dask_client_single_worker, backend):
     del automl
 
 
-def test_refit_shuffle_on_fail(backend, dask_client):
+def test_refit_shuffle_on_fail(dask_client):
 
     failing_model = unittest.mock.Mock()
     failing_model.fit.side_effect = [ValueError(), ValueError(), None]
@@ -120,7 +118,7 @@ def test_refit_shuffle_on_fail(backend, dask_client):
         ValueError(), ValueError(), (None, {})]
     failing_model.get_max_iter.return_value = 100
 
-    auto = AutoML(backend, 30, 5, dask_client=dask_client)
+    auto = AutoML(30, 5, dask_client=dask_client)
     ensemble_mock = unittest.mock.Mock()
     ensemble_mock.get_selected_model_identifiers.return_value = [(1, 1, 50.0)]
     auto.ensemble_ = ensemble_mock
@@ -192,12 +190,13 @@ def test_raises_if_no_models(automl_stub):
     automl_stub._load_models()
 
 
-def test_delete_non_candidate_models(backend, dask_client):
+def test_delete_non_candidate_models(dask_client):
 
     seed = 555
     X, Y, _, _ = putil.get_dataset('iris')
     automl = autosklearn.automl.AutoML(
-        backend,
+        delete_tmp_folder_after_terminate=False,
+        delete_output_folder_after_terminate=False,
         time_left_for_this_task=60,
         per_run_time_limit=5,
         ensemble_nbest=3,
@@ -219,7 +218,7 @@ def test_delete_non_candidate_models(backend, dask_client):
     # Assert at least one model file has been deleted and that there were no
     # deletion errors
     log_file_path = glob.glob(os.path.join(
-        backend.temporary_directory, 'AutoML(' + str(seed) + '):*.log'))
+        automl._backend.temporary_directory, 'AutoML(' + str(seed) + '):*.log'))
     with open(log_file_path[0]) as log_file:
         log_content = log_file.read()
         assert 'Deleted files of non-candidate model' in log_content, log_content
@@ -227,7 +226,7 @@ def test_delete_non_candidate_models(backend, dask_client):
         assert 'Failed to lock model' not in log_content, log_content
 
     # Assert that the files of the models used by the ensemble weren't deleted
-    model_files = backend.list_all_models(seed=seed)
+    model_files = automl._backend.list_all_models(seed=seed)
     model_files_idx = set()
     for m_file in model_files:
         # Extract the model identifiers from the filename
@@ -239,7 +238,7 @@ def test_delete_non_candidate_models(backend, dask_client):
     del automl
 
 
-def test_binary_score_and_include(backend, dask_client):
+def test_binary_score_and_include(dask_client):
     """
     Test fix for binary classification prediction
     taking the index 1 of second dimension in prediction matrix
@@ -254,7 +253,7 @@ def test_binary_score_and_include(backend, dask_client):
     Y_test = data[1][200:]
 
     automl = autosklearn.automl.AutoML(
-        backend, 20, 5,
+        20, 5,
         include_estimators=['sgd'],
         include_preprocessors=['no_preprocessing'],
         metric=accuracy,
@@ -271,22 +270,18 @@ def test_binary_score_and_include(backend, dask_client):
     del automl
 
 
-def test_automl_outputs(backend, dask_client):
+def test_automl_outputs(dask_client):
 
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
     name = 'iris'
-    data_manager_file = os.path.join(
-        backend.temporary_directory,
-        '.auto-sklearn',
-        'datamanager.pkl'
-    )
-
     auto = autosklearn.automl.AutoML(
-        backend, 30, 5,
+        30, 5,
         initial_configurations_via_metalearning=0,
         seed=100,
         metric=accuracy,
         dask_client=dask_client,
+        delete_tmp_folder_after_terminate=False,
+        delete_output_folder_after_terminate=False,
     )
     auto.fit(
         X=X_train,
@@ -295,6 +290,11 @@ def test_automl_outputs(backend, dask_client):
         y_test=Y_test,
         dataset_name=name,
         task=MULTICLASS_CLASSIFICATION,
+    )
+    data_manager_file = os.path.join(
+        auto._backend.temporary_directory,
+        '.auto-sklearn',
+        'datamanager.pkl'
     )
 
     # pickled data manager (without one hot encoding!)
@@ -314,28 +314,29 @@ def test_automl_outputs(backend, dask_client):
         'ensemble_history.json',
     ]
     assert (
-        sorted(os.listdir(os.path.join(backend.temporary_directory, '.auto-sklearn')))
+        sorted(os.listdir(os.path.join(auto._backend.temporary_directory,
+                                       '.auto-sklearn')))
         == sorted(fixture)
     )
 
     # At least one ensemble, one validation, one test prediction and one
     # model and one ensemble
     fixture = glob.glob(os.path.join(
-        backend.temporary_directory,
+        auto._backend.temporary_directory,
         '.auto-sklearn', 'runs', '*', 'predictions_ensemble*npy',
     ))
     assert len(fixture) > 0
 
-    fixture = glob.glob(os.path.join(backend.temporary_directory, '.auto-sklearn',
+    fixture = glob.glob(os.path.join(auto._backend.temporary_directory, '.auto-sklearn',
                                      'runs', '*', '100.*.model'))
     assert len(fixture) > 0
 
-    fixture = os.listdir(os.path.join(backend.temporary_directory,
+    fixture = os.listdir(os.path.join(auto._backend.temporary_directory,
                                       '.auto-sklearn', 'ensembles'))
     assert '100.0000000000.ensemble' in fixture
 
     # Start time
-    start_time_file_path = os.path.join(backend.temporary_directory,
+    start_time_file_path = os.path.join(auto._backend.temporary_directory,
                                         '.auto-sklearn', "start_time_100")
     with open(start_time_file_path, 'r') as fh:
         start_time = float(fh.read())
@@ -386,7 +387,7 @@ def test_automl_outputs(backend, dask_client):
 @pytest.mark.parametrize("datasets", [('breast_cancer', BINARY_CLASSIFICATION),
                                       ('wine', MULTICLASS_CLASSIFICATION),
                                       ('diabetes', REGRESSION)])
-def test_do_dummy_prediction(backend, dask_client, datasets):
+def test_do_dummy_prediction(dask_client, datasets):
 
     name, task = datasets
 
@@ -400,11 +401,14 @@ def test_do_dummy_prediction(backend, dask_client, datasets):
     )
 
     auto = autosklearn.automl.AutoML(
-        backend, 20, 5,
+        20, 5,
         initial_configurations_via_metalearning=25,
         metric=accuracy,
         dask_client=dask_client,
+        delete_tmp_folder_after_terminate=False,
+        delete_output_folder_after_terminate=False,
     )
+    auto._backend = auto._create_backend()
 
     # Make a dummy logger
     auto._logger_port = 9020
@@ -412,7 +416,7 @@ def test_do_dummy_prediction(backend, dask_client, datasets):
     auto._logger.info.return_value = None
 
     auto._backend.save_datamanager(datamanager)
-    D = backend.load_datamanager()
+    D = auto._backend.load_datamanager()
 
     # Check if data manager is correcly loaded
     assert D.info['task'] == datamanager.info['task']
@@ -422,7 +426,7 @@ def test_do_dummy_prediction(backend, dask_client, datasets):
     # directory, but in the temporary directory.
     assert not os.path.exists(os.path.join(os.getcwd(), '.auto-sklearn'))
     assert os.path.exists(os.path.join(
-        backend.temporary_directory, '.auto-sklearn', 'runs', '1_1_0.0',
+        auto._backend.temporary_directory, '.auto-sklearn', 'runs', '1_1_0.0',
         'predictions_ensemble_1_1_0.0.npy')
     )
 
@@ -432,7 +436,7 @@ def test_do_dummy_prediction(backend, dask_client, datasets):
 
 
 @unittest.mock.patch('autosklearn.evaluation.ExecuteTaFuncWithQueue.run')
-def test_fail_if_dummy_prediction_fails(ta_run_mock, backend, dask_client):
+def test_fail_if_dummy_prediction_fails(ta_run_mock, dask_client):
 
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
     datamanager = XYDataManager(
@@ -445,13 +449,15 @@ def test_fail_if_dummy_prediction_fails(ta_run_mock, backend, dask_client):
 
     time_for_this_task = 30
     per_run_time = 10
-    auto = autosklearn.automl.AutoML(backend,
-                                     time_for_this_task,
+    auto = autosklearn.automl.AutoML(time_for_this_task,
                                      per_run_time,
                                      initial_configurations_via_metalearning=25,
                                      metric=accuracy,
                                      dask_client=dask_client,
+                                     delete_tmp_folder_after_terminate=False,
+                                     delete_output_folder_after_terminate=False,
                                      )
+    auto._backend = auto._create_backend()
     auto._backend._make_internals_directory()
     auto._backend.save_datamanager(datamanager)
 
@@ -522,7 +528,7 @@ def test_fail_if_dummy_prediction_fails(ta_run_mock, backend, dask_client):
 
 
 @unittest.mock.patch('autosklearn.smbo.AutoMLSMBO.run_smbo')
-def test_exceptions_inside_log_in_smbo(smbo_run_mock, backend, dask_client):
+def test_exceptions_inside_log_in_smbo(smbo_run_mock, dask_client):
 
     # Below importing and shutdown is a workaround, to make sure
     # we reset the port to collect messages. Randomly, when running
@@ -532,11 +538,12 @@ def test_exceptions_inside_log_in_smbo(smbo_run_mock, backend, dask_client):
     logging.shutdown()
 
     automl = autosklearn.automl.AutoML(
-        backend,
         20,
         5,
         metric=accuracy,
         dask_client=dask_client,
+        delete_tmp_folder_after_terminate=False,
+        delete_output_folder_after_terminate=False,
     )
 
     dataset_name = 'test_exceptions_inside_log'
@@ -561,7 +568,7 @@ def test_exceptions_inside_log_in_smbo(smbo_run_mock, backend, dask_client):
     # make sure that the logfile was created
     logger_name = 'AutoML(%d):%s' % (1, dataset_name)
     logger = logging.getLogger(logger_name)
-    logfile = os.path.join(backend.temporary_directory, logger_name + '.log')
+    logfile = os.path.join(automl._backend.temporary_directory, logger_name + '.log')
     assert os.path.exists(logfile), print_debug_information(automl) + str(automl._clean_logger())
 
     # Give some time for the error message to be printed in the
@@ -590,15 +597,16 @@ def test_exceptions_inside_log_in_smbo(smbo_run_mock, backend, dask_client):
 
 
 @pytest.mark.parametrize("metric", [log_loss, balanced_accuracy])
-def test_load_best_individual_model(metric, backend, dask_client):
+def test_load_best_individual_model(metric, dask_client):
 
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
     automl = autosklearn.automl.AutoML(
-        backend=backend,
         time_left_for_this_task=30,
         per_run_time_limit=5,
         metric=metric,
         dask_client=dask_client,
+        delete_tmp_folder_after_terminate=False,
+        delete_output_folder_after_terminate=False,
     )
 
     # We cannot easily mock a function sent to dask
@@ -633,12 +641,11 @@ def test_load_best_individual_model(metric, backend, dask_client):
     del automl
 
 
-def test_fail_if_feat_type_on_pandas_input(backend, dask_client):
+def test_fail_if_feat_type_on_pandas_input(dask_client):
     """We do not support feat type when pandas
     is provided as an input
     """
     automl = autosklearn.automl.AutoML(
-        backend=backend,
         time_left_for_this_task=30,
         per_run_time_limit=5,
         metric=accuracy,

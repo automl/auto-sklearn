@@ -17,7 +17,6 @@ from autosklearn.data.validation import (
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, AutoML
 from autosklearn.metrics import Scorer
-from autosklearn.util.backend import create
 
 
 class AutoSklearnEstimator(BaseEstimator):
@@ -285,13 +284,9 @@ class AutoSklearnEstimator(BaseEstimator):
 
     def build_automl(self):
 
-        backend = create(
+        automl = self._get_automl_class()(
             temporary_directory=self.tmp_folder,
             delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
-            )
-
-        automl = self._get_automl_class()(
-            backend=backend,
             time_left_for_this_task=self.time_left_for_this_task,
             per_run_time_limit=self.per_run_time_limit,
             initial_configurations_via_metalearning=self.initial_configurations_via_metalearning,

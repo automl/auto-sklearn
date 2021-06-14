@@ -62,6 +62,8 @@ def test_fit_n_jobs(tmp_dir):
     get_smac_object_wrapper_instance = get_smac_object_wrapper()
 
     automl = AutoSklearnClassifier(
+        delete_tmp_folder_after_terminate=False,
+        delete_output_folder_after_terminate=False,
         time_left_for_this_task=30,
         per_run_time_limit=5,
         tmp_folder=tmp_dir,
@@ -331,7 +333,7 @@ def test_get_number_of_available_cores():
 
 
 @unittest.mock.patch('autosklearn.automl.AutoML.predict')
-def test_multiclass_prediction(predict_mock, backend, dask_client):
+def test_multiclass_prediction(predict_mock, dask_client):
     predicted_probabilities = [[0, 0, 0.99], [0, 0.99, 0], [0.99, 0, 0],
                                [0, 0.99, 0], [0, 0, 0.99]]
     predicted_indexes = [2, 1, 0, 1, 2]
@@ -342,7 +344,6 @@ def test_multiclass_prediction(predict_mock, backend, dask_client):
     classifier = AutoMLClassifier(
         time_left_for_this_task=1,
         per_run_time_limit=1,
-        backend=backend,
         dask_client=dask_client,
     )
     classifier.InputValidator = InputValidator(is_classification=True)
@@ -357,7 +358,7 @@ def test_multiclass_prediction(predict_mock, backend, dask_client):
 
 
 @unittest.mock.patch('autosklearn.automl.AutoML.predict')
-def test_multilabel_prediction(predict_mock, backend, dask_client):
+def test_multilabel_prediction(predict_mock, dask_client):
     predicted_probabilities = [[0.99, 0],
                                [0.99, 0],
                                [0, 0.99],
@@ -370,7 +371,6 @@ def test_multilabel_prediction(predict_mock, backend, dask_client):
     classifier = AutoMLClassifier(
         time_left_for_this_task=1,
         per_run_time_limit=1,
-        backend=backend,
         dask_client=dask_client,
     )
     classifier.InputValidator = InputValidator(is_classification=True)
@@ -389,6 +389,8 @@ def test_multilabel_prediction(predict_mock, backend, dask_client):
 def test_can_pickle_classifier(tmp_dir, dask_client):
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
     automl = AutoSklearnClassifier(time_left_for_this_task=30,
+                                   delete_tmp_folder_after_terminate=False,
+                                   delete_output_folder_after_terminate=False,
                                    per_run_time_limit=5,
                                    tmp_folder=tmp_dir,
                                    dask_client=dask_client,
@@ -458,6 +460,8 @@ def test_binary(tmp_dir, dask_client):
     X_train, Y_train, X_test, Y_test = putil.get_dataset(
         'iris', make_binary=True)
     automl = AutoSklearnClassifier(time_left_for_this_task=40,
+                                   delete_tmp_folder_after_terminate=False,
+                                   delete_output_folder_after_terminate=False,
                                    per_run_time_limit=10,
                                    tmp_folder=tmp_dir,
                                    dask_client=dask_client,
@@ -596,6 +600,8 @@ def test_autosklearn_classification_methods_returns_self(dask_client):
     """
     X_train, y_train, X_test, y_test = putil.get_dataset('iris')
     automl = AutoSklearnClassifier(time_left_for_this_task=60,
+                                   delete_tmp_folder_after_terminate=False,
+                                   delete_output_folder_after_terminate=False,
                                    per_run_time_limit=10,
                                    ensemble_size=0,
                                    dask_client=dask_client,
@@ -616,6 +622,8 @@ def test_autosklearn_classification_methods_returns_self(dask_client):
 def test_autosklearn_regression_methods_returns_self(dask_client):
     X_train, y_train, X_test, y_test = putil.get_dataset('boston')
     automl = AutoSklearnRegressor(time_left_for_this_task=30,
+                                  delete_tmp_folder_after_terminate=False,
+                                  delete_output_folder_after_terminate=False,
                                   per_run_time_limit=5,
                                   dask_client=dask_client,
                                   ensemble_size=0)
@@ -633,6 +641,8 @@ def test_autosklearn_regression_methods_returns_self(dask_client):
 def test_autosklearn2_classification_methods_returns_self(dask_client):
     X_train, y_train, X_test, y_test = putil.get_dataset('iris')
     automl = AutoSklearn2Classifier(time_left_for_this_task=60, ensemble_size=0,
+                                    delete_tmp_folder_after_terminate=False,
+                                    delete_output_folder_after_terminate=False,
                                     dask_client=dask_client)
 
     automl_fitted = automl.fit(X_train, y_train)
@@ -719,6 +729,8 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
     estimator = AutoSklearnClassifier if task_type == 'classification' else AutoSklearnRegressor
     seed = 3
     automl = estimator(
+        delete_tmp_folder_after_terminate=False,
+        delete_output_folder_after_terminate=False,
         time_left_for_this_task=120,
         # Time left for task plays no role
         # only per run time limit
