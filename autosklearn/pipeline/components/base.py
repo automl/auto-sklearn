@@ -115,8 +115,8 @@ class AutoSklearnComponent(BaseEstimator):
         Notes
         -----
         Please see the `scikit-learn API documentation
-        <http://scikit-learn.org/dev/developers/index.html#apis-of-scikit
-        -learn-objects>`_ for further information."""
+        <https://scikit-learn.org/stable/developers/develop.html#apis-of-scikit-learn-objects>`_
+        for further information."""
         raise NotImplementedError()
 
     def set_hyperparameters(self, configuration, init_params=None):
@@ -208,8 +208,8 @@ class AutoSklearnClassificationAlgorithm(AutoSklearnComponent):
         Notes
         -----
         Please see the `scikit-learn API documentation
-        <http://scikit-learn.org/dev/developers/index.html#apis-of-scikit
-        -learn-objects>`_ for further information."""
+        <https://scikit-learn.org/stable/developers/develop.html#apis-of-scikit-learn-objects>`_
+        for further information."""
         raise NotImplementedError()
 
     def predict_proba(self, X):
@@ -260,8 +260,8 @@ class AutoSklearnPreprocessingAlgorithm(AutoSklearnComponent):
         Notes
         -----
         Please see the `scikit-learn API documentation
-        <http://scikit-learn.org/dev/developers/index.html#apis-of-scikit
-        -learn-objects>`_ for further information."""
+        <https://scikit-learn.org/stable/developers/develop.html#apis-of-scikit-learn-objects>`_
+        for further information."""
         raise NotImplementedError()
 
     def get_preprocessor(self):
@@ -301,8 +301,8 @@ class AutoSklearnRegressionAlgorithm(AutoSklearnComponent):
         Notes
         -----
         Please see the `scikit-learn API documentation
-        <http://scikit-learn.org/dev/developers/index.html#apis-of-scikit
-        -learn-objects>`_ for further information."""
+        <https://scikit-learn.org/stable/developers/develop.html#apis-of-scikit-learn-objects>`_
+        for further information."""
         raise NotImplementedError()
 
     def get_estimator(self):

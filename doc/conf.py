@@ -184,6 +184,7 @@ html_theme_options = {
         ('Examples', 'examples/index'),
         ('API', 'api'),
         ('Extending', 'extending'),
+        ('FAQ', 'faq'),
     ],
 
     # Render the next and previous page links in navbar. (Default: true)
@@ -253,7 +254,7 @@ html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+# html_static_path = ['_static']
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -383,3 +384,7 @@ texinfo_documents = [('index', 'AutoSklearn', u'AutoSklearn Documentation',
 # "init"
 # Only the __init__ method’s docstring is inserted.
 autoclass_content = 'both'
+
+
+def setup(app):
+    app.warningiserror = True

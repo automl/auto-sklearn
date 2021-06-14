@@ -427,7 +427,7 @@ class AutoML(BaseEstimator):
                 self._logger.error(
                     "Dummy prediction failed with run state %s. "
                     "The error suggests that the provided memory limits were too tight. Please "
-                    "increase the 'ml_memory_limit' and try again. If this does not solve your "
+                    "increase the 'memory_limit' and try again. If this does not solve your "
                     "problem, please open an issue and paste the additional output. "
                     "Additional output: %s.",
                     str(status), str(additional_info),
@@ -436,7 +436,7 @@ class AutoML(BaseEstimator):
                 raise ValueError(
                     "Dummy prediction failed with run state %s. "
                     "The error suggests that the provided memory limits were too tight. Please "
-                    "increase the 'ml_memory_limit' and try again. If this does not solve your "
+                    "increase the 'memory_limit' and try again. If this does not solve your "
                     "problem, please open an issue and paste the additional output. "
                     "Additional output: %s." %
                     (str(status), str(additional_info)),
@@ -999,7 +999,7 @@ class AutoML(BaseEstimator):
             attributes will be automatically One-Hot encoded. The values
             used for a categorical attribute must be integers, obtained for
             example by `sklearn.preprocessing.LabelEncoder
-            <http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_.
+            <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_.
 
         Returns
         -------
