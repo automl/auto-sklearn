@@ -12,7 +12,6 @@ import sklearn.metrics
 
 
 class KernelPCAComponentTest(PreprocessingTestCase):
-    @unittest.skipIf(sys.version_info < (3, 7), 'Random failures for Python < 3.7')
     def test_default_configuration(self):
         transformation, original = _test_preprocessing(KernelPCA,
                                                        dataset='digits',

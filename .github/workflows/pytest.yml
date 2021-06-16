@@ -10,10 +10,10 @@ on:
 jobs:
   ubuntu:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.7, 3.8, 3.9]
         use-conda: [true, false]
         use-dist: [false]
         include:
