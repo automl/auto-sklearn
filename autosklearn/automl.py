@@ -853,7 +853,14 @@ class AutoML(BaseEstimator):
                 multiplier = 4
             elif X.dtype in (np.float64, np.float):
                 multiplier = 8
-            elif hasattr(np, 'float128') and X.dtype == np.float128:
+            elif (
+                # In spite of the names, np.float96 and np.float128
+                # provide only as much precision as np.longdouble,
+                # that is, 80 bits on most x86 machines and 64 bits
+                # in standard Windows builds.
+                (hasattr(np, 'float128') and X.dtype == np.float128)
+                or (hasattr(np, 'float96') and X.dtype == np.float96)
+            ):
                 multiplier = 16
             else:
                 # Just assuming some value - very unlikely
