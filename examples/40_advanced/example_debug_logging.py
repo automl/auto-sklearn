@@ -34,14 +34,14 @@ X_train, X_test, y_train, y_test = \
 
 ############################################################################
 # Create a logging config
-# ============
+# =======================
 # *auto-sklearn* uses a default
 # `logging config <https://github.com/automl/auto-sklearn/blob/master/autosklearn/util/logging.yaml>`_
 # We will instead create a custom one as follows:
 
 logging_config = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': True,
     'formatters': {
         'custom': {
             # More format options are available in the official
@@ -62,11 +62,10 @@ logging_config = {
 
     'loggers': {
         '': {  # root logger
-            'level': 'ERROR',
-            'handlers': ['console'],
+            'level': 'DEBUG',
         },
-        'EnsembleBuilder': {
-            'level': 'INFO',
+        'Client-EnsembleBuilder': {
+            'level': 'DEBUG',
             'handlers': ['console'],
         },
     },
