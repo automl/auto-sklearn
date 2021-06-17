@@ -38,7 +38,7 @@ def backend(request):
     test_dir = os.path.dirname(__file__)
     tmp = os.path.join(test_dir, '.tmp__%s__%s' % (request.module.__name__, request.node.name))
 
-    for dir in (tmp):
+    for dir in (tmp, ):
         for i in range(10):
             if os.path.exists(dir):
                 try:
@@ -55,7 +55,7 @@ def backend(request):
 
     def get_finalizer(tmp_dir):
         def session_run_at_end():
-            for dir in (tmp_dir):
+            for dir in (tmp_dir, ):
                 for i in range(10):
                     if os.path.exists(dir):
                         try:
