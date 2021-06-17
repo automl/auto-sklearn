@@ -1763,7 +1763,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy_args = {'n_splits': 2, 'n_repeats': 3,
                                               'random_state': 5}
-        evaluator.resampling_strategy = RepeatedStratifiedKFold(**evaluator.resampling_strategy_args)
+        evaluator.resampling_strategy = RepeatedStratifiedKFold(
+            **evaluator.resampling_strategy_args)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, RepeatedStratifiedKFold)
         self.assertEqual(cv.get_n_splits(

@@ -42,38 +42,6 @@ from autosklearn.util.logging_ import PicklableClientLogger
 __all__ = ['TrainEvaluator', 'eval_holdout', 'eval_iterative_holdout',
            'eval_cv', 'eval_partial_cv', 'eval_partial_cv_iterative']
 
-baseCrossValidator_defaults: Dict[str, Dict[str, Optional[Union[int, float, str]]]] = {
-    'GroupKFold': {'n_splits': 3},
-    'KFold': {'n_splits': 3,
-              'shuffle': False,
-              'random_state': None},
-    'LeaveOneGroupOut': {},
-    'LeavePGroupsOut': {'n_groups': 2},
-    'LeaveOneOut': {},
-    'LeavePOut': {'p': 2},
-    'PredefinedSplit': {},
-    'RepeatedKFold': {'n_splits': 5,
-                      'n_repeats': 10,
-                      'random_state': None},
-    'RepeatedStratifiedKFold': {'n_splits': 5,
-                                'n_repeats': 10,
-                                'random_state': None},
-    'StratifiedKFold': {'n_splits': 3,
-                        'shuffle': False,
-                        'random_state': None},
-    'TimeSeriesSplit': {'n_splits': 3,
-                        'max_train_size': None},
-    'GroupShuffleSplit': {'n_splits': 5,
-                          'test_size': None,
-                          'random_state': None},
-    'StratifiedShuffleSplit': {'n_splits': 10,
-                               'test_size': None,
-                               'random_state': None},
-    'ShuffleSplit': {'n_splits': 10,
-                     'test_size': None,
-                     'random_state': None}
-    }
-
 
 def _get_y_array(y: SUPPORTED_TARGET_TYPES, task_type: int) -> SUPPORTED_TARGET_TYPES:
     if task_type in CLASSIFICATION_TASKS and task_type != \
