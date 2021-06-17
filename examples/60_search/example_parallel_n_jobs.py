@@ -41,7 +41,6 @@ if __name__ == '__main__':
         time_left_for_this_task=120,
         per_run_time_limit=30,
         tmp_folder='/tmp/autosklearn_parallel_1_example_tmp',
-        output_folder='/tmp/autosklearn_parallel_1_example_out',
         n_jobs=4,
         # Each one of the 4 jobs is allocated 3GB
         memory_limit=3072,

@@ -4,8 +4,8 @@ Random Search
 =============
 
 A crucial feature of *auto-sklearn* is automatically optimizing the hyperparameters through SMAC,
-introduced `here <https://ml.informatik.uni-freiburg.de/papers/11-LION5-SMAC.pdf>`_. 
-Additionally, it is possible to use 
+introduced `here <https://ml.informatik.uni-freiburg.de/papers/11-LION5-SMAC.pdf>`_.
+Additionally, it is possible to use
 `random search <https://www.jmlr.org/papers/v13/bergstra12a.html>`_ instead of
 SMAC, as demonstrated in the example below. Furthermore, the example also demonstrates how to use
 `Random Online Aggressive Racing (ROAR) <https://ml.informatik.uni-freiburg.de/papers/11-LION5-SMAC.pdf>`_
@@ -65,7 +65,6 @@ def get_roar_object_callback(
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=60, per_run_time_limit=15,
     tmp_folder='/tmp/autosklearn_random_search_example_tmp',
-    output_folder='/tmp/autosklearn_random_search_example_out',
     get_smac_object_callback=get_roar_object_callback,
     initial_configurations_via_metalearning=0,
 )
@@ -118,7 +117,6 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=60,
     per_run_time_limit=15,
     tmp_folder='/tmp/autosklearn_random_search_example_tmp',
-    output_folder='/tmp/autosklearn_random_search_example_out',
     get_smac_object_callback=get_random_search_object_callback,
     initial_configurations_via_metalearning=0,
 )

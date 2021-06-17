@@ -246,9 +246,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         context = BackendContext(
             temporary_directory=os.path.join(self.working_directory, 'tmp'),
-            output_directory=os.path.join(self.working_directory, 'out'),
             delete_tmp_folder_after_terminate=True,
-            delete_output_folder_after_terminate=True,
         )
         with unittest.mock.patch.object(Backend, 'load_datamanager') as load_datamanager_mock:
             load_datamanager_mock.return_value = get_multiclass_classification_datamanager()
