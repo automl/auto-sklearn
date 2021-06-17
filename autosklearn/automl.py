@@ -171,9 +171,12 @@ class AutoML(BaseEstimator):
                                              'partial-cv',
                                              'partial-cv-iterative-fit',
                                              ] \
-           and not issubclass(self._resampling_strategy, BaseCrossValidator)\
-           and not issubclass(self._resampling_strategy, _RepeatedSplits)\
-           and not issubclass(self._resampling_strategy, BaseShuffleSplit):
+           and not isinstance(self._resampling_strategy,
+                              (
+                                  BaseCrossValidator,
+                                  _RepeatedSplits,
+                                  BaseShuffleSplit
+                              )):
             raise ValueError('Illegal resampling strategy: %s' %
                              self._resampling_strategy)
 
