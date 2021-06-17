@@ -63,7 +63,6 @@ from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.constants import MULTICLASS_CLASSIFICATION
 
 tmp_folder = '/tmp/autosklearn_parallel_3_example_tmp'
-output_folder = '/tmp/autosklearn_parallel_3_example_out'
 
 worker_processes = []
 
@@ -180,7 +179,6 @@ if __name__ == "__main__":
         per_run_time_limit=10,
         memory_limit=1024,
         tmp_folder=tmp_folder,
-        output_folder=output_folder,
         seed=777,
         # n_jobs is ignored internally as we pass a dask client.
         n_jobs=1,
