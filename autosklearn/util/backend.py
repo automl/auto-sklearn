@@ -24,13 +24,10 @@ __all__ = [
 
 def create(
     temporary_directory: str,
-    output_directory: Optional[str],
     delete_tmp_folder_after_terminate: bool = True,
-    delete_output_folder_after_terminate: bool = True,
 ) -> 'Backend':
-    context = BackendContext(temporary_directory, output_directory,
+    context = BackendContext(temporary_directory,
                              delete_tmp_folder_after_terminate,
-                             delete_output_folder_after_terminate,
                              )
     backend = Backend(context)
 
@@ -58,28 +55,18 @@ class BackendContext(object):
 
     def __init__(self,
                  temporary_directory: str,
-                 output_directory: Optional[str],
                  delete_tmp_folder_after_terminate: bool,
-                 delete_output_folder_after_terminate: bool,
                  ):
 
-        # Check that the names of tmp_dir and output_dir is not the same.
-        if temporary_directory == output_directory and temporary_directory is not None:
-            raise ValueError("The temporary and the output directory "
-                             "must be different.")
-
         self.delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
-        self.delete_output_folder_after_terminate = delete_output_folder_after_terminate
         # attributes to check that directories were created by autosklearn.
         self._tmp_dir_created = False
-        self._output_dir_created = False
 
         self._temporary_directory = (
             get_randomized_directory_name(
                 temporary_directory=temporary_directory,
             )
         )
-        self._output_directory = output_directory
         # Auto-Sklearn logs through the use of a PicklableClientLogger
         # For this reason we need a port to communicate with the server
         # When the backend is created, this port is not available
@@ -95,14 +82,6 @@ class BackendContext(object):
         )
 
     @property
-    def output_directory(self) -> Optional[str]:
-        if self._output_directory is not None:
-            # make sure that tilde does not appear on the path.
-            return os.path.expanduser(os.path.expandvars(self._output_directory))
-        else:
-            return None
-
-    @property
     def temporary_directory(self) -> str:
         # make sure that tilde does not appear on the path.
         return os.path.expanduser(os.path.expandvars(self._temporary_directory))
@@ -112,29 +91,7 @@ class BackendContext(object):
         os.makedirs(self.temporary_directory)
         self._tmp_dir_created = True
 
-        # Exception is raised if self.output_directory already exists.
-        if self.output_directory is not None:
-            os.makedirs(self.output_directory)
-            self._output_dir_created = True
-
     def delete_directories(self, force: bool = True) -> None:
-        if self.output_directory and (self.delete_output_folder_after_terminate or force):
-            if self._output_dir_created is False:
-                raise ValueError("Failed to delete output dir: %s because auto-sklearn did not "
-                                 "create it. Please make sure that the specified output dir does "
-                                 "not exist when instantiating auto-sklearn."
-                                 % self.output_directory)
-            try:
-                shutil.rmtree(self.output_directory)
-            except Exception:
-                try:
-                    if self._logger is not None:
-                        self._logger.warning("Could not delete output dir: %s" %
-                                             self.output_directory)
-                    else:
-                        print("Could not delete output dir: %s" % self.output_directory)
-                except Exception:
-                    print("Could not delete output dir: %s" % self.output_directory)
 
         if self.delete_tmp_folder_after_terminate or force:
             if self._tmp_dir_created is False:
@@ -175,10 +132,6 @@ class Backend(object):
             os.makedirs(self.temporary_directory)
         except Exception:
             pass
-        # This does not have to exist or be specified
-        if self.output_directory is not None:
-            if not os.path.exists(self.output_directory):
-                raise ValueError("Output directory %s does not exist." % self.output_directory)
 
         self.internals_directory = os.path.join(self.temporary_directory, ".auto-sklearn")
         self._make_internals_directory()
@@ -189,10 +142,6 @@ class Backend(object):
             port=port,
         )
         self.context.setup_logger(port)
-
-    @property
-    def output_directory(self) -> Optional[str]:
-        return self.context.output_directory
 
     @property
     def temporary_directory(self) -> str:
@@ -465,31 +414,6 @@ class Backend(object):
                                 budget: float
                                 ) -> str:
         return 'predictions_%s_%s_%s_%s.npy' % (subset, automl_seed, idx, budget)
-
-    def save_predictions_as_txt(self,
-                                predictions: np.ndarray,
-                                subset: str,
-                                idx: int, precision: int,
-                                prefix: Optional[str] = None) -> None:
-        if not self.output_directory:
-            return
-        # Write prediction scores in prescribed format
-        filepath = os.path.join(
-            self.output_directory,
-            ('%s_' % prefix if prefix else '') + '%s_%s.predict' % (subset, str(idx)),
-        )
-
-        format_string = '{:.%dg} ' % precision
-        with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(
-                filepath), delete=False) as output_file:
-            for row in predictions:
-                if not isinstance(row, np.ndarray) and not isinstance(row, list):
-                    row = [row]
-                for val in row:
-                    output_file.write(format_string.format(float(val)))
-                output_file.write('\n')
-            tempname = output_file.name
-        os.rename(tempname, filepath)
 
     def write_txt_file(self, filepath: str, data: str, name: str) -> None:
         with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(

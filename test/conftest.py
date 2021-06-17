@@ -37,11 +37,8 @@ def backend(request):
 
     test_dir = os.path.dirname(__file__)
     tmp = os.path.join(test_dir, '.tmp__%s__%s' % (request.module.__name__, request.node.name))
-    output = os.path.join(
-        test_dir, '.output__%s__%s' % (request.module.__name__, request.node.name)
-    )
 
-    for dir in (tmp, output):
+    for dir in (tmp):
         for i in range(10):
             if os.path.exists(dir):
                 try:
@@ -53,14 +50,12 @@ def backend(request):
     # Make sure the folders we wanna create do not already exist.
     backend = create(
         tmp,
-        output,
         delete_tmp_folder_after_terminate=True,
-        delete_output_folder_after_terminate=True,
     )
 
-    def get_finalizer(tmp_dir, output_dir):
+    def get_finalizer(tmp_dir):
         def session_run_at_end():
-            for dir in (tmp_dir, output_dir):
+            for dir in (tmp_dir):
                 for i in range(10):
                     if os.path.exists(dir):
                         try:
@@ -69,7 +64,7 @@ def backend(request):
                         except OSError:
                             time.sleep(1)
         return session_run_at_end
-    request.addfinalizer(get_finalizer(tmp, output))
+    request.addfinalizer(get_finalizer(tmp))
 
     return backend
 
@@ -77,11 +72,6 @@ def backend(request):
 @pytest.fixture(scope="function")
 def tmp_dir(request):
     return _dir_fixture('tmp', request)
-
-
-@pytest.fixture(scope="function")
-def output_dir(request):
-    return _dir_fixture('output', request)
 
 
 def _dir_fixture(dir_type, request):

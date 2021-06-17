@@ -39,9 +39,7 @@ class AutoSklearnEstimator(BaseEstimator):
         resampling_strategy='holdout',
         resampling_strategy_arguments=None,
         tmp_folder=None,
-        output_folder=None,
         delete_tmp_folder_after_terminate=True,
-        delete_output_folder_after_terminate=True,
         n_jobs: Optional[int] = None,
         dask_client: Optional[dask.distributed.Client] = None,
         disable_evaluator_output=False,
@@ -161,17 +159,9 @@ class AutoSklearnEstimator(BaseEstimator):
             folder to store configuration output and log files, if ``None``
             automatically use ``/tmp/autosklearn_tmp_$pid_$random_number``
 
-        output_folder : string, optional (None)
-            folder to store predictions for optional test set, if ``None``
-            no output will be generated
-
         delete_tmp_folder_after_terminate: string, optional (True)
             remove tmp_folder, when finished. If tmp_folder is None
             tmp_dir will always be deleted
-
-        delete_output_folder_after_terminate: bool, optional (True)
-            remove output_folder, when finished. If output_folder is None
-            output_dir will always be deleted
 
         n_jobs : int, optional, experimental
             The number of jobs to run in parallel for ``fit()``. ``-1`` means
@@ -263,9 +253,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_arguments = resampling_strategy_arguments
         self.tmp_folder = tmp_folder
-        self.output_folder = output_folder
         self.delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
-        self.delete_output_folder_after_terminate = delete_output_folder_after_terminate
         self.n_jobs = n_jobs
         self.dask_client = dask_client
         self.disable_evaluator_output = disable_evaluator_output
@@ -299,9 +287,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
         backend = create(
             temporary_directory=self.tmp_folder,
-            output_directory=self.output_folder,
             delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
-            delete_output_folder_after_terminate=self.delete_output_folder_after_terminate,
             )
 
         automl = self._get_automl_class()(
