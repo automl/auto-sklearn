@@ -11,6 +11,7 @@ distributed>=2.2.0
 pyyaml
 pandas>=1.0
 liac-arff
+threadpoolctl
 
 ConfigSpace>=0.4.14,<0.5
 pynisher>=0.6.3

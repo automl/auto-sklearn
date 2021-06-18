@@ -12,6 +12,8 @@ from sklearn.ensemble import VotingClassifier, VotingRegressor
 
 from smac.tae import StatusType
 
+from threadpoolctl import threadpool_limits
+
 import autosklearn.pipeline.classification
 import autosklearn.pipeline.regression
 from autosklearn.constants import (
@@ -192,6 +194,9 @@ class AbstractEvaluator(object):
         budget: Optional[float] = None,
         budget_type: Optional[str] = None,
     ):
+
+        # Limit the number of threads that numpy uses
+        threadpool_limits(limits=1)
 
         self.starttime = time.time()
 
