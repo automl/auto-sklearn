@@ -301,7 +301,7 @@ Start Auto-sklearn
  .. code-block:: none
 
     auto-sklearn results:
-      Dataset name: fc49f6b4-bfd1-11eb-869b-039ec7ca51f2
+      Dataset name: fbc0fa54-d5c1-11eb-8675-6fb1d7e5624e
       Metric: accuracy
       Best validation score: 0.985816
       Number of target algorithm runs: 12
@@ -342,7 +342,7 @@ line.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  39.732 seconds)
+   **Total running time of the script:** ( 0 minutes  38.698 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_manual_spawning_cli.py:
