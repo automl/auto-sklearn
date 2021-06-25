@@ -1294,9 +1294,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # KFold, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'n_splits': 4, 'shuffle': True,
-                                              'random_state': 5}
-        evaluator.resampling_strategy = KFold(**evaluator.resampling_strategy_args)
+        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = KFold(n_splits=4, shuffle=True, random_state=5)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, KFold)
         self.assertEqual(cv.get_n_splits(
@@ -1309,8 +1308,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # KFold, classification no args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy = KFold(n_splits=3)
         evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = KFold(n_splits=3)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, KFold)
         self.assertEqual(cv.get_n_splits(
@@ -1324,9 +1323,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         D.info['task'] = REGRESSION
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'n_splits': 4, 'shuffle': True,
-                                              'random_state': 5}
-        evaluator.resampling_strategy = KFold(**evaluator.resampling_strategy_args)
+        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = KFold(n_splits=4, shuffle=True, random_state=5)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, KFold)
         self.assertEqual(cv.get_n_splits(
@@ -1340,8 +1338,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         D.info['task'] = REGRESSION
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy = KFold(n_splits=3)
         evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = KFold(n_splits=3)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, KFold)
         self.assertEqual(cv.get_n_splits(
@@ -1356,9 +1354,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                      [1.0, 1.1], [1.2, 1.3], [1.4, 1.5]])
         D.info['task'] = MULTIOUTPUT_REGRESSION
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'n_splits': 4, 'shuffle': True,
-                                              'random_state': 5}
-        evaluator.resampling_strategy = KFold(**evaluator.resampling_strategy_args)
+        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = KFold(n_splits=4, shuffle=True, random_state=5)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, KFold)
         self.assertEqual(cv.get_n_splits(
@@ -1373,8 +1370,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                      [1.0, 1.1], [1.2, 1.3], [1.4, 1.5]])
         D.info['task'] = MULTIOUTPUT_REGRESSION
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy = KFold(n_splits=3)
         evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = KFold(n_splits=3)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, KFold)
         self.assertEqual(cv.get_n_splits(
@@ -1457,8 +1454,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = LeavePGroupsOut(n_groups=1)
-        evaluator.resampling_strategy_args = {'n_groups': 1,
-                                              'groups': np.array([1, 1, 2, 1, 2, 2])}
+        evaluator.resampling_strategy_args = {'groups': np.array([1, 1, 2, 1, 2, 2])}
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, LeavePGroupsOut)
         self.assertEqual(cv.n_groups, 1)
@@ -1481,8 +1477,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.info['task'] = REGRESSION
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = LeavePGroupsOut(n_groups=1)
-        evaluator.resampling_strategy_args = {'n_groups': 1,
-                                              'groups': np.array([1, 1, 2, 1, 2, 2])}
+        evaluator.resampling_strategy_args = {'groups': np.array([1, 1, 2, 1, 2, 2])}
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, LeavePGroupsOut)
         self.assertEqual(cv.n_groups, 1)
@@ -1507,8 +1502,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.info['task'] = MULTIOUTPUT_REGRESSION
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = LeavePGroupsOut(n_groups=1)
-        evaluator.resampling_strategy_args = {'n_groups': 1,
-                                              'groups': np.array([1, 1, 2, 1, 2, 2])}
+        evaluator.resampling_strategy_args = {'groups': np.array([1, 1, 2, 1, 2, 2])}
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, LeavePGroupsOut)
         self.assertEqual(cv.n_groups, 1)
@@ -1564,8 +1558,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # LeavePOut, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'p': 3}
-        evaluator.resampling_strategy = LeavePOut(**evaluator.resampling_strategy_args)
+        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = LeavePOut(p=3)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, LeavePOut)
         self.assertEqual(cv.p, 3)
@@ -1587,8 +1581,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         D.info['task'] = REGRESSION
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'p': 3}
-        evaluator.resampling_strategy = LeavePOut(**evaluator.resampling_strategy_args)
+        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = LeavePOut(p=3)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, LeavePOut)
         self.assertEqual(cv.p, 3)
@@ -1612,8 +1606,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                      [1.0, 1.1], [1.2, 1.3], [1.4, 1.5]])
         D.info['task'] = MULTIOUTPUT_REGRESSION
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'p': 3}
-        evaluator.resampling_strategy = LeavePOut(**evaluator.resampling_strategy_args)
+        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = LeavePOut(p=3)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, LeavePOut)
         self.assertEqual(cv.p, 3)
@@ -1635,8 +1629,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # PredefinedSplit, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'test_fold': np.array([0, 1, 0, 1, 0, 1])}
-        evaluator.resampling_strategy = PredefinedSplit(**evaluator.resampling_strategy_args)
+        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = PredefinedSplit(test_fold=np.array([0, 1, 0, 1, 0, 1]))
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, PredefinedSplit)
         next(cv.split(D.data['Y_train'], D.data['Y_train'],
@@ -1646,8 +1640,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         D.info['task'] = REGRESSION
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'test_fold': np.array([0, 1, 0, 1, 0, 1])}
-        evaluator.resampling_strategy = PredefinedSplit(**evaluator.resampling_strategy_args)
+        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = PredefinedSplit(test_fold=np.array([0, 1, 0, 1, 0, 1]))
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, PredefinedSplit)
         next(cv.split(D.data['Y_train'], D.data['Y_train'],
@@ -1658,8 +1652,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                      [1.0, 1.1], [1.2, 1.3], [1.4, 1.5]])
         D.info['task'] = MULTIOUTPUT_REGRESSION
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'test_fold': np.array([0, 1, 0, 1, 0, 1])}
-        evaluator.resampling_strategy = PredefinedSplit(**evaluator.resampling_strategy_args)
+        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = PredefinedSplit(test_fold=np.array([0, 1, 0, 1, 0, 1]))
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, PredefinedSplit)
         next(cv.split(D.data['Y_train'], D.data['Y_train'],
@@ -1668,9 +1662,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # RepeatedKFold, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'n_splits': 4, 'n_repeats': 3,
-                                              'random_state': 5}
-        evaluator.resampling_strategy = RepeatedKFold(**evaluator.resampling_strategy_args)
+        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = RepeatedKFold(n_splits=4, n_repeats=3, random_state=5)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, RepeatedKFold)
         self.assertEqual(cv.get_n_splits(
@@ -1698,9 +1691,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         D.info['task'] = REGRESSION
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'n_splits': 4, 'n_repeats': 3,
-                                              'random_state': 5}
-        evaluator.resampling_strategy = RepeatedKFold(**evaluator.resampling_strategy_args)
+        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = RepeatedKFold(n_splits=4, n_repeats=3, random_state=5)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, RepeatedKFold)
         self.assertEqual(cv.get_n_splits(
@@ -1730,9 +1722,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                      [1.0, 1.1], [1.2, 1.3], [1.4, 1.5]])
         D.info['task'] = MULTIOUTPUT_REGRESSION
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'n_splits': 4, 'n_repeats': 3,
-                                              'random_state': 5}
-        evaluator.resampling_strategy = RepeatedKFold(**evaluator.resampling_strategy_args)
+        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = RepeatedKFold(n_splits=4, n_repeats=3, random_state=5)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, RepeatedKFold)
         self.assertEqual(cv.get_n_splits(
@@ -1761,10 +1752,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # RepeatedStratifiedKFold, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'n_splits': 2, 'n_repeats': 3,
-                                              'random_state': 5}
+        evaluator.resampling_strategy_args = None
         evaluator.resampling_strategy = RepeatedStratifiedKFold(
-            **evaluator.resampling_strategy_args)
+            n_splits=2, n_repeats=3, random_state=5)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, RepeatedStratifiedKFold)
         self.assertEqual(cv.get_n_splits(
@@ -1792,9 +1782,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = StratifiedKFold
-        evaluator.resampling_strategy_args = {'n_splits': 2, 'shuffle': True,
-                                              'random_state': 5}
-        evaluator.resampling_strategy = StratifiedKFold(**evaluator.resampling_strategy_args)
+        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = StratifiedKFold(n_splits=2, shuffle=True, random_state=5)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, StratifiedKFold)
         self.assertEqual(cv.get_n_splits(
@@ -1823,8 +1812,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                      [1.0, 1.1], [1.2, 1.3], [1.4, 1.5]])
         D.info['task'] = MULTIOUTPUT_REGRESSION
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'n_splits': 4, 'max_train_size': 3}
-        evaluator.resampling_strategy = TimeSeriesSplit(**evaluator.resampling_strategy_args)
+        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = TimeSeriesSplit(n_splits=4, max_train_size=3)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, TimeSeriesSplit)
         self.assertEqual(cv.get_n_splits(
@@ -1852,8 +1841,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         D.info['task'] = REGRESSION
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'n_splits': 4, 'max_train_size': 3}
-        evaluator.resampling_strategy = TimeSeriesSplit(**evaluator.resampling_strategy_args)
+        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = TimeSeriesSplit(n_splits=4, max_train_size=3)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, TimeSeriesSplit)
         self.assertEqual(cv.get_n_splits(
@@ -1893,9 +1882,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # GroupShuffleSplit, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'n_splits': 2, 'test_size': 0.3,
-                                              'random_state': 5,
-                                              'groups': np.array([1, 1, 2, 1, 2, 2])}
+        evaluator.resampling_strategy_args = {'groups': np.array([1, 1, 2, 1, 2, 2])}
         evaluator.resampling_strategy = GroupShuffleSplit(n_splits=2, test_size=0.3,
                                                           random_state=5)
         cv = evaluator.get_splitter(D)
@@ -1922,9 +1909,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         D.info['task'] = REGRESSION
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'n_splits': 2, 'test_size': 0.3,
-                                              'random_state': 5,
-                                              'groups': np.array([1, 1, 2, 1, 2, 2])}
+        evaluator.resampling_strategy_args = {'groups': np.array([1, 1, 2, 1, 2, 2])}
         evaluator.resampling_strategy = GroupShuffleSplit(n_splits=2, test_size=0.3,
                                                           random_state=5)
         cv = evaluator.get_splitter(D)
@@ -1953,9 +1938,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                      [1.0, 1.1], [1.2, 1.3], [1.4, 1.5]])
         D.info['task'] = MULTIOUTPUT_REGRESSION
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'n_splits': 2, 'test_size': 0.3,
-                                              'random_state': 5,
-                                              'groups': np.array([1, 1, 2, 1, 2, 2])}
+        evaluator.resampling_strategy_args = {'groups': np.array([1, 1, 2, 1, 2, 2])}
         evaluator.resampling_strategy = GroupShuffleSplit(n_splits=2, test_size=0.3,
                                                           random_state=5)
         cv = evaluator.get_splitter(D)
@@ -1983,9 +1966,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # StratifiedShuffleSplit, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'n_splits': 2, 'test_size': 0.3,
-                                              'random_state': 5}
-        evaluator.resampling_strategy = StratifiedShuffleSplit(**evaluator.resampling_strategy_args)
+        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = StratifiedShuffleSplit(
+            n_splits=2, test_size=0.3, random_state=5)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, StratifiedShuffleSplit)
         self.assertEqual(cv.get_n_splits(
@@ -2013,9 +1996,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # ShuffleSplit, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'n_splits': 2, 'test_size': 0.3,
-                                              'random_state': 5}
-        evaluator.resampling_strategy = ShuffleSplit(**evaluator.resampling_strategy_args)
+        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = ShuffleSplit(n_splits=2, test_size=0.3, random_state=5)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, ShuffleSplit)
         self.assertEqual(cv.get_n_splits(
@@ -2043,9 +2025,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         D.info['task'] = REGRESSION
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'n_splits': 2, 'test_size': 0.3,
-                                              'random_state': 5}
-        evaluator.resampling_strategy = ShuffleSplit(**evaluator.resampling_strategy_args)
+        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = ShuffleSplit(n_splits=2, test_size=0.3, random_state=5)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, ShuffleSplit)
         self.assertEqual(cv.get_n_splits(
@@ -2075,9 +2056,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                      [1.0, 1.1], [1.2, 1.3], [1.4, 1.5]])
         D.info['task'] = MULTIOUTPUT_REGRESSION
         evaluator = TrainEvaluator()
-        evaluator.resampling_strategy_args = {'n_splits': 2, 'test_size': 0.3,
-                                              'random_state': 5}
-        evaluator.resampling_strategy = ShuffleSplit(**evaluator.resampling_strategy_args)
+        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy = ShuffleSplit(n_splits=2, test_size=0.3, random_state=5)
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, ShuffleSplit)
         self.assertEqual(cv.get_n_splits(
