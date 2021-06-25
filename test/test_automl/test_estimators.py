@@ -41,7 +41,7 @@ sys.path.append(os.path.dirname(__file__))
 from automl_utils import print_debug_information, count_succeses  # noqa (E402: module level import not at top of file)
 
 
-def test_fit_n_jobs(tmp_dir, output_dir):
+def test_fit_n_jobs(tmp_dir):
 
     X_train, Y_train, X_test, Y_test = putil.get_dataset('breast_cancer')
 
@@ -64,7 +64,6 @@ def test_fit_n_jobs(tmp_dir, output_dir):
     automl = AutoSklearnClassifier(
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        output_folder=output_dir,
         tmp_folder=tmp_dir,
         seed=1,
         initial_configurations_via_metalearning=0,
@@ -257,7 +256,7 @@ def test_type_of_target(mock_estimator):
                     "binary targets")
 
 
-def test_cv_results(tmp_dir, output_dir):
+def test_cv_results(tmp_dir):
     # TODO restructure and actually use real SMAC output from a long run
     # to do this unittest!
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
@@ -265,7 +264,6 @@ def test_cv_results(tmp_dir, output_dir):
     cls = AutoSklearnClassifier(time_left_for_this_task=30,
                                 per_run_time_limit=5,
                                 tmp_folder=tmp_dir,
-                                output_folder=output_dir,
                                 seed=1,
                                 initial_configurations_via_metalearning=0,
                                 ensemble_size=0,
@@ -388,13 +386,13 @@ def test_multilabel_prediction(predict_mock, backend, dask_client):
     np.testing.assert_array_equal(predicted_indexes, actual_result)
 
 
-def test_can_pickle_classifier(tmp_dir, output_dir, dask_client):
+def test_can_pickle_classifier(tmp_dir, dask_client):
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
     automl = AutoSklearnClassifier(time_left_for_this_task=30,
                                    per_run_time_limit=5,
                                    tmp_folder=tmp_dir,
                                    dask_client=dask_client,
-                                   output_folder=output_dir)
+                                   )
     automl.fit(X_train, Y_train)
 
     initial_predictions = automl.predict(X_test)
@@ -404,7 +402,7 @@ def test_can_pickle_classifier(tmp_dir, output_dir, dask_client):
     assert count_succeses(automl.cv_results_) > 0
 
     # Test pickle
-    dump_file = os.path.join(output_dir, 'automl.dump.pkl')
+    dump_file = os.path.join(tmp_dir, 'automl.dump.pkl')
 
     with open(dump_file, 'wb') as f:
         pickle.dump(automl, f)
@@ -419,7 +417,7 @@ def test_can_pickle_classifier(tmp_dir, output_dir, dask_client):
     assert initial_accuracy == restored_accuracy
 
     # Test joblib
-    dump_file = os.path.join(output_dir, 'automl.dump.joblib')
+    dump_file = os.path.join(tmp_dir, 'automl.dump.joblib')
 
     joblib.dump(automl, dump_file)
 
@@ -432,7 +430,7 @@ def test_can_pickle_classifier(tmp_dir, output_dir, dask_client):
     assert initial_accuracy == restored_accuracy
 
 
-def test_multilabel(tmp_dir, output_dir, dask_client):
+def test_multilabel(tmp_dir, dask_client):
 
     X_train, Y_train, X_test, Y_test = putil.get_dataset(
         'iris', make_multilabel=True)
@@ -440,7 +438,7 @@ def test_multilabel(tmp_dir, output_dir, dask_client):
                                    per_run_time_limit=5,
                                    tmp_folder=tmp_dir,
                                    dask_client=dask_client,
-                                   output_folder=output_dir)
+                                   )
 
     automl.fit(X_train, Y_train)
 
@@ -455,7 +453,7 @@ def test_multilabel(tmp_dir, output_dir, dask_client):
     assert np.mean(probs) == pytest.approx(0.33, rel=1e-1)
 
 
-def test_binary(tmp_dir, output_dir, dask_client):
+def test_binary(tmp_dir, dask_client):
 
     X_train, Y_train, X_test, Y_test = putil.get_dataset(
         'iris', make_binary=True)
@@ -463,7 +461,7 @@ def test_binary(tmp_dir, output_dir, dask_client):
                                    per_run_time_limit=10,
                                    tmp_folder=tmp_dir,
                                    dask_client=dask_client,
-                                   output_folder=output_dir)
+                                   )
 
     automl.fit(X_train, Y_train, X_test=X_test, y_test=Y_test,
                dataset_name='binary_test_dataset')
@@ -475,11 +473,8 @@ def test_binary(tmp_dir, output_dir, dask_client):
     assert score > 0.9, print_debug_information(automl)
     assert count_succeses(automl.cv_results_) > 0, print_debug_information(automl)
 
-    output_files = glob.glob(os.path.join(output_dir, 'binary_test_dataset_test_*.predict'))
-    assert len(output_files) > 0, (output_files, print_debug_information(automl))
 
-
-def test_classification_pandas_support(tmp_dir, output_dir, dask_client):
+def test_classification_pandas_support(tmp_dir, dask_client):
 
     X, y = sklearn.datasets.fetch_openml(
         data_id=2,  # cat/num dataset
@@ -500,7 +495,6 @@ def test_classification_pandas_support(tmp_dir, output_dir, dask_client):
         dask_client=dask_client,
         seed=5,
         tmp_folder=tmp_dir,
-        output_folder=output_dir,
     )
 
     automl.fit(X, y)
@@ -519,14 +513,14 @@ def test_classification_pandas_support(tmp_dir, output_dir, dask_client):
     assert count_succeses(automl.cv_results_) > 0
 
 
-def test_regression(tmp_dir, output_dir, dask_client):
+def test_regression(tmp_dir, dask_client):
 
     X_train, Y_train, X_test, Y_test = putil.get_dataset('boston')
     automl = AutoSklearnRegressor(time_left_for_this_task=30,
                                   per_run_time_limit=5,
                                   tmp_folder=tmp_dir,
                                   dask_client=dask_client,
-                                  output_folder=output_dir)
+                                  )
 
     automl.fit(X_train, Y_train)
 
@@ -541,7 +535,7 @@ def test_regression(tmp_dir, output_dir, dask_client):
     assert count_succeses(automl.cv_results_) > 0
 
 
-def test_cv_regression(tmp_dir, output_dir, dask_client):
+def test_cv_regression(tmp_dir, dask_client):
     """
     Makes sure that when using a cv strategy, we are able to fit
     a regressor
@@ -553,7 +547,7 @@ def test_cv_regression(tmp_dir, output_dir, dask_client):
                                   resampling_strategy='cv',
                                   tmp_folder=tmp_dir,
                                   dask_client=dask_client,
-                                  output_folder=output_dir)
+                                  )
 
     automl.fit(X_train, Y_train)
 
@@ -564,7 +558,7 @@ def test_cv_regression(tmp_dir, output_dir, dask_client):
     assert count_succeses(automl.cv_results_) > 0, print_debug_information(automl)
 
 
-def test_regression_pandas_support(tmp_dir, output_dir, dask_client):
+def test_regression_pandas_support(tmp_dir, dask_client):
 
     X, y = sklearn.datasets.fetch_openml(
         data_id=41514,  # diabetes
@@ -579,7 +573,6 @@ def test_regression_pandas_support(tmp_dir, output_dir, dask_client):
         per_run_time_limit=5,
         dask_client=dask_client,
         tmp_folder=tmp_dir,
-        output_folder=output_dir,
     )
 
     # Make sure we error out because y is not encoded
