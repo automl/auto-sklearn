@@ -117,7 +117,7 @@
 <span class="kn">import</span> <span class="nn">pkgutil</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 
-<span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span>
+<span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span>
 <span class="kn">from</span> <span class="nn">sklearn.utils</span> <span class="kn">import</span> <span class="n">check_random_state</span>
 
 <span class="kn">from</span> <span class="nn">autosklearn.pipeline.constants</span> <span class="kn">import</span> <span class="n">SPARSE</span>
@@ -348,7 +348,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span></div></div>
 
 
-<div class="viewcode-block" id="AutoSklearnPreprocessingAlgorithm"><a class="viewcode-back" href="../../../../api.html#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm">[docs]</a><span class="k">class</span> <span class="nc">AutoSklearnPreprocessingAlgorithm</span><span class="p">(</span><span class="n">AutoSklearnComponent</span><span class="p">):</span>
+<div class="viewcode-block" id="AutoSklearnPreprocessingAlgorithm"><a class="viewcode-back" href="../../../../api.html#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm">[docs]</a><span class="k">class</span> <span class="nc">AutoSklearnPreprocessingAlgorithm</span><span class="p">(</span><span class="n">TransformerMixin</span><span class="p">,</span> <span class="n">AutoSklearnComponent</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Provide an abstract interface for preprocessing algorithms in</span>
 <span class="sd">    auto-sklearn.</span>
 
