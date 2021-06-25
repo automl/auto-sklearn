@@ -4,7 +4,7 @@ import inspect
 import pkgutil
 import sys
 
-from sklearn.base import BaseEstimator
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils import check_random_state
 
 from autosklearn.pipeline.constants import SPARSE
@@ -235,7 +235,7 @@ class AutoSklearnClassificationAlgorithm(AutoSklearnComponent):
         return self.estimator
 
 
-class AutoSklearnPreprocessingAlgorithm(AutoSklearnComponent):
+class AutoSklearnPreprocessingAlgorithm(TransformerMixin, AutoSklearnComponent):
     """Provide an abstract interface for preprocessing algorithms in
     auto-sklearn.
 

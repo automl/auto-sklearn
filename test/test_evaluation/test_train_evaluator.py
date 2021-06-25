@@ -1062,7 +1062,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D = unittest.mock.Mock(spec=AbstractDataManager)
         D.data = dict(Y_train=np.array([0, 0, 0, 1, 1, 1]))
         D.info = dict(task=BINARY_CLASSIFICATION)
-        D.feat_type = []
+        D.feat_type = {}
 
         # holdout, binary classification
         evaluator = TrainEvaluator()
@@ -1217,7 +1217,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D = unittest.mock.Mock(spec=AbstractDataManager)
         D.data = dict(Y_train=np.array([0, 0, 0, 1, 1, 1]))
         D.info = dict(task=BINARY_CLASSIFICATION)
-        D.feat_type = []
+        D.feat_type = {}
 
         # GroupKFold, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -2138,7 +2138,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
     def test_holdout_split_size(self, te_mock):
         te_mock.return_value = None
         D = unittest.mock.Mock(spec=AbstractDataManager)
-        D.feat_type = []
+        D.feat_type = {}
 
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = 'holdout'

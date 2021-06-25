@@ -43,15 +43,10 @@ def test_data_validation_for_classification(openmlid, as_frame):
         assert np.any(pd.isnull(X_train_t).all(axis=0))
 
     # make sure everything was encoded to number
-    assert np.issubdtype(X_train_t.dtype, np.number)
     assert np.issubdtype(y_train_t.dtype, np.number)
 
-    # Categorical columns are sorted to the beginning
-    if as_frame:
-        validator.feature_validator.feat_type is not None
-        ordered_unique_elements = list(dict.fromkeys(validator.feature_validator.feat_type))
-        if len(ordered_unique_elements) > 1:
-            assert ordered_unique_elements[0] == 'categorical'
+    # Make sure we created a feat type
+    validator.feature_validator.feat_type is not None
 
 
 @pytest.mark.parametrize('openmlid', [505, 546, 531])
@@ -84,16 +79,7 @@ def test_data_validation_for_regression(openmlid, as_frame):
     elif not as_frame and np.any(pd.isnull(X_train).all(axis=0)):
         assert np.any(pd.isnull(X_train_t).all(axis=0))
 
-    # make sure everything was encoded to number
-    assert np.issubdtype(X_train_t.dtype, np.number)
-    assert np.issubdtype(y_train_t.dtype, np.number)
-
-    # Categorical columns are sorted to the beginning
-    if as_frame:
-        validator.feature_validator.feat_type is not None
-        ordered_unique_elements = list(dict.fromkeys(validator.feature_validator.feat_type))
-        if len(ordered_unique_elements) > 1:
-            assert ordered_unique_elements[0] == 'categorical'
+    validator.feature_validator.feat_type is not None
 
 
 def test_sparse_data_validation_for_regression():

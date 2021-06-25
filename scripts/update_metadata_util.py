@@ -51,7 +51,7 @@ def load_task(task_id):
     name = dataset.name.lower()
     del _
     del dataset
-    cat = ['categorical' if c else 'numerical' for c in cat]
+    cat = {i: 'categorical' if c else 'numerical' for i, c in enumerate(cat)}
 
     if isinstance(task, openml.tasks.OpenMLClassificationTask):
         task_type = 'classification'

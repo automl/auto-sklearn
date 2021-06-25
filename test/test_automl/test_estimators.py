@@ -126,13 +126,13 @@ def test_feat_type_wrong_arguments():
     y = np.zeros((100, ))
 
     cls = AutoSklearnClassifier(ensemble_size=0)
-    expected_msg = r".*Array feat_type does not have same number of "
+    expected_msg = r".*feat_type does not have same number of "
     "variables as X has features. 1 vs 100.*"
     with pytest.raises(ValueError, match=expected_msg):
         cls.fit(X=X, y=y, feat_type=[True])
 
     cls = AutoSklearnClassifier(ensemble_size=0)
-    expected_msg = r".*Array feat_type must only contain strings.*"
+    expected_msg = r".*feat_type must only contain strings.*"
     with pytest.raises(ValueError, match=expected_msg):
         cls.fit(X=X, y=y, feat_type=[True]*100)
 
@@ -783,3 +783,98 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
             assert os.path.exists(cv_model_path)
         elif resampling_strategy == 'holdout':
             assert not os.path.exists(cv_model_path)
+
+
+@pytest.mark.parametrize("data_type", ['pandas', 'numpy'])
+@pytest.mark.parametrize("include_categorical", [True, False])
+def test_pass_categorical_and_numeric_columns_to_pipeline(
+        dask_client, data_type, include_categorical):
+
+    # Prepare the training data
+    X, y = sklearn.datasets.make_classification()
+    feat_type = None
+    if 'pandas' in data_type:
+        X = pd.DataFrame(X)
+        y = pd.DataFrame(y, dtype="category")
+        if include_categorical:
+            cat_name = X.shape[1]
+            X[cat_name] = 'A'
+            X[cat_name] = X[cat_name].astype('category')
+    elif 'numpy' in data_type:
+        if include_categorical:
+            feat_type = ['numerical' for x in range(np.shape(X)[1])]
+            feat_type.append('categorical')
+            temporal = np.zeros((X.shape[0], X.shape[1]+1))
+            temporal[:, :-1] = X
+            X = temporal
+    else:
+        pytest.fail()
+
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+        X, y, test_size=0.5, random_state=3
+    )
+
+    seed = 3
+    automl = AutoSklearnClassifier(
+        time_left_for_this_task=120,
+        # Time left for task plays no role
+        # only per run time limit
+        per_run_time_limit=30,
+        ensemble_size=0,
+        dask_client=dask_client,
+        include_estimators=['random_forest'],
+        seed=seed,
+    )
+    config = automl.get_configuration_space(X_train, y_train,
+                                            feat_type=feat_type,
+                                            X_test=X_test, y_test=y_test,
+                                            ).get_default_configuration()
+
+    pipeline, run_info, run_value = automl.fit_pipeline(X=X_train, y=y_train, config=config,
+                                                        feat_type=feat_type,
+                                                        X_test=X_test, y_test=y_test)
+
+    # We should produce a decent result
+    assert run_value.cost < 0.4, f"{run_value}/{run_value.additional_info}"
+    prediction = pipeline.predict(automl.automl_.InputValidator.feature_validator.transform(X))
+    assert np.shape(prediction)[0], np.shape(y)[0]
+
+    if include_categorical:
+        expected_dict = {i: 'numerical' for i in range(np.shape(X)[1] - 1)}
+        expected_dict[X.shape[1] - 1] = 'categorical'
+    else:
+        expected_dict = {i: 'numerical' for i in range(np.shape(X)[1])}
+    assert expected_dict == pipeline.named_steps['data_preprocessing'].feat_type
+
+
+@pytest.mark.parametrize("as_frame", [True, False])
+def test_autosklearn_anneal(as_frame):
+    """
+    This test makes sure that anneal dataset can be fitted and scored.
+    This dataset is quite complex, with NaN, categorical and numerical columns
+    so is a good testcase for unit-testing
+    """
+    X, y = sklearn.datasets.fetch_openml(data_id=2, return_X_y=True, as_frame=as_frame)
+    automl = AutoSklearnClassifier(time_left_for_this_task=60, ensemble_size=0,
+                                   initial_configurations_via_metalearning=0,
+                                   smac_scenario_args={'runcount_limit': 3},
+                                   resampling_strategy='holdout-iterative-fit')
+
+    if as_frame:
+        # Let autosklearn calculate the feat types
+        automl_fitted = automl.fit(X, y)
+    else:
+        X_, y_ = sklearn.datasets.fetch_openml(data_id=2, return_X_y=True, as_frame=True)
+        feat_type = ['categorical' if X_[col].dtype.name == 'category' else 'numerical'
+                     for col in X_.columns]
+        automl_fitted = automl.fit(X, y, feat_type=feat_type)
+    assert automl is automl_fitted
+
+    automl_ensemble_fitted = automl.fit_ensemble(y, ensemble_size=5)
+    assert automl is automl_ensemble_fitted
+
+    # We want to make sure we can learn from this data.
+    # This is a test to make sure the data format (numpy/pandas)
+    # can be used in a meaningful way -- not meant for generalization,
+    # hence we use the train dataset
+    assert automl_fitted.score(X, y) > 0.75

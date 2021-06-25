@@ -23,8 +23,13 @@ class InputValidator(BaseEstimator):
     Attributes
     ----------
         feat_type: typing.Optional[typing.List[str]]
-            In case the data is not a pandas DataFrame, this list indicates
-            which columns should be treated as categorical
+            In case the dataset is not a pandas DataFrame:
+                + If provided, this list indicates which columns should be treated as categorical
+                  it is internally transformed into a dictionary that indicates a mapping from
+                  column index to categorical/numerical
+                + If not provided, by default all columns are treated as numerical
+            If the input dataset is of type pandas dataframe, this argument
+            must be none, as the column type will be inferred from the pandas dtypes.
         is_classification: bool
             For classification task, this flag indicates that the target data
             should be encoded
