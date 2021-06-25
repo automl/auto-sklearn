@@ -152,9 +152,7 @@
         <span class="n">resampling_strategy</span><span class="o">=</span><span class="s1">&#39;holdout&#39;</span><span class="p">,</span>
         <span class="n">resampling_strategy_arguments</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">tmp_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">output_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">delete_output_folder_after_terminate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">n_jobs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">dask_client</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">dask</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">Client</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">disable_evaluator_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -274,17 +272,9 @@
 <span class="sd">            folder to store configuration output and log files, if ``None``</span>
 <span class="sd">            automatically use ``/tmp/autosklearn_tmp_$pid_$random_number``</span>
 
-<span class="sd">        output_folder : string, optional (None)</span>
-<span class="sd">            folder to store predictions for optional test set, if ``None``</span>
-<span class="sd">            no output will be generated</span>
-
 <span class="sd">        delete_tmp_folder_after_terminate: string, optional (True)</span>
 <span class="sd">            remove tmp_folder, when finished. If tmp_folder is None</span>
 <span class="sd">            tmp_dir will always be deleted</span>
-
-<span class="sd">        delete_output_folder_after_terminate: bool, optional (True)</span>
-<span class="sd">            remove output_folder, when finished. If output_folder is None</span>
-<span class="sd">            output_dir will always be deleted</span>
 
 <span class="sd">        n_jobs : int, optional, experimental</span>
 <span class="sd">            The number of jobs to run in parallel for ``fit()``. ``-1`` means</span>
@@ -376,9 +366,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">resampling_strategy</span> <span class="o">=</span> <span class="n">resampling_strategy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">resampling_strategy_arguments</span> <span class="o">=</span> <span class="n">resampling_strategy_arguments</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tmp_folder</span> <span class="o">=</span> <span class="n">tmp_folder</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">output_folder</span> <span class="o">=</span> <span class="n">output_folder</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">delete_tmp_folder_after_terminate</span> <span class="o">=</span> <span class="n">delete_tmp_folder_after_terminate</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">delete_output_folder_after_terminate</span> <span class="o">=</span> <span class="n">delete_output_folder_after_terminate</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">=</span> <span class="n">n_jobs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dask_client</span> <span class="o">=</span> <span class="n">dask_client</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">disable_evaluator_output</span> <span class="o">=</span> <span class="n">disable_evaluator_output</span>
@@ -412,9 +400,7 @@
 
         <span class="n">backend</span> <span class="o">=</span> <span class="n">create</span><span class="p">(</span>
             <span class="n">temporary_directory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tmp_folder</span><span class="p">,</span>
-            <span class="n">output_directory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_folder</span><span class="p">,</span>
             <span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">delete_tmp_folder_after_terminate</span><span class="p">,</span>
-            <span class="n">delete_output_folder_after_terminate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">delete_output_folder_after_terminate</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="n">automl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_automl_class</span><span class="p">()(</span>

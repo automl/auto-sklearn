@@ -73,7 +73,7 @@ Data Loading
 Holdout
 =======
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-46
+.. GENERATED FROM PYTHON SOURCE LINES 31-45
 
 .. code-block:: default
 
@@ -82,7 +82,6 @@ Holdout
         time_left_for_this_task=120,
         per_run_time_limit=30,
         tmp_folder='/tmp/autosklearn_resampling_example_tmp',
-        output_folder='/tmp/autosklearn_resampling_example_out',
         disable_evaluator_output=False,
         # 'holdout' with 'train_size'=0.67 is the default argument setting
         # for AutoSklearnClassifier. It is explicitly specified in this example
@@ -103,20 +102,19 @@ Holdout
  .. code-block:: none
 
 
-    AutoSklearnClassifier(output_folder='/tmp/autosklearn_resampling_example_out',
-                          per_run_time_limit=30,
+    AutoSklearnClassifier(per_run_time_limit=30,
                           resampling_strategy_arguments={'train_size': 0.67},
                           time_left_for_this_task=120,
                           tmp_folder='/tmp/autosklearn_resampling_example_tmp')
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 47-49
+.. GENERATED FROM PYTHON SOURCE LINES 46-48
 
 Get the Score of the final ensemble
 ===================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 49-54
+.. GENERATED FROM PYTHON SOURCE LINES 48-53
 
 .. code-block:: default
 
@@ -140,12 +138,12 @@ Get the Score of the final ensemble
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 55-57
+.. GENERATED FROM PYTHON SOURCE LINES 54-56
 
 Cross-validation
 ================
 
-.. GENERATED FROM PYTHON SOURCE LINES 57-77
+.. GENERATED FROM PYTHON SOURCE LINES 56-75
 
 .. code-block:: default
 
@@ -154,7 +152,6 @@ Cross-validation
         time_left_for_this_task=120,
         per_run_time_limit=30,
         tmp_folder='/tmp/autosklearn_resampling_example_tmp',
-        output_folder='/tmp/autosklearn_resampling_example_out',
         disable_evaluator_output=False,
         resampling_strategy='cv',
         resampling_strategy_arguments={'folds': 5},
@@ -185,7 +182,7 @@ Cross-validation
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 78-83
+.. GENERATED FROM PYTHON SOURCE LINES 76-81
 
 Perform a refit
 ===============
@@ -193,7 +190,7 @@ During fit(), models are fit on individual cross-validation folds. To use
 all available data, we call refit() which trains all models in the
 final ensemble on the whole dataset.
 
-.. GENERATED FROM PYTHON SOURCE LINES 83-88
+.. GENERATED FROM PYTHON SOURCE LINES 81-86
 
 .. code-block:: default
 
@@ -213,12 +210,12 @@ final ensemble on the whole dataset.
  .. code-block:: none
 
     After re-fit
-    Accuracy score CV 0.958041958041958
+    Accuracy score CV 0.951048951048951
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 89-97
+.. GENERATED FROM PYTHON SOURCE LINES 87-95
 
 scikit-learn splitter objects
 =============================
@@ -229,13 +226,13 @@ splitting, it is possible to use
 `scikit-learn's PredefinedSplit <https://scikit-learn.org/stable/modules/generated/
 sklearn.model_selection.PredefinedSplit.html>`_.
 
-.. GENERATED FROM PYTHON SOURCE LINES 99-102
+.. GENERATED FROM PYTHON SOURCE LINES 97-100
 
 Below is an example of using a predefined split. We split the training
 data by the first feature. In practice, one would use a splitting according
 to the use case at hand.
 
-.. GENERATED FROM PYTHON SOURCE LINES 102-117
+.. GENERATED FROM PYTHON SOURCE LINES 100-114
 
 .. code-block:: default
 
@@ -247,7 +244,6 @@ to the use case at hand.
         time_left_for_this_task=120,
         per_run_time_limit=30,
         tmp_folder='/tmp/autosklearn_resampling_example_tmp',
-        output_folder='/tmp/autosklearn_resampling_example_out',
         disable_evaluator_output=False,
         resampling_strategy=resampling_strategy,
         resampling_strategy_arguments=resampling_strategy_arguments,
@@ -265,13 +261,13 @@ to the use case at hand.
  .. code-block:: none
 
 
-    AutoSklearnClassifier(output_folder='/tmp/autosklearn_resampling_example_out',
-                          per_run_time_limit=30,
+    AutoSklearnClassifier(per_run_time_limit=30,
                           resampling_strategy=<class 'sklearn.model_selection._split.PredefinedSplit'>,
                           resampling_strategy_arguments={'test_fold': array([  3,   4,   5,   7,   8,  10,  12,  14,  15,  16,  17,  18,  19,
             21,  22,  26,  27,  28,  29,  31,  32,  33,  34,  36,  37,  38,
             39,  40,  44,  46,  47,  48,  49,  52,  53,  54,  56,  58,  60,
-            63,  65,  67,  68,...
+            63,  65,  67,  68,  69,  70,  72,  73,  74,  75,  76,  77,  78,
+            80,  82,  83,  88,  89,  92,  96,  97,  98,  99...
            304, 307, 308, 309, 311, 312, 314, 315, 317, 319, 320, 321, 322,
            325, 326, 327, 329, 332, 333, 334, 335, 337, 338, 339, 343, 345,
            348, 349, 350, 351, 354, 355, 356, 357, 358, 361, 363, 364, 365,
@@ -284,12 +280,12 @@ to the use case at hand.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 118-120
+.. GENERATED FROM PYTHON SOURCE LINES 115-117
 
 For custom resampling strategies (i.e. resampling strategies that are not
 defined as strings by Auto-sklearn) it is necessary to perform a refit:
 
-.. GENERATED FROM PYTHON SOURCE LINES 120-122
+.. GENERATED FROM PYTHON SOURCE LINES 117-119
 
 .. code-block:: default
 
@@ -306,13 +302,13 @@ defined as strings by Auto-sklearn) it is necessary to perform a refit:
  .. code-block:: none
 
 
-    AutoSklearnClassifier(output_folder='/tmp/autosklearn_resampling_example_out',
-                          per_run_time_limit=30,
+    AutoSklearnClassifier(per_run_time_limit=30,
                           resampling_strategy=<class 'sklearn.model_selection._split.PredefinedSplit'>,
                           resampling_strategy_arguments={'test_fold': array([  3,   4,   5,   7,   8,  10,  12,  14,  15,  16,  17,  18,  19,
             21,  22,  26,  27,  28,  29,  31,  32,  33,  34,  36,  37,  38,
             39,  40,  44,  46,  47,  48,  49,  52,  53,  54,  56,  58,  60,
-            63,  65,  67,  68,...
+            63,  65,  67,  68,  69,  70,  72,  73,  74,  75,  76,  77,  78,
+            80,  82,  83,  88,  89,  92,  96,  97,  98,  99...
            304, 307, 308, 309, 311, 312, 314, 315, 317, 319, 320, 321, 322,
            325, 326, 327, 329, 332, 333, 334, 335, 337, 338, 339, 343, 345,
            348, 349, 350, 351, 354, 355, 356, 357, 358, 361, 363, 364, 365,
@@ -325,7 +321,7 @@ defined as strings by Auto-sklearn) it is necessary to perform a refit:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 123-128
+.. GENERATED FROM PYTHON SOURCE LINES 120-125
 
 Get the Score of the final ensemble (again)
 ===========================================
@@ -333,7 +329,7 @@ Get the Score of the final ensemble (again)
 Obviously, this score is pretty bad as we "destroyed" the dataset by
 splitting it on the first feature.
 
-.. GENERATED FROM PYTHON SOURCE LINES 128-130
+.. GENERATED FROM PYTHON SOURCE LINES 125-127
 
 .. code-block:: default
 
@@ -357,7 +353,7 @@ splitting it on the first feature.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 6 minutes  2.956 seconds)
+   **Total running time of the script:** ( 6 minutes  1.194 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_resampling.py:

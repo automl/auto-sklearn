@@ -72,7 +72,7 @@ Data Loading
 Build and fit the classifier
 ======================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 30-48
+.. GENERATED FROM PYTHON SOURCE LINES 30-47
 
 .. code-block:: default
 
@@ -81,7 +81,6 @@ Build and fit the classifier
         time_left_for_this_task=120,
         per_run_time_limit=30,
         tmp_folder='/tmp/autosklearn_sequential_example_tmp',
-        output_folder='/tmp/autosklearn_sequential_example_out',
         # Do not construct ensembles in parallel to avoid using more than one
         # core at a time. The ensemble will be constructed after auto-sklearn
         # finished fitting all machine learning models.
@@ -106,18 +105,17 @@ Build and fit the classifier
 
 
     AutoSklearnClassifier(delete_tmp_folder_after_terminate=False, ensemble_size=0,
-                          output_folder='/tmp/autosklearn_sequential_example_out',
                           per_run_time_limit=30, time_left_for_this_task=120,
                           tmp_folder='/tmp/autosklearn_sequential_example_tmp')
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 49-51
+.. GENERATED FROM PYTHON SOURCE LINES 48-50
 
 Print the final ensemble constructed by auto-sklearn
 ====================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 51-54
+.. GENERATED FROM PYTHON SOURCE LINES 50-53
 
 .. code-block:: default
 
@@ -235,12 +233,12 @@ Print the final ensemble constructed by auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 55-57
+.. GENERATED FROM PYTHON SOURCE LINES 54-56
 
 Get the Score of the final ensemble
 ===================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 57-61
+.. GENERATED FROM PYTHON SOURCE LINES 56-60
 
 .. code-block:: default
 
@@ -276,7 +274,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  0.192 seconds)
+   **Total running time of the script:** ( 1 minutes  57.165 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_sequential.py:

@@ -242,27 +242,6 @@ procedure.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to obtain information from a finished Auto-sklearn run. In part...">
-
-.. only:: html
-
- .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_get_pipeline_components_thumb.png
-     :alt: Obtain run information
-
-     :ref:`sphx_glr_examples_40_advanced_example_get_pipeline_components.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/40_advanced/example_get_pipeline_components
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="In *auto-sklearn* it is possible to use different resampling strategies by specifying the argum...">
 
 .. only:: html
@@ -281,6 +260,27 @@ procedure.
    :hidden:
 
    /examples/40_advanced/example_resampling
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to obtain information from a finished Auto-sklearn run. In part...">
+
+.. only:: html
+
+ .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_get_pipeline_components_thumb.png
+     :alt: Obtain run information
+
+     :ref:`sphx_glr_examples_40_advanced_example_get_pipeline_components.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/40_advanced/example_get_pipeline_components
 
 .. raw:: html
 

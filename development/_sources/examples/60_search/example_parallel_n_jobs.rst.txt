@@ -79,7 +79,7 @@ Build and fit a classifier
 
 To use ``n_jobs_`` we must guard the code
 
-.. GENERATED FROM PYTHON SOURCE LINES 38-55
+.. GENERATED FROM PYTHON SOURCE LINES 38-54
 
 .. code-block:: default
 
@@ -89,7 +89,6 @@ To use ``n_jobs_`` we must guard the code
             time_left_for_this_task=120,
             per_run_time_limit=30,
             tmp_folder='/tmp/autosklearn_parallel_1_example_tmp',
-            output_folder='/tmp/autosklearn_parallel_1_example_out',
             n_jobs=4,
             # Each one of the 4 jobs is allocated 3GB
             memory_limit=3072,
@@ -114,9 +113,9 @@ To use ``n_jobs_`` we must guard the code
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.985816
-      Number of target algorithm runs: 48
-      Number of successful target algorithm runs: 44
-      Number of crashed target algorithm runs: 1
+      Number of target algorithm runs: 40
+      Number of successful target algorithm runs: 37
+      Number of crashed target algorithm runs: 0
       Number of target algorithms that exceeded the time limit: 3
       Number of target algorithms that exceeded the memory limit: 0
 
@@ -127,7 +126,7 @@ To use ``n_jobs_`` we must guard the code
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  2.574 seconds)
+   **Total running time of the script:** ( 2 minutes  9.415 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_n_jobs.py:

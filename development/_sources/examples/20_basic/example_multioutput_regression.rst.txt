@@ -71,7 +71,7 @@ Data Loading
 Build and fit a regressor
 =========================
 
-.. GENERATED FROM PYTHON SOURCE LINES 30-39
+.. GENERATED FROM PYTHON SOURCE LINES 30-38
 
 .. code-block:: default
 
@@ -80,7 +80,6 @@ Build and fit a regressor
         time_left_for_this_task=120,
         per_run_time_limit=30,
         tmp_folder='/tmp/autosklearn_multioutput_regression_example_tmp',
-        output_folder='/tmp/autosklearn_multioutput_regression_example_out',
     )
     automl.fit(X_train, y_train, dataset_name='synthetic')
 
@@ -95,18 +94,17 @@ Build and fit a regressor
  .. code-block:: none
 
 
-    AutoSklearnRegressor(output_folder='/tmp/autosklearn_multioutput_regression_example_out',
-                         per_run_time_limit=30, time_left_for_this_task=120,
+    AutoSklearnRegressor(per_run_time_limit=30, time_left_for_this_task=120,
                          tmp_folder='/tmp/autosklearn_multioutput_regression_example_tmp')
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 40-42
+.. GENERATED FROM PYTHON SOURCE LINES 39-41
 
 Print the final ensemble constructed by auto-sklearn
 ====================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 42-45
+.. GENERATED FROM PYTHON SOURCE LINES 41-44
 
 .. code-block:: default
 
@@ -123,7 +121,7 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    [(1.000000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'extra_trees_preproc_for_regression', 'regressor:__choice__': 'gaussian_process', 'feature_preprocessor:extra_trees_preproc_for_regression:bootstrap': 'True', 'feature_preprocessor:extra_trees_preproc_for_regression:criterion': 'mse', 'feature_preprocessor:extra_trees_preproc_for_regression:max_depth': 'None', 'feature_preprocessor:extra_trees_preproc_for_regression:max_features': 0.2273935226590736, 'feature_preprocessor:extra_trees_preproc_for_regression:max_leaf_nodes': 'None', 'feature_preprocessor:extra_trees_preproc_for_regression:min_samples_leaf': 7, 'feature_preprocessor:extra_trees_preproc_for_regression:min_samples_split': 18, 'feature_preprocessor:extra_trees_preproc_for_regression:min_weight_fraction_leaf': 0.0, 'feature_preprocessor:extra_trees_preproc_for_regression:n_estimators': 100, 'regressor:gaussian_process:alpha': 8.790820426084618e-11, 'regressor:gaussian_process:thetaL': 1.408550674440915e-06, 'regressor:gaussian_process:thetaU': 13.94619866763036},
+    [(1.000000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'fast_ica', 'regressor:__choice__': 'gaussian_process', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0007681141686417691, 'feature_preprocessor:fast_ica:algorithm': 'parallel', 'feature_preprocessor:fast_ica:fun': 'logcosh', 'feature_preprocessor:fast_ica:whiten': 'False', 'regressor:gaussian_process:alpha': 1.6121981418511252e-12, 'regressor:gaussian_process:thetaL': 7.641991762886279e-05, 'regressor:gaussian_process:thetaU': 5091.968362973218},
     dataset_properties={
       'task': 5,
       'sparse': False,
@@ -135,12 +133,12 @@ Print the final ensemble constructed by auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 46-48
+.. GENERATED FROM PYTHON SOURCE LINES 45-47
 
 Get the Score of the final ensemble
 ===================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 48-52
+.. GENERATED FROM PYTHON SOURCE LINES 47-51
 
 .. code-block:: default
 
@@ -158,17 +156,17 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.9999999904585767
+    R2 score: 0.9999999698494291
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 53-55
+.. GENERATED FROM PYTHON SOURCE LINES 52-54
 
 Get the configuration space
 ===========================
 
-.. GENERATED FROM PYTHON SOURCE LINES 55-58
+.. GENERATED FROM PYTHON SOURCE LINES 54-57
 
 .. code-block:: default
 
@@ -376,7 +374,7 @@ Get the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  56.961 seconds)
+   **Total running time of the script:** ( 1 minutes  56.604 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multioutput_regression.py:
