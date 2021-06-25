@@ -1,10 +1,19 @@
 # auto-sklearn
 
-auto-sklearn is an automated machine learning toolkit and a drop-in replacement for a scikit-learn estimator.
+**auto-sklearn** is an automated machine learning toolkit and a drop-in replacement for a [scikit-learn](https://scikit-learn.org) estimator.
 
-Find the documentation [here](http://automl.github.io/auto-sklearn/)
+Find the documentation **[here](http://automl.github.io/auto-sklearn/)**. Quick links:
+  * [Installation Guide](https://automl.github.io/auto-sklearn/master/installation.html)
+  * [Releases](https://automl.github.io/auto-sklearn/master/releases.html)
+  * [Manual](https://automl.github.io/auto-sklearn/master/manual.html)
+  * [Examples](https://automl.github.io/auto-sklearn/master/examples/index.html)
+  * [API](https://automl.github.io/auto-sklearn/master/api.html)
 
-## Automated Machine Learning in four lines of code
+## auto-sklearn in one image
+
+![image](doc/images/askl_pipeline.png)
+
+## auto-sklearn in four lines of code
 
 ```python
 import autosklearn.classification
@@ -15,12 +24,39 @@ predictions = cls.predict(X_test)
 
 ## Relevant publications
 
-Efficient and Robust Automated Machine Learning  
-Matthias Feurer, Aaron Klein, Katharina Eggensperger, Jost Springenberg, Manuel Blum and Frank Hutter  
-Advances in Neural Information Processing Systems 28 (2015)  
-http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf
+If you use auto-sklearn in a scientific publications, we would appreciate citations.
 
-Auto-Sklearn 2.0: The Next Generation  
-Authors: Matthias Feurer, Katharina Eggensperger, Stefan Falkner, Marius Lindauer and Frank Hutter  
+**Efficient and Robust Automated Machine Learning**  
+*Matthias Feurer, Aaron Klein, Katharina Eggensperger, Jost Springenberg, Manuel Blum and Frank Hutter*  
+Advances in Neural Information Processing Systems 28 (2015)  
+
+[Link](http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf) to publication.
+```
+@inproceedings{feurer-neurips15a,
+  title     = {Efficient and Robust Automated Machine Learning},
+  author    = {Matthias Feurer, Aaron Klein, Katharina Eggensperger, Jost Springenberg, Manuel Blum and Frank Hutter},
+  booktitle = {Advances in Neural Information Processing Systems 28 (2015)},
+  pages     = {2962--2970},
+  year      = {2015}
+}
+```
+
+----------------------------------------
+
+**Auto-Sklearn 2.0: The Next Generation**  
+*Matthias Feurer, Katharina Eggensperger, Stefan Falkner, Marius Lindauer and Frank Hutter**  
 arXiv:2007.04074 [cs.LG], 2020
-https://arxiv.org/abs/2007.04074
+
+[Link](https://arxiv.org/abs/2007.04074) to publication.
+```
+@inproceedings{feurer-arxiv20a,
+  title     = {Auto-Sklearn 2.0: The Next Generation},
+  author    = {Matthias Feurer, Katharina Eggensperger, Stefan Falkner, Marius Lindauer and Frank Hutter},
+  booktitle = {arXiv:2007.04074 [cs.LG]},
+  year      = {2020}
+}
+```
+
+----------------------------------------
+
+Also, have a look at the blog on [automl.org](automl.org) where we regularly release blogposts.
