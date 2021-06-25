@@ -167,8 +167,8 @@ predicting the data mean has an R2 score of 0.
 
  .. code-block:: none
 
-    Train R2 score: 0.598653793453696
-    Test R2 score: 0.35788603378202233
+    Train R2 score: 0.5986566438533818
+    Test R2 score: 0.35789257970110644
 
 
 
@@ -212,7 +212,7 @@ the true value).
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  55.716 seconds)
+   **Total running time of the script:** ( 1 minutes  58.522 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_regression.py:
