@@ -51,7 +51,6 @@ class VerifyTrialsCallBack(unittest.TestCase):
                                     per_run_time_limit=10,
                                     memory_limit=1024,
                                     delete_tmp_folder_after_terminate=False,
-                                    delete_output_folder_after_terminate=False,
                                     n_jobs=1,
                                     include_estimators=["sgd"],
                                     include_preprocessors=["no_preprocessing"],
