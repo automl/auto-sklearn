@@ -8,7 +8,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 
 import numpy as np
 
-from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.base import BaseEstimator
 
 from autosklearn.pipeline.base import (
      BasePipeline,
@@ -28,7 +28,7 @@ from autosklearn.data.validation import (
 )
 
 
-class FeatTypeSplit(TransformerMixin, AutoSklearnPreprocessingAlgorithm):
+class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
     """ This component is used to apply distinct transformations to categorical and
     numerical features of a dataset. It is built on top of sklearn's ColumnTransformer.
     """
