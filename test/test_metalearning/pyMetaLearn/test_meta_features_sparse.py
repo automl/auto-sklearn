@@ -306,4 +306,3 @@ def test_calculate_all_metafeatures(sparse_data):
     mf = meta_features.calculate_all_metafeatures(
         X, y, categorical, "2", logger=logging.getLogger('Meta'))
     assert 52 == len(mf.metafeature_values)
->>>>>>> .merge_file_vRmd9h
