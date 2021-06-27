@@ -1,4 +1,4 @@
-import numpy as np
+from typing import Any, List, Dict, Optional, Tuple, Union
 
 import sklearn.compose
 from scipy import sparse
@@ -6,7 +6,15 @@ from scipy import sparse
 from ConfigSpace import Configuration
 from ConfigSpace.configuration_space import ConfigurationSpace
 
-from autosklearn.pipeline.base import BasePipeline
+import numpy as np
+
+from sklearn.base import BaseEstimator, TransformerMixin
+
+from autosklearn.pipeline.base import (
+     BasePipeline,
+     DATASET_PROPERTIES_TYPE,
+     PIPELINE_DATA_DTYPE,
+ )
 from autosklearn.pipeline.components.data_preprocessing.feature_type_categorical \
     import CategoricalPreprocessingPipeline
 from autosklearn.pipeline.components.data_preprocessing.feature_type_numerical \
@@ -14,26 +22,34 @@ from autosklearn.pipeline.components.data_preprocessing.feature_type_numerical \
 from autosklearn.pipeline.components.base import AutoSklearnComponent, AutoSklearnChoice, \
     AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
+from autosklearn.data.validation import (
+    SUPPORTED_FEAT_TYPES,
+    SUPPORTED_TARGET_TYPES,
+)
 
 
-class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
+class FeatTypeSplit(TransformerMixin, AutoSklearnPreprocessingAlgorithm):
     """ This component is used to apply distinct transformations to categorical and
     numerical features of a dataset. It is built on top of sklearn's ColumnTransformer.
     """
 
-    def __init__(self, config=None, pipeline=None, dataset_properties=None, include=None,
-                 exclude=None, random_state=None, init_params=None,
-                 categorical_features=None, force_sparse_output=False,
-                 column_transformer=None):
+    def __init__(
+        self,
+        config: Optional[Configuration] = None,
+        pipeline: Optional[BasePipeline] = None,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+        include: Optional[Dict[str, str]] = None,
+        exclude: Optional[Dict[str, str]] = None,
+        random_state: Optional[np.random.RandomState] = None,
+        init_params: Optional[Dict[str, Any]] = None,
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        force_sparse_output: bool = False,
+        column_transformer: Optional[sklearn.compose.ColumnTransformer] = None,
+    ):
 
         if pipeline is not None:
-            raise ValueError("FeatTypeSplit's argument 'pipeline' should be None")
+            raise ValueError("DataPreprocessor's argument 'pipeline' should be None")
 
-        if categorical_features is not None:
-            categorical_features = np.array(categorical_features)
-            if categorical_features.dtype != 'bool':
-                raise ValueError('Parameter categorical_features must'
-                                 ' only contain booleans.')
         self.config = config
         self.pipeline = pipeline
         self.dataset_properties = dataset_properties
@@ -41,9 +57,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         self.exclude = exclude
         self.random_state = random_state
         self.init_params = init_params
-        self.categorical_features = None
-        if categorical_features is not None:
-            self.categorical_features = categorical_features.tolist()
+        self.feat_type = feat_type
         self.force_sparse_output = force_sparse_output
 
         # The pipeline that will be applied to the categorical features (i.e. columns)
@@ -68,37 +82,64 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
             config=None, steps=pipeline, dataset_properties=dataset_properties,
             include=include, exclude=exclude, random_state=random_state,
             init_params=init_params)
-        self._transformers = [
-            ["categorical_transformer", self.categ_ppl],
-            ["numerical_transformer", self.numer_ppl],
+        self._transformers: List[Tuple[str, AutoSklearnComponent]] = [
+            ("categorical_transformer", self.categ_ppl),
+            ("numerical_transformer", self.numer_ppl),
         ]
         if self.config:
             self.set_hyperparameters(self.config, init_params=init_params)
         self.column_transformer = column_transformer
 
-    def fit(self, X, y=None):
+    def fit(self, X: SUPPORTED_FEAT_TYPES, y: Optional[SUPPORTED_TARGET_TYPES] = None
+            ) -> 'FeatTypeSplit':
 
         n_feats = X.shape[1]
-        # If categorical_features is none or an array made just of False booleans, then
-        # only the numerical transformer is used
-        numerical_features = np.logical_not(self.categorical_features)
-        if self.categorical_features is None or np.all(numerical_features):
-            sklearn_transf_spec = [
-                ["numerical_transformer", self.numer_ppl, [True] * n_feats]
+        categorical_features = []
+        numerical_features = []
+        if self.feat_type is not None:
+            # Make sure that we are not missing any column!
+            expected = set(self.feat_type.keys())
+            if hasattr(X, 'columns'):
+                columns = set(X.columns)
+            else:
+                columns = set(range(n_feats))
+            if expected != columns:
+                raise ValueError("Train data has columns={} yet the feat_types are feat={}".format(
+                    expected,
+                    columns
+                ))
+            categorical_features = [key for key, value in self.feat_type.items()
+                                    if value.lower() == 'categorical']
+            numerical_features = [key for key, value in self.feat_type.items()
+                                  if value.lower() == 'numerical']
+
+        # If no categorical features, assume we have a numerical only pipeline
+        if len(categorical_features) == 0:
+            sklearn_transf_spec: List[Tuple[str, BaseEstimator, List[Union[str, bool, int]]]] = [
+                ("numerical_transformer", self.numer_ppl, [True] * n_feats)
             ]
         # If all features are categorical, then just the categorical transformer is used
-        elif np.all(self.categorical_features):
+        elif len(numerical_features) == 0:
             sklearn_transf_spec = [
-                ["categorical_transformer", self.categ_ppl, [True] * n_feats]
+                ("categorical_transformer", self.categ_ppl, [True] * n_feats)
             ]
         # For the other cases, both transformers are used
         else:
-            cat_feats = self.categorical_features
-            num_feats = np.logical_not(self.categorical_features)
             sklearn_transf_spec = [
-                ["categorical_transformer", self.categ_ppl, cat_feats],
-                ["numerical_transformer", self.numer_ppl, num_feats]
+                ("categorical_transformer", self.categ_ppl, categorical_features),
+                ("numerical_transformer", self.numer_ppl, numerical_features)
             ]
+
+        # And one last check in case feat type is None
+        # And to make sure the final specification has all the columns
+        # considered in the column transformer
+        total_columns = sum([len(features) for name, ppl, features in sklearn_transf_spec])
+        if total_columns != n_feats:
+            raise ValueError("Missing columns in the specification of the data validator"
+                             " for train data={} and spec={}".format(
+                                 np.shape(X),
+                                 sklearn_transf_spec,
+                             ))
 
         self.sparse_ = sparse.issparse(X) or self.force_sparse_output
         self.column_transformer = sklearn.compose.ColumnTransformer(
@@ -108,35 +149,33 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         self.column_transformer.fit(X, y)
         return self
 
-    def transform(self, X):
+    def transform(self, X: SUPPORTED_FEAT_TYPES) -> PIPELINE_DATA_DTYPE:
         if self.column_transformer is None:
-            raise ValueError("Cannot call transform on a FeatTypeSplit that has not"
+            raise ValueError("Cannot call transform on a Datapreprocessor that has not"
                              "yet been fit. Please check the log files for errors "
                              "while trying to fit the model."
                              )
         return self.column_transformer.transform(X)
 
-    def fit_transform(self, X, y=None):
-        return self.fit(X, y).transform(X)
-
     @staticmethod
-    def get_properties(dataset_properties=None):
+    def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+                       ) -> Dict[str, Optional[Union[str, int, bool, Tuple]]]:
         return {'shortname': 'FeatTypeSplit',
                 'name': 'Feature Type Splitter',
                 'handles_regression': True,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
-                'handles_multioutput': True,
                 # TODO find out of this is right!
                 'handles_sparse': True,
                 'handles_dense': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (INPUT,), }
 
-    def set_hyperparameters(self, configuration, init_params=None):
-        if init_params is not None and 'categorical_features' in init_params.keys():
-            self.categorical_features = init_params['categorical_features']
+    def set_hyperparameters(self, configuration: Configuration,
+                            init_params: Optional[Dict[str, Any]] = None) -> 'FeatTypeSplit':
+        if init_params is not None and 'feat_type' in init_params.keys():
+            self.feat_type = init_params['feat_type']
 
         self.config = configuration
 
@@ -154,6 +193,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
             sub_configuration = Configuration(sub_configuration_space,
                                               values=sub_config_dict)
 
+            sub_init_params_dict: Optional[Dict[str, Any]] = None
             if init_params is not None:
                 sub_init_params_dict = {}
                 for param in init_params:
@@ -161,8 +201,6 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
                         value = init_params[param]
                         new_name = param.replace('%s:' % transf_name, '', 1)
                         sub_init_params_dict[new_name] = value
-            else:
-                sub_init_params_dict = None
 
             if isinstance(transf_op, (
                     AutoSklearnChoice, AutoSklearnComponent, BasePipeline)):
@@ -173,7 +211,10 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
 
         return self
 
-    def get_hyperparameter_search_space(self, dataset_properties=None):
+    def get_hyperparameter_search_space(
+        self,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+    ) -> ConfigurationSpace:
         self.dataset_properties = dataset_properties
         cs = ConfigurationSpace()
         cs = FeatTypeSplit._get_hyperparameter_search_space_recursevely(
@@ -181,7 +222,11 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         return cs
 
     @staticmethod
-    def _get_hyperparameter_search_space_recursevely(dataset_properties, cs, transformer):
+    def _get_hyperparameter_search_space_recursevely(
+        dataset_properties: DATASET_PROPERTIES_TYPE,
+        cs: ConfigurationSpace,
+        transformer: BaseEstimator,
+    ) -> ConfigurationSpace:
         for st_name, st_operation in transformer:
             if hasattr(st_operation, "get_hyperparameter_search_space"):
                 cs.add_configuration_space(

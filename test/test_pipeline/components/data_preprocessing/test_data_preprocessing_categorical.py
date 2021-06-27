@@ -28,7 +28,9 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
             [0, 0, 1, 1, 0, 0, 0, 1],
             [0, 1, 0, 0, 0, 1, 1, 0]])
         # dense input
-        Yt = CategoricalPreprocessingPipeline().fit_transform(X)
+        # Notice the X.copy() here as the imputation
+        # is in place to save resources
+        Yt = CategoricalPreprocessingPipeline().fit_transform(X.copy())
         np.testing.assert_array_equal(Yt, Y)
         # sparse input
         X_sparse = sparse.csc_matrix(X)

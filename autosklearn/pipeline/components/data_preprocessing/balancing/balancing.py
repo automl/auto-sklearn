@@ -1,26 +1,35 @@
+from typing import Any, List, Dict, Optional, Tuple, Union
+
 import numpy as np
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
+from sklearn.base import BaseEstimator
+
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, SIGNED_DATA, INPUT
 
 
 class Balancing(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, strategy='none', random_state=None):
+    def __init__(self, strategy: str = 'none',
+                 random_state: Optional[np.random.RandomState] = None,):
         self.strategy = strategy
         self.random_state = random_state
 
-    def fit(self, X, y=None):
+    def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None) -> 'Balancing':
         self.fitted_ = True
         return self
 
-    def transform(self, X):
+    def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         return X
 
-    def get_weights(self, Y, classifier, preprocessor, init_params, fit_params):
+    def get_weights(self, Y: PIPELINE_DATA_DTYPE,
+                    classifier: BaseEstimator, preprocessor: BaseEstimator,
+                    init_params: Optional[Dict[str, Any]], fit_params: Optional[Dict[str, Any]],
+                    ) -> Tuple[Optional[Dict[str, Any]], Optional[Dict[str, Any]]]:
         if init_params is None:
             init_params = {}
 
@@ -35,7 +44,7 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
         #  are used together with warmstarts
         clf_ = ['adaboost', 'random_forest', 'extra_trees', 'sgd', 'passive_aggressive',
                 'gradient_boosting']
-        pre_ = []
+        pre_: List[str] = []
         if classifier in clf_ or preprocessor in pre_:
             if len(Y.shape) > 1:
                 offsets = [2 ** i for i in range(Y.shape[1])]
@@ -88,7 +97,8 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
         return init_params, fit_params
 
     @staticmethod
-    def get_properties(dataset_properties=None):
+    def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+                       ) -> Dict[str, Optional[Union[str, int, bool, Tuple]]]:
         return {'shortname': 'Balancing',
                 'name': 'Balancing Imbalanced Class Distributions',
                 'handles_missing_values': True,
@@ -109,7 +119,8 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
                 'preferred_dtype': None}
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+                                        ) -> ConfigurationSpace:
         # TODO add replace by zero!
         strategy = CategoricalHyperparameter(
             "strategy", ["none", "weighting"], default_value="none")

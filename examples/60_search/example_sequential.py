@@ -32,7 +32,6 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
     per_run_time_limit=30,
     tmp_folder='/tmp/autosklearn_sequential_example_tmp',
-    output_folder='/tmp/autosklearn_sequential_example_out',
     # Do not construct ensembles in parallel to avoid using more than one
     # core at a time. The ensemble will be constructed after auto-sklearn
     # finished fitting all machine learning models.

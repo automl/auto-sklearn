@@ -235,18 +235,10 @@ class AbstractEvaluator(object):
                 self.model_class = autosklearn.pipeline.classification.SimpleClassificationPipeline
             self.predict_function = self._predict_proba
 
-        categorical_mask = []
-        for feat in self.datamanager.feat_type:
-            if feat.lower() == 'numerical':
-                categorical_mask.append(False)
-            elif feat.lower() == 'categorical':
-                categorical_mask.append(True)
-            else:
-                raise ValueError(feat)
-        if np.sum(categorical_mask) > 0:
-            self._init_params = {'data_preprocessor:categorical_features': categorical_mask}
-        else:
-            self._init_params = {}
+        self._init_params = {
+            'data_preprocessor:feat_type': self.datamanager.feat_type
+        }
+
         if init_params is not None:
             self._init_params.update(init_params)
 

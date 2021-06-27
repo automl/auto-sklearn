@@ -20,7 +20,7 @@ replacement for a scikit-learn estimator:
 hyperparameter tuning. It leverages recent advantages in *Bayesian
 optimization*, *meta-learning* and *ensemble construction*. Learn more about
 the technology behind *auto-sklearn* by reading our paper published at
-`NIPS 2015 <http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf>`_
+`NIPS 2015 <https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf>`_
 .
 
 .. topic:: NEW: Auto-sklearn 2.0
@@ -61,6 +61,7 @@ Manual
 * :ref:`manual`
 * :ref:`api`
 * :ref:`extending`
+* :ref:`faq`
 
 
 License
@@ -90,13 +91,13 @@ reference to the following paper:
         pages = {2962--2970},
         year = {2015},
         publisher = {Curran Associates, Inc.},
-        url = {http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf}
+        url = {https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf}
      }
 
 If you are using Auto-sklearn 2.0, please also cite
 
 
- Auto-Sklearn 2.0: The Next Generation, Feurer *et al.*, to appear (2020).
+ `Auto-Sklearn 2.0: The Next Generation <https://arxiv.org/abs/2007.04074>`_, Feurer *et al.*, (arXiv, 2020).
 
  Bibtex entry::
 
@@ -106,7 +107,7 @@ If you are using Auto-sklearn 2.0, please also cite
                   Falkner, Stefan and Lindauer, Marius and Hutter, Frank},
         booktitle = {Advances in Neural Information Processing Systems 28},
         year = {2020},
-        journal = {arXiv:2006.???? [cs.LG]},
+        journal = {arXiv:2007.04074 [cs.LG]},
      }
 
 Contributing

@@ -13,7 +13,7 @@ single machine. Using this mode, *Auto-sklearn* starts a dask cluster,
 manages the workers and takes care of shutting down the cluster once the
 computation is done.
 To run *Auto-sklearn* on multiple machines check the example
-`Parallel Usage with manual process spawning <example_parallel_manual_spawning.html>`_.
+:ref:`sphx_glr_examples_60_search_example_parallel_manual_spawning_cli.py`.
 """
 
 import sklearn.model_selection
@@ -41,7 +41,6 @@ if __name__ == '__main__':
         time_left_for_this_task=120,
         per_run_time_limit=30,
         tmp_folder='/tmp/autosklearn_parallel_1_example_tmp',
-        output_folder='/tmp/autosklearn_parallel_1_example_out',
         n_jobs=4,
         # Each one of the 4 jobs is allocated 3GB
         memory_limit=3072,

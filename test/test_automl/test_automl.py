@@ -12,7 +12,6 @@ import numpy as np
 import pandas as pd
 import pytest
 import sklearn.datasets
-from sklearn.base import clone
 from smac.scenario.scenario import Scenario
 from smac.facade.roar_facade import ROAR
 
@@ -397,7 +396,7 @@ def test_do_dummy_prediction(backend, dask_client, datasets):
         X_test, Y_test,
         task=task,
         dataset_name=name,
-        feat_type=None,
+        feat_type={i: 'numerical' for i in range(X_train.shape[1])},
     )
 
     auto = autosklearn.automl.AutoML(
@@ -427,16 +426,6 @@ def test_do_dummy_prediction(backend, dask_client, datasets):
         'predictions_ensemble_1_1_0.0.npy')
     )
 
-    model_path = os.path.join(backend.temporary_directory, '.auto-sklearn',
-                              'runs', '1_1_0.0',
-                              '1.1.0.0.model')
-
-    # Make sure the dummy model complies with scikit learn
-    # get/set params
-    assert os.path.exists(model_path)
-    with open(model_path, 'rb') as model_handler:
-        clone(pickle.load(model_handler))
-
     auto._clean_logger()
 
     del auto
@@ -450,7 +439,7 @@ def test_fail_if_dummy_prediction_fails(ta_run_mock, backend, dask_client):
         X_train, Y_train,
         X_test, Y_test,
         task=2,
-        feat_type=['Numerical' for i in range(X_train.shape[1])],
+        feat_type={i: 'Numerical' for i in range(X_train.shape[1])},
         dataset_name='iris',
     )
 
@@ -666,7 +655,7 @@ def test_fail_if_feat_type_on_pandas_input(backend, dask_client):
         automl.fit(
             X_train, y_train,
             task=BINARY_CLASSIFICATION,
-            feat_type=['Categorical', 'Numerical'],
+            feat_type={1: 'Categorical', 2: 'Numerical'},
         )
 
 

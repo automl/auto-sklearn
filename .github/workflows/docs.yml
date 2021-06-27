@@ -17,6 +17,10 @@ jobs:
       run: |
         cd doc
         make html
+    - name: Check links
+      run: |
+        cd doc
+        make linkcheck
     - name: Pull latest gh-pages
       if: (contains(github.ref, 'develop') || contains(github.ref, 'master')) && github.event_name == 'push'
       run: |

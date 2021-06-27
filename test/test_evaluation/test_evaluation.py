@@ -351,7 +351,6 @@ class EvaluationTest(unittest.TestCase):
         self.assertIn('traceback', info[1].additional_info)
         self.assertNotIn('exitcode', info[1].additional_info)
 
-    @unittest.skipIf(sys.version_info < (3, 7), reason="requires python3.7 or higher")
     def test_silent_exception_in_target_function(self):
         config = unittest.mock.Mock()
         config.config_id = 198

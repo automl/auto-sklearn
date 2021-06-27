@@ -128,7 +128,7 @@ you have to implement
 and
 :meth:`AutoSklearnClassificationAlgorithm.predict() <autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict>`
 . These are an implementation of the `scikit-learn predictor API
-<http://scikit-learn.org/stable/developers/index.html#apis-of-scikit-learn-objects>`_.
+<https://scikit-learn.org/stable/developers/develop.html#apis-of-scikit-learn-objects>`_.
 
 Regression
 ==========
@@ -139,7 +139,7 @@ you have to implement
 and
 :meth:`AutoSklearnRegressionAlgorithm.predict() <autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.predict>`
 . These are an implementation of the `scikit-learn predictor API
-<http://scikit-learn.org/stable/developers/index.html#apis-of-scikit-learn-objects>`_.
+<https://scikit-learn.org/stable/developers/develop.html#apis-of-scikit-learn-objects>`_.
 
 Feature Preprocessing
 =====================
@@ -150,4 +150,4 @@ you have to implement
 and
 :meth:`AutoSklearnPreprocessingAlgorithm.transform() <autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.transform>`
 . These are an implementation of the `scikit-learn predictor API
-<http://scikit-learn.org/stable/developers/index.html#apis-of-scikit-learn-objects>`_.
+<https://scikit-learn.org/stable/developers/develop.html#apis-of-scikit-learn-objects>`_.

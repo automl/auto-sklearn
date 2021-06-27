@@ -1,19 +1,25 @@
+from typing import Dict, Optional, Tuple, Union
+
+from ConfigSpace.configuration_space import ConfigurationSpace
+
 import scipy.sparse
 
 from sklearn.preprocessing import OneHotEncoder as DenseOneHotEncoder
 
-from ConfigSpace.configuration_space import ConfigurationSpace
+import numpy as np
 
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.implementations.SparseOneHotEncoder import SparseOneHotEncoder
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
 
 class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, random_state=None):
+    def __init__(self, random_state: Optional[np.random.RandomState] = None):
         self.random_state = random_state
 
-    def fit(self, X, y=None):
+    def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
+            ) -> 'OneHotEncoder':
         if scipy.sparse.issparse(X):
             self.preprocessor = SparseOneHotEncoder()
         else:
@@ -22,16 +28,14 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
         self.preprocessor.fit(X, y)
         return self
 
-    def transform(self, X):
+    def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         if self.preprocessor is None:
             raise NotImplementedError()
         return self.preprocessor.transform(X)
 
-    def fit_transform(self, X, y=None):
-        return self.fit(X, y).transform(X)
-
     @staticmethod
-    def get_properties(dataset_properties=None):
+    def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+                       ) -> Dict[str, Optional[Union[str, int, bool, Tuple]]]:
         return {'shortname': '1Hot',
                 'name': 'One Hot Encoder',
                 'handles_regression': True,
@@ -46,5 +50,6 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
                 'output': (INPUT,), }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+                                        ) -> ConfigurationSpace:
         return ConfigurationSpace()

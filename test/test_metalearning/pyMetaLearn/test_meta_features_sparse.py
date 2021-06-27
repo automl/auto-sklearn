@@ -1,12 +1,14 @@
-from io import StringIO
 import logging
 import os
-import sys
-import unittest
 
 import arff
+
 import numpy as np
+
+import pytest
+
 from scipy import sparse
+
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
@@ -14,203 +16,294 @@ from autosklearn.pipeline.components.data_preprocessing.feature_type \
     import FeatTypeSplit
 import autosklearn.metalearning.metafeatures.metafeatures as meta_features
 
-# Make the super class importable
-sys.path.append(os.path.dirname(__file__))
-import test_meta_features  # noqa: E402
+
+@pytest.fixture
+def sparse_data():
+    tests_dir = __file__
+    os.chdir(os.path.dirname(tests_dir))
+
+    decoder = arff.ArffDecoder()
+    with open(os.path.join("datasets", "dataset.arff")) as fh:
+        dataset = decoder.decode(fh, encode_nominal=True)
+
+    # -1 because the last attribute is the class
+    attribute_types = [
+        'numeric' if type(type_) != list else 'nominal'
+        for name, type_ in dataset['attributes'][:-1]]
+    categorical = {i: True if attribute == 'nominal' else False
+                   for i, attribute in enumerate(attribute_types)}
+
+    data = np.array(dataset['data'], dtype=np.float64)
+    X = data[:, :-1]
+    y = data[:, -1].reshape((-1,))
+
+    # First, swap NaNs and zeros, because when converting an encoded
+    # dense matrix to sparse, the values which are encoded to zero are lost
+    X_sparse = X.copy()
+    NaNs = ~np.isfinite(X_sparse)
+    X_sparse[NaNs] = 0
+    X_sparse = sparse.csr_matrix(X_sparse)
+
+    X = X_sparse
+    y = y
+    mf = meta_features.metafeatures
+    helpers = meta_features.helper_functions
+    logger = logging.getLogger()
+    # Precompute some helper functions
+    helpers.set_value(
+        "MissingValues",
+        helpers["MissingValues"](X, y, logger, categorical),
+        )
+    mf.set_value(
+        "NumberOfMissingValues",
+        mf["NumberOfMissingValues"](X, y, logger, categorical),
+        )
+    helpers.set_value(
+        "NumSymbols",
+        helpers["NumSymbols"](X, y, logger, categorical),
+        )
+    helpers.set_value(
+        "ClassOccurences",
+        helpers["ClassOccurences"](X, y, logger),
+        )
+    return X, y, categorical
 
 
-class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest,
-                             unittest.TestCase):
-    _multiprocess_can_split_ = True
+@pytest.fixture
+def sparse_data_transformed():
+    tests_dir = __file__
+    os.chdir(os.path.dirname(tests_dir))
 
-    def setUp(self):
-        self.cwd = os.getcwd()
-        tests_dir = __file__
-        os.chdir(os.path.dirname(tests_dir))
+    decoder = arff.ArffDecoder()
+    with open(os.path.join("datasets", "dataset.arff")) as fh:
+        dataset = decoder.decode(fh, encode_nominal=True)
 
-        decoder = arff.ArffDecoder()
-        with open(os.path.join("datasets", "dataset.arff")) as fh:
-            dataset = decoder.decode(fh, encode_nominal=True)
+    # -1 because the last attribute is the class
+    attribute_types = [
+        'numeric' if type(type_) != list else 'nominal'
+        for name, type_ in dataset['attributes'][:-1]]
+    categorical = {i: True if attribute == 'nominal' else False
+                   for i, attribute in enumerate(attribute_types)}
 
-        # -1 because the last attribute is the class
-        self.attribute_types = [
-            'numeric' if type(type_) != list else 'nominal'
-            for name, type_ in dataset['attributes'][:-1]]
-        self.categorical = [True if attribute == 'nominal' else False
-                            for attribute in self.attribute_types]
+    data = np.array(dataset['data'], dtype=np.float64)
+    X = data[:, :-1]
+    y = data[:, -1].reshape((-1,))
 
-        data = np.array(dataset['data'], dtype=np.float64)
-        X = data[:, :-1]
-        y = data[:, -1].reshape((-1,))
+    # First, swap NaNs and zeros, because when converting an encoded
+    # dense matrix to sparse, the values which are encoded to zero are lost
+    X_sparse = X.copy()
+    NaNs = ~np.isfinite(X_sparse)
+    X_sparse[NaNs] = 0
+    X_sparse = sparse.csr_matrix(X_sparse)
 
-        # First, swap NaNs and zeros, because when converting an encoded
-        # dense matrix to sparse, the values which are encoded to zero are lost
-        X_sparse = X.copy()
-        NaNs = ~np.isfinite(X_sparse)
-        X_sparse[NaNs] = 0
-        X_sparse = sparse.csr_matrix(X_sparse)
+    ohe = FeatTypeSplit(feat_type={
+        col: 'categorical' if category else 'numerical'
+        for col, category in categorical.items()
+    })
+    X_transformed = X_sparse.copy()
+    X_transformed = ohe.fit_transform(X_transformed)
+    imp = SimpleImputer(copy=False)
+    X_transformed = imp.fit_transform(X_transformed)
+    standard_scaler = StandardScaler(with_mean=False)
+    X_transformed = standard_scaler.fit_transform(X_transformed)
 
-        ohe = FeatTypeSplit(categorical_features=self.categorical)
-        X_transformed = X_sparse.copy()
-        X_transformed = ohe.fit_transform(X_transformed)
-        imp = SimpleImputer(copy=False)
-        X_transformed = imp.fit_transform(X_transformed)
-        standard_scaler = StandardScaler(with_mean=False)
-        X_transformed = standard_scaler.fit_transform(X_transformed)
+    # Transform the array which indicates the categorical metafeatures
+    number_numerical = np.sum(~np.array(list(categorical.values())))
+    categorical_transformed = {i: True if i < (X_transformed.shape[1] - number_numerical) else False
+                               for i in range(X_transformed.shape[1])}
 
-        # Transform the array which indicates the categorical metafeatures
-        number_numerical = np.sum(~np.array(self.categorical))
-        categorical_transformed = [True] * (X_transformed.shape[1] -
-                                            number_numerical) + \
-                                  [False] * number_numerical
-        self.categorical_transformed = categorical_transformed
+    X = X_sparse
+    X_transformed = X_transformed
+    y = y
+    mf = meta_features.metafeatures
+    helpers = meta_features.helper_functions
+    logger = logging.getLogger()
 
-        self.X = X_sparse
-        self.X_transformed = X_transformed
-        self.y = y
-        self.mf = meta_features.metafeatures
-        self.helpers = meta_features.helper_functions
-        self.logger = logging.getLogger()
+    # Precompute some helper functions
+    helpers.set_value(
+        "PCA",
+        helpers["PCA"](X_transformed, y, logger),
+        )
+    helpers.set_value(
+        "MissingValues",
+        helpers["MissingValues"](X, y, logger, categorical),
+        )
+    mf.set_value(
+        "NumberOfMissingValues",
+        mf["NumberOfMissingValues"](X, y, logger, categorical),
+        )
+    helpers.set_value(
+        "NumSymbols",
+        helpers["NumSymbols"](X, y, logger, categorical),
+        )
+    helpers.set_value(
+        "ClassOccurences",
+        helpers["ClassOccurences"](X, y, logger),
+        )
+    helpers.set_value(
+        "Skewnesses",
+        helpers["Skewnesses"](X_transformed, y, logger,
+                              categorical_transformed),
+        )
+    helpers.set_value(
+        "Kurtosisses",
+        helpers["Kurtosisses"](X_transformed, y, logger, categorical_transformed),
+    )
+    return X_transformed, y, categorical_transformed
 
-        # Precompute some helper functions
-        self.helpers.set_value(
-            "PCA",
-            self.helpers["PCA"](self.X_transformed, self.y, self.logger),
-            )
-        self.helpers.set_value(
-            "MissingValues",
-            self.helpers["MissingValues"](self.X, self.y, self.logger, self.categorical),
-            )
-        self.mf.set_value(
-            "NumberOfMissingValues",
-            self.mf["NumberOfMissingValues"](self.X, self.y, self.logger, self.categorical),
-            )
-        self.helpers.set_value(
-            "NumSymbols",
-            self.helpers["NumSymbols"](self.X, self.y, self.logger, self.categorical),
-            )
-        self.helpers.set_value(
-            "ClassOccurences",
-            self.helpers["ClassOccurences"](self.X, self.y, self.logger),
-            )
-        self.helpers.set_value(
-            "Skewnesses",
-            self.helpers["Skewnesses"](self.X_transformed, self.y, self.logger,
-                                       self.categorical_transformed),
-            )
-        self.helpers.set_value(
-            "Kurtosisses",
-            self.helpers["Kurtosisses"](self.X_transformed, self.y, self.logger,
-                                        self.categorical_transformed),
-            )
 
-    def test_missing_values(self):
-        mf = self.helpers["MissingValues"](self.X, self.y, self.logger, self.categorical)
-        self.assertTrue(sparse.issparse(mf.value))
-        self.assertEqual(mf.value.shape, self.X.shape)
-        self.assertEqual(mf.value.dtype, np.bool)
-        self.assertEqual(0, np.sum(mf.value.data))
+def test_missing_values(sparse_data):
+    X, y, categorical = sparse_data
+    mf = meta_features.helper_functions["MissingValues"](
+        X, y, logging.getLogger('Meta'), categorical)
+    assert sparse.issparse(mf.value)
+    assert mf.value.shape == X.shape
+    assert mf.value.dtype == np.bool
+    assert 0 == np.sum(mf.value.data)
 
-    def test_number_of_missing_values(self):
-        mf = self.mf["NumberOfMissingValues"](self.X, self.y, self.logger, self.categorical)
-        self.assertEqual(0, mf.value)
 
-    def test_percentage_missing_values(self):
-        mf = self.mf["PercentageOfMissingValues"](self.X, self.y, self.logger, self.categorical)
-        self.assertEqual(0, mf.value)
+def test_number_of_missing_values(sparse_data):
+    X, y, categorical = sparse_data
+    mf = meta_features.metafeatures["NumberOfMissingValues"](
+        X, y, logging.getLogger('Meta'), categorical)
+    assert 0 == mf.value
 
-    def test_number_of_Instances_with_missing_values(self):
-        mf = self.mf["NumberOfInstancesWithMissingValues"](
-            self.X, self.y, self.logger, self.categorical)
-        self.assertEqual(0, mf.value)
 
-    def test_percentage_of_Instances_with_missing_values(self):
-        self.mf.set_value("NumberOfInstancesWithMissingValues",
-                          self.mf["NumberOfInstancesWithMissingValues"](
-                              self.X, self.y, self.logger, self.categorical))
-        mf = self.mf["PercentageOfInstancesWithMissingValues"](self.X, self.y, self.logger,
-                                                               self.categorical)
-        self.assertAlmostEqual(0, mf.value)
+def test_percentage_missing_values(sparse_data):
+    X, y, categorical = sparse_data
+    mf = meta_features.metafeatures["PercentageOfMissingValues"](
+        X, y, logging.getLogger('Meta'), categorical)
+    assert 0 == mf.value
 
-    def test_number_of_features_with_missing_values(self):
-        mf = self.mf["NumberOfFeaturesWithMissingValues"](self.X, self.y, self.logger,
-                                                          self.categorical)
-        self.assertEqual(0, mf.value)
 
-    def test_percentage_of_features_with_missing_values(self):
-        self.mf.set_value("NumberOfFeaturesWithMissingValues",
-                          self.mf["NumberOfFeaturesWithMissingValues"](
-                              self.X, self.y, self.logger, self.categorical))
-        mf = self.mf["PercentageOfFeaturesWithMissingValues"](self.X, self.y, self.logger,
-                                                              self.categorical)
-        self.assertAlmostEqual(0, mf.value)
+def test_number_of_Instances_with_missing_values(sparse_data):
+    X, y, categorical = sparse_data
+    mf = meta_features.metafeatures["NumberOfInstancesWithMissingValues"](
+        X, y, logging.getLogger('Meta'), categorical)
+    assert 0 == mf.value
 
-    def test_num_symbols(self):
-        mf = self.helpers["NumSymbols"](self.X, self.y, self.logger, self.categorical)
 
-        symbol_frequency = [2, 0, 6, 0, 1, 3, 0, 0, 3, 1, 0, 0, 0, 1, 0, 0,
-                            0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 1, 2, 2]
-        self.assertEqual(mf.value, symbol_frequency)
+def test_percentage_of_Instances_with_missing_values(sparse_data):
+    X, y, categorical = sparse_data
+    meta_features.metafeatures.set_value(
+        "NumberOfInstancesWithMissingValues",
+        meta_features.metafeatures["NumberOfInstancesWithMissingValues"](
+            X, y, logging.getLogger('Meta'), categorical))
+    mf = meta_features.metafeatures["PercentageOfInstancesWithMissingValues"](
+        X, y, logging.getLogger('Meta'), categorical)
+    assert pytest.approx(0) == mf.value
 
-    def test_symbols_max(self):
-        # this is attribute steel
-        mf = self.mf["SymbolsMax"](self.X, self.y, self.logger, self.categorical)
-        self.assertEqual(mf.value, 6)
 
-    def test_symbols_mean(self):
-        mf = self.mf["SymbolsMean"](self.X, self.y, self.logger, self.categorical)
-        # Empty looking spaces denote empty attributes
-        symbol_frequency = [2, 6, 1, 3, 3, 1, 1, 2, 1, 1, 2, 2]
-        self.assertAlmostEqual(mf.value, np.mean(symbol_frequency))
+def test_number_of_features_with_missing_values(sparse_data):
+    X, y, categorical = sparse_data
+    mf = meta_features.metafeatures["NumberOfFeaturesWithMissingValues"](
+        X, y, logging.getLogger('Meta'), categorical)
+    assert 0 == mf.value
 
-    def test_symbols_std(self):
-        mf = self.mf["SymbolsSTD"](self.X, self.y, self.logger, self.categorical)
-        symbol_frequency = [2, 6, 1, 3, 3, 1, 1, 2, 1, 1, 2, 2]
-        self.assertAlmostEqual(mf.value, np.std(symbol_frequency))
 
-    def test_symbols_sum(self):
-        mf = self.mf["SymbolsSum"](self.X, self.y, self.logger, self.categorical)
-        self.assertEqual(mf.value, 25)
+def test_percentage_of_features_with_missing_values(sparse_data):
+    X, y, categorical = sparse_data
+    meta_features.metafeatures.set_value(
+        "NumberOfFeaturesWithMissingValues",
+        meta_features.metafeatures["NumberOfFeaturesWithMissingValues"](
+            X, y, logging.getLogger('Meta'), categorical))
+    mf = meta_features.metafeatures["PercentageOfFeaturesWithMissingValues"](
+        X, y, logging.getLogger('Meta'), categorical)
+    assert pytest.approx(0, mf.value)
 
-    def test_skewnesses(self):
-        fixture = [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                   1.0, 0.0, -1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
-                   0.0, 0.0, -1.0, 0.0, 0.0, 0.0,
-                   -0.6969708499033568, 0.626346013011263,
-                   0.3809987596624038, 1.4762248835141034,
-                   0.07687661087633726, 0.36889797830360116]
-        mf = self.helpers["Skewnesses"](self.X_transformed, self.y, self.logger)
-        print(mf.value)
-        print(fixture)
-        np.testing.assert_allclose(mf.value, fixture)
 
-    def test_kurtosisses(self):
-        fixture = [-3.0, -3.0, -2.0, -2.0, -3.0, -3.0, -3.0, -3.0,
-                   -3.0, -2.0, -3.0, -2.0, -3.0, -3.0, -2.0, -3.0,
-                   -3.0, -3.0, -3.0, -3.0, -3.0, -2.0, -3.0,
-                   -3.0, -3.0, -1.1005836114255765,
-                   -1.1786325509475712, -1.2387998382327912,
-                   1.393438264413704, -0.9768209837948336,
-                   -1.7937072296512782]
-        mf = self.helpers["Kurtosisses"](self.X_transformed, self.y, self.logger)
-        np.testing.assert_allclose(mf.value, fixture)
+def test_num_symbols(sparse_data):
+    X, y, categorical = sparse_data
+    mf = meta_features.helper_functions["NumSymbols"](
+        X, y, logging.getLogger('Meta'), categorical)
 
-    def test_pca_95percent(self):
-        mf = self.mf["PCAFractionOfComponentsFor95PercentVariance"](
-            self.X_transformed, self.y, self.logger)
-        self.assertAlmostEqual(0.7741935483870968, mf.value)
+    symbol_frequency = [2, 0, 6, 0, 1, 3, 0, 0, 3, 1, 0, 0, 0, 1, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 1, 2, 2]
+    assert mf.value == symbol_frequency
 
-    def test_pca_kurtosis_first_pc(self):
-        mf = self.mf["PCAKurtosisFirstPC"](self.X_transformed, self.y, self.logger)
-        self.assertAlmostEqual(-0.15444516166802469, mf.value)
 
-    def test_pca_skewness_first_pc(self):
-        mf = self.mf["PCASkewnessFirstPC"](self.X_transformed, self.y, self.logger)
-        self.assertAlmostEqual(0.026514792083623905, mf.value)
+def test_symbols_max(sparse_data):
+    X, y, categorical = sparse_data
+    # this is attribute steel
+    mf = meta_features.metafeatures["SymbolsMax"](X, y, logging.getLogger('Meta'), categorical)
+    assert mf.value == 6
 
-    def test_calculate_all_metafeatures(self):
-        mf = meta_features.calculate_all_metafeatures(
-            self.X, self.y, self.categorical, "2", logger=self.logger)
-        self.assertEqual(52, len(mf.metafeature_values))
-        sio = StringIO()
-        mf.dump(sio)
+
+def test_symbols_mean(sparse_data):
+    X, y, categorical = sparse_data
+    mf = meta_features.metafeatures["SymbolsMean"](
+        X, y, logging.getLogger('Meta'), categorical)
+    # Empty looking spaces denote empty attributes
+    symbol_frequency = [2, 6, 1, 3, 3, 1, 1, 2, 1, 1, 2, 2]
+    assert pytest.approx(mf.value) == np.mean(symbol_frequency)
+
+
+def test_symbols_std(sparse_data):
+    X, y, categorical = sparse_data
+    mf = meta_features.metafeatures["SymbolsSTD"](
+        X, y, logging.getLogger('Meta'), categorical)
+    symbol_frequency = [2, 6, 1, 3, 3, 1, 1, 2, 1, 1, 2, 2]
+    assert pytest.approx(mf.value) == np.std(symbol_frequency)
+
+
+def test_symbols_sum(sparse_data):
+    X, y, categorical = sparse_data
+    mf = meta_features.metafeatures["SymbolsSum"](
+        X, y, logging.getLogger('Meta'), categorical)
+    assert mf.value == 25
+
+
+def test_skewnesses(sparse_data_transformed):
+    X_transformed, y, categorical_transformed = sparse_data_transformed
+    fixture = [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+               1.0, 0.0, -1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+               0.0, 0.0, -1.0, 0.0, 0.0, 0.0,
+               -0.6969708499033568, 0.626346013011263,
+               0.3809987596624038, 1.4762248835141034,
+               0.07687661087633726, 0.36889797830360116]
+    mf = meta_features.helper_functions["Skewnesses"](X_transformed, y, logging.getLogger('Meta'))
+    print(mf.value)
+    print(fixture)
+    np.testing.assert_allclose(mf.value, fixture)
+
+
+def test_kurtosisses(sparse_data_transformed):
+    fixture = [-3.0, -3.0, -2.0, -2.0, -3.0, -3.0, -3.0, -3.0,
+               -3.0, -2.0, -3.0, -2.0, -3.0, -3.0, -2.0, -3.0,
+               -3.0, -3.0, -3.0, -3.0, -3.0, -2.0, -3.0,
+               -3.0, -3.0, -1.1005836114255765,
+               -1.1786325509475712, -1.2387998382327912,
+               1.393438264413704, -0.9768209837948336,
+               -1.7937072296512782]
+    X_transformed, y, categorical_transformed = sparse_data_transformed
+    mf = meta_features.helper_functions["Kurtosisses"](X_transformed, y, logging.getLogger('Meta'))
+    np.testing.assert_allclose(mf.value, fixture)
+
+
+def test_pca_95percent(sparse_data_transformed):
+    X_transformed, y, categorical_transformed = sparse_data_transformed
+    mf = meta_features.metafeatures["PCAFractionOfComponentsFor95PercentVariance"](
+        X_transformed, y, logging.getLogger('Meta'))
+    assert pytest.approx(0.7741935483870968) == mf.value
+
+
+def test_pca_kurtosis_first_pc(sparse_data_transformed):
+    X_transformed, y, categorical_transformed = sparse_data_transformed
+    mf = meta_features.metafeatures["PCAKurtosisFirstPC"](
+        X_transformed, y, logging.getLogger('Meta'))
+    assert pytest.approx(-0.15444516166802469) == mf.value
+
+
+def test_pca_skewness_first_pc(sparse_data_transformed):
+    X_transformed, y, categorical_transformed = sparse_data_transformed
+    mf = meta_features.metafeatures["PCASkewnessFirstPC"](
+        X_transformed, y, logging.getLogger('Meta'))
+    assert pytest.approx(0.026514792083623905) == mf.value
+
+
+def test_calculate_all_metafeatures(sparse_data):
+    X, y, categorical = sparse_data
+    mf = meta_features.calculate_all_metafeatures(
+        X, y, categorical, "2", logger=logging.getLogger('Meta'))
+    assert 52 == len(mf.metafeature_values)
+>>>>>>> .merge_file_vRmd9h
