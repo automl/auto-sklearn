@@ -1,5 +1,5 @@
 import abc
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, Union
 
 import numpy as np
 
@@ -7,35 +7,6 @@ import scipy.sparse
 
 from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
     import DataPreprocessor
-from autosklearn.util.data import predict_RAM_usage
-
-
-def perform_one_hot_encoding(
-    sparse: bool,
-    categorical: List[bool],
-    data: List
-) -> Tuple[List, bool]:
-    predicted_RAM_usage = float(
-        predict_RAM_usage(data[0], categorical)) / 1024 / 1024
-
-    if predicted_RAM_usage > 1000:
-        sparse = True
-
-    rvals = []
-    if any(categorical):
-        encoder = DataPreprocessor(
-            categorical_features=categorical, force_sparse_output=sparse)
-        rvals.append(encoder.fit_transform(data[0]))
-        for d in data[1:]:
-            rvals.append(encoder.transform(d))
-
-        if not sparse and scipy.sparse.issparse(rvals[0]):
-            for i in range(len(rvals)):
-                rvals[i] = rvals[i].todense()
-    else:
-        rvals = data
-
-    return rvals, sparse
 
 
 class AbstractDataManager():
@@ -60,11 +31,11 @@ class AbstractDataManager():
         return self._info
 
     @property
-    def feat_type(self) -> List[str]:
+    def feat_type(self) -> Dict[Union[str, int], str]:
         return self._feat_type
 
     @feat_type.setter
-    def feat_type(self, value: List[str]) -> None:
+    def feat_type(self, value: Dict[Union[str, int], str]) -> None:
         self._feat_type = value
 
     @property

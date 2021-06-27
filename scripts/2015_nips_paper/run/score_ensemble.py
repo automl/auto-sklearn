@@ -104,7 +104,6 @@ def main(input_directories, output_file, task_id, seed, ensemble_size, n_jobs=1)
 
     backend = create(input_directory, input_directory + "_output",
                      delete_tmp_folder_after_terminate=False,
-                     delete_output_folder_after_terminate=True,
                      shared_mode=True)
     valid_labels = backend.load_targets_ensemble()
     score = balanced_accuracy
@@ -168,7 +167,6 @@ def evaluate(input_directory, validation_files, test_files, ensemble_size=50):
 
     backend = create(input_directory, input_directory + "_output",
                      delete_tmp_folder_after_terminate=False,
-                     delete_output_folder_after_terminate=False,
                      shared_mode=True)
 
     valid_labels = backend.load_targets_ensemble()

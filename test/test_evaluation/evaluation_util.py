@@ -123,7 +123,10 @@ def get_multiclass_classification_datamanager():
         'X_test': X_test,
         'Y_test': Y_test
     }
-    D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
+    D.feat_type = {0: 'numerical',
+                   1: 'Numerical',
+                   2: 'numerical',
+                   3: 'numerical'}
     return D
 
 
@@ -131,9 +134,10 @@ def get_abalone_datamanager():
     # https://www.openml.org/d/183
     dataset_name = 'abalone'
     data = sklearn.datasets.fetch_openml(data_id=183, as_frame=True)
-    feat_type = [
-        'Categorical' if x.name == 'category' else 'Numerical' for x in data['data'].dtypes
-    ]
+    feat_type = {
+        i: 'Categorical' if x.name == 'category' else 'Numerical'
+        for i, x in enumerate(data['data'].dtypes)
+    }
     X, y = sklearn.datasets.fetch_openml(data_id=183, return_X_y=True, as_frame=False)
     y = preprocessing.LabelEncoder().fit_transform(y)
     X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
@@ -186,7 +190,10 @@ def get_multilabel_classification_datamanager():
         'X_test': X_test,
         'Y_test': Y_test
     }
-    D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
+    D.feat_type = {0: 'numerical',
+                   1: 'Numerical',
+                   2: 'numerical',
+                   3: 'numerical'}
     return D
 
 
@@ -225,7 +232,10 @@ def get_binary_classification_datamanager():
         'X_test': X_test,
         'Y_test': Y_test.reshape((-1, 1))
     }
-    D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
+    D.feat_type = {0: 'numerical',
+                   1: 'Numerical',
+                   2: 'numerical',
+                   3: 'numerical'}
     return D
 
 
@@ -256,9 +266,7 @@ def get_regression_datamanager():
         'X_test': X_test,
         'Y_test': Y_test.reshape((-1, 1))
     }
-    D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical',
-                   'numerical', 'numerical', 'numerical', 'numerical',
-                   'numerical', 'numerical', 'numerical']
+    D.feat_type = {i: 'numerical' for i in range(X_train.shape[1])}
     return D
 
 
@@ -290,7 +298,7 @@ def get_500_classes_datamanager():
               'X_valid': X[700:710], 'Y_valid': Y[700:710],
               'X_test': X[710:], 'Y_test': Y[710:]
               }
-    D.feat_type = ['numerical'] * 20
+    D.feat_type = {i: 'numerical' for i in range(20)}
     return D
 
 

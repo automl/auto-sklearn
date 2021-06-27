@@ -27,15 +27,38 @@ def setup_logger(
         with open(os.path.join(os.path.dirname(__file__), 'logging.yaml'), 'r') as fh:
             logging_config = yaml.safe_load(fh)
 
+    # Make sure we have a filename handler
+    if 'handlers' not in logging_config:
+        logging_config['handlers'] = {}
+    if 'file_handler' not in logging_config['handlers']:
+        logging_config['handlers']['file_handler'] = {
+            'class': 'logging.FileHandler',
+            'level': 'DEBUG',
+            'filename': 'autosklearn.log'
+        }
+    if 'distributed_logfile' not in logging_config['handlers']:
+        # We have to create a file handler
+        logging_config['handlers']['distributed_logfile'] = {
+            'class': 'logging.FileHandler',
+            'level': 'DEBUG',
+            'filename': 'distributed.log'
+        }
+
     if filename is None:
         filename = logging_config['handlers']['file_handler']['filename']
-    logging_config['handlers']['file_handler']['filename'] = os.path.join(
-        output_dir, filename
-    )
 
     if distributedlog_filename is None:
         distributedlog_filename = logging_config['handlers']['distributed_logfile']['filename']
-    logging_config['handlers']['distributed_logfile']['filename'] = os.path.join(
+
+    # Make path absolute only if required
+    # This is needed because this function might be called multiple times with the same
+    # dict, and we don't want /path/path/<name>.log but rather just /path/<name>.log
+    if os.path.sep not in logging_config['handlers']['file_handler']['filename']:
+        logging_config['handlers']['file_handler']['filename'] = os.path.join(
+            output_dir, filename
+        )
+    if os.path.sep not in logging_config['handlers']['distributed_logfile']['filename']:
+        logging_config['handlers']['distributed_logfile']['filename'] = os.path.join(
             output_dir, distributedlog_filename
         )
     logging.config.dictConfig(logging_config)

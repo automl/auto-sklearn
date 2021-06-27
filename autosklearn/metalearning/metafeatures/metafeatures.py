@@ -2,12 +2,17 @@ from collections import defaultdict, OrderedDict, deque
 import copy
 
 import numpy as np
+
+import pandas as pd
+
 import scipy.stats
 from scipy.linalg import LinAlgError
 import scipy.sparse
+
 # TODO use balanced accuracy!
-from sklearn.utils import check_array
 from sklearn.multiclass import OneVsRestClassifier
+from sklearn.utils import check_array
+from sklearn.utils.multiclass import type_of_target
 
 from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
     import DataPreprocessor
@@ -147,6 +152,10 @@ class NumberOfClasses(MetaFeature):
     does this for each label seperately and returns the mean.
     """
     def _calculate(self, X, y, logger, categorical):
+        if type_of_target(y) == 'multilabel-indicator':
+            # We have a label binary indicator array:
+            # each sample is one row of a 2d array of shape (n_samples, n_classes)
+            return y.shape[1]
         if len(y.shape) == 2:
             return np.mean([len(np.unique(y[:, i])) for i in range(y.shape[1])])
         else:
@@ -169,7 +178,7 @@ class LogNumberOfFeatures(MetaFeature):
 @helper_functions.define("MissingValues")
 class MissingValues(HelperFunction):
     def _calculate(self, X, y, logger, categorical):
-        missing = ~np.isfinite(X)
+        missing = pd.isna(X)
         return missing
 
     def _calculate_sparse(self, X, y, logger, categorical):
@@ -235,7 +244,10 @@ class PercentageOfFeaturesWithMissingValues(MetaFeature):
 @metafeatures.define("NumberOfMissingValues", dependency="MissingValues")
 class NumberOfMissingValues(MetaFeature):
     def _calculate(self, X, y, logger, categorical):
-        return float(helper_functions.get_value("MissingValues").sum())
+        if scipy.sparse.issparse(X):
+            return float(helper_functions.get_value("MissingValues").sum())
+        else:
+            return float(np.count_nonzero(helper_functions.get_value("MissingValues")))
 
 
 @metafeatures.define("PercentageOfMissingValues",
@@ -250,13 +262,13 @@ class PercentageOfMissingValues(MetaFeature):
 @metafeatures.define("NumberOfNumericFeatures")
 class NumberOfNumericFeatures(MetaFeature):
     def _calculate(self, X, y, logger, categorical):
-        return len(categorical) - np.sum(categorical)
+        return len(categorical) - np.sum(list(categorical.values()))
 
 
 @metafeatures.define("NumberOfCategoricalFeatures")
 class NumberOfCategoricalFeatures(MetaFeature):
     def _calculate(self, X, y, logger, categorical):
-        return np.sum(categorical)
+        return np.sum(list(categorical.values()))
 
 
 @metafeatures.define("RatioNumericalToNominal")
@@ -411,10 +423,12 @@ class ClassProbabilitySTD(MetaFeature):
 class NumSymbols(HelperFunction):
     def _calculate(self, X, y, logger, categorical):
         symbols_per_column = []
-        for i, column in enumerate(X.T):
-            if categorical[i]:
-                unique_values = np.unique(column)
-                num_unique = np.sum(np.isfinite(unique_values))
+        for i in range(X.shape[1]):
+            if categorical[X.columns[i] if hasattr(X, 'columns') else i]:
+                column = X.iloc[:, i] if hasattr(X, 'iloc') else X[:, i]
+                unique_values = column.unique() if hasattr(
+                    column, 'unique') else np.unique(column)
+                num_unique = np.sum(pd.notna(unique_values))
                 symbols_per_column.append(num_unique)
         return symbols_per_column
 
@@ -422,7 +436,7 @@ class NumSymbols(HelperFunction):
         symbols_per_column = []
         new_X = X.tocsc()
         for i in range(new_X.shape[1]):
-            if categorical[i]:
+            if categorical[X.columns[i] if hasattr(X, 'columns') else i]:
                 unique_values = np.unique(new_X.getcol(i).data)
                 num_unique = np.sum(np.isfinite(unique_values))
                 symbols_per_column.append(num_unique)
@@ -488,15 +502,17 @@ class Kurtosisses(HelperFunction):
     def _calculate(self, X, y, logger, categorical):
         kurts = []
         for i in range(X.shape[1]):
-            if not categorical[i]:
-                kurts.append(scipy.stats.kurtosis(X[:, i]))
+            if not categorical[X.columns[i] if hasattr(X, 'columns') else i]:
+                kurts.append(scipy.stats.kurtosis(
+                    X.iloc[:, i] if hasattr(X, 'iloc') else X[:, i]
+                ))
         return kurts
 
     def _calculate_sparse(self, X, y, logger, categorical):
         kurts = []
         X_new = X.tocsc()
         for i in range(X_new.shape[1]):
-            if not categorical[i]:
+            if not categorical[X.columns[i] if hasattr(X, 'columns') else i]:
                 start = X_new.indptr[i]
                 stop = X_new.indptr[i+1]
                 kurts.append(scipy.stats.kurtosis(X_new.data[start:stop]))
@@ -540,15 +556,17 @@ class Skewnesses(HelperFunction):
     def _calculate(self, X, y, logger, categorical):
         skews = []
         for i in range(X.shape[1]):
-            if not categorical[i]:
-                skews.append(scipy.stats.skew(X[:, i]))
+            if not categorical[X.columns[i] if hasattr(X, 'columns') else i]:
+                skews.append(scipy.stats.skew(
+                    X.iloc[:, i] if hasattr(X, 'iloc') else X[:, i]
+                ))
         return skews
 
     def _calculate_sparse(self, X, y, logger, categorical):
         skews = []
         X_new = X.tocsc()
         for i in range(X_new.shape[1]):
-            if not categorical[i]:
+            if not categorical[X.columns[i] if hasattr(X, 'columns') else i]:
                 start = X_new.indptr[i]
                 stop = X_new.indptr[i + 1]
                 skews.append(scipy.stats.skew(X_new.data[start:stop]))
@@ -604,13 +622,11 @@ def cancor2(X, y):
 class ClassEntropy(MetaFeature):
     def _calculate(self, X, y, logger, categorical):
         labels = 1 if len(y.shape) == 1 else y.shape[1]
-        if labels == 1:
-            y = y.reshape((-1, 1))
 
         entropies = []
         for i in range(labels):
             occurence_dict = defaultdict(float)
-            for value in y[:, i]:
+            for value in y if labels == 1 else y[:, i]:
                 occurence_dict[value] += 1
             entropies.append(scipy.stats.entropy([occurence_dict[key] for key in
                                                  occurence_dict], base=2))
@@ -664,13 +680,24 @@ class LandmarkLDA(MetaFeature):
                 lda = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
 
                 if len(y.shape) == 1 or y.shape[1] == 1:
-                    lda.fit(X[train], y[train])
+                    lda.fit(
+                        X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                        y.iloc[train] if hasattr(y, 'iloc') else y[train],
+                    )
                 else:
                     lda = OneVsRestClassifier(lda)
-                    lda.fit(X[train], y[train])
+                    lda.fit(
+                        X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                        y.iloc[train] if hasattr(y, 'iloc') else y[train],
+                    )
 
-                predictions = lda.predict(X[test])
-                accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
+                predictions = lda.predict(
+                    X.iloc[test] if hasattr(X, 'iloc') else X[test],
+                )
+                accuracy += sklearn.metrics.accuracy_score(
+                    predictions,
+                    y.iloc[test] if hasattr(y, 'iloc') else y[test],
+                )
             return accuracy / 5
         except scipy.linalg.LinAlgError as e:
             self.logger.warning("LDA failed: %s Returned 0 instead!" % e)
@@ -699,13 +726,24 @@ class LandmarkNaiveBayes(MetaFeature):
             nb = sklearn.naive_bayes.GaussianNB()
 
             if len(y.shape) == 1 or y.shape[1] == 1:
-                nb.fit(X[train], y[train])
+                nb.fit(
+                    X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                    y.iloc[train] if hasattr(y, 'iloc') else y[train],
+                )
             else:
                 nb = OneVsRestClassifier(nb)
-                nb.fit(X[train], y[train])
+                nb.fit(
+                    X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                    y.iloc[train] if hasattr(y, 'iloc') else y[train],
+                )
 
-            predictions = nb.predict(X[test])
-            accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
+            predictions = nb.predict(
+                X.iloc[test] if hasattr(X, 'iloc') else X[test],
+            )
+            accuracy += sklearn.metrics.accuracy_score(
+                predictions,
+                y.iloc[test] if hasattr(y, 'iloc') else y[test],
+            )
         return accuracy / 5
 
     def _calculate_sparse(self, X, y, logger, categorical):
@@ -729,13 +767,24 @@ class LandmarkDecisionTree(MetaFeature):
             tree = sklearn.tree.DecisionTreeClassifier(random_state=random_state)
 
             if len(y.shape) == 1 or y.shape[1] == 1:
-                tree.fit(X[train], y[train])
+                tree.fit(
+                    X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                    y.iloc[train] if hasattr(y, 'iloc') else y[train],
+                )
             else:
                 tree = OneVsRestClassifier(tree)
-                tree.fit(X[train], y[train])
+                tree.fit(
+                    X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                    y.iloc[train] if hasattr(y, 'iloc') else y[train],
+                )
 
-            predictions = tree.predict(X[test])
-            accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
+            predictions = tree.predict(
+                X.iloc[test] if hasattr(X, 'iloc') else X[test],
+            )
+            accuracy += sklearn.metrics.accuracy_score(
+                predictions,
+                y.iloc[test] if hasattr(y, 'iloc') else y[test],
+            )
         return accuracy / 5
 
     def _calculate_sparse(self, X, y, logger, categorical):
@@ -766,12 +815,23 @@ class LandmarkDecisionNodeLearner(MetaFeature):
                 criterion="entropy", max_depth=1, random_state=random_state,
                 min_samples_split=2, min_samples_leaf=1,  max_features=None)
             if len(y.shape) == 1 or y.shape[1] == 1:
-                node.fit(X[train], y[train])
+                node.fit(
+                    X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                    y.iloc[train] if hasattr(y, 'iloc') else y[train],
+                )
             else:
                 node = OneVsRestClassifier(node)
-                node.fit(X[train], y[train])
-            predictions = node.predict(X[test])
-            accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
+                node.fit(
+                    X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                    y.iloc[train] if hasattr(y, 'iloc') else y[train],
+                )
+            predictions = node.predict(
+                X.iloc[test] if hasattr(X, 'iloc') else X[test],
+            )
+            accuracy += sklearn.metrics.accuracy_score(
+                predictions,
+                y.iloc[test] if hasattr(y, 'iloc') else y[test],
+            )
         return accuracy / 5
 
     def _calculate_sparse(self, X, y, logger, categorical):
@@ -794,9 +854,17 @@ class LandmarkRandomNodeLearner(MetaFeature):
             node = sklearn.tree.DecisionTreeClassifier(
                 criterion="entropy", max_depth=1, random_state=random_state,
                 min_samples_split=2, min_samples_leaf=1, max_features=1)
-            node.fit(X[train], y[train])
-            predictions = node.predict(X[test])
-            accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
+            node.fit(
+                X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                y.iloc[train] if hasattr(y, 'iloc') else y[train],
+            )
+            predictions = node.predict(
+                X.iloc[test] if hasattr(X, 'iloc') else X[test],
+            )
+            accuracy += sklearn.metrics.accuracy_score(
+                predictions,
+                y.iloc[test] if hasattr(y, 'iloc') else y[test],
+            )
         return accuracy / 5
 
     def _calculate_sparse(self, X, y, logger, categorical):
@@ -844,12 +912,23 @@ class Landmark1NN(MetaFeature):
         for train, test in kf.split(X, y):
             kNN = sklearn.neighbors.KNeighborsClassifier(n_neighbors=1)
             if len(y.shape) == 1 or y.shape[1] == 1:
-                kNN.fit(X[train], y[train])
+                kNN.fit(
+                    X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                    y.iloc[train] if hasattr(y, 'iloc') else y[train],
+                )
             else:
                 kNN = OneVsRestClassifier(kNN)
-                kNN.fit(X[train], y[train])
-            predictions = kNN.predict(X[test])
-            accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
+                kNN.fit(
+                    X.iloc[train] if hasattr(X, 'iloc') else X[train],
+                    y.iloc[train] if hasattr(y, 'iloc') else y[train],
+                )
+            predictions = kNN.predict(
+                X.iloc[test] if hasattr(X, 'iloc') else X[test],
+            )
+            accuracy += sklearn.metrics.accuracy_score(
+                predictions,
+                y.iloc[test] if hasattr(y, 'iloc') else y[test],
+            )
         return accuracy / 5
 
 
@@ -872,7 +951,9 @@ class PCA(HelperFunction):
         for i in range(10):
             try:
                 rs.shuffle(indices)
-                pca.fit(X[indices])
+                pca.fit(
+                    X.iloc[indices] if hasattr(X, 'iloc') else X[indices],
+                )
                 return pca
             except LinAlgError:
                 pass
@@ -1002,9 +1083,13 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name, logger,
                 # sparse matrices because of wrong sparse format)
                 sparse = scipy.sparse.issparse(X)
                 DPP = DataPreprocessor(
-                    categorical_features=categorical, force_sparse_output=True)
+                    # The difference between feat_type and categorical, is that
+                    # categorical has True/False instead of categorical/numerical
+                    feat_type={key: 'categorical' if value else 'numerical'
+                               for key, value in categorical.items()},
+                    force_sparse_output=True)
                 X_transformed = DPP.fit_transform(X)
-                categorical_transformed = [False] * X_transformed.shape[1]
+                categorical_transformed = {i: False for i in range(X_transformed.shape[1])}
 
                 # Densify the transformed matrix
                 if not sparse and scipy.sparse.issparse(X_transformed):
@@ -1052,7 +1137,8 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name, logger,
                     dependency):
                 logger.info("%s: Going to calculate: %s", dataset_name,
                             dependency)
-                value = helper_functions[dependency](X_, y_, categorical_)
+                value = helper_functions[dependency](
+                    X_, y_, categorical=categorical_, logger=logger)
                 helper_functions.set_value(dependency, value)
                 mf_[dependency] = value
 

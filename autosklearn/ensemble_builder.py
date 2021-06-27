@@ -1329,14 +1329,6 @@ class EnsembleBuilder(object):
             y = ensemble.predict(predictions)
             if self.task_type == BINARY_CLASSIFICATION:
                 y = y[:, 1]
-            if self.SAVE2DISC:
-                self.backend.save_predictions_as_txt(
-                    predictions=y,
-                    subset=set_,
-                    idx=index_run,
-                    prefix=self.dataset_name,
-                    precision=8,
-                )
             return y
         else:
             self.logger.info(

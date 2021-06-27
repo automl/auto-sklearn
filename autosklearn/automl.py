@@ -145,7 +145,6 @@ class AutoML(BaseEstimator):
         self.configuration_space = None
         self._backend = backend
         # self._tmp_dir = tmp_dir
-        # self._output_dir = output_dir
         self._time_for_task = time_left_for_this_task
         self._per_run_time_limit = per_run_time_limit
         self._initial_configurations_via_metalearning = \
@@ -253,9 +252,6 @@ class AutoML(BaseEstimator):
 
         # By default try to use the TCP logging port or get a new port
         self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
-
-        # After assigning and checking variables...
-        # self._backend = Backend(self._output_dir, self._tmp_dir)
 
         # Num_run tell us how many runs have been launched
         # It can be seen as an identifier for each configuration
@@ -537,10 +533,8 @@ class AutoML(BaseEstimator):
         self._dataset_name = dataset_name
         self._stopwatch.start_task(self._dataset_name)
 
-        if feat_type is None and self.InputValidator.feature_validator.feat_type:
-            self._feat_type = self.InputValidator.feature_validator.feat_type
-        elif feat_type is not None:
-            self._feat_type = feat_type
+        # Take the feature types from the validator
+        self._feat_type = self.InputValidator.feature_validator.feat_type
 
         # Produce debug information to the logfile
         self._logger.debug('Starting to print environment information')
@@ -573,7 +567,6 @@ class AutoML(BaseEstimator):
                 raise ValueError('Unable to read requirement: %s' % requirement)
         self._logger.debug('Done printing environment information')
         self._logger.debug('Starting to print arguments to auto-sklearn')
-        self._logger.debug('  output_folder: %s', self._backend.context._output_directory)
         self._logger.debug('  tmp_folder: %s', self._backend.context._temporary_directory)
         self._logger.debug('  time_left_for_this_task: %f', self._time_for_task)
         self._logger.debug('  per_run_time_limit: %f', self._per_run_time_limit)
@@ -853,7 +846,14 @@ class AutoML(BaseEstimator):
                 multiplier = 4
             elif X.dtype in (np.float64, np.float):
                 multiplier = 8
-            elif X.dtype == np.float128:
+            elif (
+                # In spite of the names, np.float96 and np.float128
+                # provide only as much precision as np.longdouble,
+                # that is, 80 bits on most x86 machines and 64 bits
+                # in standard Windows builds.
+                (hasattr(np, 'float128') and X.dtype == np.float128)
+                or (hasattr(np, 'float96') and X.dtype == np.float96)
+            ):
                 multiplier = 16
             else:
                 # Just assuming some value - very unlikely

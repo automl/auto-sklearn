@@ -1,17 +1,24 @@
+from typing import Dict, Optional, Tuple, Union
+
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
+import numpy as np
+
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
 
 class NumericalImputation(AutoSklearnPreprocessingAlgorithm):
 
-    def __init__(self, strategy='mean', random_state=None):
+    def __init__(self, strategy: str = 'mean',
+                 random_state: Optional[np.random.RandomState] = None):
         self.strategy = strategy
         self.random_state = random_state
 
-    def fit(self, X, y=None):
+    def fit(self, X: PIPELINE_DATA_DTYPE,
+            y: Optional[PIPELINE_DATA_DTYPE] = None) -> 'NumericalImputation':
         import sklearn.impute
 
         self.preprocessor = sklearn.impute.SimpleImputer(
@@ -19,13 +26,14 @@ class NumericalImputation(AutoSklearnPreprocessingAlgorithm):
         self.preprocessor.fit(X)
         return self
 
-    def transform(self, X):
+    def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         if self.preprocessor is None:
             raise NotImplementedError()
         return self.preprocessor.transform(X)
 
     @staticmethod
-    def get_properties(dataset_properties=None):
+    def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+                       ) -> Dict[str, Optional[Union[str, int, bool, Tuple]]]:
         return {'shortname': 'NumericalImputation',
                 'name': 'Numerical Imputation',
                 'handles_missing_values': True,
@@ -47,7 +55,8 @@ class NumericalImputation(AutoSklearnPreprocessingAlgorithm):
                 'preferred_dtype': None}
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+                                        ) -> ConfigurationSpace:
         # TODO add replace by zero!
         strategy = CategoricalHyperparameter(
             "strategy", ["mean", "median", "most_frequent"], default_value="mean")
