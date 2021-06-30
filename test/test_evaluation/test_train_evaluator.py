@@ -1221,6 +1221,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         # GroupKFold, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
+        D.data['X_train'] = np.array([0, 0, 0, 1, 1, 1])
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = GroupKFold(n_splits=2)
         evaluator.resampling_strategy_args = {'groups': np.array([1, 1, 2, 1, 2, 2])}
@@ -1237,7 +1238,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.resampling_strategy_args = None
         self.assertRaisesRegex(
             ValueError,
-            'Must provide parameter groups for chosen CrossValidator.',
+            "The 'groups' parameter should not be None",
             evaluator.get_splitter,
             D)
 
@@ -1261,7 +1262,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.resampling_strategy_args = None
         self.assertRaisesRegex(
             ValueError,
-            'Must provide parameter groups for chosen CrossValidator.',
+            "The 'groups' parameter should not be None",
             evaluator.get_splitter,
             D)
 
@@ -1287,7 +1288,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.resampling_strategy_args = None
         self.assertRaisesRegex(
             ValueError,
-            'Must provide parameter groups for chosen CrossValidator.',
+            "The 'groups' parameter should not be None",
             evaluator.get_splitter,
             D)
 
@@ -1398,7 +1399,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.resampling_strategy_args = None
         self.assertRaisesRegex(
             ValueError,
-            'Must provide parameter groups for chosen CrossValidator.',
+            "The 'groups' parameter should not be None",
             evaluator.get_splitter,
             D)
 
@@ -1421,7 +1422,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.resampling_strategy_args = None
         self.assertRaisesRegex(
             ValueError,
-            'Must provide parameter groups for chosen CrossValidator.',
+            "The 'groups' parameter should not be None",
             evaluator.get_splitter,
             D)
 
@@ -1446,7 +1447,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.resampling_strategy_args = None
         self.assertRaisesRegex(
             ValueError,
-            'Must provide parameter groups for chosen CrossValidator.',
+            "The 'groups' parameter should not be None",
             evaluator.get_splitter,
             D)
 
@@ -1468,7 +1469,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.resampling_strategy_args = None
         self.assertRaisesRegex(
             ValueError,
-            'Must provide parameter groups for chosen CrossValidator.',
+            "The 'groups' parameter should not be None",
             evaluator.get_splitter,
             D)
 
@@ -1492,7 +1493,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.resampling_strategy_args = None
         self.assertRaisesRegex(
             ValueError,
-            'Must provide parameter groups for chosen CrossValidator.',
+            "The 'groups' parameter should not be None",
             evaluator.get_splitter,
             D)
 
@@ -1518,7 +1519,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.resampling_strategy_args = None
         self.assertRaisesRegex(
             ValueError,
-            'Must provide parameter groups for chosen CrossValidator.',
+            "The 'groups' parameter should not be None",
             evaluator.get_splitter,
             D)
 
@@ -1766,6 +1767,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         # RepeatedStratifiedKFold, classification no args
         D.data['Y_train'] = np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1])
+        D.data['X_train'] = D.data['Y_train']
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = RepeatedStratifiedKFold(n_splits=5, n_repeats=10)
         evaluator.resampling_strategy_args = None
@@ -1780,6 +1782,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         # StratifiedKFold, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
+        D.data['X_train'] = D.data['Y_train']
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = StratifiedKFold
         evaluator.resampling_strategy_args = None
@@ -1901,7 +1904,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.resampling_strategy_args = None
         self.assertRaisesRegex(
             ValueError,
-            'Must provide parameter groups for chosen CrossValidator.',
+            "The 'groups' parameter should not be None",
             evaluator.get_splitter,
             D)
 
@@ -1929,7 +1932,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.resampling_strategy_args = None
         self.assertRaisesRegex(
             ValueError,
-            'Must provide parameter groups for chosen CrossValidator.',
+            "The 'groups' parameter should not be None",
             evaluator.get_splitter,
             D)
 
@@ -1959,7 +1962,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.resampling_strategy_args = None
         self.assertRaisesRegex(
             ValueError,
-            'Must provide parameter groups for chosen CrossValidator.',
+            "The 'groups' parameter should not be None",
             evaluator.get_splitter,
             D)
 
@@ -1981,6 +1984,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # StratifiedShuffleSplit, classification no args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1,
                                       0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1])
+        D.data['X_train'] = D.data['Y_train']
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = StratifiedShuffleSplit(n_splits=10)
         evaluator.resampling_strategy_args = None
@@ -1995,6 +1999,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         # ShuffleSplit, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
+        D.data['X_train'] = D.data['Y_train']
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy_args = None
         evaluator.resampling_strategy = ShuffleSplit(n_splits=2, test_size=0.3, random_state=5)

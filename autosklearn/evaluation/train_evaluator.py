@@ -995,50 +995,30 @@ class TrainEvaluator(AbstractEvaluator):
         if self.resampling_strategy_args is None:
             self.resampling_strategy_args = {}
 
-        if self.resampling_strategy is not None and not isinstance(self.resampling_strategy, str):
+        if (
+                self.resampling_strategy is not None
+                and not isinstance(self.resampling_strategy, str)
+        ):
+            if 'groups' not in self.resampling_strategy_args:
+                self.resampling_strategy_args['groups'] = None
 
             if isinstance(self.resampling_strategy, (BaseCrossValidator,
                                                      _RepeatedSplits,
                                                      BaseShuffleSplit)):
-
-                class_name = self.resampling_strategy.__class__.__name__
-
-                y = D.data['Y_train']
-                if (D.info['task'] in CLASSIFICATION_TASKS and
-                   D.info['task'] != MULTILABEL_CLASSIFICATION) or \
-                   (D.info['task'] in REGRESSION_TASKS and
-                   D.info['task'] != MULTIOUTPUT_REGRESSION):
-
-                    y = y.ravel()
-                if class_name == 'LeaveOneGroupOut' or \
-                        class_name == 'LeavePGroupsOut' or\
-                        class_name == 'GroupKFold' or\
-                        class_name == 'GroupShuffleSplit':
-                    if 'groups' not in self.resampling_strategy_args:
-                        raise ValueError('Must provide parameter groups '
-                                         'for chosen CrossValidator.')
-                    try:
-                        if np.shape(self.resampling_strategy_args['groups'])[0] != y.shape[0]:
-                            raise ValueError('Groups must be array-like '
-                                             'with shape (n_samples,).')
-                    except Exception:
-                        raise ValueError('Groups must be array-like '
-                                         'with shape (n_samples,).')
-                else:
-                    if 'groups' in self.resampling_strategy_args:
-                        if np.shape(self.resampling_strategy_args['groups'])[0] != y.shape[0]:
-                            raise ValueError('Groups must be array-like'
-                                             ' with shape (n_samples,).')
-
-                if 'groups' not in self.resampling_strategy_args:
-                    self.resampling_strategy_args['groups'] = None
-
+                self.check_splitter_resampling_strategy(
+                    X=D.data['X_train'], y=D.data['Y_train'],
+                    groups=self.resampling_strategy_args.get('groups'),
+                    task=D.info['task'],
+                    resampling_strategy=self.resampling_strategy,
+                )
                 return self.resampling_strategy
-            else:
-                raise ValueError("Unsupported resampling strategy {}/{} provided".format(
-                    self.resampling_strategy,
-                    type(self.resampling_strategy),
-                ))
+
+            # If it got to this point, we are dealing with a non-supported
+            # re-sampling strategy
+            raise ValueError("Unsupported resampling strategy {}/{} provided".format(
+                self.resampling_strategy,
+                type(self.resampling_strategy),
+            ))
 
         y = D.data['Y_train']
         shuffle = self.resampling_strategy_args.get('shuffle', True)
@@ -1109,6 +1089,37 @@ class TrainEvaluator(AbstractEvaluator):
             else:
                 raise ValueError(self.resampling_strategy)
         return cv
+
+    @classmethod
+    def check_splitter_resampling_strategy(
+        cls,
+        X: PIPELINE_DATA_DTYPE,
+        y: np.ndarray,
+        task: int,
+        groups: Any,
+        resampling_strategy: Union[BaseCrossValidator, _RepeatedSplits,
+                                   BaseShuffleSplit],
+    ) -> None:
+        if (
+            task in CLASSIFICATION_TASKS
+            and task != MULTILABEL_CLASSIFICATION
+            or (
+                task in REGRESSION_TASKS
+                and task != MULTIOUTPUT_REGRESSION
+            )
+        ):
+            y = y.ravel()
+
+        try:
+            resampling_strategy.get_n_splits(X=X, y=y, groups=groups)
+            next(resampling_strategy.split(X=X, y=y, groups=groups))
+        except Exception as e:
+            raise ValueError("Unsupported resampling strategy "
+                             "{}/{} cause exception: {}".format(
+                                 resampling_strategy,
+                                 groups,
+                                 str(e),
+                             ))
 
 
 # create closure for evaluating an algorithm
