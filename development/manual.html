@@ -278,12 +278,14 @@ available, <em>auto-sklearn</em> will create a worker per core, and use the avai
 for better machine learning models as well as building an ensemble with them until the time resource
 is exhausted.</p>
 <p><strong>Note:</strong> <em>auto-sklearn</em> requires all workers to have access to a shared file system for storing training data and models.</p>
-<p>Furthermore, depending on the installation of scikit-learn and numpy,
-the model building procedure may use up to all cores. Such behaviour is
-unintended by <em>auto-sklearn</em> and is most likely due to numpy being installed
-from <cite>pypi</cite> as a binary wheel (<a class="reference external" href="https://scikit-learn-general.narkive.com/44ywvAHA/binary-wheel-packages-for-linux-are-coming">see here</a>). Executing
-<code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">OPENBLAS_NUM_THREADS=1</span></code> should disable such behaviours and make numpy
-only use a single core at a time.</p>
+<p><em>auto-sklearn</em> employs <a class="reference external" href="https://github.com/joblib/threadpoolctl/">threadpoolctl</a> to control the number of threads employed by scientific libraries like numpy or scikit-learn. This is done exclusively during the building procedure of models, not during inference. In particular, <em>auto-sklearn</em> allows each pipeline to use at most 1 thread during training. At predicting and scoring time this limitation is not enforced by <em>auto-sklearn</em>. You can control the number of resources
+employed by the pipelines by setting the following variables in your environment, prior to running <em>auto-sklearn</em>:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">export</span> <span class="nv">OPENBLAS_NUM_THREADS</span><span class="o">=</span><span class="m">1</span>
+<span class="gp">$ </span><span class="nb">export</span> <span class="nv">MKL_NUM_THREADS</span><span class="o">=</span><span class="m">1</span>
+<span class="gp">$ </span><span class="nb">export</span> <span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">1</span>
+</pre></div>
+</div>
+<p>For further information about how scikit-learn handles multiprocessing, please check the <a class="reference external" href="https://scikit-learn.org/stable/computing/parallelism.html">Parallelism, resource management, and configuration</a> documentation from the library.</p>
 </section>
 <section id="model-persistence">
 <h2>Model persistence<a class="headerlink" href="#model-persistence" title="Permalink to this headline">¶</a></h2>

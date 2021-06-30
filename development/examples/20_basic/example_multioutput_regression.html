@@ -169,14 +169,7 @@ to download the full example code or to run this example in your browser via Bin
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(0.960000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;regressor:__choice__&#39;: &#39;random_forest&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01, &#39;regressor:random_forest:bootstrap&#39;: &#39;True&#39;, &#39;regressor:random_forest:criterion&#39;: &#39;mse&#39;, &#39;regressor:random_forest:max_depth&#39;: &#39;None&#39;, &#39;regressor:random_forest:max_features&#39;: 1.0, &#39;regressor:random_forest:max_leaf_nodes&#39;: &#39;None&#39;, &#39;regressor:random_forest:min_impurity_decrease&#39;: 0.0, &#39;regressor:random_forest:min_samples_leaf&#39;: 1, &#39;regressor:random_forest:min_samples_split&#39;: 2, &#39;regressor:random_forest:min_weight_fraction_leaf&#39;: 0.0},
-dataset_properties={
-  &#39;task&#39;: 5,
-  &#39;sparse&#39;: False,
-  &#39;multioutput&#39;: True,
-  &#39;target_type&#39;: &#39;regression&#39;,
-  &#39;signed&#39;: False})),
-(0.040000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;polynomial&#39;, &#39;regressor:__choice__&#39;: &#39;k_nearest_neighbors&#39;, &#39;feature_preprocessor:polynomial:degree&#39;: 3, &#39;feature_preprocessor:polynomial:include_bias&#39;: &#39;True&#39;, &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;False&#39;, &#39;regressor:k_nearest_neighbors:n_neighbors&#39;: 1, &#39;regressor:k_nearest_neighbors:p&#39;: 2, &#39;regressor:k_nearest_neighbors:weights&#39;: &#39;distance&#39;},
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(1.000000, SimpleRegressionPipeline({&#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;power_transformer&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;fast_ica&#39;, &#39;regressor:__choice__&#39;: &#39;gaussian_process&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.00017509749919120547, &#39;feature_preprocessor:fast_ica:algorithm&#39;: &#39;parallel&#39;, &#39;feature_preprocessor:fast_ica:fun&#39;: &#39;logcosh&#39;, &#39;feature_preprocessor:fast_ica:whiten&#39;: &#39;False&#39;, &#39;regressor:gaussian_process:alpha&#39;: 0.15342096918434228, &#39;regressor:gaussian_process:thetaL&#39;: 4.936581625776892e-06, &#39;regressor:gaussian_process:thetaU&#39;: 6135.9118843590995},
 dataset_properties={
   &#39;task&#39;: 5,
   &#39;sparse&#39;: False,
@@ -194,7 +187,7 @@ dataset_properties={
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.8805621077812243
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.9974019945527225
 </pre></div>
 </div>
 </section>
@@ -390,7 +383,7 @@ dataset_properties={
     (Forbidden: regressor:__choice__ == &#39;random_forest&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  57.469 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  54.652 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-20-basic-example-multioutput-regression-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/20_basic/example_multioutput_regression.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo.svg" width="150px" /></a>
