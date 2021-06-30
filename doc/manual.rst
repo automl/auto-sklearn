@@ -175,11 +175,14 @@ is exhausted.
 *auto-sklearn* employs `threadpoolctl <https://github.com/joblib/threadpoolctl/>`_ to control the number of threads employed by scientific libraries like numpy or scikit-learn. This is done exclusively during the building procedure of models, not during inference. In particular, *auto-sklearn* allows each pipeline to use at most 1 thread during training. At predicting and scoring time this limitation is not enforced by *auto-sklearn*. You can control the number of resources
 employed by the pipelines by setting the following variables in your environment, prior to running *auto-sklearn*:
 
-.. role:: bash(code)
-   :language: bash
-   export OPENBLAS_NUM_THREADS=1
-   export MKL_NUM_THREADS=1
-   export OMP_NUM_THREADS=1
+.. code-block:: shell-session
+
+    $ export OPENBLAS_NUM_THREADS=1
+    $ export MKL_NUM_THREADS=1
+    $ export OMP_NUM_THREADS=1
+
+
+For further information about how scikit-learn handles multiprocessing, please check the `Parallelism, resource management, and configuration <https://scikit-learn.org/stable/computing/parallelism.html>`_ documentation from the library.
 
 Model persistence
 =================
