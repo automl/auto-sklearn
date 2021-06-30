@@ -848,26 +848,26 @@ class AutoML(BaseEstimator):
         ] and not is_split_object:
             raise ValueError('Illegal resampling strategy: %s' % self._resampling_strategy)
 
-        if is_split_object:
+        elif is_split_object:
             TrainEvaluator.check_splitter_resampling_strategy(
                 X=X, y=y, task=task,
                 groups=self._resampling_strategy_arguments.get('groups', None),
                 resampling_strategy=self._resampling_strategy,
             )
 
-        if self._resampling_strategy in [
+        elif self._resampling_strategy in [
             'partial-cv',
             'partial-cv-iterative-fit',
         ] and self._ensemble_size != 0:
             raise ValueError("Resampling strategy %s cannot be used "
                              "together with ensembles." % self._resampling_strategy)
 
-        if self._resampling_strategy in ['partial-cv',
-                                         'cv',
-                                         'cv-iterative-fit',
-                                         'partial-cv-iterative-fit',
-                                         ]\
-           and 'folds' not in self._resampling_strategy_arguments:
+        elif self._resampling_strategy in [
+            'partial-cv',
+            'cv',
+            'cv-iterative-fit',
+            'partial-cv-iterative-fit',
+        ] and 'folds' not in self._resampling_strategy_arguments:
             self._resampling_strategy_arguments['folds'] = 5
 
         return
