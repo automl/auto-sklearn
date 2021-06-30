@@ -63,7 +63,6 @@ def test_fit_n_jobs(tmp_dir):
 
     automl = AutoSklearnClassifier(
         delete_tmp_folder_after_terminate=False,
-        delete_output_folder_after_terminate=False,
         time_left_for_this_task=30,
         per_run_time_limit=5,
         tmp_folder=tmp_dir,
@@ -390,7 +389,6 @@ def test_can_pickle_classifier(tmp_dir, dask_client):
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
     automl = AutoSklearnClassifier(time_left_for_this_task=30,
                                    delete_tmp_folder_after_terminate=False,
-                                   delete_output_folder_after_terminate=False,
                                    per_run_time_limit=5,
                                    tmp_folder=tmp_dir,
                                    dask_client=dask_client,
@@ -461,7 +459,6 @@ def test_binary(tmp_dir, dask_client):
         'iris', make_binary=True)
     automl = AutoSklearnClassifier(time_left_for_this_task=40,
                                    delete_tmp_folder_after_terminate=False,
-                                   delete_output_folder_after_terminate=False,
                                    per_run_time_limit=10,
                                    tmp_folder=tmp_dir,
                                    dask_client=dask_client,
@@ -601,7 +598,6 @@ def test_autosklearn_classification_methods_returns_self(dask_client):
     X_train, y_train, X_test, y_test = putil.get_dataset('iris')
     automl = AutoSklearnClassifier(time_left_for_this_task=60,
                                    delete_tmp_folder_after_terminate=False,
-                                   delete_output_folder_after_terminate=False,
                                    per_run_time_limit=10,
                                    ensemble_size=0,
                                    dask_client=dask_client,
@@ -623,7 +619,6 @@ def test_autosklearn_regression_methods_returns_self(dask_client):
     X_train, y_train, X_test, y_test = putil.get_dataset('boston')
     automl = AutoSklearnRegressor(time_left_for_this_task=30,
                                   delete_tmp_folder_after_terminate=False,
-                                  delete_output_folder_after_terminate=False,
                                   per_run_time_limit=5,
                                   dask_client=dask_client,
                                   ensemble_size=0)
@@ -642,7 +637,6 @@ def test_autosklearn2_classification_methods_returns_self(dask_client):
     X_train, y_train, X_test, y_test = putil.get_dataset('iris')
     automl = AutoSklearn2Classifier(time_left_for_this_task=60, ensemble_size=0,
                                     delete_tmp_folder_after_terminate=False,
-                                    delete_output_folder_after_terminate=False,
                                     dask_client=dask_client)
 
     automl_fitted = automl.fit(X_train, y_train)
@@ -730,7 +724,6 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
     seed = 3
     automl = estimator(
         delete_tmp_folder_after_terminate=False,
-        delete_output_folder_after_terminate=False,
         time_left_for_this_task=120,
         # Time left for task plays no role
         # only per run time limit
@@ -828,6 +821,7 @@ def test_pass_categorical_and_numeric_columns_to_pipeline(
 
     seed = 3
     automl = AutoSklearnClassifier(
+        delete_tmp_folder_after_terminate=False,
         time_left_for_this_task=120,
         # Time left for task plays no role
         # only per run time limit
@@ -868,6 +862,7 @@ def test_autosklearn_anneal(as_frame):
     """
     X, y = sklearn.datasets.fetch_openml(data_id=2, return_X_y=True, as_frame=as_frame)
     automl = AutoSklearnClassifier(time_left_for_this_task=60, ensemble_size=0,
+                                   delete_tmp_folder_after_terminate=False,
                                    initial_configurations_via_metalearning=0,
                                    smac_scenario_args={'runcount_limit': 3},
                                    resampling_strategy='holdout-iterative-fit')
