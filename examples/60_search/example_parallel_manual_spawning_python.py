@@ -124,7 +124,6 @@ if __name__ == '__main__':
         with dask.distributed.Client(address=cluster.scheduler_address) as client:
             automl = AutoSklearnClassifier(
                 delete_tmp_folder_after_terminate=False,
-                delete_output_folder_after_terminate=False,
                 time_left_for_this_task=30,
                 per_run_time_limit=10,
                 memory_limit=1024,
