@@ -196,7 +196,6 @@ def test_delete_non_candidate_models(dask_client):
     X, Y, _, _ = putil.get_dataset('iris')
     automl = autosklearn.automl.AutoML(
         delete_tmp_folder_after_terminate=False,
-        delete_output_folder_after_terminate=False,
         time_left_for_this_task=60,
         per_run_time_limit=5,
         ensemble_nbest=3,
@@ -281,7 +280,6 @@ def test_automl_outputs(dask_client):
         metric=accuracy,
         dask_client=dask_client,
         delete_tmp_folder_after_terminate=False,
-        delete_output_folder_after_terminate=False,
     )
     auto.fit(
         X=X_train,
@@ -406,7 +404,6 @@ def test_do_dummy_prediction(dask_client, datasets):
         metric=accuracy,
         dask_client=dask_client,
         delete_tmp_folder_after_terminate=False,
-        delete_output_folder_after_terminate=False,
     )
     auto._backend = auto._create_backend()
 
@@ -455,7 +452,6 @@ def test_fail_if_dummy_prediction_fails(ta_run_mock, dask_client):
                                      metric=accuracy,
                                      dask_client=dask_client,
                                      delete_tmp_folder_after_terminate=False,
-                                     delete_output_folder_after_terminate=False,
                                      )
     auto._backend = auto._create_backend()
     auto._backend._make_internals_directory()
@@ -543,7 +539,6 @@ def test_exceptions_inside_log_in_smbo(smbo_run_mock, dask_client):
         metric=accuracy,
         dask_client=dask_client,
         delete_tmp_folder_after_terminate=False,
-        delete_output_folder_after_terminate=False,
     )
 
     dataset_name = 'test_exceptions_inside_log'
@@ -606,7 +601,6 @@ def test_load_best_individual_model(metric, dask_client):
         metric=metric,
         dask_client=dask_client,
         delete_tmp_folder_after_terminate=False,
-        delete_output_folder_after_terminate=False,
     )
 
     # We cannot easily mock a function sent to dask

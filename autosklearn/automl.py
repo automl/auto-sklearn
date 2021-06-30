@@ -119,7 +119,6 @@ class AutoML(BaseEstimator):
                  temporary_directory: Optional[str] = None,
                  output_directory: Optional[str] = None,
                  delete_tmp_folder_after_terminate: bool = True,
-                 delete_output_folder_after_terminate: bool = True,
                  initial_configurations_via_metalearning=25,
                  ensemble_size=1,
                  ensemble_nbest=1,
@@ -150,7 +149,6 @@ class AutoML(BaseEstimator):
         self._temporary_directory = temporary_directory
         self._output_directory = output_directory
         self._delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
-        self._delete_output_folder_after_terminate = delete_output_folder_after_terminate
         # self._tmp_dir = tmp_dir
         self._time_for_task = time_left_for_this_task
         self._per_run_time_limit = per_run_time_limit
@@ -268,9 +266,7 @@ class AutoML(BaseEstimator):
     def _create_backend(self) -> Backend:
         return create(
             temporary_directory=self._temporary_directory,
-            output_directory=self._output_directory,
             delete_tmp_folder_after_terminate=self._delete_tmp_folder_after_terminate,
-            delete_output_folder_after_terminate=self._delete_output_folder_after_terminate,
         )
 
     def _create_dask_client(self):
@@ -850,7 +846,7 @@ class AutoML(BaseEstimator):
         self._clean_logger()
 
         # Clean up the backend
-        if self._delete_tmp_folder_after_terminate or self._delete_output_folder_after_terminate:
+        if self._delete_tmp_folder_after_terminate:
             self._backend.context.delete_directories(force=False)
         return
 
