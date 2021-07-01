@@ -137,15 +137,15 @@ class DataPreprocessorChoice(AutoSklearnChoice):
             config[param] = value
 
         new_params = {}
-        categorical_features = None
+        feat_type = None
         if init_params is not None:
             for param, value in init_params.items():
                 param = param.replace(choice, '').split(':', 1)[-1]
-                if "categorical_features" in param:
-                    categorical_features = value
+                if "feat_type" in param:
+                    feat_type = value
                 else:
                     new_params[param] = value
         self.choice = self.get_components()[choice](config=config, init_params=new_params,
-                                                    categorical_features=categorical_features)
+                                                    categorical_features=feat_type)
 
         return self
