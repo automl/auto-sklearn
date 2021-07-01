@@ -18,7 +18,14 @@ class AutoMLTrialsCallBack(IncorporateRunResultCallback):
         self.trials_num = 1
         self.fname = fname
         with open(fname, "w") as fp:
-            fp.write("TrialNo, StartTime, EndTime, Status, TrainLoss, ValidLoss, TestLoss, Classifier")
+            fp.write("TrialNo, "
+                     "StartTime, "
+                     "EndTime, "
+                     "Status, "
+                     "TrainLoss, "
+                     "ValidLoss, "
+                     "TestLoss, "
+                     "Classifier")
 
     def __call__(
             self, smbo: 'SMBO',
@@ -58,4 +65,4 @@ class VerifyTrialsCallBack(unittest.TestCase):
                                     )
         cls.fit(X_train, Y_train, X_test, Y_test)
         trials = pd.read_csv(trials_summary_fname)
-        assert trials.shape[0] > 0, f"Auto-Sklearn explored {trials.shape[0]-1} trials"
+        assert trials.shape[0] > 0, f"Auto-Sklearn explored {trials.shape[0] - 1} trials"
