@@ -9,13 +9,11 @@ import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.utils.multiclass import type_of_target
 from smac.runhistory.runhistory import RunInfo, RunValue
-import smac.callbacks
 
 from autosklearn.data.validation import (
     SUPPORTED_FEAT_TYPES,
     SUPPORTED_TARGET_TYPES,
 )
-from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, AutoML
 from autosklearn.metrics import Scorer
