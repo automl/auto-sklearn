@@ -700,7 +700,8 @@ def test_check_askl2_same_arguments_as_askl():
                            'get_smac_object_callback',
                            'initial_configurations_via_metalearning',
                            'resampling_strategy',
-                           'metadata_directory']
+                           'metadata_directory',
+                           'get_trials_callback']
     unexpected_args = set(extra_arguments) - set(expected_extra_args)
     assert len(unexpected_args) == 0, unexpected_args
 

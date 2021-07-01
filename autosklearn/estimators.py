@@ -50,6 +50,7 @@ class AutoSklearnEstimator(BaseEstimator):
         metric=None,
         scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
+        get_trials_callback=None
     ):
         """
         Parameters
@@ -223,6 +224,12 @@ class AutoSklearnEstimator(BaseEstimator):
 
         load_models : bool, optional (True)
             Whether to load the models after fitting Auto-sklearn.
+           
+        get_trials_callback: callable
+            Callback function to create an object of subclass defined in module
+            `smac.callbacks <https://automl.github.io/SMAC3/master/apidoc/smac.callbacks.html>`_.
+            This is an advanced feature. Use only if you are familiar with
+            `SMAC <https://automl.github.io/SMAC3/master/index.html>`_.
 
         Attributes
         ----------
@@ -264,6 +271,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.metric = metric
         self.scoring_functions = scoring_functions
         self.load_models = load_models
+        self.get_trials_callback = get_trials_callback
 
         self.automl_ = None  # type: Optional[AutoML]
 
@@ -314,7 +322,8 @@ class AutoSklearnEstimator(BaseEstimator):
             logging_config=self.logging_config,
             metadata_directory=self.metadata_directory,
             metric=self.metric,
-            scoring_functions=self.scoring_functions
+            scoring_functions=self.scoring_functions,
+            get_trials_callback=self.get_trials_callback
         )
 
         return automl
