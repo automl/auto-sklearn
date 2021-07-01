@@ -163,6 +163,7 @@
         <span class="n">metric</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">scoring_functions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">load_models</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">get_trials_callback</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
@@ -336,6 +337,12 @@
 
 <span class="sd">        load_models : bool, optional (True)</span>
 <span class="sd">            Whether to load the models after fitting Auto-sklearn.</span>
+<span class="sd">           </span>
+<span class="sd">        get_trials_callback: callable</span>
+<span class="sd">            Callback function to create an object of subclass defined in module</span>
+<span class="sd">            `smac.callbacks &lt;https://automl.github.io/SMAC3/master/apidoc/smac.callbacks.html&gt;`_.</span>
+<span class="sd">            This is an advanced feature. Use only if you are familiar with</span>
+<span class="sd">            `SMAC &lt;https://automl.github.io/SMAC3/master/index.html&gt;`_.</span>
 
 <span class="sd">        Attributes</span>
 <span class="sd">        ----------</span>
@@ -377,6 +384,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="n">metric</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scoring_functions</span> <span class="o">=</span> <span class="n">scoring_functions</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_models</span> <span class="o">=</span> <span class="n">load_models</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_trials_callback</span> <span class="o">=</span> <span class="n">get_trials_callback</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[AutoML]</span>
 
@@ -427,7 +435,8 @@
             <span class="n">logging_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logging_config</span><span class="p">,</span>
             <span class="n">metadata_directory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_directory</span><span class="p">,</span>
             <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span>
-            <span class="n">scoring_functions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scoring_functions</span>
+            <span class="n">scoring_functions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scoring_functions</span><span class="p">,</span>
+            <span class="n">get_trials_callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_trials_callback</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">automl</span>
