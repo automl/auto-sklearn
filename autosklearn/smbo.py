@@ -18,6 +18,7 @@ from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
 from smac.scenario.scenario import Scenario
 from smac.tae.serial_runner import SerialRunner
 from smac.tae.dask_runner import DaskParallelRunner
+from smac.callbacks import IncorporateRunResultCallback
 
 
 import autosklearn.metalearning
@@ -241,6 +242,7 @@ class AutoMLSMBO(object):
                  scoring_functions=None,
                  pynisher_context='spawn',
                  ensemble_callback: typing.Optional[EnsembleBuilderManager] = None,
+                 trials_callback: typing.Optional[IncorporateRunResultCallback] = None
                  ):
         super(AutoMLSMBO, self).__init__()
         # data related
@@ -288,6 +290,7 @@ class AutoMLSMBO(object):
         self.pynisher_context = pynisher_context
 
         self.ensemble_callback = ensemble_callback
+        self.trials_callback = trials_callback
 
         dataset_name_ = "" if dataset_name is None else dataset_name
         logger_name = '%s(%d):%s' % (self.__class__.__name__, self.seed, ":" + dataset_name_)
@@ -499,6 +502,8 @@ class AutoMLSMBO(object):
 
         if self.ensemble_callback is not None:
             smac.register_callback(self.ensemble_callback)
+        if self.trials_callback is not None:
+            smac.register_callback(self.trials_callback)
 
         smac.optimize()
 

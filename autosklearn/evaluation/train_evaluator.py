@@ -42,38 +42,6 @@ from autosklearn.util.logging_ import PicklableClientLogger
 __all__ = ['TrainEvaluator', 'eval_holdout', 'eval_iterative_holdout',
            'eval_cv', 'eval_partial_cv', 'eval_partial_cv_iterative']
 
-baseCrossValidator_defaults: Dict[str, Dict[str, Optional[Union[int, float, str]]]] = {
-    'GroupKFold': {'n_splits': 3},
-    'KFold': {'n_splits': 3,
-              'shuffle': False,
-              'random_state': None},
-    'LeaveOneGroupOut': {},
-    'LeavePGroupsOut': {'n_groups': 2},
-    'LeaveOneOut': {},
-    'LeavePOut': {'p': 2},
-    'PredefinedSplit': {},
-    'RepeatedKFold': {'n_splits': 5,
-                      'n_repeats': 10,
-                      'random_state': None},
-    'RepeatedStratifiedKFold': {'n_splits': 5,
-                                'n_repeats': 10,
-                                'random_state': None},
-    'StratifiedKFold': {'n_splits': 3,
-                        'shuffle': False,
-                        'random_state': None},
-    'TimeSeriesSplit': {'n_splits': 3,
-                        'max_train_size': None},
-    'GroupShuffleSplit': {'n_splits': 5,
-                          'test_size': None,
-                          'random_state': None},
-    'StratifiedShuffleSplit': {'n_splits': 10,
-                               'test_size': None,
-                               'random_state': None},
-    'ShuffleSplit': {'n_splits': 10,
-                     'test_size': None,
-                     'random_state': None}
-    }
-
 
 def _get_y_array(y: SUPPORTED_TARGET_TYPES, task_type: int) -> SUPPORTED_TARGET_TYPES:
     if task_type in CLASSIFICATION_TASKS and task_type != \
@@ -1027,69 +995,30 @@ class TrainEvaluator(AbstractEvaluator):
         if self.resampling_strategy_args is None:
             self.resampling_strategy_args = {}
 
-        if self.resampling_strategy is not None and not isinstance(self.resampling_strategy, str):
+        if (
+                self.resampling_strategy is not None
+                and not isinstance(self.resampling_strategy, str)
+        ):
+            if 'groups' not in self.resampling_strategy_args:
+                self.resampling_strategy_args['groups'] = None
 
-            if issubclass(self.resampling_strategy, BaseCrossValidator) or \
-               issubclass(self.resampling_strategy, _RepeatedSplits) or \
-               issubclass(self.resampling_strategy, BaseShuffleSplit):
+            if isinstance(self.resampling_strategy, (BaseCrossValidator,
+                                                     _RepeatedSplits,
+                                                     BaseShuffleSplit)):
+                self.check_splitter_resampling_strategy(
+                    X=D.data['X_train'], y=D.data['Y_train'],
+                    groups=self.resampling_strategy_args.get('groups'),
+                    task=D.info['task'],
+                    resampling_strategy=self.resampling_strategy,
+                )
+                return self.resampling_strategy
 
-                class_name = self.resampling_strategy.__name__
-                if class_name not in baseCrossValidator_defaults:
-                    raise ValueError('Unknown CrossValidator.')
-                ref_arg_dict = baseCrossValidator_defaults[class_name]
-
-                y = D.data['Y_train']
-                if (D.info['task'] in CLASSIFICATION_TASKS and
-                   D.info['task'] != MULTILABEL_CLASSIFICATION) or \
-                   (D.info['task'] in REGRESSION_TASKS and
-                   D.info['task'] != MULTIOUTPUT_REGRESSION):
-
-                    y = y.ravel()
-                if class_name == 'PredefinedSplit':
-                    if 'test_fold' not in self.resampling_strategy_args:
-                        raise ValueError('Must provide parameter test_fold'
-                                         ' for class PredefinedSplit.')
-                if class_name == 'LeaveOneGroupOut' or \
-                        class_name == 'LeavePGroupsOut' or\
-                        class_name == 'GroupKFold' or\
-                        class_name == 'GroupShuffleSplit':
-                    if 'groups' not in self.resampling_strategy_args:
-                        raise ValueError('Must provide parameter groups '
-                                         'for chosen CrossValidator.')
-                    try:
-                        if np.shape(self.resampling_strategy_args['groups'])[0] != y.shape[0]:
-                            raise ValueError('Groups must be array-like '
-                                             'with shape (n_samples,).')
-                    except Exception:
-                        raise ValueError('Groups must be array-like '
-                                         'with shape (n_samples,).')
-                else:
-                    if 'groups' in self.resampling_strategy_args:
-                        if np.shape(self.resampling_strategy_args['groups'])[0] != y.shape[0]:
-                            raise ValueError('Groups must be array-like'
-                                             ' with shape (n_samples,).')
-
-                # Put args in self.resampling_strategy_args
-                for key in ref_arg_dict:
-                    if key == 'n_splits':
-                        if 'folds' not in self.resampling_strategy_args:
-                            self.resampling_strategy_args['folds'] = ref_arg_dict['n_splits']
-                    else:
-                        if key not in self.resampling_strategy_args:
-                            self.resampling_strategy_args[key] = ref_arg_dict[key]
-
-                # Instantiate object with args
-                init_dict = copy.deepcopy(self.resampling_strategy_args)
-                init_dict.pop('groups', None)
-                if 'folds' in init_dict:
-                    init_dict['n_splits'] = init_dict.pop('folds', None)
-                assert self.resampling_strategy is not None
-                cv = copy.deepcopy(self.resampling_strategy)(**init_dict)
-
-                if 'groups' not in self.resampling_strategy_args:
-                    self.resampling_strategy_args['groups'] = None
-
-                return cv
+            # If it got to this point, we are dealing with a non-supported
+            # re-sampling strategy
+            raise ValueError("Unsupported resampling strategy {}/{} provided".format(
+                self.resampling_strategy,
+                type(self.resampling_strategy),
+            ))
 
         y = D.data['Y_train']
         shuffle = self.resampling_strategy_args.get('shuffle', True)
@@ -1160,6 +1089,37 @@ class TrainEvaluator(AbstractEvaluator):
             else:
                 raise ValueError(self.resampling_strategy)
         return cv
+
+    @classmethod
+    def check_splitter_resampling_strategy(
+        cls,
+        X: PIPELINE_DATA_DTYPE,
+        y: np.ndarray,
+        task: int,
+        groups: Any,
+        resampling_strategy: Union[BaseCrossValidator, _RepeatedSplits,
+                                   BaseShuffleSplit],
+    ) -> None:
+        if (
+            task in CLASSIFICATION_TASKS
+            and task != MULTILABEL_CLASSIFICATION
+            or (
+                task in REGRESSION_TASKS
+                and task != MULTIOUTPUT_REGRESSION
+            )
+        ):
+            y = y.ravel()
+
+        try:
+            resampling_strategy.get_n_splits(X=X, y=y, groups=groups)
+            next(resampling_strategy.split(X=X, y=y, groups=groups))
+        except Exception as e:
+            raise ValueError("Unsupported resampling strategy "
+                             "{}/{} cause exception: {}".format(
+                                 resampling_strategy,
+                                 groups,
+                                 str(e),
+                             ))
 
 
 # create closure for evaluating an algorithm
