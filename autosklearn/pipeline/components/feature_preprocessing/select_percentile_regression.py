@@ -5,6 +5,7 @@ from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorit
 from autosklearn.pipeline.components.feature_preprocessing.select_percentile import \
     SelectPercentileBase
 from autosklearn.pipeline.constants import SPARSE, DENSE, UNSIGNED_DATA, INPUT
+from autosklearn.pipeline.implementations.util import partial_mutual_info
 
 
 class SelectPercentileRegression(SelectPercentileBase,
@@ -24,7 +25,7 @@ class SelectPercentileRegression(SelectPercentileBase,
         if score_func == "f_regression":
             self.score_func = sklearn.feature_selection.f_regression
         elif score_func == "mutual_info":
-            self.score_func = sklearn.feature_selection.mutual_info_regression
+            self.score_func = partial_mutual_info(sklearn.feature_selection.mutual_info_regression,random_state)
         else:
             raise ValueError("Don't know this scoring function: %s" % score_func)
 
