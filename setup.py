@@ -64,7 +64,7 @@ setup(
     extras_require=extras_reqs,
     install_requires=install_reqs,
     include_package_data=True,
-    license='BSD',
+    license='BSD3',
     platforms=['Linux'],
     classifiers=[
         "Environment :: Console",
