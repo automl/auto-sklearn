@@ -824,7 +824,7 @@ def test_pass_categorical_and_numeric_columns_to_pipeline(
         per_run_time_limit=30,
         ensemble_size=0,
         dask_client=dask_client,
-        include_estimators=['random_forest'],
+        include={'classifier': ['random_forest']},
         seed=seed,
     )
     config = automl.get_configuration_space(X_train, y_train,
@@ -846,7 +846,7 @@ def test_pass_categorical_and_numeric_columns_to_pipeline(
         expected_dict[X.shape[1] - 1] = 'categorical'
     else:
         expected_dict = {i: 'numerical' for i in range(np.shape(X)[1])}
-    assert expected_dict == pipeline.named_steps['data_preprocessing'].feat_type
+    assert expected_dict == pipeline.named_steps['data_preprocessor'].choice.feat_type
 
 
 @pytest.mark.parametrize("as_frame", [True, False])

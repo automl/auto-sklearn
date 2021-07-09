@@ -146,6 +146,6 @@ class DataPreprocessorChoice(AutoSklearnChoice):
                 else:
                     new_params[param] = value
         self.choice = self.get_components()[choice](config=config, init_params=new_params,
-                                                    categorical_features=feat_type)
+                                                    feat_type=feat_type)
 
         return self
