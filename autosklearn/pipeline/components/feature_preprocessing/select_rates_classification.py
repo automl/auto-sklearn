@@ -23,7 +23,8 @@ class SelectClassificationRates(AutoSklearnPreprocessingAlgorithm):
         elif score_func == "f_classif":
             self.score_func = sklearn.feature_selection.f_classif
         elif score_func == "mutual_info_classif":
-            self.score_func = partial_mutual_info(sklearn.feature_selection.mutual_info_classif, random_state)
+            self.score_func = partial_mutual_info(sklearn.feature_selection.mutual_info_classif,
+                                                  random_state)
             # mutual info classif constantly crashes without mode percentile
             self.mode = 'percentile'
         else:

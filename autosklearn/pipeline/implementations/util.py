@@ -36,6 +36,7 @@ def convert_multioutput_multiclass_to_multilabel(probas):
         probas = multioutput_probas
     return probas
 
+
 def partial_mutual_info(mutual_info_func, algo_random_state):
     def mutual_info_score(X, y, *, discrete_features='auto', n_neighbors=3,
                           copy=True, random_state=None):
