@@ -1,5 +1,6 @@
 import os
 from collections import OrderedDict
+from typing import Dict, Optional
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
@@ -14,7 +15,7 @@ _preprocessors = find_components(__package__,
 _addons = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
 
 
-def add_preprocessor(preprocessor):
+def add_preprocessor(preprocessor: AutoSklearnPreprocessingAlgorithm):
     _addons.add_component(preprocessor)
 
 
@@ -27,9 +28,9 @@ class DataPreprocessorChoice(AutoSklearnChoice):
         components.update(_addons.components)
         return components
 
-    def get_available_components(self, dataset_properties=None,
-                                 include=None,
-                                 exclude=None):
+    def get_available_components(self, dataset_properties: Optional[Dict] = None,
+                                 include: Optional[Dict] = None,
+                                 exclude: Optional[Dict] = None) -> OrderedDict:
         if dataset_properties is None:
             dataset_properties = {}
 
@@ -85,10 +86,10 @@ class DataPreprocessorChoice(AutoSklearnChoice):
 
         return components_dict
 
-    def get_hyperparameter_search_space(self, dataset_properties=None,
-                                        default=None,
-                                        include=None,
-                                        exclude=None):
+    def get_hyperparameter_search_space(self, dataset_properties: Optional[Dict] = None,
+                                        default: Optional[Dict] = None,
+                                        include: Optional[Dict] = None,
+                                        exclude: Optional[Dict] = None) -> ConfigurationSpace:
         cs = ConfigurationSpace()
 
         if dataset_properties is None:
@@ -126,7 +127,8 @@ class DataPreprocessorChoice(AutoSklearnChoice):
     def transform(self, X):
         return self.choice.transform(X)
 
-    def set_hyperparameters(self, configuration, init_params=None):
+    def set_hyperparameters(self, configuration: ConfigurationSpace,
+                            init_params: Optional[Dict] = None) -> 'DataPreprocessorChoice':
         config = {}
         params = configuration.get_dictionary()
         choice = params['__choice__']
