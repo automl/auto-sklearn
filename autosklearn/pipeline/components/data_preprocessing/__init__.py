@@ -15,14 +15,14 @@ _preprocessors = find_components(__package__,
 _addons = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
 
 
-def add_preprocessor(preprocessor: AutoSklearnPreprocessingAlgorithm):
+def add_preprocessor(preprocessor: AutoSklearnPreprocessingAlgorithm) -> None:
     _addons.add_component(preprocessor)
 
 
 class DataPreprocessorChoice(AutoSklearnChoice):
 
     @classmethod
-    def get_components(cls):
+    def get_components(cls) -> OrderedDict:
         components = OrderedDict()
         components.update(_preprocessors)
         components.update(_addons.components)
