@@ -860,7 +860,7 @@ def test_autosklearn_anneal(as_frame):
     X, y = sklearn.datasets.fetch_openml(data_id=2, return_X_y=True, as_frame=as_frame)
     automl = AutoSklearnClassifier(time_left_for_this_task=60, ensemble_size=0,
                                    initial_configurations_via_metalearning=0,
-                                   smac_scenario_args={'runcount_limit': 3},
+                                   smac_scenario_args={'runcount_limit': 6},
                                    resampling_strategy='holdout-iterative-fit')
 
     if as_frame:
