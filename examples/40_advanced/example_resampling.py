@@ -98,8 +98,8 @@ print("Accuracy score CV", sklearn.metrics.accuracy_score(y_test, predictions))
 # data by the first feature. In practice, one would use a splitting according
 # to the use case at hand.
 
-resampling_strategy = sklearn.model_selection.PredefinedSplit
-resampling_strategy_arguments = {'test_fold': np.where(X_train[:, 0] < np.mean(X_train[:, 0]))[0]}
+resampling_strategy = sklearn.model_selection.PredefinedSplit(
+    test_fold=np.where(X_train[:, 0] < np.mean(X_train[:, 0]))[0])
 
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
@@ -107,7 +107,6 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     tmp_folder='/tmp/autosklearn_resampling_example_tmp',
     disable_evaluator_output=False,
     resampling_strategy=resampling_strategy,
-    resampling_strategy_arguments=resampling_strategy_arguments,
 )
 automl.fit(X_train, y_train, dataset_name='breast_cancer')
 

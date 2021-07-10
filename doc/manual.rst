@@ -173,13 +173,17 @@ is exhausted.
 
 **Note:** *auto-sklearn* requires all workers to have access to a shared file system for storing training data and models.
 
-Furthermore, depending on the installation of scikit-learn and numpy,
-the model building procedure may use up to all cores. Such behaviour is
-unintended by *auto-sklearn* and is most likely due to numpy being installed
-from `pypi` as a binary wheel (`see here <https://scikit-learn-general.narkive
-.com/44ywvAHA/binary-wheel-packages-for-linux-are-coming>`_). Executing
-``export OPENBLAS_NUM_THREADS=1`` should disable such behaviours and make numpy
-only use a single core at a time.
+*auto-sklearn* employs `threadpoolctl <https://github.com/joblib/threadpoolctl/>`_ to control the number of threads employed by scientific libraries like numpy or scikit-learn. This is done exclusively during the building procedure of models, not during inference. In particular, *auto-sklearn* allows each pipeline to use at most 1 thread during training. At predicting and scoring time this limitation is not enforced by *auto-sklearn*. You can control the number of resources
+employed by the pipelines by setting the following variables in your environment, prior to running *auto-sklearn*:
+
+.. code-block:: shell-session
+
+    $ export OPENBLAS_NUM_THREADS=1
+    $ export MKL_NUM_THREADS=1
+    $ export OMP_NUM_THREADS=1
+
+
+For further information about how scikit-learn handles multiprocessing, please check the `Parallelism, resource management, and configuration <https://scikit-learn.org/stable/computing/parallelism.html>`_ documentation from the library.
 
 Model persistence
 =================
