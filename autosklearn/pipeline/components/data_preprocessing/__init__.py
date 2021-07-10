@@ -23,7 +23,7 @@ class DataPreprocessorChoice(AutoSklearnChoice):
 
     @classmethod
     def get_components(cls) -> OrderedDict:
-        components = OrderedDict()
+        components: OrderedDict = OrderedDict()
         components.update(_preprocessors)
         components.update(_addons.components)
         return components

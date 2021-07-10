@@ -60,7 +60,7 @@ class VerifyTrialsCallBack(unittest.TestCase):
                                     delete_tmp_folder_after_terminate=False,
                                     n_jobs=1,
                                     include={'feature_preprocessor': ['pca'],
-                                             'classifier': 'sgd'},
+                                             'classifier': ['sgd']},
                                     get_trials_callback=AutoMLTrialsCallBack(trials_summary_fname)
                                     )
         cls.fit(X_train, Y_train, X_test, Y_test)
