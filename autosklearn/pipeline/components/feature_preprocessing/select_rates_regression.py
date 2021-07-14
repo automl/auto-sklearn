@@ -2,11 +2,11 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter
 from ConfigSpace import NotEqualsCondition
+from functools import partial
 
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import UNSIGNED_DATA, SPARSE, DENSE, INPUT
-from autosklearn.pipeline.implementations.util import partial_mutual_info
 
 
 class SelectRegressionRates(AutoSklearnPreprocessingAlgorithm):
@@ -21,8 +21,8 @@ class SelectRegressionRates(AutoSklearnPreprocessingAlgorithm):
         if score_func == "f_regression":
             self.score_func = sklearn.feature_selection.f_regression
         elif score_func == "mutual_info_regression":
-            self.score_func = partial_mutual_info(sklearn.feature_selection.mutual_info_regression,
-                                                  random_state)
+            self.score_func = partial(sklearn.feature_selection.mutual_info_regression,
+                                      random_state=self.random_state)
             # Mutual info consistently crashes if percentile is not the mode
             self.mode = 'percentile'
         else:
