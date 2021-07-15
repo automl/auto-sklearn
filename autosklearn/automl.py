@@ -8,7 +8,7 @@ import multiprocessing
 import os
 import sys
 import time
-from typing import Any, Dict, Optional, List, Tuple, Union
+from typing import Any, Dict, Optional, List, Tuple, Union, Iterable
 import uuid
 import unittest.mock
 import warnings
@@ -1556,6 +1556,140 @@ class AutoML(BaseEstimator):
         sio.write('  Number of target algorithms that exceeded the memory '
                   'limit: %d\n' % num_memout)
         return sio.getvalue()
+
+    def leaderboard(
+        self,
+        include: Optional[Union[str, Iterable[str]]] = None
+    ) -> pd.DataFrame:
+        """ Returns a pandas table of results for all evaluated models.
+
+        Gives a list of all models trained during the search process along with
+        any given items/metrics/info that can be accquired and presented in
+        a tabular format.
+
+        These are:
+            id : The id used to identify the model.
+            type: The type of classifier/regressor used.
+            data_preprocessors: The preprocessors used on the data as a comma
+                                seperated list.
+            feature_preprocessors: The preprocessors used for features as a
+                                   comma seperated list.
+            balancing_strategy: TODO
+            ensemble_weight: The weight given to the model in the ensemble
+            start_time: Time the model began being optimized
+            end_time: Time the model ended being optimized
+            duration: Length of time the model was optimized for
+
+        Paramaters
+        ----------
+        include: Optional[Iterable | str] = None
+            Items to include, other items not specified will be excluded.
+            If left as `None`, all items are included in the table.
+            Mutually exclusive with parameter `exclude`.
+
+        Returns
+        -------
+        pd.DataFrame
+            A dataframe of all the calculated metrics during the runs
+        """
+        # TODO validate that `self` is fitted. This is required for
+        #      self.ensemble_ to get the identifiers of models it will generate
+        #      weights for.
+        # The valid table columns, this also acts as the ordering in which
+        # the columns of the table appear
+        table_columns = ["id", "ensemble_weight", "type", "train_loss", "cost",
+                         "duration", "seed", "start_time", "end_time", "budget",
+                         "status", "data_preprocessors", 
+                         "feature_preprocessors", "balancing_strategy",
+                         "configuration_origin"
+                        ]
+
+        if include is not None:
+            # Convert `include` to Iterable if is a string
+            if isinstance(include, str):
+                include = [include]
+
+            # Validate values passed
+            invalid_include_items = set(include) - set(table_columns)  # type: ignore
+            if len(invalid_include_items) != 0:
+                raise ValueError(f"Values {invalid_include_items} are not known"
+                                 f" columns to include, must be contained in "
+                                 f"{table_columns}")
+        else:
+            include = table_columns
+
+        # To get all the models that were optmized, we collect what we can from
+        # runhistory first. Later we fill in the model information.
+        successful = lambda rv: rv.status in [StatusType.SUCCESS]
+        has_origin = lambda rv: rv.status not in [StatusType.RUNNING]
+
+        model_runs = {
+            rk.config_id : {
+                'id': rk.config_id,
+                'seed': rk.seed,
+                'budget': rk.budget,
+                'duration': rv.time,
+                'start_time': rv.starttime,
+                'end_time': rv.endtime,
+                'status': str(rv.status),
+                'cost': rv.cost,
+                'train_loss': rv.additional_info.train_loss
+                              if successful(rv) else None,
+                'configuration_origin': rv.additional_info.configuration_origin
+                                        if has_origin(rv) else None,
+            }
+            for rk, rv in self.runhistory_.data.items()
+        }
+
+        # Next we get some info about the model itself
+        # TODO detect if classifier type or regressor type
+        is_classifier = True
+
+        # A dict mapping model ids to their configurations
+        configurations = self.runhistory_.ids_config
+
+        for model_id, run_info in model_runs.items():
+            run_config = configurations[model_id]
+
+            run_info.update({
+                'balancing_strategy': run_config['balancing:strategy'],
+                'type': run_config['classifier:__choice__'] if is_classifier
+                        else run_config['regressor:__choice__'],
+                'data_preprocessing': [
+                    value for key, value in run_config.items()
+                    if 'data_processing' in key and '__choice__' in key
+                ],
+                'feature_preprocessing': [
+                    value for key, value in run_config.items()
+                    if 'feature_processing' in key and '__choice__' in key
+                ]
+            })
+
+        # Get the models ensemble weight if it has one
+        # TODO both implementing classes of AbstractEnsemble have a property
+        #      `identifiers_` and `weights_`,
+        #       might be good to put it as an abstract property
+        # TODO `ensemble_.identifiers_` and `ensemble_.weights_` are loosely
+        #      tied together by ordering, might be better to store as tuple
+        for i, (_, model_id, _) in enumerate(self.ensemble_.identifiers_):
+            model_runs[model_id]['weight'] = self.ensemble_.weights_[i]
+
+        # Fill in an NA value for runs which were not considered for ensembling.
+        # Likely to occur on crashes or incomplete runs
+        # TODO decide on an NA value, 0 or None?
+        for model_run in model_runs:
+            if 'weight' not in model_run:
+                model_run['weight'] = None
+
+        # Finally, convert into a tabular format by converting the dict into
+        # column wise orientation.
+        dataframe = pd.DataFrame({
+            col: [ model_run[col] for model_run in model_runs ]
+            for col in table_columns
+        })
+        dataframe.sort_values(by=['ensemble_weight', 'train_loss'])
+
+        return dataframe
 
     def get_models_with_weights(self):
         if self.models_ is None or len(self.models_) == 0 or \
