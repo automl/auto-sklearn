@@ -1599,9 +1599,9 @@ class AutoML(BaseEstimator):
         # the columns of the table appear
         table_columns = ["id", "ensemble_weight", "type", "train_loss", "cost",
                          "duration", "seed", "start_time", "end_time", "budget",
-                         "status", "data_preprocessors", 
+                         "status", "data_preprocessors",
                          "feature_preprocessors", "balancing_strategy",
-                         "configuration_origin"
+                         "config_origin"
                         ]
 
         if include is not None:
@@ -1620,7 +1620,7 @@ class AutoML(BaseEstimator):
 
         # To get all the models that were optmized, we collect what we can from
         # runhistory first. Later we fill in the model information.
-        successful = lambda rv: rv.status in [StatusType.SUCCESS]
+        has_train_loss = lambda rv: rv.status in [StatusType.SUCCESS]
         has_origin = lambda rv: rv.status not in [StatusType.RUNNING]
 
         model_runs = {
@@ -1633,10 +1633,10 @@ class AutoML(BaseEstimator):
                 'end_time': rv.endtime,
                 'status': str(rv.status),
                 'cost': rv.cost,
-                'train_loss': rv.additional_info.train_loss
-                              if successful(rv) else None,
-                'configuration_origin': rv.additional_info.configuration_origin
-                                        if has_origin(rv) else None,
+                'train_loss': rv.additional_info['train_loss']
+                              if has_train_loss(rv) else None,
+                'config_origin': rv.additional_info['configuration_origin']
+                                 if has_origin(rv) else None,
             }
             for rk, rv in self.runhistory_.data.items()
         }
@@ -1649,19 +1649,19 @@ class AutoML(BaseEstimator):
         configurations = self.runhistory_.ids_config
 
         for model_id, run_info in model_runs.items():
-            run_config = configurations[model_id]
+            run_config = configurations[model_id]._values
 
             run_info.update({
                 'balancing_strategy': run_config['balancing:strategy'],
                 'type': run_config['classifier:__choice__'] if is_classifier
                         else run_config['regressor:__choice__'],
-                'data_preprocessing': [
+                'data_preprocessors': [
                     value for key, value in run_config.items()
-                    if 'data_processing' in key and '__choice__' in key
+                    if 'data_preprocessing' in key and '__choice__' in key
                 ],
-                'feature_preprocessing': [
+                'feature_preprocessors': [
                     value for key, value in run_config.items()
-                    if 'feature_processing' in key and '__choice__' in key
+                    if 'feature_preprocessor' in key and '__choice__' in key
                 ]
             })
 
@@ -1672,22 +1672,24 @@ class AutoML(BaseEstimator):
         # TODO `ensemble_.identifiers_` and `ensemble_.weights_` are loosely
         #      tied together by ordering, might be better to store as tuple
         for i, (_, model_id, _) in enumerate(self.ensemble_.identifiers_):
-            model_runs[model_id]['weight'] = self.ensemble_.weights_[i]
+            model_runs[model_id]['ensemble_weight'] = self.ensemble_.weights_[i]
 
         # Fill in an NA value for runs which were not considered for ensembling.
         # Likely to occur on crashes or incomplete runs
         # TODO decide on an NA value, 0 or None?
-        for model_run in model_runs:
-            if 'weight' not in model_run:
-                model_run['weight'] = None
+        for model_id, run_info in model_runs.items():
+            if 'ensemble_weight' not in run_info:
+                run_info['ensemble_weight'] = None
 
         # Finally, convert into a tabular format by converting the dict into
         # column wise orientation.
         dataframe = pd.DataFrame({
-            col: [ model_run[col] for model_run in model_runs ]
+            col: [ run_info[col] for run_info in model_runs.values() ]
             for col in table_columns
         })
-        dataframe.sort_values(by=['ensemble_weight', 'train_loss'])
+        dataframe.sort_values(by=['ensemble_weight', 'train_loss'],
+                              ascending=[False, True], inplace=True)
+        dataframe.set_index('id', inplace=True)
 
         return dataframe
 
