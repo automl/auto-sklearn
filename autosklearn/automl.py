@@ -1698,12 +1698,19 @@ class AutoML(BaseEstimator):
         for i, (_, model_id, _) in enumerate(self.ensemble_.identifiers_):
             model_runs[model_id]['ensemble_weight'] = self.ensemble_.weights_[i]
 
-        # Fill in an NA value for runs which were not considered for ensembling.
-        # Likely to occur on crashes or incomplete runs
-        # TODO decide on an NA value, 0 or None?
-        for model_id, run_info in model_runs.items():
-            if 'ensemble_weight' not in run_info:
-                run_info['ensemble_weight'] = None
+
+        # Filter out non-ensemble members if needed, else fill in a default
+        # value of 0 if it's missing
+        if ensemble_only:
+            model_runs = {
+                model_id: info
+                for model_id, info in model_runs.items()
+                if ('ensemble_weight' in info and info['ensemble_weight'] > 0)
+            }
+        else:
+            for model_id, info in model_runs.items():
+                if 'ensemble_weight' not in info:
+                    info['ensemble_weight'] = 0
 
         # Finally, convert into a tabular format by converting the dict into
         # column wise orientation.
