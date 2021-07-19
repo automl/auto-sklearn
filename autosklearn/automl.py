@@ -1650,25 +1650,26 @@ class AutoML(BaseEstimator):
 
         # To get all the models that were optmized, we collect what we can from
         # runhistory first.
-        has_train_loss = lambda rv: rv.status in [StatusType.SUCCESS]
-        has_origin = lambda rv: rv.status not in [StatusType.RUNNING]
+        has_key = lambda rv, key: rv.additional_info and key in rv.additonal_info
 
         model_runs = {
-            rk.config_id : {
-                'id': rk.config_id,
-                'seed': rk.seed,
-                'budget': rk.budget,
-                'duration': rv.time,
-                'start_time': rv.starttime,
-                'end_time': rv.endtime,
-                'status': str(rv.status),
-                'cost': rv.cost,
-                'train_loss': rv.additional_info['train_loss']
-                              if has_train_loss(rv) else None,
-                'config_origin': rv.additional_info['configuration_origin']
-                                 if has_origin(rv) else None,
+            rkey.config_id : {
+                'id': rkey.config_id,
+                'seed': rkey.seed,
+                'budget': rkey.budget,
+                'duration': rval.time,
+                'start_time': rval.starttime,
+                'end_time': rval.endtime,
+                'status': str(rval.status),
+                'cost': rval.cost,
+                'train_loss': rval.additional_info['train_loss']
+                              if has_key(rval, 'train_loss')
+                              else None,
+                'config_origin': rval.additional_info['configuration_origin']
+                                 if has_key(rval, 'configuration_origin')
+                                 else None
             }
-            for rk, rv in self.runhistory_.data.items()
+            for rkey, rval in self.runhistory_.data.items()
         }
 
         # Next we get some info about the model itself
