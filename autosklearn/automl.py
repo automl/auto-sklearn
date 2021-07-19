@@ -1610,6 +1610,14 @@ class AutoML(BaseEstimator):
             raise ValueError(f"sort_by='{sort_by}' must be one of "
                              f"{valid_sort_by}")
 
+        if (
+            not (isinstance(top_k, str) or isinstance(top_k, int))
+            or (isinstance(top_k, str) and top_k != 'all')
+            or (isinstance(top_k, int) and top_k <= 0)
+        ):
+            raise ValueError(f"top_k={top_k} must be a positive integer or pass"
+                             f"'all' to view all results")
+
         # TODO budget seems to be 0.0 all the time?
         # TODO validate that `self` is fitted. This is required for
         #      self.ensemble_ to get the identifiers of models it will generate
@@ -1737,6 +1745,12 @@ class AutoML(BaseEstimator):
             dataframe.insert(column='rank',
                              value=range(1, len(dataframe)),
                              loc=list(columns).index('rank'))
+
+        # Lastly, just grab the top_k
+        if top_k == 'all' or top_k >= len(dataframe):
+            top_k = len(dataframe) - 1
+
+        dataframe = dataframe.head(top_k)
 
         return dataframe
 
