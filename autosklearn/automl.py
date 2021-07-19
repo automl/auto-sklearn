@@ -1604,6 +1604,12 @@ class AutoML(BaseEstimator):
         pd.DataFrame
             A dataframe of statistics for the models, ordered by their rank.
         """
+        # Validation
+        valid_sort_by = ['cost', 'ensemble_weight']
+        if sort_by not in valid_sort_by:
+            raise ValueError(f"sort_by='{sort_by}' must be one of "
+                             f"{valid_sort_by}")
+
         # TODO budget seems to be 0.0 all the time?
         # TODO validate that `self` is fitted. This is required for
         #      self.ensemble_ to get the identifiers of models it will generate
@@ -1702,10 +1708,18 @@ class AutoML(BaseEstimator):
         # column wise orientation.
         dataframe = pd.DataFrame({
             col: [ run_info[col] for run_info in model_runs.values() ]
-            for col in table_columns
+            for col in columns
         })
-        dataframe.sort_values(by=['ensemble_weight', 'train_loss'],
-                              ascending=[False, True], inplace=True)
+
+        # Sort the values of the specified column
+        column_sort_ascending = {
+            'ensemble_weight': False,
+            'cost': True
+        }
+        dataframe.sort_values(by=sort_by,
+                              ascending=column_sort_ascending[sort_by],
+                              inplace=True)
+
         dataframe.set_index('id', inplace=True)
 
         return dataframe
