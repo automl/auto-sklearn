@@ -8,7 +8,9 @@ import multiprocessing
 import os
 import sys
 import time
-from typing import Any, Dict, Optional, List, Tuple, Union, Iterable
+from typing import (
+    Any, Dict, Optional, List, Tuple, Union, Iterable, Final, Literal
+)
 import uuid
 import unittest.mock
 import warnings
@@ -1543,67 +1545,95 @@ class AutoML(BaseEstimator):
 
     def leaderboard(
         self,
-        include: Optional[Union[str, Iterable[str]]] = None
+        detailed: bool = False,
+        ensemble_only: bool = True,
+        top_k: Union[int, Literal['all']] = 'all',
+        sort_by: Literal['cost', 'ensemble_weight'] = 'cost',
+        include: Optional[Iterable[str]] = None
     ) -> pd.DataFrame:
         """ Returns a pandas table of results for all evaluated models.
 
-        Gives a list of all models trained during the search process along with
-        any given items/metrics/info that can be accquired and presented in
-        a tabular format.
+        Gives an overview of all models trained during the search process along
+        with various statistics about their training.
 
-        These are:
-            id : The id used to identify the model.
-            type: The type of classifier/regressor used.
-            data_preprocessors: The preprocessors used on the data as a comma
-                                seperated list.
-            feature_preprocessors: The preprocessors used for features as a
-                                   comma seperated list.
-            balancing_strategy: TODO
-            ensemble_weight: The weight given to the model in the ensemble
-            start_time: Time the model began being optimized
-            end_time: Time the model ended being optimized
-            duration: Length of time the model was optimized for
+        The availble statistics are:
+
+            Simple:
+                * id - The id used to identify the model.
+                * rank - The rank of the model.
+                * ensemble_weight - The weight given to the model in the 
+                ensemble.
+                * type - The type of classifier/regressor used.
+                * cost - The loss of the model on the validation set.
+                * duration - Length of time the model was optimized for.
+
+            Includable:
+                * budget - How much time was allocated to this model.
+                * status - The return status of training the model with SMAC.
+                * train_loss - The loss of the model on the training set.
+                * balancing_strategy - TODO
+                * start_time - Time the model began being optimized
+                * end_time - Time the model ended being optimized
+                * data_preprocessors - The preprocessors used on the data
+                * feature_preprocessors - The preprocessors for features types
 
         Paramaters
         ----------
-        include: Optional[Iterable | str] = None
+        detailed: bool = False
+            Whether to give detailed information or just a simple overview.
+
+        ensemble_only: bool = True
+            Whether to view only models included in the ensemble or all models
+            trained.
+
+        top_k: int or 'all'
+            How many models to display.
+
+        sort_by: 'cost' or 'ensemble_weight'
+            Whether to sort model ranks by 'cost' or
+
+        include: Optional[Iterable[str]] = None
             Items to include, other items not specified will be excluded.
-            If left as `None`, all items are included in the table.
-            Mutually exclusive with parameter `exclude`.
+            If left as `None`, it will resort back to the the `simple` or
+            `detailed` view as specified by the `detailed` parameter.
 
         Returns
         -------
         pd.DataFrame
-            A dataframe of all the calculated metrics during the runs
+            A dataframe of statistics for the models, ordered by their rank.
         """
+        # TODO budget seems to be 0.0 all the time?
         # TODO validate that `self` is fitted. This is required for
         #      self.ensemble_ to get the identifiers of models it will generate
         #      weights for.
-        # The valid table columns, this also acts as the ordering in which
-        # the columns of the table appear
-        table_columns = ["id", "ensemble_weight", "type", "train_loss", "cost",
-                         "duration", "seed", "start_time", "end_time", "budget",
-                         "status", "data_preprocessors",
-                         "feature_preprocessors", "balancing_strategy",
-                         "config_origin"
-                        ]
 
+        # The different kinds of column ouputs based on the parameters
+        all_columns : Final[List[str]] = [
+            "id", "rank", "ensemble_weight", "type", "cost", "duration",
+            "train_loss", "seed", "start_time", "end_time", "budget", "status",
+            "data_preprocessors", "feature_preprocessors", "balancing_strategy",
+            "config_origin"
+        ]
+        simple_columns : Final[List[str]] = [
+            "id", "rank", "ensemble_weight", "type", "cost", "duration"
+        ]
+        detailed_columns : Final[List[str]] = all_columns
+
+        # Decide which columns to include in the output
         if include is not None:
-            # Convert `include` to Iterable if is a string
-            if isinstance(include, str):
-                include = [include]
-
-            # Validate values passed
-            invalid_include_items = set(include) - set(table_columns)  # type: ignore
+            invalid_include_items = set(include) - set(all_columns)
             if len(invalid_include_items) != 0:
                 raise ValueError(f"Values {invalid_include_items} are not known"
                                  f" columns to include, must be contained in "
-                                 f"{table_columns}")
+                                 f"{all_columns}")
+            columns = include
+        elif detailed:
+            columns = detailed_columns
         else:
-            include = table_columns
+            columns = simple_columns
 
         # To get all the models that were optmized, we collect what we can from
-        # runhistory first. Later we fill in the model information.
+        # runhistory first.
         has_train_loss = lambda rv: rv.status in [StatusType.SUCCESS]
         has_origin = lambda rv: rv.status not in [StatusType.RUNNING]
 
