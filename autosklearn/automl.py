@@ -1629,12 +1629,13 @@ class AutoML(BaseEstimator):
 
         # Decide which columns to include in the output
         if include is not None:
-            invalid_include_items = set(include) - set(all_columns)
+            columns = list(include) # Incase `include` is generator
+
+            invalid_include_items = set(columns) - set(all_columns)
             if len(invalid_include_items) != 0:
                 raise ValueError(f"Values {invalid_include_items} are not known"
                                  f" columns to include, must be contained in "
                                  f"{all_columns}")
-            columns = include
         elif detailed:
             columns = detailed_columns
         else:
@@ -1706,9 +1707,10 @@ class AutoML(BaseEstimator):
 
         # Finally, convert into a tabular format by converting the dict into
         # column wise orientation.
+        # We don't have `rank` yet so we ignore it for now
         dataframe = pd.DataFrame({
             col: [ run_info[col] for run_info in model_runs.values() ]
-            for col in columns
+            for col in columns if col != 'rank'
         })
 
         # Sort the values of the specified column
@@ -1720,7 +1722,14 @@ class AutoML(BaseEstimator):
                               ascending=column_sort_ascending[sort_by],
                               inplace=True)
 
+        # Give it an index
         dataframe.set_index('id', inplace=True)
+
+        # Add the rank column at the position given by columns
+        if 'rank' in columns:
+            dataframe.insert(column='rank',
+                             value=range(1, len(dataframe)),
+                             loc=list(columns).index('rank'))
 
         return dataframe
 
