@@ -6,3 +6,4 @@ include requirements.txt
 include autosklearn/requirements.txt
 recursive-include autosklearn/experimental/askl2_portfolios *.json
 include autosklearn/experimental/askl2_training_data.json
+include LICENSE.txt
