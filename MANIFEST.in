@@ -4,6 +4,6 @@ recursive-include autosklearn/metalearning/files *.txt
 include autosklearn/util/logging.yaml
 include requirements.txt
 include autosklearn/requirements.txt
-recursive-include autosklearn/experimental/askl2_portfolios *.json
+recursive-include autosklearn/experimental/ *.json
 include autosklearn/experimental/askl2_training_data.json
 include LICENSE.txt
