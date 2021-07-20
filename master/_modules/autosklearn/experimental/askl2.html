@@ -127,53 +127,60 @@
 <span class="kn">import</span> <span class="nn">autosklearn</span>
 <span class="kn">from</span> <span class="nn">autosklearn.classification</span> <span class="kn">import</span> <span class="n">AutoSklearnClassifier</span>
 <span class="kn">import</span> <span class="nn">autosklearn.experimental.selector</span>
-<span class="kn">from</span> <span class="nn">autosklearn.metrics</span> <span class="kn">import</span> <span class="n">Scorer</span>
+<span class="kn">from</span> <span class="nn">autosklearn.metrics</span> <span class="kn">import</span> <span class="n">Scorer</span><span class="p">,</span> <span class="n">balanced_accuracy</span><span class="p">,</span> <span class="n">roc_auc</span><span class="p">,</span> <span class="n">log_loss</span><span class="p">,</span> <span class="n">accuracy</span>
 
+<span class="n">metrics</span> <span class="o">=</span> <span class="p">(</span><span class="n">balanced_accuracy</span><span class="p">,</span> <span class="n">roc_auc</span><span class="p">,</span> <span class="n">log_loss</span><span class="p">)</span>
+<span class="n">selector_files</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="n">this_directory</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span>
-<span class="n">training_data_file</span> <span class="o">=</span> <span class="n">this_directory</span> <span class="o">/</span> <span class="s1">&#39;askl2_training_data.json&#39;</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">training_data_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
-    <span class="n">training_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
-    <span class="n">fh</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">m</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
-    <span class="n">m</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">fh</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">))</span>
-<span class="n">training_data_hash</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()[:</span><span class="mi">10</span><span class="p">]</span>
-<span class="n">selector_filename</span> <span class="o">=</span> <span class="s2">&quot;askl2_selector_</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">.pkl&quot;</span> <span class="o">%</span> <span class="p">(</span>
-    <span class="n">autosklearn</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span>
-    <span class="n">sklearn</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span>
-    <span class="n">training_data_hash</span>
-<span class="p">)</span>
-<span class="n">selector_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;XDG_CACHE_HOME&#39;</span><span class="p">)</span>
-<span class="k">if</span> <span class="n">selector_directory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">selector_directory</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span>
-<span class="n">selector_directory</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">selector_directory</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s1">&#39;auto-sklearn&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
-<span class="n">selector_file</span> <span class="o">=</span> <span class="n">selector_directory</span> <span class="o">/</span> <span class="n">selector_filename</span>
-<span class="n">metafeatures</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;metafeatures&#39;</span><span class="p">])</span>
-<span class="n">y_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;y_values&#39;</span><span class="p">])</span>
-<span class="n">strategies</span> <span class="o">=</span> <span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;strategies&#39;</span><span class="p">]</span>
-<span class="n">minima_for_methods</span> <span class="o">=</span> <span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;minima_for_methods&#39;</span><span class="p">]</span>
-<span class="n">maxima_for_methods</span> <span class="o">=</span> <span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;maxima_for_methods&#39;</span><span class="p">]</span>
-<span class="k">if</span> <span class="ow">not</span> <span class="n">selector_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-    <span class="n">selector</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">OneVSOneSelector</span><span class="p">(</span>
-        <span class="n">configuration</span><span class="o">=</span><span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;configuration&#39;</span><span class="p">],</span>
-        <span class="n">default_strategy_idx</span><span class="o">=</span><span class="n">strategies</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;RF_SH-eta4-i_holdout_iterative_es_if&#39;</span><span class="p">),</span>
-        <span class="n">rng</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+    <span class="n">training_data_file</span> <span class="o">=</span> <span class="n">this_directory</span> <span class="o">/</span> <span class="n">metric</span><span class="o">.</span><span class="n">name</span> <span class="o">/</span> <span class="s1">&#39;askl2_training_data.json&#39;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">training_data_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+        <span class="n">training_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+        <span class="n">fh</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">fh</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">))</span>
+    <span class="n">training_data_hash</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()[:</span><span class="mi">10</span><span class="p">]</span>
+    <span class="n">selector_filename</span> <span class="o">=</span> <span class="s2">&quot;askl2_selector_</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">.pkl&quot;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">autosklearn</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span>
+        <span class="n">sklearn</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span>
+        <span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">training_data_hash</span>
     <span class="p">)</span>
-    <span class="n">selector</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
-        <span class="n">X</span><span class="o">=</span><span class="n">metafeatures</span><span class="p">,</span>
-        <span class="n">y</span><span class="o">=</span><span class="n">y_values</span><span class="p">,</span>
-        <span class="n">methods</span><span class="o">=</span><span class="n">strategies</span><span class="p">,</span>
-        <span class="n">minima</span><span class="o">=</span><span class="n">minima_for_methods</span><span class="p">,</span>
-        <span class="n">maxima</span><span class="o">=</span><span class="n">maxima_for_methods</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">selector_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">selector_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
-            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">fh</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AutoSklearn2Classifier needs to create a selector file under &quot;</span>
-              <span class="s2">&quot;the user&#39;s home directory or XDG_CACHE_HOME. Nevertheless &quot;</span>
-              <span class="s2">&quot;the path </span><span class="si">{}</span><span class="s2"> is not writable.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selector_file</span><span class="p">))</span>
-        <span class="k">raise</span> <span class="n">e</span>
+    <span class="n">selector_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;XDG_CACHE_HOME&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">selector_directory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">selector_directory</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span>
+    <span class="n">selector_directory</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">selector_directory</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s1">&#39;auto-sklearn&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+    <span class="n">selector_files</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">selector_directory</span> <span class="o">/</span> <span class="n">selector_filename</span>
+    <span class="n">metafeatures</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;metafeatures&#39;</span><span class="p">])</span>
+    <span class="n">strategies</span> <span class="o">=</span> <span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;strategies&#39;</span><span class="p">]</span>
+    <span class="n">y_values</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;y_values&#39;</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="n">strategies</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">metafeatures</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+    <span class="n">minima_for_methods</span> <span class="o">=</span> <span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;minima_for_methods&#39;</span><span class="p">]</span>
+    <span class="n">maxima_for_methods</span> <span class="o">=</span> <span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;maxima_for_methods&#39;</span><span class="p">]</span>
+    <span class="n">default_strategies</span> <span class="o">=</span> <span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;tie_break_order&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">selector_files</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">selector</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">OVORF</span><span class="p">(</span>
+            <span class="n">configuration</span><span class="o">=</span><span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;configuration&#39;</span><span class="p">],</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">n_estimators</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+            <span class="n">tie_break_order</span><span class="o">=</span><span class="n">default_strategies</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">selector</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">FallbackWrapper</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">default_strategies</span><span class="p">)</span>
+        <span class="n">selector</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+            <span class="n">X</span><span class="o">=</span><span class="n">metafeatures</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">y_values</span><span class="p">,</span>
+            <span class="n">minima</span><span class="o">=</span><span class="n">minima_for_methods</span><span class="p">,</span>
+            <span class="n">maxima</span><span class="o">=</span><span class="n">maxima_for_methods</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">selector_files</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">selector_files</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">],</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">fh</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AutoSklearn2Classifier needs to create a selector file under &quot;</span>
+                  <span class="s2">&quot;the user&#39;s home directory or XDG_CACHE_HOME. Nevertheless &quot;</span>
+                  <span class="s2">&quot;the path </span><span class="si">{}</span><span class="s2"> is not writable.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selector_files</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]))</span>
+            <span class="k">raise</span> <span class="n">e</span>
 
 
 <span class="k">class</span> <span class="nc">SmacObjectCallback</span><span class="p">:</span>
@@ -408,7 +415,7 @@
 <span class="sd">        Attributes</span>
 <span class="sd">        ----------</span>
 
-<span class="sd">        cv_results\_ : dict of numpy (masked) ndarrays</span>
+<span class="sd">        cv_results_ : dict of numpy (masked) ndarrays</span>
 <span class="sd">            A dict with keys as column headers and values as columns, that can be</span>
 <span class="sd">            imported into a pandas ``DataFrame``.</span>
 
@@ -458,10 +465,22 @@
             <span class="n">feat_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">dataset_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="n">accuracy</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="n">log_loss</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+            <span class="n">metric_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">selector_file</span> <span class="o">=</span> <span class="n">selector_files</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">metric_name</span> <span class="o">=</span> <span class="s1">&#39;balanced_accuracy&#39;</span>
+            <span class="n">selector_file</span> <span class="o">=</span> <span class="n">selector_files</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">selector_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
             <span class="n">selector</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
 
-        <span class="n">metafeatures</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">)),</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+        <span class="n">metafeatures</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">dataset_name</span><span class="p">:</span> <span class="p">[</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]]})</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
         <span class="n">selection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">selector</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">metafeatures</span><span class="p">))</span>
         <span class="n">automl_policy</span> <span class="o">=</span> <span class="n">strategies</span><span class="p">[</span><span class="n">selection</span><span class="p">]</span>
 
@@ -512,7 +531,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">resampling_strategy_kwargs</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="n">portfolio_file</span> <span class="o">=</span> <span class="n">this_directory</span> <span class="o">/</span> <span class="s1">&#39;askl2_portfolios&#39;</span> <span class="o">/</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="n">automl_policy</span><span class="p">)</span>
+        <span class="n">portfolio_file</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">this_directory</span> <span class="o">/</span> <span class="n">metric_name</span> <span class="o">/</span> <span class="s1">&#39;askl2_portfolios&#39;</span> <span class="o">/</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="n">automl_policy</span><span class="p">)</span>
+        <span class="p">)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">portfolio_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
             <span class="n">portfolio_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
         <span class="n">portfolio</span> <span class="o">=</span> <span class="n">portfolio_json</span><span class="p">[</span><span class="s1">&#39;portfolio&#39;</span><span class="p">]</span>
