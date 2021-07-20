@@ -203,7 +203,7 @@ class AutoML(BaseEstimator):
         self.cv_models_ = None
         self.ensemble_ = None
         self._can_predict = False
-        self._is_classificaiton = None # Ctrl+f 'TODO 78xh'
+        self._is_classificaiton = None  # Ctrl+f 'TODO 78xh'
 
         self._debug_mode = debug_mode
 
@@ -475,7 +475,7 @@ class AutoML(BaseEstimator):
             X_test, y_test = self.InputValidator.transform(X_test, y_test)
 
         self._task = task
-        self._is_classificaiton = is_classification # Ctrl+f 'TODO 78xh'
+        self._is_classificaiton = is_classification  # Ctrl+f 'TODO 78xh'
 
         X, y = self.subsample_if_too_large(
             X=X,
@@ -1579,7 +1579,7 @@ class AutoML(BaseEstimator):
             Simple:
                 * id - The id used to identify the model.
                 * rank - The rank of the model.
-                * ensemble_weight - The weight given to the model in the 
+                * ensemble_weight - The weight given to the model in the
                 ensemble.
                 * type - The type of classifier/regressor used.
                 * cost - The loss of the model on the validation set.
@@ -1640,20 +1640,20 @@ class AutoML(BaseEstimator):
         #      weights for.
 
         # The different kinds of column ouputs based on the parameters
-        all_columns : Final[List[str]] = [
+        all_columns: Final[List[str]] = [
             "id", "rank", "ensemble_weight", "type", "cost", "duration",
             "train_loss", "seed", "start_time", "end_time", "budget", "status",
             "data_preprocessors", "feature_preprocessors", "balancing_strategy",
             "config_origin"
         ]
-        simple_columns : Final[List[str]] = [
+        simple_columns: Final[List[str]] = [
             "id", "rank", "ensemble_weight", "type", "cost", "duration"
         ]
-        detailed_columns : Final[List[str]] = all_columns
+        detailed_columns: Final[List[str]] = all_columns
 
         # Decide which columns to include in the output
         if include is not None:
-            columns = list(include) # Incase `include` is generator
+            columns = list(include)  # Incase `include` is generator
 
             invalid_include_items = set(columns) - set(all_columns)
             if len(invalid_include_items) != 0:
@@ -1667,10 +1667,11 @@ class AutoML(BaseEstimator):
 
         # To get all the models that were optmized, we collect what we can from
         # runhistory first.
-        has_key = lambda rv, key: rv.additional_info and key in rv.additonal_info
+        def has_key(rv, key):
+            return rv.additional_info and key in rv.additional_info
 
         model_runs = {
-            rkey.config_id : {
+            rkey.config_id: {
                 'id': rkey.config_id,
                 'seed': rkey.seed,
                 'budget': rkey.budget,
@@ -1680,11 +1681,9 @@ class AutoML(BaseEstimator):
                 'status': str(rval.status),
                 'cost': rval.cost,
                 'train_loss': rval.additional_info['train_loss']
-                              if has_key(rval, 'train_loss')
-                              else None,
+                if has_key(rval, 'train_loss') else None,
                 'config_origin': rval.additional_info['configuration_origin']
-                                 if has_key(rval, 'configuration_origin')
-                                 else None
+                if has_key(rval, 'configuration_origin') else None
             }
             for rkey, rval in self.runhistory_.data.items()
         }
@@ -1722,7 +1721,6 @@ class AutoML(BaseEstimator):
         for i, (_, model_id, _) in enumerate(self.ensemble_.identifiers_):
             model_runs[model_id]['ensemble_weight'] = self.ensemble_.weights_[i]
 
-
         # Filter out non-ensemble members if needed, else fill in a default
         # value of 0 if it's missing
         if ensemble_only:
@@ -1740,7 +1738,7 @@ class AutoML(BaseEstimator):
         # column wise orientation.
         # We don't have `rank` yet so we ignore it for now
         dataframe = pd.DataFrame({
-            col: [ run_info[col] for run_info in model_runs.values() ]
+            col: [run_info[col] for run_info in model_runs.values()]
             for col in columns if col != 'rank'
         })
 
