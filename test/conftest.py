@@ -79,8 +79,8 @@ def tmp_dir(request):
     return _dir_fixture('tmp', request)
 
 
-@pytest.fixture(scope="session")
-def tmp_dir_session_scope(request):
+@pytest.fixture(scope="module")
+def tmp_dir_module_scope(request):
     return _dir_fixture('tmp', request)
 
 
@@ -183,9 +183,9 @@ def boston_dataset() -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     return putil.get_dataset('boston')  # type: ignore
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def simple_AutoSklearnClassifier(
-    tmp_dir_session_scope: str,
+    tmp_dir_module_scope: str,
     iris_dataset: Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
 ) -> AutoSklearnClassifier:
     """ Provides a standard fitted re-usable AutoSklearnClassifier for tests.
@@ -208,16 +208,16 @@ def simple_AutoSklearnClassifier(
     classifier = AutoSklearnClassifier(
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        tmp_folder=tmp_dir_session_scope,
+        tmp_folder=tmp_dir_module_scope,
         seed=1
     )
     classifier.fit(X_train, Y_train)
     return classifier
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def simple_AutoSklearnRegressor(
-    tmp_dir_session_scope: str,
+    tmp_dir_module_scope: str,
     boston_dataset: Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
 ) -> AutoSklearnRegressor:
     """ Provides a standard fitted re-usable AutoSklearnRegressor for tests.
@@ -240,7 +240,7 @@ def simple_AutoSklearnRegressor(
     regressor = AutoSklearnRegressor(
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        tmp_folder=tmp_dir_session_scope,
+        tmp_folder=tmp_dir_module_scope,
         seed=1
     )
     regressor.fit(X_train, Y_train)
