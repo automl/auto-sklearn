@@ -7,6 +7,7 @@ import pickle
 import re
 import sys
 import tempfile
+from typing import Tuple
 import unittest
 import unittest.mock
 import pytest
@@ -39,6 +40,78 @@ from autosklearn.smbo import get_smac_object
 
 sys.path.append(os.path.dirname(__file__))
 from automl_utils import print_debug_information, count_succeses  # noqa (E402: module level import not at top of file)
+
+
+@pytest.fixture(scope='module')
+def iris_dataset() -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """ Provides the 'iris' multi-label classification dataset """
+    return putil.get_dataset('iris')  # type: ignore
+
+
+@pytest.fixture(scope='module')
+def boston_dataset() -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """ Provides the 'boston' multi-label classification dataset """
+    return putil.get_dataset('boston')  # type: ignore
+
+
+@pytest.fixture(scope='module')
+def default_AutoSklearnClassifier(
+    tmp_dir: str,
+    iris_dataset: Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
+) -> AutoSklearnClassifier:
+    """ Provides a standard fitted re-usable AutoSklearnClassifier for tests.
+
+    Creates a classifier as a user might make to test auto-sklearn
+    on the iris dataset, mostly keeping default parameters.
+    Keeps as close to the first example seen at
+        https://automl.github.io/auto-sklearn/master/index.html#auto-sklearn
+
+    Tests which rely on the following should make their own instances:
+        * Specific construction parameters
+        * Specific fitting parameters or data
+        * Performance (by metric or time)
+        * Calling any state modifying functions
+        * Manually modifying state
+    """
+    X_train, Y_train, _, _ = iris_dataset
+    classifier = AutoSklearnClassifier(
+        time_left_for_this_task=60,
+        per_run_time_limit=5,
+        tmp_folder=tmp_dir,
+        seed=1
+    )
+    classifier.fit(X_train, Y_train)
+    return classifier
+
+
+@pytest.fixture(scope='module')
+def default_AutoSklearnRegressor(
+    tmp_dir: str,
+    boston_dataset: Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
+) -> AutoSklearnRegressor:
+    """ Provides a standard fitted re-usable AutoSklearnRegressor for tests.
+
+    Creates a classifier as a user might make to test auto-sklearn
+    on the iris dataset, mostly keeping default parameters.
+    Keeps as close to the first example seen at
+        https://automl.github.io/auto-sklearn/master/index.html#auto-sklearn
+
+    Tests which rely on the following should make their own instances:
+        * Specific construction parameters
+        * Specific fitting parameters or data
+        * Performance (by metric or time)
+        * Calling any state modifying functions
+        * Manually modifying state
+    """
+    X_train, Y_train, _, _ = boston_dataset
+    regressor = AutoSklearnRegressor(
+        time_left_for_this_task=60,
+        per_run_time_limit=5,
+        tmp_folder=tmp_dir,
+        seed=1
+    )
+    regressor.fit(X_train, Y_train)
+    return regressor
 
 
 def test_fit_n_jobs(tmp_dir):
@@ -315,6 +388,11 @@ def test_cv_results(tmp_dir):
     # Comply with https://scikit-learn.org/dev/glossary.html#term-classes
     is_classifier(cls)
     assert hasattr(cls, 'classes_')
+
+
+def test_leaderboard(tmp_dir):
+    print('hello')
+    assert 0
 
 
 @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.build_automl')
