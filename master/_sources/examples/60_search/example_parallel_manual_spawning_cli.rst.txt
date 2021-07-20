@@ -301,16 +301,16 @@ Start Auto-sklearn
  .. code-block:: none
 
     auto-sklearn results:
-      Dataset name: cd5159da-e942-11eb-86fd-c1536c4371d3
+      Dataset name: f001b9d5-e94d-11eb-8630-83bdc5dae580
       Metric: accuracy
       Best validation score: 0.985816
       Number of target algorithm runs: 11
-      Number of successful target algorithm runs: 9
+      Number of successful target algorithm runs: 10
       Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 2
+      Number of target algorithms that exceeded the time limit: 1
       Number of target algorithms that exceeded the memory limit: 0
 
-    Accuracy score 0.951048951048951
+    Accuracy score 0.958041958041958
 
 
 
@@ -342,7 +342,7 @@ line.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  38.522 seconds)
+   **Total running time of the script:** ( 0 minutes  43.247 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_manual_spawning_cli.py:
