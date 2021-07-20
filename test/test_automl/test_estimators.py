@@ -3,11 +3,11 @@ import glob
 import importlib
 import os
 import inspect
+import itertools
 import pickle
 import re
 import sys
 import tempfile
-from typing import Tuple
 import unittest
 import unittest.mock
 import pytest
@@ -336,6 +336,30 @@ def test_leaderboard(tmp_dir: str):
         seed=1
     )
     regressor.fit(X_train, Y_train)
+
+    # Fuzz over the possible combinations of valid parameters listed
+    valid_params = {
+        'detaild': [True, False],
+        'ensemble_only': [True, False],
+        'top_k': [0, 1, 2, 10, 1000, 'all'],
+        'sort_by': ['cost', 'ensemble_weight'],
+        'include': [None, ['cost', 'type', 'ensemble_weight'], ['id', 'rank']],
+    }
+
+    for model in [classifier, regressor]:
+        # Create a generator of all possible combinations of valid_params
+        params_generator = iter(
+            dict(zip(valid_params.keys(), param_values))
+            for param_values in itertools.product(*valid_params.values())
+        )
+
+        # No exception should be raised, but print params if one does
+        for params in params_generator:
+            try:
+                model.leaderboard(**params)
+            except Exception as e:
+                print(f"params = {params}")
+                raise e
 
 
 @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.build_automl')
