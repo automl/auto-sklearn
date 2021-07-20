@@ -28,7 +28,7 @@ for metric in metrics:
         m = hashlib.md5()
         m.update(fh.read().encode('utf8'))
     training_data_hash = m.hexdigest()[:10]
-        selector_filename = "askl2_selector_%s_%s_%s_%s.pkl" % (
+    selector_filename = "askl2_selector_%s_%s_%s_%s.pkl" % (
         autosklearn.__version__,
         sklearn.__version__,
         metric.name,
@@ -40,34 +40,35 @@ for metric in metrics:
     selector_directory = pathlib.Path(selector_directory).joinpath('auto-sklearn').expanduser()
     selector_files[metric.name] = selector_directory / selector_filename
     metafeatures = pd.DataFrame(training_data['metafeatures'])
-    y_values = np.array(training_data['y_values'])
     strategies = training_data['strategies']
+    y_values = pd.DataFrame(training_data['y_values'], columns=strategies, index=metafeatures.index)
     minima_for_methods = training_data['minima_for_methods']
     maxima_for_methods = training_data['maxima_for_methods']
-    if not selector_file.exists():
-        selector = autosklearn.experimental.selector.OneVSOneSelector(
+    default_strategies = training_data['tie_break_order']
+    if not selector_files[metric.name].exists():
+        selector = autosklearn.experimental.selector.OVORF(
             configuration=training_data['configuration'],
-            default_strategy_idx=strategies.index('RF_SH-eta4-i_holdout_iterative_es_if'),
-            rng=1,
+            random_state=np.random.RandomState(1),
             n_estimators=500,
+            tie_break_order=default_strategies,
         )
+        selector = autosklearn.experimental.selector.FallbackWrapper(selector, default_strategies)
         selector.fit(
             X=metafeatures,
             y=y_values,
-            methods=strategies,
             minima=minima_for_methods,
             maxima=maxima_for_methods,
         )
-        selector_file.parent.mkdir(exist_ok=True, parents=True)
+        selector_files[metric.name].parent.mkdir(exist_ok=True, parents=True)
 
-    try:
-        with open(selector_file, 'wb') as fh:
-            pickle.dump(selector, fh)
-    except Exception as e:
-        print("AutoSklearn2Classifier needs to create a selector file under "
-              "the user's home directory or XDG_CACHE_HOME. Nevertheless "
-              "the path {} is not writable.".format(selector_file))
-        raise e
+        try:
+            with open(selector_files[metric.name], 'wb') as fh:
+                pickle.dump(selector, fh)
+        except Exception as e:
+            print("AutoSklearn2Classifier needs to create a selector file under "
+                  "the user's home directory or XDG_CACHE_HOME. Nevertheless "
+                  "the path {} is not writable.".format(selector_files[metric.name]))
+            raise e
 
 
 class SmacObjectCallback:
@@ -352,14 +353,14 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             feat_type=None,
             dataset_name=None):
 
-        if self._metric is None:
+        if self.metric is None:
             if len(y.shape) == 1 or y.shape[1] == 1:
-                self._metric = accuracy
+                self.metric = accuracy
             else:
-                self._metric = log_loss
+                self.metric = log_loss
 
-        if self._metric in metrics:
-            metric_name = self._metric.name
+        if self.metric in metrics:
+            metric_name = self.metric.name
             selector_file = selector_files[metric_name]
         else:
             metric_name = 'balanced_accuracy'
@@ -367,7 +368,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         with open(selector_file, 'rb') as fh:
             selector = pickle.load(fh)
 
-        metafeatures = np.array([len(np.unique(y)), X.shape[1], X.shape[0]])
+        metafeatures = pd.DataFrame({dataset_name: [X.shape[1], X.shape[0]]}).transpose()
         selection = np.argmax(selector.predict(metafeatures))
         automl_policy = strategies[selection]
 
