@@ -7,6 +7,23 @@
     commit. From http://stackoverflow.com/questions/6482436/list-of-authors-in-git-since-a-given-commit
     git log 25d680d4e9520a661aae48ea4c7295c663b64df3.. --format="%aN <%aE>" --reverse | perl -e 'my %dedupe; while (<STDIN>) { print unless $dedupe{$_}++}'
 
+Version 0.12.7
+==============
+
+* ADD #1178: Reduce precision if dataset is too large for given memory limit.
+* ADD #1179: Improve Auto-sklearn 2.0 meta-data by providing new meta-data for the metrics
+  `roc_auc` and `logloss`.
+* DOC: Fix reference to arXiv paper
+* MAINT #1134,#1142,#1143: Improvements to the stale bot - the stale bot now marks issues labeled
+  with `feedback required` as stale if there is nothing happening for 30 days. After another 7
+  days it then closes the issue.
+* MAINT: Added a new issue template for questions.
+* MAINT #1168: Upper-bound scipy to `1.6.3` as `1.7.0` is incompatible with `SMAC`.
+* MAINT #1173: Update the license files to be recognized by github.
+
+Contributors v0.12.7
+********************
+
 Version 0.12.6
 ==============
 
