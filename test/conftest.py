@@ -1,19 +1,14 @@
 import os
 import shutil
 import time
-from typing import Tuple
 import unittest.mock
 
 from dask.distributed import Client, get_client
-import numpy as np
 import psutil
 import pytest
 
 from autosklearn.util.backend import create, Backend
-import autosklearn.pipeline.util as putil
 from autosklearn.automl import AutoML
-from autosklearn.classification import AutoSklearnClassifier
-from autosklearn.regression import AutoSklearnRegressor
 
 
 class AutoMLStub(AutoML):
@@ -79,17 +74,11 @@ def tmp_dir(request):
     return _dir_fixture('tmp', request)
 
 
-@pytest.fixture(scope="module")
-def tmp_dir_module_scope(request):
-    return _dir_fixture('tmp', request)
-
-
 def _dir_fixture(dir_type, request):
-
     test_dir = os.path.dirname(__file__)
-    dir = os.path.join(
-        test_dir, '.%s__%s__%s' % (dir_type, request.module.__name__, request.node.name)
-    )
+
+    dirname = f".{dir_type}__{request.module.__name__}__{request.node.name}"
+    dir = os.path.join(test_dir, dirname)
 
     for i in range(10):
         if os.path.exists(dir):
@@ -169,79 +158,3 @@ def pytest_sessionfinish(session, exitstatus):
     proc = psutil.Process()
     for child in proc.children(recursive=True):
         print(child, child.cmdline())
-
-
-@pytest.fixture(scope='session')
-def iris_dataset() -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """ Provides the 'iris' multi-label classification dataset """
-    return putil.get_dataset('iris')  # type: ignore
-
-
-@pytest.fixture(scope='session')
-def boston_dataset() -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """ Provides the 'boston' multi-label classification dataset """
-    return putil.get_dataset('boston')  # type: ignore
-
-
-@pytest.fixture(scope='module')
-def simple_AutoSklearnClassifier(
-    tmp_dir_module_scope: str,
-    iris_dataset: Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
-) -> AutoSklearnClassifier:
-    """ Provides a standard fitted re-usable AutoSklearnClassifier for tests.
-
-    Useful for read-only testing, not for any functions which might modify state.
-
-    Creates a classifier as a user might make to test auto-sklearn
-    on the iris dataset, mostly keeping default parameters.
-    Keeps as close to the first example seen at
-        https://automl.github.io/auto-sklearn/master/index.html#auto-sklearn
-
-    Tests which rely on the following should make their own instances:
-        * Specific construction parameters
-        * Specific fitting parameters or data
-        * Performance (by metric or time)
-        * Calling any state modifying functions
-        * Manually modifying state
-    """
-    X_train, Y_train, _, _ = iris_dataset
-    classifier = AutoSklearnClassifier(
-        time_left_for_this_task=30,
-        per_run_time_limit=5,
-        tmp_folder=tmp_dir_module_scope,
-        seed=1
-    )
-    classifier.fit(X_train, Y_train)
-    return classifier
-
-
-@pytest.fixture(scope='module')
-def simple_AutoSklearnRegressor(
-    tmp_dir_module_scope: str,
-    boston_dataset: Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
-) -> AutoSklearnRegressor:
-    """ Provides a standard fitted re-usable AutoSklearnRegressor for tests.
-
-    Useful for read-only testing, not for any functions which might modify state.
-
-    Creates a classifier as a user might make to test auto-sklearn
-    on the iris dataset, mostly keeping default parameters.
-    Keeps as close to the first example seen at
-        https://automl.github.io/auto-sklearn/master/index.html#auto-sklearn
-
-    Tests which rely on the following should make their own instances:
-        * Specific construction parameters
-        * Specific fitting parameters or data
-        * Performance (by metric or time)
-        * Calling any state modifying functions
-        * Manually modifying state
-    """
-    X_train, Y_train, _, _ = boston_dataset
-    regressor = AutoSklearnRegressor(
-        time_left_for_this_task=30,
-        per_run_time_limit=5,
-        tmp_folder=tmp_dir_module_scope,
-        seed=1
-    )
-    regressor.fit(X_train, Y_train)
-    return regressor

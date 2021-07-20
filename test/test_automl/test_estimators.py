@@ -318,9 +318,24 @@ def test_cv_results(tmp_dir):
     assert hasattr(cls, 'classes_')
 
 
-def test_leaderboard(tmp_dir):
-    print('hello')
-    assert 0
+def test_leaderboard(tmp_dir: str):
+    X_train, Y_train, _, _ = putil.get_dataset('iris')
+    classifier = AutoSklearnClassifier(
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        tmp_folder=tmp_dir + '_classifier',
+        seed=1
+    )
+    classifier.fit(X_train, Y_train)
+
+    X_train, Y_train, _, _ = putil.get_dataset('boston')
+    regressor = AutoSklearnRegressor(
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        tmp_folder=tmp_dir + '_regressor',
+        seed=1
+    )
+    regressor.fit(X_train, Y_train)
 
 
 @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.build_automl')
