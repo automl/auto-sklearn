@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 
-from typing import Optional, Dict, List, Tuple, Union, Iterable, Literal
+from typing import Optional, Dict, List, Tuple, Union, Iterable
 
 from ConfigSpace.configuration_space import Configuration
 import dask.distributed
@@ -555,9 +555,9 @@ class AutoSklearnEstimator(BaseEstimator):
         self,
         detailed: bool = False,
         ensemble_only: bool = True,
-        top_k: Union[int, Literal['all']] = 'all',
+        top_k: Union[int, str] = 'all',
         sort_by: str = 'cost',
-        sort_order: Optional[Literal['ascending', 'descending']] = None,
+        sort_order: Optional[str] = None,
         include: Optional[Iterable[str]] = None
     ) -> pd.DataFrame:
         """ Returns a pandas table of results for all evaluated models.
