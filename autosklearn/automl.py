@@ -201,8 +201,6 @@ class AutoML(BaseEstimator):
         self.cv_models_ = None
         self.ensemble_ = None
         self._can_predict = False
-        self._is_classificaiton = None  # Ctrl+f 'TODO 78xh'
-
         self._debug_mode = debug_mode
 
         self.InputValidator = None  # type: Optional[InputValidator]
@@ -473,7 +471,6 @@ class AutoML(BaseEstimator):
             X_test, y_test = self.InputValidator.transform(X_test, y_test)
 
         self._task = task
-        self._is_classificaiton = is_classification  # Ctrl+f 'TODO 78xh'
 
         X, y = self.subsample_if_too_large(
             X=X,
