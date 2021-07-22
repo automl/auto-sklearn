@@ -556,7 +556,8 @@ class AutoSklearnEstimator(BaseEstimator):
         detailed: bool = False,
         ensemble_only: bool = True,
         top_k: Union[int, Literal['all']] = 'all',
-        sort_by: Literal['cost', 'ensemble_weight'] = 'cost',
+        sort_by: str = 'cost',
+        sort_order: Optional[Literal['ascending', 'descending']] = None,
         include: Optional[Iterable[str]] = None
     ) -> pd.DataFrame:
         """ Returns a pandas table of results for all evaluated models.
@@ -567,7 +568,6 @@ class AutoSklearnEstimator(BaseEstimator):
         The availble statistics are:
 
             Simple:
-                * id - The id used to identify the model.
                 * rank - The rank of the model.
                 * ensemble_weight - The weight given to the model in the
                 ensemble.
@@ -594,56 +594,60 @@ class AutoSklearnEstimator(BaseEstimator):
             Whether to view only models included in the ensemble or all models
             trained.
 
-        top_k: int or 'all'
+        top_k: int or 'all' = 'all'
             How many models to display.
 
-        sort_by: 'cost' or 'ensemble_weight'
-            Whether to sort model ranks by 'cost' or
+        sort_by: str = 'cost'
+            What column to sort by. If that column is not present, the
+            sorting defaults to the 'id' index.
 
-        include: Optional[Iterable[str]] = None
+        sort_order: Optional['ascending' or 'descending']
+            Which sort order to apply to the `sort_by` column. If left
+            as None, it will sort by a sensible default where "better" is on
+            top, otherwise defaulting to pandas default for
+            DataFrame.sort_values if there is no obvious "better".
+
+        include: Optional[Iterable[str]]
             Items to include, other items not specified will be excluded.
+            The exception is the `id` which is always included.
+
             If left as `None`, it will resort back to the the `simple` or
             `detailed` view as specified by the `detailed` parameter.
 
         Returns
         -------
         pd.DataFrame
-            A dataframe of statistics for the models, ordered by their rank.
+            A dataframe of statistics for the models, ordered by `sort_by``.
         """
-        # Validation
-        valid_sort_by = ['cost', 'ensemble_weight']
-        if sort_by not in valid_sort_by:
-            raise ValueError(f"sort_by='{sort_by}' must be one of "
-                             f"{valid_sort_by}")
+        # TODO budget seems to be 0.0 all the time?
+        # TODO validate that `self` is fitted. This is required for
+        #      self.ensemble_ to get the identifiers of models it will generate
+        #      weights for.
 
+        # The different kinds of columns and their sort order
+        all_columns: Final[List[str]] = [
+            "rank", "ensemble_weight", "type", "cost", "duration",
+            "train_loss", "seed", "start_time", "end_time", "budget", "status",
+            "data_preprocessors", "feature_preprocessors", "balancing_strategy",
+            "config_origin"
+        ]
+        simple_columns: Final[List[str]] = [
+            "rank", "ensemble_weight", "type", "cost", "duration"
+        ]
+        detailed_columns = all_columns
+
+        # Validation of top_k
         if (
             not (isinstance(top_k, str) or isinstance(top_k, int))
             or (isinstance(top_k, str) and top_k != 'all')
             or (isinstance(top_k, int) and top_k <= 0)
         ):
             raise ValueError(f"top_k={top_k} must be a positive integer or pass"
-                             f"'all' to view all results")
+                             " `top_k`='all' to view results for all models")
 
-        # TODO budget seems to be 0.0 all the time?
-        # TODO validate that `self` is fitted. This is required for
-        #      self.ensemble_ to get the identifiers of models it will generate
-        #      weights for.
-
-        # The different kinds of column ouputs based on the parameters
-        all_columns: Final[List[str]] = [
-            "id", "rank", "ensemble_weight", "type", "cost", "duration",
-            "train_loss", "seed", "start_time", "end_time", "budget", "status",
-            "data_preprocessors", "feature_preprocessors", "balancing_strategy",
-            "config_origin"
-        ]
-        simple_columns: Final[List[str]] = [
-            "id", "rank", "ensemble_weight", "type", "cost", "duration"
-        ]
-        detailed_columns: Final[List[str]] = all_columns
-
-        # Decide which columns to include in the output
+        # Validate columns to include
         if include is not None:
-            columns = list(include)  # Incase `include` is generator
+            columns = [*include]
 
             invalid_include_items = set(columns) - set(all_columns)
             if len(invalid_include_items) != 0:
@@ -654,6 +658,17 @@ class AutoSklearnEstimator(BaseEstimator):
             columns = detailed_columns
         else:
             columns = simple_columns
+
+        # Validation of sorting
+        if sort_by == 'rank':
+            raise ValueError("Can't sort_by rank as `sort_by` defines `rank`")
+        if sort_by not in all_columns:
+            raise ValueError(f"sort_by='{sort_by}' must be one of included "
+                             f"columns {set(all_columns) - set(['rank'])}")
+
+        valid_sort_orders = ['ascending', 'descending']
+        if isinstance(sort_order, str) and sort_order not in valid_sort_orders:
+            raise ValueError(f"Optional sort_order not in {valid_sort_orders}")
 
         # To get all the models that were optmized, we collect what we can from
         # runhistory first.
@@ -679,13 +694,13 @@ class AutoSklearnEstimator(BaseEstimator):
         }
 
         # Next we get some info about the model itself
-        model_type = None
-        if self._get_automl_class() == AutoSklearnClassifier:
-            model_type = 'classifier'
-        elif self._get_automl_class() == AutoSklearnRegressor:
-            model_type = 'regressor'
-        else:
-            raise RuntimeError
+        model_class_strings = {
+            AutoMLClassifier: 'classifier',
+            AutoMLRegressor: 'regressor'
+        }
+        model_type = model_class_strings.get(self._get_automl_class(), None)
+        if model_type is None:
+            raise RuntimeError(f"Unknown `automl_class` {self._get_automl_class()}")
 
         # A dict mapping model ids to their configurations
         configurations = self.automl_.runhistory_.ids_config
@@ -694,7 +709,7 @@ class AutoSklearnEstimator(BaseEstimator):
             run_config = configurations[model_id]._values
 
             run_info.update({
-                'balancing_strategy': run_config['balancing:strategy'],
+                'balancing_strategy': run_config.get('balancing:strategy', None),
                 'type': run_config[f'{model_type}:__choice__'],
                 'data_preprocessors': [
                     value for key, value in run_config.items()
@@ -733,30 +748,35 @@ class AutoSklearnEstimator(BaseEstimator):
         # We don't have `rank` yet so we ignore it for now
         dataframe = pd.DataFrame({
             col: [run_info[col] for run_info in model_runs.values()]
-            for col in columns if col != 'rank'
+            for col in ['id', *columns] if col != 'rank'
         })
 
-        # Sort the values of the specified column
-        column_sort_ascending = {
-            'ensemble_weight': False,
-            'cost': True
-        }
-        dataframe.sort_values(by=sort_by,
-                              ascending=column_sort_ascending[sort_by],
-                              inplace=True)
-
-        # Give it an index
+        # Give it an index, even if not in the `include`
         dataframe.set_index('id', inplace=True)
+
+        # Sort by the given column name, defaulting to 'id' if not present
+        if sort_by not in dataframe.columns:
+            sort_by = 'id'
+
+        descending_columns = ['ensemble_weight', 'duration']
+        if sort_order is not None:
+            ascending_param = False if sort_order == 'descending' else True
+        else:
+            ascending_param = False if sort_by in descending_columns else True
+
+        dataframe.sort_values(by=sort_by,
+                              ascending=ascending_param,
+                              inplace=True)
 
         # Add the rank column at the position given by columns
         if 'rank' in columns:
             dataframe.insert(column='rank',
-                             value=range(1, len(dataframe)),
+                             value=range(1, len(dataframe) + 1),
                              loc=list(columns).index('rank'))
 
         # Lastly, just grab the top_k
         if top_k == 'all' or top_k >= len(dataframe):
-            top_k = len(dataframe) - 1
+            top_k = len(dataframe)
 
         dataframe = dataframe.head(top_k)
 

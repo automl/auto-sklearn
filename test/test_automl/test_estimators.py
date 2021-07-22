@@ -1,3 +1,5 @@
+from typing import Type
+
 import copy
 import glob
 import importlib
@@ -30,9 +32,9 @@ from autosklearn.data.validation import InputValidator
 import autosklearn.pipeline.util as putil
 from autosklearn.ensemble_builder import MODEL_FN_RE
 import autosklearn.estimators  # noqa F401
-from autosklearn.estimators import AutoSklearnEstimator
-from autosklearn.classification import AutoSklearnClassifier
-from autosklearn.regression import AutoSklearnRegressor
+from autosklearn.estimators import (
+    AutoSklearnEstimator, AutoSklearnRegressor, AutoSklearnClassifier
+)
 from autosklearn.metrics import accuracy, f1_macro, mean_squared_error, r2
 from autosklearn.automl import AutoMLClassifier
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier
@@ -318,48 +320,112 @@ def test_cv_results(tmp_dir):
     assert hasattr(cls, 'classes_')
 
 
-def test_leaderboard(tmp_dir: str):
-    X_train, Y_train, _, _ = putil.get_dataset('iris')
-    classifier = AutoSklearnClassifier(
+@pytest.mark.parametrize('estimator_type,dataset_name', [
+    (AutoSklearnClassifier, 'iris'),
+    (AutoSklearnRegressor, 'boston')
+])
+def test_leaderboard(
+    tmp_dir: str,
+    estimator_type: Type[AutoSklearnEstimator],
+    dataset_name: str
+):
+    # Comprehensive test tasks a substantial amount of time, manually set if
+    # required.
+    MAX_COMBO_SIZE_FOR_INCLUDE_PARAM = 2 # [0, len(valid_columns) + 1]
+
+    X_train, Y_train, _, _ = putil.get_dataset(dataset_name)
+    model = estimator_type(
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        tmp_folder=tmp_dir + '_classifier',
+        tmp_folder=tmp_dir,
         seed=1
     )
-    classifier.fit(X_train, Y_train)
+    model.fit(X_train, Y_train)
 
-    X_train, Y_train, _, _ = putil.get_dataset('boston')
-    regressor = AutoSklearnRegressor(
-        time_left_for_this_task=30,
-        per_run_time_limit=5,
-        tmp_folder=tmp_dir + '_regressor',
-        seed=1
-    )
-    regressor.fit(X_train, Y_train)
+    valid_columns = [
+        "rank", "ensemble_weight", "type", "cost", "duration",
+        "train_loss", "seed", "start_time", "end_time", "budget", "status",
+        "data_preprocessors", "feature_preprocessors", "balancing_strategy",
+        "config_origin"
+    ]
+    simple_columns = ["rank", "ensemble_weight", "type", "cost", "duration"]
+    detailed_columns = valid_columns
 
-    # Fuzz over the possible combinations of valid parameters listed
+    # Create a dict of all possible param values for each param
+    # with some invalid one's of the incorrect type
     valid_params = {
-        'detaild': [True, False],
+        'detailed': [True, False],
         'ensemble_only': [True, False],
-        'top_k': [0, 1, 2, 10, 1000, 'all'],
-        'sort_by': ['cost', 'ensemble_weight'],
-        'include': [None, ['cost', 'type', 'ensemble_weight'], ['id', 'rank']],
+        'top_k': [-10, 0, 1, 10, 'all'],
+        'sort_by': [*valid_columns, 'invalid'],
+        'sort_order': ['ascending', 'descending', 'invalid', None],
+        'include': itertools.chain.from_iterable(
+            itertools.combinations(
+                [None, *valid_columns, 'invalid'], item_count
+            )
+            for item_count in range(0, MAX_COMBO_SIZE_FOR_INCLUDE_PARAM)
+        )
     }
 
-    for model in [classifier, regressor]:
-        # Create a generator of all possible combinations of valid_params
-        params_generator = iter(
-            dict(zip(valid_params.keys(), param_values))
-            for param_values in itertools.product(*valid_params.values())
-        )
+    # Create a generator of all possible combinations of valid_params
+    params_generator = iter(
+        dict(zip(valid_params.keys(), param_values))
+        for param_values in itertools.product(*valid_params.values())
+    )
 
-        # No exception should be raised, but print params if one does
-        for params in params_generator:
-            try:
+    for params in params_generator:
+
+        # Invalid top_k should raise an error, is a positive int or 'all'
+        if not (params['top_k'] == 'all' or params['top_k'] > 0):
+            with pytest.raises(ValueError):
                 model.leaderboard(**params)
-            except Exception as e:
-                print(f"params = {params}")
-                raise e
+
+        # Invalid sort_by column
+        # Can't sort_by rank as rank is based on the sort criteria
+        elif (
+            params['sort_by'] == 'rank'
+            or params['sort_by'] not in valid_columns
+        ):
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # Shouldn't accept an invalid sort order
+        elif params['sort_order'] not in ['ascending', 'descending', None]:
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # Invalid include item
+        elif len(set(params['include']) - set(valid_columns)) != 0:
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # Should run without an error if all params are valid
+        else:
+            # Validate the outputs
+            leaderboard = model.leaderboard(**params)
+
+            # top_k should never be less than the rows given back
+            # It can however be larger
+            if isinstance(params['top_k'], int):
+                assert params['top_k'] >= len(leaderboard)
+
+            # Check the right columns are present and in the right order
+            # The id is set as the index but is not included in pandas columns
+            columns = list(leaderboard.columns)
+            if params['include'] is not None:
+                assert columns == list(params['include'])
+            elif params['detailed']:
+                assert columns == detailed_columns
+            else:
+                assert columns == simple_columns
+
+            # Ensure that if it's ensemble only
+            # Can only check if 'ensemble_weight' is present
+            if (
+                params['ensemble_only']
+                and 'ensemble_weight' in columns
+            ):
+                assert all(leaderboard['ensemble_weight'] > 0)
 
 
 @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.build_automl')
