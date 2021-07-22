@@ -331,7 +331,7 @@ def test_leaderboard(
 ):
     # Comprehensive test tasks a substantial amount of time, manually set if
     # required.
-    MAX_COMBO_SIZE_FOR_INCLUDE_PARAM = 2 # [0, len(valid_columns) + 1]
+    MAX_COMBO_SIZE_FOR_INCLUDE_PARAM = 2  # [0, len(valid_columns) + 1]
 
     X_train, Y_train, _, _ = putil.get_dataset(dataset_name)
     model = estimator_type(
