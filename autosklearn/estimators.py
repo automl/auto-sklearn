@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 
-from typing import Optional, Dict, List, Tuple, Union, Iterable, Final, Literal
+from typing import Optional, Dict, List, Tuple, Union, Iterable, Literal
 
 from ConfigSpace.configuration_space import Configuration
 import dask.distributed
@@ -625,13 +625,13 @@ class AutoSklearnEstimator(BaseEstimator):
         #      weights for.
 
         # The different kinds of columns and their sort order
-        all_columns: Final[List[str]] = [
+        all_columns = [
             "rank", "ensemble_weight", "type", "cost", "duration",
             "train_loss", "seed", "start_time", "end_time", "budget", "status",
             "data_preprocessors", "feature_preprocessors", "balancing_strategy",
             "config_origin"
         ]
-        simple_columns: Final[List[str]] = [
+        simple_columns = [
             "rank", "ensemble_weight", "type", "cost", "duration"
         ]
         detailed_columns = all_columns
