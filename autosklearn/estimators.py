@@ -567,25 +567,28 @@ class AutoSklearnEstimator(BaseEstimator):
 
         The availble statistics are:
 
-            Simple:
-                * rank - The rank of the model.
-                * ensemble_weight - The weight given to the model in the
-                ensemble.
-                * type - The type of classifier/regressor used.
-                * cost - The loss of the model on the validation set.
-                * duration - Length of time the model was optimized for.
+        **Simple**:
 
-            Includable:
-                * budget - How much time was allocated to this model.
-                * status - The return status of training the model with SMAC.
-                * train_loss - The loss of the model on the training set.
-                * balancing_strategy - TODO
-                * start_time - Time the model began being optimized
-                * end_time - Time the model ended being optimized
-                * data_preprocessors - The preprocessors used on the data
-                * feature_preprocessors - The preprocessors for features types
+        * ``"rank"`` - The rank of the model.
+        * ``"ensemble_weight"`` - The weight given to the model in the ensemble.
+        * ``"type"`` - The type of classifier/regressor used.
+        * ``"cost"`` - The loss of the model on the validation set.
+        * ``"duration"`` - Length of time the model was optimized for.
 
-        Paramaters
+        **Detailed**:
+        The detailed view includes all of the simple statistics along with the
+        following.
+
+        * ``"budget"`` - How much time was allocated to this model.
+        * ``"status"`` - The return status of training the model with SMAC.
+        * ``"train_loss"`` - The loss of the model on the training set.
+        * ``"balancing_strategy"`` - The balancing strategy used for data preprocessing.
+        * ``"start_time"`` - Time the model began being optimized
+        * ``"end_time"`` - Time the model ended being optimized
+        * ``"data_preprocessors"`` - The preprocessors used on the data
+        * ``"feature_preprocessors"`` - The preprocessors for features types
+
+        Parameters
         ----------
         detailed: bool = False
             Whether to give detailed information or just a simple overview.
@@ -594,31 +597,34 @@ class AutoSklearnEstimator(BaseEstimator):
             Whether to view only models included in the ensemble or all models
             trained.
 
-        top_k: int or 'all' = 'all'
+        top_k: int or "all" = "all"
             How many models to display.
 
         sort_by: str = 'cost'
             What column to sort by. If that column is not present, the
-            sorting defaults to the 'id' index.
+            sorting defaults to the ``"id"`` index column.
 
-        sort_order: Optional['ascending' or 'descending']
-            Which sort order to apply to the `sort_by` column. If left
-            as None, it will sort by a sensible default where "better" is on
+        sort_order: Optional["ascending" or "descending"]
+            Which sort order to apply to the ``sort_by`` column. If left
+            as ``None``, it will sort by a sensible default where "better" is on
             top, otherwise defaulting to pandas default for
-            DataFrame.sort_values if there is no obvious "better".
+            `DataFrame.sort_values`_ if there is no obvious "better".
+
+            .. _DataFrame.sort_values: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.sort_values.html
 
         include: Optional[Iterable[str]]
             Items to include, other items not specified will be excluded.
-            The exception is the `id` which is always included.
+            The exception is the ``"id"`` index column which is always included.
 
-            If left as `None`, it will resort back to the the `simple` or
-            `detailed` view as specified by the `detailed` parameter.
+            If left as ``None``, it will resort back to using the ``detailed``
+            param to decide the columns to include.
 
         Returns
         -------
         pd.DataFrame
-            A dataframe of statistics for the models, ordered by `sort_by``.
-        """
+            A dataframe of statistics for the models, ordered by ``sort_by``.
+
+        """  # noqa (links are too long)
         # TODO budget seems to be 0.0 all the time?
         # TODO validate that `self` is fitted. This is required for
         #      self.ensemble_ to get the identifiers of models it will generate
