@@ -1,7 +1,12 @@
 # Documentation
 docs/build/*
+docs/examples
 
 *.py[cod]
+
+# Exmaples
+# examples 40_advanced generate a tmp_folder
+examples/40_advanced/tmp_folder
 
 # C extensions
 *.c
