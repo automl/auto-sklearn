@@ -737,8 +737,8 @@ class AutoSklearnEstimator(BaseEstimator):
                 ]
             })
 
-        # Create index into model_runs by model_id
-        # run_info can have model_id=None but not important here
+        # Create dict model_id -> run_info
+        # Needed for now as we can't use model_id to index all runs
         model_id_to_run_info = {
             run_info['id']: model_runs[config_id]
             for config_id, run_info in model_runs.items()
@@ -746,14 +746,22 @@ class AutoSklearnEstimator(BaseEstimator):
 
         # Get the models ensemble weight if it has one
         # TODO both implementing classes of AbstractEnsemble have a property
-        #      `identifiers_` and `weights_`,
-        #       might be good to put it as an abstract property
+        #      `identifiers_` and `weights_`, might be good to put it as an
+        #       abstract property
         # TODO `ensemble_.identifiers_` and `ensemble_.weights_` are loosely
         #      tied together by ordering, might be better to store as tuple
         for i, weight in enumerate(self.automl_.ensemble_.weights_):
             (_, model_id, _) = self.automl_.ensemble_.identifiers_[i]
             run_info = model_id_to_run_info[model_id]
             run_info['ensemble_weight'] = weight
+
+        # TODO If model_id and config_id align we can simply use model_id
+        #      to index into run_info.
+        #      Alternatively, if any run fails to produce a num_run, we can
+        #      exclude it, maintaining num_run as the index
+        # for i, weight in enumerate(self.automl_.ensemble_.weights_):
+        #   (_, model_id, _) = self.automl_.ensemble_.identifiers_[i]
+        #   model_runs[model_id]['ensemble_id'] = weight
 
         # Filter out non-ensemble members if needed, else fill in a default
         # value of 0 if it's missing
