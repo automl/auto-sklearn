@@ -278,14 +278,20 @@ class EnsembleSelection(AbstractEnsemble):
         return average
 
     def __str__(self) -> str:
-        return 'Ensemble Selection:\n\tTrajectory: %s\n\tMembers: %s' \
-               '\n\tWeights: %s\n\tIdentifiers: %s' % \
-               (' '.join(['%d: %5f' % (idx, performance)
-                         for idx, performance in enumerate(self.trajectory_)]),
-                self.indices_, self.weights_,
-                ' '.join([str(identifier) for idx, identifier in
-                          enumerate(self.identifiers_)
-                          if self.weights_[idx] > 0]))
+        trajectory_str = ' '.join([
+            f'{id}: {perf:.5f}'
+            for id, perf in enumerate(self.trajectory_)
+        ])
+        identifiers_str = ' '.join([
+            f'{identifier}'
+            for idx, identifier in enumerate(self.identifiers_)
+            if self.weights_[idx] > 0
+        ])
+        return ("Ensemble Selection:\n"
+                f"\tTrajectory: {trajectory_str}\n"
+                f"\tMembers: {self.indices_}\n"
+                f"\tWeights: {self.weights_}\n"
+                f"\tIdentifiers: {identifiers_str}\n")
 
     def get_models_with_weights(
         self,
