@@ -629,6 +629,15 @@ class AutoSklearnEstimator(BaseEstimator):
         # TODO validate that `self` is fitted. This is required for
         #      self.ensemble_ to get the identifiers of models it will generate
         #      weights for.
+        # TODO There is a discrepency between identifiers used by SMAC and
+        #      and the identifiers used by an Ensemble class.
+        #      SMAC uses `config_id` which is available for every run of SMAC
+        #      while Ensemble uses `model_id == num_run` which is only available
+        #      in runinfo.additional_info. However, this is not always included
+        #      in additional_info, nor is additional_info garunteed to exist.
+        #      Therefore the only garunteed unique identifier for models are
+        #      `config_id`s which can confuse the user if they wise to interact
+        #      with the ensembler.
 
         # The different kinds of columns and their sort order
         all_columns = [
@@ -683,7 +692,8 @@ class AutoSklearnEstimator(BaseEstimator):
 
         model_runs = {
             rkey.config_id: {
-                'id': rkey.config_id,
+                'id': rval.additional_info['num_run']
+                if has_key(rval, 'num_run') else None,
                 'seed': rkey.seed,
                 'budget': rkey.budget,
                 'duration': rval.time,
@@ -711,8 +721,8 @@ class AutoSklearnEstimator(BaseEstimator):
         # A dict mapping model ids to their configurations
         configurations = self.automl_.runhistory_.ids_config
 
-        for model_id, run_info in model_runs.items():
-            run_config = configurations[model_id]._values
+        for config_id, run_info in model_runs.items():
+            run_config = configurations[config_id]._values
 
             run_info.update({
                 'balancing_strategy': run_config.get('balancing:strategy', None),
@@ -727,14 +737,23 @@ class AutoSklearnEstimator(BaseEstimator):
                 ]
             })
 
+        # Create index into model_runs by model_id
+        # run_info can have model_id=None but not important here
+        model_id_to_run_info = {
+            run_info['id']: model_runs[config_id]
+            for config_id, run_info in model_runs.items()
+        }
+
         # Get the models ensemble weight if it has one
         # TODO both implementing classes of AbstractEnsemble have a property
         #      `identifiers_` and `weights_`,
         #       might be good to put it as an abstract property
         # TODO `ensemble_.identifiers_` and `ensemble_.weights_` are loosely
         #      tied together by ordering, might be better to store as tuple
-        for i, (_, model_id, _) in enumerate(self.automl_.ensemble_.identifiers_):
-            model_runs[model_id]['ensemble_weight'] = self.automl_.ensemble_.weights_[i]
+        for i, weight in enumerate(self.automl_.ensemble_.weights_):
+            (_, model_id, _) = self.automl_.ensemble_.identifiers_[i]
+            run_info = model_id_to_run_info[model_id]
+            run_info['ensemble_weight'] = weight
 
         # Filter out non-ensemble members if needed, else fill in a default
         # value of 0 if it's missing
