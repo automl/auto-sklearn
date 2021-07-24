@@ -33,6 +33,12 @@ automl = autosklearn.regression.AutoSklearnRegressor(
 )
 automl.fit(X_train, y_train, dataset_name='diabetes')
 
+############################################################################
+# View the models found by auto-sklearn
+# =====================================
+
+print(automl.leaderboard())
+
 ######################################################
 # Print the final ensemble constructed by auto-sklearn
 # ====================================================
