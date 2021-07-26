@@ -13,10 +13,10 @@ if os.name != 'posix':
         sys.platform
     )
 
-if sys.version_info < (3, 6):
+if sys.version_info < (3, 7):
     raise ValueError(
         'Unsupported Python version %d.%d.%d found. Auto-sklearn requires Python '
-        '3.6 or higher.' % (sys.version_info.major, sys.version_info.minor, sys.version_info.micro)
+        '3.7 or higher.' % (sys.version_info.major, sys.version_info.minor, sys.version_info.micro)
     )
 
 HERE = os.path.abspath(os.path.dirname(__file__))
@@ -77,10 +77,10 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
         "Topic :: Scientific/Engineering :: Information Analysis",
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     url='https://automl.github.io/auto-sklearn',
 )

@@ -45,7 +45,7 @@ from autosklearn.data.validation import (
 )
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
-from autosklearn.evaluation.train_evaluator import _fit_with_budget
+from autosklearn.evaluation.train_evaluator import TrainEvaluator, _fit_with_budget
 from autosklearn.metrics import calculate_metric
 from autosklearn.util.backend import Backend
 from autosklearn.util.stopwatch import StopWatch
@@ -139,13 +139,13 @@ class AutoML(BaseEstimator):
                  smac_scenario_args=None,
                  logging_config=None,
                  metric=None,
-                 scoring_functions=None
+                 scoring_functions=None,
+                 get_trials_callback=None
                  ):
         super(AutoML, self).__init__()
         self.configuration_space = None
         self._backend = backend
         # self._tmp_dir = tmp_dir
-        # self._output_dir = output_dir
         self._time_for_task = time_left_for_this_task
         self._per_run_time_limit = per_run_time_limit
         self._initial_configurations_via_metalearning = \
@@ -165,32 +165,6 @@ class AutoML(BaseEstimator):
         self._scoring_functions = scoring_functions if scoring_functions is not None else []
         self._resampling_strategy_arguments = resampling_strategy_arguments \
             if resampling_strategy_arguments is not None else {}
-        if self._resampling_strategy not in ['holdout',
-                                             'holdout-iterative-fit',
-                                             'cv',
-                                             'cv-iterative-fit',
-                                             'partial-cv',
-                                             'partial-cv-iterative-fit',
-                                             ] \
-           and not issubclass(self._resampling_strategy, BaseCrossValidator)\
-           and not issubclass(self._resampling_strategy, _RepeatedSplits)\
-           and not issubclass(self._resampling_strategy, BaseShuffleSplit):
-            raise ValueError('Illegal resampling strategy: %s' %
-                             self._resampling_strategy)
-
-        if self._resampling_strategy in ['partial-cv',
-                                         'partial-cv-iterative-fit',
-                                         ] \
-           and self._ensemble_size != 0:
-            raise ValueError("Resampling strategy %s cannot be used "
-                             "together with ensembles." % self._resampling_strategy)
-        if self._resampling_strategy in ['partial-cv',
-                                         'cv',
-                                         'cv-iterative-fit',
-                                         'partial-cv-iterative-fit',
-                                         ]\
-           and 'folds' not in self._resampling_strategy_arguments:
-            self._resampling_strategy_arguments['folds'] = 5
         self._n_jobs = n_jobs
         self._dask_client = dask_client
 
@@ -208,6 +182,7 @@ class AutoML(BaseEstimator):
                                      "'disable_evaluator_output' must be one "
                                      "of " + str(allowed_elements))
         self._get_smac_object_callback = get_smac_object_callback
+        self._get_trials_callback = get_trials_callback
         self._smac_scenario_args = smac_scenario_args
         self.logging_config = logging_config
 
@@ -253,9 +228,6 @@ class AutoML(BaseEstimator):
 
         # By default try to use the TCP logging port or get a new port
         self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
-
-        # After assigning and checking variables...
-        # self._backend = Backend(self._output_dir, self._tmp_dir)
 
         # Num_run tell us how many runs have been launched
         # It can be seen as an identifier for each configuration
@@ -427,7 +399,7 @@ class AutoML(BaseEstimator):
                 self._logger.error(
                     "Dummy prediction failed with run state %s. "
                     "The error suggests that the provided memory limits were too tight. Please "
-                    "increase the 'ml_memory_limit' and try again. If this does not solve your "
+                    "increase the 'memory_limit' and try again. If this does not solve your "
                     "problem, please open an issue and paste the additional output. "
                     "Additional output: %s.",
                     str(status), str(additional_info),
@@ -436,7 +408,7 @@ class AutoML(BaseEstimator):
                 raise ValueError(
                     "Dummy prediction failed with run state %s. "
                     "The error suggests that the provided memory limits were too tight. Please "
-                    "increase the 'ml_memory_limit' and try again. If this does not solve your "
+                    "increase the 'memory_limit' and try again. If this does not solve your "
                     "problem, please open an issue and paste the additional output. "
                     "Additional output: %s." %
                     (str(status), str(additional_info)),
@@ -510,6 +482,15 @@ class AutoML(BaseEstimator):
             task=self._task,
         )
 
+        # Check the re-sampling strategy
+        try:
+            self._check_resampling_strategy(
+                X=X, y=y, task=task,
+            )
+        except Exception as e:
+            self._fit_cleanup()
+            raise e
+
         # Reset learnt stuff
         self.models_ = None
         self.cv_models_ = None
@@ -537,10 +518,8 @@ class AutoML(BaseEstimator):
         self._dataset_name = dataset_name
         self._stopwatch.start_task(self._dataset_name)
 
-        if feat_type is None and self.InputValidator.feature_validator.feat_type:
-            self._feat_type = self.InputValidator.feature_validator.feat_type
-        elif feat_type is not None:
-            self._feat_type = feat_type
+        # Take the feature types from the validator
+        self._feat_type = self.InputValidator.feature_validator.feat_type
 
         # Produce debug information to the logfile
         self._logger.debug('Starting to print environment information')
@@ -573,7 +552,6 @@ class AutoML(BaseEstimator):
                 raise ValueError('Unable to read requirement: %s' % requirement)
         self._logger.debug('Done printing environment information')
         self._logger.debug('Starting to print arguments to auto-sklearn')
-        self._logger.debug('  output_folder: %s', self._backend.context._output_directory)
         self._logger.debug('  tmp_folder: %s', self._backend.context._temporary_directory)
         self._logger.debug('  time_left_for_this_task: %f', self._time_for_task)
         self._logger.debug('  per_run_time_limit: %f', self._per_run_time_limit)
@@ -782,6 +760,7 @@ class AutoML(BaseEstimator):
                 port=self._logger_port,
                 pynisher_context=self._multiprocessing_context,
                 ensemble_callback=proc_ensemble,
+                trials_callback=self._get_trials_callback
             )
 
             try:
@@ -837,6 +816,63 @@ class AutoML(BaseEstimator):
         # Clean up the logger
         self._logger.info("Starting to clean up the logger")
         self._clean_logger()
+        return
+
+    def _check_resampling_strategy(
+        self,
+        X: SUPPORTED_FEAT_TYPES,
+        y: SUPPORTED_TARGET_TYPES,
+        task: int,
+    ) -> None:
+        """
+        This method centralizes the checks for resampling strategies
+
+        Parameters
+        ----------
+        X: (SUPPORTED_FEAT_TYPES)
+            Input features for the given task
+        y: (SUPPORTED_TARGET_TYPES)
+            Input targets for the given task
+        task: (task)
+            Integer describing a supported task type, like BINARY_CLASSIFICATION
+        """
+        is_split_object = isinstance(
+            self._resampling_strategy,
+            (BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit)
+        )
+
+        if self._resampling_strategy not in [
+                'holdout',
+                'holdout-iterative-fit',
+                'cv',
+                'cv-iterative-fit',
+                'partial-cv',
+                'partial-cv-iterative-fit',
+        ] and not is_split_object:
+            raise ValueError('Illegal resampling strategy: %s' % self._resampling_strategy)
+
+        elif is_split_object:
+            TrainEvaluator.check_splitter_resampling_strategy(
+                X=X, y=y, task=task,
+                groups=self._resampling_strategy_arguments.get('groups', None),
+                resampling_strategy=self._resampling_strategy,
+            )
+
+        elif self._resampling_strategy in [
+            'partial-cv',
+            'partial-cv-iterative-fit',
+        ] and self._ensemble_size != 0:
+            raise ValueError("Resampling strategy %s cannot be used "
+                             "together with ensembles." % self._resampling_strategy)
+
+        elif self._resampling_strategy in [
+            'partial-cv',
+            'cv',
+            'cv-iterative-fit',
+            'partial-cv-iterative-fit',
+        ] and 'folds' not in self._resampling_strategy_arguments:
+            self._resampling_strategy_arguments['folds'] = 5
+
         return
 
     @staticmethod
@@ -1022,7 +1058,7 @@ class AutoML(BaseEstimator):
             attributes will be automatically One-Hot encoded. The values
             used for a categorical attribute must be integers, obtained for
             example by `sklearn.preprocessing.LabelEncoder
-            <http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_.
+            <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_.
 
         Returns
         -------

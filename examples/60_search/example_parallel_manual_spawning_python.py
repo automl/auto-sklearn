@@ -12,9 +12,9 @@ This example shows how to start the dask scheduler and spawn
 workers for *Auto-sklearn* manually within Python. Use this example
 as a starting point to parallelize *Auto-sklearn* across multiple
 machines. If you want to start everything manually from the command line
-please see `this example <example_parallel_manual_spawning_cli.html>`_.
+please see :ref:`sphx_glr_examples_60_search_example_parallel_manual_spawning_cli.py`.
 To run *Auto-sklearn* in parallel on a single machine check out the example
-`Parallel Usage on a single machine <example_parallel_n_jobs.html>`_.
+:ref:`sphx_glr_examples_60_search_example_parallel_n_jobs.py`.
 
 When manually passing a dask client to Auto-sklearn, all logic
 must be guarded by ``if __name__ == "__main__":`` statements! We use
@@ -57,7 +57,6 @@ from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.constants import MULTICLASS_CLASSIFICATION
 
 tmp_folder = '/tmp/autosklearn_parallel_2_example_tmp'
-output_folder = '/tmp/autosklearn_parallel_2_example_out'
 
 
 ############################################################################
@@ -91,7 +90,7 @@ def start_python_worker(scheduler_address):
 # Start Auto-sklearn
 # ==================
 #
-# We are now ready to start *auto-sklearn and all dask related processes.
+# We are now ready to start *auto-sklearn* and all dask related processes.
 #
 # To use auto-sklearn in parallel we must guard the code with
 # ``if __name__ == '__main__'``. We then start a dask cluster as a context,
@@ -128,7 +127,6 @@ if __name__ == '__main__':
                 per_run_time_limit=10,
                 memory_limit=1024,
                 tmp_folder=tmp_folder,
-                output_folder=output_folder,
                 seed=777,
                 # n_jobs is ignored internally as we pass a dask client.
                 n_jobs=1,

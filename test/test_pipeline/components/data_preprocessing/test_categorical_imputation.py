@@ -1,29 +1,76 @@
 import numpy as np
 from scipy import sparse
 
+import pandas as pd
+import pytest
+
 from autosklearn.pipeline.components.data_preprocessing.imputation.categorical_imputation\
     import CategoricalImputation
-from autosklearn.pipeline.util import PreprocessingTestCase
 
 
-class CategoricalImputationTest(PreprocessingTestCase):
-    def _get_dataset(self):
-        size = (50, 20)
-        X = np.array(np.random.randint(3, 10, size=size), dtype=float)
-        mask = np.logical_not(np.random.randint(0, 5, size=size), dtype=bool)
+@pytest.fixture
+def input_data_imputation(request):
+    size = (50, 20)
+    X = np.array(np.random.randint(3, 10, size=size), dtype=float)
+    mask = np.logical_not(np.random.randint(0, 5, size=size), dtype=bool)
+    X[mask] = np.nan
+    if request.param == 'numpy':
+        pass
+    elif request.param == 'pandas':
+        X = pd.DataFrame(X)
+    return X, mask
+
+
+@pytest.mark.parametrize('input_data_imputation', ('numpy', 'pandas'), indirect=True)
+@pytest.mark.parametrize('categorical', (True, False))
+def test_default_imputation(input_data_imputation, categorical):
+    """
+    Makes sure that imputation works for both numerical and categorical data.
+    This also has to be guaranteed for numpy and pandas like objects.
+    """
+    X, mask = input_data_imputation
+    if categorical:
+        imputation_value = 'missing_value'
+        X = X.astype('str').astype('object')
         X[mask] = np.nan
-        return X, mask
+    else:
+        imputation_value = 0
+    Y = CategoricalImputation().fit_transform(X.copy())
+    assert ((np.argwhere(Y == imputation_value) == np.argwhere(mask)).all())
+    assert ((np.argwhere(Y != imputation_value) == np.argwhere(np.logical_not(mask))).all())
 
-    def test_default(self):
-        X, mask = self._get_dataset()
-        Y = CategoricalImputation().fit_transform(X)
-        self.assertTrue((np.argwhere(Y == 2) == np.argwhere(mask)).all())
-        self.assertTrue((np.argwhere(Y != 2) == np.argwhere(np.logical_not(mask))).all())
 
-    def test_default_sparse(self):
-        X, mask = self._get_dataset()
-        X = sparse.csc_matrix(X)
-        Y = CategoricalImputation().fit_transform(X)
-        Y = Y.todense()
-        self.assertTrue((np.argwhere(Y == 2) == np.argwhere(mask)).all())
-        self.assertTrue((np.argwhere(Y != 2) == np.argwhere(np.logical_not(mask))).all())
+@pytest.mark.parametrize('format_type', ('numpy', 'pandas'))
+def test_nonzero_numerical_imputation(format_type):
+
+    # First try with an array with 0 as only valid category. The imputation should
+    # happen with -1
+    X = np.full(fill_value=np.nan, shape=(10, 10))
+    X[0, :] = 0
+    if 'pandas' in format_type:
+        X = pd.DataFrame(X)
+    elif 'numpy' in format_type:
+        pass
+    else:
+        pytest.fail(format_type)
+    Y = CategoricalImputation().fit_transform(X.copy())
+    np.testing.assert_equal(np.nan_to_num(X, nan=-1, copy=True), Y)
+
+    # Then if there is also a -1 in the category, we expect -2 as imputation
+    X = np.full(fill_value=np.nan, shape=(10, 10))
+    X[0, :] = 0
+    X[1, :] = -1
+    if 'pandas' in format_type:
+        X = pd.DataFrame(X)
+    Y = CategoricalImputation().fit_transform(X.copy())
+    np.testing.assert_equal(np.nan_to_num(X, nan=-2, copy=True), Y)
+
+
+@pytest.mark.parametrize('input_data_imputation', ('numpy'), indirect=True)
+def test_default_sparse(input_data_imputation):
+    X, mask = input_data_imputation
+    X = sparse.csc_matrix(X)
+    Y = CategoricalImputation().fit_transform(X)
+    Y = Y.todense()
+    assert (np.argwhere(Y == 0) == np.argwhere(mask)).all()
+    assert (np.argwhere(Y != 0) == np.argwhere(np.logical_not(mask))).all()

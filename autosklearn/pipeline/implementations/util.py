@@ -11,7 +11,7 @@ def softmax(df):
         return np.transpose(np.array((1 - ppositive, ppositive)))
     else:
         # Compute the Softmax like it is described here:
-        # http://www.iro.umontreal.ca/~bengioy/dlbook/numerical.html
+        # https://www.deeplearningbook.org/contents/numerical.html
         tmp = df - np.max(df, axis=1).reshape((-1, 1))
         tmp = np.exp(tmp)
         return tmp / np.sum(tmp, axis=1).reshape((-1, 1))

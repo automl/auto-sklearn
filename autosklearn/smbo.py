@@ -18,6 +18,7 @@ from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
 from smac.scenario.scenario import Scenario
 from smac.tae.serial_runner import SerialRunner
 from smac.tae.dask_runner import DaskParallelRunner
+from smac.callbacks import IncorporateRunResultCallback
 
 
 import autosklearn.metalearning
@@ -84,8 +85,9 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
         # == Calculate metafeatures
         task_name = 'CalculateMetafeatures'
         watcher.start_task(task_name)
-        categorical = [True if feat_type.lower() in ['categorical'] else False
-                       for feat_type in data_feat_type]
+
+        categorical = {col: True if feat_type.lower() == 'categorical' else False
+                       for col, feat_type in data_feat_type.items()}
 
         EXCLUDE_META_FEATURES = EXCLUDE_META_FEATURES_CLASSIFICATION \
             if data_info_task in CLASSIFICATION_TASKS else EXCLUDE_META_FEATURES_REGRESSION
@@ -122,8 +124,8 @@ def _calculate_metafeatures_encoded(data_feat_type, basename, x_train, y_train, 
 
         task_name = 'CalculateMetafeaturesEncoded'
         watcher.start_task(task_name)
-        categorical = [True if feat_type.lower() in ['categorical'] else False
-                       for feat_type in data_feat_type]
+        categorical = {col: True if feat_type.lower() == 'categorical' else False
+                       for col, feat_type in data_feat_type.items()}
 
         result = calculate_all_metafeatures_encoded_labels(
             x_train, y_train, categorical=categorical,
@@ -240,6 +242,7 @@ class AutoMLSMBO(object):
                  scoring_functions=None,
                  pynisher_context='spawn',
                  ensemble_callback: typing.Optional[EnsembleBuilderManager] = None,
+                 trials_callback: typing.Optional[IncorporateRunResultCallback] = None
                  ):
         super(AutoMLSMBO, self).__init__()
         # data related
@@ -287,6 +290,7 @@ class AutoMLSMBO(object):
         self.pynisher_context = pynisher_context
 
         self.ensemble_callback = ensemble_callback
+        self.trials_callback = trials_callback
 
         dataset_name_ = "" if dataset_name is None else dataset_name
         logger_name = '%s(%d):%s' % (self.__class__.__name__, self.seed, ":" + dataset_name_)
@@ -498,6 +502,8 @@ class AutoMLSMBO(object):
 
         if self.ensemble_callback is not None:
             smac.register_callback(self.ensemble_callback)
+        if self.trials_callback is not None:
+            smac.register_callback(self.trials_callback)
 
         smac.optimize()
 

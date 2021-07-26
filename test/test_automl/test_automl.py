@@ -396,7 +396,7 @@ def test_do_dummy_prediction(backend, dask_client, datasets):
         X_test, Y_test,
         task=task,
         dataset_name=name,
-        feat_type=None,
+        feat_type={i: 'numerical' for i in range(X_train.shape[1])},
     )
 
     auto = autosklearn.automl.AutoML(
@@ -439,7 +439,7 @@ def test_fail_if_dummy_prediction_fails(ta_run_mock, backend, dask_client):
         X_train, Y_train,
         X_test, Y_test,
         task=2,
-        feat_type=['Numerical' for i in range(X_train.shape[1])],
+        feat_type={i: 'Numerical' for i in range(X_train.shape[1])},
         dataset_name='iris',
     )
 
@@ -655,7 +655,7 @@ def test_fail_if_feat_type_on_pandas_input(backend, dask_client):
         automl.fit(
             X_train, y_train,
             task=BINARY_CLASSIFICATION,
-            feat_type=['Categorical', 'Numerical'],
+            feat_type={1: 'Categorical', 2: 'Numerical'},
         )
 
 

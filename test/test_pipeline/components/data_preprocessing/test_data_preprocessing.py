@@ -62,19 +62,24 @@ class PreprocessingPipelineTest(unittest.TestCase):
         # Combine datasets and shuffle columns:
         n_feats = len(categ_feat)
         random_order = np.random.choice(np.arange(n_feats), size=n_feats, replace=False)
-        # Shuffle cat_feat according to random_order
-        categ_feat = np.array(categ_feat)[random_order]
         # Shuffle X according to random_order
         X = np.array(X)[random_order]
         X_comb = np.hstack(X)
         # Shuffle Y according to random_order and reorder it as the PreprocessingPipeline
         # does (i.e. categorical features come first in Y).
-        num_feat = np.logical_not(categ_feat)
-        y_order = random_order[np.argsort(num_feat)]
-        Y = [Y[n] for n in y_order]
+
+        categ_feat = {i: 'categorical' if categ_feat[order] else 'numerical'
+                      for i, order in enumerate(random_order)}
+        cat_to_left_order = [index for col, index in sorted(
+            [(col_type, i) for i, col_type in categ_feat.items()]
+        )]
+        # Sort so that Y Matches the random ordering
+        Y = [Y[n] for n in random_order]
+        # Then move the categorical columns to the left
+        Y = [Y[n] for n in cat_to_left_order]
         Y_comb = np.hstack(Y)
         # Data preprocessing
-        DPP = DataPreprocessor(categorical_features=categ_feat)
+        DPP = DataPreprocessor(feat_type=categ_feat)
         X_comb = sparse.csc_matrix(X_comb) if sparse_input else X_comb
         Y_comb_out_1 = DPP.fit_transform(X_comb)
         # Check if Y_comb_out is what we expect it to be:
@@ -107,10 +112,12 @@ class PreprocessingPipelineTest(unittest.TestCase):
             ['white', 'tall', np.nan]])
         # Combined dataset with shuffled columns:
         X_comb = np.hstack((X_num, X_cat))
-        categ_feat = np.array([False] * 3 + [True] * 3)
+        categ_feat = [False] * 3 + [True] * 3
         random_order = np.random.choice(np.arange(6), size=6, replace=False)
         X_comb = X_comb[:, random_order]
-        categ_feat = categ_feat[random_order]
+        categ_feat = [categ_feat[order] for order in random_order]
         # Strings are not allowed, therefore:
         with self.assertRaises(ValueError):
-            DataPreprocessor(categorical_features=categ_feat).fit_transform(X_comb)
+            categ_feat = {i: 'categorical' if feat else 'numerical'
+                          for i, feat in enumerate(categ_feat)}
+            DataPreprocessor(feat_type=categ_feat).fit_transform(X_comb)

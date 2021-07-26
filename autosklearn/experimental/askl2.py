@@ -177,9 +177,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         seed: int = 1,
         memory_limit: int = 3072,
         tmp_folder: Optional[str] = None,
-        output_folder: Optional[str] = None,
         delete_tmp_folder_after_terminate: bool = True,
-        delete_output_folder_after_terminate: bool = True,
         n_jobs: Optional[int] = None,
         dask_client: Optional[dask.distributed.Client] = None,
         disable_evaluator_output: bool = False,
@@ -237,17 +235,9 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             folder to store configuration output and log files, if ``None``
             automatically use ``/tmp/autosklearn_tmp_$pid_$random_number``
 
-        output_folder : string, optional (None)
-            folder to store predictions for optional test set, if ``None``
-            no output will be generated
-
         delete_tmp_folder_after_terminate: string, optional (True)
             remove tmp_folder, when finished. If tmp_folder is None
             tmp_dir will always be deleted
-
-        delete_output_folder_after_terminate: bool, optional (True)
-            remove output_folder, when finished. If output_folder is None
-            output_dir will always be deleted
 
         n_jobs : int, optional, experimental
             The number of jobs to run in parallel for ``fit()``. ``-1`` means
@@ -331,9 +321,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             resampling_strategy=None,
             resampling_strategy_arguments=None,
             tmp_folder=tmp_folder,
-            output_folder=output_folder,
             delete_tmp_folder_after_terminate=delete_tmp_folder_after_terminate,
-            delete_output_folder_after_terminate=delete_output_folder_after_terminate,
             n_jobs=n_jobs,
             dask_client=dask_client,
             disable_evaluator_output=disable_evaluator_output,

@@ -1,3 +1,8 @@
+from typing import Dict, Optional, Tuple, Union
+
+import numpy as np
+
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformIntegerHyperparameter, \
     CategoricalHyperparameter
@@ -10,7 +15,8 @@ from autosklearn.pipeline.components.base import \
 
 
 class QuantileTransformerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, n_quantiles, output_distribution, random_state):
+    def __init__(self, n_quantiles: int, output_distribution: str,
+                 random_state: Optional[np.random.RandomState] = None):
         from sklearn.preprocessing import QuantileTransformer
         self.n_quantiles = n_quantiles
         self.output_distribution = output_distribution
@@ -21,7 +27,8 @@ class QuantileTransformerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm)
         )
 
     @staticmethod
-    def get_properties(dataset_properties=None):
+    def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+                       ) -> Dict[str, Optional[Union[str, int, bool, Tuple]]]:
         return {'shortname': 'QuantileTransformer',
                 'name': 'QuantileTransformer',
                 'handles_regression': True,
@@ -37,7 +44,9 @@ class QuantileTransformerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm)
                 'output': (INPUT, SIGNED_DATA),
                 'preferred_dtype': None}
 
-    def get_hyperparameter_search_space(dataset_properties=None):
+    @staticmethod
+    def get_hyperparameter_search_space(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+                                        ) -> ConfigurationSpace:
         cs = ConfigurationSpace()
         # TODO parametrize like the Random Forest as n_quantiles = n_features^param
         n_quantiles = UniformIntegerHyperparameter(

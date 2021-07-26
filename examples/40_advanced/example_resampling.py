@@ -33,7 +33,6 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
     per_run_time_limit=30,
     tmp_folder='/tmp/autosklearn_resampling_example_tmp',
-    output_folder='/tmp/autosklearn_resampling_example_out',
     disable_evaluator_output=False,
     # 'holdout' with 'train_size'=0.67 is the default argument setting
     # for AutoSklearnClassifier. It is explicitly specified in this example
@@ -59,7 +58,6 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
     per_run_time_limit=30,
     tmp_folder='/tmp/autosklearn_resampling_example_tmp',
-    output_folder='/tmp/autosklearn_resampling_example_out',
     disable_evaluator_output=False,
     resampling_strategy='cv',
     resampling_strategy_arguments={'folds': 5},
@@ -100,17 +98,15 @@ print("Accuracy score CV", sklearn.metrics.accuracy_score(y_test, predictions))
 # data by the first feature. In practice, one would use a splitting according
 # to the use case at hand.
 
-resampling_strategy = sklearn.model_selection.PredefinedSplit
-resampling_strategy_arguments = {'test_fold': np.where(X_train[:, 0] < np.mean(X_train[:, 0]))[0]}
+resampling_strategy = sklearn.model_selection.PredefinedSplit(
+    test_fold=np.where(X_train[:, 0] < np.mean(X_train[:, 0]))[0])
 
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
     per_run_time_limit=30,
     tmp_folder='/tmp/autosklearn_resampling_example_tmp',
-    output_folder='/tmp/autosklearn_resampling_example_out',
     disable_evaluator_output=False,
     resampling_strategy=resampling_strategy,
-    resampling_strategy_arguments=resampling_strategy_arguments,
 )
 automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
