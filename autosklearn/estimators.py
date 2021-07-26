@@ -651,18 +651,24 @@ class AutoSklearnEstimator(BaseEstimator):
             raise ValueError(f"top_k={top_k} must be a positive integer or pass"
                              " `top_k`='all' to view results for all models")
 
+
+        # Validate columns to include
         if isinstance(include, str):
             include = [include]
 
-        # Validate columns to include
         if include is not None:
             columns = [*include]
+
+            # 'model_id' should always be present as it is the unique index 
+            # used for pandas
+            if 'model_id' not in columns:
+                columns.append('model_id')
 
             invalid_include_items = set(columns) - set(column_types['all'])
             if len(invalid_include_items) != 0:
                 raise ValueError(f"Values {invalid_include_items} are not known"
                                  f" columns to include, must be contained in "
-                                 f"{all_columns}")
+                                 f"{column_types['all']}")
         elif detailed:
             columns = column_types['all']
         else:
@@ -806,13 +812,13 @@ class AutoSklearnEstimator(BaseEstimator):
     @staticmethod
     def _leaderboard_columns() -> Dict[str, List[str]]:
         all = [
-            "rank", "ensemble_weight", "type", "cost", "duration", "config_id",
-            "train_loss", "seed", "start_time", "end_time", "budget", "status",
-            "data_preprocessors", "feature_preprocessors", "balancing_strategy",
-            "config_origin"
+            "model_id", "rank", "ensemble_weight", "type", "cost", "duration",
+            "config_id", "train_loss", "seed", "start_time", "end_time",
+            "budget", "status", "data_preprocessors", "feature_preprocessors",
+            "balancing_strategy", "config_origin"
         ]
         simple= [
-            "rank", "ensemble_weight", "type", "cost", "duration"
+            "model_id", "rank", "ensemble_weight", "type", "cost", "duration"
         ]
         detailed = all
         return {'all': all, 'simple': simple , 'detailed': detailed}
