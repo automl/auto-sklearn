@@ -557,7 +557,7 @@ class AutoSklearnEstimator(BaseEstimator):
         top_k: Union[int, str] = 'all',
         sort_by: str = 'cost',
         sort_order: Optional[str] = None,
-        include: Optional[Iterable[str]] = None
+        include: Optional[Union[str, Iterable[str]]] = None
     ) -> pd.DataFrame:
         """ Returns a pandas table of results for all evaluated models.
 
@@ -568,6 +568,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
         **Simple**:
 
+        * ``"model_id"`` - The id given to a model by ``autosklearn``.
         * ``"rank"`` - The rank of the model.
         * ``"ensemble_weight"`` - The weight given to the model in the ensemble.
         * ``"type"`` - The type of classifier/regressor used.
@@ -578,6 +579,7 @@ class AutoSklearnEstimator(BaseEstimator):
         The detailed view includes all of the simple statistics along with the
         following.
 
+        * ``"config_id"`` - The id used by SMAC for optimization.
         * ``"budget"`` - How much time was allocated to this model.
         * ``"status"`` - The return status of training the model with SMAC.
         * ``"train_loss"`` - The loss of the model on the training set.
@@ -601,7 +603,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
         sort_by: str = 'cost'
             What column to sort by. If that column is not present, the
-            sorting defaults to the ``"id"`` index column.
+            sorting defaults to the ``"model_id"`` index column.
 
         sort_order: Optional["ascending" or "descending"]
             Which sort order to apply to the ``sort_by`` column. If left
@@ -611,9 +613,9 @@ class AutoSklearnEstimator(BaseEstimator):
 
             .. _DataFrame.sort_values: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.sort_values.html
 
-        include: Optional[Iterable[str]]
+        include: Optional[str or Iterable[str]]
             Items to include, other items not specified will be excluded.
-            The exception is the ``"id"`` index column which is always included.
+            The exception is the ``"model_id"`` index column which is always included.
 
             If left as ``None``, it will resort back to using the ``detailed``
             param to decide the columns to include.
@@ -640,7 +642,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
         # The different kinds of columns and their sort order
         all_columns = [
-            "rank", "ensemble_weight", "type", "cost", "duration",
+            "rank", "ensemble_weight", "type", "cost", "duration", "config_id",
             "train_loss", "seed", "start_time", "end_time", "budget", "status",
             "data_preprocessors", "feature_preprocessors", "balancing_strategy",
             "config_origin"
@@ -658,6 +660,9 @@ class AutoSklearnEstimator(BaseEstimator):
         ):
             raise ValueError(f"top_k={top_k} must be a positive integer or pass"
                              " `top_k`='all' to view results for all models")
+
+        if isinstance(include, str):
+            include = [include]
 
         # Validate columns to include
         if include is not None:
@@ -690,12 +695,12 @@ class AutoSklearnEstimator(BaseEstimator):
             return rv.additional_info and key in rv.additional_info
 
         model_runs = {
-            rkey.config_id: {
-                'id': rval.additional_info['num_run']
-                if has_key(rval, 'num_run') else None,
+            rval.additional_info['num_run']: {
+                'model_id': rval.additional_info['num_run'],
                 'seed': rkey.seed,
                 'budget': rkey.budget,
                 'duration': rval.time,
+                'config_id': rkey.config_id,
                 'start_time': rval.starttime,
                 'end_time': rval.endtime,
                 'status': str(rval.status),
@@ -706,7 +711,9 @@ class AutoSklearnEstimator(BaseEstimator):
                 if has_key(rval, 'configuration_origin') else None
             }
             for rkey, rval in self.automl_.runhistory_.data.items()
+            if has_key(rval, 'num_run')
         }
+
 
         # Next we get some info about the model itself
         model_class_strings = {
@@ -720,7 +727,8 @@ class AutoSklearnEstimator(BaseEstimator):
         # A dict mapping model ids to their configurations
         configurations = self.automl_.runhistory_.ids_config
 
-        for config_id, run_info in model_runs.items():
+        for model_id, run_info in model_runs.items():
+            config_id = run_info['config_id']
             run_config = configurations[config_id]._values
 
             run_info.update({
@@ -736,13 +744,6 @@ class AutoSklearnEstimator(BaseEstimator):
                 ]
             })
 
-        # Create dict model_id -> run_info
-        # Needed for now as we can't use model_id to index all runs
-        model_id_to_run_info = {
-            run_info['id']: model_runs[config_id]
-            for config_id, run_info in model_runs.items()
-        }
-
         # Get the models ensemble weight if it has one
         # TODO both implementing classes of AbstractEnsemble have a property
         #      `identifiers_` and `weights_`, might be good to put it as an
@@ -751,16 +752,7 @@ class AutoSklearnEstimator(BaseEstimator):
         #      tied together by ordering, might be better to store as tuple
         for i, weight in enumerate(self.automl_.ensemble_.weights_):
             (_, model_id, _) = self.automl_.ensemble_.identifiers_[i]
-            run_info = model_id_to_run_info[model_id]
-            run_info['ensemble_weight'] = weight
-
-        # TODO If model_id and config_id align we can simply use model_id
-        #      to index into run_info.
-        #      Alternatively, if any run fails to produce a num_run, we can
-        #      exclude it, maintaining num_run as the index
-        # for i, weight in enumerate(self.automl_.ensemble_.weights_):
-        #   (_, model_id, _) = self.automl_.ensemble_.identifiers_[i]
-        #   model_runs[model_id]['ensemble_id'] = weight
+            model_runs[model_id]['ensemble_weight'] = weight
 
         # Filter out non-ensemble members if needed, else fill in a default
         # value of 0 if it's missing
@@ -780,15 +772,15 @@ class AutoSklearnEstimator(BaseEstimator):
         # We don't have `rank` yet so we ignore it for now
         dataframe = pd.DataFrame({
             col: [run_info[col] for run_info in model_runs.values()]
-            for col in ['id', *columns] if col != 'rank'
+            for col in ['model_id', *columns] if col != 'rank'
         })
 
         # Give it an index, even if not in the `include`
-        dataframe.set_index('id', inplace=True)
+        dataframe.set_index('model_id', inplace=True)
 
-        # Sort by the given column name, defaulting to 'id' if not present
+        # Sort by the given column name, defaulting to 'model_id' if not present
         if sort_by not in dataframe.columns:
-            sort_by = 'id'
+            sort_by = 'model_id'
 
         descending_columns = ['ensemble_weight', 'duration']
         if sort_order is not None:
