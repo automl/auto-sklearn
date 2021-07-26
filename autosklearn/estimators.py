@@ -626,7 +626,6 @@ class AutoSklearnEstimator(BaseEstimator):
             A dataframe of statistics for the models, ordered by ``sort_by``.
 
         """  # noqa (links are too long)
-        # TODO budget seems to be 0.0 all the time?
         # TODO validate that `self` is fitted. This is required for
         #      self.ensemble_ to get the identifiers of models it will generate
         #      weights for.
@@ -641,16 +640,7 @@ class AutoSklearnEstimator(BaseEstimator):
         #      with the ensembler.
 
         # The different kinds of columns and their sort order
-        all_columns = [
-            "rank", "ensemble_weight", "type", "cost", "duration", "config_id",
-            "train_loss", "seed", "start_time", "end_time", "budget", "status",
-            "data_preprocessors", "feature_preprocessors", "balancing_strategy",
-            "config_origin"
-        ]
-        simple_columns = [
-            "rank", "ensemble_weight", "type", "cost", "duration"
-        ]
-        detailed_columns = all_columns
+        column_types = self._leaderboard_columns()
 
         # Validation of top_k
         if (
@@ -668,22 +658,22 @@ class AutoSklearnEstimator(BaseEstimator):
         if include is not None:
             columns = [*include]
 
-            invalid_include_items = set(columns) - set(all_columns)
+            invalid_include_items = set(columns) - set(column_types['all'])
             if len(invalid_include_items) != 0:
                 raise ValueError(f"Values {invalid_include_items} are not known"
                                  f" columns to include, must be contained in "
                                  f"{all_columns}")
         elif detailed:
-            columns = detailed_columns
+            columns = column_types['all']
         else:
-            columns = simple_columns
+            columns = column_types['simple']
 
         # Validation of sorting
         if sort_by == 'rank':
             raise ValueError("Can't sort_by rank as `sort_by` defines `rank`")
-        if sort_by not in all_columns:
+        if sort_by not in column_types['all']:
             raise ValueError(f"sort_by='{sort_by}' must be one of included "
-                             f"columns {set(all_columns) - set(['rank'])}")
+                             f"columns {set(column_types['all']) - set(['rank'])}")
 
         valid_sort_orders = ['ascending', 'descending']
         if isinstance(sort_order, str) and sort_order not in valid_sort_orders:
@@ -807,6 +797,20 @@ class AutoSklearnEstimator(BaseEstimator):
         dataframe = dataframe.head(top_k)
 
         return dataframe
+
+    @staticmethod
+    def _leaderboard_columns() -> Dict[str, List[str]]:
+        all = [
+            "rank", "ensemble_weight", "type", "cost", "duration", "config_id",
+            "train_loss", "seed", "start_time", "end_time", "budget", "status",
+            "data_preprocessors", "feature_preprocessors", "balancing_strategy",
+            "config_origin"
+        ]
+        simple= [
+            "rank", "ensemble_weight", "type", "cost", "duration"
+        ]
+        detailed = all
+        return {'all': all, 'simple': simple , 'detailed': detailed}
 
     def _get_automl_class(self):
         raise NotImplementedError()

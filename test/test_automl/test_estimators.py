@@ -342,26 +342,19 @@ def test_leaderboard(
     )
     model.fit(X_train, Y_train)
 
-    valid_columns = [
-        "rank", "ensemble_weight", "type", "cost", "duration", "config_id",
-        "train_loss", "seed", "start_time", "end_time", "budget", "status",
-        "data_preprocessors", "feature_preprocessors", "balancing_strategy",
-        "config_origin"
-    ]
-    simple_columns = ["rank", "ensemble_weight", "type", "cost", "duration"]
-    detailed_columns = valid_columns
+    column_types = AutoSklearnEstimator._leaderboard_columns()
 
     # Create a dict of all possible param values for each param
     # with some invalid one's of the incorrect type
     include_combinations = itertools.chain(
-        itertools.combinations(valid_columns, item_count)
+        itertools.combinations(column_types['all'], item_count)
         for item_count in range(1, MAX_COMBO_SIZE_FOR_INCLUDE_PARAM)
     )
     valid_params = {
         'detailed': [True, False],
         'ensemble_only': [True, False],
         'top_k': [-10, 0, 1, 10, 'all'],
-        'sort_by': [*valid_columns, 'invalid'],
+        'sort_by': [column_types['all'], 'invalid'],
         'sort_order': ['ascending', 'descending', 'invalid', None],
         'include': itertools.chain([None, 'invalid', 'type'], include_combinations),
     }
@@ -383,7 +376,7 @@ def test_leaderboard(
         # Can't sort_by rank as rank is based on the sort criteria
         elif (
             params['sort_by'] == 'rank'
-            or params['sort_by'] not in valid_columns
+            or params['sort_by'] not in column_types['all']
         ):
             with pytest.raises(ValueError):
                 model.leaderboard(**params)
@@ -398,14 +391,14 @@ def test_leaderboard(
             # Crash if just a str but invalid column
             if (
                 isinstance(params['include'], str)
-                and params['include'] not in valid_columns
+                and params['include'] not in column_types['all']
             ):
                 with pytest.raises(ValueError):
                     model.leaderboard(**params)
             # Crash if list but contains invalid column
             elif (
                 not isinstance(params['include'], str)
-                and len(set(params['include']) - set(valid_columns)) != 0
+                and len(set(params['include']) - set(column_types['all'])) != 0
             ):
                 with pytest.raises(ValueError):
                     model.leaderboard(**params)
@@ -426,9 +419,9 @@ def test_leaderboard(
             if params['include'] is not None:
                 assert columns == list(params['include'])
             elif params['detailed']:
-                assert columns == detailed_columns
+                assert columns == column_types['detailed']
             else:
-                assert columns == simple_columns
+                assert columns == column_types['simple']
 
             # Ensure that if it's ensemble only
             # Can only check if 'ensemble_weight' is present
