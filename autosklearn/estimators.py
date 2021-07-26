@@ -580,7 +580,7 @@ class AutoSklearnEstimator(BaseEstimator):
         following.
 
         * ``"config_id"`` - The id used by SMAC for optimization.
-        * ``"budget"`` - How much time was allocated to this model.
+        * ``"budget"`` - How much budget was allocated to this model.
         * ``"status"`` - The return status of training the model with SMAC.
         * ``"train_loss"`` - The loss of the model on the training set.
         * ``"balancing_strategy"`` - The balancing strategy used for data preprocessing.
