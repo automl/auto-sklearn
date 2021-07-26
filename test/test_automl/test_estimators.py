@@ -343,7 +343,7 @@ def test_leaderboard(
     model.fit(X_train, Y_train)
 
     valid_columns = [
-        "rank", "ensemble_weight", "type", "cost", "duration",
+        "rank", "ensemble_weight", "type", "cost", "duration", "config_id",
         "train_loss", "seed", "start_time", "end_time", "budget", "status",
         "data_preprocessors", "feature_preprocessors", "balancing_strategy",
         "config_origin"
@@ -353,18 +353,17 @@ def test_leaderboard(
 
     # Create a dict of all possible param values for each param
     # with some invalid one's of the incorrect type
+    include_combinations = itertools.chain(
+        itertools.combinations(valid_columns, item_count)
+        for item_count in range(1, MAX_COMBO_SIZE_FOR_INCLUDE_PARAM)
+    )
     valid_params = {
         'detailed': [True, False],
         'ensemble_only': [True, False],
         'top_k': [-10, 0, 1, 10, 'all'],
         'sort_by': [*valid_columns, 'invalid'],
         'sort_order': ['ascending', 'descending', 'invalid', None],
-        'include': itertools.chain.from_iterable(
-            itertools.combinations(
-                [None, *valid_columns, 'invalid'], item_count
-            )
-            for item_count in range(0, MAX_COMBO_SIZE_FOR_INCLUDE_PARAM)
-        )
+        'include': itertools.chain([None, 'invalid', 'type'], include_combinations),
     }
 
     # Create a generator of all possible combinations of valid_params
@@ -394,10 +393,22 @@ def test_leaderboard(
             with pytest.raises(ValueError):
                 model.leaderboard(**params)
 
-        # Invalid include item
-        elif len(set(params['include']) - set(valid_columns)) != 0:
-            with pytest.raises(ValueError):
-                model.leaderboard(**params)
+        # Invalid include item in a list
+        elif params['include'] is not None:
+            # Crash if just a str but invalid column
+            if (
+                isinstance(params['include'], str)
+                and params['include'] not in valid_columns
+            ):
+                with pytest.raises(ValueError):
+                    model.leaderboard(**params)
+            # Crash if list but contains invalid column
+            elif (
+                not isinstance(params['include'], str)
+                and len(set(params['include']) - set(valid_columns)) != 0
+            ):
+                with pytest.raises(ValueError):
+                    model.leaderboard(**params)
 
         # Should run without an error if all params are valid
         else:
