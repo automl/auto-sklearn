@@ -779,6 +779,9 @@ class AutoSklearnEstimator(BaseEstimator):
 
         # Sort by the given column name, defaulting to 'model_id' if not present
         if sort_by not in dataframe.columns:
+            self.automl_._logger.warning(f"sort_by = '{sort_by}' was not present"
+                                         ", defaulting to sort on the index "
+                                         "'model_id'")
             sort_by = 'model_id'
 
         descending_columns = ['ensemble_weight', 'duration']
