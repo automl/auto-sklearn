@@ -760,28 +760,31 @@ class AutoSklearnEstimator(BaseEstimator):
                 if 'ensemble_weight' not in info:
                     info['ensemble_weight'] = 0
 
+        # `rank` relies on `cost` so we include `cost`
+        # We drop it later if it's not requested
+        if 'rank' in columns and 'cost' not in columns:
+            columns = [*columns, 'cost']
+
         # Finally, convert into a tabular format by converting the dict into
         # column wise orientation.
-        # We don't have `rank` yet so we ignore it. `rank` relies on cost so we
-        # include it anyways, dropping later if needed
         dataframe = pd.DataFrame({
             col: [run_info[col] for run_info in model_runs.values()]
-            for col in set(['model_id', 'cost', *columns]) if col != 'rank'
+            for col in columns if col != 'rank'
         })
 
         # Give it an index, even if not in the `include`
         dataframe.set_index('model_id', inplace=True)
 
-        # Add the rank by cost if present, sorting by rank and including a cost
+        # Add the `rank` column if needed, dropping `cost` if it's not
+        # requested by the user
         if 'rank' in columns:
             dataframe.sort_values(by='cost', ascending=False, inplace=True)
             dataframe.insert(column='rank',
                              value=range(1, len(dataframe) + 1),
                              loc=list(columns).index('rank'))
 
-        # Drop the cost column if it is not needed
-        if 'cost' not in columns:
-            dataframe.drop('cost', inplace=True)
+            if 'cost' not in columns:
+                dataframe.drop('cost', inplace=True)
 
         # Decide on the sort order depending on what it gets sorted by
         descending_columns = ['ensemble_weight', 'duration']
