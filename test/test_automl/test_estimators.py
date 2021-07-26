@@ -373,11 +373,7 @@ def test_leaderboard(
                 model.leaderboard(**params)
 
         # Invalid sort_by column
-        # Can't sort_by rank as rank is based on the sort criteria
-        elif (
-            params['sort_by'] == 'rank'
-            or params['sort_by'] not in column_types['all']
-        ):
+        elif params['sort_by'] not in column_types['all']:
             with pytest.raises(ValueError):
                 model.leaderboard(**params)
 

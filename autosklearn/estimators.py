@@ -569,7 +569,7 @@ class AutoSklearnEstimator(BaseEstimator):
         **Simple**:
 
         * ``"model_id"`` - The id given to a model by ``autosklearn``.
-        * ``"rank"`` - The rank of the model.
+        * ``"rank"`` - The rank of the model based on it's ``"cost"``.
         * ``"ensemble_weight"`` - The weight given to the model in the ensemble.
         * ``"type"`` - The type of classifier/regressor used.
         * ``"cost"`` - The loss of the model on the validation set.
@@ -669,11 +669,9 @@ class AutoSklearnEstimator(BaseEstimator):
             columns = column_types['simple']
 
         # Validation of sorting
-        if sort_by == 'rank':
-            raise ValueError("Can't sort_by rank as `sort_by` defines `rank`")
         if sort_by not in column_types['all']:
             raise ValueError(f"sort_by='{sort_by}' must be one of included "
-                             f"columns {set(column_types['all']) - set(['rank'])}")
+                             f"columns {set(column_types['all'])}")
 
         valid_sort_orders = ['ascending', 'descending']
         if isinstance(sort_order, str) and sort_order not in valid_sort_orders:
@@ -758,14 +756,33 @@ class AutoSklearnEstimator(BaseEstimator):
 
         # Finally, convert into a tabular format by converting the dict into
         # column wise orientation.
-        # We don't have `rank` yet so we ignore it for now
+        # We don't have `rank` yet so we ignore it. `rank` relies on cost so we
+        # include it anyways, dropping later if needed
         dataframe = pd.DataFrame({
             col: [run_info[col] for run_info in model_runs.values()]
-            for col in ['model_id', *columns] if col != 'rank'
+            for col in set(['model_id', 'cost', *columns]) if col != 'rank'
         })
 
         # Give it an index, even if not in the `include`
         dataframe.set_index('model_id', inplace=True)
+
+        # Add the rank by cost if present, sorting by rank and including a cost
+        if 'rank' in columns:
+            dataframe.sort_values(by='cost', ascending=False, inplace=True)
+            dataframe.insert(column='rank',
+                             value=range(1, len(dataframe) + 1),
+                             loc=list(columns).index('rank'))
+
+        # Drop the cost column if it is not needed
+        if 'cost' not in columns:
+            dataframe.drop('cost', inplace=True)
+
+        # Decide on the sort order depending on what it gets sorted by
+        descending_columns = ['ensemble_weight', 'duration']
+        if sort_order is not None:
+            ascending_param = False if sort_order == 'descending' else True
+        else:
+            ascending_param = False if sort_by in descending_columns else True
 
         # Sort by the given column name, defaulting to 'model_id' if not present
         if sort_by not in dataframe.columns:
@@ -774,21 +791,9 @@ class AutoSklearnEstimator(BaseEstimator):
                                          "'model_id'")
             sort_by = 'model_id'
 
-        descending_columns = ['ensemble_weight', 'duration']
-        if sort_order is not None:
-            ascending_param = False if sort_order == 'descending' else True
-        else:
-            ascending_param = False if sort_by in descending_columns else True
-
         dataframe.sort_values(by=sort_by,
                               ascending=ascending_param,
                               inplace=True)
-
-        # Add the rank column at the position given by columns
-        if 'rank' in columns:
-            dataframe.insert(column='rank',
-                             value=range(1, len(dataframe) + 1),
-                             loc=list(columns).index('rank'))
 
         # Lastly, just grab the top_k
         if top_k == 'all' or top_k >= len(dataframe):
