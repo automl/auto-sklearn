@@ -714,7 +714,6 @@ class AutoSklearnEstimator(BaseEstimator):
             if has_key(rval, 'num_run')
         }
 
-
         # Next we get some info about the model itself
         model_class_strings = {
             AutoMLClassifier: 'classifier',
