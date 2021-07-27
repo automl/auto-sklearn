@@ -342,8 +342,11 @@ def test_leaderboard(
     )
     model.fit(X_train, Y_train)
 
-    column_types = AutoSklearnEstimator._leaderboard_columns()
-
+    column_types = {
+        'all' : AutoSklearnEstimator._leaderboard_columns['all'],
+        'simple': AutoSklearnEstimator._leaderboard_columns['simple'],
+        'detailed': AutoSklearnEstimator._leaderboard_columns['all']
+    }
     # Create a dict of all possible param values for each param
     # with some invalid one's of the incorrect type
     include_combinations = itertools.chain(

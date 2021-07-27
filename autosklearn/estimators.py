@@ -23,7 +23,19 @@ from autosklearn.util.backend import create
 
 
 class AutoSklearnEstimator(BaseEstimator):
-
+    
+    # Constants used by `def leaderboard` for columns and their sort order
+    _leaderboard_columns: ClassVar[Dict[str, List[str]]] = {
+        "all": [
+            "model_id", "rank", "ensemble_weight", "type", "cost", "duration",
+            "config_id", "train_loss", "seed", "start_time", "end_time",
+            "budget", "status", "data_preprocessors", "feature_preprocessors",
+            "balancing_strategy", "config_origin"
+        ],
+        "simple": [
+            "model_id", "rank", "ensemble_weight", "type", "cost", "duration"
+        ]
+    }
 
     def __init__(
         self,
@@ -632,18 +644,11 @@ class AutoSklearnEstimator(BaseEstimator):
         # TODO validate that `self` is fitted. This is required for
         #      self.ensemble_ to get the identifiers of models it will generate
         #      weights for.
-        # TODO There is a discrepency between identifiers used by SMAC and
-        #      and the identifiers used by an Ensemble class.
-        #      SMAC uses `config_id` which is available for every run of SMAC
-        #      while Ensemble uses `model_id == num_run` which is only available
-        #      in runinfo.additional_info. However, this is not always included
-        #      in additional_info, nor is additional_info garunteed to exist.
-        #      Therefore the only garunteed unique identifier for models are
-        #      `config_id`s which can confuse the user if they wise to interact
-        #      with the ensembler.
-
-        # The different kinds of columns and their sort order
-        column_types = self._leaderboard_columns()
+        column_types = {
+            'all' : AutoSklearnEstimator._leaderboard_columns['all'],
+            'simple': AutoSklearnEstimator._leaderboard_columns['simple'],
+            'detailed': AutoSklearnEstimator._leaderboard_columns['all']
+        }
 
         # Validation of top_k
         if (
@@ -654,7 +659,6 @@ class AutoSklearnEstimator(BaseEstimator):
             raise ValueError(f"top_k={top_k} must be a positive integer or pass"
                              " `top_k`='all' to view results for all models")
 
-
         # Validate columns to include
         if isinstance(include, str):
             include = [include]
@@ -662,7 +666,7 @@ class AutoSklearnEstimator(BaseEstimator):
         if include is not None:
             columns = [*include]
 
-            # 'model_id' should always be present as it is the unique index 
+            # 'model_id' should always be present as it is the unique index
             # used for pandas
             if 'model_id' not in columns:
                 columns.append('model_id')
@@ -816,20 +820,6 @@ class AutoSklearnEstimator(BaseEstimator):
 
         return dataframe
 
-    @staticmethod
-    def _leaderboard_columns() -> Dict[str, List[str]]:
-        all = [
-            "model_id", "rank", "ensemble_weight", "type", "cost", "duration",
-            "config_id", "train_loss", "seed", "start_time", "end_time",
-            "budget", "status", "data_preprocessors", "feature_preprocessors",
-            "balancing_strategy", "config_origin"
-        ]
-        simple = [
-            "model_id", "rank", "ensemble_weight", "type", "cost", "duration"
-        ]
-        detailed = all
-        return {'all': all, 'simple': simple, 'detailed': detailed}
-
     def _get_automl_class(self):
         raise NotImplementedError()
 
@@ -869,6 +859,7 @@ class AutoSklearnEstimator(BaseEstimator):
             feat_type=feat_type,
             only_return_configuration_space=True,
         ) if self.automl_.configuration_space is None else self.automl_.configuration_space
+
 
 
 class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
