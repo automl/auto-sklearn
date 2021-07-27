@@ -17,4 +17,4 @@ threadpoolctl
 ConfigSpace>=0.4.14,<0.5
 pynisher>=0.6.3
 pyrfr>=0.8.1,<0.9
-smac@ git+git://github.com/automl/SMAC3@development
+smac>=0.14
