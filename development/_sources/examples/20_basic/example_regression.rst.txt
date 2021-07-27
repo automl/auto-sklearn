@@ -99,10 +99,45 @@ Build and fit a regressor
 
 .. GENERATED FROM PYTHON SOURCE LINES 37-39
 
+View the models found by auto-sklearn
+=====================================
+
+.. GENERATED FROM PYTHON SOURCE LINES 39-42
+
+.. code-block:: default
+
+
+    print(automl.leaderboard())
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+              ensemble_weight  rank               type      cost   duration
+    model_id                                                               
+    5                    0.14     7   gaussian_process  0.455027  23.402778
+    6                    0.30     6     ard_regression  0.455042   0.689145
+    25                   0.20     5                sgd  0.460012   0.647428
+    22                   0.06     4         libsvm_svr  0.461373   0.679190
+    27                   0.24     3     ard_regression  0.462249   0.645328
+    11                   0.02     2      random_forest  0.510608  10.392980
+    7                    0.04     1  gradient_boosting  0.518673   1.397805
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 43-45
+
 Print the final ensemble constructed by auto-sklearn
 ====================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 39-42
+.. GENERATED FROM PYTHON SOURCE LINES 45-48
 
 .. code-block:: default
 
@@ -173,7 +208,7 @@ Print the final ensemble constructed by auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 43-49
+.. GENERATED FROM PYTHON SOURCE LINES 49-55
 
 Get the Score of the final ensemble
 ===================================
@@ -182,7 +217,7 @@ is the `R2 score <https://scikit-learn.org/stable/modules/model_evaluation.html#
 The values range between -inf and 1 with 1 being the best possible value. A dummy estimator
 predicting the data mean has an R2 score of 0.
 
-.. GENERATED FROM PYTHON SOURCE LINES 49-55
+.. GENERATED FROM PYTHON SOURCE LINES 55-61
 
 .. code-block:: default
 
@@ -208,7 +243,7 @@ predicting the data mean has an R2 score of 0.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 56-63
+.. GENERATED FROM PYTHON SOURCE LINES 62-69
 
 Plot the predictions
 ====================
@@ -218,7 +253,7 @@ predictions. Points below the diagonal were overestimated by the model (predicte
 than the true value), points above the diagonal were underestimated (predicted value is lower than
 the true value).
 
-.. GENERATED FROM PYTHON SOURCE LINES 63-74
+.. GENERATED FROM PYTHON SOURCE LINES 69-80
 
 .. code-block:: default
 
@@ -247,7 +282,7 @@ the true value).
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  56.878 seconds)
+   **Total running time of the script:** ( 1 minutes  56.209 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_regression.py:

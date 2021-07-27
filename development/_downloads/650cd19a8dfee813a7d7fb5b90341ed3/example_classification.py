@@ -33,6 +33,12 @@ automl = autosklearn.classification.AutoSklearnClassifier(
 automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
 ############################################################################
+# View the models found by auto-sklearn
+# =====================================
+
+print(automl.leaderboard())
+
+############################################################################
 # Print the final ensemble constructed by auto-sklearn
 # ====================================================
 
@@ -44,3 +50,4 @@ print(automl.show_models())
 
 predictions = automl.predict(X_test)
 print("Accuracy score:", sklearn.metrics.accuracy_score(y_test, predictions))
+

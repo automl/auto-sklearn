@@ -112,13 +112,14 @@
       
   <h1>Source code for autosklearn.estimators</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- encoding: utf-8 -*-</span>
-
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">ClassVar</span>
+<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
 <span class="kn">from</span> <span class="nn">ConfigSpace.configuration_space</span> <span class="kn">import</span> <span class="n">Configuration</span>
 <span class="kn">import</span> <span class="nn">dask.distributed</span>
 <span class="kn">import</span> <span class="nn">joblib</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">ClassifierMixin</span><span class="p">,</span> <span class="n">RegressorMixin</span>
 <span class="kn">from</span> <span class="nn">sklearn.utils.multiclass</span> <span class="kn">import</span> <span class="n">type_of_target</span>
 <span class="kn">from</span> <span class="nn">smac.runhistory.runhistory</span> <span class="kn">import</span> <span class="n">RunInfo</span><span class="p">,</span> <span class="n">RunValue</span>
@@ -134,6 +135,18 @@
 
 
 <span class="k">class</span> <span class="nc">AutoSklearnEstimator</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">):</span>
+    <span class="c1"># Constants used by `def leaderboard` for columns and their sort order</span>
+    <span class="n">_leaderboard_columns</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;all&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;model_id&quot;</span><span class="p">,</span> <span class="s2">&quot;rank&quot;</span><span class="p">,</span> <span class="s2">&quot;ensemble_weight&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;cost&quot;</span><span class="p">,</span> <span class="s2">&quot;duration&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;config_id&quot;</span><span class="p">,</span> <span class="s2">&quot;train_loss&quot;</span><span class="p">,</span> <span class="s2">&quot;seed&quot;</span><span class="p">,</span> <span class="s2">&quot;start_time&quot;</span><span class="p">,</span> <span class="s2">&quot;end_time&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;budget&quot;</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="s2">&quot;data_preprocessors&quot;</span><span class="p">,</span> <span class="s2">&quot;feature_preprocessors&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;balancing_strategy&quot;</span><span class="p">,</span> <span class="s2">&quot;config_origin&quot;</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;simple&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;model_id&quot;</span><span class="p">,</span> <span class="s2">&quot;rank&quot;</span><span class="p">,</span> <span class="s2">&quot;ensemble_weight&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;cost&quot;</span><span class="p">,</span> <span class="s2">&quot;duration&quot;</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -662,6 +675,261 @@
 <span class="sd">        str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">sprint_statistics</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">leaderboard</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">detailed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">ensemble_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">top_k</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span>
+        <span class="n">sort_by</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;cost&#39;</span><span class="p">,</span>
+        <span class="n">sort_order</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="s1">&#39;ascending&#39;</span><span class="p">,</span> <span class="s1">&#39;descending&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span>
+        <span class="n">include</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns a pandas table of results for all evaluated models.</span>
+
+<span class="sd">        Gives an overview of all models trained during the search process along</span>
+<span class="sd">        with various statistics about their training.</span>
+
+<span class="sd">        The availble statistics are:</span>
+
+<span class="sd">        **Simple**:</span>
+
+<span class="sd">        * ``&quot;model_id&quot;`` - The id given to a model by ``autosklearn``.</span>
+<span class="sd">        * ``&quot;rank&quot;`` - The rank of the model based on it&#39;s ``&quot;cost&quot;``.</span>
+<span class="sd">        * ``&quot;ensemble_weight&quot;`` - The weight given to the model in the ensemble.</span>
+<span class="sd">        * ``&quot;type&quot;`` - The type of classifier/regressor used.</span>
+<span class="sd">        * ``&quot;cost&quot;`` - The loss of the model on the validation set.</span>
+<span class="sd">        * ``&quot;duration&quot;`` - Length of time the model was optimized for.</span>
+
+<span class="sd">        **Detailed**:</span>
+<span class="sd">        The detailed view includes all of the simple statistics along with the</span>
+<span class="sd">        following.</span>
+
+<span class="sd">        * ``&quot;config_id&quot;`` - The id used by SMAC for optimization.</span>
+<span class="sd">        * ``&quot;budget&quot;`` - How much budget was allocated to this model.</span>
+<span class="sd">        * ``&quot;status&quot;`` - The return status of training the model with SMAC.</span>
+<span class="sd">        * ``&quot;train_loss&quot;`` - The loss of the model on the training set.</span>
+<span class="sd">        * ``&quot;balancing_strategy&quot;`` - The balancing strategy used for data preprocessing.</span>
+<span class="sd">        * ``&quot;start_time&quot;`` - Time the model began being optimized</span>
+<span class="sd">        * ``&quot;end_time&quot;`` - Time the model ended being optimized</span>
+<span class="sd">        * ``&quot;data_preprocessors&quot;`` - The preprocessors used on the data</span>
+<span class="sd">        * ``&quot;feature_preprocessors&quot;`` - The preprocessors for features types</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        detailed: bool = False</span>
+<span class="sd">            Whether to give detailed information or just a simple overview.</span>
+
+<span class="sd">        ensemble_only: bool = True</span>
+<span class="sd">            Whether to view only models included in the ensemble or all models</span>
+<span class="sd">            trained.</span>
+
+<span class="sd">        top_k: int or &quot;all&quot; = &quot;all&quot;</span>
+<span class="sd">            How many models to display.</span>
+
+<span class="sd">        sort_by: str = &#39;cost&#39;</span>
+<span class="sd">            What column to sort by. If that column is not present, the</span>
+<span class="sd">            sorting defaults to the ``&quot;model_id&quot;`` index column.</span>
+
+<span class="sd">        sort_order: &quot;auto&quot; or &quot;ascending&quot; or &quot;descending&quot; = &quot;auto&quot;</span>
+<span class="sd">            Which sort order to apply to the ``sort_by`` column. If left</span>
+<span class="sd">            as ``&quot;auto&quot;``, it will sort by a sensible default where &quot;better&quot; is</span>
+<span class="sd">            on top, otherwise defaulting to the pandas default for</span>
+<span class="sd">            `DataFrame.sort_values`_ if there is no obvious &quot;better&quot;.</span>
+
+<span class="sd">            .. _DataFrame.sort_values: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.sort_values.html</span>
+
+<span class="sd">        include: Optional[str or Iterable[str]]</span>
+<span class="sd">            Items to include, other items not specified will be excluded.</span>
+<span class="sd">            The exception is the ``&quot;model_id&quot;`` index column which is always included.</span>
+
+<span class="sd">            If left as ``None``, it will resort back to using the ``detailed``</span>
+<span class="sd">            param to decide the columns to include.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            A dataframe of statistics for the models, ordered by ``sort_by``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa (links are too long)</span>
+        <span class="c1"># TODO validate that `self` is fitted. This is required for</span>
+        <span class="c1">#      self.ensemble_ to get the identifiers of models it will generate</span>
+        <span class="c1">#      weights for.</span>
+        <span class="n">column_types</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;all&#39;</span><span class="p">:</span> <span class="n">AutoSklearnEstimator</span><span class="o">.</span><span class="n">_leaderboard_columns</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;simple&#39;</span><span class="p">:</span> <span class="n">AutoSklearnEstimator</span><span class="o">.</span><span class="n">_leaderboard_columns</span><span class="p">[</span><span class="s1">&#39;simple&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;detailed&#39;</span><span class="p">:</span> <span class="n">AutoSklearnEstimator</span><span class="o">.</span><span class="n">_leaderboard_columns</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">]</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Validation of top_k</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">top_k</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">top_k</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">top_k</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">top_k</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">top_k</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">top_k</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;top_k=</span><span class="si">{</span><span class="n">top_k</span><span class="si">}</span><span class="s2"> must be a positive integer or pass&quot;</span>
+                             <span class="s2">&quot; `top_k`=&#39;all&#39; to view results for all models&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Validate columns to include</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">include</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">include</span> <span class="o">=</span> <span class="p">[</span><span class="n">include</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">include</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">include</span><span class="p">]</span>
+
+            <span class="c1"># &#39;model_id&#39; should always be present as it is the unique index</span>
+            <span class="c1"># used for pandas</span>
+            <span class="k">if</span> <span class="s1">&#39;model_id&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
+                <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;model_id&#39;</span><span class="p">)</span>
+
+            <span class="n">invalid_include_items</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">column_types</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">invalid_include_items</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Values </span><span class="si">{</span><span class="n">invalid_include_items</span><span class="si">}</span><span class="s2"> are not known&quot;</span>
+                                 <span class="sa">f</span><span class="s2">&quot; columns to include, must be contained in &quot;</span>
+                                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">column_types</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">detailed</span><span class="p">:</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="n">column_types</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="n">column_types</span><span class="p">[</span><span class="s1">&#39;simple&#39;</span><span class="p">]</span>
+
+        <span class="c1"># Validation of sorting</span>
+        <span class="k">if</span> <span class="n">sort_by</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">column_types</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sort_by=&#39;</span><span class="si">{</span><span class="n">sort_by</span><span class="si">}</span><span class="s2">&#39; must be one of included &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;columns </span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">column_types</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">valid_sort_orders</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="s1">&#39;ascending&#39;</span><span class="p">,</span> <span class="s1">&#39;descending&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">sort_order</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">sort_order</span> <span class="ow">in</span> <span class="n">valid_sort_orders</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`sort_order` = </span><span class="si">{</span><span class="n">sort_order</span><span class="si">}</span><span class="s2"> must be a str in &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">valid_sort_orders</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># To get all the models that were optmized, we collect what we can from</span>
+        <span class="c1"># runhistory first.</span>
+        <span class="k">def</span> <span class="nf">has_key</span><span class="p">(</span><span class="n">rv</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">rv</span><span class="o">.</span><span class="n">additional_info</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">rv</span><span class="o">.</span><span class="n">additional_info</span>
+
+        <span class="n">model_runs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">rval</span><span class="o">.</span><span class="n">additional_info</span><span class="p">[</span><span class="s1">&#39;num_run&#39;</span><span class="p">]:</span> <span class="p">{</span>
+                <span class="s1">&#39;model_id&#39;</span><span class="p">:</span> <span class="n">rval</span><span class="o">.</span><span class="n">additional_info</span><span class="p">[</span><span class="s1">&#39;num_run&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;seed&#39;</span><span class="p">:</span> <span class="n">rkey</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
+                <span class="s1">&#39;budget&#39;</span><span class="p">:</span> <span class="n">rkey</span><span class="o">.</span><span class="n">budget</span><span class="p">,</span>
+                <span class="s1">&#39;duration&#39;</span><span class="p">:</span> <span class="n">rval</span><span class="o">.</span><span class="n">time</span><span class="p">,</span>
+                <span class="s1">&#39;config_id&#39;</span><span class="p">:</span> <span class="n">rkey</span><span class="o">.</span><span class="n">config_id</span><span class="p">,</span>
+                <span class="s1">&#39;start_time&#39;</span><span class="p">:</span> <span class="n">rval</span><span class="o">.</span><span class="n">starttime</span><span class="p">,</span>
+                <span class="s1">&#39;end_time&#39;</span><span class="p">:</span> <span class="n">rval</span><span class="o">.</span><span class="n">endtime</span><span class="p">,</span>
+                <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">rval</span><span class="o">.</span><span class="n">status</span><span class="p">),</span>
+                <span class="s1">&#39;cost&#39;</span><span class="p">:</span> <span class="n">rval</span><span class="o">.</span><span class="n">cost</span><span class="p">,</span>
+                <span class="s1">&#39;train_loss&#39;</span><span class="p">:</span> <span class="n">rval</span><span class="o">.</span><span class="n">additional_info</span><span class="p">[</span><span class="s1">&#39;train_loss&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">has_key</span><span class="p">(</span><span class="n">rval</span><span class="p">,</span> <span class="s1">&#39;train_loss&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">&#39;config_origin&#39;</span><span class="p">:</span> <span class="n">rval</span><span class="o">.</span><span class="n">additional_info</span><span class="p">[</span><span class="s1">&#39;configuration_origin&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">has_key</span><span class="p">(</span><span class="n">rval</span><span class="p">,</span> <span class="s1">&#39;configuration_origin&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">}</span>
+            <span class="k">for</span> <span class="n">rkey</span><span class="p">,</span> <span class="n">rval</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">runhistory_</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">has_key</span><span class="p">(</span><span class="n">rval</span><span class="p">,</span> <span class="s1">&#39;num_run&#39;</span><span class="p">)</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Next we get some info about the model itself</span>
+        <span class="n">model_class_strings</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">AutoMLClassifier</span><span class="p">:</span> <span class="s1">&#39;classifier&#39;</span><span class="p">,</span>
+            <span class="n">AutoMLRegressor</span><span class="p">:</span> <span class="s1">&#39;regressor&#39;</span>
+        <span class="p">}</span>
+        <span class="n">model_type</span> <span class="o">=</span> <span class="n">model_class_strings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_automl_class</span><span class="p">(),</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">model_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown `automl_class` </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_automl_class</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># A dict mapping model ids to their configurations</span>
+        <span class="n">configurations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">runhistory_</span><span class="o">.</span><span class="n">ids_config</span>
+
+        <span class="k">for</span> <span class="n">model_id</span><span class="p">,</span> <span class="n">run_info</span> <span class="ow">in</span> <span class="n">model_runs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">config_id</span> <span class="o">=</span> <span class="n">run_info</span><span class="p">[</span><span class="s1">&#39;config_id&#39;</span><span class="p">]</span>
+            <span class="n">run_config</span> <span class="o">=</span> <span class="n">configurations</span><span class="p">[</span><span class="n">config_id</span><span class="p">]</span><span class="o">.</span><span class="n">_values</span>
+
+            <span class="n">run_info</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                <span class="s1">&#39;balancing_strategy&#39;</span><span class="p">:</span> <span class="n">run_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;balancing:strategy&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">run_config</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">model_type</span><span class="si">}</span><span class="s1">:__choice__&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;data_preprocessors&#39;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">run_config</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="s1">&#39;data_preprocessing&#39;</span> <span class="ow">in</span> <span class="n">key</span> <span class="ow">and</span> <span class="s1">&#39;__choice__&#39;</span> <span class="ow">in</span> <span class="n">key</span>
+                <span class="p">],</span>
+                <span class="s1">&#39;feature_preprocessors&#39;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">run_config</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="s1">&#39;feature_preprocessor&#39;</span> <span class="ow">in</span> <span class="n">key</span> <span class="ow">and</span> <span class="s1">&#39;__choice__&#39;</span> <span class="ow">in</span> <span class="n">key</span>
+                <span class="p">]</span>
+            <span class="p">})</span>
+
+        <span class="c1"># Get the models ensemble weight if it has one</span>
+        <span class="c1"># TODO both implementing classes of AbstractEnsemble have a property</span>
+        <span class="c1">#      `identifiers_` and `weights_`, might be good to put it as an</span>
+        <span class="c1">#       abstract property</span>
+        <span class="c1"># TODO `ensemble_.identifiers_` and `ensemble_.weights_` are loosely</span>
+        <span class="c1">#      tied together by ordering, might be better to store as tuple</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">ensemble_</span><span class="o">.</span><span class="n">weights_</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">model_id</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">ensemble_</span><span class="o">.</span><span class="n">identifiers_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">model_runs</span><span class="p">[</span><span class="n">model_id</span><span class="p">][</span><span class="s1">&#39;ensemble_weight&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">weight</span>
+
+        <span class="c1"># Filter out non-ensemble members if needed, else fill in a default</span>
+        <span class="c1"># value of 0 if it&#39;s missing</span>
+        <span class="k">if</span> <span class="n">ensemble_only</span><span class="p">:</span>
+            <span class="n">model_runs</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">model_id</span><span class="p">:</span> <span class="n">info</span>
+                <span class="k">for</span> <span class="n">model_id</span><span class="p">,</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">model_runs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;ensemble_weight&#39;</span> <span class="ow">in</span> <span class="n">info</span> <span class="ow">and</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;ensemble_weight&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">model_id</span><span class="p">,</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">model_runs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="s1">&#39;ensemble_weight&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span><span class="p">:</span>
+                    <span class="n">info</span><span class="p">[</span><span class="s1">&#39;ensemble_weight&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># `rank` relies on `cost` so we include `cost`</span>
+        <span class="c1"># We drop it later if it&#39;s not requested</span>
+        <span class="k">if</span> <span class="s1">&#39;rank&#39;</span> <span class="ow">in</span> <span class="n">columns</span> <span class="ow">and</span> <span class="s1">&#39;cost&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">columns</span><span class="p">,</span> <span class="s1">&#39;cost&#39;</span><span class="p">]</span>
+
+        <span class="c1"># Finally, convert into a tabular format by converting the dict into</span>
+        <span class="c1"># column wise orientation.</span>
+        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+            <span class="n">col</span><span class="p">:</span> <span class="p">[</span><span class="n">run_info</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="k">for</span> <span class="n">run_info</span> <span class="ow">in</span> <span class="n">model_runs</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">columns</span> <span class="k">if</span> <span class="n">col</span> <span class="o">!=</span> <span class="s1">&#39;rank&#39;</span>
+        <span class="p">})</span>
+
+        <span class="c1"># Give it an index, even if not in the `include`</span>
+        <span class="n">dataframe</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;model_id&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Add the `rank` column if needed, dropping `cost` if it&#39;s not</span>
+        <span class="c1"># requested by the user</span>
+        <span class="k">if</span> <span class="s1">&#39;rank&#39;</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
+            <span class="n">dataframe</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;cost&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">dataframe</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="s1">&#39;rank&#39;</span><span class="p">,</span>
+                             <span class="n">value</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+                             <span class="n">loc</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;rank&#39;</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="s1">&#39;cost&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
+                <span class="n">dataframe</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;cost&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Decide on the sort order depending on what it gets sorted by</span>
+        <span class="n">descending_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ensemble_weight&#39;</span><span class="p">,</span> <span class="s1">&#39;duration&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">sort_order</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+            <span class="n">ascending_param</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">sort_by</span> <span class="ow">in</span> <span class="n">descending_columns</span> <span class="k">else</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ascending_param</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">sort_order</span> <span class="o">==</span> <span class="s1">&#39;descending&#39;</span> <span class="k">else</span> <span class="kc">True</span>
+
+        <span class="c1"># Sort by the given column name, defaulting to &#39;model_id&#39; if not present</span>
+        <span class="k">if</span> <span class="n">sort_by</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sort_by = &#39;</span><span class="si">{</span><span class="n">sort_by</span><span class="si">}</span><span class="s2">&#39; was not present&quot;</span>
+                                         <span class="s2">&quot;, defaulting to sort on the index &quot;</span>
+                                         <span class="s2">&quot;&#39;model_id&#39;&quot;</span><span class="p">)</span>
+            <span class="n">sort_by</span> <span class="o">=</span> <span class="s1">&#39;model_id&#39;</span>
+
+        <span class="n">dataframe</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">sort_by</span><span class="p">,</span>
+                              <span class="n">ascending</span><span class="o">=</span><span class="n">ascending_param</span><span class="p">,</span>
+                              <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Lastly, just grab the top_k</span>
+        <span class="k">if</span> <span class="n">top_k</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span> <span class="ow">or</span> <span class="n">top_k</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataframe</span><span class="p">):</span>
+            <span class="n">top_k</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span>
+
+        <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">top_k</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dataframe</span>
 
     <span class="k">def</span> <span class="nf">_get_automl_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
