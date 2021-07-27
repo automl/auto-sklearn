@@ -9,6 +9,38 @@
 Releases
 ========
 
+Version 0.13.0
+==============
+
+* ADD #1100: Provide access to the callbacks of SMAC.
+* ADD #1185: New leaderboard functionality to visualize models
+* FIX #1133: Refer to the correct attribute in an error message.
+* FIX #1154: Allow running Auto-sklearn on a 32-bit system.
+* MAINT #924: Instead of passing classes for the resampling strategy one has now to pass objects.
+* MAINT #1108: Limit the number of threads used by numpy and/or scikit-learn via `threadpoolctl`.
+* MAINT #1135: Simplify internal workflow of pandas handling. This results in pandas being passed
+  directly passed to scikit-learn models instead of being internally converted into a numpy array.
+  However, this should neither impact the behavior nor the performance of Auto-sklearn.
+* MAINT #1157: Drop support for Python 3.6, enable support for Python 3.9.
+* MAINT #1159: Remove the output directory argument to the classifier and regressor. Despite the
+  name, the output directory was not used and was a leftover from participating in the AutoML
+  challenges.
+* MAINT #1187: Bump requires SMAC version to at least 0.14.
+* DOC #1109: Add an FAQ.
+* DOC #1126: Add new examples on how to use scikit-learn's inspect module.
+* DOC #1136: Add a new example on how to perform multi-output regression.
+* DOC #1152: Enable link checking when buiding the documentation.
+* DOC #1158: New example on how to configure the logger for Auto-sklearn.
+* DOC #1165: Improve the readme page.
+
+Contributors v0.13.0
+********************
+
+* Matthias Feurer
+* Eddie Bergman
+* bitsbuffer
+* Francisco Rivera Valverde
+
 Version 0.12.7
 ==============
 
