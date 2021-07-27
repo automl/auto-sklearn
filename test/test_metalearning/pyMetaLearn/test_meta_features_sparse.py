@@ -256,12 +256,12 @@ def test_symbols_sum(sparse_data):
 
 def test_skewnesses(sparse_data_transformed):
     X_transformed, y, categorical_transformed = sparse_data_transformed
-    fixture = [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-               1.0, 0.0, -1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
-               0.0, 0.0, -1.0, 0.0, 0.0, 0.0,
-               -0.6969708499033568, 0.626346013011263,
-               0.3809987596624038, 1.4762248835141034,
-               0.07687661087633726, 0.36889797830360116]
+    fixture = [
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+        -0.696970849903357, 0.626346013011262, 0.38099875966240554,
+        1.4762248835141032, 0.07687661087633788, 0.3688979783036015
+    ]
     mf = meta_features.helper_functions["Skewnesses"](X_transformed, y, logging.getLogger('Meta'))
     print(mf.value)
     print(fixture)
@@ -269,15 +269,15 @@ def test_skewnesses(sparse_data_transformed):
 
 
 def test_kurtosisses(sparse_data_transformed):
-    fixture = [-3.0, -3.0, -2.0, -2.0, -3.0, -3.0, -3.0, -3.0,
-               -3.0, -2.0, -3.0, -2.0, -3.0, -3.0, -2.0, -3.0,
-               -3.0, -3.0, -3.0, -3.0, -3.0, -2.0, -3.0,
-               -3.0, -3.0, -1.1005836114255765,
-               -1.1786325509475712, -1.2387998382327912,
-               1.393438264413704, -0.9768209837948336,
-               -1.7937072296512782]
+    fixture = [
+        -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0,
+        -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0,
+        -3.0, -1.1005836114255763, -1.1786325509475744, -1.23879983823279,
+        1.3934382644137013, -0.9768209837948336, -1.7937072296512784
+    ]
     X_transformed, y, categorical_transformed = sparse_data_transformed
     mf = meta_features.helper_functions["Kurtosisses"](X_transformed, y, logging.getLogger('Meta'))
+    print(mf.value)
     np.testing.assert_allclose(mf.value, fixture)
 
 
