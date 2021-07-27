@@ -355,7 +355,7 @@ def test_leaderboard(
         'ensemble_only': [True, False],
         'top_k': [-10, 0, 1, 10, 'all'],
         'sort_by': [column_types['all'], 'invalid'],
-        'sort_order': ['ascending', 'descending', 'invalid', None],
+        'sort_order': ['ascending', 'descending', 'auto', 'invalid', None],
         'include': itertools.chain([None, 'invalid', 'type'], include_combinations),
     }
 
@@ -378,7 +378,7 @@ def test_leaderboard(
                 model.leaderboard(**params)
 
         # Shouldn't accept an invalid sort order
-        elif params['sort_order'] not in ['ascending', 'descending', None]:
+        elif params['sort_order'] not in ['ascending', 'descending', 'auto']:
             with pytest.raises(ValueError):
                 model.leaderboard(**params)
 

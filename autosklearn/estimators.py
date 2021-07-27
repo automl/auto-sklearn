@@ -559,7 +559,7 @@ class AutoSklearnEstimator(BaseEstimator):
         ensemble_only: bool = True,
         top_k: Union[int, Literal['all']] = 'all',
         sort_by: str = 'cost',
-        sort_order: Optional[Literal['ascending', 'descending']] = None,
+        sort_order: Literal['auto', 'ascending', 'descending'] = 'auto',
         include: Optional[Union[str, Iterable[str]]] = None
     ) -> pd.DataFrame:
         """ Returns a pandas table of results for all evaluated models.
@@ -608,10 +608,10 @@ class AutoSklearnEstimator(BaseEstimator):
             What column to sort by. If that column is not present, the
             sorting defaults to the ``"model_id"`` index column.
 
-        sort_order: Optional["ascending" or "descending"]
+        sort_order: "auto" or "ascending" or "descending" = "auto"
             Which sort order to apply to the ``sort_by`` column. If left
-            as ``None``, it will sort by a sensible default where "better" is on
-            top, otherwise defaulting to pandas default for
+            as ``"auto"``, it will sort by a sensible default where "better" is
+            on top, otherwise defaulting to the pandas default for
             `DataFrame.sort_values`_ if there is no obvious "better".
 
             .. _DataFrame.sort_values: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.sort_values.html
@@ -682,9 +682,10 @@ class AutoSklearnEstimator(BaseEstimator):
             raise ValueError(f"sort_by='{sort_by}' must be one of included "
                              f"columns {set(column_types['all'])}")
 
-        valid_sort_orders = ['ascending', 'descending']
-        if isinstance(sort_order, str) and sort_order not in valid_sort_orders:
-            raise ValueError(f"Optional sort_order not in {valid_sort_orders}")
+        valid_sort_orders = ['auto', 'ascending', 'descending']
+        if not (isinstance(sort_order, str) and sort_order in valid_sort_orders):
+            raise ValueError(f"`sort_order` = {sort_order} must be a str in "
+                             f"{valid_sort_orders}")
 
         # To get all the models that were optmized, we collect what we can from
         # runhistory first.
@@ -791,10 +792,10 @@ class AutoSklearnEstimator(BaseEstimator):
 
         # Decide on the sort order depending on what it gets sorted by
         descending_columns = ['ensemble_weight', 'duration']
-        if sort_order is not None:
-            ascending_param = False if sort_order == 'descending' else True
-        else:
+        if sort_order == 'auto':
             ascending_param = False if sort_by in descending_columns else True
+        else:
+            ascending_param = False if sort_order == 'descending' else True
 
         # Sort by the given column name, defaulting to 'model_id' if not present
         if sort_by not in dataframe.columns:
