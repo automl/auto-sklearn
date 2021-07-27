@@ -6,6 +6,7 @@ import importlib
 import os
 import inspect
 import itertools
+import operator
 import pickle
 import re
 import sys
@@ -331,22 +332,9 @@ def test_leaderboard(
 ):
     # Comprehensive test tasks a substantial amount of time, manually set if
     # required.
-    MAX_COMBO_SIZE_FOR_INCLUDE_PARAM = 2  # [0, len(valid_columns) + 1]
+    MAX_COMBO_SIZE_FOR_INCLUDE_PARAM = 3  # [0, len(valid_columns) + 1]
+    column_types = AutoSklearnEstimator._leaderboard_columns()
 
-    X_train, Y_train, _, _ = putil.get_dataset(dataset_name)
-    model = estimator_type(
-        time_left_for_this_task=30,
-        per_run_time_limit=5,
-        tmp_folder=tmp_dir,
-        seed=1
-    )
-    model.fit(X_train, Y_train)
-
-    column_types = {
-        'all': AutoSklearnEstimator._leaderboard_columns['all'],
-        'simple': AutoSklearnEstimator._leaderboard_columns['simple'],
-        'detailed': AutoSklearnEstimator._leaderboard_columns['all']
-    }
     # Create a dict of all possible param values for each param
     # with some invalid one's of the incorrect type
     include_combinations = itertools.chain(
@@ -357,7 +345,7 @@ def test_leaderboard(
         'detailed': [True, False],
         'ensemble_only': [True, False],
         'top_k': [-10, 0, 1, 10, 'all'],
-        'sort_by': [column_types['all'], 'invalid'],
+        'sort_by': [*column_types['all'], 'invalid'],
         'sort_order': ['ascending', 'descending', 'auto', 'invalid', None],
         'include': itertools.chain([None, 'invalid', 'type'], include_combinations),
     }
@@ -368,7 +356,19 @@ def test_leaderboard(
         for param_values in itertools.product(*valid_params.values())
     )
 
+    X_train, Y_train, _, _ = putil.get_dataset(dataset_name)
+    model = estimator_type(
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        tmp_folder=tmp_dir,
+        seed=1
+    )
+    model.fit(X_train, Y_train)
+
     for params in params_generator:
+        # Convert from iterator to solid list
+        if params['include'] is not None and not isinstance(params['include'], str):
+            params['include'] = list(params['include'])
 
         # Invalid top_k should raise an error, is a positive int or 'all'
         if not (params['top_k'] == 'all' or params['top_k'] > 0):
@@ -385,26 +385,32 @@ def test_leaderboard(
             with pytest.raises(ValueError):
                 model.leaderboard(**params)
 
-        # Invalid include item in a list
-        elif params['include'] is not None:
-            # Crash if just a str but invalid column
-            if (
-                isinstance(params['include'], str)
-                and params['include'] not in column_types['all']
-            ):
-                with pytest.raises(ValueError):
-                    model.leaderboard(**params)
-            # Crash if list but contains invalid column
-            elif (
-                not isinstance(params['include'], str)
-                and len(set(params['include']) - set(column_types['all'])) != 0
-            ):
-                with pytest.raises(ValueError):
-                    model.leaderboard(**params)
+        # include is single str but not valid
+        elif (
+            isinstance(params['include'], str)
+            and params['include'] not in column_types['all']
+        ):
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
 
-        # Should run without an error if all params are valid
+        # Crash if include is list but contains invalid column
+        elif (
+            isinstance(params['include'], list)
+            and len(set(params['include']) - set(column_types['all'])) != 0
+        ):
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # Can't have just model_id, in both single str and list case
+        elif (
+            params['include'] == 'model_id'
+            or params['include'] == ['model_id']
+        ):
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # Else all valid combinations should be validated
         else:
-            # Validate the outputs
             leaderboard = model.leaderboard(**params)
 
             # top_k should never be less than the rows given back
@@ -413,14 +419,22 @@ def test_leaderboard(
                 assert params['top_k'] >= len(leaderboard)
 
             # Check the right columns are present and in the right order
-            # The id is set as the index but is not included in pandas columns
+            # The model_id is set as the index, not included in pandas columns
             columns = list(leaderboard.columns)
+            def exclude(lst, s):
+                return [x for x in lst if x != s]
+
             if params['include'] is not None:
-                assert columns == list(params['include'])
+                # Include with only single str should be the only column
+                if isinstance(params['include'], str):
+                    assert params['include'] in columns and len(columns) == 1
+                # Include as a list should have all the columns without model_id
+                else:
+                    assert columns == exclude(params['include'], 'model_id')
             elif params['detailed']:
-                assert columns == column_types['detailed']
+                assert columns == exclude(column_types['detailed'], 'model_id')
             else:
-                assert columns == column_types['simple']
+                assert columns == exclude(column_types['simple'], 'model_id')
 
             # Ensure that if it's ensemble only
             # Can only check if 'ensemble_weight' is present
