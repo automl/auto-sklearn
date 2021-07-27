@@ -36,6 +36,13 @@ automl = AutoSklearnRegressor(
 automl.fit(X_train, y_train, dataset_name='synthetic')
 
 ############################################################################
+# View the models found by auto-sklearn
+# =====================================
+
+print(automl.leaderboard())
+
+
+############################################################################
 # Print the final ensemble constructed by auto-sklearn
 # ====================================================
 

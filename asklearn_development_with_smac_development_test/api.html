@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>APIs &#8212; AutoSklearn 0.12.6 documentation</title>
+    <title>APIs &#8212; AutoSklearn 0.12.7 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
@@ -55,7 +55,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.12.6</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.12.7</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -505,6 +505,70 @@ contained subobjects that are estimators.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.classification.AutoSklearnClassifier.leaderboard">
+<span class="sig-name descname"><span class="pre">leaderboard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detailed</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble_only</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_k</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">all</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_by</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'cost'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_order</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">auto</span><span class="p"><span class="pre">,</span> </span><span class="pre">ascending</span><span class="p"><span class="pre">,</span> </span><span class="pre">descending</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.leaderboard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a pandas table of results for all evaluated models.</p>
+<p>Gives an overview of all models trained during the search process along
+with various statistics about their training.</p>
+<p>The availble statistics are:</p>
+<p><strong>Simple</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;model_id&quot;</span></code> - The id given to a model by <code class="docutils literal notranslate"><span class="pre">autosklearn</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;rank&quot;</span></code> - The rank of the model based on it’s <code class="docutils literal notranslate"><span class="pre">&quot;cost&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;ensemble_weight&quot;</span></code> - The weight given to the model in the ensemble.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;type&quot;</span></code> - The type of classifier/regressor used.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;cost&quot;</span></code> - The loss of the model on the validation set.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;duration&quot;</span></code> - Length of time the model was optimized for.</p></li>
+</ul>
+<p><strong>Detailed</strong>:
+The detailed view includes all of the simple statistics along with the
+following.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;config_id&quot;</span></code> - The id used by SMAC for optimization.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;budget&quot;</span></code> - How much budget was allocated to this model.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;status&quot;</span></code> - The return status of training the model with SMAC.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;train_loss&quot;</span></code> - The loss of the model on the training set.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;balancing_strategy&quot;</span></code> - The balancing strategy used for data preprocessing.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;start_time&quot;</span></code> - Time the model began being optimized</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;end_time&quot;</span></code> - Time the model ended being optimized</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;data_preprocessors&quot;</span></code> - The preprocessors used on the data</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;feature_preprocessors&quot;</span></code> - The preprocessors for features types</p></li>
+</ul>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>detailed: bool = False</strong></dt><dd><p>Whether to give detailed information or just a simple overview.</p>
+</dd>
+<dt><strong>ensemble_only: bool = True</strong></dt><dd><p>Whether to view only models included in the ensemble or all models
+trained.</p>
+</dd>
+<dt><strong>top_k: int or “all” = “all”</strong></dt><dd><p>How many models to display.</p>
+</dd>
+<dt><strong>sort_by: str = ‘cost’</strong></dt><dd><p>What column to sort by. If that column is not present, the
+sorting defaults to the <code class="docutils literal notranslate"><span class="pre">&quot;model_id&quot;</span></code> index column.</p>
+</dd>
+<dt><strong>sort_order: “auto” or “ascending” or “descending” = “auto”</strong></dt><dd><p>Which sort order to apply to the <code class="docutils literal notranslate"><span class="pre">sort_by</span></code> column. If left
+as <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, it will sort by a sensible default where “better” is
+on top, otherwise defaulting to the pandas default for
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.sort_values.html">DataFrame.sort_values</a> if there is no obvious “better”.</p>
+</dd>
+<dt><strong>include: Optional[str or Iterable[str]]</strong></dt><dd><p>Items to include, other items not specified will be excluded.
+The exception is the <code class="docutils literal notranslate"><span class="pre">&quot;model_id&quot;</span></code> index column which is always included.</p>
+<p>If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, it will resort back to using the <code class="docutils literal notranslate"><span class="pre">detailed</span></code>
+param to decide the columns to include.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>pd.DataFrame</dt><dd><p>A dataframe of statistics for the models, ordered by <code class="docutils literal notranslate"><span class="pre">sort_by</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="autosklearn.classification.AutoSklearnClassifier.predict">
 <span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predict classes for X.</p>
@@ -913,6 +977,70 @@ contained subobjects that are estimators.</p>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>params</strong><span class="classifier">dict</span></dt><dd><p>Parameter names mapped to their values.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.experimental.askl2.AutoSklearn2Classifier.leaderboard">
+<span class="sig-name descname"><span class="pre">leaderboard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detailed</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble_only</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_k</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">all</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_by</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'cost'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_order</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">auto</span><span class="p"><span class="pre">,</span> </span><span class="pre">ascending</span><span class="p"><span class="pre">,</span> </span><span class="pre">descending</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="headerlink" href="#autosklearn.experimental.askl2.AutoSklearn2Classifier.leaderboard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a pandas table of results for all evaluated models.</p>
+<p>Gives an overview of all models trained during the search process along
+with various statistics about their training.</p>
+<p>The availble statistics are:</p>
+<p><strong>Simple</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;model_id&quot;</span></code> - The id given to a model by <code class="docutils literal notranslate"><span class="pre">autosklearn</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;rank&quot;</span></code> - The rank of the model based on it’s <code class="docutils literal notranslate"><span class="pre">&quot;cost&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;ensemble_weight&quot;</span></code> - The weight given to the model in the ensemble.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;type&quot;</span></code> - The type of classifier/regressor used.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;cost&quot;</span></code> - The loss of the model on the validation set.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;duration&quot;</span></code> - Length of time the model was optimized for.</p></li>
+</ul>
+<p><strong>Detailed</strong>:
+The detailed view includes all of the simple statistics along with the
+following.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;config_id&quot;</span></code> - The id used by SMAC for optimization.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;budget&quot;</span></code> - How much budget was allocated to this model.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;status&quot;</span></code> - The return status of training the model with SMAC.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;train_loss&quot;</span></code> - The loss of the model on the training set.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;balancing_strategy&quot;</span></code> - The balancing strategy used for data preprocessing.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;start_time&quot;</span></code> - Time the model began being optimized</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;end_time&quot;</span></code> - Time the model ended being optimized</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;data_preprocessors&quot;</span></code> - The preprocessors used on the data</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;feature_preprocessors&quot;</span></code> - The preprocessors for features types</p></li>
+</ul>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>detailed: bool = False</strong></dt><dd><p>Whether to give detailed information or just a simple overview.</p>
+</dd>
+<dt><strong>ensemble_only: bool = True</strong></dt><dd><p>Whether to view only models included in the ensemble or all models
+trained.</p>
+</dd>
+<dt><strong>top_k: int or “all” = “all”</strong></dt><dd><p>How many models to display.</p>
+</dd>
+<dt><strong>sort_by: str = ‘cost’</strong></dt><dd><p>What column to sort by. If that column is not present, the
+sorting defaults to the <code class="docutils literal notranslate"><span class="pre">&quot;model_id&quot;</span></code> index column.</p>
+</dd>
+<dt><strong>sort_order: “auto” or “ascending” or “descending” = “auto”</strong></dt><dd><p>Which sort order to apply to the <code class="docutils literal notranslate"><span class="pre">sort_by</span></code> column. If left
+as <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, it will sort by a sensible default where “better” is
+on top, otherwise defaulting to the pandas default for
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.sort_values.html">DataFrame.sort_values</a> if there is no obvious “better”.</p>
+</dd>
+<dt><strong>include: Optional[str or Iterable[str]]</strong></dt><dd><p>Items to include, other items not specified will be excluded.
+The exception is the <code class="docutils literal notranslate"><span class="pre">&quot;model_id&quot;</span></code> index column which is always included.</p>
+<p>If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, it will resort back to using the <code class="docutils literal notranslate"><span class="pre">detailed</span></code>
+param to decide the columns to include.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>pd.DataFrame</dt><dd><p>A dataframe of statistics for the models, ordered by <code class="docutils literal notranslate"><span class="pre">sort_by</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -1413,6 +1541,70 @@ contained subobjects that are estimators.</p>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>params</strong><span class="classifier">dict</span></dt><dd><p>Parameter names mapped to their values.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.regression.AutoSklearnRegressor.leaderboard">
+<span class="sig-name descname"><span class="pre">leaderboard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detailed</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble_only</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_k</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">all</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_by</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'cost'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_order</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">auto</span><span class="p"><span class="pre">,</span> </span><span class="pre">ascending</span><span class="p"><span class="pre">,</span> </span><span class="pre">descending</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.leaderboard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a pandas table of results for all evaluated models.</p>
+<p>Gives an overview of all models trained during the search process along
+with various statistics about their training.</p>
+<p>The availble statistics are:</p>
+<p><strong>Simple</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;model_id&quot;</span></code> - The id given to a model by <code class="docutils literal notranslate"><span class="pre">autosklearn</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;rank&quot;</span></code> - The rank of the model based on it’s <code class="docutils literal notranslate"><span class="pre">&quot;cost&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;ensemble_weight&quot;</span></code> - The weight given to the model in the ensemble.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;type&quot;</span></code> - The type of classifier/regressor used.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;cost&quot;</span></code> - The loss of the model on the validation set.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;duration&quot;</span></code> - Length of time the model was optimized for.</p></li>
+</ul>
+<p><strong>Detailed</strong>:
+The detailed view includes all of the simple statistics along with the
+following.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;config_id&quot;</span></code> - The id used by SMAC for optimization.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;budget&quot;</span></code> - How much budget was allocated to this model.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;status&quot;</span></code> - The return status of training the model with SMAC.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;train_loss&quot;</span></code> - The loss of the model on the training set.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;balancing_strategy&quot;</span></code> - The balancing strategy used for data preprocessing.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;start_time&quot;</span></code> - Time the model began being optimized</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;end_time&quot;</span></code> - Time the model ended being optimized</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;data_preprocessors&quot;</span></code> - The preprocessors used on the data</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;feature_preprocessors&quot;</span></code> - The preprocessors for features types</p></li>
+</ul>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>detailed: bool = False</strong></dt><dd><p>Whether to give detailed information or just a simple overview.</p>
+</dd>
+<dt><strong>ensemble_only: bool = True</strong></dt><dd><p>Whether to view only models included in the ensemble or all models
+trained.</p>
+</dd>
+<dt><strong>top_k: int or “all” = “all”</strong></dt><dd><p>How many models to display.</p>
+</dd>
+<dt><strong>sort_by: str = ‘cost’</strong></dt><dd><p>What column to sort by. If that column is not present, the
+sorting defaults to the <code class="docutils literal notranslate"><span class="pre">&quot;model_id&quot;</span></code> index column.</p>
+</dd>
+<dt><strong>sort_order: “auto” or “ascending” or “descending” = “auto”</strong></dt><dd><p>Which sort order to apply to the <code class="docutils literal notranslate"><span class="pre">sort_by</span></code> column. If left
+as <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, it will sort by a sensible default where “better” is
+on top, otherwise defaulting to the pandas default for
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.sort_values.html">DataFrame.sort_values</a> if there is no obvious “better”.</p>
+</dd>
+<dt><strong>include: Optional[str or Iterable[str]]</strong></dt><dd><p>Items to include, other items not specified will be excluded.
+The exception is the <code class="docutils literal notranslate"><span class="pre">&quot;model_id&quot;</span></code> index column which is always included.</p>
+<p>If left as <code class="docutils literal notranslate"><span class="pre">None</span></code>, it will resort back to using the <code class="docutils literal notranslate"><span class="pre">detailed</span></code>
+param to decide the columns to include.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>pd.DataFrame</dt><dd><p>A dataframe of statistics for the models, ordered by <code class="docutils literal notranslate"><span class="pre">sort_by</span></code>.</p>
 </dd>
 </dl>
 </dd>
