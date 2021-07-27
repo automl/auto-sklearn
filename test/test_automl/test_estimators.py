@@ -675,13 +675,18 @@ def test_selector_file_askl2_can_be_created(selector_path):
                 importlib.reload(autosklearn.experimental.askl2)
         else:
             importlib.reload(autosklearn.experimental.askl2)
-            assert os.path.exists(autosklearn.experimental.askl2.selector_file)
-            if selector_path is None or not os.access(selector_path, os.W_OK):
-                # We default to home in worst case
-                assert os.path.expanduser("~") in str(autosklearn.experimental.askl2.selector_file)
-            else:
-                # a dir provided via XDG_CACHE_HOME
-                assert selector_path in str(autosklearn.experimental.askl2.selector_file)
+            for metric in autosklearn.experimental.askl2.metrics:
+                assert os.path.exists(autosklearn.experimental.askl2.selector_files[metric.name])
+                if selector_path is None or not os.access(selector_path, os.W_OK):
+                    # We default to home in worst case
+                    assert os.path.expanduser("~") in str(
+                        autosklearn.experimental.askl2.selector_files[metric.name]
+                    )
+                else:
+                    # a dir provided via XDG_CACHE_HOME
+                    assert selector_path in str(
+                        autosklearn.experimental.askl2.selector_files[metric.name]
+                    )
     # Re import it at the end so we do not affect other test
     importlib.reload(autosklearn.experimental.askl2)
 

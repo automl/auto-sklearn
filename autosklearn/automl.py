@@ -885,9 +885,10 @@ class AutoML(BaseEstimator):
         task: int,
     ):
         if memory_limit and isinstance(X, np.ndarray):
+
             if X.dtype == np.float32:
                 multiplier = 4
-            elif X.dtype in (np.float64, np.float):
+            elif X.dtype in (np.float64, float):
                 multiplier = 8
             elif (
                 # In spite of the names, np.float96 and np.float128
@@ -903,6 +904,21 @@ class AutoML(BaseEstimator):
                 multiplier = 8
                 logger.warning('Unknown dtype for X: %s, assuming it takes 8 bit/number',
                                str(X.dtype))
+
+            megabytes = X.shape[0] * X.shape[1] * multiplier / 1024 / 1024
+            if memory_limit <= megabytes * 10 and X.dtype != np.float32:
+                cast_to = {
+                    8: np.float32,
+                    16: np.float64,
+                }.get(multiplier, np.float32)
+                logger.warning(
+                    'Dataset too large for memory limit %dMB, reducing the precision from %s to %s',
+                    memory_limit,
+                    X.dtype,
+                    cast_to,
+                )
+                X = X.astype(cast_to)
+
             megabytes = X.shape[0] * X.shape[1] * multiplier / 1024 / 1024
             if memory_limit <= megabytes * 10:
                 new_num_samples = int(
