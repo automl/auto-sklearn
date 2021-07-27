@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-from typing import Optional, Dict, List, Tuple, Union, Iterable, ClassVar
+from typing import Optional, Dict, List, Tuple, Union, Iterable
 from typing_extensions import Literal
 
 from ConfigSpace.configuration_space import Configuration
@@ -22,18 +22,6 @@ from autosklearn.util.backend import create
 
 
 class AutoSklearnEstimator(BaseEstimator):
-    # Constants used by `def leaderboard` for columns and their sort order
-    _leaderboard_columns: ClassVar[Dict[str, List[str]]] = {
-        "all": [
-            "model_id", "rank", "ensemble_weight", "type", "cost", "duration",
-            "config_id", "train_loss", "seed", "start_time", "end_time",
-            "budget", "status", "data_preprocessors", "feature_preprocessors",
-            "balancing_strategy", "config_origin"
-        ],
-        "simple": [
-            "model_id", "rank", "ensemble_weight", "type", "cost", "duration"
-        ]
-    }
 
     def __init__(
         self,
@@ -642,11 +630,7 @@ class AutoSklearnEstimator(BaseEstimator):
         # TODO validate that `self` is fitted. This is required for
         #      self.ensemble_ to get the identifiers of models it will generate
         #      weights for.
-        column_types = {
-            'all': AutoSklearnEstimator._leaderboard_columns['all'],
-            'simple': AutoSklearnEstimator._leaderboard_columns['simple'],
-            'detailed': AutoSklearnEstimator._leaderboard_columns['all']
-        }
+        column_types = AutoSklearnEstimator._leaderboard_columns()
 
         # Validation of top_k
         if (
@@ -660,6 +644,9 @@ class AutoSklearnEstimator(BaseEstimator):
         # Validate columns to include
         if isinstance(include, str):
             include = [include]
+
+        if include == ['model_id']:
+            raise ValueError('Must provide more than just `model_id`')
 
         if include is not None:
             columns = [*include]
@@ -784,10 +771,10 @@ class AutoSklearnEstimator(BaseEstimator):
         # Add the `rank` column if needed, dropping `cost` if it's not
         # requested by the user
         if 'rank' in columns:
-            dataframe.sort_values(by='cost', ascending=False, inplace=True)
+            dataframe.sort_values(by='cost', ascending=True, inplace=True)
             dataframe.insert(column='rank',
                              value=range(1, len(dataframe) + 1),
-                             loc=list(columns).index('rank'))
+                             loc=list(columns).index('rank') - 1)  # account for `model_id`
 
             if 'cost' not in columns:
                 dataframe.drop('cost', inplace=True)
@@ -806,9 +793,15 @@ class AutoSklearnEstimator(BaseEstimator):
                                          "'model_id'")
             sort_by = 'model_id'
 
-        dataframe.sort_values(by=sort_by,
-                              ascending=ascending_param,
-                              inplace=True)
+        # Cost can be the same but leave rank all over the place
+        if 'rank' in columns and sort_by == 'cost':
+            dataframe.sort_values(by=[sort_by, 'rank'],
+                                  ascending=[ascending_param, True],
+                                  inplace=True)
+        else:
+            dataframe.sort_values(by=sort_by,
+                                  ascending=ascending_param,
+                                  inplace=True)
 
         # Lastly, just grab the top_k
         if top_k == 'all' or top_k >= len(dataframe):
@@ -817,6 +810,20 @@ class AutoSklearnEstimator(BaseEstimator):
         dataframe = dataframe.head(top_k)
 
         return dataframe
+
+    @staticmethod
+    def _leaderboard_columns() -> Dict[Literal['all', 'simple', 'detailed'], List[str]]:
+        all = [
+            "model_id", "rank", "ensemble_weight", "type", "cost", "duration",
+            "config_id", "train_loss", "seed", "start_time", "end_time",
+            "budget", "status", "data_preprocessors", "feature_preprocessors",
+            "balancing_strategy", "config_origin"
+        ]
+        simple = [
+            "model_id", "rank", "ensemble_weight", "type", "cost", "duration"
+        ]
+        detailed = all
+        return {'all': all, 'detailed': detailed, 'simple': simple}
 
     def _get_automl_class(self):
         raise NotImplementedError()
