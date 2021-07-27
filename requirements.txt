@@ -1,4 +1,5 @@
 setuptools
+typing_extensions
 
 numpy>=1.9.0
 scipy>=0.14.1,<1.7.0
