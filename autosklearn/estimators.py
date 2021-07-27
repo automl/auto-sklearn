@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
-from typing import Optional, Dict, List, Tuple, Union, Iterable
+from typing import Optional, Dict, List, Tuple, Union, Iterable, ClassVar
+from typing_extensions import Literal
 
 from ConfigSpace.configuration_space import Configuration
 import dask.distributed
@@ -20,7 +21,9 @@ from autosklearn.metrics import Scorer
 from autosklearn.util.backend import create
 
 
+
 class AutoSklearnEstimator(BaseEstimator):
+
 
     def __init__(
         self,
@@ -554,9 +557,9 @@ class AutoSklearnEstimator(BaseEstimator):
         self,
         detailed: bool = False,
         ensemble_only: bool = True,
-        top_k: Union[int, str] = 'all',
+        top_k: Union[int, Literal['all']] = 'all',
         sort_by: str = 'cost',
-        sort_order: Optional[str] = None,
+        sort_order: Optional[Literal['ascending', 'descending']] = None,
         include: Optional[Union[str, Iterable[str]]] = None
     ) -> pd.DataFrame:
         """ Returns a pandas table of results for all evaluated models.
@@ -820,11 +823,11 @@ class AutoSklearnEstimator(BaseEstimator):
             "budget", "status", "data_preprocessors", "feature_preprocessors",
             "balancing_strategy", "config_origin"
         ]
-        simple= [
+        simple = [
             "model_id", "rank", "ensemble_weight", "type", "cost", "duration"
         ]
         detailed = all
-        return {'all': all, 'simple': simple , 'detailed': detailed}
+        return {'all': all, 'simple': simple, 'detailed': detailed}
 
     def _get_automl_class(self):
         raise NotImplementedError()
