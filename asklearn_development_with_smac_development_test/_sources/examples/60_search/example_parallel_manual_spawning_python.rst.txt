@@ -208,15 +208,15 @@ which means that it is automatically stopped once all computation is done.
 
  .. code-block:: none
 
-    [ERROR] [2021-07-27 16:03:58,848:asyncio] _GatheringFuture exception was never retrieved
+    [ERROR] [2021-07-27 19:19:18,595:asyncio] _GatheringFuture exception was never retrieved
     future: <_GatheringFuture finished exception=CancelledError()>
     asyncio.exceptions.CancelledError
     auto-sklearn results:
-      Dataset name: 3b66f4dc-eef4-11eb-8774-0f821ad33e1d
+      Dataset name: 84fb8bf0-ef0f-11eb-876a-f580a99df589
       Metric: accuracy
       Best validation score: 0.985816
-      Number of target algorithm runs: 13
-      Number of successful target algorithm runs: 12
+      Number of target algorithm runs: 16
+      Number of successful target algorithm runs: 15
       Number of crashed target algorithm runs: 0
       Number of target algorithms that exceeded the time limit: 1
       Number of target algorithms that exceeded the memory limit: 0
@@ -229,7 +229,7 @@ which means that it is automatically stopped once all computation is done.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  35.957 seconds)
+   **Total running time of the script:** ( 0 minutes  35.909 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_manual_spawning_python.py:
