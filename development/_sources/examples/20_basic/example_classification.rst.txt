@@ -120,30 +120,30 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight                 type      cost  duration
     model_id                                                                
-    7            1             0.10          extra_trees  0.014184  1.205559
-    21           2             0.04          extra_trees  0.021277  1.092175
-    16           3             0.06    gradient_boosting  0.021277  0.742199
-    44           4             0.02          extra_trees  0.021277  1.546742
-    2            5             0.06        random_forest  0.028369  1.468955
-    19           6             0.06          extra_trees  0.028369  2.226264
-    22           7             0.02    gradient_boosting  0.028369  0.845336
-    6            8             0.02                  mlp  0.028369  0.806401
-    12           9             0.04    gradient_boosting  0.035461  0.968355
-    17          10             0.04    gradient_boosting  0.035461  1.345124
-    18          11             0.02        random_forest  0.035461  1.490044
-    37          12             0.12          extra_trees  0.035461  1.542303
-    40          13             0.10           libsvm_svc  0.042553  0.709444
-    31          14             0.04          extra_trees  0.042553  1.107129
-    9           15             0.02          extra_trees  0.042553  1.361734
-    25          16             0.02             adaboost  0.042553  1.744518
-    4           17             0.02                  mlp  0.049645  1.175389
-    32          18             0.04  k_nearest_neighbors  0.120567  0.771238
-    43          19             0.06             adaboost  0.120567  1.459821
-    20          20             0.02   passive_aggressive  0.127660  0.589246
-    36          21             0.02   passive_aggressive  0.163121  0.660884
-    39          22             0.02         bernoulli_nb  0.390071  0.807024
-    42          23             0.02                  mlp  0.602837  5.006140
-    35          24             0.02         bernoulli_nb  0.609929  0.660950
+    7            1             0.10          extra_trees  0.014184  1.343907
+    21           2             0.04          extra_trees  0.021277  1.212742
+    16           3             0.06    gradient_boosting  0.021277  0.823288
+    44           4             0.02          extra_trees  0.021277  1.577734
+    2            5             0.06        random_forest  0.028369  1.470836
+    19           6             0.06          extra_trees  0.028369  2.533323
+    22           7             0.02    gradient_boosting  0.028369  0.936103
+    6            8             0.02                  mlp  0.028369  0.887592
+    12           9             0.04    gradient_boosting  0.035461  1.073343
+    17          10             0.04    gradient_boosting  0.035461  1.374527
+    18          11             0.02        random_forest  0.035461  1.668471
+    37          12             0.12          extra_trees  0.035461  1.565667
+    40          13             0.10           libsvm_svc  0.042553  0.789399
+    31          14             0.04          extra_trees  0.042553  1.220966
+    9           15             0.02          extra_trees  0.042553  1.537309
+    25          16             0.02             adaboost  0.042553  1.772941
+    4           17             0.02                  mlp  0.049645  1.349273
+    32          18             0.04  k_nearest_neighbors  0.120567  0.775807
+    43          19             0.06             adaboost  0.120567  1.458761
+    20          20             0.02   passive_aggressive  0.127660  0.599253
+    36          21             0.02   passive_aggressive  0.163121  0.717375
+    39          22             0.02         bernoulli_nb  0.390071  0.854210
+    42          23             0.02                  mlp  0.602837  5.600616
+    35          24             0.02         bernoulli_nb  0.609929  0.734670
 
 
 
@@ -398,7 +398,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  5.254 seconds)
+   **Total running time of the script:** ( 2 minutes  0.711 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_classification.py:

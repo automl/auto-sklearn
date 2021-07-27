@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Fit a single configuration &#8212; AutoSklearn 0.12.7 documentation</title>
+    <title>Fit a single configuration &#8212; AutoSklearn 0.13.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -55,7 +55,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.12.7</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.13.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -210,9 +210,9 @@ get further documentation about Scikit-Learn models here: &lt;<a class="referenc
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{&#39;data_preprocessing&#39;: DataPreprocessor(column_transformer=ColumnTransformer(sparse_threshold=0.0,
                                                       transformers=[(&#39;categorical_transformer&#39;,
                                                                      CategoricalPreprocessingPipeline(config=Configuration:
-  categorical_encoding:__choice__, Value: &#39;encoding&#39;
+  categorical_encoding:__choice__, Value: &#39;no_encoding&#39;
   category_coalescence:__choice__, Value: &#39;no_coalescense&#39;
-, dataset_properties={&#39;multiclass&#39;: False, &#39;multilabel&#39;: False, &#39;signed&#39;: False, &#39;spa...
+, dataset_properties={&#39;multiclass&#39;: False, &#39;multilabel&#39;: False, &#39;signed&#39;: False, &#39;...
                             &#39;katri&#39;: &#39;categorical&#39;, &#39;mulch&#39;: &#39;categorical&#39;,
                             &#39;qxmsq&#39;: &#39;categorical&#39;, &#39;r2ar8&#39;: &#39;categorical&#39;,
                             &#39;reskd&#39;: &#39;categorical&#39;, &#39;reskr&#39;: &#39;categorical&#39;,
@@ -220,56 +220,64 @@ get further documentation about Scikit-Learn models here: &lt;<a class="referenc
                             &#39;rxmsq&#39;: &#39;categorical&#39;, &#39;simpl&#39;: &#39;categorical&#39;,
                             &#39;skach&#39;: &#39;categorical&#39;, &#39;skewr&#39;: &#39;categorical&#39;,
                             &#39;skrxp&#39;: &#39;categorical&#39;, &#39;spcop&#39;: &#39;categorical&#39;,
-                            &#39;stlmt&#39;: &#39;categorical&#39;, &#39;thrsk&#39;: &#39;categorical&#39;, ...}), &#39;balancing&#39;: Balancing(strategy=&#39;weighting&#39;), &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fd45caf4b50&gt;, &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fd45caf4880&gt;}
+                            &#39;stlmt&#39;: &#39;categorical&#39;, &#39;thrsk&#39;: &#39;categorical&#39;, ...}), &#39;balancing&#39;: Balancing(strategy=&#39;weighting&#39;), &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fa6ae63f100&gt;, &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fa6af2582e0&gt;}
 RunInfo(config=Configuration:
   balancing:strategy, Value: &#39;weighting&#39;
   classifier:__choice__, Value: &#39;random_forest&#39;
-  classifier:random_forest:bootstrap, Value: &#39;False&#39;
+  classifier:random_forest:bootstrap, Value: &#39;True&#39;
   classifier:random_forest:criterion, Value: &#39;entropy&#39;
   classifier:random_forest:max_depth, Constant: &#39;None&#39;
-  classifier:random_forest:max_features, Value: 0.2215993323994362
+  classifier:random_forest:max_features, Value: 0.8775356121146328
   classifier:random_forest:max_leaf_nodes, Constant: &#39;None&#39;
   classifier:random_forest:min_impurity_decrease, Constant: 0.0
-  classifier:random_forest:min_samples_leaf, Value: 10
+  classifier:random_forest:min_samples_leaf, Value: 15
   classifier:random_forest:min_samples_split, Value: 11
   classifier:random_forest:min_weight_fraction_leaf, Constant: 0.0
-  data_preprocessing:categorical_transformer:categorical_encoding:__choice__, Value: &#39;encoding&#39;
+  data_preprocessing:categorical_transformer:categorical_encoding:__choice__, Value: &#39;no_encoding&#39;
   data_preprocessing:categorical_transformer:category_coalescence:__choice__, Value: &#39;no_coalescense&#39;
-  data_preprocessing:numerical_transformer:imputation:strategy, Value: &#39;median&#39;
-  data_preprocessing:numerical_transformer:rescaling:__choice__, Value: &#39;power_transformer&#39;
-  feature_preprocessor:__choice__, Value: &#39;select_percentile_classification&#39;
-  feature_preprocessor:select_percentile_classification:percentile, Value: 64.5922817108987
-  feature_preprocessor:select_percentile_classification:score_func, Value: &#39;f_classif&#39;
+  data_preprocessing:numerical_transformer:imputation:strategy, Value: &#39;most_frequent&#39;
+  data_preprocessing:numerical_transformer:rescaling:__choice__, Value: &#39;quantile_transformer&#39;
+  data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles, Value: 1549
+  data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution, Value: &#39;uniform&#39;
+  feature_preprocessor:__choice__, Value: &#39;fast_ica&#39;
+  feature_preprocessor:fast_ica:algorithm, Value: &#39;parallel&#39;
+  feature_preprocessor:fast_ica:fun, Value: &#39;exp&#39;
+  feature_preprocessor:fast_ica:n_components, Value: 605
+  feature_preprocessor:fast_ica:whiten, Value: &#39;True&#39;
 , instance=None, instance_specific=None, seed=1, cutoff=60, capped=False, budget=0.0, source_id=0)
-RunValue(cost=0.04360189573459716, time=1.6169214248657227, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1627425341.541902, endtime=1627425343.177269, additional_info={&#39;duration&#39;: 1.5503764152526855, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.043437645959831905, &#39;configuration_origin&#39;: None})
+RunValue(cost=0.024644549763033208, time=13.367454290390015, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1627425393.9140604, endtime=1627425407.3021595, additional_info={&#39;duration&#39;: 13.285256385803223, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.018682858477347075, &#39;configuration_origin&#39;: None})
 Passed Configuration: Configuration:
   balancing:strategy, Value: &#39;weighting&#39;
   classifier:__choice__, Value: &#39;random_forest&#39;
-  classifier:random_forest:bootstrap, Value: &#39;False&#39;
+  classifier:random_forest:bootstrap, Value: &#39;True&#39;
   classifier:random_forest:criterion, Value: &#39;entropy&#39;
   classifier:random_forest:max_depth, Constant: &#39;None&#39;
-  classifier:random_forest:max_features, Value: 0.2215993323994362
+  classifier:random_forest:max_features, Value: 0.8775356121146328
   classifier:random_forest:max_leaf_nodes, Constant: &#39;None&#39;
   classifier:random_forest:min_impurity_decrease, Constant: 0.0
-  classifier:random_forest:min_samples_leaf, Value: 10
+  classifier:random_forest:min_samples_leaf, Value: 15
   classifier:random_forest:min_samples_split, Value: 11
   classifier:random_forest:min_weight_fraction_leaf, Constant: 0.0
-  data_preprocessing:categorical_transformer:categorical_encoding:__choice__, Value: &#39;encoding&#39;
+  data_preprocessing:categorical_transformer:categorical_encoding:__choice__, Value: &#39;no_encoding&#39;
   data_preprocessing:categorical_transformer:category_coalescence:__choice__, Value: &#39;no_coalescense&#39;
-  data_preprocessing:numerical_transformer:imputation:strategy, Value: &#39;median&#39;
-  data_preprocessing:numerical_transformer:rescaling:__choice__, Value: &#39;power_transformer&#39;
-  feature_preprocessor:__choice__, Value: &#39;select_percentile_classification&#39;
-  feature_preprocessor:select_percentile_classification:percentile, Value: 64.5922817108987
-  feature_preprocessor:select_percentile_classification:score_func, Value: &#39;f_classif&#39;
+  data_preprocessing:numerical_transformer:imputation:strategy, Value: &#39;most_frequent&#39;
+  data_preprocessing:numerical_transformer:rescaling:__choice__, Value: &#39;quantile_transformer&#39;
+  data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles, Value: 1549
+  data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution, Value: &#39;uniform&#39;
+  feature_preprocessor:__choice__, Value: &#39;fast_ica&#39;
+  feature_preprocessor:fast_ica:algorithm, Value: &#39;parallel&#39;
+  feature_preprocessor:fast_ica:fun, Value: &#39;exp&#39;
+  feature_preprocessor:fast_ica:n_components, Value: 605
+  feature_preprocessor:fast_ica:whiten, Value: &#39;True&#39;
 
-Random Forest: RandomForestClassifier(bootstrap=False, criterion=&#39;entropy&#39;, max_features=2,
-                       min_samples_leaf=10, min_samples_split=11,
+Random Forest: RandomForestClassifier(criterion=&#39;entropy&#39;, max_features=23,
+                       min_samples_leaf=15, min_samples_split=11,
                        n_estimators=512, n_jobs=1,
-                       random_state=RandomState(MT19937) at 0x7FD45CEE9740,
+                       random_state=RandomState(MT19937) at 0x7FA6ADAE0C40,
                        warm_start=True)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  11.108 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  29.166 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-single-configuration-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_single_configuration.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
