@@ -3,11 +3,21 @@
 ..
     The following command allows to retrieve all commiters since a specified
     commit. From https://stackoverflow.com/questions/6482436/list-of-authors-in-git-since-a-given-commit
-    git log 25d680d4e9520a661aae48ea4c7295c663b64df3.. --format="%aN <%aE>" --reverse | perl -e 'my %dedupe; while (<STDIN>) { print unless $dedupe{$_}++}'
+    git log 275d0d6b20d16822252d8b50bf71b1c787187f09.. --format="%aN <%aE>" --reverse | perl -e 'my %dedupe; while (<STDIN>) { print unless $dedupe{$_}++}'
 
 ========
 Releases
 ========
+
+Version 0.12.8
+==============
+
+* MAINT #1183: Introduce an upper bound on the dask version to retain compatibility with SMAC3.
+
+Contributors v0.12.8
+********************
+
+* Eddie Bergman
 
 Version 0.12.7
 ==============
@@ -25,6 +35,15 @@ Version 0.12.7
 
 Contributors v0.12.7
 ********************
+
+* Francisco Rivera Valverde
+* Matthias Feurer
+* JJ Ben-Joseph
+* Isaac Chung
+* Katharina Eggensperger
+* bitsbuffer
+* Eddie Bergman
+* olehb007
 
 Version 0.12.6
 ==============
