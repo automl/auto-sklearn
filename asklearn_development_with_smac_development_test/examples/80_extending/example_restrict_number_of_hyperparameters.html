@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Restricting the number of hyperparameters for an existing component &#8212; AutoSklearn 0.12.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-rendered-html.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="../../_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+  
+  <a href="https://github.com/automl/auto-sklearn"
+     class="visible-desktop hidden-xs"><img
+    id="gh-banner"
+    style="position: absolute; top: 50px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"
+    alt="Fork me on GitHub"></a>
+  <script>
+    // Adjust banner height.
+    $(function () {
+      var navHeight = $(".navbar .container").css("height");
+      $("#gh-banner").css("top", navHeight);
+    });
+  </script>
+
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../index.html">
+          auto-sklearn</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.12.6</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../index.html">Start</a></li>
+                <li><a href="../../releases.html">Releases</a></li>
+                <li><a href="../../installation.html">Installation</a></li>
+                <li><a href="../../manual.html">Manual</a></li>
+                <li><a href="../index.html">Examples</a></li>
+                <li><a href="../../api.html">API</a></li>
+                <li><a href="../../extending.html">Extending</a></li>
+                <li><a href="../../faq.html">FAQ</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">Restricting the number of hyperparameters for an existing component</a><ul>
+<li><a class="reference internal" href="#subclass-auto-sklearn-s-random-forest-classifier">Subclass auto-sklearn’s random forest classifier</a></li>
+<li><a class="reference internal" href="#data-loading">Data Loading</a></li>
+<li><a class="reference internal" href="#fit-random-forest-classifier-to-the-data">Fit Random forest classifier to the data</a></li>
+<li><a class="reference internal" href="#print-the-configuration-space">Print the configuration space</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
+      
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-80-extending-example-restrict-number-of-hyperparameters-py"><span class="std std-ref">here</span></a>
+to download the full example code or to run this example in your browser via Binder</p>
+</div>
+<section class="sphx-glr-example-title" id="restricting-the-number-of-hyperparameters-for-an-existing-component">
+<span id="sphx-glr-examples-80-extending-example-restrict-number-of-hyperparameters-py"></span><h1>Restricting the number of hyperparameters for an existing component<a class="headerlink" href="#restricting-the-number-of-hyperparameters-for-an-existing-component" title="Permalink to this headline">¶</a></h1>
+<p>The following example demonstrates how to replace an existing
+component with a new component, implementing the same classifier,
+but with different hyperparameters .</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ConfigSpace.configuration_space</span> <span class="kn">import</span> <span class="n">ConfigurationSpace</span>
+<span class="kn">from</span> <span class="nn">ConfigSpace.hyperparameters</span> <span class="kn">import</span> <span class="n">UniformIntegerHyperparameter</span><span class="p">,</span> <span class="n">UniformFloatHyperparameter</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_breast_cancer</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="kn">import</span> <span class="nn">autosklearn.classification</span>
+<span class="kn">import</span> <span class="nn">autosklearn.pipeline.components.classification</span>
+<span class="kn">from</span> <span class="nn">autosklearn.pipeline.components.classification</span> \
+    <span class="kn">import</span> <span class="nn">AutoSklearnClassificationAlgorithm</span>
+<span class="kn">from</span> <span class="nn">autosklearn.pipeline.constants</span> <span class="kn">import</span> <span class="n">DENSE</span><span class="p">,</span> <span class="n">UNSIGNED_DATA</span><span class="p">,</span> <span class="n">PREDICTIONS</span><span class="p">,</span> <span class="n">SPARSE</span>
+</pre></div>
+</div>
+<section id="subclass-auto-sklearn-s-random-forest-classifier">
+<h2>Subclass auto-sklearn’s random forest classifier<a class="headerlink" href="#subclass-auto-sklearn-s-random-forest-classifier" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># This classifier only has one of the hyperparameter&#39;s of auto-sklearn&#39;s</span>
+<span class="c1"># default parametrization (``max_features``). Instead, it also</span>
+<span class="c1"># tunes the number of estimators (``n_estimators``).</span>
+
+<span class="k">class</span> <span class="nc">CustomRandomForest</span><span class="p">(</span><span class="n">AutoSklearnClassificationAlgorithm</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">n_estimators</span><span class="p">,</span>
+                 <span class="n">max_features</span><span class="p">,</span>
+                 <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span> <span class="o">=</span> <span class="n">n_estimators</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_features</span> <span class="o">=</span> <span class="n">max_features</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_features</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;sqrt&quot;</span><span class="p">,</span> <span class="s2">&quot;log2&quot;</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">):</span>
+            <span class="n">max_features</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_features</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">max_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_features</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span>
+            <span class="n">n_estimators</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span><span class="p">,</span>
+            <span class="n">max_features</span><span class="o">=</span><span class="n">max_features</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_properties</span><span class="p">(</span><span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;shortname&#39;</span><span class="p">:</span> <span class="s1">&#39;RF&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Random Forest Classifier&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;handles_regression&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;handles_classification&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s1">&#39;handles_multiclass&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s1">&#39;handles_multilabel&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s1">&#39;handles_multioutput&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;is_deterministic&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s1">&#39;input&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">DENSE</span><span class="p">,</span> <span class="n">SPARSE</span><span class="p">,</span> <span class="n">UNSIGNED_DATA</span><span class="p">),</span>
+                <span class="s1">&#39;output&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">PREDICTIONS</span><span class="p">,)}</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_hyperparameter_search_space</span><span class="p">(</span><span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">cs</span> <span class="o">=</span> <span class="n">ConfigurationSpace</span><span class="p">()</span>
+
+        <span class="c1"># The maximum number of features used in the forest is calculated as m^max_features, where</span>
+        <span class="c1"># m is the total number of features, and max_features is the hyperparameter specified below.</span>
+        <span class="c1"># The default is 0.5, which yields sqrt(m) features as max_features in the estimator. This</span>
+        <span class="c1"># corresponds with Geurts&#39; heuristic.</span>
+        <span class="n">max_features</span> <span class="o">=</span> <span class="n">UniformFloatHyperparameter</span><span class="p">(</span><span class="s2">&quot;max_features&quot;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">n_estimators</span> <span class="o">=</span> <span class="n">UniformIntegerHyperparameter</span><span class="p">(</span><span class="s2">&quot;n_estimators&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+        <span class="n">cs</span><span class="o">.</span><span class="n">add_hyperparameters</span><span class="p">([</span><span class="n">max_features</span><span class="p">,</span> <span class="n">n_estimators</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">cs</span>
+
+
+<span class="c1"># Add custom random forest classifier component to auto-sklearn.</span>
+<span class="n">autosklearn</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">add_classifier</span><span class="p">(</span><span class="n">CustomRandomForest</span><span class="p">)</span>
+<span class="n">cs</span> <span class="o">=</span> <span class="n">CustomRandomForest</span><span class="o">.</span><span class="n">get_hyperparameter_search_space</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Configuration space object:
+  Hyperparameters:
+    max_features, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.5
+    n_estimators, Type: UniformInteger, Range: [10, 1000], Default: 100
+</pre></div>
+</div>
+</section>
+<section id="data-loading">
+<h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="fit-random-forest-classifier-to-the-data">
+<h2>Fit Random forest classifier to the data<a class="headerlink" href="#fit-random-forest-classifier-to-the-data" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">clf</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="c1"># Here we exclude auto-sklearn&#39;s default random forest component</span>
+    <span class="n">exclude_estimators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;random_forest&#39;</span><span class="p">],</span>
+    <span class="c1"># Bellow two flags are provided to speed up calculations</span>
+    <span class="c1"># Not recommended for a real implementation</span>
+    <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">smac_scenario_args</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;runcount_limit&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+<span class="p">)</span>
+<span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(exclude_estimators=[&#39;random_forest&#39;],
+                      initial_configurations_via_metalearning=0,
+                      per_run_time_limit=10,
+                      smac_scenario_args={&#39;runcount_limit&#39;: 1},
+                      time_left_for_this_task=30)
+</pre></div>
+</div>
+</section>
+<section id="print-the-configuration-space">
+<h2>Print the configuration space<a class="headerlink" href="#print-the-configuration-space" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Observe that this configuration space only contains our custom random</span>
+<span class="c1"># forest, but not auto-sklearn&#39;s ``random_forest``</span>
+<span class="n">cs</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">get_configuration_space</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="k">assert</span> <span class="s1">&#39;random_forest&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Configuration space object:
+  Hyperparameters:
+    balancing:strategy, Type: Categorical, Choices: {none, weighting}, Default: none
+    classifier:CustomRandomForest:max_features, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.5
+    classifier:CustomRandomForest:n_estimators, Type: UniformInteger, Range: [10, 1000], Default: 100
+    classifier:__choice__, Type: Categorical, Choices: {adaboost, bernoulli_nb, decision_tree, extra_trees, gaussian_nb, gradient_boosting, k_nearest_neighbors, lda, liblinear_svc, libsvm_svc, mlp, multinomial_nb, passive_aggressive, qda, sgd, CustomRandomForest}, Default: liblinear_svc
+    classifier:adaboost:algorithm, Type: Categorical, Choices: {SAMME.R, SAMME}, Default: SAMME.R
+    classifier:adaboost:learning_rate, Type: UniformFloat, Range: [0.01, 2.0], Default: 0.1, on log-scale
+    classifier:adaboost:max_depth, Type: UniformInteger, Range: [1, 10], Default: 1
+    classifier:adaboost:n_estimators, Type: UniformInteger, Range: [50, 500], Default: 50
+    classifier:bernoulli_nb:alpha, Type: UniformFloat, Range: [0.01, 100.0], Default: 1.0, on log-scale
+    classifier:bernoulli_nb:fit_prior, Type: Categorical, Choices: {True, False}, Default: True
+    classifier:decision_tree:criterion, Type: Categorical, Choices: {gini, entropy}, Default: gini
+    classifier:decision_tree:max_depth_factor, Type: UniformFloat, Range: [0.0, 2.0], Default: 0.5
+    classifier:decision_tree:max_features, Type: Constant, Value: 1.0
+    classifier:decision_tree:max_leaf_nodes, Type: Constant, Value: None
+    classifier:decision_tree:min_impurity_decrease, Type: Constant, Value: 0.0
+    classifier:decision_tree:min_samples_leaf, Type: UniformInteger, Range: [1, 20], Default: 1
+    classifier:decision_tree:min_samples_split, Type: UniformInteger, Range: [2, 20], Default: 2
+    classifier:decision_tree:min_weight_fraction_leaf, Type: Constant, Value: 0.0
+    classifier:extra_trees:bootstrap, Type: Categorical, Choices: {True, False}, Default: False
+    classifier:extra_trees:criterion, Type: Categorical, Choices: {gini, entropy}, Default: gini
+    classifier:extra_trees:max_depth, Type: Constant, Value: None
+    classifier:extra_trees:max_features, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.5
+    classifier:extra_trees:max_leaf_nodes, Type: Constant, Value: None
+    classifier:extra_trees:min_impurity_decrease, Type: Constant, Value: 0.0
+    classifier:extra_trees:min_samples_leaf, Type: UniformInteger, Range: [1, 20], Default: 1
+    classifier:extra_trees:min_samples_split, Type: UniformInteger, Range: [2, 20], Default: 2
+    classifier:extra_trees:min_weight_fraction_leaf, Type: Constant, Value: 0.0
+    classifier:gradient_boosting:early_stop, Type: Categorical, Choices: {off, valid, train}, Default: off
+    classifier:gradient_boosting:l2_regularization, Type: UniformFloat, Range: [1e-10, 1.0], Default: 1e-10, on log-scale
+    classifier:gradient_boosting:learning_rate, Type: UniformFloat, Range: [0.01, 1.0], Default: 0.1, on log-scale
+    classifier:gradient_boosting:loss, Type: Constant, Value: auto
+    classifier:gradient_boosting:max_bins, Type: Constant, Value: 255
+    classifier:gradient_boosting:max_depth, Type: Constant, Value: None
+    classifier:gradient_boosting:max_leaf_nodes, Type: UniformInteger, Range: [3, 2047], Default: 31, on log-scale
+    classifier:gradient_boosting:min_samples_leaf, Type: UniformInteger, Range: [1, 200], Default: 20, on log-scale
+    classifier:gradient_boosting:n_iter_no_change, Type: UniformInteger, Range: [1, 20], Default: 10
+    classifier:gradient_boosting:scoring, Type: Constant, Value: loss
+    classifier:gradient_boosting:tol, Type: Constant, Value: 1e-07
+    classifier:gradient_boosting:validation_fraction, Type: UniformFloat, Range: [0.01, 0.4], Default: 0.1
+    classifier:k_nearest_neighbors:n_neighbors, Type: UniformInteger, Range: [1, 100], Default: 1, on log-scale
+    classifier:k_nearest_neighbors:p, Type: Categorical, Choices: {1, 2}, Default: 2
+    classifier:k_nearest_neighbors:weights, Type: Categorical, Choices: {uniform, distance}, Default: uniform
+    classifier:lda:shrinkage, Type: Categorical, Choices: {None, auto, manual}, Default: None
+    classifier:lda:shrinkage_factor, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.5
+    classifier:lda:tol, Type: UniformFloat, Range: [1e-05, 0.1], Default: 0.0001, on log-scale
+    classifier:liblinear_svc:C, Type: UniformFloat, Range: [0.03125, 32768.0], Default: 1.0, on log-scale
+    classifier:liblinear_svc:dual, Type: Constant, Value: False
+    classifier:liblinear_svc:fit_intercept, Type: Constant, Value: True
+    classifier:liblinear_svc:intercept_scaling, Type: Constant, Value: 1
+    classifier:liblinear_svc:loss, Type: Categorical, Choices: {hinge, squared_hinge}, Default: squared_hinge
+    classifier:liblinear_svc:multi_class, Type: Constant, Value: ovr
+    classifier:liblinear_svc:penalty, Type: Categorical, Choices: {l1, l2}, Default: l2
+    classifier:liblinear_svc:tol, Type: UniformFloat, Range: [1e-05, 0.1], Default: 0.0001, on log-scale
+    classifier:libsvm_svc:C, Type: UniformFloat, Range: [0.03125, 32768.0], Default: 1.0, on log-scale
+    classifier:libsvm_svc:coef0, Type: UniformFloat, Range: [-1.0, 1.0], Default: 0.0
+    classifier:libsvm_svc:degree, Type: UniformInteger, Range: [2, 5], Default: 3
+    classifier:libsvm_svc:gamma, Type: UniformFloat, Range: [3.0517578125e-05, 8.0], Default: 0.1, on log-scale
+    classifier:libsvm_svc:kernel, Type: Categorical, Choices: {rbf, poly, sigmoid}, Default: rbf
+    classifier:libsvm_svc:max_iter, Type: Constant, Value: -1
+    classifier:libsvm_svc:shrinking, Type: Categorical, Choices: {True, False}, Default: True
+    classifier:libsvm_svc:tol, Type: UniformFloat, Range: [1e-05, 0.1], Default: 0.001, on log-scale
+    classifier:mlp:activation, Type: Categorical, Choices: {tanh, relu}, Default: relu
+    classifier:mlp:alpha, Type: UniformFloat, Range: [1e-07, 0.1], Default: 0.0001, on log-scale
+    classifier:mlp:batch_size, Type: Constant, Value: auto
+    classifier:mlp:beta_1, Type: Constant, Value: 0.9
+    classifier:mlp:beta_2, Type: Constant, Value: 0.999
+    classifier:mlp:early_stopping, Type: Categorical, Choices: {valid, train}, Default: valid
+    classifier:mlp:epsilon, Type: Constant, Value: 1e-08
+    classifier:mlp:hidden_layer_depth, Type: UniformInteger, Range: [1, 3], Default: 1
+    classifier:mlp:learning_rate_init, Type: UniformFloat, Range: [0.0001, 0.5], Default: 0.001, on log-scale
+    classifier:mlp:n_iter_no_change, Type: Constant, Value: 32
+    classifier:mlp:num_nodes_per_layer, Type: UniformInteger, Range: [16, 264], Default: 32, on log-scale
+    classifier:mlp:shuffle, Type: Constant, Value: True
+    classifier:mlp:solver, Type: Constant, Value: adam
+    classifier:mlp:tol, Type: Constant, Value: 0.0001
+    classifier:mlp:validation_fraction, Type: Constant, Value: 0.1
+    classifier:multinomial_nb:alpha, Type: UniformFloat, Range: [0.01, 100.0], Default: 1.0, on log-scale
+    classifier:multinomial_nb:fit_prior, Type: Categorical, Choices: {True, False}, Default: True
+    classifier:passive_aggressive:C, Type: UniformFloat, Range: [1e-05, 10.0], Default: 1.0, on log-scale
+    classifier:passive_aggressive:average, Type: Categorical, Choices: {False, True}, Default: False
+    classifier:passive_aggressive:fit_intercept, Type: Constant, Value: True
+    classifier:passive_aggressive:loss, Type: Categorical, Choices: {hinge, squared_hinge}, Default: hinge
+    classifier:passive_aggressive:tol, Type: UniformFloat, Range: [1e-05, 0.1], Default: 0.0001, on log-scale
+    classifier:qda:reg_param, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.0
+    classifier:sgd:alpha, Type: UniformFloat, Range: [1e-07, 0.1], Default: 0.0001, on log-scale
+    classifier:sgd:average, Type: Categorical, Choices: {False, True}, Default: False
+    classifier:sgd:epsilon, Type: UniformFloat, Range: [1e-05, 0.1], Default: 0.0001, on log-scale
+    classifier:sgd:eta0, Type: UniformFloat, Range: [1e-07, 0.1], Default: 0.01, on log-scale
+    classifier:sgd:fit_intercept, Type: Constant, Value: True
+    classifier:sgd:l1_ratio, Type: UniformFloat, Range: [1e-09, 1.0], Default: 0.15, on log-scale
+    classifier:sgd:learning_rate, Type: Categorical, Choices: {optimal, invscaling, constant}, Default: invscaling
+    classifier:sgd:loss, Type: Categorical, Choices: {hinge, log, modified_huber, squared_hinge, perceptron}, Default: log
+    classifier:sgd:penalty, Type: Categorical, Choices: {l1, l2, elasticnet}, Default: l2
+    classifier:sgd:power_t, Type: UniformFloat, Range: [1e-05, 1.0], Default: 0.5
+    classifier:sgd:tol, Type: UniformFloat, Range: [1e-05, 0.1], Default: 0.0001, on log-scale
+    data_preprocessing:categorical_transformer:categorical_encoding:__choice__, Type: Categorical, Choices: {encoding, no_encoding, one_hot_encoding}, Default: one_hot_encoding
+    data_preprocessing:categorical_transformer:category_coalescence:__choice__, Type: Categorical, Choices: {minority_coalescer, no_coalescense}, Default: minority_coalescer
+    data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Type: UniformFloat, Range: [0.0001, 0.5], Default: 0.01, on log-scale
+    data_preprocessing:numerical_transformer:imputation:strategy, Type: Categorical, Choices: {mean, median, most_frequent}, Default: mean
+    data_preprocessing:numerical_transformer:rescaling:__choice__, Type: Categorical, Choices: {minmax, none, normalize, power_transformer, quantile_transformer, robust_scaler, standardize}, Default: standardize
+    data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles, Type: UniformInteger, Range: [10, 2000], Default: 1000
+    data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution, Type: Categorical, Choices: {uniform, normal}, Default: uniform
+    data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max, Type: UniformFloat, Range: [0.7, 0.999], Default: 0.75
+    data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min, Type: UniformFloat, Range: [0.001, 0.3], Default: 0.25
+    feature_preprocessor:LDA:shrinkage, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.5
+    feature_preprocessor:LDA:solver, Type: Categorical, Choices: {svd, lsqr, eigen}, Default: svd
+    feature_preprocessor:LDA:tol, Type: UniformFloat, Range: [0.0001, 1.0], Default: 0.0001
+    feature_preprocessor:__choice__, Type: Categorical, Choices: {extra_trees_preproc_for_classification, fast_ica, feature_agglomeration, kernel_pca, kitchen_sinks, liblinear_svc_preprocessor, no_preprocessing, nystroem_sampler, pca, polynomial, random_trees_embedding, select_percentile_classification, select_rates_classification, LDA}, Default: no_preprocessing
+    feature_preprocessor:extra_trees_preproc_for_classification:bootstrap, Type: Categorical, Choices: {True, False}, Default: False
+    feature_preprocessor:extra_trees_preproc_for_classification:criterion, Type: Categorical, Choices: {gini, entropy}, Default: gini
+    feature_preprocessor:extra_trees_preproc_for_classification:max_depth, Type: Constant, Value: None
+    feature_preprocessor:extra_trees_preproc_for_classification:max_features, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.5
+    feature_preprocessor:extra_trees_preproc_for_classification:max_leaf_nodes, Type: Constant, Value: None
+    feature_preprocessor:extra_trees_preproc_for_classification:min_impurity_decrease, Type: Constant, Value: 0.0
+    feature_preprocessor:extra_trees_preproc_for_classification:min_samples_leaf, Type: UniformInteger, Range: [1, 20], Default: 1
+    feature_preprocessor:extra_trees_preproc_for_classification:min_samples_split, Type: UniformInteger, Range: [2, 20], Default: 2
+    feature_preprocessor:extra_trees_preproc_for_classification:min_weight_fraction_leaf, Type: Constant, Value: 0.0
+    feature_preprocessor:extra_trees_preproc_for_classification:n_estimators, Type: Constant, Value: 100
+    feature_preprocessor:fast_ica:algorithm, Type: Categorical, Choices: {parallel, deflation}, Default: parallel
+    feature_preprocessor:fast_ica:fun, Type: Categorical, Choices: {logcosh, exp, cube}, Default: logcosh
+    feature_preprocessor:fast_ica:n_components, Type: UniformInteger, Range: [10, 2000], Default: 100
+    feature_preprocessor:fast_ica:whiten, Type: Categorical, Choices: {False, True}, Default: False
+    feature_preprocessor:feature_agglomeration:affinity, Type: Categorical, Choices: {euclidean, manhattan, cosine}, Default: euclidean
+    feature_preprocessor:feature_agglomeration:linkage, Type: Categorical, Choices: {ward, complete, average}, Default: ward
+    feature_preprocessor:feature_agglomeration:n_clusters, Type: UniformInteger, Range: [2, 400], Default: 25
+    feature_preprocessor:feature_agglomeration:pooling_func, Type: Categorical, Choices: {mean, median, max}, Default: mean
+    feature_preprocessor:kernel_pca:coef0, Type: UniformFloat, Range: [-1.0, 1.0], Default: 0.0
+    feature_preprocessor:kernel_pca:degree, Type: UniformInteger, Range: [2, 5], Default: 3
+    feature_preprocessor:kernel_pca:gamma, Type: UniformFloat, Range: [3.0517578125e-05, 8.0], Default: 0.01, on log-scale
+    feature_preprocessor:kernel_pca:kernel, Type: Categorical, Choices: {poly, rbf, sigmoid, cosine}, Default: rbf
+    feature_preprocessor:kernel_pca:n_components, Type: UniformInteger, Range: [10, 2000], Default: 100
+    feature_preprocessor:kitchen_sinks:gamma, Type: UniformFloat, Range: [3.0517578125e-05, 8.0], Default: 1.0, on log-scale
+    feature_preprocessor:kitchen_sinks:n_components, Type: UniformInteger, Range: [50, 10000], Default: 100, on log-scale
+    feature_preprocessor:liblinear_svc_preprocessor:C, Type: UniformFloat, Range: [0.03125, 32768.0], Default: 1.0, on log-scale
+    feature_preprocessor:liblinear_svc_preprocessor:dual, Type: Constant, Value: False
+    feature_preprocessor:liblinear_svc_preprocessor:fit_intercept, Type: Constant, Value: True
+    feature_preprocessor:liblinear_svc_preprocessor:intercept_scaling, Type: Constant, Value: 1
+    feature_preprocessor:liblinear_svc_preprocessor:loss, Type: Categorical, Choices: {hinge, squared_hinge}, Default: squared_hinge
+    feature_preprocessor:liblinear_svc_preprocessor:multi_class, Type: Constant, Value: ovr
+    feature_preprocessor:liblinear_svc_preprocessor:penalty, Type: Constant, Value: l1
+    feature_preprocessor:liblinear_svc_preprocessor:tol, Type: UniformFloat, Range: [1e-05, 0.1], Default: 0.0001, on log-scale
+    feature_preprocessor:nystroem_sampler:coef0, Type: UniformFloat, Range: [-1.0, 1.0], Default: 0.0
+    feature_preprocessor:nystroem_sampler:degree, Type: UniformInteger, Range: [2, 5], Default: 3
+    feature_preprocessor:nystroem_sampler:gamma, Type: UniformFloat, Range: [3.0517578125e-05, 8.0], Default: 0.1, on log-scale
+    feature_preprocessor:nystroem_sampler:kernel, Type: Categorical, Choices: {poly, rbf, sigmoid, cosine}, Default: rbf
+    feature_preprocessor:nystroem_sampler:n_components, Type: UniformInteger, Range: [50, 10000], Default: 100, on log-scale
+    feature_preprocessor:pca:keep_variance, Type: UniformFloat, Range: [0.5, 0.9999], Default: 0.9999
+    feature_preprocessor:pca:whiten, Type: Categorical, Choices: {False, True}, Default: False
+    feature_preprocessor:polynomial:degree, Type: UniformInteger, Range: [2, 3], Default: 2
+    feature_preprocessor:polynomial:include_bias, Type: Categorical, Choices: {True, False}, Default: True
+    feature_preprocessor:polynomial:interaction_only, Type: Categorical, Choices: {False, True}, Default: False
+    feature_preprocessor:random_trees_embedding:bootstrap, Type: Categorical, Choices: {True, False}, Default: True
+    feature_preprocessor:random_trees_embedding:max_depth, Type: UniformInteger, Range: [2, 10], Default: 5
+    feature_preprocessor:random_trees_embedding:max_leaf_nodes, Type: Constant, Value: None
+    feature_preprocessor:random_trees_embedding:min_samples_leaf, Type: UniformInteger, Range: [1, 20], Default: 1
+    feature_preprocessor:random_trees_embedding:min_samples_split, Type: UniformInteger, Range: [2, 20], Default: 2
+    feature_preprocessor:random_trees_embedding:min_weight_fraction_leaf, Type: Constant, Value: 1.0
+    feature_preprocessor:random_trees_embedding:n_estimators, Type: UniformInteger, Range: [10, 100], Default: 10
+    feature_preprocessor:select_percentile_classification:percentile, Type: UniformFloat, Range: [1.0, 99.0], Default: 50.0
+    feature_preprocessor:select_percentile_classification:score_func, Type: Categorical, Choices: {chi2, f_classif, mutual_info}, Default: chi2
+    feature_preprocessor:select_rates_classification:alpha, Type: UniformFloat, Range: [0.01, 0.5], Default: 0.1
+    feature_preprocessor:select_rates_classification:mode, Type: Categorical, Choices: {fpr, fdr, fwe}, Default: fpr
+    feature_preprocessor:select_rates_classification:score_func, Type: Categorical, Choices: {chi2, f_classif, mutual_info_classif}, Default: chi2
+  Conditions:
+    classifier:CustomRandomForest:max_features | classifier:__choice__ == &#39;CustomRandomForest&#39;
+    classifier:CustomRandomForest:n_estimators | classifier:__choice__ == &#39;CustomRandomForest&#39;
+    classifier:adaboost:algorithm | classifier:__choice__ == &#39;adaboost&#39;
+    classifier:adaboost:learning_rate | classifier:__choice__ == &#39;adaboost&#39;
+    classifier:adaboost:max_depth | classifier:__choice__ == &#39;adaboost&#39;
+    classifier:adaboost:n_estimators | classifier:__choice__ == &#39;adaboost&#39;
+    classifier:bernoulli_nb:alpha | classifier:__choice__ == &#39;bernoulli_nb&#39;
+    classifier:bernoulli_nb:fit_prior | classifier:__choice__ == &#39;bernoulli_nb&#39;
+    classifier:decision_tree:criterion | classifier:__choice__ == &#39;decision_tree&#39;
+    classifier:decision_tree:max_depth_factor | classifier:__choice__ == &#39;decision_tree&#39;
+    classifier:decision_tree:max_features | classifier:__choice__ == &#39;decision_tree&#39;
+    classifier:decision_tree:max_leaf_nodes | classifier:__choice__ == &#39;decision_tree&#39;
+    classifier:decision_tree:min_impurity_decrease | classifier:__choice__ == &#39;decision_tree&#39;
+    classifier:decision_tree:min_samples_leaf | classifier:__choice__ == &#39;decision_tree&#39;
+    classifier:decision_tree:min_samples_split | classifier:__choice__ == &#39;decision_tree&#39;
+    classifier:decision_tree:min_weight_fraction_leaf | classifier:__choice__ == &#39;decision_tree&#39;
+    classifier:extra_trees:bootstrap | classifier:__choice__ == &#39;extra_trees&#39;
+    classifier:extra_trees:criterion | classifier:__choice__ == &#39;extra_trees&#39;
+    classifier:extra_trees:max_depth | classifier:__choice__ == &#39;extra_trees&#39;
+    classifier:extra_trees:max_features | classifier:__choice__ == &#39;extra_trees&#39;
+    classifier:extra_trees:max_leaf_nodes | classifier:__choice__ == &#39;extra_trees&#39;
+    classifier:extra_trees:min_impurity_decrease | classifier:__choice__ == &#39;extra_trees&#39;
+    classifier:extra_trees:min_samples_leaf | classifier:__choice__ == &#39;extra_trees&#39;
+    classifier:extra_trees:min_samples_split | classifier:__choice__ == &#39;extra_trees&#39;
+    classifier:extra_trees:min_weight_fraction_leaf | classifier:__choice__ == &#39;extra_trees&#39;
+    classifier:gradient_boosting:early_stop | classifier:__choice__ == &#39;gradient_boosting&#39;
+    classifier:gradient_boosting:l2_regularization | classifier:__choice__ == &#39;gradient_boosting&#39;
+    classifier:gradient_boosting:learning_rate | classifier:__choice__ == &#39;gradient_boosting&#39;
+    classifier:gradient_boosting:loss | classifier:__choice__ == &#39;gradient_boosting&#39;
+    classifier:gradient_boosting:max_bins | classifier:__choice__ == &#39;gradient_boosting&#39;
+    classifier:gradient_boosting:max_depth | classifier:__choice__ == &#39;gradient_boosting&#39;
+    classifier:gradient_boosting:max_leaf_nodes | classifier:__choice__ == &#39;gradient_boosting&#39;
+    classifier:gradient_boosting:min_samples_leaf | classifier:__choice__ == &#39;gradient_boosting&#39;
+    classifier:gradient_boosting:n_iter_no_change | classifier:gradient_boosting:early_stop in {&#39;valid&#39;, &#39;train&#39;}
+    classifier:gradient_boosting:scoring | classifier:__choice__ == &#39;gradient_boosting&#39;
+    classifier:gradient_boosting:tol | classifier:__choice__ == &#39;gradient_boosting&#39;
+    classifier:gradient_boosting:validation_fraction | classifier:gradient_boosting:early_stop == &#39;valid&#39;
+    classifier:k_nearest_neighbors:n_neighbors | classifier:__choice__ == &#39;k_nearest_neighbors&#39;
+    classifier:k_nearest_neighbors:p | classifier:__choice__ == &#39;k_nearest_neighbors&#39;
+    classifier:k_nearest_neighbors:weights | classifier:__choice__ == &#39;k_nearest_neighbors&#39;
+    classifier:lda:shrinkage | classifier:__choice__ == &#39;lda&#39;
+    classifier:lda:shrinkage_factor | classifier:lda:shrinkage == &#39;manual&#39;
+    classifier:lda:tol | classifier:__choice__ == &#39;lda&#39;
+    classifier:liblinear_svc:C | classifier:__choice__ == &#39;liblinear_svc&#39;
+    classifier:liblinear_svc:dual | classifier:__choice__ == &#39;liblinear_svc&#39;
+    classifier:liblinear_svc:fit_intercept | classifier:__choice__ == &#39;liblinear_svc&#39;
+    classifier:liblinear_svc:intercept_scaling | classifier:__choice__ == &#39;liblinear_svc&#39;
+    classifier:liblinear_svc:loss | classifier:__choice__ == &#39;liblinear_svc&#39;
+    classifier:liblinear_svc:multi_class | classifier:__choice__ == &#39;liblinear_svc&#39;
+    classifier:liblinear_svc:penalty | classifier:__choice__ == &#39;liblinear_svc&#39;
+    classifier:liblinear_svc:tol | classifier:__choice__ == &#39;liblinear_svc&#39;
+    classifier:libsvm_svc:C | classifier:__choice__ == &#39;libsvm_svc&#39;
+    classifier:libsvm_svc:coef0 | classifier:libsvm_svc:kernel in {&#39;poly&#39;, &#39;sigmoid&#39;}
+    classifier:libsvm_svc:degree | classifier:libsvm_svc:kernel == &#39;poly&#39;
+    classifier:libsvm_svc:gamma | classifier:__choice__ == &#39;libsvm_svc&#39;
+    classifier:libsvm_svc:kernel | classifier:__choice__ == &#39;libsvm_svc&#39;
+    classifier:libsvm_svc:max_iter | classifier:__choice__ == &#39;libsvm_svc&#39;
+    classifier:libsvm_svc:shrinking | classifier:__choice__ == &#39;libsvm_svc&#39;
+    classifier:libsvm_svc:tol | classifier:__choice__ == &#39;libsvm_svc&#39;
+    classifier:mlp:activation | classifier:__choice__ == &#39;mlp&#39;
+    classifier:mlp:alpha | classifier:__choice__ == &#39;mlp&#39;
+    classifier:mlp:batch_size | classifier:__choice__ == &#39;mlp&#39;
+    classifier:mlp:beta_1 | classifier:__choice__ == &#39;mlp&#39;
+    classifier:mlp:beta_2 | classifier:__choice__ == &#39;mlp&#39;
+    classifier:mlp:early_stopping | classifier:__choice__ == &#39;mlp&#39;
+    classifier:mlp:epsilon | classifier:__choice__ == &#39;mlp&#39;
+    classifier:mlp:hidden_layer_depth | classifier:__choice__ == &#39;mlp&#39;
+    classifier:mlp:learning_rate_init | classifier:__choice__ == &#39;mlp&#39;
+    classifier:mlp:n_iter_no_change | classifier:__choice__ == &#39;mlp&#39;
+    classifier:mlp:num_nodes_per_layer | classifier:__choice__ == &#39;mlp&#39;
+    classifier:mlp:shuffle | classifier:__choice__ == &#39;mlp&#39;
+    classifier:mlp:solver | classifier:__choice__ == &#39;mlp&#39;
+    classifier:mlp:tol | classifier:__choice__ == &#39;mlp&#39;
+    classifier:mlp:validation_fraction | classifier:mlp:early_stopping in {&#39;valid&#39;}
+    classifier:multinomial_nb:alpha | classifier:__choice__ == &#39;multinomial_nb&#39;
+    classifier:multinomial_nb:fit_prior | classifier:__choice__ == &#39;multinomial_nb&#39;
+    classifier:passive_aggressive:C | classifier:__choice__ == &#39;passive_aggressive&#39;
+    classifier:passive_aggressive:average | classifier:__choice__ == &#39;passive_aggressive&#39;
+    classifier:passive_aggressive:fit_intercept | classifier:__choice__ == &#39;passive_aggressive&#39;
+    classifier:passive_aggressive:loss | classifier:__choice__ == &#39;passive_aggressive&#39;
+    classifier:passive_aggressive:tol | classifier:__choice__ == &#39;passive_aggressive&#39;
+    classifier:qda:reg_param | classifier:__choice__ == &#39;qda&#39;
+    classifier:sgd:alpha | classifier:__choice__ == &#39;sgd&#39;
+    classifier:sgd:average | classifier:__choice__ == &#39;sgd&#39;
+    classifier:sgd:epsilon | classifier:sgd:loss == &#39;modified_huber&#39;
+    classifier:sgd:eta0 | classifier:sgd:learning_rate in {&#39;invscaling&#39;, &#39;constant&#39;}
+    classifier:sgd:fit_intercept | classifier:__choice__ == &#39;sgd&#39;
+    classifier:sgd:l1_ratio | classifier:sgd:penalty == &#39;elasticnet&#39;
+    classifier:sgd:learning_rate | classifier:__choice__ == &#39;sgd&#39;
+    classifier:sgd:loss | classifier:__choice__ == &#39;sgd&#39;
+    classifier:sgd:penalty | classifier:__choice__ == &#39;sgd&#39;
+    classifier:sgd:power_t | classifier:sgd:learning_rate == &#39;invscaling&#39;
+    classifier:sgd:tol | classifier:__choice__ == &#39;sgd&#39;
+    data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction | data_preprocessing:categorical_transformer:category_coalescence:__choice__ == &#39;minority_coalescer&#39;
+    data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles | data_preprocessing:numerical_transformer:rescaling:__choice__ == &#39;quantile_transformer&#39;
+    data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution | data_preprocessing:numerical_transformer:rescaling:__choice__ == &#39;quantile_transformer&#39;
+    data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max | data_preprocessing:numerical_transformer:rescaling:__choice__ == &#39;robust_scaler&#39;
+    data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min | data_preprocessing:numerical_transformer:rescaling:__choice__ == &#39;robust_scaler&#39;
+    feature_preprocessor:LDA:shrinkage | feature_preprocessor:LDA:solver in {&#39;lsqr&#39;, &#39;eigen&#39;}
+    feature_preprocessor:LDA:solver | feature_preprocessor:__choice__ == &#39;LDA&#39;
+    feature_preprocessor:LDA:tol | feature_preprocessor:__choice__ == &#39;LDA&#39;
+    feature_preprocessor:extra_trees_preproc_for_classification:bootstrap | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_classification&#39;
+    feature_preprocessor:extra_trees_preproc_for_classification:criterion | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_classification&#39;
+    feature_preprocessor:extra_trees_preproc_for_classification:max_depth | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_classification&#39;
+    feature_preprocessor:extra_trees_preproc_for_classification:max_features | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_classification&#39;
+    feature_preprocessor:extra_trees_preproc_for_classification:max_leaf_nodes | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_classification&#39;
+    feature_preprocessor:extra_trees_preproc_for_classification:min_impurity_decrease | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_classification&#39;
+    feature_preprocessor:extra_trees_preproc_for_classification:min_samples_leaf | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_classification&#39;
+    feature_preprocessor:extra_trees_preproc_for_classification:min_samples_split | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_classification&#39;
+    feature_preprocessor:extra_trees_preproc_for_classification:min_weight_fraction_leaf | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_classification&#39;
+    feature_preprocessor:extra_trees_preproc_for_classification:n_estimators | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_classification&#39;
+    feature_preprocessor:fast_ica:algorithm | feature_preprocessor:__choice__ == &#39;fast_ica&#39;
+    feature_preprocessor:fast_ica:fun | feature_preprocessor:__choice__ == &#39;fast_ica&#39;
+    feature_preprocessor:fast_ica:n_components | feature_preprocessor:fast_ica:whiten == &#39;True&#39;
+    feature_preprocessor:fast_ica:whiten | feature_preprocessor:__choice__ == &#39;fast_ica&#39;
+    feature_preprocessor:feature_agglomeration:affinity | feature_preprocessor:__choice__ == &#39;feature_agglomeration&#39;
+    feature_preprocessor:feature_agglomeration:linkage | feature_preprocessor:__choice__ == &#39;feature_agglomeration&#39;
+    feature_preprocessor:feature_agglomeration:n_clusters | feature_preprocessor:__choice__ == &#39;feature_agglomeration&#39;
+    feature_preprocessor:feature_agglomeration:pooling_func | feature_preprocessor:__choice__ == &#39;feature_agglomeration&#39;
+    feature_preprocessor:kernel_pca:coef0 | feature_preprocessor:kernel_pca:kernel in {&#39;poly&#39;, &#39;sigmoid&#39;}
+    feature_preprocessor:kernel_pca:degree | feature_preprocessor:kernel_pca:kernel == &#39;poly&#39;
+    feature_preprocessor:kernel_pca:gamma | feature_preprocessor:kernel_pca:kernel in {&#39;poly&#39;, &#39;rbf&#39;}
+    feature_preprocessor:kernel_pca:kernel | feature_preprocessor:__choice__ == &#39;kernel_pca&#39;
+    feature_preprocessor:kernel_pca:n_components | feature_preprocessor:__choice__ == &#39;kernel_pca&#39;
+    feature_preprocessor:kitchen_sinks:gamma | feature_preprocessor:__choice__ == &#39;kitchen_sinks&#39;
+    feature_preprocessor:kitchen_sinks:n_components | feature_preprocessor:__choice__ == &#39;kitchen_sinks&#39;
+    feature_preprocessor:liblinear_svc_preprocessor:C | feature_preprocessor:__choice__ == &#39;liblinear_svc_preprocessor&#39;
+    feature_preprocessor:liblinear_svc_preprocessor:dual | feature_preprocessor:__choice__ == &#39;liblinear_svc_preprocessor&#39;
+    feature_preprocessor:liblinear_svc_preprocessor:fit_intercept | feature_preprocessor:__choice__ == &#39;liblinear_svc_preprocessor&#39;
+    feature_preprocessor:liblinear_svc_preprocessor:intercept_scaling | feature_preprocessor:__choice__ == &#39;liblinear_svc_preprocessor&#39;
+    feature_preprocessor:liblinear_svc_preprocessor:loss | feature_preprocessor:__choice__ == &#39;liblinear_svc_preprocessor&#39;
+    feature_preprocessor:liblinear_svc_preprocessor:multi_class | feature_preprocessor:__choice__ == &#39;liblinear_svc_preprocessor&#39;
+    feature_preprocessor:liblinear_svc_preprocessor:penalty | feature_preprocessor:__choice__ == &#39;liblinear_svc_preprocessor&#39;
+    feature_preprocessor:liblinear_svc_preprocessor:tol | feature_preprocessor:__choice__ == &#39;liblinear_svc_preprocessor&#39;
+    feature_preprocessor:nystroem_sampler:coef0 | feature_preprocessor:nystroem_sampler:kernel in {&#39;poly&#39;, &#39;sigmoid&#39;}
+    feature_preprocessor:nystroem_sampler:degree | feature_preprocessor:nystroem_sampler:kernel == &#39;poly&#39;
+    feature_preprocessor:nystroem_sampler:gamma | feature_preprocessor:nystroem_sampler:kernel in {&#39;poly&#39;, &#39;rbf&#39;, &#39;sigmoid&#39;}
+    feature_preprocessor:nystroem_sampler:kernel | feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;
+    feature_preprocessor:nystroem_sampler:n_components | feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;
+    feature_preprocessor:pca:keep_variance | feature_preprocessor:__choice__ == &#39;pca&#39;
+    feature_preprocessor:pca:whiten | feature_preprocessor:__choice__ == &#39;pca&#39;
+    feature_preprocessor:polynomial:degree | feature_preprocessor:__choice__ == &#39;polynomial&#39;
+    feature_preprocessor:polynomial:include_bias | feature_preprocessor:__choice__ == &#39;polynomial&#39;
+    feature_preprocessor:polynomial:interaction_only | feature_preprocessor:__choice__ == &#39;polynomial&#39;
+    feature_preprocessor:random_trees_embedding:bootstrap | feature_preprocessor:__choice__ == &#39;random_trees_embedding&#39;
+    feature_preprocessor:random_trees_embedding:max_depth | feature_preprocessor:__choice__ == &#39;random_trees_embedding&#39;
+    feature_preprocessor:random_trees_embedding:max_leaf_nodes | feature_preprocessor:__choice__ == &#39;random_trees_embedding&#39;
+    feature_preprocessor:random_trees_embedding:min_samples_leaf | feature_preprocessor:__choice__ == &#39;random_trees_embedding&#39;
+    feature_preprocessor:random_trees_embedding:min_samples_split | feature_preprocessor:__choice__ == &#39;random_trees_embedding&#39;
+    feature_preprocessor:random_trees_embedding:min_weight_fraction_leaf | feature_preprocessor:__choice__ == &#39;random_trees_embedding&#39;
+    feature_preprocessor:random_trees_embedding:n_estimators | feature_preprocessor:__choice__ == &#39;random_trees_embedding&#39;
+    feature_preprocessor:select_percentile_classification:percentile | feature_preprocessor:__choice__ == &#39;select_percentile_classification&#39;
+    feature_preprocessor:select_percentile_classification:score_func | feature_preprocessor:__choice__ == &#39;select_percentile_classification&#39;
+    feature_preprocessor:select_rates_classification:alpha | feature_preprocessor:__choice__ == &#39;select_rates_classification&#39;
+    feature_preprocessor:select_rates_classification:mode | feature_preprocessor:select_rates_classification:score_func != &#39;mutual_info_classif&#39;
+    feature_preprocessor:select_rates_classification:score_func | feature_preprocessor:__choice__ == &#39;select_rates_classification&#39;
+  Forbidden Clauses:
+    (Forbidden: feature_preprocessor:feature_agglomeration:affinity in {&#39;cosine&#39;, &#39;manhattan&#39;} &amp;&amp; Forbidden: feature_preprocessor:feature_agglomeration:linkage == &#39;ward&#39;)
+    (Forbidden: feature_preprocessor:liblinear_svc_preprocessor:penalty == &#39;l1&#39; &amp;&amp; Forbidden: feature_preprocessor:liblinear_svc_preprocessor:loss == &#39;hinge&#39;)
+    (Forbidden: classifier:liblinear_svc:penalty == &#39;l1&#39; &amp;&amp; Forbidden: classifier:liblinear_svc:loss == &#39;hinge&#39;)
+    (Forbidden: classifier:liblinear_svc:dual == &#39;False&#39; &amp;&amp; Forbidden: classifier:liblinear_svc:penalty == &#39;l2&#39; &amp;&amp; Forbidden: classifier:liblinear_svc:loss == &#39;hinge&#39;)
+    (Forbidden: classifier:liblinear_svc:dual == &#39;False&#39; &amp;&amp; Forbidden: classifier:liblinear_svc:penalty == &#39;l1&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_classification&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;fast_ica&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;feature_agglomeration&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;kernel_pca&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;kitchen_sinks&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;liblinear_svc_preprocessor&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;no_preprocessing&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;pca&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;polynomial&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;random_trees_embedding&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;gaussian_nb&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;random_trees_embedding&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;gradient_boosting&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;random_trees_embedding&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;lda&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;random_trees_embedding&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;qda&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;select_percentile_classification&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;select_rates_classification&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
+    (Forbidden: classifier:__choice__ == &#39;adaboost&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kernel_pca&#39;)
+    (Forbidden: classifier:__choice__ == &#39;adaboost&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kitchen_sinks&#39;)
+    (Forbidden: classifier:__choice__ == &#39;adaboost&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
+    (Forbidden: classifier:__choice__ == &#39;decision_tree&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kernel_pca&#39;)
+    (Forbidden: classifier:__choice__ == &#39;decision_tree&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kitchen_sinks&#39;)
+    (Forbidden: classifier:__choice__ == &#39;decision_tree&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
+    (Forbidden: classifier:__choice__ == &#39;extra_trees&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kernel_pca&#39;)
+    (Forbidden: classifier:__choice__ == &#39;extra_trees&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kitchen_sinks&#39;)
+    (Forbidden: classifier:__choice__ == &#39;extra_trees&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
+    (Forbidden: classifier:__choice__ == &#39;gradient_boosting&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kernel_pca&#39;)
+    (Forbidden: classifier:__choice__ == &#39;gradient_boosting&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kitchen_sinks&#39;)
+    (Forbidden: classifier:__choice__ == &#39;gradient_boosting&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
+    (Forbidden: classifier:__choice__ == &#39;k_nearest_neighbors&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kernel_pca&#39;)
+    (Forbidden: classifier:__choice__ == &#39;k_nearest_neighbors&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kitchen_sinks&#39;)
+    (Forbidden: classifier:__choice__ == &#39;k_nearest_neighbors&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
+    (Forbidden: classifier:__choice__ == &#39;libsvm_svc&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kernel_pca&#39;)
+    (Forbidden: classifier:__choice__ == &#39;libsvm_svc&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kitchen_sinks&#39;)
+    (Forbidden: classifier:__choice__ == &#39;libsvm_svc&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
+    (Forbidden: classifier:__choice__ == &#39;mlp&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kernel_pca&#39;)
+    (Forbidden: classifier:__choice__ == &#39;mlp&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kitchen_sinks&#39;)
+    (Forbidden: classifier:__choice__ == &#39;mlp&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
+    (Forbidden: classifier:__choice__ == &#39;gaussian_nb&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kernel_pca&#39;)
+    (Forbidden: classifier:__choice__ == &#39;gaussian_nb&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;kitchen_sinks&#39;)
+    (Forbidden: classifier:__choice__ == &#39;gaussian_nb&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;kitchen_sinks&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;pca&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;fast_ica&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;kernel_pca&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
+    (Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  6.264 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-restrict-number-of-hyperparameters-py">
+<div class="binder-badge docutils container">
+<a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_restrict_number_of_hyperparameters.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/3188e6424499bf3242cdcdfc032bf614/example_restrict_number_of_hyperparameters.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_restrict_number_of_hyperparameters.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/e7fd26f15ae956c559740e0177874713/example_restrict_number_of_hyperparameters.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">example_restrict_number_of_hyperparameters.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="../../_sources/examples/80_extending/example_restrict_number_of_hyperparameters.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
