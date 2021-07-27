@@ -343,7 +343,7 @@ def test_leaderboard(
     model.fit(X_train, Y_train)
 
     column_types = {
-        'all' : AutoSklearnEstimator._leaderboard_columns['all'],
+        'all': AutoSklearnEstimator._leaderboard_columns['all'],
         'simple': AutoSklearnEstimator._leaderboard_columns['simple'],
         'detailed': AutoSklearnEstimator._leaderboard_columns['all']
     }
