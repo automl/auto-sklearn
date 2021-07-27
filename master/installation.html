@@ -68,6 +68,7 @@
                 <li><a href="examples/index.html">Examples</a></li>
                 <li><a href="api.html">API</a></li>
                 <li><a href="extending.html">Extending</a></li>
+                <li><a href="faq.html">FAQ</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -131,10 +132,15 @@
 <h2>System requirements<a class="headerlink" href="#system-requirements" title="Permalink to this headline">¶</a></h2>
 <p>auto-sklearn has the following system requirements:</p>
 <ul class="simple">
-<li><p>Linux operating system (for example Ubuntu) <a class="reference external" href="https://www.wikihow.com/Install-Linux">(get Linux here)</a>,</p></li>
-<li><p>Python (&gt;=3.6) <a class="reference external" href="https://www.python.org/downloads/">(get Python here)</a>.</p></li>
-<li><p>C++ compiler (with C++11 supports) <a class="reference external" href="https://www.tutorialspoint.com/How-to-Install-Cplusplus-Compiler-on-Linux">(get GCC here)</a> and</p></li>
-<li><p>SWIG (version 3.0.* is required; &gt;=4.0.0 is not supported) <a class="reference external" href="http://www.swig.org/survey.html">(get SWIG here)</a>.</p></li>
+<li><p>Linux operating system (for example Ubuntu) (<a class="reference external" href="https://www.wikihow.com/Install-Linux">get Linux here</a>)</p></li>
+<li><p>Python (&gt;=3.7) (<a class="reference external" href="https://www.python.org/downloads/">get Python here</a>),</p></li>
+<li><p>C++ compiler (with C++11 supports) (<a class="reference external" href="https://www.tutorialspoint.com/How-to-Install-Cplusplus-Compiler-on-Linux">get GCC here</a>).</p></li>
+</ul>
+<p>In case you try to install Auto-sklearn on a system where no wheel files for the pyrfr package
+are provided (see <a class="reference external" href="https://pypi.org/project/pyrfr/#files">here</a> for available wheels) you also
+need:</p>
+<ul class="simple">
+<li><p>SWIG (version 3.0.* is required; &gt;=4.0.0 is not supported) (<a class="reference external" href="http://www.swig.org/survey.html">get SWIG here</a>).</p></li>
 </ul>
 <p>For an explanation of missing Microsoft Windows and MAC OSX support please
 check the Section <a class="reference internal" href="#windows-osx-compatibility">Windows/OSX compatibility</a>.</p>
@@ -150,7 +156,7 @@ check the Section <a class="reference internal" href="#windows-osx-compatibility
 </pre></div>
 </div>
 <p>We recommend installing <em>auto-sklearn</em> into a
-<a class="reference external" href="http://docs.python-guide.org/en/latest/dev/virtualenvs/">virtual environment</a>
+<a class="reference external" href="https://docs.python-guide.org/dev/virtualenvs/">virtual environment</a>
 or an
 <a class="reference external" href="https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">Anaconda environment</a>.</p>
 <p>If the <code class="docutils literal notranslate"><span class="pre">pip3</span></code> installation command fails, make sure you have the <a class="reference internal" href="#system-requirements">System requirements</a> installed correctly.</p>
@@ -185,9 +191,10 @@ be solved by installing the <em>gcc</em> compiler shipped with AnaConda (as well
 is part of Python’s <a class="reference external" href="https://docs.python.org/3/library/unix.html">Unix Specific Services</a>
 and not available on a Windows machine. Therefore, it is not possible to run
 <em>auto-sklearn</em> on a Windows machine.</p>
-<p>Possible solutions (not tested):</p>
+<p>Possible solutions:</p>
 <ul class="simple">
-<li><p>Windows 10 bash shell</p></li>
+<li><p>Windows 10 bash shell (see <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/431">431</a> and
+<a class="reference external" href="https://github.com/automl/auto-sklearn/issues/860">860</a> for suggestions)</p></li>
 <li><p>virtual machine</p></li>
 <li><p>docker image</p></li>
 </ul>
@@ -199,14 +206,11 @@ issues holding us back from actively supporting OSX:</p>
 <ul class="simple">
 <li><p>The <code class="docutils literal notranslate"><span class="pre">resource</span></code> module cannot enforce a memory limit on a Python process
 (see <a class="reference external" href="https://github.com/automl/SMAC3/issues/115">SMAC3/issues/115</a>).</p></li>
-<li><p>OSX machines on <a class="reference external" href="https://travis-ci.org/">travis-ci</a> take more than 30
-minutes to spawn. This makes it impossible for us to run unit tests for
-<em>auto-sklearn</em> and its dependencies <a class="reference external" href="https://github.com/automl/SMAC3">SMAC3</a>
-and <a class="reference external" href="https://github.com/automl/ConfigSpace">ConfigSpace</a>.</p></li>
+<li><p>Not all dependencies we are using are set up to work on OSX.</p></li>
 </ul>
 <p>In case you’re having issues installing the <a class="reference external" href="https://github.com/automl/random_forest_run">pyrfr package</a>, check out
 <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/360#issuecomment-335150470">this installation suggestion on github</a>.</p>
-<p>Possible other solutions (not tested):</p>
+<p>Possible other:</p>
 <ul class="simple">
 <li><p>virtual machine</p></li>
 <li><p>docker image</p></li>
@@ -257,7 +261,7 @@ occurences of <code class="docutils literal notranslate"><span class="pre">maste
     </p>
     <p>
         &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
     </p>
   </div>
 </footer>

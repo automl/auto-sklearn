@@ -67,6 +67,7 @@
                 <li><a href="../../examples/index.html">Examples</a></li>
                 <li><a href="../../api.html">API</a></li>
                 <li><a href="../../extending.html">Extending</a></li>
+                <li><a href="../../faq.html">FAQ</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -151,9 +152,7 @@
         <span class="n">resampling_strategy</span><span class="o">=</span><span class="s1">&#39;holdout&#39;</span><span class="p">,</span>
         <span class="n">resampling_strategy_arguments</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">tmp_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">output_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">delete_output_folder_after_terminate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">n_jobs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">dask_client</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">dask</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">Client</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">disable_evaluator_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -164,6 +163,7 @@
         <span class="n">metric</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">scoring_functions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">load_models</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">get_trials_callback</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
@@ -273,17 +273,9 @@
 <span class="sd">            folder to store configuration output and log files, if ``None``</span>
 <span class="sd">            automatically use ``/tmp/autosklearn_tmp_$pid_$random_number``</span>
 
-<span class="sd">        output_folder : string, optional (None)</span>
-<span class="sd">            folder to store predictions for optional test set, if ``None``</span>
-<span class="sd">            no output will be generated</span>
-
 <span class="sd">        delete_tmp_folder_after_terminate: string, optional (True)</span>
 <span class="sd">            remove tmp_folder, when finished. If tmp_folder is None</span>
 <span class="sd">            tmp_dir will always be deleted</span>
-
-<span class="sd">        delete_output_folder_after_terminate: bool, optional (True)</span>
-<span class="sd">            remove output_folder, when finished. If output_folder is None</span>
-<span class="sd">            output_dir will always be deleted</span>
 
 <span class="sd">        n_jobs : int, optional, experimental</span>
 <span class="sd">            The number of jobs to run in parallel for ``fit()``. ``-1`` means</span>
@@ -345,6 +337,12 @@
 
 <span class="sd">        load_models : bool, optional (True)</span>
 <span class="sd">            Whether to load the models after fitting Auto-sklearn.</span>
+<span class="sd">           </span>
+<span class="sd">        get_trials_callback: callable</span>
+<span class="sd">            Callback function to create an object of subclass defined in module</span>
+<span class="sd">            `smac.callbacks &lt;https://automl.github.io/SMAC3/master/apidoc/smac.callbacks.html&gt;`_.</span>
+<span class="sd">            This is an advanced feature. Use only if you are familiar with</span>
+<span class="sd">            `SMAC &lt;https://automl.github.io/SMAC3/master/index.html&gt;`_.</span>
 
 <span class="sd">        Attributes</span>
 <span class="sd">        ----------</span>
@@ -375,9 +373,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">resampling_strategy</span> <span class="o">=</span> <span class="n">resampling_strategy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">resampling_strategy_arguments</span> <span class="o">=</span> <span class="n">resampling_strategy_arguments</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tmp_folder</span> <span class="o">=</span> <span class="n">tmp_folder</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">output_folder</span> <span class="o">=</span> <span class="n">output_folder</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">delete_tmp_folder_after_terminate</span> <span class="o">=</span> <span class="n">delete_tmp_folder_after_terminate</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">delete_output_folder_after_terminate</span> <span class="o">=</span> <span class="n">delete_output_folder_after_terminate</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">=</span> <span class="n">n_jobs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dask_client</span> <span class="o">=</span> <span class="n">dask_client</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">disable_evaluator_output</span> <span class="o">=</span> <span class="n">disable_evaluator_output</span>
@@ -388,6 +384,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="n">metric</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scoring_functions</span> <span class="o">=</span> <span class="n">scoring_functions</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_models</span> <span class="o">=</span> <span class="n">load_models</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_trials_callback</span> <span class="o">=</span> <span class="n">get_trials_callback</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[AutoML]</span>
 
@@ -411,9 +408,7 @@
 
         <span class="n">backend</span> <span class="o">=</span> <span class="n">create</span><span class="p">(</span>
             <span class="n">temporary_directory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tmp_folder</span><span class="p">,</span>
-            <span class="n">output_directory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_folder</span><span class="p">,</span>
             <span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">delete_tmp_folder_after_terminate</span><span class="p">,</span>
-            <span class="n">delete_output_folder_after_terminate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">delete_output_folder_after_terminate</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="n">automl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_automl_class</span><span class="p">()(</span>
@@ -440,7 +435,8 @@
             <span class="n">logging_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logging_config</span><span class="p">,</span>
             <span class="n">metadata_directory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_directory</span><span class="p">,</span>
             <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span>
-            <span class="n">scoring_functions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scoring_functions</span>
+            <span class="n">scoring_functions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scoring_functions</span><span class="p">,</span>
+            <span class="n">get_trials_callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_trials_callback</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">automl</span>
@@ -502,7 +498,7 @@
 <span class="sd">            attributes will be automatically One-Hot encoded. The values</span>
 <span class="sd">            used for a categorical attribute must be integers, obtained for</span>
 <span class="sd">            example by `sklearn.preprocessing.LabelEncoder</span>
-<span class="sd">            &lt;http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html&gt;`_.</span>
+<span class="sd">            &lt;https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html&gt;`_.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -677,6 +673,7 @@
         <span class="n">X_test</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SUPPORTED_FEAT_TYPES</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">y_test</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SUPPORTED_TARGET_TYPES</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">dataset_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">feat_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the Configuration Space object, from which Auto-Sklearn</span>
@@ -702,6 +699,7 @@
             <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>
             <span class="n">X_test</span><span class="o">=</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="o">=</span><span class="n">y_test</span><span class="p">,</span>
             <span class="n">dataset_name</span><span class="o">=</span><span class="n">dataset_name</span><span class="p">,</span>
+            <span class="n">feat_type</span><span class="o">=</span><span class="n">feat_type</span><span class="p">,</span>
             <span class="n">only_return_configuration_space</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">configuration_space</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">configuration_space</span>
 
@@ -747,7 +745,7 @@
 <span class="sd">            attributes will be automatically One-Hot encoded. The values</span>
 <span class="sd">            used for a categorical attribute must be integers, obtained for</span>
 <span class="sd">            example by `sklearn.preprocessing.LabelEncoder</span>
-<span class="sd">            &lt;http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html&gt;`_.</span>
+<span class="sd">            &lt;https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html&gt;`_.</span>
 
 <span class="sd">        dataset_name : str, optional (default=None)</span>
 <span class="sd">            Create nicer output. If None, a string will be determined by the</span>
@@ -966,7 +964,7 @@
     </p>
     <p>
         &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
     </p>
   </div>
 </footer>

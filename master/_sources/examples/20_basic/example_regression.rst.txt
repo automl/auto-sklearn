@@ -33,7 +33,7 @@ The following example shows how to fit a simple regression model with
     import sklearn.metrics
 
     import autosklearn.regression
-
+    import matplotlib.pyplot as plt
 
 
 
@@ -52,7 +52,7 @@ Data Loading
 .. code-block:: default
 
 
-    X, y = sklearn.datasets.load_boston(return_X_y=True)
+    X, y = sklearn.datasets.load_diabetes(return_X_y=True)
 
     X_train, X_test, y_train, y_test = \
         sklearn.model_selection.train_test_split(X, y, random_state=1)
@@ -69,7 +69,7 @@ Data Loading
 Build and fit a regressor
 =========================
 
-.. GENERATED FROM PYTHON SOURCE LINES 28-37
+.. GENERATED FROM PYTHON SOURCE LINES 28-36
 
 .. code-block:: default
 
@@ -78,9 +78,8 @@ Build and fit a regressor
         time_left_for_this_task=120,
         per_run_time_limit=30,
         tmp_folder='/tmp/autosklearn_regression_example_tmp',
-        output_folder='/tmp/autosklearn_regression_example_out',
     )
-    automl.fit(X_train, y_train, dataset_name='boston')
+    automl.fit(X_train, y_train, dataset_name='diabetes')
 
 
 
@@ -93,18 +92,17 @@ Build and fit a regressor
  .. code-block:: none
 
 
-    AutoSklearnRegressor(output_folder='/tmp/autosklearn_regression_example_out',
-                         per_run_time_limit=30, time_left_for_this_task=120,
+    AutoSklearnRegressor(per_run_time_limit=30, time_left_for_this_task=120,
                          tmp_folder='/tmp/autosklearn_regression_example_tmp')
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 38-40
+.. GENERATED FROM PYTHON SOURCE LINES 37-39
 
 Print the final ensemble constructed by auto-sklearn
 ====================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 40-43
+.. GENERATED FROM PYTHON SOURCE LINES 39-42
 
 .. code-block:: default
 
@@ -121,21 +119,63 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    [(0.640000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'regressor:random_forest:bootstrap': 'True', 'regressor:random_forest:criterion': 'mse', 'regressor:random_forest:max_depth': 'None', 'regressor:random_forest:max_features': 1.0, 'regressor:random_forest:max_leaf_nodes': 'None', 'regressor:random_forest:min_impurity_decrease': 0.0, 'regressor:random_forest:min_samples_leaf': 1, 'regressor:random_forest:min_samples_split': 2, 'regressor:random_forest:min_weight_fraction_leaf': 0.0},
+    [(0.320000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'ard_regression', 'feature_preprocessor:polynomial:degree': 2, 'feature_preprocessor:polynomial:include_bias': 'True', 'feature_preprocessor:polynomial:interaction_only': 'False', 'regressor:ard_regression:alpha_1': 0.0003701926442639788, 'regressor:ard_regression:alpha_2': 2.2118001735899097e-07, 'regressor:ard_regression:fit_intercept': 'True', 'regressor:ard_regression:lambda_1': 1.2037591637980971e-06, 'regressor:ard_regression:lambda_2': 4.358378124977852e-09, 'regressor:ard_regression:n_iter': 300, 'regressor:ard_regression:threshold_lambda': 1136.5286041327277, 'regressor:ard_regression:tol': 0.021944240404849075},
     dataset_properties={
       'task': 4,
       'sparse': False,
       'multioutput': False,
       'target_type': 'regression',
       'signed': False})),
-    (0.200000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'gaussian_process', 'feature_preprocessor:polynomial:degree': 2, 'feature_preprocessor:polynomial:include_bias': 'True', 'feature_preprocessor:polynomial:interaction_only': 'True', 'regressor:gaussian_process:alpha': 0.037731974209709904, 'regressor:gaussian_process:thetaL': 5.002213042554931e-07, 'regressor:gaussian_process:thetaU': 22409.945864393645},
+    (0.260000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'gaussian_process', 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 1044, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'uniform', 'feature_preprocessor:polynomial:degree': 2, 'feature_preprocessor:polynomial:include_bias': 'True', 'feature_preprocessor:polynomial:interaction_only': 'True', 'regressor:gaussian_process:alpha': 0.40377128710801274, 'regressor:gaussian_process:thetaL': 0.0006440074254633847, 'regressor:gaussian_process:thetaU': 18.039349882600167},
     dataset_properties={
       'task': 4,
       'sparse': False,
       'multioutput': False,
       'target_type': 'regression',
       'signed': False})),
-    (0.160000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'ard_regression', 'feature_preprocessor:polynomial:degree': 2, 'feature_preprocessor:polynomial:include_bias': 'True', 'feature_preprocessor:polynomial:interaction_only': 'False', 'regressor:ard_regression:alpha_1': 0.0003701926442639788, 'regressor:ard_regression:alpha_2': 2.2118001735899097e-07, 'regressor:ard_regression:fit_intercept': 'True', 'regressor:ard_regression:lambda_1': 1.2037591637980971e-06, 'regressor:ard_regression:lambda_2': 4.358378124977852e-09, 'regressor:ard_regression:n_iter': 300, 'regressor:ard_regression:threshold_lambda': 1136.5286041327277, 'regressor:ard_regression:tol': 0.021944240404849075},
+    (0.180000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'sgd', 'feature_preprocessor:polynomial:degree': 3, 'feature_preprocessor:polynomial:include_bias': 'False', 'feature_preprocessor:polynomial:interaction_only': 'False', 'regressor:sgd:alpha': 0.0006517033225329654, 'regressor:sgd:average': 'False', 'regressor:sgd:fit_intercept': 'True', 'regressor:sgd:learning_rate': 'invscaling', 'regressor:sgd:loss': 'epsilon_insensitive', 'regressor:sgd:penalty': 'elasticnet', 'regressor:sgd:tol': 0.002431731981071206, 'regressor:sgd:epsilon': 0.012150149892783745, 'regressor:sgd:eta0': 0.016444224834275295, 'regressor:sgd:l1_ratio': 1.7462342366289323e-09, 'regressor:sgd:power_t': 0.21521743568582094},
+    dataset_properties={
+      'task': 4,
+      'sparse': False,
+      'multioutput': False,
+      'target_type': 'regression',
+      'signed': False})),
+    (0.140000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'select_rates_regression', 'regressor:__choice__': 'liblinear_svr', 'feature_preprocessor:select_rates_regression:alpha': 0.034904198000955684, 'feature_preprocessor:select_rates_regression:mode': 'fdr', 'feature_preprocessor:select_rates_regression:score_func': 'f_regression', 'regressor:liblinear_svr:C': 35.012615180923554, 'regressor:liblinear_svr:dual': 'False', 'regressor:liblinear_svr:epsilon': 0.7326132441316412, 'regressor:liblinear_svr:fit_intercept': 'True', 'regressor:liblinear_svr:intercept_scaling': 1, 'regressor:liblinear_svr:loss': 'squared_epsilon_insensitive', 'regressor:liblinear_svr:tol': 0.00012982617662684841},
+    dataset_properties={
+      'task': 4,
+      'sparse': False,
+      'multioutput': False,
+      'target_type': 'regression',
+      'signed': False})),
+    (0.020000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'feature_agglomeration', 'regressor:__choice__': 'gaussian_process', 'feature_preprocessor:feature_agglomeration:affinity': 'cosine', 'feature_preprocessor:feature_agglomeration:linkage': 'average', 'feature_preprocessor:feature_agglomeration:n_clusters': 88, 'feature_preprocessor:feature_agglomeration:pooling_func': 'median', 'regressor:gaussian_process:alpha': 0.42928092501196696, 'regressor:gaussian_process:thetaL': 6.172116627632286e-09, 'regressor:gaussian_process:thetaU': 16.276500613703412},
+    dataset_properties={
+      'task': 4,
+      'sparse': False,
+      'multioutput': False,
+      'target_type': 'regression',
+      'signed': False})),
+    (0.020000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'gaussian_process', 'feature_preprocessor:polynomial:degree': 3, 'feature_preprocessor:polynomial:include_bias': 'True', 'feature_preprocessor:polynomial:interaction_only': 'True', 'regressor:gaussian_process:alpha': 0.283161627129086, 'regressor:gaussian_process:thetaL': 7.245332579977274e-08, 'regressor:gaussian_process:thetaU': 36.28453043772396},
+    dataset_properties={
+      'task': 4,
+      'sparse': False,
+      'multioutput': False,
+      'target_type': 'regression',
+      'signed': False})),
+    (0.020000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'fast_ica', 'regressor:__choice__': 'libsvm_svr', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.014192135928954746, 'feature_preprocessor:fast_ica:algorithm': 'deflation', 'feature_preprocessor:fast_ica:fun': 'exp', 'feature_preprocessor:fast_ica:whiten': 'False', 'regressor:libsvm_svr:C': 1.4272136443763257, 'regressor:libsvm_svr:epsilon': 0.10000000000000006, 'regressor:libsvm_svr:kernel': 'poly', 'regressor:libsvm_svr:max_iter': -1, 'regressor:libsvm_svr:shrinking': 'False', 'regressor:libsvm_svr:tol': 0.0010000000000000002, 'regressor:libsvm_svr:coef0': 0.2694141260648879, 'regressor:libsvm_svr:degree': 2, 'regressor:libsvm_svr:gamma': 0.05757315877344016},
+    dataset_properties={
+      'task': 4,
+      'sparse': False,
+      'multioutput': False,
+      'target_type': 'regression',
+      'signed': False})),
+    (0.020000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'feature_preprocessor:__choice__': 'select_rates_regression', 'regressor:__choice__': 'ard_regression', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0001745391328519669, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max': 0.8057830372269097, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min': 0.24982831110057324, 'feature_preprocessor:select_rates_regression:alpha': 0.3621762718897781, 'feature_preprocessor:select_rates_regression:mode': 'fwe', 'feature_preprocessor:select_rates_regression:score_func': 'f_regression', 'regressor:ard_regression:alpha_1': 2.7664515192592053e-05, 'regressor:ard_regression:alpha_2': 9.504988116581138e-07, 'regressor:ard_regression:fit_intercept': 'True', 'regressor:ard_regression:lambda_1': 6.50650698230178e-09, 'regressor:ard_regression:lambda_2': 4.238533890074848e-07, 'regressor:ard_regression:n_iter': 300, 'regressor:ard_regression:threshold_lambda': 78251.58542976103, 'regressor:ard_regression:tol': 0.0007301343236220855},
+    dataset_properties={
+      'task': 4,
+      'sparse': False,
+      'multioutput': False,
+      'target_type': 'regression',
+      'signed': False})),
+    (0.020000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'feature_preprocessor:__choice__': 'extra_trees_preproc_for_regression', 'regressor:__choice__': 'gaussian_process', 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 1687, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'uniform', 'feature_preprocessor:extra_trees_preproc_for_regression:bootstrap': 'True', 'feature_preprocessor:extra_trees_preproc_for_regression:criterion': 'friedman_mse', 'feature_preprocessor:extra_trees_preproc_for_regression:max_depth': 'None', 'feature_preprocessor:extra_trees_preproc_for_regression:max_features': 0.35137700543588724, 'feature_preprocessor:extra_trees_preproc_for_regression:max_leaf_nodes': 'None', 'feature_preprocessor:extra_trees_preproc_for_regression:min_samples_leaf': 11, 'feature_preprocessor:extra_trees_preproc_for_regression:min_samples_split': 14, 'feature_preprocessor:extra_trees_preproc_for_regression:min_weight_fraction_leaf': 0.0, 'feature_preprocessor:extra_trees_preproc_for_regression:n_estimators': 100, 'regressor:gaussian_process:alpha': 1.7023676127624204e-13, 'regressor:gaussian_process:thetaL': 3.673081985499841e-05, 'regressor:gaussian_process:thetaU': 21.307384432431714},
     dataset_properties={
       'task': 4,
       'sparse': False,
@@ -147,18 +187,25 @@ Print the final ensemble constructed by auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 44-46
+.. GENERATED FROM PYTHON SOURCE LINES 43-49
 
 Get the Score of the final ensemble
 ===================================
+After training the estimator, we can now quantify the goodness of fit. One possibility for
+is the `R2 score <https://scikit-learn.org/stable/modules/model_evaluation.html#r2-score>`_.
+The values range between -inf and 1 with 1 being the best possible value. A dummy estimator
+predicting the data mean has an R2 score of 0.
 
-.. GENERATED FROM PYTHON SOURCE LINES 46-49
+.. GENERATED FROM PYTHON SOURCE LINES 49-55
 
 .. code-block:: default
 
 
-    predictions = automl.predict(X_test)
-    print("R2 score:", sklearn.metrics.r2_score(y_test, predictions))
+    train_predictions = automl.predict(X_train)
+    print("Train R2 score:", sklearn.metrics.r2_score(y_train, train_predictions))
+    test_predictions = automl.predict(X_test)
+    print("Test R2 score:", sklearn.metrics.r2_score(y_test, test_predictions))
+
 
 
 
@@ -169,7 +216,44 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.9040482708670964
+    Train R2 score: 0.610347269214311
+    Test R2 score: 0.37973085073216584
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 56-63
+
+Plot the predictions
+====================
+Furthermore, we can now visually inspect the predictions. We plot the true value against the
+predictions and show results on train and test data. Points on the diagonal depict perfect
+predictions. Points below the diagonal were overestimated by the model (predicted value is higher
+than the true value), points above the diagonal were underestimated (predicted value is lower than
+the true value).
+
+.. GENERATED FROM PYTHON SOURCE LINES 63-74
+
+.. code-block:: default
+
+
+    plt.scatter(train_predictions, y_train, label="Train samples", c='#d95f02')
+    plt.scatter(test_predictions, y_test, label="Test samples", c='#7570b3')
+    plt.xlabel("Predicted value")
+    plt.ylabel("True value")
+    plt.legend()
+    plt.plot([30, 400], [30, 400], c='k', zorder=0)
+    plt.xlim([30, 400])
+    plt.ylim([30, 400])
+    plt.tight_layout()
+    plt.show()
+
+
+
+.. image:: /examples/20_basic/images/sphx_glr_example_regression_001.png
+    :alt: example regression
+    :class: sphx-glr-single-img
+
 
 
 
@@ -177,7 +261,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  15.827 seconds)
+   **Total running time of the script:** ( 2 minutes  0.699 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_regression.py:

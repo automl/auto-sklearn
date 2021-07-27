@@ -31,7 +31,7 @@ single machine. Using this mode, *Auto-sklearn* starts a dask cluster,
 manages the workers and takes care of shutting down the cluster once the
 computation is done.
 To run *Auto-sklearn* on multiple machines check the example
-`Parallel Usage with manual process spawning <example_parallel_manual_spawning.html>`_.
+:ref:`sphx_glr_examples_60_search_example_parallel_manual_spawning_cli.py`.
 
 .. GENERATED FROM PYTHON SOURCE LINES 18-26
 
@@ -79,7 +79,7 @@ Build and fit a classifier
 
 To use ``n_jobs_`` we must guard the code
 
-.. GENERATED FROM PYTHON SOURCE LINES 38-55
+.. GENERATED FROM PYTHON SOURCE LINES 38-54
 
 .. code-block:: default
 
@@ -89,7 +89,6 @@ To use ``n_jobs_`` we must guard the code
             time_left_for_this_task=120,
             per_run_time_limit=30,
             tmp_folder='/tmp/autosklearn_parallel_1_example_tmp',
-            output_folder='/tmp/autosklearn_parallel_1_example_out',
             n_jobs=4,
             # Each one of the 4 jobs is allocated 3GB
             memory_limit=3072,
@@ -114,10 +113,10 @@ To use ``n_jobs_`` we must guard the code
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.985816
-      Number of target algorithm runs: 48
-      Number of successful target algorithm runs: 45
-      Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 3
+      Number of target algorithm runs: 67
+      Number of successful target algorithm runs: 65
+      Number of crashed target algorithm runs: 2
+      Number of target algorithms that exceeded the time limit: 0
       Number of target algorithms that exceeded the memory limit: 0
 
 
@@ -127,7 +126,7 @@ To use ``n_jobs_`` we must guard the code
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  14.094 seconds)
+   **Total running time of the script:** ( 1 minutes  58.552 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_n_jobs.py:

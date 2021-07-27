@@ -68,6 +68,7 @@
                 <li><a href="../index.html">Examples</a></li>
                 <li><a href="../../api.html">API</a></li>
                 <li><a href="../../extending.html">Extending</a></li>
+                <li><a href="../../faq.html">FAQ</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -366,7 +367,7 @@ but with different hyperparameters .</p>
     classifier:sgd:penalty, Type: Categorical, Choices: {l1, l2, elasticnet}, Default: l2
     classifier:sgd:power_t, Type: UniformFloat, Range: [1e-05, 1.0], Default: 0.5
     classifier:sgd:tol, Type: UniformFloat, Range: [1e-05, 0.1], Default: 0.0001, on log-scale
-    data_preprocessing:categorical_transformer:categorical_encoding:__choice__, Type: Categorical, Choices: {no_encoding, one_hot_encoding}, Default: one_hot_encoding
+    data_preprocessing:categorical_transformer:categorical_encoding:__choice__, Type: Categorical, Choices: {encoding, no_encoding, one_hot_encoding}, Default: one_hot_encoding
     data_preprocessing:categorical_transformer:category_coalescence:__choice__, Type: Categorical, Choices: {minority_coalescer, no_coalescense}, Default: minority_coalescer
     data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Type: UniformFloat, Range: [0.0001, 0.5], Default: 0.01, on log-scale
     data_preprocessing:numerical_transformer:imputation:strategy, Type: Categorical, Choices: {mean, median, most_frequent}, Default: mean
@@ -644,7 +645,7 @@ but with different hyperparameters .</p>
     (Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  9.972 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  6.741 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-restrict-number-of-hyperparameters-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_restrict_number_of_hyperparameters.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>
@@ -680,7 +681,7 @@ but with different hyperparameters .</p>
     </p>
     <p>
         &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
     </p>
   </div>
 </footer>

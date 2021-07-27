@@ -30,9 +30,9 @@ This example shows how to start the dask scheduler and spawn
 workers for *Auto-sklearn* manually within Python. Use this example
 as a starting point to parallelize *Auto-sklearn* across multiple
 machines. If you want to start everything manually from the command line
-please see `this example <example_parallel_manual_spawning_cli.html>`_.
+please see :ref:`sphx_glr_examples_60_search_example_parallel_manual_spawning_cli.py`.
 To run *Auto-sklearn* in parallel on a single machine check out the example
-`Parallel Usage on a single machine <example_parallel_n_jobs.html>`_.
+:ref:`sphx_glr_examples_60_search_example_parallel_n_jobs.py`.
 
 When manually passing a dask client to Auto-sklearn, all logic
 must be guarded by ``if __name__ == "__main__":`` statements! We use
@@ -61,7 +61,7 @@ be started from the command line and not from within a Python file via
 the ``subprocess`` module as done here (for the sake of having a self-contained
 example).
 
-.. GENERATED FROM PYTHON SOURCE LINES 46-63
+.. GENERATED FROM PYTHON SOURCE LINES 46-62
 
 .. code-block:: default
 
@@ -79,7 +79,6 @@ example).
     from autosklearn.constants import MULTICLASS_CLASSIFICATION
 
     tmp_folder = '/tmp/autosklearn_parallel_2_example_tmp'
-    output_folder = '/tmp/autosklearn_parallel_2_example_out'
 
 
 
@@ -89,7 +88,7 @@ example).
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 64-70
+.. GENERATED FROM PYTHON SOURCE LINES 63-69
 
 Define function to start worker
 ===============================
@@ -98,7 +97,7 @@ Define the function to start a dask worker from python. This
 is a bit cumbersome and should ideally be done from the command line.
 We do it here only for illustrational purpose.
 
-.. GENERATED FROM PYTHON SOURCE LINES 70-90
+.. GENERATED FROM PYTHON SOURCE LINES 69-89
 
 .. code-block:: default
 
@@ -129,18 +128,18 @@ We do it here only for illustrational purpose.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 91-99
+.. GENERATED FROM PYTHON SOURCE LINES 90-98
 
 Start Auto-sklearn
 ==================
 
-We are now ready to start *auto-sklearn and all dask related processes.
+We are now ready to start *auto-sklearn* and all dask related processes.
 
 To use auto-sklearn in parallel we must guard the code with
 ``if __name__ == '__main__'``. We then start a dask cluster as a context,
 which means that it is automatically stopped once all computation is done.
 
-.. GENERATED FROM PYTHON SOURCE LINES 99-155
+.. GENERATED FROM PYTHON SOURCE LINES 98-153
 
 .. code-block:: default
 
@@ -176,7 +175,6 @@ which means that it is automatically stopped once all computation is done.
                     per_run_time_limit=10,
                     memory_limit=1024,
                     tmp_folder=tmp_folder,
-                    output_folder=output_folder,
                     seed=777,
                     # n_jobs is ignored internally as we pass a dask client.
                     n_jobs=1,
@@ -210,20 +208,20 @@ which means that it is automatically stopped once all computation is done.
 
  .. code-block:: none
 
-    [ERROR] [2021-07-20 21:26:31,177:asyncio] _GatheringFuture exception was never retrieved
+    [ERROR] [2021-07-27 12:13:16,327:asyncio] _GatheringFuture exception was never retrieved
     future: <_GatheringFuture finished exception=CancelledError()>
     asyncio.exceptions.CancelledError
     auto-sklearn results:
-      Dataset name: 218dead1-e9a1-11eb-8677-01babc6d0ff4
+      Dataset name: 009ddc16-eed4-11eb-8652-7fb34aa4ca1f
       Metric: accuracy
       Best validation score: 0.985816
-      Number of target algorithm runs: 12
-      Number of successful target algorithm runs: 10
+      Number of target algorithm runs: 18
+      Number of successful target algorithm runs: 17
       Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 2
+      Number of target algorithms that exceeded the time limit: 1
       Number of target algorithms that exceeded the memory limit: 0
 
-    Accuracy score 0.951048951048951
+    Accuracy score 0.958041958041958
 
 
 
@@ -231,7 +229,7 @@ which means that it is automatically stopped once all computation is done.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  35.878 seconds)
+   **Total running time of the script:** ( 0 minutes  35.790 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_manual_spawning_python.py:

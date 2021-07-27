@@ -338,7 +338,7 @@ Print the configuration space
         classifier:sgd:penalty, Type: Categorical, Choices: {l1, l2, elasticnet}, Default: l2
         classifier:sgd:power_t, Type: UniformFloat, Range: [1e-05, 1.0], Default: 0.5
         classifier:sgd:tol, Type: UniformFloat, Range: [1e-05, 0.1], Default: 0.0001, on log-scale
-        data_preprocessing:categorical_transformer:categorical_encoding:__choice__, Type: Categorical, Choices: {no_encoding, one_hot_encoding}, Default: one_hot_encoding
+        data_preprocessing:categorical_transformer:categorical_encoding:__choice__, Type: Categorical, Choices: {encoding, no_encoding, one_hot_encoding}, Default: one_hot_encoding
         data_preprocessing:categorical_transformer:category_coalescence:__choice__, Type: Categorical, Choices: {minority_coalescer, no_coalescense}, Default: minority_coalescer
         data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Type: UniformFloat, Range: [0.0001, 0.5], Default: 0.01, on log-scale
         data_preprocessing:numerical_transformer:imputation:strategy, Type: Categorical, Choices: {mean, median, most_frequent}, Default: mean
@@ -622,7 +622,7 @@ Print the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  9.972 seconds)
+   **Total running time of the script:** ( 0 minutes  6.741 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_restrict_number_of_hyperparameters.py:

@@ -68,6 +68,7 @@
                 <li><a href="examples/index.html">Examples</a></li>
                 <li><a href="api.html">API</a></li>
                 <li><a href="extending.html">Extending</a></li>
+                <li><a href="faq.html">FAQ</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -113,7 +114,7 @@
 <li><a class="reference internal" href="#turning-off-preprocessing">Turning off preprocessing</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id2">Resampling strategies</a></li>
+<li><a class="reference internal" href="#resampling-strategies">Resampling strategies</a></li>
 <li><a class="reference internal" href="#supported-inputs">Supported Inputs</a></li>
 <li><a class="reference internal" href="#ensemble-building-process">Ensemble Building Process</a></li>
 <li><a class="reference internal" href="#inspecting-the-results">Inspecting the results</a></li>
@@ -134,28 +135,9 @@
 references the examples where possible or explains certain configurations.</p>
 <section id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
-<p><em>auto-sklearn</em> comes with the following examples which demonstrate several
-aspects of its usage:</p>
-<ul class="simple">
-<li><p><a class="reference external" href="examples/20_basic/example_classification.html">Classification</a></p></li>
-<li><p><a class="reference external" href="examples/20_basic/example_multilabel_classification.html">Multi-label Classification</a></p></li>
-<li><p><a class="reference external" href="examples/20_basic/example_regression.html">Regression</a></p></li>
-<li><p><a class="reference external" href="examples/40_advanced/example_feature_types.html">Continuous and categorical data</a></p></li>
-<li><p><a class="reference external" href="examples/40_advanced/example_get_pipeline_components.html">Iterating over the models</a></p></li>
-<li><p><a class="reference external" href="examples/40_advanced/example_metrics.html">Using custom metrics</a></p></li>
-<li><p><a class="reference external" href="examples/40_advanced/example_pandas_train_test.html">Pandas Train and Test inputs</a></p></li>
-<li><p><a class="reference external" href="examples/40_advanced/example_single_configuration.html">Train a single configuration</a></p></li>
-<li><p><a class="reference external" href="examples/40_advanced/example_resampling.html">Resampling strategies</a></p></li>
-<li><p><a class="reference external" href="examples/60_search/example_parallel_manual_spawning.html">Parallel usage (manual)</a></p></li>
-<li><p><a class="reference external" href="examples/60_search/example_parallel_n_jobs.html">Parallel usage (n_jobs)</a></p></li>
-<li><p><a class="reference external" href="examples/60_search/example_random_search.html">Random search</a></p></li>
-<li><p><a class="reference external" href="examples/60_search/example_sequential.html">Sequential usage</a></p></li>
-<li><p><a class="reference external" href="examples/60_search/example_successive_halving.html">Successive Halving</a></p></li>
-<li><p><a class="reference external" href="examples/80_extending/example_extending_classification.html">Extending with a new classifier</a></p></li>
-<li><p><a class="reference external" href="examples/80_extending/example_extending_regression.html">Extending with a new regressor</a></p></li>
-<li><p><a class="reference external" href="examples/80_extending/example_extending_preprocessor.html">Extending with a new preprocessor</a></p></li>
-<li><p><a class="reference external" href="examples/80_extending/example_restrict_number_of_hyperparameters.html">Restrict hyperparameters for a component</a></p></li>
-</ul>
+<p>We provide examples on using <em>auto-sklearn</em> for multiple use cases ranging from
+simple classification to advanced uses such as feature importance, parallel runs
+and customization. They can be found in the <a class="reference internal" href="examples/index.html#sphx-glr-examples"><span class="std std-ref">Examples</span></a>.</p>
 </section>
 <section id="time-and-memory-limits">
 <h2>Time and memory limits<a class="headerlink" href="#time-and-memory-limits" title="Permalink to this headline">¶</a></h2>
@@ -175,7 +157,7 @@ time limit of one day, and a time limit of 30 minutes for a single run.</p>
 <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/142">auto-sklearn/issues/142</a>.</p>
 </section>
 <section id="restricting-the-searchspace">
-<h2>Restricting the searchspace<a class="headerlink" href="#restricting-the-searchspace" title="Permalink to this headline">¶</a></h2>
+<span id="id2"></span><h2>Restricting the searchspace<a class="headerlink" href="#restricting-the-searchspace" title="Permalink to this headline">¶</a></h2>
 <p>Instead of using all available estimators, it is possible to restrict
 <em>auto-sklearn</em>’s searchspace. The following shows an example of how to exclude
 all preprocessing methods and restrict the configuration space to only
@@ -197,6 +179,8 @@ random forests.</p>
 <li><p><a class="reference external" href="https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/feature_preprocessing">Preprocessors</a></p></li>
 </ul>
 </div></blockquote>
+<p>We do also provide an example on how to restrict the classifiers to search over
+<a class="reference internal" href="examples/40_advanced/example_interpretable_models.html#sphx-glr-examples-40-advanced-example-interpretable-models-py"><span class="std std-ref">Interpretable models</span></a>.</p>
 <section id="turning-off-preprocessing">
 <h3>Turning off preprocessing<a class="headerlink" href="#turning-off-preprocessing" title="Permalink to this headline">¶</a></h3>
 <p>Preprocessing in <em>auto-sklearn</em> is divided into data preprocessing and
@@ -209,26 +193,42 @@ This can be turned off by setting
 <code class="docutils literal notranslate"><span class="pre">include_preprocessors=[&quot;no_preprocessing&quot;]</span></code> as shown in the example above.</p>
 </section>
 </section>
-<section id="id2">
-<h2>Resampling strategies<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<section id="resampling-strategies">
+<h2>Resampling strategies<a class="headerlink" href="#resampling-strategies" title="Permalink to this headline">¶</a></h2>
 <p>Examples for using holdout and cross-validation can be found in <a class="reference external" href="examples/">auto-sklearn/examples/</a></p>
 </section>
 <section id="supported-inputs">
 <h2>Supported Inputs<a class="headerlink" href="#supported-inputs" title="Permalink to this headline">¶</a></h2>
-<p><em>auto-sklearn</em> can accept targets for the following tasks (more details on <a class="reference external" href="https://scikit-learn.org/stable/modules/multiclass.html">Sklearn algorithms</a>):
-* Binary Classification
-* Multiclass Classification
-* Multilabel Classification
-* Regression
-* Multioutput Regression</p>
-<dl class="simple">
-<dt>You can provide feature and target training pairs (X_train/y_train) to <em>auto-sklearn</em> to fit an ensemble of pipelines as described in the next section. This X_train/y_train dataset must belong to one of the supported formats: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.</dt><dd><p>Optionally, you can measure the ability of this fitted model to generalize to unseen data by providing an optional testing pair (X_test/Y_test). For further details, please refer to the example <a class="reference external" href="examples/40_advanced/example_pandas_train_test.html">Train and Test inputs</a>. Supported formats for these training and testing pairs are: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.</p>
-</dd>
-</dl>
+<p><em>auto-sklearn</em> can accept targets for the following tasks (more details on <a class="reference external" href="https://scikit-learn.org/stable/modules/multiclass.html">Sklearn algorithms</a>):</p>
+<ul class="simple">
+<li><p>Binary Classification</p></li>
+<li><p>Multiclass Classification</p></li>
+<li><p>Multilabel Classification</p></li>
+<li><p>Regression</p></li>
+<li><p>Multioutput Regression</p></li>
+</ul>
+<p>You can provide feature and target training pairs (X_train/y_train) to <em>auto-sklearn</em> to fit an
+ensemble of pipelines as described in the next section. This X_train/y_train dataset must belong
+to one of the supported formats: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.
+Optionally, you can measure the ability of this fitted model to generalize to unseen data by
+providing an optional testing pair (X_test/Y_test). For further details, please refer to the
+Example <a class="reference internal" href="examples/40_advanced/example_pandas_train_test.html#sphx-glr-examples-40-advanced-example-pandas-train-test-py"><span class="std std-ref">Test and Train data with Pandas</span></a>.
+Supported formats for these training and testing pairs are: np.ndarray,
+pd.DataFrame, scipy.sparse.csr_matrix and python lists.</p>
 <p>If your data contains categorical values (in the features or targets), autosklearn will automatically encode your data using a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html">sklearn.preprocessing.LabelEncoder</a> for unidimensional data and a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html">sklearn.preprocessing.OrdinalEncoder</a> for multidimensional data.</p>
-<p>Regarding the features, there are two methods to guide <em>auto-sklearn</em> to properly encode categorical columns:
-* Providing a X_train/X_test numpy array with the optional flag feat_type. For further details, you can check the example <a class="reference external" href="examples/40_advanced/example_feature_types.html">Feature Types</a>.
-* You can provide a pandas DataFrame, with properly formatted columns. If a column has numerical dtype, <em>auto-sklearn</em> will not encode it and it will be passed directly to scikit-learn. If the column has a categorical/boolean class, it will be encoded. If the column is of any other type (Object or Timeseries), an error will be raised. For further details on how to properly encode your data, you can check the example <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html">Working with categorical data</a>). If you are working with time series, it is recommended that you follow this approach <a class="reference external" href="https://stats.stackexchange.com/questions/311494/">Working with time data</a>.</p>
+<p>Regarding the features, there are two methods to guide <em>auto-sklearn</em> to properly encode categorical columns:</p>
+<ul class="simple">
+<li><p>Providing a X_train/X_test numpy array with the optional flag feat_type. For further details, you
+can check the Example <a class="reference internal" href="examples/40_advanced/example_feature_types.html#sphx-glr-examples-40-advanced-example-feature-types-py"><span class="std std-ref">Feature Types</span></a>.</p></li>
+<li><p>You can provide a pandas DataFrame, with properly formatted columns. If a column has numerical
+dtype, <em>auto-sklearn</em> will not encode it and it will be passed directly to scikit-learn. If the
+column has a categorical/boolean class, it will be encoded. If the column is of any other type
+(Object or Timeseries), an error will be raised. For further details on how to properly encode
+your data, you can check the Pandas Example
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html">Working with categorical data</a>).
+If you are working with time series, it is recommended that you follow this approach
+<a class="reference external" href="https://stats.stackexchange.com/questions/311494/">Working with time data</a>.</p></li>
+</ul>
 <p>Regarding the targets (y_train/y_test), if the task involves a classification problem, such features will be automatically encoded. It is recommended to provide both y_train and y_test during fit, so that a common encoding is created between these splits (if only y_train is provided during fit, the categorical encoder will not be able to handle new classes that are exclusive to y_test). If the task is regression, no encoding happens on the targets.</p>
 </section>
 <section id="ensemble-building-process">
@@ -242,7 +242,7 @@ to build an ensemble based on the models’ prediction for the validation set. T
 </ul>
 </section>
 <section id="inspecting-the-results">
-<h2>Inspecting the results<a class="headerlink" href="#inspecting-the-results" title="Permalink to this headline">¶</a></h2>
+<span id="id3"></span><h2>Inspecting the results<a class="headerlink" href="#inspecting-the-results" title="Permalink to this headline">¶</a></h2>
 <p><em>auto-sklearn</em> allows users to inspect the training results and statistics. The following example shows how different
 statistics can be printed for the inspection.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
@@ -257,30 +257,41 @@ statistics can be printed for the inspection.</p>
 <code class="docutils literal notranslate"><span class="pre">sprint_statistics()</span></code> is a method that prints the name of the  dataset, the metric used, and the best validation score
 obtained by running <em>auto-sklearn</em>. It additionally prints the number of both successful and unsuccessful
 algorithm runs.</p>
-<p>The results obtained from the final ensemble can be printed by calling <code class="docutils literal notranslate"><span class="pre">show_models()</span></code>. <em>auto-sklearn</em> ensemble is composed of scikit-learn models that can be inspected as exemplified by
-<a class="reference external" href="examples/40_advanced/example_get_pipeline_components.html">model inspection example</a>
-.</p>
+<p>The results obtained from the final ensemble can be printed by calling <code class="docutils literal notranslate"><span class="pre">show_models()</span></code>.
+<em>auto-sklearn</em> ensemble is composed of scikit-learn models that can be inspected as exemplified
+in the Example <a class="reference internal" href="examples/40_advanced/example_get_pipeline_components.html#sphx-glr-examples-40-advanced-example-get-pipeline-components-py"><span class="std std-ref">Obtain run information</span></a>.</p>
 </section>
 <section id="parallel-computation">
 <h2>Parallel computation<a class="headerlink" href="#parallel-computation" title="Permalink to this headline">¶</a></h2>
 <p>In it’s default mode, <em>auto-sklearn</em> already uses two cores. The first one is
 used for model building, the second for building an ensemble every time a new
-machine learning model has finished training. An example on how to do this sequentially (first searching for individual models, and then building an ensemble from them) can be seen in <a class="reference external" href="examples/60_search/example_sequential.html">sequential auto-sklearn example</a>.</p>
-<p>Nevertheless, <em>auto-sklearn</em> also supports parallel Bayesian optimization via the use of <a class="reference external" href="https://distributed.dask.org/">Dask.distributed</a>. By providing the arguments <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> to the estimator construction, one can control the number of cores available to <em>auto-sklearn</em> (As exemplified in <a class="reference external" href="examples/60_search/example_parallel_n_jobs">sequential auto-sklearn  example</a>). Distributed processes are also supported by providing a custom client object to <em>auto-sklearn</em> like in the
-example: <a class="reference external" href="examples/60_search/example_parallel_manual_spawning_python">sequential auto-sklearn  example</a>. When multiple cores are available, <em>auto-sklearn</em>
-will create a worker per core, and use the available workers to both search for better machine learning models as well as building an ensemble with them until the time resource is exhausted.</p>
+machine learning model has finished training. An example on how to do this sequentially (first searching for individual models, and then building an ensemble from them) can be seen in
+<a class="reference internal" href="examples/60_search/example_sequential.html#sphx-glr-examples-60-search-example-sequential-py"><span class="std std-ref">Sequential Usage</span></a>.</p>
+<p>Nevertheless, <em>auto-sklearn</em> also supports parallel Bayesian optimization via the use of
+<a class="reference external" href="https://distributed.dask.org/">Dask.distributed</a>. By providing the arguments <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code>
+to the estimator construction, one can control the number of cores available to <em>auto-sklearn</em>
+(As shown in the Example <a class="reference internal" href="examples/60_search/example_parallel_n_jobs.html#sphx-glr-examples-60-search-example-parallel-n-jobs-py"><span class="std std-ref">Parallel Usage  on a single machine</span></a>).
+Distributed processes are also supported by providing a custom client object to <em>auto-sklearn</em> like
+in the Example: <a class="reference internal" href="examples/60_search/example_parallel_manual_spawning_cli.html#sphx-glr-examples-60-search-example-parallel-manual-spawning-cli-py"><span class="std std-ref">Parallel Usage: Spawning workers from the command line</span></a>. When
+multiple cores are
+available, <em>auto-sklearn</em> will create a worker per core, and use the available workers to both search
+for better machine learning models as well as building an ensemble with them until the time resource
+is exhausted.</p>
 <p><strong>Note:</strong> <em>auto-sklearn</em> requires all workers to have access to a shared file system for storing training data and models.</p>
-<p>Furthermore, depending on the installation of scikit-learn and numpy,
-the model building procedure may use up to all cores. Such behaviour is
-unintended by <em>auto-sklearn</em> and is most likely due to numpy being installed
-from <cite>pypi</cite> as a binary wheel (<a class="reference external" href="http://scikit-learn-general.narkive.com/44ywvAHA/binary-wheel-packages-for-linux-are-coming">see here</a>). Executing
-<code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">OPENBLAS_NUM_THREADS=1</span></code> should disable such behaviours and make numpy
-only use a single core at a time.</p>
+<p><em>auto-sklearn</em> employs <a class="reference external" href="https://github.com/joblib/threadpoolctl/">threadpoolctl</a> to control the number of threads employed by scientific libraries like numpy or scikit-learn. This is done exclusively during the building procedure of models, not during inference. In particular, <em>auto-sklearn</em> allows each pipeline to use at most 1 thread during training. At predicting and scoring time this limitation is not enforced by <em>auto-sklearn</em>. You can control the number of resources
+employed by the pipelines by setting the following variables in your environment, prior to running <em>auto-sklearn</em>:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">export</span> <span class="nv">OPENBLAS_NUM_THREADS</span><span class="o">=</span><span class="m">1</span>
+<span class="gp">$ </span><span class="nb">export</span> <span class="nv">MKL_NUM_THREADS</span><span class="o">=</span><span class="m">1</span>
+<span class="gp">$ </span><span class="nb">export</span> <span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">1</span>
+</pre></div>
+</div>
+<p>For further information about how scikit-learn handles multiprocessing, please check the <a class="reference external" href="https://scikit-learn.org/stable/computing/parallelism.html">Parallelism, resource management, and configuration</a> documentation from the library.</p>
 </section>
 <section id="model-persistence">
 <h2>Model persistence<a class="headerlink" href="#model-persistence" title="Permalink to this headline">¶</a></h2>
 <p><em>auto-sklearn</em> is mostly a wrapper around scikit-learn. Therefore, it is
-possible to follow the <a class="reference external" href="http://scikit-learn.org/stable/modules/model_persistence.html#persistence-example">persistence example</a>
+possible to follow the
+<a class="reference external" href="https://scikit-learn.org/stable/modules/model_persistence.html">persistence Example</a>
 from scikit-learn.</p>
 </section>
 <section id="vanilla-auto-sklearn">
@@ -319,7 +330,7 @@ regular SMAC algorithm for suggesting new hyperparameter configurations.</p>
     </p>
     <p>
         &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
     </p>
   </div>
 </footer>
