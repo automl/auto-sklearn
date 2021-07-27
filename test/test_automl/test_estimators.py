@@ -6,7 +6,6 @@ import importlib
 import os
 import inspect
 import itertools
-import operator
 import pickle
 import re
 import sys
@@ -421,6 +420,7 @@ def test_leaderboard(
             # Check the right columns are present and in the right order
             # The model_id is set as the index, not included in pandas columns
             columns = list(leaderboard.columns)
+
             def exclude(lst, s):
                 return [x for x in lst if x != s]
 

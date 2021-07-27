@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-from typing import Optional, Dict, List, Tuple, Union, Iterable, ClassVar
+from typing import Optional, Dict, List, Tuple, Union, Iterable
 from typing_extensions import Literal
 
 from ConfigSpace.configuration_space import Configuration
@@ -802,8 +802,6 @@ class AutoSklearnEstimator(BaseEstimator):
             dataframe.sort_values(by=sort_by,
                                   ascending=ascending_param,
                                   inplace=True)
-
-
 
         # Lastly, just grab the top_k
         if top_k == 'all' or top_k >= len(dataframe):
