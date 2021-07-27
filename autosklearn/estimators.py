@@ -21,9 +21,7 @@ from autosklearn.metrics import Scorer
 from autosklearn.util.backend import create
 
 
-
 class AutoSklearnEstimator(BaseEstimator):
-    
     # Constants used by `def leaderboard` for columns and their sort order
     _leaderboard_columns: ClassVar[Dict[str, List[str]]] = {
         "all": [
@@ -645,7 +643,7 @@ class AutoSklearnEstimator(BaseEstimator):
         #      self.ensemble_ to get the identifiers of models it will generate
         #      weights for.
         column_types = {
-            'all' : AutoSklearnEstimator._leaderboard_columns['all'],
+            'all': AutoSklearnEstimator._leaderboard_columns['all'],
             'simple': AutoSklearnEstimator._leaderboard_columns['simple'],
             'detailed': AutoSklearnEstimator._leaderboard_columns['all']
         }
@@ -859,7 +857,6 @@ class AutoSklearnEstimator(BaseEstimator):
             feat_type=feat_type,
             only_return_configuration_space=True,
         ) if self.automl_.configuration_space is None else self.automl_.configuration_space
-
 
 
 class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
