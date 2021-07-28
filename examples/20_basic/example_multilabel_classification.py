@@ -55,6 +55,13 @@ automl = autosklearn.classification.AutoSklearnClassifier(
 automl.fit(X_train, y_train, dataset_name='reuters')
 
 ############################################################################
+# View the models found by auto-sklearn
+# =====================================
+
+print(automl.leaderboard())
+
+
+############################################################################
 # Print the final ensemble constructed by auto-sklearn
 # ====================================================
 

@@ -201,7 +201,6 @@ class AutoML(BaseEstimator):
         self.cv_models_ = None
         self.ensemble_ = None
         self._can_predict = False
-
         self._debug_mode = debug_mode
 
         self.InputValidator = None  # type: Optional[InputValidator]
