@@ -41,9 +41,10 @@ jobs:
             Hello @${{ github.event.pull_request.user.login }},
 
             We are doing regrssion tests for
-            **Branch** ${{ github.event.pull_request.head.ref }}
-            **Commit** ${{ github.event.merge_commit_sha }}
-            ${{ github.event.pull_request.head.sha }}
+            **Branch**
+            * ${{ github.event.pull_request.head.ref }}
+            **Commit**
+            * ${{ github.event.pull_request.head.sha }}
 
       - name: Run Regression Tests
         run: |
