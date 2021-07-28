@@ -46,7 +46,7 @@ jobs:
             * **Commit** ${{ github.event.pull_request.head.sha }}
 
             The results will be show here once complete but in the meantime,
-            you can check the results [here](https://github.com/eddiebergman/auto-sklearn/actions/runs/${{ github.run_id }}).
+            you can check the progress [here](https://github.com/eddiebergman/auto-sklearn/actions/runs/${{ github.run_id }}).
 
 
       - name: Run Regression Tests
