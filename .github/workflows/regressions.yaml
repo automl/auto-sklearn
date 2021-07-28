@@ -8,4 +8,4 @@ jobs:
     if: contains(github.event.pull_request.labels.*.name, 'regression-tests')
     runs-on: ubuntu-latest
     steps:
-      - runs: echo "hello world"
+      - run: echo "hello world"
