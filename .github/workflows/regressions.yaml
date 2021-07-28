@@ -1,4 +1,4 @@
-name: 'PR Regression Tests'
+name: Regression Tests
 on:
   pull_request: [labeled]
 
