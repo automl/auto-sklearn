@@ -46,6 +46,7 @@ jobs:
       - name: Update Comment
         id: update_comment
         if: steps.create_comment.oututs.comment-id != ''
+        uses: peter-evans/create-or-update-comment@v1
         with:
           comment-id: ${{ steps.create_comment.output.comment-id }}
           edit-mode: append
