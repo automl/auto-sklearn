@@ -1,15 +1,19 @@
 name: Payload info with multiple triggers
 
 on:
+
   workflow_dispatch:
     inputs:
       config:
         description: 'Config to run'
         required: true
         default: 'small.yml'
+
   pull_request:
+    branches:
+      - master
+      - development
     types: [labeled]
-  push:
 
 jobs:
 
