@@ -1,6 +1,7 @@
 name: Regression Tests
 on:
-  pull_request: [labeled]
+  pull_request:
+    types: [labeled]
 
 jobs:
   regression-tests:
