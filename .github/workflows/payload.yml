@@ -1,4 +1,4 @@
-name: Get payload info
+name: Payload info with multiple triggers
 
 on:
   workflow_dispatch:
