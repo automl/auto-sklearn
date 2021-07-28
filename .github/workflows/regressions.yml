@@ -24,8 +24,8 @@ jobs:
         && github.event.label.name == 'regression-tests'
       )
     steps:
-      - name: DEBUG
-        id: debug
+      - name: Set Env
+        id: set_env
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
@@ -38,10 +38,12 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            Hello @${{ github.event.pull_request.user.login }}
+            Hello @${{ github.event.pull_request.user.login }},
 
             We are doing regrssion tests for
-            - ${{ github.event.pull_request.head.ref }}${{ github.event.pull_request.head.sha }}
+            **Branch** ${{ github.event.pull_request.head.ref }}
+            **Commit** ${{ github.event.merge_commit_sha }}
+            ${{ github.event.pull_request.head.sha }}
 
       - name: Run Regression Tests
         run: |
@@ -50,12 +52,16 @@ jobs:
 
       - name: Update Comment
         id: update_comment
-        if: >
-          github.event_name == 'pull_request'
-          && steps.create_comment.oututs.comment-id != ''
+        if: steps.create_comment.oututs.comment-id != ''
         uses: peter-evans/create-or-update-comment@v1
         with:
           comment-id: ${{ steps.create_comment.output.comment-id }}
-          edit-mode: append
           body: |
             success?
+            ...maybe
+
+      - name: Tet
+        id: me
+        if: steps.create_comment.oututs.comment-id != ''
+        run: |
+          echo "success?"
