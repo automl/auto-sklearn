@@ -33,6 +33,7 @@ jobs:
 
       - name: Create comment
         id: create_comment
+        if: github.event_name == 'pull_request'
         uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{ github.event.pull_request.number }}
@@ -49,7 +50,9 @@ jobs:
 
       - name: Update Comment
         id: update_comment
-        if: steps.create_comment.oututs.comment-id != ''
+        if: ^
+          github.event_name == 'pull_request'
+          && steps.create_comment.oututs.comment-id != ''
         uses: peter-evans/create-or-update-comment@v1
         with:
           comment-id: ${{ steps.create_comment.output.comment-id }}
