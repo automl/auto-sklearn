@@ -39,11 +39,16 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             Hello @${{ github.event.pull_request.user.login }},
+            
+            We are doing regression tests for
 
-            We are doing regrssion tests for
-            **Branch** ${{ github.event.pull_request.head.ref }}
-            **Commit** ${{ github.event.merge_commit_sha }}
-            ${{ github.event.pull_request.head.sha }}
+            **Branch**
+
+            * ${{ github.event.pull_request.head.ref }}
+
+            **Commit**
+
+            * ${{ github.event.pull_request.head.sha }}
 
       - name: Run Regression Tests
         run: |
@@ -59,6 +64,7 @@ jobs:
         with:
           comment-id: ${{ steps.create_comment.outputs.comment-id }}
           body: |
+
             success?
             ...maybe
 
