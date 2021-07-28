@@ -1,0 +1,25 @@
+name: Get payload info
+
+on:
+  workflow_dispatch:
+    inputs:
+      config:
+        description: 'Config to run'
+        required: true
+        default: 'small.yml'
+  pull_request:
+    types: [labeled]
+  push:
+
+jobs:
+
+  print_payload:
+    name: Print github payload
+    runs-on: ubuntu-latest
+    steps:
+    - name: Print payload
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+      run: |
+        echo "$GITHUB_CONTEXT"
+
