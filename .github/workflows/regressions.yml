@@ -17,8 +17,12 @@ jobs:
   run-regression-tests-labeled:
     name: Run the regression tests
     runs-on: ubuntu-latest
-    if: github.event.label.name == 'regression-tests'
-
+    if: >
+      github.event_name == 'workflow_dispatch'
+      || (
+        github.event.action == 'labeled'
+        github.event.label.name == 'regression-tests'
+      )
     steps:
       - name: DEBUG
         id: debug
