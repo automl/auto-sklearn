@@ -42,13 +42,8 @@ jobs:
             
             We are doing regression tests for
 
-            **Branch**
-
-            * ${{ github.event.pull_request.head.ref }}
-
-            **Commit**
-
-            * ${{ github.event.pull_request.head.sha }}
+            * **Branch** ${{ github.event.pull_request.head.ref }}
+            * **Commit** ${{ github.event.pull_request.head.sha }}
 
             The results will be show here once complete but in the meantime,
             you can check the results [here](https://github.com/eddiebergman/auto-sklearn/actions/runs/${{ github.run_id }}).
