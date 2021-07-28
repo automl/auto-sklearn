@@ -57,7 +57,7 @@ jobs:
           && steps.create_comment.outputs.comment-id != ''
         uses: peter-evans/create-or-update-comment@v1
         with:
-          comment-id: ${{ steps.create_comment.output.comment-id }}
+          comment-id: ${{ steps.create_comment.outputs.comment-id }}
           body: |
             success?
             ...maybe
