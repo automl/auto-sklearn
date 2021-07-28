@@ -162,9 +162,9 @@ Fit an user provided configuration
     {'data_preprocessing': DataPreprocessor(column_transformer=ColumnTransformer(sparse_threshold=0.0,
                                                           transformers=[('categorical_transformer',
                                                                          CategoricalPreprocessingPipeline(config=Configuration:
-      categorical_encoding:__choice__, Value: 'one_hot_encoding'
-      category_coalescence:__choice__, Value: 'minority_coalescer'
-      category_coalescence:minority_coalescer:minimum_fraction, Value: 0.0...
+      categorical_encoding:__choice__, Value: 'no_encoding'
+      category_coalescence:__choice__, Value: 'no_coalescense'
+    , dataset_properties={'multiclass': False, 'multilabel': False, 'signed': False, '...
                                 'katri': 'categorical', 'mulch': 'categorical',
                                 'qxmsq': 'categorical', 'r2ar8': 'categorical',
                                 'reskd': 'categorical', 'reskr': 'categorical',
@@ -172,54 +172,67 @@ Fit an user provided configuration
                                 'rxmsq': 'categorical', 'simpl': 'categorical',
                                 'skach': 'categorical', 'skewr': 'categorical',
                                 'skrxp': 'categorical', 'spcop': 'categorical',
-                                'stlmt': 'categorical', 'thrsk': 'categorical', ...}), 'balancing': Balancing(strategy='weighting'), 'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fa207179310>, 'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fa207179130>}
+                                'stlmt': 'categorical', 'thrsk': 'categorical', ...}), 'balancing': Balancing(strategy='weighting'), 'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fec48ec6130>, 'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fec4c2796a0>}
     RunInfo(config=Configuration:
       balancing:strategy, Value: 'weighting'
       classifier:__choice__, Value: 'random_forest'
       classifier:random_forest:bootstrap, Value: 'False'
-      classifier:random_forest:criterion, Value: 'entropy'
+      classifier:random_forest:criterion, Value: 'gini'
       classifier:random_forest:max_depth, Constant: 'None'
-      classifier:random_forest:max_features, Value: 0.7340142506448974
+      classifier:random_forest:max_features, Value: 0.7555030235058298
       classifier:random_forest:max_leaf_nodes, Constant: 'None'
       classifier:random_forest:min_impurity_decrease, Constant: 0.0
-      classifier:random_forest:min_samples_leaf, Value: 20
+      classifier:random_forest:min_samples_leaf, Value: 10
       classifier:random_forest:min_samples_split, Value: 11
       classifier:random_forest:min_weight_fraction_leaf, Constant: 0.0
-      data_preprocessing:categorical_transformer:categorical_encoding:__choice__, Value: 'one_hot_encoding'
-      data_preprocessing:categorical_transformer:category_coalescence:__choice__, Value: 'minority_coalescer'
-      data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Value: 0.046352352688879606
+      data_preprocessing:categorical_transformer:categorical_encoding:__choice__, Value: 'no_encoding'
+      data_preprocessing:categorical_transformer:category_coalescence:__choice__, Value: 'no_coalescense'
       data_preprocessing:numerical_transformer:imputation:strategy, Value: 'mean'
-      data_preprocessing:numerical_transformer:rescaling:__choice__, Value: 'normalize'
-      feature_preprocessor:__choice__, Value: 'select_percentile_classification'
-      feature_preprocessor:select_percentile_classification:percentile, Value: 64.92714067741738
-      feature_preprocessor:select_percentile_classification:score_func, Value: 'chi2'
+      data_preprocessing:numerical_transformer:rescaling:__choice__, Value: 'none'
+      feature_preprocessor:__choice__, Value: 'extra_trees_preproc_for_classification'
+      feature_preprocessor:extra_trees_preproc_for_classification:bootstrap, Value: 'False'
+      feature_preprocessor:extra_trees_preproc_for_classification:criterion, Value: 'entropy'
+      feature_preprocessor:extra_trees_preproc_for_classification:max_depth, Constant: 'None'
+      feature_preprocessor:extra_trees_preproc_for_classification:max_features, Value: 0.14665429028623755
+      feature_preprocessor:extra_trees_preproc_for_classification:max_leaf_nodes, Constant: 'None'
+      feature_preprocessor:extra_trees_preproc_for_classification:min_impurity_decrease, Constant: 0.0
+      feature_preprocessor:extra_trees_preproc_for_classification:min_samples_leaf, Value: 9
+      feature_preprocessor:extra_trees_preproc_for_classification:min_samples_split, Value: 4
+      feature_preprocessor:extra_trees_preproc_for_classification:min_weight_fraction_leaf, Constant: 0.0
+      feature_preprocessor:extra_trees_preproc_for_classification:n_estimators, Constant: 100
     , instance=None, instance_specific=None, seed=1, cutoff=60, capped=False, budget=0.0, source_id=0)
-    RunValue(cost=0.03222748815165877, time=2.240760087966919, status=<StatusType.SUCCESS: 1>, starttime=1627386775.8443825, endtime=1627386778.1053464, additional_info={'duration': 2.1653034687042236, 'num_run': 2, 'train_loss': 0.03829985987856144, 'configuration_origin': None})
+    RunValue(cost=0.03696682464454981, time=2.701122283935547, status=<StatusType.SUCCESS: 1>, starttime=1627456481.073874, endtime=1627456483.7980072, additional_info={'duration': 2.6041550636291504, 'num_run': 2, 'train_loss': 0.04530593180756659, 'configuration_origin': None})
     Passed Configuration: Configuration:
       balancing:strategy, Value: 'weighting'
       classifier:__choice__, Value: 'random_forest'
       classifier:random_forest:bootstrap, Value: 'False'
-      classifier:random_forest:criterion, Value: 'entropy'
+      classifier:random_forest:criterion, Value: 'gini'
       classifier:random_forest:max_depth, Constant: 'None'
-      classifier:random_forest:max_features, Value: 0.7340142506448974
+      classifier:random_forest:max_features, Value: 0.7555030235058298
       classifier:random_forest:max_leaf_nodes, Constant: 'None'
       classifier:random_forest:min_impurity_decrease, Constant: 0.0
-      classifier:random_forest:min_samples_leaf, Value: 20
+      classifier:random_forest:min_samples_leaf, Value: 10
       classifier:random_forest:min_samples_split, Value: 11
       classifier:random_forest:min_weight_fraction_leaf, Constant: 0.0
-      data_preprocessing:categorical_transformer:categorical_encoding:__choice__, Value: 'one_hot_encoding'
-      data_preprocessing:categorical_transformer:category_coalescence:__choice__, Value: 'minority_coalescer'
-      data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Value: 0.046352352688879606
+      data_preprocessing:categorical_transformer:categorical_encoding:__choice__, Value: 'no_encoding'
+      data_preprocessing:categorical_transformer:category_coalescence:__choice__, Value: 'no_coalescense'
       data_preprocessing:numerical_transformer:imputation:strategy, Value: 'mean'
-      data_preprocessing:numerical_transformer:rescaling:__choice__, Value: 'normalize'
-      feature_preprocessor:__choice__, Value: 'select_percentile_classification'
-      feature_preprocessor:select_percentile_classification:percentile, Value: 64.92714067741738
-      feature_preprocessor:select_percentile_classification:score_func, Value: 'chi2'
+      data_preprocessing:numerical_transformer:rescaling:__choice__, Value: 'none'
+      feature_preprocessor:__choice__, Value: 'extra_trees_preproc_for_classification'
+      feature_preprocessor:extra_trees_preproc_for_classification:bootstrap, Value: 'False'
+      feature_preprocessor:extra_trees_preproc_for_classification:criterion, Value: 'entropy'
+      feature_preprocessor:extra_trees_preproc_for_classification:max_depth, Constant: 'None'
+      feature_preprocessor:extra_trees_preproc_for_classification:max_features, Value: 0.14665429028623755
+      feature_preprocessor:extra_trees_preproc_for_classification:max_leaf_nodes, Constant: 'None'
+      feature_preprocessor:extra_trees_preproc_for_classification:min_impurity_decrease, Constant: 0.0
+      feature_preprocessor:extra_trees_preproc_for_classification:min_samples_leaf, Value: 9
+      feature_preprocessor:extra_trees_preproc_for_classification:min_samples_split, Value: 4
+      feature_preprocessor:extra_trees_preproc_for_classification:min_weight_fraction_leaf, Constant: 0.0
+      feature_preprocessor:extra_trees_preproc_for_classification:n_estimators, Constant: 100
 
-    Random Forest: RandomForestClassifier(bootstrap=False, criterion='entropy', max_features=16,
-                           min_samples_leaf=20, min_samples_split=11,
-                           n_estimators=512, n_jobs=1,
-                           random_state=RandomState(MT19937) at 0x7FA207172D40,
+    Random Forest: RandomForestClassifier(bootstrap=False, max_features=5, min_samples_leaf=10,
+                           min_samples_split=11, n_estimators=512, n_jobs=1,
+                           random_state=RandomState(MT19937) at 0x7FEC49E11340,
                            warm_start=True)
 
 
@@ -228,7 +241,7 @@ Fit an user provided configuration
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  4.614 seconds)
+   **Total running time of the script:** ( 2 minutes  17.459 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_single_configuration.py:

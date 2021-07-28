@@ -134,10 +134,40 @@ Building the classifier
 
 .. GENERATED FROM PYTHON SOURCE LINES 58-60
 
+View the models found by auto-sklearn
+=====================================
+
+.. GENERATED FROM PYTHON SOURCE LINES 60-64
+
+.. code-block:: default
+
+
+    print(automl.leaderboard())
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+              rank  ensemble_weight           type     cost  duration
+    model_id                                                         
+    2            1              1.0  random_forest  0.44715  4.193884
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 65-67
+
 Print the final ensemble constructed by auto-sklearn
 ====================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 60-63
+.. GENERATED FROM PYTHON SOURCE LINES 67-70
 
 .. code-block:: default
 
@@ -167,12 +197,12 @@ Print the final ensemble constructed by auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 64-66
+.. GENERATED FROM PYTHON SOURCE LINES 71-73
 
 Print statistics about the auto-sklearn run
 ===========================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 66-71
+.. GENERATED FROM PYTHON SOURCE LINES 73-78
 
 .. code-block:: default
 
@@ -205,12 +235,12 @@ Print statistics about the auto-sklearn run
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 72-74
+.. GENERATED FROM PYTHON SOURCE LINES 79-81
 
 Get the Score of the final ensemble
 ===================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 74-77
+.. GENERATED FROM PYTHON SOURCE LINES 81-84
 
 .. code-block:: default
 
@@ -235,7 +265,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  15.776 seconds)
+   **Total running time of the script:** ( 0 minutes  16.372 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multilabel_classification.py:

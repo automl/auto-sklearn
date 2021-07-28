@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Releases &#8212; AutoSklearn 0.12.7 documentation</title>
+    <title>Releases &#8212; AutoSklearn 0.13.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
@@ -55,7 +55,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.12.7</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.13.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -108,6 +108,14 @@
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
 <li><a class="reference internal" href="#">Releases</a><ul>
+<li><a class="reference internal" href="#version-0-13-0">Version 0.13.0</a><ul>
+<li><a class="reference internal" href="#contributors-v0-13-0">Contributors v0.13.0</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-12-8">Version 0.12.8</a><ul>
+<li><a class="reference internal" href="#contributors-v0-12-8">Contributors v0.12.8</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#version-0-12-7">Version 0.12.7</a><ul>
 <li><a class="reference internal" href="#contributors-v0-12-7">Contributors v0.12.7</a></li>
 </ul>
@@ -222,6 +230,52 @@
       
   <section id="releases">
 <h1>Releases<a class="headerlink" href="#releases" title="Permalink to this headline">¶</a></h1>
+<section id="version-0-13-0">
+<h2>Version 0.13.0<a class="headerlink" href="#version-0-13-0" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ADD #1100: Provide access to the callbacks of SMAC.</p></li>
+<li><p>ADD #1185: New leaderboard functionality to visualize models</p></li>
+<li><p>FIX #1133: Refer to the correct attribute in an error message.</p></li>
+<li><p>FIX #1154: Allow running Auto-sklearn on a 32-bit system.</p></li>
+<li><p>MAINT #924: Instead of passing classes for the resampling strategy one has now to pass objects.</p></li>
+<li><p>MAINT #1108: Limit the number of threads used by numpy and/or scikit-learn via <cite>threadpoolctl</cite>.</p></li>
+<li><p>MAINT #1135: Simplify internal workflow of pandas handling. This results in pandas being passed
+directly passed to scikit-learn models instead of being internally converted into a numpy array.
+However, this should neither impact the behavior nor the performance of Auto-sklearn.</p></li>
+<li><p>MAINT #1157: Drop support for Python 3.6, enable support for Python 3.9.</p></li>
+<li><p>MAINT #1159: Remove the output directory argument to the classifier and regressor. Despite the
+name, the output directory was not used and was a leftover from participating in the AutoML
+challenges.</p></li>
+<li><p>MAINT #1187: Bump requires SMAC version to at least 0.14.</p></li>
+<li><p>DOC #1109: Add an FAQ.</p></li>
+<li><p>DOC #1126: Add new examples on how to use scikit-learn’s inspect module.</p></li>
+<li><p>DOC #1136: Add a new example on how to perform multi-output regression.</p></li>
+<li><p>DOC #1152: Enable link checking when buiding the documentation.</p></li>
+<li><p>DOC #1158: New example on how to configure the logger for Auto-sklearn.</p></li>
+<li><p>DOC #1165: Improve the readme page.</p></li>
+</ul>
+<section id="contributors-v0-13-0">
+<h3>Contributors v0.13.0<a class="headerlink" href="#contributors-v0-13-0" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Matthias Feurer</p></li>
+<li><p>Eddie Bergman</p></li>
+<li><p>bitsbuffer</p></li>
+<li><p>Francisco Rivera Valverde</p></li>
+</ul>
+</section>
+</section>
+<section id="version-0-12-8">
+<h2>Version 0.12.8<a class="headerlink" href="#version-0-12-8" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>MAINT #1183: Introduce an upper bound on the dask version to retain compatibility with SMAC3.</p></li>
+</ul>
+<section id="contributors-v0-12-8">
+<h3>Contributors v0.12.8<a class="headerlink" href="#contributors-v0-12-8" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Eddie Bergman</p></li>
+</ul>
+</section>
+</section>
 <section id="version-0-12-7">
 <h2>Version 0.12.7<a class="headerlink" href="#version-0-12-7" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -238,6 +292,16 @@ days it then closes the issue.</p></li>
 </ul>
 <section id="contributors-v0-12-7">
 <h3>Contributors v0.12.7<a class="headerlink" href="#contributors-v0-12-7" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Francisco Rivera Valverde</p></li>
+<li><p>Matthias Feurer</p></li>
+<li><p>JJ Ben-Joseph</p></li>
+<li><p>Isaac Chung</p></li>
+<li><p>Katharina Eggensperger</p></li>
+<li><p>bitsbuffer</p></li>
+<li><p>Eddie Bergman</p></li>
+<li><p>olehb007</p></li>
+</ul>
 </section>
 </section>
 <section id="version-0-12-6">

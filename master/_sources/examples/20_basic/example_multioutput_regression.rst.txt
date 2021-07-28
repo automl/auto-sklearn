@@ -101,10 +101,40 @@ Build and fit a regressor
 
 .. GENERATED FROM PYTHON SOURCE LINES 39-41
 
+View the models found by auto-sklearn
+=====================================
+
+.. GENERATED FROM PYTHON SOURCE LINES 41-45
+
+.. code-block:: default
+
+
+    print(automl.leaderboard())
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+              rank  ensemble_weight              type          cost  duration
+    model_id                                                                 
+    21           1              1.0  gaussian_process  1.684366e-09  3.791864
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 46-48
+
 Print the final ensemble constructed by auto-sklearn
 ====================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 41-44
+.. GENERATED FROM PYTHON SOURCE LINES 48-51
 
 .. code-block:: default
 
@@ -121,7 +151,7 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    [(1.000000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'feature_agglomeration', 'regressor:__choice__': 'gaussian_process', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.027922790202894097, 'feature_preprocessor:feature_agglomeration:affinity': 'manhattan', 'feature_preprocessor:feature_agglomeration:linkage': 'complete', 'feature_preprocessor:feature_agglomeration:n_clusters': 256, 'feature_preprocessor:feature_agglomeration:pooling_func': 'max', 'regressor:gaussian_process:alpha': 1.0095703081748996e-09, 'regressor:gaussian_process:thetaL': 0.00010418956209399766, 'regressor:gaussian_process:thetaU': 260.37056388828114},
+    [(1.000000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'extra_trees_preproc_for_regression', 'regressor:__choice__': 'gaussian_process', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.18167586527508778, 'feature_preprocessor:extra_trees_preproc_for_regression:bootstrap': 'False', 'feature_preprocessor:extra_trees_preproc_for_regression:criterion': 'friedman_mse', 'feature_preprocessor:extra_trees_preproc_for_regression:max_depth': 'None', 'feature_preprocessor:extra_trees_preproc_for_regression:max_features': 0.625703658407829, 'feature_preprocessor:extra_trees_preproc_for_regression:max_leaf_nodes': 'None', 'feature_preprocessor:extra_trees_preproc_for_regression:min_samples_leaf': 3, 'feature_preprocessor:extra_trees_preproc_for_regression:min_samples_split': 6, 'feature_preprocessor:extra_trees_preproc_for_regression:min_weight_fraction_leaf': 0.0, 'feature_preprocessor:extra_trees_preproc_for_regression:n_estimators': 100, 'regressor:gaussian_process:alpha': 1.7321018721389234e-12, 'regressor:gaussian_process:thetaL': 1.5254266117678173e-09, 'regressor:gaussian_process:thetaU': 13.818317415428846},
     dataset_properties={
       'task': 5,
       'sparse': False,
@@ -133,12 +163,12 @@ Print the final ensemble constructed by auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-47
+.. GENERATED FROM PYTHON SOURCE LINES 52-54
 
 Get the Score of the final ensemble
 ===================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 47-51
+.. GENERATED FROM PYTHON SOURCE LINES 54-58
 
 .. code-block:: default
 
@@ -156,17 +186,17 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.9999999824719777
+    R2 score: 0.9999999999338843
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 52-54
+.. GENERATED FROM PYTHON SOURCE LINES 59-61
 
 Get the configuration space
 ===========================
 
-.. GENERATED FROM PYTHON SOURCE LINES 54-57
+.. GENERATED FROM PYTHON SOURCE LINES 61-64
 
 .. code-block:: default
 
@@ -374,7 +404,7 @@ Get the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  56.863 seconds)
+   **Total running time of the script:** ( 2 minutes  7.329 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multioutput_regression.py:
