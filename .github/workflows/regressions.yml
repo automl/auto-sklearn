@@ -50,7 +50,7 @@ jobs:
 
       - name: Update Comment
         id: update_comment
-        if: ^
+        if: >
           github.event_name == 'pull_request'
           && steps.create_comment.oututs.comment-id != ''
         uses: peter-evans/create-or-update-comment@v1
