@@ -20,16 +20,19 @@ jobs:
     if: >
       github.event_name == 'workflow_dispatch'
       || (
-        github.event.action == 'labeled'
+        github.event_name == 'pull_request'
+        && github.event.action == 'labeled'
         && github.event.label.name == 'regression-tests'
       )
+
     steps:
-      - name: Set Env
-        id: set_env
+      - name: Debug
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
           echo "$GITHUB_CONTEXT"
+          pwd
+          ls -a
 
       - name: Create comment
         id: create_comment
@@ -45,29 +48,57 @@ jobs:
             * **Branch** ${{ github.event.pull_request.head.ref }}
             * **Commit** ${{ github.event.pull_request.head.sha }}
 
-            The results will be show here once complete but in the meantime,
-            you can check the progress [here](https://github.com/eddiebergman/auto-sklearn/actions/runs/${{ github.run_id }}).
+            [Progress and Artifacts](https://github.com/eddiebergman/auto-sklearn/actions/runs/${{ github.run_id }})
 
+            A summary of the results will be show in this comment once complete but the full results will be available once complete.
 
       - name: Run Regression Tests
+        id: regression_tests
+        env:
+          out_filename: benchmark_output.txt
         run: |
-          echo "Run regressions >> results.txt"
+          echo "Run regressions" >> $out_filename
+          echo "::set-output name=filepath::$(pwd)/$out_filename"
+          # outputs:
+          #   filepath: path to the results of running the PR on the benchmark
 
       - name: Generate Results
+        id: generate_results
+        env:
+          out_filename: results.txt
+          benchmark_path: ${{ steps.regression_tests.outputs.filepath }}
         run: |
-          echo "Generate results >> results.txt"
+          echo "\nResults\n" > $out_filename
+          cat $benchmark_path >> $out_filename
+
+          echo "::set-output name=filepath::$(pwd)/$out_filename"
+          # outputs:
+          #   filepath: path to the results of regression test vs baseline
+
+      - name: Upload Results as Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: results
+          path: |
+            ${{ steps.generate_results.outputs.filepath }}
+            ${{ steps.regression_tests.outputs.filepath }}
+          retention-days: 1
 
       - name: Create Comment Body
         id: results_for_comment
         if: >
           github.event_name == 'pull_request'
           && steps.create_comment.outputs.comment-id != ''
+        env:
+          results_path: ${{ steps.generate_results.filepath }}
         run: |
           body="\n**Results**\n$(cat results.txt)
           body="${body//'%'/'%25'}"
           body="${body//$'\n'/'%0A'}"
           body="${body//$'\r'/'%0D'}" 
           echo ::set-output name=body::$body
+          # outputs:
+          #   body: the body of the comment update
 
       - name: Update Comment
         id: update_comment
@@ -78,11 +109,3 @@ jobs:
         with:
           comment-id: ${{ steps.create_comment.outputs.comment-id }}
           body: ${{ steps.results_for_comment.outputs.body }}
-
-      - name: Upload Results as Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: results
-          path: results.txt
-          retention-days: 1
-
