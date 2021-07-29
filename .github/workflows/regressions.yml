@@ -51,8 +51,23 @@ jobs:
 
       - name: Run Regression Tests
         run: |
-          echo "hello world"
-          echo "${{ steps.create_comment.outputs.comment-id }}"
+          echo "Run regressions >> results.txt"
+
+      - name: Generate Results
+        run: |
+          echo "Generate results >> results.txt"
+
+      - name: Create Comment Body
+        id: results_for_comment
+        if: >
+          github.event_name == 'pull_request'
+          && steps.create_comment.outputs.comment-id != ''
+        run: |
+          body="\n**Results**\n$(cat results.txt)
+          body="${body//'%'/'%25'}"
+          body="${body//$'\n'/'%0A'}"
+          body="${body//$'\r'/'%0D'}" 
+          echo ::set-output name=body::$body
 
       - name: Update Comment
         id: update_comment
@@ -62,13 +77,12 @@ jobs:
         uses: peter-evans/create-or-update-comment@v1
         with:
           comment-id: ${{ steps.create_comment.outputs.comment-id }}
-          body: |
+          body: ${{ steps.results_for_comment.outputs.body }}
 
-            success?
-            ...maybe
+      - name: Upload Results as Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: results
+          path: results.txt
+          retention-days: 1
 
-      - name: Tet
-        id: me
-        if: steps.create_comment.oututs.comment-id != ''
-        run: |
-          echo "success?"
