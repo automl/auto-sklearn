@@ -12,6 +12,17 @@ on:
   pull_request:
     types: [labeled]
 
+env:
+  AUTOMLBENCHMARK_REPO: 'openml/automlbenchmark'
+  AUTOMLBENCHMARK_REF: 'master'
+  AUTOMLBENCHMARK_PATH: 'automlbenchmark'
+  PYTHON_COMPARE_BRANCH: 'master'
+  PYTHON_COMPARE_URL: '.github/workflows/dist.yml'
+  BASELINE_BRANCH: 'master'
+  BASELINE_URL: '.github/workflows/dist.yml'
+  GITHUB_URL: 'https://github.com'
+  GITHUB_RAW_URL: 'https://raw.githubusercontent.com'
+
 jobs:
 
   run-regression-tests-labeled:
@@ -48,41 +59,83 @@ jobs:
             * **Branch** ${{ github.event.pull_request.head.ref }}
             * **Commit** ${{ github.event.pull_request.head.sha }}
 
-            [Progress and Artifacts](https://github.com/eddiebergman/auto-sklearn/actions/runs/${{ github.run_id }})
+            [Progress and Artifacts](${{ env.GITHUB_URL }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
             A summary of the results will be show in this comment once complete but the full results will be available once complete.
 
+      - name: Setup Python 3.9.6
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
 
-      - name: Run Regression Tests
-        id: regression_tests
-        env:
-          out_filename: benchmark_output.txt
+      - name: Checkout Automlbenchmark
+        uses: actions/checkout@v2
+        with:
+          repo: ${{ env.AUTOMLBENCHMARK_REPO }}
+          path: ${{ env.AUTOMLBENCHMARK_PATH }}
+          ref: ${{ env.AUTOMLBENCHMARK_REF }}
+
+      - name: Install Automlbenchmark
+        working-directory: $AUTOMLBENCHMARK_PATH
         run: |
-          echo "Run regressions" >> $out_filename
-          echo "::set-output name=filepath::$(pwd)/$out_filename"
-          # outputs:
-          #   filepath: path to the results of running the PR on the benchmark
+          python -m pip install --upgrade pip
+          pip install -e .[test]
 
-      - name: Generate Results
-        id: generate_results
+      - name: Start benchmark
+        id: benchmark
+        working-directory: $AUTOMLBENCHMARK_PATH
         env:
-          out_filename: results.txt
-          benchmark_path: ${{ steps.regression_tests.outputs.filepath }}
+          COMMIT_REF: ${{ github.event.pull_request.head.sha }}
         run: |
-          echo "\nResults\n" > $out_filename
-          cat $benchmark_path >> $out_filename
-
-          echo "::set-output name=filepath::$(pwd)/$out_filename"
+          python runbenchmark.py \
+            -f autosklearn:${COMMIT_REF} \
+            --fold 0 \
+            --task Australian \
+            --run_mode single
+          echo "::set-output name=results_path::$(pwd)/results/results.csv"
           # outputs:
-          #   filepath: path to the results of regression test vs baseline
+          #   results_path: path to the results of the benchmark
+
+      - name: Fetch the Python Script and Baseline from the Repo
+        id: fetch
+        env:
+          pyscript_url: ${{ env.GITHUB_RAW_URL }}/${{github.repository}}/${{ env.PYTHON_COMPARE_BRANCH}}/${{ env.PYTHON_COMPARE_URL }}
+          baseline_url: ${{ env.GITHUB_RAW_URL }}/${{github.repository}}/${{ env.BASELINE_BRANCH }}/${{ env.BASELINE_URL }}
+          baseline_to: 'baseline.csv'
+          pyscript_to: 'compare.py'
+        run: |
+          wget $pyscript_url -O $pyscript_to
+          wget $baseline_url -O $baseline_url
+
+          echo "::set-output name=pyscript::$(pwd)/${pyscript_to}"
+          echo "::set-output name=baseline::$(pwd)/${baseline_to}"
+          # outpts:
+          #   pyscript: path to the pyscript
+          #   baseline: path to the baseline
+
+      - name: Run comparison
+        id: compare
+        env:
+          pyscript_path: ${{ steps.fetch.outputs.pyscript }}
+          baseline_path: ${{ steps.fetch.outputs.baseline }}
+          results_path: ${{ steps.regression_tests.outputs.results_path}}
+          filename: comparisons.csv
+        run: |
+          # python $pyscript_path --baseline $baseline_path --results $results_path --to $filename
+          echo "success" > $filename
+          cat $pyscript_path >> $filename
+          cat $baseline_path >> $filename
+          cat $results_path >> $filename
+          echo "::set-output name=comparisons_path::$(pwd)/$filename"
+          # outputs:
+          #   comparisons_path: path to the results of regression test vs baseline
 
       - name: Upload Results as Artifact
         uses: actions/upload-artifact@v2
         with:
           name: results
           path: |
-            ${{ steps.generate_results.outputs.filepath }}
-            ${{ steps.regression_tests.outputs.filepath }}
+            ${{ steps.compare.outputs.comparisons_path }}
           retention-days: 1
 
       - name: Create Comment Body
@@ -91,9 +144,9 @@ jobs:
           github.event_name == 'pull_request'
           && steps.create_comment.outputs.comment-id != ''
         env:
-          results_path: ${{ steps.generate_results.filepath }}
+          results_path: ${{ steps.compare.outputs.comparisons_path }}
         run: |
-          body="\n**Results**\n$(cat results.txt)
+          body="\n**Results**\n$(cat $results_path)
           body="${body//'%'/'%25'}"
           body="${body//$'\n'/'%0A'}"
           body="${body//$'\r'/'%0D'}" 
