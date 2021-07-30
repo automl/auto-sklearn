@@ -118,6 +118,7 @@ jobs:
           results_path: ${{ steps.benchmark.outputs.results_path}}
           filename: comparisons.csv
         run: |
+          pip install pandas
           python $pyscript_path $results_path $baseline_path $filename
           echo "::set-output name=comparisons_path::$(pwd)/$filename"
           # outputs:
