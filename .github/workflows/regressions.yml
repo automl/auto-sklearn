@@ -81,8 +81,8 @@ jobs:
       - name: Fetch the Python Script and Baseline from the Repo
         id: fetch
         env:
-          pyscript_url: ${{ env.GITHUB_RAW_URL }}/${{github.repository}}/${{ env.PYTHON_COMPARE_BRANCH}}/${{ env.PYTHON_COMPARE_URL }}
-          baseline_url: ${{ env.GITHUB_RAW_URL }}/${{github.repository}}/${{ env.BASELINE_BRANCH }}/${{ env.BASELINE_URL }}
+          pyscript_url: ${{ env.GITHUB_RAW_URL }}/${{github.repository}}/${{ env.PYTHON_COMPARE_BRANCH}}/${{env.PYTHON_COMPARE_URL}}
+          baseline_url: ${{ env.GITHUB_RAW_URL }}/${{github.repository}}/${{ env.BASELINE_BRANCH }}/${{env.BASELINE_URL}}
           baseline_to: 'baseline.csv'
           pyscript_to: 'compare.py'
         run: |
