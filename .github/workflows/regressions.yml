@@ -87,8 +87,7 @@ jobs:
           pyscript_to: 'compare.py'
         run: |
           wget $pyscript_url -O $pyscript_to
-          wget $baseline_url -O $baseline_url
-
+          wget $baseline_url -O $baseline_to
           echo "::set-output name=pyscript::$(pwd)/${pyscript_to}"
           echo "::set-output name=baseline::$(pwd)/${baseline_to}"
           # outpts:
