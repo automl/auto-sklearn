@@ -75,10 +75,8 @@ jobs:
 
       - name: Install Automlbenchmark
         run: |
-          pwd
-          ls -a
           python -m pip install --upgrade pip
-          pip install -e .[test]
+          pip install -r requirements.txt
 
       - name: Start benchmark
         id: benchmark
