@@ -78,20 +78,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Start benchmark
-        id: benchmark
-        env:
-          COMMIT_REF: ${{ github.event.pull_request.head.sha }}
-        run: |
-          python runbenchmark.py \
-            -f autosklearn:${COMMIT_REF} \
-            --fold 0 \
-            --task Australian \
-            --run_mode single
-          echo "::set-output name=results_path::$(pwd)/results/results.csv"
-          # outputs:
-          #   results_path: path to the results of the benchmark
-
       - name: Fetch the Python Script and Baseline from the Repo
         id: fetch
         env:
@@ -108,6 +94,18 @@ jobs:
           # outpts:
           #   pyscript: path to the pyscript
           #   baseline: path to the baseline
+
+      - name: Start benchmark
+        id: benchmark
+        env:
+          COMMIT_REF: ${{ github.event.pull_request.head.sha }}
+          BENCHMARK_ARGS: >-
+            autosklearn test -t iris
+        run: |
+          python runbenchmark.py $BENCHMARK_ARGS
+          echo "::set-output name=results_path::$(pwd)/results/results.csv"
+          # outputs:
+          #   results_path: path to the results of the benchmark
 
       - name: Run comparison
         id: compare
