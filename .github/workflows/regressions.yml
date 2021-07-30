@@ -118,12 +118,7 @@ jobs:
           results_path: ${{ steps.benchmark.outputs.results_path}}
           filename: comparisons.csv
         run: |
-          # python $pyscript_path --baseline $baseline_path --results $results_path --to $filename
-          echo "success" > $filename
-          cat $pyscript_path >> $filename
-          cat $baseline_path >> $filename
-          cat $results_path >> $filename
-          echo "::set-output name=comparisons_path::$(pwd)/$filename"
+          python $pyscript_path $results_path $baseline_path $filename
           # outputs:
           #   comparisons_path: path to the results of regression test vs baseline
 
