@@ -21,7 +21,7 @@ baseline = pd.read_csv(sys.argv[2])
 # Just to show it works
 results['acc'] = results['acc'].apply(lambda x: x + 100)
 
-comparisons = pd.Dataframe({
+comparisons = pd.DataFrame({
     'task': list(baseline['task']),
     'fold': list(baseline['fold']),
     'seed': list(baseline['seed']),
