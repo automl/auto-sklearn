@@ -16,9 +16,9 @@ env:
   AUTOMLBENCHMARK_REPO: 'openml/automlbenchmark'
   AUTOMLBENCHMARK_REF: 'master'
   PYTHON_COMPARE_BRANCH: 'master'
-  PYTHON_COMPARE_URL: '.github/workflows/dist.yml'
+  PYTHON_COMPARE_URL: '.github/workflows/compare.py'
   BASELINE_BRANCH: 'master'
-  BASELINE_URL: '.github/workflows/dist.yml'
+  BASELINE_URL: '.github/workflows/baseline.csv'
   GITHUB_URL: 'https://github.com'
   GITHUB_RAW_URL: 'https://raw.githubusercontent.com'
 
