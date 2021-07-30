@@ -71,13 +71,15 @@ jobs:
       - name: Checkout Automlbenchmark
         uses: actions/checkout@v2
         with:
-          repo: ${{ env.AUTOMLBENCHMARK_REPO }}
+          repository: ${{ env.AUTOMLBENCHMARK_REPO }}
           path: ${{ env.AUTOMLBENCHMARK_PATH }}
           ref: ${{ env.AUTOMLBENCHMARK_REF }}
 
       - name: Install Automlbenchmark
         working-directory: $AUTOMLBENCHMARK_PATH
         run: |
+          pwd
+          ls -a
           python -m pip install --upgrade pip
           pip install -e .[test]
 
