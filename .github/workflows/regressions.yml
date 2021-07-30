@@ -62,22 +62,6 @@ jobs:
 
             A summary of the results will be show in this comment once complete but the full results will be available once complete.
 
-      - name: Setup Python 3.9.6
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-
-      - name: Checkout Automlbenchmark
-        uses: actions/checkout@v2
-        with:
-          repository: ${{ env.AUTOMLBENCHMARK_REPO }}
-          ref: ${{ env.AUTOMLBENCHMARK_REF }}
-
-      - name: Install Automlbenchmark
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
       - name: Fetch the Python Script and Baseline from the Repo
         id: fetch
         env:
@@ -94,6 +78,22 @@ jobs:
           #   pyscript: path to the pyscript
           #   baseline: path to the baseline
 
+      - name: Setup Python 3.9.6
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Checkout Automlbenchmark
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ env.AUTOMLBENCHMARK_REPO }}
+          ref: ${{ env.AUTOMLBENCHMARK_REF }}
+
+      - name: Install Automlbenchmark
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
       - name: Start benchmark
         id: benchmark
         env:
@@ -102,6 +102,9 @@ jobs:
             autosklearn test -t iris
         run: |
           python runbenchmark.py $BENCHMARK_ARGS
+          ls
+          ls results
+          cat results/results.csv
           echo "::set-output name=results_path::$(pwd)/results/results.csv"
           # outputs:
           #   results_path: path to the results of the benchmark
@@ -111,7 +114,7 @@ jobs:
         env:
           pyscript_path: ${{ steps.fetch.outputs.pyscript }}
           baseline_path: ${{ steps.fetch.outputs.baseline }}
-          results_path: ${{ steps.regression_tests.outputs.results_path}}
+          results_path: ${{ steps.benchmark.outputs.results_path}}
           filename: comparisons.csv
         run: |
           # python $pyscript_path --baseline $baseline_path --results $results_path --to $filename
