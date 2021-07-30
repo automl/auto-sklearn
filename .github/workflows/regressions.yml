@@ -62,21 +62,6 @@ jobs:
 
             A summary of the results will be show in this comment once complete but the full results will be available once complete.
 
-      - name: Fetch the Python Script and Baseline from the Repo
-        id: fetch
-        env:
-          pyscript_url: ${{ env.GITHUB_RAW_URL }}/${{github.repository}}/${{ env.PYTHON_COMPARE_BRANCH}}/${{env.PYTHON_COMPARE_URL}}
-          baseline_url: ${{ env.GITHUB_RAW_URL }}/${{github.repository}}/${{ env.BASELINE_BRANCH }}/${{env.BASELINE_URL}}
-          baseline_to: 'baseline.csv'
-          pyscript_to: 'compare.py'
-        run: |
-          wget $pyscript_url -O $pyscript_to
-          wget $baseline_url -O $baseline_to
-          echo "::set-output name=pyscript::$(pwd)/${pyscript_to}"
-          echo "::set-output name=baseline::$(pwd)/${baseline_to}"
-          # outpts:
-          #   pyscript: path to the pyscript
-          #   baseline: path to the baseline
 
       - name: Setup Python 3.9.6
         uses: actions/setup-python@v2
@@ -108,6 +93,22 @@ jobs:
           echo "::set-output name=results_path::$(pwd)/results/results.csv"
           # outputs:
           #   results_path: path to the results of the benchmark
+
+      - name: Fetch the Python Script and Baseline from the Repo
+        id: fetch
+        env:
+          pyscript_url: ${{ env.GITHUB_RAW_URL }}/${{github.repository}}/${{ env.PYTHON_COMPARE_BRANCH}}/${{env.PYTHON_COMPARE_URL}}
+          baseline_url: ${{ env.GITHUB_RAW_URL }}/${{github.repository}}/${{ env.BASELINE_BRANCH }}/${{env.BASELINE_URL}}
+          baseline_to: 'baseline.csv'
+          pyscript_to: 'compare.py'
+        run: |
+          wget $pyscript_url -O $pyscript_to
+          wget $baseline_url -O $baseline_to
+          echo "::set-output name=pyscript::$(pwd)/${pyscript_to}"
+          echo "::set-output name=baseline::$(pwd)/${baseline_to}"
+          # outpts:
+          #   pyscript: path to the pyscript
+          #   baseline: path to the baseline
 
       - name: Run comparison
         id: compare
