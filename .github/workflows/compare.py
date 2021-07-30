@@ -30,5 +30,5 @@ comparisons = pd.DataFrame({
     ),
 })
 
-comparisons.to_csv(path=sys.argv[3])
+comparisons.to_csv(sys.argv[3])
 
