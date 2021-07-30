@@ -336,7 +336,7 @@ memory or time limit, please increase the respective limit and rerun the optimiz
 scikit-learn uses two modes of parallelizing computations:</p>
 <ol class="arabic simple">
 <li><p>By using joblib to distribute independent function calls on multiple cores.</p></li>
-<li><p>By using lower level libraries such as OpenML and numpy to distribute more fine-grained
+<li><p>By using lower level libraries such as OpenMP and numpy to distribute more fine-grained
 computation.</p></li>
 </ol>
 <p>This means that Auto-sklearn can use more resources than expected by the user. For technical
@@ -347,7 +347,7 @@ adjust this, but when using a compute cluster it is necessary to align the paral
 with the number of requested CPUs). This can be done by setting the following environment
 variables: <code class="docutils literal notranslate"><span class="pre">MKL_NUM_THREADS</span></code>, <code class="docutils literal notranslate"><span class="pre">OPENBLAS_NUM_THREADS</span></code>, <code class="docutils literal notranslate"><span class="pre">BLIS_NUM_THREADS</span></code> and
 <code class="docutils literal notranslate"><span class="pre">OMP_NUM_THREADS</span></code>.</p>
-<p>More details can be found in the <cite>scikit-learn docs &lt;https://scikit-learn.org/stable/computing/parallelism.html?highlight=joblib#parallelism&gt;</cite></p>
+<p>More details can be found in the <a class="reference external" href="https://scikit-learn.org/stable/computing/parallelism.html?highlight=joblib#parallelism">scikit-learn docs</a>.</p>
 </section>
 </section>
 <section id="meta-learning">
@@ -357,7 +357,7 @@ variables: <code class="docutils literal notranslate"><span class="pre">MKL_NUM_
 <p>We updated the list of datasets used for meta-learning several times and this list now differs
 significantly from the original 140 datasets we used in 2015 when the paper and the package were
 released. An up-to-date list of <a class="reference external" href="https://docs.openml.org/#tasks">OpenML task IDs</a> can be found
-on <a class="reference external" href="https://github.com/automl/auto-sklearn/blob/master/scripts/update_metadata_util.py">github</a></p>
+on <a class="reference external" href="https://github.com/automl/auto-sklearn/blob/master/scripts/update_metadata_util.py">github</a>.</p>
 </section>
 <section id="how-can-datasets-from-the-meta-data-be-excluded">
 <h3>How can datasets from the meta-data be excluded?<a class="headerlink" href="#how-can-datasets-from-the-meta-data-be-excluded" title="Permalink to this headline">¶</a></h3>

@@ -122,11 +122,9 @@ View the models found by auto-sklearn
 
  .. code-block:: none
 
-              rank  ensemble_weight                 type      cost  duration
-    model_id                                                                
-    2            1             0.88        random_forest  0.134039  2.538830
-    17           2             0.02          extra_trees  0.172699  1.284385
-    3            3             0.10  k_nearest_neighbors  0.405286  0.447854
+              rank  ensemble_weight              type          cost  duration
+    model_id                                                                 
+    27           1              1.0  gaussian_process  1.628666e-10  2.862413
 
 
 
@@ -153,21 +151,7 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    [(0.880000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'regressor:random_forest:bootstrap': 'True', 'regressor:random_forest:criterion': 'mse', 'regressor:random_forest:max_depth': 'None', 'regressor:random_forest:max_features': 1.0, 'regressor:random_forest:max_leaf_nodes': 'None', 'regressor:random_forest:min_impurity_decrease': 0.0, 'regressor:random_forest:min_samples_leaf': 1, 'regressor:random_forest:min_samples_split': 2, 'regressor:random_forest:min_weight_fraction_leaf': 0.0},
-    dataset_properties={
-      'task': 5,
-      'sparse': False,
-      'multioutput': True,
-      'target_type': 'regression',
-      'signed': False})),
-    (0.100000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'k_nearest_neighbors', 'feature_preprocessor:polynomial:degree': 3, 'feature_preprocessor:polynomial:include_bias': 'True', 'feature_preprocessor:polynomial:interaction_only': 'False', 'regressor:k_nearest_neighbors:n_neighbors': 1, 'regressor:k_nearest_neighbors:p': 2, 'regressor:k_nearest_neighbors:weights': 'distance'},
-    dataset_properties={
-      'task': 5,
-      'sparse': False,
-      'multioutput': True,
-      'target_type': 'regression',
-      'signed': False})),
-    (0.020000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'extra_trees', 'regressor:extra_trees:bootstrap': 'False', 'regressor:extra_trees:criterion': 'friedman_mse', 'regressor:extra_trees:max_depth': 'None', 'regressor:extra_trees:max_features': 0.9914064482705816, 'regressor:extra_trees:max_leaf_nodes': 'None', 'regressor:extra_trees:min_impurity_decrease': 0.0, 'regressor:extra_trees:min_samples_leaf': 4, 'regressor:extra_trees:min_samples_split': 2, 'regressor:extra_trees:min_weight_fraction_leaf': 0.0},
+    [(1.000000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'feature_preprocessor:__choice__': 'extra_trees_preproc_for_regression', 'regressor:__choice__': 'gaussian_process', 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max': 0.7432258253641646, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min': 0.12896828326667173, 'feature_preprocessor:extra_trees_preproc_for_regression:bootstrap': 'True', 'feature_preprocessor:extra_trees_preproc_for_regression:criterion': 'mse', 'feature_preprocessor:extra_trees_preproc_for_regression:max_depth': 'None', 'feature_preprocessor:extra_trees_preproc_for_regression:max_features': 0.9318160181923308, 'feature_preprocessor:extra_trees_preproc_for_regression:max_leaf_nodes': 'None', 'feature_preprocessor:extra_trees_preproc_for_regression:min_samples_leaf': 13, 'feature_preprocessor:extra_trees_preproc_for_regression:min_samples_split': 13, 'feature_preprocessor:extra_trees_preproc_for_regression:min_weight_fraction_leaf': 0.0, 'feature_preprocessor:extra_trees_preproc_for_regression:n_estimators': 100, 'regressor:gaussian_process:alpha': 1.3899476021714937e-12, 'regressor:gaussian_process:thetaL': 2.3506349608668528e-05, 'regressor:gaussian_process:thetaU': 71.59558675211053},
     dataset_properties={
       'task': 5,
       'sparse': False,
@@ -202,7 +186,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.8635988561696383
+    R2 score: 0.9999999999175478
 
 
 
@@ -420,7 +404,7 @@ Get the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  0.281 seconds)
+   **Total running time of the script:** ( 1 minutes  56.684 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multioutput_regression.py:
