@@ -141,10 +141,10 @@ jobs:
         env:
           results_path: ${{ steps.compare.outputs.comparisons_path }}
         run: |
-          body="\n**Results**\n$(cat $results_path)
+          body="\n**Results**\n$(cat $results_path)"
           body="${body//'%'/'%25'}"
           body="${body//$'\n'/'%0A'}"
-          body="${body//$'\r'/'%0D'}" 
+          body="${body//$'\r'/'%0D'}"
           echo ::set-output name=body::$body
           # outputs:
           #   body: the body of the comment update
