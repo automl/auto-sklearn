@@ -1,8 +1,11 @@
+from typing import Type
+
 import copy
 import glob
 import importlib
 import os
 import inspect
+import itertools
 import pickle
 import re
 import sys
@@ -29,9 +32,9 @@ from autosklearn.data.validation import InputValidator
 import autosklearn.pipeline.util as putil
 from autosklearn.ensemble_builder import MODEL_FN_RE
 import autosklearn.estimators  # noqa F401
-from autosklearn.estimators import AutoSklearnEstimator
-from autosklearn.classification import AutoSklearnClassifier
-from autosklearn.regression import AutoSklearnRegressor
+from autosklearn.estimators import (
+    AutoSklearnEstimator, AutoSklearnRegressor, AutoSklearnClassifier
+)
 from autosklearn.metrics import accuracy, f1_macro, mean_squared_error, r2
 from autosklearn.automl import AutoMLClassifier
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier
@@ -315,6 +318,131 @@ def test_cv_results(tmp_dir):
     # Comply with https://scikit-learn.org/dev/glossary.html#term-classes
     is_classifier(cls)
     assert hasattr(cls, 'classes_')
+
+
+@pytest.mark.parametrize('estimator_type,dataset_name', [
+    (AutoSklearnClassifier, 'iris'),
+    (AutoSklearnRegressor, 'boston')
+])
+def test_leaderboard(
+    tmp_dir: str,
+    estimator_type: Type[AutoSklearnEstimator],
+    dataset_name: str
+):
+    # Comprehensive test tasks a substantial amount of time, manually set if
+    # required.
+    MAX_COMBO_SIZE_FOR_INCLUDE_PARAM = 3  # [0, len(valid_columns) + 1]
+    column_types = AutoSklearnEstimator._leaderboard_columns()
+
+    # Create a dict of all possible param values for each param
+    # with some invalid one's of the incorrect type
+    include_combinations = itertools.chain(
+        itertools.combinations(column_types['all'], item_count)
+        for item_count in range(1, MAX_COMBO_SIZE_FOR_INCLUDE_PARAM)
+    )
+    valid_params = {
+        'detailed': [True, False],
+        'ensemble_only': [True, False],
+        'top_k': [-10, 0, 1, 10, 'all'],
+        'sort_by': [*column_types['all'], 'invalid'],
+        'sort_order': ['ascending', 'descending', 'auto', 'invalid', None],
+        'include': itertools.chain([None, 'invalid', 'type'], include_combinations),
+    }
+
+    # Create a generator of all possible combinations of valid_params
+    params_generator = iter(
+        dict(zip(valid_params.keys(), param_values))
+        for param_values in itertools.product(*valid_params.values())
+    )
+
+    X_train, Y_train, _, _ = putil.get_dataset(dataset_name)
+    model = estimator_type(
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        tmp_folder=tmp_dir,
+        seed=1
+    )
+    model.fit(X_train, Y_train)
+
+    for params in params_generator:
+        # Convert from iterator to solid list
+        if params['include'] is not None and not isinstance(params['include'], str):
+            params['include'] = list(params['include'])
+
+        # Invalid top_k should raise an error, is a positive int or 'all'
+        if not (params['top_k'] == 'all' or params['top_k'] > 0):
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # Invalid sort_by column
+        elif params['sort_by'] not in column_types['all']:
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # Shouldn't accept an invalid sort order
+        elif params['sort_order'] not in ['ascending', 'descending', 'auto']:
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # include is single str but not valid
+        elif (
+            isinstance(params['include'], str)
+            and params['include'] not in column_types['all']
+        ):
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # Crash if include is list but contains invalid column
+        elif (
+            isinstance(params['include'], list)
+            and len(set(params['include']) - set(column_types['all'])) != 0
+        ):
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # Can't have just model_id, in both single str and list case
+        elif (
+            params['include'] == 'model_id'
+            or params['include'] == ['model_id']
+        ):
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # Else all valid combinations should be validated
+        else:
+            leaderboard = model.leaderboard(**params)
+
+            # top_k should never be less than the rows given back
+            # It can however be larger
+            if isinstance(params['top_k'], int):
+                assert params['top_k'] >= len(leaderboard)
+
+            # Check the right columns are present and in the right order
+            # The model_id is set as the index, not included in pandas columns
+            columns = list(leaderboard.columns)
+
+            def exclude(lst, s):
+                return [x for x in lst if x != s]
+
+            if params['include'] is not None:
+                # Include with only single str should be the only column
+                if isinstance(params['include'], str):
+                    assert params['include'] in columns and len(columns) == 1
+                # Include as a list should have all the columns without model_id
+                else:
+                    assert columns == exclude(params['include'], 'model_id')
+            elif params['detailed']:
+                assert columns == exclude(column_types['detailed'], 'model_id')
+            else:
+                assert columns == exclude(column_types['simple'], 'model_id')
+
+            # Ensure that if it's ensemble only
+            # Can only check if 'ensemble_weight' is present
+            if (
+                params['ensemble_only']
+                and 'ensemble_weight' in columns
+            ):
+                assert all(leaderboard['ensemble_weight'] > 0)
 
 
 @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.build_automl')
@@ -675,13 +803,18 @@ def test_selector_file_askl2_can_be_created(selector_path):
                 importlib.reload(autosklearn.experimental.askl2)
         else:
             importlib.reload(autosklearn.experimental.askl2)
-            assert os.path.exists(autosklearn.experimental.askl2.selector_file)
-            if selector_path is None or not os.access(selector_path, os.W_OK):
-                # We default to home in worst case
-                assert os.path.expanduser("~") in str(autosklearn.experimental.askl2.selector_file)
-            else:
-                # a dir provided via XDG_CACHE_HOME
-                assert selector_path in str(autosklearn.experimental.askl2.selector_file)
+            for metric in autosklearn.experimental.askl2.metrics:
+                assert os.path.exists(autosklearn.experimental.askl2.selector_files[metric.name])
+                if selector_path is None or not os.access(selector_path, os.W_OK):
+                    # We default to home in worst case
+                    assert os.path.expanduser("~") in str(
+                        autosklearn.experimental.askl2.selector_files[metric.name]
+                    )
+                else:
+                    # a dir provided via XDG_CACHE_HOME
+                    assert selector_path in str(
+                        autosklearn.experimental.askl2.selector_files[metric.name]
+                    )
     # Re import it at the end so we do not affect other test
     importlib.reload(autosklearn.experimental.askl2)
 

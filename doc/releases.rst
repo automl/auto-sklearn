@@ -3,11 +3,79 @@
 ..
     The following command allows to retrieve all commiters since a specified
     commit. From https://stackoverflow.com/questions/6482436/list-of-authors-in-git-since-a-given-commit
-    git log 25d680d4e9520a661aae48ea4c7295c663b64df3.. --format="%aN <%aE>" --reverse | perl -e 'my %dedupe; while (<STDIN>) { print unless $dedupe{$_}++}'
+    git log 275d0d6b20d16822252d8b50bf71b1c787187f09.. --format="%aN <%aE>" --reverse | perl -e 'my %dedupe; while (<STDIN>) { print unless $dedupe{$_}++}'
 
 ========
 Releases
 ========
+
+Version 0.13.0
+==============
+
+* ADD #1100: Provide access to the callbacks of SMAC.
+* ADD #1185: New leaderboard functionality to visualize models
+* FIX #1133: Refer to the correct attribute in an error message.
+* FIX #1154: Allow running Auto-sklearn on a 32-bit system.
+* MAINT #924: Instead of passing classes for the resampling strategy one has now to pass objects.
+* MAINT #1108: Limit the number of threads used by numpy and/or scikit-learn via `threadpoolctl`.
+* MAINT #1135: Simplify internal workflow of pandas handling. This results in pandas being passed
+  directly passed to scikit-learn models instead of being internally converted into a numpy array.
+  However, this should neither impact the behavior nor the performance of Auto-sklearn.
+* MAINT #1157: Drop support for Python 3.6, enable support for Python 3.9.
+* MAINT #1159: Remove the output directory argument to the classifier and regressor. Despite the
+  name, the output directory was not used and was a leftover from participating in the AutoML
+  challenges.
+* MAINT #1187: Bump requires SMAC version to at least 0.14.
+* DOC #1109: Add an FAQ.
+* DOC #1126: Add new examples on how to use scikit-learn's inspect module.
+* DOC #1136: Add a new example on how to perform multi-output regression.
+* DOC #1152: Enable link checking when buiding the documentation.
+* DOC #1158: New example on how to configure the logger for Auto-sklearn.
+* DOC #1165: Improve the readme page.
+
+Contributors v0.13.0
+********************
+
+* Matthias Feurer
+* Eddie Bergman
+* bitsbuffer
+* Francisco Rivera Valverde
+
+Version 0.12.8
+==============
+
+* MAINT #1183: Introduce an upper bound on the dask version to retain compatibility with SMAC3.
+
+Contributors v0.12.8
+********************
+
+* Eddie Bergman
+
+Version 0.12.7
+==============
+
+* ADD #1178: Reduce precision if dataset is too large for given memory limit.
+* ADD #1179: Improve Auto-sklearn 2.0 meta-data by providing new meta-data for the metrics
+  `roc_auc` and `logloss`.
+* DOC: Fix reference to arXiv paper
+* MAINT #1134,#1142,#1143: Improvements to the stale bot - the stale bot now marks issues labeled
+  with `feedback required` as stale if there is nothing happening for 30 days. After another 7
+  days it then closes the issue.
+* MAINT: Added a new issue template for questions.
+* MAINT #1168: Upper-bound scipy to `1.6.3` as `1.7.0` is incompatible with `SMAC`.
+* MAINT #1173: Update the license files to be recognized by github.
+
+Contributors v0.12.7
+********************
+
+* Francisco Rivera Valverde
+* Matthias Feurer
+* JJ Ben-Joseph
+* Isaac Chung
+* Katharina Eggensperger
+* bitsbuffer
+* Eddie Bergman
+* olehb007
 
 Version 0.12.6
 ==============
