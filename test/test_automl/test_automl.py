@@ -660,24 +660,45 @@ def test_fail_if_feat_type_on_pandas_input(backend, dask_client):
 
 
 @pytest.mark.parametrize(
-    'memory_limit,task',
+    'memory_limit,precision,task',
     [
-        (memory_limit, task)
+        (memory_limit, precision, task)
         for task in itertools.chain(CLASSIFICATION_TASKS, REGRESSION_TASKS)
-        for memory_limit in (1, 10, None)
+        for precision in (float, np.float32, np.float64, np.float128)
+        for memory_limit in (1, 100, None)
     ]
 )
-def test_subsample_if_too_large(memory_limit, task):
+def test_subsample_if_too_large(memory_limit, precision, task):
     fixture = {
-        BINARY_CLASSIFICATION: {1: 436, 10: 569, None: 569},
-        MULTICLASS_CLASSIFICATION: {1: 204, 10: 1797, None: 1797},
-        MULTILABEL_CLASSIFICATION: {1: 204, 10: 1797, None: 1797},
-        REGRESSION: {1: 1310, 10: 1326, None: 1326},
-        MULTIOUTPUT_REGRESSION: {1: 1310, 10: 1326, None: 1326}
+        BINARY_CLASSIFICATION: {
+            1: {float: 1310, np.float32: 2621, np.float64: 1310, np.float128: 655},
+            100: {float: 12000, np.float32: 12000, np.float64: 12000, np.float128: 12000},
+            None: {float: 12000, np.float32: 12000, np.float64: 12000, np.float128: 12000},
+        },
+        MULTICLASS_CLASSIFICATION: {
+            1: {float: 204, np.float32: 409, np.float64: 204, np.float128: 102},
+            100: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
+            None: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
+        },
+        MULTILABEL_CLASSIFICATION: {
+            1: {float: 204, np.float32: 409, np.float64: 204, np.float128: 102},
+            100: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
+            None: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
+        },
+        REGRESSION: {
+            1: {float: 655, np.float32: 1310, np.float64: 655, np.float128: 327},
+            100: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
+            None: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
+        },
+        MULTIOUTPUT_REGRESSION: {
+            1: {float: 655, np.float32: 1310, np.float64: 655, np.float128: 327},
+            100: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
+            None: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
+        }
     }
     mock = unittest.mock.Mock()
     if task == BINARY_CLASSIFICATION:
-        X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
+        X, y = sklearn.datasets.make_hastie_10_2()
     elif task == MULTICLASS_CLASSIFICATION:
         X, y = sklearn.datasets.load_digits(return_X_y=True)
     elif task == MULTILABEL_CLASSIFICATION:
@@ -686,22 +707,22 @@ def test_subsample_if_too_large(memory_limit, task):
         for i, j in enumerate(y_):
             y[i, j] = 1
     elif task == REGRESSION:
-        X, y = sklearn.datasets.load_diabetes(return_X_y=True)
-        X = np.vstack((X, X, X))
-        y = np.vstack((y.reshape((-1, 1)), y.reshape((-1, 1)), y.reshape((-1, 1))))
+        X, y = sklearn.datasets.make_friedman1(n_samples=5000, n_features=20)
     elif task == MULTIOUTPUT_REGRESSION:
-        X, y = sklearn.datasets.load_diabetes(return_X_y=True)
+        X, y = sklearn.datasets.make_friedman1(n_samples=5000, n_features=20)
         y = np.vstack((y, y)).transpose()
-        X = np.vstack((X, X, X))
-        y = np.vstack((y, y, y))
     else:
         raise ValueError(task)
+    X = X.astype(precision)
 
     assert X.shape[0] == y.shape[0]
 
     X_new, y_new = AutoML.subsample_if_too_large(X, y, mock, 1, memory_limit, task)
-    assert X_new.shape[0] == fixture[task][memory_limit]
+    assert X_new.shape[0] == fixture[task][memory_limit][precision]
     if memory_limit == 1:
-        assert mock.warning.call_count == 1
+        if precision in (np.float128, np.float64, float):
+            assert mock.warning.call_count == 2
+        else:
+            assert mock.warning.call_count == 1
     else:
         assert mock.warning.call_count == 0

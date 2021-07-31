@@ -75,11 +75,10 @@ def tmp_dir(request):
 
 
 def _dir_fixture(dir_type, request):
-
     test_dir = os.path.dirname(__file__)
-    dir = os.path.join(
-        test_dir, '.%s__%s__%s' % (dir_type, request.module.__name__, request.node.name)
-    )
+
+    dirname = f".{dir_type}__{request.module.__name__}__{request.node.name}"
+    dir = os.path.join(test_dir, dirname)
 
     for i in range(10):
         if os.path.exists(dir):

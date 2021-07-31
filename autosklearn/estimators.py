@@ -1,11 +1,12 @@
 # -*- encoding: utf-8 -*-
-
-from typing import Optional, Dict, List, Tuple, Union
+from typing import Optional, Dict, List, Tuple, Union, Iterable
+from typing_extensions import Literal
 
 from ConfigSpace.configuration_space import Configuration
 import dask.distributed
 import joblib
 import numpy as np
+import pandas as pd
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.utils.multiclass import type_of_target
 from smac.runhistory.runhistory import RunInfo, RunValue
@@ -537,6 +538,280 @@ class AutoSklearnEstimator(BaseEstimator):
         str
         """
         return self.automl_.sprint_statistics()
+
+    def leaderboard(
+        self,
+        detailed: bool = False,
+        ensemble_only: bool = True,
+        top_k: Union[int, Literal['all']] = 'all',
+        sort_by: str = 'cost',
+        sort_order: Literal['auto', 'ascending', 'descending'] = 'auto',
+        include: Optional[Union[str, Iterable[str]]] = None
+    ) -> pd.DataFrame:
+        """ Returns a pandas table of results for all evaluated models.
+
+        Gives an overview of all models trained during the search process along
+        with various statistics about their training.
+
+        The availble statistics are:
+
+        **Simple**:
+
+        * ``"model_id"`` - The id given to a model by ``autosklearn``.
+        * ``"rank"`` - The rank of the model based on it's ``"cost"``.
+        * ``"ensemble_weight"`` - The weight given to the model in the ensemble.
+        * ``"type"`` - The type of classifier/regressor used.
+        * ``"cost"`` - The loss of the model on the validation set.
+        * ``"duration"`` - Length of time the model was optimized for.
+
+        **Detailed**:
+        The detailed view includes all of the simple statistics along with the
+        following.
+
+        * ``"config_id"`` - The id used by SMAC for optimization.
+        * ``"budget"`` - How much budget was allocated to this model.
+        * ``"status"`` - The return status of training the model with SMAC.
+        * ``"train_loss"`` - The loss of the model on the training set.
+        * ``"balancing_strategy"`` - The balancing strategy used for data preprocessing.
+        * ``"start_time"`` - Time the model began being optimized
+        * ``"end_time"`` - Time the model ended being optimized
+        * ``"data_preprocessors"`` - The preprocessors used on the data
+        * ``"feature_preprocessors"`` - The preprocessors for features types
+
+        Parameters
+        ----------
+        detailed: bool = False
+            Whether to give detailed information or just a simple overview.
+
+        ensemble_only: bool = True
+            Whether to view only models included in the ensemble or all models
+            trained.
+
+        top_k: int or "all" = "all"
+            How many models to display.
+
+        sort_by: str = 'cost'
+            What column to sort by. If that column is not present, the
+            sorting defaults to the ``"model_id"`` index column.
+
+        sort_order: "auto" or "ascending" or "descending" = "auto"
+            Which sort order to apply to the ``sort_by`` column. If left
+            as ``"auto"``, it will sort by a sensible default where "better" is
+            on top, otherwise defaulting to the pandas default for
+            `DataFrame.sort_values`_ if there is no obvious "better".
+
+            .. _DataFrame.sort_values: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.sort_values.html
+
+        include: Optional[str or Iterable[str]]
+            Items to include, other items not specified will be excluded.
+            The exception is the ``"model_id"`` index column which is always included.
+
+            If left as ``None``, it will resort back to using the ``detailed``
+            param to decide the columns to include.
+
+        Returns
+        -------
+        pd.DataFrame
+            A dataframe of statistics for the models, ordered by ``sort_by``.
+
+        """  # noqa (links are too long)
+        # TODO validate that `self` is fitted. This is required for
+        #      self.ensemble_ to get the identifiers of models it will generate
+        #      weights for.
+        column_types = AutoSklearnEstimator._leaderboard_columns()
+
+        # Validation of top_k
+        if (
+            not (isinstance(top_k, str) or isinstance(top_k, int))
+            or (isinstance(top_k, str) and top_k != 'all')
+            or (isinstance(top_k, int) and top_k <= 0)
+        ):
+            raise ValueError(f"top_k={top_k} must be a positive integer or pass"
+                             " `top_k`='all' to view results for all models")
+
+        # Validate columns to include
+        if isinstance(include, str):
+            include = [include]
+
+        if include == ['model_id']:
+            raise ValueError('Must provide more than just `model_id`')
+
+        if include is not None:
+            columns = [*include]
+
+            # 'model_id' should always be present as it is the unique index
+            # used for pandas
+            if 'model_id' not in columns:
+                columns.append('model_id')
+
+            invalid_include_items = set(columns) - set(column_types['all'])
+            if len(invalid_include_items) != 0:
+                raise ValueError(f"Values {invalid_include_items} are not known"
+                                 f" columns to include, must be contained in "
+                                 f"{column_types['all']}")
+        elif detailed:
+            columns = column_types['all']
+        else:
+            columns = column_types['simple']
+
+        # Validation of sorting
+        if sort_by not in column_types['all']:
+            raise ValueError(f"sort_by='{sort_by}' must be one of included "
+                             f"columns {set(column_types['all'])}")
+
+        valid_sort_orders = ['auto', 'ascending', 'descending']
+        if not (isinstance(sort_order, str) and sort_order in valid_sort_orders):
+            raise ValueError(f"`sort_order` = {sort_order} must be a str in "
+                             f"{valid_sort_orders}")
+
+        # To get all the models that were optmized, we collect what we can from
+        # runhistory first.
+        def has_key(rv, key):
+            return rv.additional_info and key in rv.additional_info
+
+        model_runs = {
+            rval.additional_info['num_run']: {
+                'model_id': rval.additional_info['num_run'],
+                'seed': rkey.seed,
+                'budget': rkey.budget,
+                'duration': rval.time,
+                'config_id': rkey.config_id,
+                'start_time': rval.starttime,
+                'end_time': rval.endtime,
+                'status': str(rval.status),
+                'cost': rval.cost,
+                'train_loss': rval.additional_info['train_loss']
+                if has_key(rval, 'train_loss') else None,
+                'config_origin': rval.additional_info['configuration_origin']
+                if has_key(rval, 'configuration_origin') else None
+            }
+            for rkey, rval in self.automl_.runhistory_.data.items()
+            if has_key(rval, 'num_run')
+        }
+
+        # Next we get some info about the model itself
+        model_class_strings = {
+            AutoMLClassifier: 'classifier',
+            AutoMLRegressor: 'regressor'
+        }
+        model_type = model_class_strings.get(self._get_automl_class(), None)
+        if model_type is None:
+            raise RuntimeError(f"Unknown `automl_class` {self._get_automl_class()}")
+
+        # A dict mapping model ids to their configurations
+        configurations = self.automl_.runhistory_.ids_config
+
+        for model_id, run_info in model_runs.items():
+            config_id = run_info['config_id']
+            run_config = configurations[config_id]._values
+
+            run_info.update({
+                'balancing_strategy': run_config.get('balancing:strategy', None),
+                'type': run_config[f'{model_type}:__choice__'],
+                'data_preprocessors': [
+                    value for key, value in run_config.items()
+                    if 'data_preprocessing' in key and '__choice__' in key
+                ],
+                'feature_preprocessors': [
+                    value for key, value in run_config.items()
+                    if 'feature_preprocessor' in key and '__choice__' in key
+                ]
+            })
+
+        # Get the models ensemble weight if it has one
+        # TODO both implementing classes of AbstractEnsemble have a property
+        #      `identifiers_` and `weights_`, might be good to put it as an
+        #       abstract property
+        # TODO `ensemble_.identifiers_` and `ensemble_.weights_` are loosely
+        #      tied together by ordering, might be better to store as tuple
+        for i, weight in enumerate(self.automl_.ensemble_.weights_):
+            (_, model_id, _) = self.automl_.ensemble_.identifiers_[i]
+            model_runs[model_id]['ensemble_weight'] = weight
+
+        # Filter out non-ensemble members if needed, else fill in a default
+        # value of 0 if it's missing
+        if ensemble_only:
+            model_runs = {
+                model_id: info
+                for model_id, info in model_runs.items()
+                if ('ensemble_weight' in info and info['ensemble_weight'] > 0)
+            }
+        else:
+            for model_id, info in model_runs.items():
+                if 'ensemble_weight' not in info:
+                    info['ensemble_weight'] = 0
+
+        # `rank` relies on `cost` so we include `cost`
+        # We drop it later if it's not requested
+        if 'rank' in columns and 'cost' not in columns:
+            columns = [*columns, 'cost']
+
+        # Finally, convert into a tabular format by converting the dict into
+        # column wise orientation.
+        dataframe = pd.DataFrame({
+            col: [run_info[col] for run_info in model_runs.values()]
+            for col in columns if col != 'rank'
+        })
+
+        # Give it an index, even if not in the `include`
+        dataframe.set_index('model_id', inplace=True)
+
+        # Add the `rank` column if needed, dropping `cost` if it's not
+        # requested by the user
+        if 'rank' in columns:
+            dataframe.sort_values(by='cost', ascending=True, inplace=True)
+            dataframe.insert(column='rank',
+                             value=range(1, len(dataframe) + 1),
+                             loc=list(columns).index('rank') - 1)  # account for `model_id`
+
+            if 'cost' not in columns:
+                dataframe.drop('cost', inplace=True)
+
+        # Decide on the sort order depending on what it gets sorted by
+        descending_columns = ['ensemble_weight', 'duration']
+        if sort_order == 'auto':
+            ascending_param = False if sort_by in descending_columns else True
+        else:
+            ascending_param = False if sort_order == 'descending' else True
+
+        # Sort by the given column name, defaulting to 'model_id' if not present
+        if sort_by not in dataframe.columns:
+            self.automl_._logger.warning(f"sort_by = '{sort_by}' was not present"
+                                         ", defaulting to sort on the index "
+                                         "'model_id'")
+            sort_by = 'model_id'
+
+        # Cost can be the same but leave rank all over the place
+        if 'rank' in columns and sort_by == 'cost':
+            dataframe.sort_values(by=[sort_by, 'rank'],
+                                  ascending=[ascending_param, True],
+                                  inplace=True)
+        else:
+            dataframe.sort_values(by=sort_by,
+                                  ascending=ascending_param,
+                                  inplace=True)
+
+        # Lastly, just grab the top_k
+        if top_k == 'all' or top_k >= len(dataframe):
+            top_k = len(dataframe)
+
+        dataframe = dataframe.head(top_k)
+
+        return dataframe
+
+    @staticmethod
+    def _leaderboard_columns() -> Dict[Literal['all', 'simple', 'detailed'], List[str]]:
+        all = [
+            "model_id", "rank", "ensemble_weight", "type", "cost", "duration",
+            "config_id", "train_loss", "seed", "start_time", "end_time",
+            "budget", "status", "data_preprocessors", "feature_preprocessors",
+            "balancing_strategy", "config_origin"
+        ]
+        simple = [
+            "model_id", "rank", "ensemble_weight", "type", "cost", "duration"
+        ]
+        detailed = all
+        return {'all': all, 'detailed': detailed, 'simple': simple}
 
     def _get_automl_class(self):
         raise NotImplementedError()
