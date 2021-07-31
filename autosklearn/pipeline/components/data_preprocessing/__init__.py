@@ -4,6 +4,7 @@ from typing import Dict, Optional
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
+from autosklearn.pipeline.base import PIPELINE_DATA_DTYPE
 
 from ..base import find_components, \
     ThirdPartyComponents, AutoSklearnChoice, AutoSklearnPreprocessingAlgorithm
@@ -87,7 +88,7 @@ class DataPreprocessorChoice(AutoSklearnChoice):
         return components_dict
 
     def get_hyperparameter_search_space(self, dataset_properties: Optional[Dict] = None,
-                                        default: Optional[Dict] = None,
+                                        default: str = None,
                                         include: Optional[Dict] = None,
                                         exclude: Optional[Dict] = None) -> ConfigurationSpace:
         cs = ConfigurationSpace()
@@ -124,7 +125,7 @@ class DataPreprocessorChoice(AutoSklearnChoice):
                                        parent_hyperparameter=parent_hyperparameter)
         return cs
 
-    def transform(self, X):
+    def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         return self.choice.transform(X)
 
     def set_hyperparameters(self, configuration: ConfigurationSpace,
