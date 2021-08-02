@@ -262,7 +262,7 @@ component for using in auto-sklearn.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">clf</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
     <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
     <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-    <span class="n">include_estimators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;MLPClassifier&#39;</span><span class="p">],</span>
+    <span class="n">include</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;classifier&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MLPClassifier&#39;</span><span class="p">]},</span>
     <span class="c1"># Bellow two flags are provided to speed up calculations</span>
     <span class="c1"># Not recommended for a real implementation</span>
     <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
@@ -272,7 +272,7 @@ component for using in auto-sklearn.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(include_estimators=[&#39;MLPClassifier&#39;],
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(include={&#39;classifier&#39;: [&#39;MLPClassifier&#39;]},
                       initial_configurations_via_metalearning=0,
                       per_run_time_limit=10,
                       smac_scenario_args={&#39;runcount_limit&#39;: 5},
@@ -288,8 +288,8 @@ component for using in auto-sklearn.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.9790209790209791
-[(0.880000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;MLPClassifier&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;classifier:MLPClassifier:activation&#39;: &#39;relu&#39;, &#39;classifier:MLPClassifier:alpha&#39;: 0.0001, &#39;classifier:MLPClassifier:hidden_layer_depth&#39;: 1, &#39;classifier:MLPClassifier:num_nodes_per_layer&#39;: 32, &#39;classifier:MLPClassifier:solver&#39;: &#39;adam&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01},
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.986013986013986
+[(0.520000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;MLPClassifier&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;classifier:MLPClassifier:activation&#39;: &#39;relu&#39;, &#39;classifier:MLPClassifier:alpha&#39;: 0.0001, &#39;classifier:MLPClassifier:hidden_layer_depth&#39;: 1, &#39;classifier:MLPClassifier:num_nodes_per_layer&#39;: 32, &#39;classifier:MLPClassifier:solver&#39;: &#39;adam&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01},
 dataset_properties={
   &#39;task&#39;: 1,
   &#39;sparse&#39;: False,
@@ -297,7 +297,7 @@ dataset_properties={
   &#39;multiclass&#39;: False,
   &#39;target_type&#39;: &#39;classification&#39;,
   &#39;signed&#39;: False})),
-(0.120000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;MLPClassifier&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;select_rates_classification&#39;, &#39;classifier:MLPClassifier:activation&#39;: &#39;logistic&#39;, &#39;classifier:MLPClassifier:alpha&#39;: 0.4002926647969067, &#39;classifier:MLPClassifier:hidden_layer_depth&#39;: 2, &#39;classifier:MLPClassifier:num_nodes_per_layer&#39;: 141, &#39;classifier:MLPClassifier:solver&#39;: &#39;lbfgs&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.00016869772227646337, &#39;feature_preprocessor:select_rates_classification:alpha&#39;: 0.14167907583397624, &#39;feature_preprocessor:select_rates_classification:score_func&#39;: &#39;f_classif&#39;, &#39;feature_preprocessor:select_rates_classification:mode&#39;: &#39;fwe&#39;},
+(0.480000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;MLPClassifier&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;select_rates_classification&#39;, &#39;classifier:MLPClassifier:activation&#39;: &#39;relu&#39;, &#39;classifier:MLPClassifier:alpha&#39;: 0.054648061621061846, &#39;classifier:MLPClassifier:hidden_layer_depth&#39;: 1, &#39;classifier:MLPClassifier:num_nodes_per_layer&#39;: 187, &#39;classifier:MLPClassifier:solver&#39;: &#39;adam&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;robust_scaler&#39;, &#39;feature_preprocessor:select_rates_classification:alpha&#39;: 0.17677801820619737, &#39;feature_preprocessor:select_rates_classification:score_func&#39;: &#39;mutual_info_classif&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.06846183238648647, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max&#39;: 0.8465036896999549, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min&#39;: 0.14555017892884228},
 dataset_properties={
   &#39;task&#39;: 1,
   &#39;sparse&#39;: False,
@@ -308,7 +308,7 @@ dataset_properties={
 ]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  22.871 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  14.954 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-extending-classification-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_classification.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>

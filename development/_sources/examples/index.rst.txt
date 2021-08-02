@@ -507,6 +507,27 @@ Examples of extending Auto-sklearn with custom components.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example demonstrates how to turn off data preprocessing step in auto-skearn.">
+
+.. only:: html
+
+ .. figure:: /examples/80_extending/images/thumb/sphx_glr_example_extending_data_preprocessor_thumb.png
+     :alt: Extending Auto-Sklearn with Data Preprocessor Component
+
+     :ref:`sphx_glr_examples_80_extending_example_extending_data_preprocessor.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/80_extending/example_extending_data_preprocessor
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="The following example demonstrates how to create a wrapper around the linear discriminant analy...">
 
 .. only:: html

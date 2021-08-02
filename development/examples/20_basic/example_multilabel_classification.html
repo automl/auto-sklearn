@@ -201,7 +201,7 @@ type_of_target=multilabel-indicator
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight           type     cost  duration
 model_id
-2            1              1.0  random_forest  0.44715  4.107375
+2            1              1.0  random_forest  0.44715  4.491632
 </pre></div>
 </div>
 </section>
@@ -211,7 +211,7 @@ model_id
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(1.000000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;random_forest&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;, &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;, &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;, &#39;classifier:random_forest:max_features&#39;: 0.5, &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0, &#39;classifier:random_forest:min_samples_leaf&#39;: 1, &#39;classifier:random_forest:min_samples_split&#39;: 2, &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01},
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(1.000000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;random_forest&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;, &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;, &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;, &#39;classifier:random_forest:max_features&#39;: 0.5, &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0, &#39;classifier:random_forest:min_samples_leaf&#39;: 1, &#39;classifier:random_forest:min_samples_split&#39;: 2, &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01},
 dataset_properties={
   &#39;task&#39;: 3,
   &#39;sparse&#39;: False,
@@ -253,7 +253,7 @@ dataset_properties={
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score 0.606
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  19.254 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  14.411 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-20-basic-example-multilabel-classification-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/20_basic/example_multilabel_classification.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo.svg" width="150px" /></a>

@@ -418,6 +418,8 @@
             <span class="s1">&#39;extra_trees&#39;</span><span class="p">,</span> <span class="s1">&#39;passive_aggressive&#39;</span><span class="p">,</span> <span class="s1">&#39;random_forest&#39;</span><span class="p">,</span> <span class="s1">&#39;sgd&#39;</span><span class="p">,</span> <span class="s1">&#39;gradient_boosting&#39;</span><span class="p">,</span> <span class="s1">&#39;mlp&#39;</span><span class="p">,</span>
         <span class="p">]</span>
         <span class="n">include_preprocessors</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;no_preprocessing&quot;</span><span class="p">]</span>
+        <span class="n">include</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;classifier&#39;</span><span class="p">:</span> <span class="n">include_estimators</span><span class="p">,</span>
+                   <span class="s1">&#39;feature_preprocessor&#39;</span><span class="p">:</span> <span class="n">include_preprocessors</span><span class="p">}</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="n">time_left_for_this_task</span><span class="p">,</span>
             <span class="n">per_run_time_limit</span><span class="o">=</span><span class="n">per_run_time_limit</span><span class="p">,</span>
@@ -427,10 +429,8 @@
             <span class="n">max_models_on_disc</span><span class="o">=</span><span class="n">max_models_on_disc</span><span class="p">,</span>
             <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
             <span class="n">memory_limit</span><span class="o">=</span><span class="n">memory_limit</span><span class="p">,</span>
-            <span class="n">include_estimators</span><span class="o">=</span><span class="n">include_estimators</span><span class="p">,</span>
-            <span class="n">exclude_estimators</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">include_preprocessors</span><span class="o">=</span><span class="n">include_preprocessors</span><span class="p">,</span>
-            <span class="n">exclude_preprocessors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">include</span><span class="o">=</span><span class="n">include</span><span class="p">,</span>
+            <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">resampling_strategy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">resampling_strategy_arguments</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">tmp_folder</span><span class="o">=</span><span class="n">tmp_folder</span><span class="p">,</span>

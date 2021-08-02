@@ -25,14 +25,15 @@ Interpretable models
 The following example shows how to inspect the models which *auto-sklearn*
 optimizes over and how to restrict them to an interpretable subset.
 
-.. GENERATED FROM PYTHON SOURCE LINES 10-16
+.. GENERATED FROM PYTHON SOURCE LINES 10-15
 
 .. code-block:: default
 
+    import autosklearn.classification
+    import autosklearn.pipeline.components.classification
     import sklearn.datasets
     import sklearn.metrics
 
-    import autosklearn.classification
 
 
 
@@ -40,9 +41,7 @@ optimizes over and how to restrict them to an interpretable subset.
 
 
 
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 17-23
+.. GENERATED FROM PYTHON SOURCE LINES 16-22
 
 Show available classification models
 ====================================
@@ -51,12 +50,10 @@ We will first list all classifiers Auto-sklearn chooses from. A similar
 call is available for preprocessors (see below) and regression (not shown)
 as well.
 
-.. GENERATED FROM PYTHON SOURCE LINES 23-28
+.. GENERATED FROM PYTHON SOURCE LINES 22-25
 
 .. code-block:: default
 
-
-    import autosklearn.pipeline.components.classification
     for name in autosklearn.pipeline.components.classification.ClassifierChoice.get_components():
         print(name)
 
@@ -90,17 +87,18 @@ as well.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 29-31
+.. GENERATED FROM PYTHON SOURCE LINES 26-28
 
 Show available preprocessors
 ============================
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-36
+.. GENERATED FROM PYTHON SOURCE LINES 28-34
 
 .. code-block:: default
 
 
     import autosklearn.pipeline.components.feature_preprocessing
+
     for name in autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice.get_components():
         print(name)
 
@@ -136,12 +134,12 @@ Show available preprocessors
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 37-39
+.. GENERATED FROM PYTHON SOURCE LINES 35-37
 
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 39-44
+.. GENERATED FROM PYTHON SOURCE LINES 37-42
 
 .. code-block:: default
 
@@ -157,7 +155,7 @@ Data Loading
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-53
+.. GENERATED FROM PYTHON SOURCE LINES 43-51
 
 Build and fit a classifier
 ==========================
@@ -168,7 +166,7 @@ single best model in the end. However, we would like to note that the
 choice of which models is deemed interpretable is very much up to the user
 and can change from use case to use case.
 
-.. GENERATED FROM PYTHON SOURCE LINES 53-64
+.. GENERATED FROM PYTHON SOURCE LINES 51-62
 
 .. code-block:: default
 
@@ -177,8 +175,8 @@ and can change from use case to use case.
         time_left_for_this_task=120,
         per_run_time_limit=30,
         tmp_folder='/tmp/autosklearn_interpretable_models_example_tmp',
-        include_estimators=['decision_tree', 'lda', 'sgd'],
-        include_preprocessors=['no_preprocessing', 'polynomial', 'select_percentile_classification'],
+        include={'classifier': ['decision_tree', 'lda', 'sgd'],
+                 'feature_preprocessor': ['no_preprocessing', 'polynomial', 'select_percentile_classification']},
         ensemble_size=1,
     )
     automl.fit(X_train, y_train, dataset_name='breast_cancer')
@@ -195,20 +193,21 @@ and can change from use case to use case.
 
 
     AutoSklearnClassifier(ensemble_size=1,
-                          include_estimators=['decision_tree', 'lda', 'sgd'],
-                          include_preprocessors=['no_preprocessing', 'polynomial',
-                                                 'select_percentile_classification'],
+                          include={'classifier': ['decision_tree', 'lda', 'sgd'],
+                                   'feature_preprocessor': ['no_preprocessing',
+                                                            'polynomial',
+                                                            'select_percentile_classification']},
                           per_run_time_limit=30, time_left_for_this_task=120,
                           tmp_folder='/tmp/autosklearn_interpretable_models_example_tmp')
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 65-67
+.. GENERATED FROM PYTHON SOURCE LINES 63-65
 
 Print the final ensemble constructed by auto-sklearn
 ====================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 67-70
+.. GENERATED FROM PYTHON SOURCE LINES 65-68
 
 .. code-block:: default
 
@@ -225,7 +224,7 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    [(1.000000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'sgd', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'polynomial', 'classifier:sgd:alpha': 2.7394019880335755e-07, 'classifier:sgd:average': 'False', 'classifier:sgd:fit_intercept': 'True', 'classifier:sgd:learning_rate': 'constant', 'classifier:sgd:loss': 'log', 'classifier:sgd:penalty': 'l1', 'classifier:sgd:tol': 0.0038175781754295085, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.010000000000000004, 'feature_preprocessor:polynomial:degree': 3, 'feature_preprocessor:polynomial:include_bias': 'False', 'feature_preprocessor:polynomial:interaction_only': 'True', 'classifier:sgd:eta0': 0.009982905352365661},
+    [(1.000000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'sgd', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:sgd:alpha': 0.03365788005835157, 'classifier:sgd:average': 'False', 'classifier:sgd:fit_intercept': 'True', 'classifier:sgd:learning_rate': 'invscaling', 'classifier:sgd:loss': 'modified_huber', 'classifier:sgd:penalty': 'l1', 'classifier:sgd:tol': 4.0607703349827144e-05, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'classifier:sgd:epsilon': 0.00010421755585335175, 'classifier:sgd:eta0': 0.0008563676540838705, 'classifier:sgd:power_t': 0.28513270938716134},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -238,12 +237,12 @@ Print the final ensemble constructed by auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 71-73
+.. GENERATED FROM PYTHON SOURCE LINES 69-71
 
 Get the Score of the final ensemble
 ===================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 73-76
+.. GENERATED FROM PYTHON SOURCE LINES 71-74
 
 .. code-block:: default
 
@@ -260,7 +259,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score: 0.958041958041958
+    Accuracy score: 0.972027972027972
 
 
 
@@ -268,7 +267,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  57.044 seconds)
+   **Total running time of the script:** ( 1 minutes  54.573 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_interpretable_models.py:

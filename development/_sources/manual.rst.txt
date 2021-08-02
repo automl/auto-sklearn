@@ -48,8 +48,9 @@ random forests.
 
 >>> import autosklearn.classification
 >>> automl = autosklearn.classification.AutoSklearnClassifier(
->>>     include_estimators=["random_forest", ], exclude_estimators=None,
->>>     include_preprocessors=["no_preprocessing", ], exclude_preprocessors=None)
+>>>     include={'classifier':["random_forest", ],
+>>>				 'feature_preprocessors': ["no_preprocessing"]},
+>>>		exclude=None)
 >>> automl.fit(X_train, y_train)
 >>> predictions = automl.predict(X_test)
 
@@ -74,7 +75,7 @@ features or samples. These steps currently cannot be turned off. Feature
 preprocessing is a single transformer which implements for example feature
 selection or transformation of features into a different space (i.e. PCA).
 This can be turned off by setting
-``include_preprocessors=["no_preprocessing"]`` as shown in the example above.
+``include={'feature_preprocessors'=["no_preprocessing"]}`` as shown in the example above.
 
 Resampling strategies
 =====================
