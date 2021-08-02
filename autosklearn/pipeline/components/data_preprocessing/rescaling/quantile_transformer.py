@@ -23,7 +23,8 @@ class QuantileTransformerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm)
         self.preprocessor = QuantileTransformer(
             n_quantiles=n_quantiles,
             output_distribution=output_distribution,
-            copy=False
+            copy=False,
+            random_state=random_state
         )
 
     @staticmethod
