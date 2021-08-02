@@ -12,8 +12,8 @@ from joblib import Memory
 import numpy as np
 from sklearn.datasets import make_multilabel_classification, fetch_openml
 
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
-    import DataPreprocessor
+from autosklearn.pipeline.components.data_preprocessing.feature_type \
+    import FeatTypeSplit
 from autosklearn.metalearning.metafeatures.metafeature import MetaFeatureValue
 import autosklearn.metalearning.metafeatures.metafeatures as meta_features
 
@@ -121,7 +121,7 @@ def meta_train_data_transformed(request):
         meta_features.helper_functions["ClassOccurences"](X, y, logger),
     )
 
-    DPP = DataPreprocessor(feat_type={
+    DPP = FeatTypeSplit(feat_type={
         col: 'categorical' if category else 'numerical' for col, category in categorical.items()
     })
     X_transformed = DPP.fit_transform(X)

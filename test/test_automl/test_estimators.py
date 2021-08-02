@@ -72,8 +72,8 @@ def test_fit_n_jobs(tmp_dir):
         initial_configurations_via_metalearning=0,
         ensemble_size=5,
         n_jobs=2,
-        include_estimators=['sgd'],
-        include_preprocessors=['no_preprocessing'],
+        include={'classifier': ['sgd'],
+                 'feature_preprocessor': ['no_preprocessing']},
         get_smac_object_callback=get_smac_object_wrapper_instance,
         max_models_on_disc=None,
     )
@@ -619,7 +619,7 @@ def test_classification_pandas_support(tmp_dir, dask_client):
     automl = AutoSklearnClassifier(
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        exclude_estimators=['libsvm_svc'],
+        exclude={'classifier': ['libsvm_svc']},
         dask_client=dask_client,
         seed=5,
         tmp_folder=tmp_dir,
@@ -727,7 +727,7 @@ def test_autosklearn_classification_methods_returns_self(dask_client):
                                    per_run_time_limit=10,
                                    ensemble_size=0,
                                    dask_client=dask_client,
-                                   exclude_preprocessors=['fast_ica'])
+                                   exclude={'feature_preprocessor': ['fast_ica']})
 
     automl_fitted = automl.fit(X_train, y_train)
     assert automl is automl_fitted
@@ -825,11 +825,9 @@ def test_check_askl2_same_arguments_as_askl():
     extra_arguments = list(set(
         inspect.getfullargspec(AutoSklearnEstimator.__init__).args) - set(
             inspect.getfullargspec(AutoSklearn2Classifier.__init__).args))
-    expected_extra_args = ['exclude_estimators',
-                           'include_preprocessors',
+    expected_extra_args = ['exclude',
+                           'include',
                            'resampling_strategy_arguments',
-                           'exclude_preprocessors',
-                           'include_estimators',
                            'get_smac_object_callback',
                            'initial_configurations_via_metalearning',
                            'resampling_strategy',
@@ -852,6 +850,10 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
     )
     estimator = AutoSklearnClassifier if task_type == 'classification' else AutoSklearnRegressor
     seed = 3
+    if task_type == "classification":
+        include = {'classifier': ['random_forest']}
+    else:
+        include = {'regressor': ['random_forest']}
     automl = estimator(
         time_left_for_this_task=120,
         # Time left for task plays no role
@@ -859,7 +861,7 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
         per_run_time_limit=30,
         ensemble_size=0,
         dask_client=dask_client,
-        include_estimators=['random_forest'],
+        include=include,
         seed=seed,
         # We cannot get the configuration space with 'test' not fit with it
         resampling_strategy=resampling_strategy if resampling_strategy != 'test' else 'holdout',
@@ -956,7 +958,7 @@ def test_pass_categorical_and_numeric_columns_to_pipeline(
         per_run_time_limit=30,
         ensemble_size=0,
         dask_client=dask_client,
-        include_estimators=['random_forest'],
+        include={'classifier': ['random_forest']},
         seed=seed,
     )
     config = automl.get_configuration_space(X_train, y_train,
@@ -978,7 +980,7 @@ def test_pass_categorical_and_numeric_columns_to_pipeline(
         expected_dict[X.shape[1] - 1] = 'categorical'
     else:
         expected_dict = {i: 'numerical' for i in range(np.shape(X)[1])}
-    assert expected_dict == pipeline.named_steps['data_preprocessing'].feat_type
+    assert expected_dict == pipeline.named_steps['data_preprocessor'].choice.feat_type
 
 
 @pytest.mark.parametrize("as_frame", [True, False])
@@ -991,7 +993,7 @@ def test_autosklearn_anneal(as_frame):
     X, y = sklearn.datasets.fetch_openml(data_id=2, return_X_y=True, as_frame=as_frame)
     automl = AutoSklearnClassifier(time_left_for_this_task=60, ensemble_size=0,
                                    initial_configurations_via_metalearning=0,
-                                   smac_scenario_args={'runcount_limit': 3},
+                                   smac_scenario_args={'runcount_limit': 6},
                                    resampling_strategy='holdout-iterative-fit')
 
     if as_frame:

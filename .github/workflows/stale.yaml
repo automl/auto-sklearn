@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/stale@v3
         with:
-          days-before-stale: 30
+          days-before-stale: 60
           days-before-close: 7
           stale-issue-message: >
             This issue has been automatically marked as stale because it has not had
@@ -18,7 +18,5 @@ jobs:
           close-issue-message: >
             This issue has been automatically closed due to inactivity.
           stale-issue-label: 'stale'
-          # Only issues with ANY of these labels are checked.
-          # Separate multiple labels with commas (eg. "incomplete,waiting-feedback").
-          any-of-labels: 'Answered,Feedback-Required,invalid,wontfix'
+          only-issue-labels: 'Answered,Feedback-Required,invalid,wontfix'
           exempt-all-milestones: true

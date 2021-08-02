@@ -241,8 +241,7 @@ class AbstractEvaluator(object):
             self.predict_function = self._predict_proba
 
         self._init_params = {
-            'data_preprocessing:feat_type':
-                self.datamanager.feat_type
+            'data_preprocessor:feat_type': self.datamanager.feat_type
         }
 
         if init_params is not None:

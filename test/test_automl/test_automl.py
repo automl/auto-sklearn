@@ -204,8 +204,8 @@ def test_delete_non_candidate_models(backend, dask_client):
         seed=seed,
         initial_configurations_via_metalearning=0,
         resampling_strategy='holdout',
-        include_estimators=['sgd'],
-        include_preprocessors=['no_preprocessing'],
+        include={'classifier': ['sgd'],
+                 'feature_preprocessor': ['no_preprocessing']},
         metric=accuracy,
         dask_client=dask_client,
         # Force model to be deleted. That is, from 50 which is the
@@ -255,8 +255,8 @@ def test_binary_score_and_include(backend, dask_client):
 
     automl = autosklearn.automl.AutoML(
         backend, 20, 5,
-        include_estimators=['sgd'],
-        include_preprocessors=['no_preprocessing'],
+        include={'classifier': ['sgd'],
+                 'feature_preprocessor': ['no_preprocessing']},
         metric=accuracy,
         dask_client=dask_client,
     )

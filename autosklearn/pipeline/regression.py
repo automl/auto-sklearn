@@ -6,8 +6,8 @@ from sklearn.base import RegressorMixin
 
 from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
-    import DataPreprocessor
+from autosklearn.pipeline.components.data_preprocessing import DataPreprocessorChoice
+
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from autosklearn.pipeline.components import regression as \
@@ -69,6 +69,10 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
                  include=None, exclude=None, random_state=None,
                  init_params=None):
         self._output_dtype = np.float32
+        if dataset_properties is None:
+            dataset_properties = dict()
+        if 'target_type' not in dataset_properties:
+            dataset_properties['target_type'] = 'regression'
         super().__init__(
             config=config, steps=steps,
             dataset_properties=dataset_properties,
@@ -102,31 +106,16 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
         Parameters
         ----------
-        include_estimators : list of str
-            If include_estimators is given, only the regressors specified
+        include : dict
+            If include is given, only the modules specified for nodes
             are used. Specify them by their module name; e.g., to include
-            only the SVM use :python:`include_regressors=['svr']`.
-            Cannot be used together with :python:`exclude_regressors`.
+            only the SVM use :python:`include={'regressor':['svr']}`.
 
-        exclude_estimators : list of str
-            If exclude_estimators is given, only the regressors specified
+        exclude : dict
+            If exclude is given, only the components specified for nodes
             are used. Specify them by their module name; e.g., to include
             all regressors except the SVM use
-            :python:`exclude_regressors=['svr']`.
-            Cannot be used together with :python:`include_regressors`.
-
-        include_preprocessors : list of str
-            If include_preprocessors is given, only the preprocessors specified
-            are used. Specify them by their module name; e.g., to include
-            only the PCA use :python:`include_preprocessors=['pca']`.
-            Cannot be used together with :python:`exclude_preprocessors`.
-
-        exclude_preprocessors : list of str
-            If include_preprocessors is given, only the preprocessors specified
-            are used. Specify them by their module name; e.g., to include
-            all preprocessors except the PCA use
-            :python:`exclude_preprocessors=['pca']`.
-            Cannot be used together with :python:`include_preprocessors`.
+            :python:`exclude=['regressor': 'svr']`.
 
         Returns
         -------
@@ -235,8 +224,8 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
             default_dataset_properties.update(dataset_properties)
 
         steps.extend([
-            ['data_preprocessing',
-                DataPreprocessor(dataset_properties=default_dataset_properties)],
+            ['data_preprocessor',
+                DataPreprocessorChoice(dataset_properties=default_dataset_properties)],
             ['feature_preprocessor',
                 feature_preprocessing_components.FeaturePreprocessorChoice(
                     default_dataset_properties)],

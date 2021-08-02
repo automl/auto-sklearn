@@ -5,8 +5,8 @@ import numpy as np
 
 import scipy.sparse
 
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
-    import DataPreprocessor
+from autosklearn.pipeline.components.data_preprocessing.feature_type \
+    import FeatTypeSplit
 
 
 class AbstractDataManager():
@@ -39,11 +39,11 @@ class AbstractDataManager():
         self._feat_type = value
 
     @property
-    def encoder(self) -> DataPreprocessor:
+    def encoder(self) -> FeatTypeSplit:
         return self._encoder
 
     @encoder.setter
-    def encoder(self, value: DataPreprocessor) -> DataPreprocessor:
+    def encoder(self, value: FeatTypeSplit) -> FeatTypeSplit:
         self._encoder = value
 
     def __repr__(self) -> str:
