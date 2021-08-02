@@ -31,7 +31,6 @@ from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.util.logging_ import get_named_client_logger
 from autosklearn.util.parallel import preload_modules
-from autosklearn.util.pipeline import parse_include_exclude_components
 from autosklearn.metalearning.metalearning.meta_base import MetaBase
 from autosklearn.metalearning.metafeatures.metafeatures import \
     calculate_all_metafeatures_with_labels, calculate_all_metafeatures_encoded_labels
@@ -232,10 +231,8 @@ class AutoMLSMBO(object):
                  metadata_directory=None,
                  resampling_strategy='holdout',
                  resampling_strategy_args=None,
-                 include_estimators=None,
-                 exclude_estimators=None,
-                 include_preprocessors=None,
-                 exclude_preprocessors=None,
+                 include=None,
+                 exclude=None,
                  disable_file_output=False,
                  smac_scenario_args=None,
                  get_smac_object_callback=None,
@@ -278,10 +275,8 @@ class AutoMLSMBO(object):
         self.seed = seed
         self.metadata_directory = metadata_directory
         self.start_num_run = start_num_run
-        self.include_estimators = include_estimators
-        self.exclude_estimators = exclude_estimators
-        self.include_preprocessors = include_preprocessors
-        self.exclude_preprocessors = exclude_preprocessors
+        self.include = include
+        self.exclude = exclude
         self.disable_file_output = disable_file_output
         self.smac_scenario_args = smac_scenario_args
         self.get_smac_object_callback = get_smac_object_callback
@@ -418,21 +413,14 @@ class AutoMLSMBO(object):
         # evaluator, which takes into account that a run can be killed prior
         # to the model being fully fitted; thus putting intermediate results
         # into a queue and querying them once the time is over
-        include, exclude = parse_include_exclude_components(
-            task=self.task,
-            include_estimators=self.include_estimators,
-            exclude_estimators=self.exclude_estimators,
-            include_preprocessors=self.include_preprocessors,
-            exclude_preprocessors=self.exclude_preprocessors,
-        )
 
         ta_kwargs = dict(
             backend=copy.deepcopy(self.backend),
             autosklearn_seed=seed,
             resampling_strategy=self.resampling_strategy,
             initial_num_run=num_run,
-            include=include,
-            exclude=exclude,
+            include=self.include,
+            exclude=self.exclude,
             metric=self.metric,
             memory_limit=self.memory_limit,
             disable_file_output=self.disable_file_output,
