@@ -59,7 +59,7 @@ list or numpy arrays as there is no per-column dtype (further details in the exa
 
 
     def get_runhistory_models_performance(automl):
-        metric = cls.automl_._metric
+        metric = automl.automl_._metric
         data = automl.automl_.runhistory_.data
         performance_list = []
         for run_key, run_value in data.items():
@@ -214,7 +214,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score 0.8695652173913043
+    Accuracy score 0.8724637681159421
 
 
 
@@ -278,7 +278,7 @@ Plot the ensemble performance
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  4.303 seconds)
+   **Total running time of the script:** ( 1 minutes  59.059 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_pandas_train_test.py:
