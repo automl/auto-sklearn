@@ -37,7 +37,7 @@ import autosklearn.classification
 
 
 def get_runhistory_models_performance(automl):
-    metric = cls.automl_._metric
+    metric = automl.automl_._metric
     data = automl.automl_.runhistory_.data
     performance_list = []
     for run_key, run_value in data.items():

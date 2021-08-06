@@ -45,7 +45,7 @@ from autosklearn.data.validation import (
 )
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
-from autosklearn.evaluation.train_evaluator import _fit_with_budget
+from autosklearn.evaluation.train_evaluator import TrainEvaluator, _fit_with_budget
 from autosklearn.metrics import calculate_metric
 from autosklearn.util.backend import Backend, create
 from autosklearn.util.stopwatch import StopWatch
@@ -55,7 +55,6 @@ from autosklearn.util.logging_ import (
     get_named_client_logger,
 )
 from autosklearn.util import pipeline, RE_PATTERN
-from autosklearn.util.pipeline import parse_include_exclude_components
 from autosklearn.util.parallel import preload_modules
 from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
@@ -126,10 +125,8 @@ class AutoML(BaseEstimator):
                  memory_limit=3072,
                  metadata_directory=None,
                  debug_mode=False,
-                 include_estimators=None,
-                 exclude_estimators=None,
-                 include_preprocessors=None,
-                 exclude_preprocessors=None,
+                 include=None,
+                 exclude=None,
                  resampling_strategy='holdout-iterative-fit',
                  resampling_strategy_arguments=None,
                  n_jobs=None,
@@ -140,7 +137,8 @@ class AutoML(BaseEstimator):
                  smac_scenario_args=None,
                  logging_config=None,
                  metric=None,
-                 scoring_functions=None
+                 scoring_functions=None,
+                 get_trials_callback=None
                  ):
         super(AutoML, self).__init__()
         self.configuration_space = None
@@ -159,40 +157,12 @@ class AutoML(BaseEstimator):
         self._memory_limit = memory_limit
         self._data_memory_limit = None
         self._metadata_directory = metadata_directory
-        self._include_estimators = include_estimators
-        self._exclude_estimators = exclude_estimators
-        self._include_preprocessors = include_preprocessors
-        self._exclude_preprocessors = exclude_preprocessors
+        self._include = include
+        self._exclude = exclude
         self._resampling_strategy = resampling_strategy
         self._scoring_functions = scoring_functions if scoring_functions is not None else []
         self._resampling_strategy_arguments = resampling_strategy_arguments \
             if resampling_strategy_arguments is not None else {}
-        if self._resampling_strategy not in ['holdout',
-                                             'holdout-iterative-fit',
-                                             'cv',
-                                             'cv-iterative-fit',
-                                             'partial-cv',
-                                             'partial-cv-iterative-fit',
-                                             ] \
-           and not issubclass(self._resampling_strategy, BaseCrossValidator)\
-           and not issubclass(self._resampling_strategy, _RepeatedSplits)\
-           and not issubclass(self._resampling_strategy, BaseShuffleSplit):
-            raise ValueError('Illegal resampling strategy: %s' %
-                             self._resampling_strategy)
-
-        if self._resampling_strategy in ['partial-cv',
-                                         'partial-cv-iterative-fit',
-                                         ] \
-           and self._ensemble_size != 0:
-            raise ValueError("Resampling strategy %s cannot be used "
-                             "together with ensembles." % self._resampling_strategy)
-        if self._resampling_strategy in ['partial-cv',
-                                         'cv',
-                                         'cv-iterative-fit',
-                                         'partial-cv-iterative-fit',
-                                         ]\
-           and 'folds' not in self._resampling_strategy_arguments:
-            self._resampling_strategy_arguments['folds'] = 5
         self._n_jobs = n_jobs
         self._dask_client = dask_client
 
@@ -210,6 +180,7 @@ class AutoML(BaseEstimator):
                                      "'disable_evaluator_output' must be one "
                                      "of " + str(allowed_elements))
         self._get_smac_object_callback = get_smac_object_callback
+        self._get_trials_callback = get_trials_callback
         self._smac_scenario_args = smac_scenario_args
         self.logging_config = logging_config
 
@@ -228,7 +199,6 @@ class AutoML(BaseEstimator):
         self.cv_models_ = None
         self.ensemble_ = None
         self._can_predict = False
-
         self._debug_mode = debug_mode
 
         self.InputValidator = None  # type: Optional[InputValidator]
@@ -518,6 +488,15 @@ class AutoML(BaseEstimator):
             task=self._task,
         )
 
+        # Check the re-sampling strategy
+        try:
+            self._check_resampling_strategy(
+                X=X, y=y, task=task,
+            )
+        except Exception as e:
+            self._fit_cleanup()
+            raise e
+
         # Reset learnt stuff
         self.models_ = None
         self.cv_models_ = None
@@ -593,10 +572,8 @@ class AutoML(BaseEstimator):
         self._logger.debug('  memory_limit: %s', str(self._memory_limit))
         self._logger.debug('  metadata_directory: %s', self._metadata_directory)
         self._logger.debug('  debug_mode: %s', self._debug_mode)
-        self._logger.debug('  include_estimators: %s', str(self._include_estimators))
-        self._logger.debug('  exclude_estimators: %s', str(self._exclude_estimators))
-        self._logger.debug('  include_preprocessors: %s', str(self._include_preprocessors))
-        self._logger.debug('  exclude_preprocessors: %s', str(self._exclude_preprocessors))
+        self._logger.debug('  include: %s', str(self._include))
+        self._logger.debug('  exclude: %s', str(self._exclude))
         self._logger.debug('  resampling_strategy: %s', str(self._resampling_strategy))
         self._logger.debug('  resampling_strategy_arguments: %s',
                            str(self._resampling_strategy_arguments))
@@ -657,10 +634,9 @@ class AutoML(BaseEstimator):
             self._backend.temporary_directory,
             self._backend,
             datamanager,
-            include_estimators=self._include_estimators,
-            exclude_estimators=self._exclude_estimators,
-            include_preprocessors=self._include_preprocessors,
-            exclude_preprocessors=self._exclude_preprocessors)
+            include=self._include,
+            exclude=self._exclude,
+        )
         if only_return_configuration_space:
             self._fit_cleanup()
             return self.configuration_space
@@ -776,10 +752,8 @@ class AutoML(BaseEstimator):
                 metric=self._metric,
                 resampling_strategy=self._resampling_strategy,
                 resampling_strategy_args=self._resampling_strategy_arguments,
-                include_estimators=self._include_estimators,
-                exclude_estimators=self._exclude_estimators,
-                include_preprocessors=self._include_preprocessors,
-                exclude_preprocessors=self._exclude_preprocessors,
+                include=self._include,
+                exclude=self._exclude,
                 disable_file_output=self._disable_evaluator_output,
                 get_smac_object_callback=self._get_smac_object_callback,
                 smac_scenario_args=self._smac_scenario_args,
@@ -787,6 +761,7 @@ class AutoML(BaseEstimator):
                 port=self._logger_port,
                 pynisher_context=self._multiprocessing_context,
                 ensemble_callback=proc_ensemble,
+                trials_callback=self._get_trials_callback
             )
 
             try:
@@ -848,6 +823,63 @@ class AutoML(BaseEstimator):
             self._backend.context.delete_directories(force=False)
         return
 
+    def _check_resampling_strategy(
+        self,
+        X: SUPPORTED_FEAT_TYPES,
+        y: SUPPORTED_TARGET_TYPES,
+        task: int,
+    ) -> None:
+        """
+        This method centralizes the checks for resampling strategies
+
+        Parameters
+        ----------
+        X: (SUPPORTED_FEAT_TYPES)
+            Input features for the given task
+        y: (SUPPORTED_TARGET_TYPES)
+            Input targets for the given task
+        task: (task)
+            Integer describing a supported task type, like BINARY_CLASSIFICATION
+        """
+        is_split_object = isinstance(
+            self._resampling_strategy,
+            (BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit)
+        )
+
+        if self._resampling_strategy not in [
+                'holdout',
+                'holdout-iterative-fit',
+                'cv',
+                'cv-iterative-fit',
+                'partial-cv',
+                'partial-cv-iterative-fit',
+        ] and not is_split_object:
+            raise ValueError('Illegal resampling strategy: %s' % self._resampling_strategy)
+
+        elif is_split_object:
+            TrainEvaluator.check_splitter_resampling_strategy(
+                X=X, y=y, task=task,
+                groups=self._resampling_strategy_arguments.get('groups', None),
+                resampling_strategy=self._resampling_strategy,
+            )
+
+        elif self._resampling_strategy in [
+            'partial-cv',
+            'partial-cv-iterative-fit',
+        ] and self._ensemble_size != 0:
+            raise ValueError("Resampling strategy %s cannot be used "
+                             "together with ensembles." % self._resampling_strategy)
+
+        elif self._resampling_strategy in [
+            'partial-cv',
+            'cv',
+            'cv-iterative-fit',
+            'partial-cv-iterative-fit',
+        ] and 'folds' not in self._resampling_strategy_arguments:
+            self._resampling_strategy_arguments['folds'] = 5
+
+        return
+
     @staticmethod
     def subsample_if_too_large(
         X: SUPPORTED_FEAT_TYPES,
@@ -858,9 +890,10 @@ class AutoML(BaseEstimator):
         task: int,
     ):
         if memory_limit and isinstance(X, np.ndarray):
+
             if X.dtype == np.float32:
                 multiplier = 4
-            elif X.dtype in (np.float64, np.float):
+            elif X.dtype in (np.float64, float):
                 multiplier = 8
             elif (
                 # In spite of the names, np.float96 and np.float128
@@ -876,6 +909,21 @@ class AutoML(BaseEstimator):
                 multiplier = 8
                 logger.warning('Unknown dtype for X: %s, assuming it takes 8 bit/number',
                                str(X.dtype))
+
+            megabytes = X.shape[0] * X.shape[1] * multiplier / 1024 / 1024
+            if memory_limit <= megabytes * 10 and X.dtype != np.float32:
+                cast_to = {
+                    8: np.float32,
+                    16: np.float64,
+                }.get(multiplier, np.float32)
+                logger.warning(
+                    'Dataset too large for memory limit %dMB, reducing the precision from %s to %s',
+                    memory_limit,
+                    X.dtype,
+                    cast_to,
+                )
+                X = X.astype(cast_to)
+
             megabytes = X.shape[0] * X.shape[1] * multiplier / 1024 / 1024
             if memory_limit <= megabytes * 10:
                 new_num_samples = int(
@@ -1046,21 +1094,11 @@ class AutoML(BaseEstimator):
             config = Configuration(self.configuration_space, config)
         config.config_id = self.num_run
 
-        # Get the components to include and exclude on the configuration space
-        # from the estimator attributes
-        include, exclude = parse_include_exclude_components(
-            task=self._task,
-            include_estimators=self._include_estimators,
-            exclude_estimators=self._exclude_estimators,
-            include_preprocessors=self._include_preprocessors,
-            exclude_preprocessors=self._exclude_preprocessors,
-        )
-
         # Prepare missing components to the TAE function call
         if 'include' not in kwargs:
-            kwargs['include'] = include
+            kwargs['include'] = self._include
         if 'exclude' not in kwargs:
-            kwargs['exclude'] = exclude
+            kwargs['exclude'] = self._exclude
         if 'memory_limit' not in kwargs:
             kwargs['memory_limit'] = self._memory_limit
         if 'resampling_strategy' not in kwargs:
@@ -1533,20 +1571,18 @@ class AutoML(BaseEstimator):
             return sio.getvalue()
 
     def _create_search_space(self, tmp_dir, backend, datamanager,
-                             include_estimators=None,
-                             exclude_estimators=None,
-                             include_preprocessors=None,
-                             exclude_preprocessors=None):
+                             include=None,
+                             exclude=None,
+                             ):
         task_name = 'CreateConfigSpace'
 
         self._stopwatch.start_task(task_name)
         configspace_path = os.path.join(tmp_dir, 'space.json')
         configuration_space = pipeline.get_configuration_space(
             datamanager.info,
-            include_estimators=include_estimators,
-            exclude_estimators=exclude_estimators,
-            include_preprocessors=include_preprocessors,
-            exclude_preprocessors=exclude_preprocessors)
+            include=include,
+            exclude=exclude,
+        )
         configuration_space = self.configuration_space_created_hook(
             datamanager, configuration_space)
         backend.write_txt_file(

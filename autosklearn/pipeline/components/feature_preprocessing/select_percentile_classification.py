@@ -1,6 +1,7 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import \
     UniformFloatHyperparameter, CategoricalHyperparameter, Constant
+from functools import partial
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.components.feature_preprocessing.select_percentile import \
@@ -27,7 +28,8 @@ class SelectPercentileClassification(SelectPercentileBase,
         elif score_func == "f_classif":
             self.score_func = sklearn.feature_selection.f_classif
         elif score_func == "mutual_info":
-            self.score_func = sklearn.feature_selection.mutual_info_classif
+            self.score_func = partial(sklearn.feature_selection.mutual_info_classif,
+                                      random_state=self.random_state)
         else:
             raise ValueError("score_func must be in ('chi2, 'f_classif', 'mutual_info'), "
                              "but is: %s" % score_func)

@@ -1,8 +1,11 @@
+from typing import Type
+
 import copy
 import glob
 import importlib
 import os
 import inspect
+import itertools
 import pickle
 import re
 import sys
@@ -29,9 +32,9 @@ from autosklearn.data.validation import InputValidator
 import autosklearn.pipeline.util as putil
 from autosklearn.ensemble_builder import MODEL_FN_RE
 import autosklearn.estimators  # noqa F401
-from autosklearn.estimators import AutoSklearnEstimator
-from autosklearn.classification import AutoSklearnClassifier
-from autosklearn.regression import AutoSklearnRegressor
+from autosklearn.estimators import (
+    AutoSklearnEstimator, AutoSklearnRegressor, AutoSklearnClassifier
+)
 from autosklearn.metrics import accuracy, f1_macro, mean_squared_error, r2
 from autosklearn.automl import AutoMLClassifier
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier
@@ -70,8 +73,8 @@ def test_fit_n_jobs(tmp_dir):
         initial_configurations_via_metalearning=0,
         ensemble_size=5,
         n_jobs=2,
-        include_estimators=['sgd'],
-        include_preprocessors=['no_preprocessing'],
+        include={'classifier': ['sgd'],
+                 'feature_preprocessor': ['no_preprocessing']},
         get_smac_object_callback=get_smac_object_wrapper_instance,
         max_models_on_disc=None,
     )
@@ -318,6 +321,131 @@ def test_cv_results(tmp_dir):
     assert hasattr(cls, 'classes_')
 
 
+@pytest.mark.parametrize('estimator_type,dataset_name', [
+    (AutoSklearnClassifier, 'iris'),
+    (AutoSklearnRegressor, 'boston')
+])
+def test_leaderboard(
+    tmp_dir: str,
+    estimator_type: Type[AutoSklearnEstimator],
+    dataset_name: str
+):
+    # Comprehensive test tasks a substantial amount of time, manually set if
+    # required.
+    MAX_COMBO_SIZE_FOR_INCLUDE_PARAM = 3  # [0, len(valid_columns) + 1]
+    column_types = AutoSklearnEstimator._leaderboard_columns()
+
+    # Create a dict of all possible param values for each param
+    # with some invalid one's of the incorrect type
+    include_combinations = itertools.chain(
+        itertools.combinations(column_types['all'], item_count)
+        for item_count in range(1, MAX_COMBO_SIZE_FOR_INCLUDE_PARAM)
+    )
+    valid_params = {
+        'detailed': [True, False],
+        'ensemble_only': [True, False],
+        'top_k': [-10, 0, 1, 10, 'all'],
+        'sort_by': [*column_types['all'], 'invalid'],
+        'sort_order': ['ascending', 'descending', 'auto', 'invalid', None],
+        'include': itertools.chain([None, 'invalid', 'type'], include_combinations),
+    }
+
+    # Create a generator of all possible combinations of valid_params
+    params_generator = iter(
+        dict(zip(valid_params.keys(), param_values))
+        for param_values in itertools.product(*valid_params.values())
+    )
+
+    X_train, Y_train, _, _ = putil.get_dataset(dataset_name)
+    model = estimator_type(
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        tmp_folder=tmp_dir,
+        seed=1
+    )
+    model.fit(X_train, Y_train)
+
+    for params in params_generator:
+        # Convert from iterator to solid list
+        if params['include'] is not None and not isinstance(params['include'], str):
+            params['include'] = list(params['include'])
+
+        # Invalid top_k should raise an error, is a positive int or 'all'
+        if not (params['top_k'] == 'all' or params['top_k'] > 0):
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # Invalid sort_by column
+        elif params['sort_by'] not in column_types['all']:
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # Shouldn't accept an invalid sort order
+        elif params['sort_order'] not in ['ascending', 'descending', 'auto']:
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # include is single str but not valid
+        elif (
+            isinstance(params['include'], str)
+            and params['include'] not in column_types['all']
+        ):
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # Crash if include is list but contains invalid column
+        elif (
+            isinstance(params['include'], list)
+            and len(set(params['include']) - set(column_types['all'])) != 0
+        ):
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # Can't have just model_id, in both single str and list case
+        elif (
+            params['include'] == 'model_id'
+            or params['include'] == ['model_id']
+        ):
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # Else all valid combinations should be validated
+        else:
+            leaderboard = model.leaderboard(**params)
+
+            # top_k should never be less than the rows given back
+            # It can however be larger
+            if isinstance(params['top_k'], int):
+                assert params['top_k'] >= len(leaderboard)
+
+            # Check the right columns are present and in the right order
+            # The model_id is set as the index, not included in pandas columns
+            columns = list(leaderboard.columns)
+
+            def exclude(lst, s):
+                return [x for x in lst if x != s]
+
+            if params['include'] is not None:
+                # Include with only single str should be the only column
+                if isinstance(params['include'], str):
+                    assert params['include'] in columns and len(columns) == 1
+                # Include as a list should have all the columns without model_id
+                else:
+                    assert columns == exclude(params['include'], 'model_id')
+            elif params['detailed']:
+                assert columns == exclude(column_types['detailed'], 'model_id')
+            else:
+                assert columns == exclude(column_types['simple'], 'model_id')
+
+            # Ensure that if it's ensemble only
+            # Can only check if 'ensemble_weight' is present
+            if (
+                params['ensemble_only']
+                and 'ensemble_weight' in columns
+            ):
+                assert all(leaderboard['ensemble_weight'] > 0)
+
+
 @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.build_automl')
 def test_fit_n_jobs_negative(build_automl_patch):
     n_cores = cpu_count()
@@ -492,7 +620,7 @@ def test_classification_pandas_support(tmp_dir, dask_client):
     automl = AutoSklearnClassifier(
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        exclude_estimators=['libsvm_svc'],
+        exclude={'classifier': ['libsvm_svc']},
         dask_client=dask_client,
         seed=5,
         tmp_folder=tmp_dir,
@@ -601,7 +729,7 @@ def test_autosklearn_classification_methods_returns_self(dask_client):
                                    per_run_time_limit=10,
                                    ensemble_size=0,
                                    dask_client=dask_client,
-                                   exclude_preprocessors=['fast_ica'])
+                                   exclude={'feature_preprocessor': ['fast_ica']})
 
     automl_fitted = automl.fit(X_train, y_train)
     assert automl is automl_fitted
@@ -679,13 +807,18 @@ def test_selector_file_askl2_can_be_created(selector_path):
                 importlib.reload(autosklearn.experimental.askl2)
         else:
             importlib.reload(autosklearn.experimental.askl2)
-            assert os.path.exists(autosklearn.experimental.askl2.selector_file)
-            if selector_path is None or not os.access(selector_path, os.W_OK):
-                # We default to home in worst case
-                assert os.path.expanduser("~") in str(autosklearn.experimental.askl2.selector_file)
-            else:
-                # a dir provided via XDG_CACHE_HOME
-                assert selector_path in str(autosklearn.experimental.askl2.selector_file)
+            for metric in autosklearn.experimental.askl2.metrics:
+                assert os.path.exists(autosklearn.experimental.askl2.selector_files[metric.name])
+                if selector_path is None or not os.access(selector_path, os.W_OK):
+                    # We default to home in worst case
+                    assert os.path.expanduser("~") in str(
+                        autosklearn.experimental.askl2.selector_files[metric.name]
+                    )
+                else:
+                    # a dir provided via XDG_CACHE_HOME
+                    assert selector_path in str(
+                        autosklearn.experimental.askl2.selector_files[metric.name]
+                    )
     # Re import it at the end so we do not affect other test
     importlib.reload(autosklearn.experimental.askl2)
 
@@ -696,15 +829,14 @@ def test_check_askl2_same_arguments_as_askl():
     extra_arguments = list(set(
         inspect.getfullargspec(AutoSklearnEstimator.__init__).args) - set(
             inspect.getfullargspec(AutoSklearn2Classifier.__init__).args))
-    expected_extra_args = ['exclude_estimators',
-                           'include_preprocessors',
+    expected_extra_args = ['exclude',
+                           'include',
                            'resampling_strategy_arguments',
-                           'exclude_preprocessors',
-                           'include_estimators',
                            'get_smac_object_callback',
                            'initial_configurations_via_metalearning',
                            'resampling_strategy',
-                           'metadata_directory']
+                           'metadata_directory',
+                           'get_trials_callback']
     unexpected_args = set(extra_arguments) - set(expected_extra_args)
     assert len(unexpected_args) == 0, unexpected_args
 
@@ -722,6 +854,10 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
     )
     estimator = AutoSklearnClassifier if task_type == 'classification' else AutoSklearnRegressor
     seed = 3
+    if task_type == "classification":
+        include = {'classifier': ['random_forest']}
+    else:
+        include = {'regressor': ['random_forest']}
     automl = estimator(
         delete_tmp_folder_after_terminate=False,
         time_left_for_this_task=120,
@@ -730,7 +866,7 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
         per_run_time_limit=30,
         ensemble_size=0,
         dask_client=dask_client,
-        include_estimators=['random_forest'],
+        include=include,
         seed=seed,
         # We cannot get the configuration space with 'test' not fit with it
         resampling_strategy=resampling_strategy if resampling_strategy != 'test' else 'holdout',
@@ -828,7 +964,7 @@ def test_pass_categorical_and_numeric_columns_to_pipeline(
         per_run_time_limit=30,
         ensemble_size=0,
         dask_client=dask_client,
-        include_estimators=['random_forest'],
+        include={'classifier': ['random_forest']},
         seed=seed,
     )
     config = automl.get_configuration_space(X_train, y_train,
@@ -850,7 +986,7 @@ def test_pass_categorical_and_numeric_columns_to_pipeline(
         expected_dict[X.shape[1] - 1] = 'categorical'
     else:
         expected_dict = {i: 'numerical' for i in range(np.shape(X)[1])}
-    assert expected_dict == pipeline.named_steps['data_preprocessing'].feat_type
+    assert expected_dict == pipeline.named_steps['data_preprocessor'].choice.feat_type
 
 
 @pytest.mark.parametrize("as_frame", [True, False])
@@ -864,7 +1000,7 @@ def test_autosklearn_anneal(as_frame):
     automl = AutoSklearnClassifier(time_left_for_this_task=60, ensemble_size=0,
                                    delete_tmp_folder_after_terminate=False,
                                    initial_configurations_via_metalearning=0,
-                                   smac_scenario_args={'runcount_limit': 3},
+                                   smac_scenario_args={'runcount_limit': 6},
                                    resampling_strategy='holdout-iterative-fit')
 
     if as_frame:
