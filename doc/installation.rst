@@ -55,9 +55,9 @@ run:
 Anaconda installation
 =====================
 
-Anaconda does not ship *auto-sklearn*, and there are no conda packages for
-*auto-sklearn*. Thus, it is easiest to install *auto-sklearn* as detailed in
-the Section `Installing auto-sklearn`_.
+You need to enable conda-forge to install *auto-sklearn* via anaconda. This section explains how to enable conda-forge so
+installation can be done with the command `conda install auto-sklearn`. 
+Optionally, you can also install *auto-sklearn* with `pip` as detailed in the Section `Installing auto-sklearn`_. 
 
 A common installation problem under recent Linux distribution is the
 incompatibility of the compiler version used to compile the Python binary
