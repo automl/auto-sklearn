@@ -254,7 +254,7 @@ the information in the file created by the scheduler.
 Start Auto-sklearn
 ~~~~~~~~~~~~~~~~~~
 
-.. GENERATED FROM PYTHON SOURCE LINES 173-203
+.. GENERATED FROM PYTHON SOURCE LINES 173-204
 
 .. code-block:: default
 
@@ -263,6 +263,7 @@ Start Auto-sklearn
         X_train, X_test, y_train, y_test = \
             sklearn.model_selection.train_test_split(X, y, random_state=1)
         automl = AutoSklearnClassifier(
+            delete_tmp_folder_after_terminate=False,
             time_left_for_this_task=30,
             per_run_time_limit=10,
             memory_limit=1024,
@@ -299,21 +300,21 @@ Start Auto-sklearn
  .. code-block:: none
 
     auto-sklearn results:
-      Dataset name: f2ddc1c1-f510-11eb-86ad-bd863d9e4375
+      Dataset name: 818db983-f6a7-11eb-8684-a7e485d3ca0a
       Metric: accuracy
       Best validation score: 0.985816
-      Number of target algorithm runs: 10
-      Number of successful target algorithm runs: 9
+      Number of target algorithm runs: 14
+      Number of successful target algorithm runs: 13
       Number of crashed target algorithm runs: 0
       Number of target algorithms that exceeded the time limit: 1
       Number of target algorithms that exceeded the memory limit: 0
 
-    Accuracy score 0.951048951048951
+    Accuracy score 0.9440559440559441
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 204-210
+.. GENERATED FROM PYTHON SOURCE LINES 205-211
 
 Wait until all workers are closed
 =================================
@@ -322,7 +323,7 @@ This is only necessary if the workers are started from within this python
 script. In a real application one would start them directly from the command
 line.
 
-.. GENERATED FROM PYTHON SOURCE LINES 210-214
+.. GENERATED FROM PYTHON SOURCE LINES 211-215
 
 .. code-block:: default
 
@@ -340,7 +341,7 @@ line.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  40.637 seconds)
+   **Total running time of the script:** ( 0 minutes  37.703 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_manual_spawning_cli.py:

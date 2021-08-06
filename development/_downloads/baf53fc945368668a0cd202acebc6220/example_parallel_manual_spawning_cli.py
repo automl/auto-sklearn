@@ -175,6 +175,7 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = \
         sklearn.model_selection.train_test_split(X, y, random_state=1)
     automl = AutoSklearnClassifier(
+        delete_tmp_folder_after_terminate=False,
         time_left_for_this_task=30,
         per_run_time_limit=10,
         memory_limit=1024,

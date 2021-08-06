@@ -285,6 +285,7 @@ the information in the file created by the scheduler.</p>
     <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> \
         <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">automl</span> <span class="o">=</span> <span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+        <span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
         <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
         <span class="n">memory_limit</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span>
@@ -312,16 +313,16 @@ the information in the file created by the scheduler.</p>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>auto-sklearn results:
-  Dataset name: f2ddc1c1-f510-11eb-86ad-bd863d9e4375
+  Dataset name: 818db983-f6a7-11eb-8684-a7e485d3ca0a
   Metric: accuracy
   Best validation score: 0.985816
-  Number of target algorithm runs: 10
-  Number of successful target algorithm runs: 9
+  Number of target algorithm runs: 14
+  Number of successful target algorithm runs: 13
   Number of crashed target algorithm runs: 0
   Number of target algorithms that exceeded the time limit: 1
   Number of target algorithms that exceeded the memory limit: 0
 
-Accuracy score 0.951048951048951
+Accuracy score 0.9440559440559441
 </pre></div>
 </div>
 </section>
@@ -337,7 +338,7 @@ line.</p>
         <span class="n">process</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  40.637 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  37.703 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-60-search-example-parallel-manual-spawning-cli-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/60_search/example_parallel_manual_spawning_cli.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo2.svg" width="150px" /></a>

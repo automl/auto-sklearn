@@ -139,7 +139,7 @@ To use auto-sklearn in parallel we must guard the code with
 ``if __name__ == '__main__'``. We then start a dask cluster as a context,
 which means that it is automatically stopped once all computation is done.
 
-.. GENERATED FROM PYTHON SOURCE LINES 98-153
+.. GENERATED FROM PYTHON SOURCE LINES 98-154
 
 .. code-block:: default
 
@@ -171,6 +171,7 @@ which means that it is automatically stopped once all computation is done.
             # 3. Start the client
             with dask.distributed.Client(address=cluster.scheduler_address) as client:
                 automl = AutoSklearnClassifier(
+                    delete_tmp_folder_after_terminate=False,
                     time_left_for_this_task=30,
                     per_run_time_limit=10,
                     memory_limit=1024,
@@ -208,20 +209,20 @@ which means that it is automatically stopped once all computation is done.
 
  .. code-block:: none
 
-    [ERROR] [2021-08-04 10:45:19,419:asyncio] _GatheringFuture exception was never retrieved
+    [ERROR] [2021-08-06 11:15:31,586:asyncio] _GatheringFuture exception was never retrieved
     future: <_GatheringFuture finished exception=CancelledError()>
     asyncio.exceptions.CancelledError
     auto-sklearn results:
-      Dataset name: 0a9e0a5f-f511-11eb-86ad-bd863d9e4375
+      Dataset name: 978dfaf7-f6a7-11eb-8684-a7e485d3ca0a
       Metric: accuracy
       Best validation score: 0.985816
-      Number of target algorithm runs: 11
-      Number of successful target algorithm runs: 11
+      Number of target algorithm runs: 16
+      Number of successful target algorithm runs: 14
       Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 0
+      Number of target algorithms that exceeded the time limit: 2
       Number of target algorithms that exceeded the memory limit: 0
 
-    Accuracy score 0.951048951048951
+    Accuracy score 0.9440559440559441
 
 
 
@@ -229,7 +230,7 @@ which means that it is automatically stopped once all computation is done.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  35.931 seconds)
+   **Total running time of the script:** ( 0 minutes  35.699 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_manual_spawning_python.py:
