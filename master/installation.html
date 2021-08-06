@@ -111,7 +111,10 @@
 <li><a class="reference internal" href="#system-requirements">System requirements</a></li>
 <li><a class="reference internal" href="#installing-auto-sklearn">Installing auto-sklearn</a></li>
 <li><a class="reference internal" href="#ubuntu-installation">Ubuntu installation</a></li>
-<li><a class="reference internal" href="#anaconda-installation">Anaconda installation</a></li>
+<li><a class="reference internal" href="#anaconda-installation">Anaconda installation</a><ul>
+<li><a class="reference internal" href="#conda-forge">Conda-forge</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#windows-osx-compatibility">Windows/OSX compatibility</a><ul>
 <li><a class="reference internal" href="#windows">Windows</a></li>
 <li><a class="reference internal" href="#mac-osx">Mac OSX</a></li>
@@ -171,9 +174,9 @@ run:</p>
 </section>
 <section id="anaconda-installation">
 <h2>Anaconda installation<a class="headerlink" href="#anaconda-installation" title="Permalink to this headline">¶</a></h2>
-<p>Anaconda does not ship <em>auto-sklearn</em>, and there are no conda packages for
-<em>auto-sklearn</em>. Thus, it is easiest to install <em>auto-sklearn</em> as detailed in
-the Section <a class="reference internal" href="#installing-auto-sklearn">Installing auto-sklearn</a>.</p>
+<p>You need to enable conda-forge to install <em>auto-sklearn</em> via anaconda. This section explains how to enable conda-forge so
+installation can be done with the command <cite>conda install auto-sklearn</cite>.
+Optionally, you can also install <em>auto-sklearn</em> with <cite>pip</cite> as detailed in the Section <a class="reference internal" href="#installing-auto-sklearn">Installing auto-sklearn</a>.</p>
 <p>A common installation problem under recent Linux distribution is the
 incompatibility of the compiler version used to compile the Python binary
 shipped by AnaConda and the compiler installed by the distribution. This can
@@ -182,6 +185,27 @@ be solved by installing the <em>gcc</em> compiler shipped with AnaConda (as well
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install gxx_linux-64 gcc_linux-64 swig
 </pre></div>
 </div>
+<section id="conda-forge">
+<h3>Conda-forge<a class="headerlink" href="#conda-forge" title="Permalink to this headline">¶</a></h3>
+<p>Installing <cite>auto-sklearn</cite> from the <cite>conda-forge</cite> channel can be achieved by adding <cite>conda-forge</cite> to your channels with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda config --add channels conda-forge
+
+conda config --set channel_priority strict
+</pre></div>
+</div>
+<p>You must have <cite>conda &gt;=4.9</cite>. To update conda or check your current conda version, please follow the instructions from <a class="reference external" href="https://docs.anaconda.com/anaconda/install/update-version/">the official anaconda documentation</a> . Once the <cite>conda-forge</cite> channel has been enabled, <cite>auto-sklearn</cite> can be installed with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install auto-sklearn
+</pre></div>
+</div>
+<p>It is possible to list all of the versions of <cite>auto-sklearn</cite> available on your platform with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda search auto-sklearn --channel conda-forge
+</pre></div>
+</div>
+<p>to read in more details check
+<a class="reference external" href="https://github.com/conda-forge/auto-sklearn-feedstock">auto sklearn feedstock</a>.</p>
+<p>for more information about Conda forge check
+<a class="reference external" href="https://conda-forge.org/docs/">conda-forge documentations</a>.</p>
+</section>
 </section>
 <section id="windows-osx-compatibility">
 <h2>Windows/OSX compatibility<a class="headerlink" href="#windows-osx-compatibility" title="Permalink to this headline">¶</a></h2>

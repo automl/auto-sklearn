@@ -181,7 +181,6 @@ Get the Score of the final ensemble
                     2                 extra_trees         0.978723                  0.971154          0.967391       1.000000   0.983425             0.021277
                    15               liblinear_svc         0.964539                  0.959918          0.966667       0.977528   0.972067             0.035461
                    26                 gaussian_nb         0.929078                  0.907844          0.907216       0.988764   0.946237             0.070922
-                   28           gradient_boosting         0.631206                  0.500000          0.631206       1.000000   0.773913             0.368794
 
 
 
@@ -189,7 +188,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  12.316 seconds)
+   **Total running time of the script:** ( 2 minutes  4.883 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_calc_multiple_metrics.py:
