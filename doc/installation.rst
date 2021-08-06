@@ -82,7 +82,7 @@ Installing `auto-sklearn` from the `conda-forge` channel can be achieved by addi
     conda config --set channel_priority strict
 
 
-Once the `conda-forge` channel has been enabled, `auto-sklearn` can be installed with:
+You must have `conda >=4.9`. To update conda or check your current conda version, please follow the instructions from `the official anaconda documentation <https://docs.anaconda.com/anaconda/install/update-version/>`_ . Once the `conda-forge` channel has been enabled, `auto-sklearn` can be installed with:
 
 .. code:: bash
 
