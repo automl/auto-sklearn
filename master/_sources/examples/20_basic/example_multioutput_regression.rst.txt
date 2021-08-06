@@ -124,8 +124,7 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight              type      cost  duration
     model_id                                                             
-    27           1             0.76  gaussian_process  0.000040  7.345591
-    26           2             0.24  gaussian_process  0.000055  7.826746
+    20           1              1.0  gaussian_process  0.000004  2.687078
 
 
 
@@ -152,14 +151,7 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    [(0.760000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'power_transformer', 'feature_preprocessor:__choice__': 'extra_trees_preproc_for_regression', 'regressor:__choice__': 'gaussian_process', 'feature_preprocessor:extra_trees_preproc_for_regression:bootstrap': 'True', 'feature_preprocessor:extra_trees_preproc_for_regression:criterion': 'mse', 'feature_preprocessor:extra_trees_preproc_for_regression:max_depth': 'None', 'feature_preprocessor:extra_trees_preproc_for_regression:max_features': 0.8526425214532543, 'feature_preprocessor:extra_trees_preproc_for_regression:max_leaf_nodes': 'None', 'feature_preprocessor:extra_trees_preproc_for_regression:min_samples_leaf': 14, 'feature_preprocessor:extra_trees_preproc_for_regression:min_samples_split': 7, 'feature_preprocessor:extra_trees_preproc_for_regression:min_weight_fraction_leaf': 0.0, 'feature_preprocessor:extra_trees_preproc_for_regression:n_estimators': 100, 'regressor:gaussian_process:alpha': 0.00018384686698160946, 'regressor:gaussian_process:thetaL': 0.00016110771972314172, 'regressor:gaussian_process:thetaU': 10319.8089105238},
-    dataset_properties={
-      'task': 5,
-      'sparse': False,
-      'multioutput': True,
-      'target_type': 'regression',
-      'signed': False})),
-    (0.240000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'power_transformer', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'gaussian_process', 'regressor:gaussian_process:alpha': 2.1287091964478646e-10, 'regressor:gaussian_process:thetaL': 5.747604853479803e-10, 'regressor:gaussian_process:thetaU': 7978.006907734802},
+    [(1.000000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'fast_ica', 'regressor:__choice__': 'gaussian_process', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.03525312698553994, 'feature_preprocessor:fast_ica:algorithm': 'deflation', 'feature_preprocessor:fast_ica:fun': 'cube', 'feature_preprocessor:fast_ica:whiten': 'True', 'regressor:gaussian_process:alpha': 1.6308437468964296e-06, 'regressor:gaussian_process:thetaL': 2.9247731111629564e-09, 'regressor:gaussian_process:thetaU': 551.0700100096957, 'feature_preprocessor:fast_ica:n_components': 100},
     dataset_properties={
       'task': 5,
       'sparse': False,
@@ -194,7 +186,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.9999841858420232
+    R2 score: 0.9999953767477678
 
 
 
@@ -412,7 +404,7 @@ Get the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  56.464 seconds)
+   **Total running time of the script:** ( 2 minutes  7.873 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multioutput_regression.py:
