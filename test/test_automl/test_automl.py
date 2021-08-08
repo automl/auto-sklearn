@@ -11,6 +11,7 @@ import unittest.mock
 import numpy as np
 import pandas as pd
 import pytest
+from scipy.sparse import csr_matrix
 import sklearn.datasets
 from smac.scenario.scenario import Scenario
 from smac.facade.roar_facade import ROAR
@@ -19,7 +20,9 @@ from autosklearn.automl import AutoML
 from autosklearn.data.validation import InputValidator
 import autosklearn.automl
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.metrics import accuracy, log_loss, balanced_accuracy
+from autosklearn.metrics import (
+    accuracy, log_loss, balanced_accuracy, default_metric_for_task
+)
 import autosklearn.pipeline.util as putil
 from autosklearn.constants import (
     MULTICLASS_CLASSIFICATION,
@@ -727,3 +730,107 @@ def test_subsample_if_too_large(memory_limit, precision, task):
             assert mock.warning.call_count == 1
     else:
         assert mock.warning.call_count == 0
+
+
+def data_input_and_target_types():
+    n_rows = 100
+
+    # Create valid inputs
+    X_ndarray = np.random.random(size=(n_rows, 5))
+    X_ndarray[X_ndarray < .9] = 0
+
+    # Binary Classificaiton
+    y_binary_ndarray = np.random.random(size=n_rows)
+    y_binary_ndarray[y_binary_ndarray > 0.5] = 0
+    y_binary_ndarray[y_binary_ndarray <= 0.5] = 1
+
+    # Multiclass classification
+    y_multiclass_ndarray = np.random.random(size=n_rows)
+    y_multiclass_ndarray[y_multiclass_ndarray > 0.5] = 0
+    y_multiclass_ndarray[y_multiclass_ndarray <= 0.5] = 1
+    y_multiclass_ndarray[y_multiclass_ndarray <= 0.3] = 2
+
+    # Multilabel classificaiton
+    y_multilabel_ndarray = np.random.random(size=(n_rows, 3))
+    y_multilabel_ndarray[y_multilabel_ndarray > 0.5] = 0
+
+    # Regression
+    y_regression_ndarray = np.random.random(size=n_rows)
+
+    # Multioutput Regression
+    y_multioutput_regression_ndarray = np.random.random(size=(n_rows, 3))
+
+    xs = [
+        X_ndarray,
+        list(X_ndarray),
+        csr_matrix(X_ndarray),
+        pd.DataFrame(data=X_ndarray),
+    ]
+
+    ys_binary = [
+        y_binary_ndarray,
+        list(y_binary_ndarray),
+        csr_matrix(y_binary_ndarray),
+        pd.Series(y_binary_ndarray),
+        pd.DataFrame(data=y_binary_ndarray),
+    ]
+
+    ys_multiclass = [
+        y_multiclass_ndarray,
+        list(y_multiclass_ndarray),
+        csr_matrix(y_multiclass_ndarray),
+        pd.Series(y_multiclass_ndarray),
+        pd.DataFrame(data=y_multiclass_ndarray),
+    ]
+
+    ys_multilabel = [
+        y_multilabel_ndarray,
+        list(y_multilabel_ndarray),
+        csr_matrix(y_multilabel_ndarray),
+        # pd.Series(y_multilabel_ndarray)
+        pd.DataFrame(data=y_multilabel_ndarray),
+    ]
+
+    ys_regression = [
+        y_regression_ndarray,
+        list(y_regression_ndarray),
+        csr_matrix(y_regression_ndarray),
+        pd.Series(y_regression_ndarray),
+        pd.DataFrame(data=y_regression_ndarray),
+    ]
+
+    ys_multioutput_regression = [
+        y_multioutput_regression_ndarray,
+        list(y_multioutput_regression_ndarray),
+        csr_matrix(y_multioutput_regression_ndarray),
+        # pd.Series(y_multioutput_regression_ndarray),
+        pd.DataFrame(data=y_multioutput_regression_ndarray),
+    ]
+
+    # [ (X, y, task), ... ]
+    return (
+        (X, y, task)
+        for X in xs
+        for y, task in itertools.chain(
+            itertools.product(ys_binary, [BINARY_CLASSIFICATION]),
+            itertools.product(ys_multiclass, [MULTICLASS_CLASSIFICATION]),
+            itertools.product(ys_multilabel, [MULTILABEL_CLASSIFICATION]),
+            itertools.product(ys_regression, [REGRESSION]),
+            itertools.product(ys_multioutput_regression, [MULTIOUTPUT_REGRESSION]),
+        )
+    )
+
+@pytest.mark.parametrize("X, y, task", data_input_and_target_types())
+def test_input_and_target_types(dask_client, X, y, task):
+    automl = AutoML(
+        time_left_for_this_task=15,
+        per_run_time_limit=5,
+        dask_client=dask_client,
+    )
+    # To save time fitting and only validate the inputs we only return
+    # the configuration space
+    automl.fit(X, y, task=task, only_return_configuration_space=True)
+    assert automl._task == task
+    assert automl._metric.name == default_metric_for_task[task].name
+
+
