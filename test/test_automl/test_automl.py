@@ -57,7 +57,7 @@ def test_fit(dask_client):
         dask_client=dask_client,
     )
     automl.fit(
-        X_train, Y_train, task=MULTICLASS_CLASSIFICATION,
+        X_train, Y_train, task=MULTICLASS_CLASSIFICATION
     )
     score = automl.score(X_test, Y_test)
     assert score > 0.8

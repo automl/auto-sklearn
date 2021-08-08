@@ -36,7 +36,7 @@ from sklearn.utils.validation import check_is_fitted
 from sklearn.metrics._classification import type_of_target
 from sklearn.dummy import DummyClassifier, DummyRegressor
 
-from autosklearn.metrics import Scorer
+from autosklearn.metrics import Scorer, default_metric_for_task
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.data.validation import (
     InputValidator,
@@ -429,11 +429,21 @@ class AutoML(BaseEstimator):
                 )
         return num_run
 
+    @classmethod
+    def _task_type_id(cls, task_type: str) -> int:
+        raise NotImplementedError
+
+
+    @classmethod
+    def _supports_task_type(cls, task_type: str) -> bool:
+        raise NotImplementedError
+        
+
     def fit(
         self,
         X: SUPPORTED_FEAT_TYPES,
         y: SUPPORTED_TARGET_TYPES,
-        task: int,
+        task: Optional[int] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
         y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
         feat_type: Optional[List[str]] = None,
@@ -442,6 +452,20 @@ class AutoML(BaseEstimator):
         load_models: bool = True,
         is_classification: bool = False,
     ):
+        # Get the task if it doesn't exist
+        if task is None:
+            y_task = type_of_target(y)
+            if not self._supports_task_type(y_task):
+                raise ValueError(f"{self.__class__.__name__} does not support"
+                                 f" task {y_task}")
+            self._task = self._task_type_id(y_task)
+        else:
+            self._task = task
+
+        # Assign a metric if it doesnt exist
+        if self._metric is None:
+            self._metric = default_metric_for_task[self._task]
+
         if dataset_name is None:
             dataset_name = str(uuid.uuid1(clock_seq=os.getpid()))
 
@@ -1021,9 +1045,9 @@ class AutoML(BaseEstimator):
         self,
         X: SUPPORTED_FEAT_TYPES,
         y: SUPPORTED_TARGET_TYPES,
-        task: int,
         is_classification: bool,
         config: Union[Configuration,  Dict[str, Union[str, float, int]]],
+        task: Optional[int] = None,
         dataset_name: Optional[str] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
         y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
@@ -1075,6 +1099,22 @@ class AutoML(BaseEstimator):
         run_value: RunValue
             A named tuple that contains the result of the run
         """
+        if task is not None and self._metric is None:
+            raise ValueError("Can not provide a task without a metric")
+
+        # Get the task if it doesn't exist
+        if task is None:
+            y_task = type_of_target(y)
+            if not self._supports_task_type(y_task):
+                raise ValueError(f"{self.__class__.__name__} does not support"
+                                 f" task {y_task}")
+            self._task = self._task_type_id(y_task)
+        else:
+            self._task = task
+
+        # Assign a metric if it doesnt exist
+        if self._metric is None:
+            self._metric = default_metric_for_task[self._task]
 
         # Get the configuration space
         # This also ensures that the Backend has processed the
@@ -1612,12 +1652,21 @@ class AutoML(BaseEstimator):
 
 
 class AutoMLClassifier(AutoML):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
-        self._task_mapping = {'multilabel-indicator': MULTILABEL_CLASSIFICATION,
-                              'multiclass': MULTICLASS_CLASSIFICATION,
-                              'binary': BINARY_CLASSIFICATION}
+    _task_mapping = {
+        'multilabel-indicator': MULTILABEL_CLASSIFICATION,
+        'multiclass': MULTICLASS_CLASSIFICATION,
+        'binary': BINARY_CLASSIFICATION,
+    }
+
+    @classmethod
+    def _task_type_id(cls, task_type: str) -> int:
+        return cls._task_mapping[task_type]
+
+    @classmethod
+    def _supports_task_type(cls, task_type: str) -> bool:
+        return task_type in cls._task_mapping.keys()
+        
 
     def fit(
         self,
@@ -1630,22 +1679,10 @@ class AutoMLClassifier(AutoML):
         only_return_configuration_space: bool = False,
         load_models: bool = True,
     ):
-        y_task = type_of_target(y)
-        task = self._task_mapping.get(y_task)
-        if task is None:
-            raise ValueError('Cannot work on data of type %s' % y_task)
-
-        if self._metric is None:
-            if task == MULTILABEL_CLASSIFICATION:
-                self._metric = f1_macro
-            else:
-                self._metric = accuracy
-
         return super().fit(
             X, y,
             X_test=X_test,
             y_test=y_test,
-            task=task,
             feat_type=feat_type,
             dataset_name=dataset_name,
             only_return_configuration_space=only_return_configuration_space,
@@ -1664,23 +1701,11 @@ class AutoMLClassifier(AutoML):
         feat_type: Optional[List[str]] = None,
         **kwargs,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
-        y_task = type_of_target(y)
-        task = self._task_mapping.get(y_task)
-        if task is None:
-            raise ValueError('Cannot work on data of type %s' % y_task)
-
-        if self._metric is None:
-            if task == MULTILABEL_CLASSIFICATION:
-                self._metric = f1_macro
-            else:
-                self._metric = accuracy
-
         return super().fit_pipeline(
             X=X, y=y,
             X_test=X_test, y_test=y_test,
             dataset_name=dataset_name,
             config=config,
-            task=task,
             is_classification=True,
             feat_type=feat_type,
             **kwargs,
@@ -1705,11 +1730,23 @@ class AutoMLClassifier(AutoML):
 
 
 class AutoMLRegressor(AutoML):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._task_mapping = {'continuous-multioutput': MULTIOUTPUT_REGRESSION,
-                              'continuous': REGRESSION,
-                              'multiclass': REGRESSION}
+
+    _task_mapping = {
+        'continuous-multioutput': MULTIOUTPUT_REGRESSION,
+        'continuous': REGRESSION,
+        'multiclass': REGRESSION,
+    }
+
+
+    @classmethod
+    def _task_type_id(cls, task_type: str) -> int:
+        return cls._task_mapping[task_type]
+
+
+    @classmethod
+    def _supports_task_type(cls, task_type: str) -> bool:
+        return task_type in cls._task_mapping.keys()
+
 
     def fit(
         self,
@@ -1722,22 +1759,10 @@ class AutoMLRegressor(AutoML):
         only_return_configuration_space: bool = False,
         load_models: bool = True,
     ):
-
-        # Check the data provided in y
-        # After the y data type is validated,
-        # check the task type
-        y_task = type_of_target(y)
-        task = self._task_mapping.get(y_task)
-        if task is None:
-            raise ValueError('Cannot work on data of type %s' % y_task)
-        if self._metric is None:
-            self._metric = r2
-
         return super().fit(
             X, y,
             X_test=X_test,
             y_test=y_test,
-            task=task,
             feat_type=feat_type,
             dataset_name=dataset_name,
             only_return_configuration_space=only_return_configuration_space,
@@ -1756,22 +1781,10 @@ class AutoMLRegressor(AutoML):
         feat_type: Optional[List[str]] = None,
         **kwargs: Dict,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
-
-        # Check the data provided in y
-        # After the y data type is validated,
-        # check the task type
-        y_task = type_of_target(y)
-        task = self._task_mapping.get(y_task)
-        if task is None:
-            raise ValueError('Cannot work on data of type %s' % y_task)
-        if self._metric is None:
-            self._metric = r2
-
         return super().fit_pipeline(
             X=X, y=y,
             X_test=X_test, y_test=y_test,
             config=config,
-            task=task,
             feat_type=feat_type,
             dataset_name=dataset_name,
             is_classification=False,
