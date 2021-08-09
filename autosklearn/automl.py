@@ -39,6 +39,7 @@ from sklearn.dummy import DummyClassifier, DummyRegressor
 from autosklearn.metrics import Scorer, default_metric_for_task
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.data.validation import (
+    convert_if_sparse,
     InputValidator,
     SUPPORTED_FEAT_TYPES,
     SUPPORTED_TARGET_TYPES,
@@ -59,7 +60,6 @@ from autosklearn.util.parallel import preload_modules
 from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.smbo import AutoMLSMBO
-from autosklearn.metrics import f1_macro, accuracy, r2
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
     REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION, \
     CLASSIFICATION_TASKS
@@ -433,11 +433,9 @@ class AutoML(BaseEstimator):
     def _task_type_id(cls, task_type: str) -> int:
         raise NotImplementedError
 
-
     @classmethod
     def _supports_task_type(cls, task_type: str) -> bool:
         raise NotImplementedError
-        
 
     def fit(
         self,
@@ -452,6 +450,9 @@ class AutoML(BaseEstimator):
         load_models: bool = True,
         is_classification: bool = False,
     ):
+        # AutoSklearn does not handle sparse y for now
+        y = convert_if_sparse(y)
+
         # Get the task if it doesn't exist
         if task is None:
             y_task = type_of_target(y)
@@ -501,8 +502,6 @@ class AutoML(BaseEstimator):
         if X_test is not None:
             X_test, y_test = self.InputValidator.transform(X_test, y_test)
 
-        self._task = task
-
         X, y = self.subsample_if_too_large(
             X=X,
             y=y,
@@ -515,7 +514,7 @@ class AutoML(BaseEstimator):
         # Check the re-sampling strategy
         try:
             self._check_resampling_strategy(
-                X=X, y=y, task=task,
+                X=X, y=y, task=self._task,
             )
         except Exception as e:
             self._fit_cleanup()
@@ -627,7 +626,7 @@ class AutoML(BaseEstimator):
             X, y,
             X_test=X_test,
             y_test=y_test,
-            task=task,
+            task=self._task,
             feat_type=self._feat_type,
             dataset_name=dataset_name,
         )
@@ -697,7 +696,7 @@ class AutoML(BaseEstimator):
                 time_left_for_ensembles=time_left_for_ensembles,
                 backend=copy.deepcopy(self._backend),
                 dataset_name=dataset_name,
-                task=task,
+                task=self._task,
                 metric=self._metric,
                 ensemble_size=self._ensemble_size,
                 ensemble_nbest=self._ensemble_nbest,
@@ -990,6 +989,8 @@ class AutoML(BaseEstimator):
         return X, y
 
     def refit(self, X, y):
+        # AutoSklearn does not handle sparse y for now
+        y = convert_if_sparse(y)
 
         # Make sure input data is valid
         if self.InputValidator is None or not self.InputValidator._is_fitted:
@@ -1099,8 +1100,8 @@ class AutoML(BaseEstimator):
         run_value: RunValue
             A named tuple that contains the result of the run
         """
-        if task is not None and self._metric is None:
-            raise ValueError("Can not provide a task without a metric")
+        # AutoSklearn does not handle sparse y for now
+        y = convert_if_sparse(y)
 
         # Get the task if it doesn't exist
         if task is None:
@@ -1285,6 +1286,9 @@ class AutoML(BaseEstimator):
     def fit_ensemble(self, y, task=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
+        # AutoSklearn does not handle sparse y for now
+        y = convert_if_sparse(y)
+
         if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit']:
             raise ValueError('Cannot call fit_ensemble with resampling '
                              'strategy %s.' % self._resampling_strategy)
@@ -1666,7 +1670,6 @@ class AutoMLClassifier(AutoML):
     @classmethod
     def _supports_task_type(cls, task_type: str) -> bool:
         return task_type in cls._task_mapping.keys()
-        
 
     def fit(
         self,
@@ -1737,16 +1740,13 @@ class AutoMLRegressor(AutoML):
         'multiclass': REGRESSION,
     }
 
-
     @classmethod
     def _task_type_id(cls, task_type: str) -> int:
         return cls._task_mapping[task_type]
 
-
     @classmethod
     def _supports_task_type(cls, task_type: str) -> bool:
         return task_type in cls._task_mapping.keys()
-
 
     def fit(
         self,

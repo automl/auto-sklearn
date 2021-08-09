@@ -12,6 +12,7 @@ from sklearn.utils.multiclass import type_of_target
 from smac.runhistory.runhistory import RunInfo, RunValue
 
 from autosklearn.data.validation import (
+    convert_if_sparse,
     SUPPORTED_FEAT_TYPES,
     SUPPORTED_TARGET_TYPES,
 )
@@ -901,6 +902,9 @@ class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
         self
 
         """
+        # AutoSklearn does not handle sparse y for now
+        y = convert_if_sparse(y)
+
         # Before running anything else, first check that the
         # type of data is compatible with auto-sklearn. Legal target
         # types are: binary, multiclass, multilabel-indicator.
@@ -1048,6 +1052,9 @@ class AutoSklearnRegressor(AutoSklearnEstimator, RegressorMixin):
         # types are: continuous, continuous-multioutput, and the special cases:
         # multiclass : because [3.0, 1.0, 5.0] is considered as multiclass
         # binary: because [1.0, 0.0] is considered multiclass
+        # AutoSklearn does not handle sparse y for now
+        y = convert_if_sparse(y)
+
         target_type = type_of_target(y)
         supported_types = ['continuous', 'binary', 'multiclass', 'continuous-multioutput']
         if target_type not in supported_types:

@@ -4,12 +4,29 @@ import typing
 
 import numpy as np
 
+from scipy.sparse import issparse, spmatrix
+
 from sklearn.base import BaseEstimator
 from sklearn.exceptions import NotFittedError
 
 from autosklearn.data.feature_validator import FeatureValidator, SUPPORTED_FEAT_TYPES
 from autosklearn.data.target_validator import SUPPORTED_TARGET_TYPES, TargetValidator
 from autosklearn.util.logging_ import get_named_client_logger
+
+
+def convert_if_sparse(y: SUPPORTED_TARGET_TYPES) -> SUPPORTED_TARGET_TYPES:
+    # Densify sparse y
+    # TODO This could possibly be passed all the way through but it
+    #      introduces many bugs which will need to be dealt with
+    if issparse(y):
+        y = typing.cast(spmatrix, y)
+        y = y.toarray()
+        y = typing.cast(np.ndarray, y)
+        # For one dimensional data, toarray will return (1, nrows)
+        if y.shape[0] == 1:
+            y = y.flatten()
+
+    return y
 
 
 class InputValidator(BaseEstimator):

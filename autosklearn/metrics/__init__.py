@@ -10,9 +10,8 @@ from sklearn.utils.multiclass import type_of_target
 from smac.utils.constants import MAXINT
 
 from autosklearn.constants import (
-    REGRESSION_TASKS, TASK_TYPES,
     BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION,
-    REGRESSION, MULTIOUTPUT_REGRESSION
+    MULTIOUTPUT_REGRESSION, REGRESSION, REGRESSION_TASKS, TASK_TYPES,
 )
 
 from .util import sanitize_array
@@ -545,9 +544,10 @@ def _compute_scorer(
         score = metric(solution, prediction)
     return score
 
+
 # Must be at bottom so all metrics are defined
-default_metric_for_task : Dict[int, Scorer] = {
-    BINARY_CLASSIFICATION:CLASSIFICATION_METRICS['accuracy'],
+default_metric_for_task: Dict[int, Scorer] = {
+    BINARY_CLASSIFICATION: CLASSIFICATION_METRICS['accuracy'],
     MULTICLASS_CLASSIFICATION: CLASSIFICATION_METRICS['accuracy'],
     MULTILABEL_CLASSIFICATION: CLASSIFICATION_METRICS['f1_macro'],
     REGRESSION: REGRESSION_METRICS['r2'],

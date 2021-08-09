@@ -16,7 +16,7 @@ import sklearn.datasets
 from smac.scenario.scenario import Scenario
 from smac.facade.roar_facade import ROAR
 
-from autosklearn.automl import AutoML
+from autosklearn.automl import AutoML, AutoMLClassifier, AutoMLRegressor
 from autosklearn.data.validation import InputValidator
 import autosklearn.automl
 from autosklearn.data.xy_data_manager import XYDataManager
@@ -741,18 +741,19 @@ def data_input_and_target_types():
 
     # Binary Classificaiton
     y_binary_ndarray = np.random.random(size=n_rows)
-    y_binary_ndarray[y_binary_ndarray > 0.5] = 0
-    y_binary_ndarray[y_binary_ndarray <= 0.5] = 1
+    y_binary_ndarray[y_binary_ndarray >= 0.5] = 1
+    y_binary_ndarray[y_binary_ndarray < 0.5] = 0
 
     # Multiclass classification
     y_multiclass_ndarray = np.random.random(size=n_rows)
-    y_multiclass_ndarray[y_multiclass_ndarray > 0.5] = 0
-    y_multiclass_ndarray[y_multiclass_ndarray <= 0.5] = 1
-    y_multiclass_ndarray[y_multiclass_ndarray <= 0.3] = 2
+    y_multiclass_ndarray[y_multiclass_ndarray > 0.66] = 2
+    y_multiclass_ndarray[(y_multiclass_ndarray <= 0.66) & (y_multiclass_ndarray >= 0.33)] = 1
+    y_multiclass_ndarray[y_multiclass_ndarray < 0.33] = 0
 
     # Multilabel classificaiton
     y_multilabel_ndarray = np.random.random(size=(n_rows, 3))
-    y_multilabel_ndarray[y_multilabel_ndarray > 0.5] = 0
+    y_multilabel_ndarray[y_multilabel_ndarray > 0.5] = 1
+    y_multilabel_ndarray[y_multilabel_ndarray <= 0.5] = 0
 
     # Regression
     y_regression_ndarray = np.random.random(size=n_rows)
@@ -820,17 +821,24 @@ def data_input_and_target_types():
         )
     )
 
+
 @pytest.mark.parametrize("X, y, task", data_input_and_target_types())
 def test_input_and_target_types(dask_client, X, y, task):
-    automl = AutoML(
-        time_left_for_this_task=15,
-        per_run_time_limit=5,
-        dask_client=dask_client,
-    )
+
+    if task in CLASSIFICATION_TASKS:
+        automl = AutoMLClassifier(
+            time_left_for_this_task=15,
+            per_run_time_limit=5,
+            dask_client=dask_client,
+        )
+    else:
+        automl = AutoMLRegressor(
+            time_left_for_this_task=15,
+            per_run_time_limit=5,
+            dask_client=dask_client,
+        )
     # To save time fitting and only validate the inputs we only return
     # the configuration space
-    automl.fit(X, y, task=task, only_return_configuration_space=True)
+    automl.fit(X, y, only_return_configuration_space=True)
     assert automl._task == task
     assert automl._metric.name == default_metric_for_task[task].name
-
-
