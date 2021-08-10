@@ -24,7 +24,7 @@ predictions = cls.predict(X_test)
 
 ## Relevant publications
 
-If you use auto-sklearn in a scientific publications, we would appreciate citations.
+If you use auto-sklearn in scientific publications, we would appreciate citations.
 
 **Efficient and Robust Automated Machine Learning**  
 *Matthias Feurer, Aaron Klein, Katharina Eggensperger, Jost Springenberg, Manuel Blum and Frank Hutter*  
