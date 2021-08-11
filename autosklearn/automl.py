@@ -99,9 +99,9 @@ def _model_predict(
     X: array-like (n_samples, ...)
         The data to perform predictions on.
 
-    requires_proba: bool
-        Whether the probability predictions are required. Usually this will be
-        dependant on the task type.
+    task: int
+        The int identifier indicating the kind of task that the model was
+        trained on.
 
     batchsize: Optional[int] = None
         If the model supports batch_size predictions then it's possible to pass
