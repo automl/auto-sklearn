@@ -959,7 +959,7 @@ class AutoML(BaseEstimator):
 
                         X, _, y, _ = sklearn.model_selection.train_test_split(
                             X, y,
-                            train_size=new_num_samples,
+                            train_size=new_num_samples - len(unique_y),
                             random_state=seed,
                             stratify=y,
                         )
