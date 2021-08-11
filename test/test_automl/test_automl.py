@@ -994,13 +994,13 @@ def test_model_predict_outputs_to_stdout_if_no_logger():
         4999 * [1] + 4999 * [2] + 1 * [3] + 1 * [4]
     )),
     (MULTILABEL_CLASSIFICATION, np.asarray(
-        4999 * [[0,1,1]] + 4999 * [[1,1,0]] + 1 * [[1,0,1]] + 1 * [[0,0,0]]
+        4999 * [[0, 1, 1]] + 4999 * [[1, 1, 0]] + 1 * [[1, 0, 1]] + 1 * [[0, 0, 0]]
     ))
 ])
 def test_subsample_classification_unique_labels_stay_in_training_set(task, y):
     n_samples = 10000
     X = np.random.random(size=(n_samples, 3))
-    memory_limit = 1 # Force subsampling
+    memory_limit = 1  # Force subsampling
     mock = unittest.mock.Mock()
 
     # Make sure our test assumptions are correct
