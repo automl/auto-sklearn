@@ -89,7 +89,7 @@ def _model_predict(
     # TODO issue 1169
     #   As CV models are collected into a VotingRegressor which does not
     #   not support multioutput regression, we need to manually transform and
-    #   transform their predictions.
+    #   average their predictions.
 
     Parameters
     ----------
