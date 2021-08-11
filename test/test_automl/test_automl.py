@@ -726,3 +726,44 @@ def test_subsample_if_too_large(memory_limit, precision, task):
             assert mock.warning.call_count == 1
     else:
         assert mock.warning.call_count == 0
+
+@pytest.mark.parametrize("task, y", [
+    (BINARY_CLASSIFICATION, np.asarray(
+        9999 * [0] + 1 * [1]
+    )),
+    (MULTICLASS_CLASSIFICATION, np.asarray(
+        4999 * [1] + 4999 * [2] + 1 * [3] + 1 * [4]
+    )),
+    (MULTILABEL_CLASSIFICATION, np.asarray(
+        4999 * [[0,1,1]] + 4999 * [[1,1,0]] + 1 * [[1,0,1]] + 1 * [[0,0,0]]
+    ))
+])
+def test_subsample_classification_unique_labels_stay_in_training_set(task, y):
+    n_samples = 10000
+    X = np.random.random(size=(n_samples, 3))
+    memory_limit = 1 # Force subsampling
+    mock = unittest.mock.Mock()
+
+    # Make sure our test assumptions are correct
+    assert len(y) == n_samples, "Ensure tests are correctly setup"
+
+    values, counts = np.unique(y, axis=0, return_counts=True)
+    unique_labels = [value for value, count in zip(values, counts) if count == 1]
+    assert len(unique_labels), "Ensure we have unique labels in the test"
+
+    _, y_sampled = AutoML.subsample_if_too_large(X, y,
+                                                 logger=mock,
+                                                 seed=1,
+                                                 memory_limit=memory_limit,
+                                                 task=task)
+
+    assert len(y_sampled) <= len(y), \
+        "Ensure sampling took place"
+    # TODO issue 1190
+    #   Not a large fan on relying the warning call count to identify
+    #   if stratification did or didn't take place
+    assert mock.warning.call_count == 2
+    assert all(label in y_sampled for label in unique_labels), \
+        "All unique labels present in the return sampled set"
+
+    
