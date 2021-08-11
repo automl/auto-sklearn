@@ -784,37 +784,53 @@ def data_test_model_predict_outsputs_correct_shapes():
     test_data = {
         BINARY_CLASSIFICATION : {
             'models': [classifier(*binary), voting_classifier(*binary)],
-            'data': binary
+            'data': binary,
+            # prob of false/true for the one class
+            'expected_output_shape': (len(binary[0]), 2)
         },
         MULTICLASS_CLASSIFICATION : {
             'models': [classifier(*multiclass), voting_classifier(*multiclass)],
-            'data': multiclass
+            'data': multiclass,
+            # prob of true for each possible class
+            'expected_output_shape': (len(multiclass[0]), 3)
         },
         MULTILABEL_CLASSIFICATION : {
             'models': [classifier(*multilabel), voting_classifier(*multilabel)],
-            'data': multilabel
+            'data': multilabel,
+            # probability of true for each binary label
+            'expected_output_shape': (len(multilabel[0]), 3)  # type: ignore
         },
         REGRESSION: {
             'models': [regressor(*regression), voting_regressor(*regression)],
-            'data': regression
+            'data': regression,
+            # array of single outputs
+            'expected_output_shape': (len(regression[0]), )
         },
         MULTIOUTPUT_REGRESSION : {
             'models': [regressor(*multioutput), voting_regressor(*multioutput)],
-            'data': multioutput
+            'data': multioutput,
+            # array of vector otuputs
+            'expected_output_shape': (len(multioutput[0]), 3)
         }
     }
 
     return itertools.chain.from_iterable(
-        [(model, cfg['data'], task) for model in cfg['models']]
+        [
+            (model, cfg['data'], task, cfg['expected_output_shape'])
+            for model in cfg['models']
+        ]
         for task, cfg in test_data.items()
     )
 
 
 @pytest.mark.parametrize(
-    "model, data, task", data_test_model_predict_outsputs_correct_shapes()
+    "model, data, task, expected_output_shape",
+    data_test_model_predict_outsputs_correct_shapes()
 )
-def test_model_predict_outputs_correct_shapes(model, data, task):
+def test_model_predict_outputs_correct_shapes(model, data, task, expected_output_shape):
     X, y = data
     prediction = _model_predict(model=model, X=X, task=task)
-    assert prediction.shape[0] == X.shape[0]
+    print(prediction)
+    assert prediction.shape == expected_output_shape
+
 
