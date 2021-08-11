@@ -730,6 +730,7 @@ def test_subsample_if_too_large(memory_limit, precision, task):
     else:
         assert mock.warning.call_count == 0
 
+
 def data_test_model_predict_outsputs_correct_shapes():
     datasets = sklearn.datasets
     binary = datasets.make_classification(n_samples=5, n_classes=2)
@@ -774,7 +775,7 @@ def data_test_model_predict_outsputs_correct_shapes():
 
     def voting_regressor(X, y):
         regressors = [
-            MyDummyRegressor(config=1, random_state=seed()).fit(X, y) 
+            MyDummyRegressor(config=1, random_state=seed()).fit(X, y)
             for _ in range(5)
         ]
         vr = VotingRegressor(estimators=None)
@@ -782,19 +783,19 @@ def data_test_model_predict_outsputs_correct_shapes():
         return vr
 
     test_data = {
-        BINARY_CLASSIFICATION : {
+        BINARY_CLASSIFICATION: {
             'models': [classifier(*binary), voting_classifier(*binary)],
             'data': binary,
             # prob of false/true for the one class
             'expected_output_shape': (len(binary[0]), 2)
         },
-        MULTICLASS_CLASSIFICATION : {
+        MULTICLASS_CLASSIFICATION: {
             'models': [classifier(*multiclass), voting_classifier(*multiclass)],
             'data': multiclass,
             # prob of true for each possible class
             'expected_output_shape': (len(multiclass[0]), 3)
         },
-        MULTILABEL_CLASSIFICATION : {
+        MULTILABEL_CLASSIFICATION: {
             'models': [classifier(*multilabel), voting_classifier(*multilabel)],
             'data': multilabel,
             # probability of true for each binary label
@@ -806,7 +807,7 @@ def data_test_model_predict_outsputs_correct_shapes():
             # array of single outputs
             'expected_output_shape': (len(regression[0]), )
         },
-        MULTIOUTPUT_REGRESSION : {
+        MULTIOUTPUT_REGRESSION: {
             'models': [regressor(*multioutput), voting_regressor(*multioutput)],
             'data': multioutput,
             # array of vector otuputs
@@ -830,7 +831,4 @@ def data_test_model_predict_outsputs_correct_shapes():
 def test_model_predict_outputs_correct_shapes(model, data, task, expected_output_shape):
     X, y = data
     prediction = _model_predict(model=model, X=X, task=task)
-    print(prediction)
     assert prediction.shape == expected_output_shape
-
-
