@@ -717,7 +717,6 @@ def test_cv_regression(tmp_dir, dask_client):
     assert performance_over_time_is_plausible(automl.performance_over_time_) is True
 
 
-
 def test_regression_pandas_support(tmp_dir, dask_client):
 
     X, y = sklearn.datasets.fetch_openml(
