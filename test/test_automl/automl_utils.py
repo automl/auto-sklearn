@@ -61,14 +61,7 @@ def print_debug_information(automl):
 
 
 def _includes(scores, all_scores):
-    if len(all_scores) != len(scores):
-        return False
-
-    for score in all_scores:
-        if score not in scores:
-            return False
-
-    return True
+    return all(score in all_scores for score in scores) and len(scores) == len(all_scores)
 
 
 def count_succeses(cv_results):

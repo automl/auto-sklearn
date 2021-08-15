@@ -64,7 +64,6 @@ def test_fit(dask_client):
     assert count_succeses(automl.cv_results_) > 0
     assert includes_train_scores(automl.performance_over_time_.columns) is True
     assert performance_over_time_is_plausible(automl.performance_over_time_) is True
-    assert performance_over_time_is_plausible(automl.performance_over_time_) is True
     assert automl._task == MULTICLASS_CLASSIFICATION
 
     del automl

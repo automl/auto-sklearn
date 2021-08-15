@@ -119,6 +119,7 @@ def test_fit_n_jobs(tmp_dir):
 
     assert count_succeses(automl.cv_results_) > 0
     assert includes_train_scores(automl.performance_over_time_.columns) is True
+    assert performance_over_time_is_plausible(automl.performance_over_time_) is True
     # For travis-ci it is important that the client no longer exists
     assert automl.automl_._dask_client is None
 
@@ -261,13 +262,12 @@ def test_type_of_target(mock_estimator):
                     "binary targets")
 
 
-def test_performance_over_time_no_ensemble(tmp_dir, output_dir):
+def test_performance_over_time_no_ensemble(tmp_dir):
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
 
     cls = AutoSklearnClassifier(time_left_for_this_task=30,
                                 per_run_time_limit=5,
                                 tmp_folder=tmp_dir,
-                                output_folder=output_dir,
                                 seed=1,
                                 initial_configurations_via_metalearning=0,
                                 ensemble_size=0,)
@@ -278,7 +278,7 @@ def test_performance_over_time_no_ensemble(tmp_dir, output_dir):
     assert performance_over_time_is_plausible(performance_over_time) is True
 
 
-def test_cv_results(tmp_dir, output_dir):
+def test_cv_results(tmp_dir):
     # TODO restructure and actually use real SMAC output from a long run
     # to do this unittest!
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
@@ -714,6 +714,8 @@ def test_cv_regression(tmp_dir, dask_client):
     assert score >= 0.1, print_debug_information(automl)
     assert count_succeses(automl.cv_results_) > 0, print_debug_information(automl)
     assert includes_train_scores(automl.performance_over_time_.columns) is True
+    assert performance_over_time_is_plausible(automl.performance_over_time_) is True
+
 
 
 def test_regression_pandas_support(tmp_dir, dask_client):
