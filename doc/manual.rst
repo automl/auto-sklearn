@@ -153,7 +153,7 @@ statistics can be printed for the inspection.
 >>> automl.show_models()
 
 ``cv_results_`` returns a dict with keys as column headers and values as columns, that can be imported into a pandas DataFrame.
-``performance_over_time_``  returns a DataFrame containing the models performance over time data, which can be used for plotting directly (`Train and Test inputs <examples/40_advanced/example_pandas_train_test.html>`_).
+``performance_over_time_``  returns a DataFrame containing the models performance over time data, which can be used for plotting directly (:ref`Here's an example <sphx_glr_examples_40_advanced_example_pandas_train_test.py>`).
 ``sprint_statistics()`` is a method that prints the name of the  dataset, the metric used, and the best validation score
 obtained by running *auto-sklearn*. It additionally prints the number of both successful and unsuccessful
 algorithm runs.
