@@ -873,7 +873,6 @@ def test_check_askl2_same_arguments_as_askl():
     assert len(unexpected_args) == 0, unexpected_args
 
 
-
 @pytest.mark.parametrize("task_type", ['classification', 'regression'])
 @pytest.mark.parametrize("resampling_strategy", ['test', 'cv', 'holdout'])
 @pytest.mark.parametrize("disable_file_output", [True, False])
