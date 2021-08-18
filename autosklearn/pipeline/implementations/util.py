@@ -27,19 +27,16 @@ def convert_multioutput_multiclass_to_multilabel(probas):
 
     Parameters
     ----------
-    probas: array_like (1 or 2, n_samples, n_labels) | (n_samples, n_labels)
+    probas: array_like (1 or 2, n_samples, n_labels) or (n_samples, n_labels)
         The output of predict_proba of a classifier model
 
     Returns
     -------
-    np.ndarray (n_samples, n_labels)
+    np.ndarray shape of (n_samples, n_labels)
         The probabilities of each label for every sample
     """
-    if isinstance(probas, np.ndarray) and len(probas.shape) > 2:
-        raise ValueError('New unsupported sklearn output!')
-
     if isinstance(probas, list):
-        # probas = (prob of positive/negative label, n_samples, n_labels)
+        # probas = shape of (prob of positive/negative label, n_samples, n_labels)
         n_samples = probas[0].shape[0]
         n_labels = len(probas)
         multioutput_probas = np.ndarray((n_samples, n_labels))
@@ -47,15 +44,16 @@ def convert_multioutput_multiclass_to_multilabel(probas):
         for i, label_scores in enumerate(probas):
             n_probabilities = label_scores.shape[1]
 
-            # Label was never observer so it has a probability of 0
+            # Label was never observed so it has a probability of 0
             if n_probabilities == 1:
                 multioutput_probas[:, i] = 0
 
-            # Label has a probability of true or false
+            # Label has a probability score for true or false
             elif n_probabilities == 2:
                 multioutput_probas[:, i] = label_scores[:, 1]
 
-            # In case multioutput-multiclass input was used
+            # In case multioutput-multiclass input was used, where we have
+            # a probability for each class
             elif n_probabilities > 2:
                 raise ValueError('Multioutput-Multiclass supported by '
                                  'scikit-learn, but not by auto-sklearn!')
@@ -64,5 +62,11 @@ def convert_multioutput_multiclass_to_multilabel(probas):
 
         return multioutput_probas
 
+    elif isinstance(probas, np.ndarray):
+        if len(probas.shape) > 2:
+            raise ValueError('New unsupported sklearn output!')
+        else:
+            return probas
+
     else:
-        return probas
+        return ValueError(f"Unrecognized probas\n{type(probas)}\n{probas}")

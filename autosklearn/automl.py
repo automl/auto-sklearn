@@ -11,7 +11,6 @@ import time
 from typing import Any, Dict, Optional, List, Tuple, Union
 import uuid
 import unittest.mock
-import warnings
 import tempfile
 
 from ConfigSpace.configuration_space import Configuration
@@ -76,7 +75,7 @@ from autosklearn.util.single_thread_client import SingleThreadedClient
 
 
 def _model_predict(
-    model: Any,  # TODO Narrow this down
+    model: Any,
     X: SUPPORTED_FEAT_TYPES,
     task: int,
     batch_size: Optional[int] = None
@@ -86,17 +85,12 @@ def _model_predict(
     This is seperated out into a seperate function to allow for multiprocessing
     and perform parallel predictions.
 
-    # TODO issue 1169
-    #   As CV models are collected into a VotingRegressor which does not
-    #   not support multioutput regression, we need to manually transform and
-    #   average their predictions.
-
     Parameters
     ----------
     model: Any
         The model to perform predictions with
 
-    X: array-like (n_samples, ...)
+    X: {array-like, sparse matrix} of shape (n_samples, n_features)
         The data to perform predictions on.
 
     task: int
@@ -105,11 +99,11 @@ def _model_predict(
 
     batchsize: Optional[int] = None
         If the model supports batch_size predictions then it's possible to pass
-        this in as a parameter.
+        this in as an argument.
 
     Returns
     -------
-    np.ndarray (n_samples, ...)
+    np.ndarray of shape (n_samples,) or (n_samples, n_outputs)
         The predictions produced by the model
     """
     # Copy the array and ensure is has the attr 'shape'
@@ -117,31 +111,29 @@ def _model_predict(
 
     assert X_.shape[0] >= 1, f"X must have more than 1 sample but has {X_.shape[0]}"
 
-    with warnings.catch_warnings():
+    # TODO issue 1169
+    #   VotingRegressors aren't meant to be used for multioutput but we are
+    #   using them anyways. Hence we need to manually get their outputs and
+    #   average the right index as it averages on wrong dimension for us.
+    #   We should probaly move away from this in the future.
+    #
+    #   def VotingRegressor.predict()
+    #       return np.average(self._predict(X), axis=1) <- wrong axis
+    #
+    if task == MULTIOUTPUT_REGRESSION and isinstance(model, VotingRegressor):
+        voting_regressor = model
+        prediction = np.average(voting_regressor.transform(X_), axis=2).T
 
-        # TODO issue 1169
-        #   VotingRegressors aren't meant to be used for multioutput but we are
-        #   using them anyways. Hence we need to manually get their outputs and
-        #   average the right index as it averages on wrong dimension for us.
-        #   We should probaly move away from this in the future.
-        #
-        #   def VotingRegressor.predict()
-        #       return np.average(self._predict(X), axis=1) <- wrong axis
-        #
-        if task == MULTIOUTPUT_REGRESSION and isinstance(model, VotingRegressor):
-            voting_regressor = model
-            prediction = np.average(voting_regressor.transform(X_), axis=2).T
-
+    else:
+        if task in CLASSIFICATION_TASKS:
+            predict_func = model.predict_proba
         else:
-            if task in CLASSIFICATION_TASKS:
-                predict_func = model.predict_proba
-            else:
-                predict_func = model.predict
+            predict_func = model.predict
 
-            if batch_size is not None and hasattr(model, 'batch_size'):
-                prediction = predict_func(X_, batch_size=batch_size)
-            else:
-                prediction = predict_func(X_)
+        if batch_size is not None and hasattr(model, 'batch_size'):
+            prediction = predict_func(X_, batch_size=batch_size)
+        else:
+            prediction = predict_func(X_)
 
     # Check that probability values lie between 0 and 1.
     if task in CLASSIFICATION_TASKS:
