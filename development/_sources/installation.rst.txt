@@ -60,9 +60,9 @@ run:
 Anaconda installation
 =====================
 
-Anaconda does not ship *auto-sklearn*, and there are no conda packages for
-*auto-sklearn*. Thus, it is easiest to install *auto-sklearn* as detailed in
-the Section `Installing auto-sklearn`_.
+You need to enable conda-forge to install *auto-sklearn* via anaconda. This section explains how to enable conda-forge so
+installation can be done with the command `conda install auto-sklearn`. 
+Optionally, you can also install *auto-sklearn* with `pip` as detailed in the Section `Installing auto-sklearn`_. 
 
 A common installation problem under recent Linux distribution is the
 incompatibility of the compiler version used to compile the Python binary
@@ -73,6 +73,38 @@ be solved by installing the *gcc* compiler shipped with AnaConda (as well as
 .. code:: bash
 
     conda install gxx_linux-64 gcc_linux-64 swig
+
+
+Conda-forge
+~~~~~~~~~~~
+
+Installing `auto-sklearn` from the `conda-forge` channel can be achieved by adding `conda-forge` to your channels with:
+
+.. code:: bash
+
+    conda config --add channels conda-forge
+
+    conda config --set channel_priority strict
+
+
+You must have `conda >=4.9`. To update conda or check your current conda version, please follow the instructions from `the official anaconda documentation <https://docs.anaconda.com/anaconda/install/update-version/>`_ . Once the `conda-forge` channel has been enabled, `auto-sklearn` can be installed with:
+
+.. code:: bash
+
+    conda install auto-sklearn
+
+
+It is possible to list all of the versions of `auto-sklearn` available on your platform with:
+
+.. code:: bash
+
+    conda search auto-sklearn --channel conda-forge
+
+to read in more details check
+`auto sklearn feedstock <https://github.com/conda-forge/auto-sklearn-feedstock>`_.
+
+for more information about Conda forge check
+`conda-forge documentations <https://conda-forge.org/docs/>`_.
 
 
 Windows/OSX compatibility
@@ -92,6 +124,7 @@ Possible solutions:
   `860 <https://github.com/automl/auto-sklearn/issues/860>`_ for suggestions)
 * virtual machine
 * docker image
+
 
 Mac OSX
 ~~~~~~~
