@@ -7,6 +7,7 @@ import dask.distributed
 import joblib
 import numpy as np
 import pandas as pd
+from scipy.sparse import spmatrix
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.utils.multiclass import type_of_target
 from smac.runhistory.runhistory import RunInfo, RunValue
@@ -328,11 +329,11 @@ class AutoSklearnEstimator(BaseEstimator):
     def fit_pipeline(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
+        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
         config: Union[Configuration,  Dict[str, Union[str, float, int]]],
         dataset_name: Optional[str] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         feat_type: Optional[List[str]] = None,
         *args,
         **kwargs: Dict,
@@ -815,9 +816,9 @@ class AutoSklearnEstimator(BaseEstimator):
     def get_configuration_space(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
+        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         dataset_name: Optional[str] = None,
         feat_type: Optional[List[str]] = None,
     ):

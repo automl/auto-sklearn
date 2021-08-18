@@ -21,8 +21,7 @@ SUPPORTED_TARGET_TYPES = typing.Union[
     typing.List,
     pd.Series,
     pd.DataFrame,
-    np.ndarray,
-    scipy.sparse.spmatrix
+    np.ndarray
 ]
 
 

@@ -31,7 +31,7 @@ from smac.tae import StatusType
 from smac.stats.stats import Stats
 import joblib
 import sklearn.utils
-import scipy.sparse
+from scipy.sparse import spmatrix
 from sklearn.utils.validation import check_is_fitted
 from sklearn.metrics._classification import type_of_target
 from sklearn.dummy import DummyClassifier, DummyRegressor
@@ -440,10 +440,10 @@ class AutoML(BaseEstimator):
     def fit(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
+        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
         task: Optional[int] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         feat_type: Optional[List[str]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: Optional[bool] = False,
@@ -1045,13 +1045,13 @@ class AutoML(BaseEstimator):
     def fit_pipeline(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
+        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
         is_classification: bool,
         config: Union[Configuration,  Dict[str, Union[str, float, int]]],
         task: Optional[int] = None,
         dataset_name: Optional[str] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         feat_type: Optional[List[str]] = None,
         **kwargs: Dict,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
@@ -1674,9 +1674,9 @@ class AutoMLClassifier(AutoML):
     def fit(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
+        y: Union[SUPPORTED_TARGET_TYPES, spmatrix]
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         feat_type: Optional[List[bool]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
@@ -1696,11 +1696,11 @@ class AutoMLClassifier(AutoML):
     def fit_pipeline(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
+        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
         config: Union[Configuration,  Dict[str, Union[str, float, int]]],
         dataset_name: Optional[str] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         feat_type: Optional[List[str]] = None,
         **kwargs,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
@@ -1751,9 +1751,9 @@ class AutoMLRegressor(AutoML):
     def fit(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
+        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         feat_type: Optional[List[bool]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
@@ -1773,11 +1773,11 @@ class AutoMLRegressor(AutoML):
     def fit_pipeline(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
+        y: Union[SUPPORTED_TARGET_TYPES, spamtrix],
         config: Union[Configuration,  Dict[str, Union[str, float, int]]],
         dataset_name: Optional[str] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         feat_type: Optional[List[str]] = None,
         **kwargs: Dict,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:

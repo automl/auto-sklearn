@@ -14,14 +14,25 @@ from autosklearn.data.target_validator import SUPPORTED_TARGET_TYPES, TargetVali
 from autosklearn.util.logging_ import get_named_client_logger
 
 
-def convert_if_sparse(y: SUPPORTED_TARGET_TYPES) -> SUPPORTED_TARGET_TYPES:
-    # Densify sparse y
-    # TODO This could possibly be passed all the way through but it
-    #      introduces many bugs which will need to be dealt with
+def convert_if_sparse(
+    y: typing.Union[SUPPORTED_TARGET_TYPES, spmatrix]
+) -> SUPPORTED_TARGET_TYPES:
+    """If the labels `y` are sparse, it will convert it to its dense representation
+
+    Parameters
+    ----------
+    y: {array-like, sparse matrix} of shape (n_samples,) or (n_samples, n_outputs)
+        The labels to 'densify' if sparse
+
+    Returns
+    -------
+    np.ndarray of shape (n_samples, ) or (n_samples, n_outputs)
+    """
     if issparse(y):
         y = typing.cast(spmatrix, y)
         y = y.toarray()
         y = typing.cast(np.ndarray, y)
+
         # For one dimensional data, toarray will return (1, nrows)
         if y.shape[0] == 1:
             y = y.flatten()
