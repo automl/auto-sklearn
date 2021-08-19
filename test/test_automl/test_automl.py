@@ -835,6 +835,7 @@ def test_model_predict_outputs_correct_shapes(model, data, task, expected_output
     prediction = _model_predict(model=model, X=X, task=task)
     assert prediction.shape == expected_output_shape
 
+
 def test_model_predict_outputs_warnings_to_logs():
     X = list(range(20))
     task = REGRESSION
@@ -852,6 +853,7 @@ def test_model_predict_outputs_warnings_to_logs():
 
     assert logger.warning.call_count == 1, "Logger should have had warning called"
 
+
 def test_model_predict_outputs_to_stdout_if_no_logger():
     X = list(range(20))
     task = REGRESSION
@@ -863,12 +865,7 @@ def test_model_predict_outputs_to_stdout_if_no_logger():
 
     model = DummyModel()
 
-
     with warnings.catch_warnings(record=True) as w:
         _model_predict(model, X, task, logger=None)
 
         assert len(w) == 1, "One warning sould have been emmited"
-
-
-
-

@@ -51,6 +51,7 @@ from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import (
     setup_logger,
     start_log_server,
+    get_named_client_logger,
     warnings_to,
     PicklableClientLogger,
 )

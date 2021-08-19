@@ -1,5 +1,4 @@
 # -*- encoding: utf-8 -*-
-from contextlib import contextmanager
 import logging
 import logging.config
 import logging.handlers
@@ -11,10 +10,12 @@ import select
 import socketserver
 import struct
 import threading
-from typing import Any, Dict, Optional, Type
 import warnings
+from contextlib import contextmanager
+from typing import Any, Dict, Iterator, Optional, TextIO, Type, cast
 
 import yaml
+
 
 def setup_logger(
     output_dir: str,
@@ -127,7 +128,6 @@ class PickableLoggerAdapter(object):
 
     def isEnabledFor(self, level: int) -> bool:
         return self.logger.isEnabledFor(level)
-
 
 
 def get_named_client_logger(
@@ -246,6 +246,7 @@ class PicklableClientLogger(PickableLoggerAdapter):
             port=self.port,
         )
 
+
 class LogRecordStreamHandler(socketserver.StreamRequestHandler):
     """Handler for a streaming logging request.
 
@@ -354,8 +355,9 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
             if self.event is not None and self.event.is_set():
                 break
 
+
 @contextmanager
-def warnings_to(logger: Optional[PicklableClientLogger] = None):
+def warnings_to(logger: Optional[PicklableClientLogger] = None) -> Iterator[None]:
     """ A context manager to catch warnings and send them to the logger
 
     If no logger is passed, warnings propogate as they normally would.
@@ -366,12 +368,26 @@ def warnings_to(logger: Optional[PicklableClientLogger] = None):
         The logger to send the warnings to
     """
     # Send to a logger if one exists
-    if logger is not None:
-        def to_log(message, category, filename, lineno, file=None, line=None):
-            logger.warning(f"{filename}:{lineno} {category.__name__}:{message}")
+    if logger:
 
         with warnings.catch_warnings():
-            warnings.showwarning = to_log
+            def to_log(
+                logger: PicklableClientLogger,
+                message: str,
+                category: Type[Warning],  # Weird but that's what it is
+                filename: str,
+                lineno: int,
+                file: Optional[TextIO] = None,
+                line: Optional[str] = None
+            ) -> None:
+                logger.warning(f"{filename}:{lineno} {category.__name__}:{message}")
+
+            # Mypy was complaining that logger didn't exist in `to_log` see here:
+            # https://mypy.readthedocs.io/en/stable/common_issues.html#narrowing-and-inner-functions
+            # we explicitly pass it in and have to force it's type with `cast`
+            warnings.showwarning = lambda *args: \
+                to_log(cast(PicklableClientLogger, logger), *args)
+
             yield
     # Else do nothing, warnings go to wherever they would without this context
     else:
