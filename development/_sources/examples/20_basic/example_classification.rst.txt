@@ -120,34 +120,34 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight                 type      cost  duration
     model_id                                                                
-    34           1             0.06                  sgd  0.014184  0.905902
-    7            2             0.04          extra_trees  0.014184  1.957125
-    32           3             0.04                  lda  0.021277  1.190025
-    26           4             0.02          extra_trees  0.021277  2.785173
-    21           5             0.04          extra_trees  0.021277  1.787872
-    16           6             0.04    gradient_boosting  0.021277  1.268896
-    2            7             0.06        random_forest  0.028369  2.155508
-    29           8             0.06          extra_trees  0.028369  2.081570
-    19           9             0.02          extra_trees  0.028369  3.469197
-    14          10             0.02                  mlp  0.028369  2.585121
-    36          11             0.02  k_nearest_neighbors  0.028369  0.961665
-    11          12             0.04        random_forest  0.028369  2.614032
-    6           13             0.02                  mlp  0.028369  1.394524
-    10          14             0.02        random_forest  0.028369  2.400844
-    8           15             0.04        random_forest  0.028369  2.492112
-    13          16             0.08    gradient_boosting  0.028369  1.681851
-    12          17             0.04    gradient_boosting  0.035461  1.594115
-    3           18             0.04                  mlp  0.035461  1.324174
-    17          19             0.02    gradient_boosting  0.035461  2.120387
-    18          20             0.04        random_forest  0.035461  2.550826
-    9           21             0.04          extra_trees  0.042553  2.320723
-    24          22             0.02        random_forest  0.042553  2.171826
-    25          23             0.02             adaboost  0.042553  2.522023
-    4           24             0.02                  mlp  0.049645  2.016507
-    28          25             0.02         bernoulli_nb  0.070922  1.119417
-    30          26             0.04  k_nearest_neighbors  0.092199  1.167598
-    35          27             0.04                  lda  0.092199  0.896838
-    20          28             0.04   passive_aggressive  0.127660  0.869986
+    34           1             0.06                  sgd  0.014184  0.884103
+    7            2             0.04          extra_trees  0.014184  1.851748
+    32           3             0.04                  lda  0.021277  1.141031
+    26           4             0.02          extra_trees  0.021277  2.727530
+    21           5             0.04          extra_trees  0.021277  1.750846
+    16           6             0.04    gradient_boosting  0.021277  1.225712
+    2            7             0.06        random_forest  0.028369  2.031466
+    29           8             0.06          extra_trees  0.028369  2.005919
+    19           9             0.02          extra_trees  0.028369  3.324448
+    14          10             0.02                  mlp  0.028369  2.510744
+    36          11             0.02  k_nearest_neighbors  0.028369  0.873648
+    11          12             0.04        random_forest  0.028369  2.570656
+    6           13             0.02                  mlp  0.028369  1.393394
+    10          14             0.02        random_forest  0.028369  2.335135
+    8           15             0.04        random_forest  0.028369  2.385031
+    13          16             0.08    gradient_boosting  0.028369  1.731761
+    12          17             0.04    gradient_boosting  0.035461  1.532347
+    3           18             0.04                  mlp  0.035461  1.325993
+    17          19             0.02    gradient_boosting  0.035461  2.010672
+    18          20             0.04        random_forest  0.035461  2.414064
+    9           21             0.04          extra_trees  0.042553  2.289789
+    24          22             0.02        random_forest  0.042553  2.196353
+    25          23             0.02             adaboost  0.042553  2.440675
+    4           24             0.02                  mlp  0.049645  1.972579
+    28          25             0.02         bernoulli_nb  0.070922  1.084818
+    30          26             0.04  k_nearest_neighbors  0.092199  1.105967
+    35          27             0.04                  lda  0.092199  0.885832
+    20          28             0.04   passive_aggressive  0.127660  0.854337
 
 
 
@@ -434,7 +434,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  3.510 seconds)
+   **Total running time of the script:** ( 2 minutes  13.362 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_classification.py:
