@@ -18,7 +18,7 @@ SUPPORTED_FEAT_TYPES = typing.Union[
     typing.List,
     pd.DataFrame,
     np.ndarray,
-    scipy.sparse.spmatrix
+    scipy.sparse.spmatrix,
 ]
 
 

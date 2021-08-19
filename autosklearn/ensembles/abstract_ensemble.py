@@ -54,6 +54,7 @@ class AbstractEnsemble(object):
         """
         pass
 
+
     @abstractmethod
     def get_models_with_weights(self, models: Dict) -> List[Tuple[float, BasePipeline]]:
         """Return a list of (weight, model) pairs

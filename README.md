@@ -2,7 +2,7 @@
 
 **auto-sklearn** is an automated machine learning toolkit and a drop-in replacement for a [scikit-learn](https://scikit-learn.org) estimator.
 
-Find the documentation **[here](http://automl.github.io/auto-sklearn/)**. Quick links:
+Find the documentation **[here](https://automl.github.io/auto-sklearn/)**. Quick links:
   * [Installation Guide](https://automl.github.io/auto-sklearn/master/installation.html)
   * [Releases](https://automl.github.io/auto-sklearn/master/releases.html)
   * [Manual](https://automl.github.io/auto-sklearn/master/manual.html)
@@ -24,13 +24,13 @@ predictions = cls.predict(X_test)
 
 ## Relevant publications
 
-If you use auto-sklearn in a scientific publications, we would appreciate citations.
+If you use auto-sklearn in scientific publications, we would appreciate citations.
 
 **Efficient and Robust Automated Machine Learning**  
 *Matthias Feurer, Aaron Klein, Katharina Eggensperger, Jost Springenberg, Manuel Blum and Frank Hutter*  
 Advances in Neural Information Processing Systems 28 (2015)  
 
-[Link](http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf) to publication.
+[Link](https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf) to publication.
 ```
 @inproceedings{feurer-neurips15a,
   title     = {Efficient and Robust Automated Machine Learning},
@@ -59,4 +59,4 @@ arXiv:2007.04074 [cs.LG], 2020
 
 ----------------------------------------
 
-Also, have a look at the blog on [automl.org](automl.org) where we regularly release blogposts.
+Also, have a look at the blog on [automl.org](https://automl.org) where we regularly release blogposts.
