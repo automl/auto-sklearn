@@ -1,15 +1,66 @@
 # Contributing to auto-sklearn
-Thanks for checking out the contribution guide! Feel free to [skip ahead](#pull-request-overview) if you're not new to open-source or already contributed before. 
+Thanks for checking out the contribution guide! 
+We included a quick overview at the start for anyone familiar with open-source contribution or autosklearn and simply wants to see our workflow.
 
-Hopefully this guide helps you to contribute to open-source and auto-sklearn, whether it be a simple doc fix, a small bug fix or even new features that everyone can get use out of.
-If you're new to open-source or even new to Python but you want to get your hands dirty, we'll try to be as helpful as possible.
-If you're looking for a particular project to work on, check out the [Issues](https://github.com/automl/auto-sklearn/issues) for things you might be interested in working on!
+If you're new to contributing then hopefully this guide helps with contributing to open-source and auto-sklearn, whether it be a simple doc fix, a small bug fix or even new features that everyone can get use out of.
+Even if you're new to open-source or even new to Python but you want to get your hands dirty, we'll try to be as helpful as possible.
+If you're looking for a particular project to work on, check out the [Issues](https://github.com/automl/auto-sklearn/issues) for things you might be interested in!
 
-For new contributors, the first sections will be of most help while contributors to other open-source projects or even auto-sklearn can refer to the [details](#pull-request-overview) section.
+For new contributors, you can skip the overview and find the more detailed walkthrough [here](#contributing)!
 
 This guide is only aimed towards Unix command line users as that's what we know but the same principles apply.
 
-# Contributing Overview
+# Pull Request Overview
+* Create a fork of the [automl/auto-sklearn](https://github.com/automl/auto-sklearn) git repo
+* Clone your own fork and create a new branch from the branch to work on
+    ```bash
+    git clone git@github.com:automl/auto-sklearn.git
+    cd auto-sklearn
+    git checkout -b my_new_branch development
+    
+    python -m venv my-virtual-env
+    source my-virtual-env/bin/activate
+    
+    pip install -e .[test,docs,examples] # zsh users need quotes ".[test,...]"
+    
+    # Edit files...
+    
+    # If you changed documentation:
+    # This will generate all documentation, run examples and check links
+    cd doc
+    make linkcheck
+    
+    # ... fix any issues
+    
+    # If you edited any code
+    # Check out pytest --help if you want to only run specific tests
+    pytest
+    
+    # ... fix any issues
+    
+    # Use pre-commit for style and typing checks
+    pip install pre-commit
+    pre-commit run --all-files
+    
+    # ... fix any issues
+    
+    # Add the changes
+    git add {changed files}
+    git commit -m "Meaningful as you can make it message"
+    
+    # Push back to your fork
+    git push --set-upstream origin my_new_branch
+    ```
+* Go to github, go to our own fork and then make a pull request using the *Contribute*
+icon.
+    * `automl/auto-sklearn` | `development` <- `your-username/auto-sklearn` | `my_new_branch`
+* Write a description of the changes, why you implemented them and any implications.
+* If it's your first time contributing, we will run some automated tests, mostly
+the same as you can run manually
+* We'll review the code and perhaps ask for some changes
+* Once we're happy with the result, we'll merge it in!
+
+# Contributing
 There are many kinds of contributions you can make to auto-sklearn but we'll focus on three main ones **Documentation**, **Bug Fixes** and **Features**, each of which require a little bit of a different flow to make sure it meets code standards and won't cause any issues later on.
 
 First we'll go over the general flow, what each step does and then later look at making more specific kinds of changes, what we'd like to see and how you might create a workflow.
@@ -126,71 +177,65 @@ First we'll go over the general flow, what each step does and then later look at
     git push --set-upstream origin my_new_branch
     ```
 
-* Creating a PR TODO
-* Writing a PR description TODO
-* Automated tests TODO
-* Fixing Review changes TODO
+*   At this point, we need to create a PR request to the [automl/autosklearn](https://github.com/automl/auto-sklearn) repository with our new changes.
+    This can be done simply by going to your own forked repo, clicking **'Contribute'**, and selecting
+    the **development** branch of `automl/auto-sklearn`.
+    *   `automl/auto-sklearn` | `development` <- `your-username/auto-sklearn` | `my_new_branch`
+    The reason we don't want to directly merge new PR's into master is to make
+    sure we always have a stable version. With a development branch, we can safely
+    accumulate certain changes and makes sure they all work together before creating
+    a new master version.
 
-## Documentation
+*   Now you've got to describe what you've changed.
+    Some key things to include here are:
+    *   A high level overview of what you've done such as fixing a problem or
+        introducing a new feature.
+        If it's a simple doc fix, don't worry too much about this.
+    *   Have you introduced any breaking changes to the API?
+        We may not realise it while reviewing the changes but if you are aware,
+        it definitely helps to tell us!
+    *   Do you think this might have any implications in the future or how would
+        further work on this look like?
+    *   If you've introduced some new feature, write about who might use it,
+        give a breif code sample to show it and let us know how you tested it!
+    *   If you've fixed a bug, write about why this bug exists in the first place,
+        how you solved it and how a test makes sure it won't pop up again!
+
+*   Once you've submitted a PR, we'll probably enable some automatic tests to run.
+    This will make sure all the tests run smoothly, make sure the documentation builds correctly and do some quick check on code quality.
+    You'll be able to see these run in the **Checks** tab or at the bottom of the PR.
+    If you see a red x, that means somethings probably gone wrong which should have been caught by running the tests locally but we also do some checks in environments you were not developing on.
+    Sometimes it is the case that there is a bug unrelated to your changes that cause the tests to fail but we are aware of these.
+    If you see one of these failures, feel free to ask!
+
+*   Meanwhile, we'll also review your code.
+    In the top right you'll see a little **Suggested Reviewers** button so feel free to request a review with that!
+    Some common review points are:
+    * This seems odd, why was this done?
+    * Could you see if you can use the functionality from place X?
+    * Could you creat a test or documentation for this?
+    * This could be a nicer way of doing this, what do you think?
+    Occasionally there will be some major point which will require more discussion but those are more on a case-by-case basis.
+
+*   This process of review, fix and testing may go on a few times.
+    The simplest way to reduce the time needed and to help us too is to run the tests, code formatting check and doc building locall.
+    If they all pass locally they will very often have no issues in the automated tests.
+
+    Once everyone is happy, it's time for us to hit (*squash*) merge, get it into the development branch and have one more contribution to autosklearn!
+
+## Kinds of PRs
+Of course we can't cover every use case but here's some common kinds of PR's along with some pointers!
+
+#### Documentation
+Anything to contribute to better documentation is always appreciated
+#### Bug Fixes
 * TODO
-## Bug Fixes
-* TODO
-## Features
+#### Features
 * TODO
 
-# Pull Request Overview
-* Create a fork of the [automl/auto-sklearn](https://github.com/automl/auto-sklearn) git repo
-* Clone your own fork and create a new branch from the branch to work on
-    ```bash
-    git clone git@github.com:automl/auto-sklearn.git
-    cd auto-sklearn
-    git checkout -b my_new_branch development
-    
-    python -m venv my-virtual-env
-    source my-virtual-env/bin/activate
-    
-    pip install -e .[test,docs,examples] # zsh users need quotes ".[test,...]"
-    
-    # Edit files...
-    
-    # If you changed documentation:
-    # This will generate all documentation, run examples and check links
-    cd doc
-    make linkcheck
-    
-    # ... fix any issues
-    
-    # If you edited any code
-    # Check out pytest --help if you want to only run specific tests
-    pytest
-    
-    # ... fix any issues
-    
-    # Use pre-commit for style and typing checks
-    pip install pre-commit
-    pre-commit run --all-files
-    
-    # ... fix any issues
-    
-    # Add the changes
-    git add {changed files}
-    git commit -m "Meaningful as you can make it message"
-    
-    # Push back to your fork
-    git push --set-upstream origin my_new_branch
-    ```
-* Go to github, go to our own fork and then make a pull request using the *Contribute*
-icon.
-    * `automl/auto-sklearn` | `development` <- `your-username/auto-sklearn` | `my_new_branch`
-* Write a description of the changes, why you implemented them and any implications.
-* If it's your first time contributing, we will run some automated tests, mostly
-the same as you can run manually
-* We'll review the code and perhaps ask for some changes
-* Once we're happy with the result, we'll merge it in!
+# General FAQ
 
-# FAQ
-
-### I've finished my pull request and want it reviewed, now what?
+### I've finished my pull request or made new changes and want it reviewed, now what?
 * In the Pull request on the right there should be a tab **Reviewers** with some suggested
 reviewers, feel free to request once you think your contribution is ready.
 
