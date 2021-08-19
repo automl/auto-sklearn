@@ -446,10 +446,99 @@ class AutoML(BaseEstimator):
         y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         feat_type: Optional[List[str]] = None,
         dataset_name: Optional[str] = None,
-        only_return_configuration_space: Optional[bool] = False,
+        only_return_configuration_space: bool = False,
         load_models: bool = True,
         is_classification: bool = False,
     ):
+        """Fit AutoML to given training set (X, y).
+
+        Fit both optimizes the machine learning models and builds an ensemble
+        out of them. To disable ensembling, set ``ensemble_size==0``.
+
+        # TODO PR1213
+        #
+        #   `task: Optional[int]` and `is_classification`
+        #
+        #   `AutoML` tries to identify the task itself with
+        #   `sklearn.type_of_target`, leaving little for the subclasses to do.
+        #   Except this failes when type_of_target(y) == "multiclass".
+        #
+        #   "multiclass" be mean either REGRESSION or MULTICLASS_CLASSIFICATION,
+        #   and so this is where the subclasses are used to determine which.
+        #   However, this could also be deduced from the `is_classification`
+        #   paramaeter.
+        #
+        #   In the future, there is little need for the subclasses of `AutoML`
+        #   and no need for the `task` parameter. The extra functionality
+        #   provided by `AutoMLClassifier` in predict could be moved to
+        #   `AutoSklearnClassifier`, leaving `AutoML` to just produce raw
+        #   outputs and simplifying the heirarchy.
+        #
+        #  `load_models`
+        #
+        #   This parameter is likely not needed as they are loaded upon demand
+        #   throughout `AutoML`.
+        #   Creating a @property models that loads models into self.models_ is
+        #   not loaded would remove the need for this parameter and simplyify
+        #   the verification of `load if self.models_ is None` to one place.
+        #
+        #   `only_return_configuration_space`
+        #
+        #   This parameter is indicative of a need to create a seperate method
+        #   for this as the functionality of `fit` and what it returns can vary.
+
+        Parameters
+        ----------
+
+        X : {array-like, sparse matrix}, shape (n_samples, n_features)
+            The training input samples.
+
+        y : array-like, shape (n_samples) or (n_samples, n_outputs)
+            The target classes.
+
+        task : Optional[int]
+            The identifier for the task AutoML is to perform.
+
+        X_test : Optional[{array-like, sparse matrix}, shape (n_samples, n_features)]
+            Test data input samples. Will be used to save test predictions for
+            all models. This allows to evaluate the performance of Auto-sklearn
+            over time.
+
+        y_test : Optional[array-like, shape (n_samples) or (n_samples, n_outputs)]
+            Test data target classes. Will be used to calculate the test error
+            of all models. This allows to evaluate the performance of
+            Auto-sklearn over time.
+
+        feat_type : Optional[List],
+            List of str of `len(X.shape[1])` describing the attribute type.
+            Possible types are `Categorical` and `Numerical`. `Categorical`
+            attributes will be automatically One-Hot encoded. The values
+            used for a categorical attribute must be integers, obtained for
+            example by `sklearn.preprocessing.LabelEncoder
+            <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_.
+
+        dataset_name : Optional[str]
+            Create nicer output. If None, a string will be determined by the
+            md5 hash of the dataset.
+
+        only_return_configuration_space: bool = False
+            If set to true, fit will only return the configuration space that will
+            be used for model search. Otherwise fitting will be performed and an
+            ensemble created.
+
+        load_models: bool = True
+            If true, this will load the models into memory once complete.
+
+        is_classification: bool = False
+            Indicates whether this is a classification task if True or a
+            regression task if False.
+
+        Returns
+        -------
+        self
+
+        """
+
         # AutoSklearn does not handle sparse y for now
         y = convert_if_sparse(y)
 
