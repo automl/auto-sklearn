@@ -735,7 +735,7 @@ def test_subsample_if_too_large(memory_limit, precision, task):
     else:
         assert mock.warning.call_count == 0
 
-        
+
 def data_input_and_target_types():
     n_rows = 100
 
@@ -847,7 +847,7 @@ def test_input_and_target_types(dask_client, X, y, task):
     assert automl._task == task
     assert automl._metric.name == default_metric_for_task[task].name
 
-    
+
 def data_test_model_predict_outsputs_correct_shapes():
     datasets = sklearn.datasets
     binary = datasets.make_classification(n_samples=5, n_classes=2)
