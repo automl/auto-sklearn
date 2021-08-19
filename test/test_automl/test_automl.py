@@ -7,19 +7,23 @@ import time
 import glob
 import unittest
 import unittest.mock
+import warnings
 
 import numpy as np
 import pandas as pd
 import pytest
 import sklearn.datasets
+from sklearn.ensemble import VotingRegressor, VotingClassifier
 from smac.scenario.scenario import Scenario
 from smac.facade.roar_facade import ROAR
 
-from autosklearn.automl import AutoML
+from autosklearn.automl import AutoML, _model_predict
 from autosklearn.data.validation import InputValidator
 import autosklearn.automl
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.metrics import accuracy, log_loss, balanced_accuracy
+from autosklearn.evaluation.abstract_evaluator import MyDummyClassifier, MyDummyRegressor
+from autosklearn.util.logging_ import PickableLoggerAdapter
 import autosklearn.pipeline.util as putil
 from autosklearn.constants import (
     MULTICLASS_CLASSIFICATION,
@@ -727,3 +731,141 @@ def test_subsample_if_too_large(memory_limit, precision, task):
             assert mock.warning.call_count == 1
     else:
         assert mock.warning.call_count == 0
+
+
+def data_test_model_predict_outsputs_correct_shapes():
+    datasets = sklearn.datasets
+    binary = datasets.make_classification(n_samples=5, n_classes=2)
+    multiclass = datasets.make_classification(n_samples=5, n_informative=3, n_classes=3)
+    multilabel = datasets.make_multilabel_classification(n_samples=5, n_classes=3)
+    regression = datasets.make_regression(n_samples=5)
+    multioutput = datasets.make_regression(n_samples=5, n_targets=3)
+
+    # TODO issue 1169
+    #   While testing output shapes, realised all models are wrapped to provide
+    #   a special predict_proba that outputs a different shape than usual.
+    #   This includes DummyClassifier and DummyRegressor which are wrapped as
+    #   `MyDummyClassifier/Regressor` and require a config object.
+    #   config == 1 : Classifier uses 'uniform', Regressor uses 'mean'
+    #   else        : Classifier uses 'most_frequent', Regressor uses 'median'
+    #
+    #   This wrapping of probabilities with
+    #       `convert_multioutput_multiclass_to_multilabel`
+    #   can probably be just put into a base class which queries subclasses
+    #   as to whether it's needed.
+    #
+    #   tldr; thats why we use MyDummyX here instead of the default models
+    #         from sklearn
+    def seed():
+        return np.random.RandomState(42)
+
+    def classifier(X, y):
+        return MyDummyClassifier(config=1, random_state=seed()).fit(X, y)
+
+    def regressor(X, y):
+        return MyDummyRegressor(config=1, random_state=seed()).fit(X, y)
+
+    # How cross validation models are currently grouped together
+    def voting_classifier(X, y):
+        classifiers = [
+            MyDummyClassifier(config=1, random_state=seed()).fit(X, y)
+            for _ in range(5)
+        ]
+        vc = VotingClassifier(estimators=None, voting='soft')
+        vc.estimators_ = classifiers
+        return vc
+
+    def voting_regressor(X, y):
+        regressors = [
+            MyDummyRegressor(config=1, random_state=seed()).fit(X, y)
+            for _ in range(5)
+        ]
+        vr = VotingRegressor(estimators=None)
+        vr.estimators_ = regressors
+        return vr
+
+    test_data = {
+        BINARY_CLASSIFICATION: {
+            'models': [classifier(*binary), voting_classifier(*binary)],
+            'data': binary,
+            # prob of false/true for the one class
+            'expected_output_shape': (len(binary[0]), 2)
+        },
+        MULTICLASS_CLASSIFICATION: {
+            'models': [classifier(*multiclass), voting_classifier(*multiclass)],
+            'data': multiclass,
+            # prob of true for each possible class
+            'expected_output_shape': (len(multiclass[0]), 3)
+        },
+        MULTILABEL_CLASSIFICATION: {
+            'models': [classifier(*multilabel), voting_classifier(*multilabel)],
+            'data': multilabel,
+            # probability of true for each binary label
+            'expected_output_shape': (len(multilabel[0]), 3)  # type: ignore
+        },
+        REGRESSION: {
+            'models': [regressor(*regression), voting_regressor(*regression)],
+            'data': regression,
+            # array of single outputs
+            'expected_output_shape': (len(regression[0]), )
+        },
+        MULTIOUTPUT_REGRESSION: {
+            'models': [regressor(*multioutput), voting_regressor(*multioutput)],
+            'data': multioutput,
+            # array of vector otuputs
+            'expected_output_shape': (len(multioutput[0]), 3)
+        }
+    }
+
+    return itertools.chain.from_iterable(
+        [
+            (model, cfg['data'], task, cfg['expected_output_shape'])
+            for model in cfg['models']
+        ]
+        for task, cfg in test_data.items()
+    )
+
+
+@pytest.mark.parametrize(
+    "model, data, task, expected_output_shape",
+    data_test_model_predict_outsputs_correct_shapes()
+)
+def test_model_predict_outputs_correct_shapes(model, data, task, expected_output_shape):
+    X, y = data
+    prediction = _model_predict(model=model, X=X, task=task)
+    assert prediction.shape == expected_output_shape
+
+
+def test_model_predict_outputs_warnings_to_logs():
+    X = list(range(20))
+    task = REGRESSION
+    logger = PickableLoggerAdapter('test_model_predict_correctly_outputs_warnings')
+    logger.warning = unittest.mock.Mock()
+
+    class DummyModel:
+        def predict(self, x):
+            warnings.warn('test warning', Warning)
+            return x
+
+    model = DummyModel()
+
+    _model_predict(model, X, task, logger=logger)
+
+    assert logger.warning.call_count == 1, "Logger should have had warning called"
+
+
+def test_model_predict_outputs_to_stdout_if_no_logger():
+    X = list(range(20))
+    task = REGRESSION
+
+    class DummyModel:
+        def predict(self, x):
+            warnings.warn('test warning', Warning)
+            return x
+
+    model = DummyModel()
+
+    with warnings.catch_warnings(record=True) as w:
+        _model_predict(model, X, task, logger=None)
+
+        assert len(w) == 1, "One warning sould have been emmited"

@@ -11,7 +11,6 @@ import time
 from typing import Any, Dict, Optional, List, Tuple, Union
 import uuid
 import unittest.mock
-import warnings
 import tempfile
 
 from ConfigSpace.configuration_space import Configuration
@@ -24,6 +23,7 @@ import pandas as pd
 import pkg_resources
 import scipy.stats
 from sklearn.base import BaseEstimator
+from sklearn.ensemble import VotingRegressor
 from sklearn.model_selection._split import _RepeatedSplits, \
     BaseShuffleSplit, BaseCrossValidator
 from smac.runhistory.runhistory import RunInfo, RunValue
@@ -31,7 +31,6 @@ from smac.tae import StatusType
 from smac.stats.stats import Stats
 import joblib
 import sklearn.utils
-import scipy.sparse
 from sklearn.utils.validation import check_is_fitted
 from sklearn.metrics._classification import type_of_target
 from sklearn.dummy import DummyClassifier, DummyRegressor
@@ -53,6 +52,8 @@ from autosklearn.util.logging_ import (
     setup_logger,
     start_log_server,
     get_named_client_logger,
+    warnings_to,
+    PicklableClientLogger,
 )
 from autosklearn.util import pipeline, RE_PATTERN
 from autosklearn.util.parallel import preload_modules
@@ -75,38 +76,81 @@ from autosklearn.pipeline.components.data_preprocessing.rescaling import Rescali
 from autosklearn.util.single_thread_client import SingleThreadedClient
 
 
-def _model_predict(model, X, batch_size, logger, task):
-    def send_warnings_to_log(
-            message, category, filename, lineno, file=None, line=None):
-        logger.debug('%s:%s: %s:%s' % (filename, lineno, category.__name__, message))
-        return
-    X_ = X.copy()
-    with warnings.catch_warnings():
-        warnings.showwarning = send_warnings_to_log
-        if task in REGRESSION_TASKS:
-            if hasattr(model, 'batch_size'):
-                prediction = model.predict(X_, batch_size=batch_size)
-            else:
-                prediction = model.predict(X_)
+def _model_predict(
+    model: Any,
+    X: SUPPORTED_FEAT_TYPES,
+    task: int,
+    batch_size: Optional[int] = None,
+    logger: Optional[PicklableClientLogger] = None,
+) -> np.ndarray:
+    """ Generates the predictions from a model.
+
+    This is seperated out into a seperate function to allow for multiprocessing
+    and perform parallel predictions.
+
+    Parameters
+    ----------
+    model: Any
+        The model to perform predictions with
+
+    X: {array-like, sparse matrix} of shape (n_samples, n_features)
+        The data to perform predictions on.
+
+    task: int
+        The int identifier indicating the kind of task that the model was
+        trained on.
+
+    batchsize: Optional[int] = None
+        If the model supports batch_size predictions then it's possible to pass
+        this in as an argument.
+
+    logger: Optional[PicklableClientLogger] = None
+        If a logger is passed, the warnings are writte to the logger. Otherwise
+        the warnings propogate as they would normally.
+
+    Returns
+    -------
+    np.ndarray of shape (n_samples,) or (n_samples, n_outputs)
+        The predictions produced by the model
+    """
+    # Copy the array and ensure is has the attr 'shape'
+    X_ = np.asarray(X) if isinstance(X, list) else X.copy()
+
+    assert X_.shape[0] >= 1, f"X must have more than 1 sample but has {X_.shape[0]}"
+
+    with warnings_to(logger=logger):
+        # TODO issue 1169
+        #   VotingRegressors aren't meant to be used for multioutput but we are
+        #   using them anyways. Hence we need to manually get their outputs and
+        #   average the right index as it averages on wrong dimension for us.
+        #   We should probaly move away from this in the future.
+        #
+        #   def VotingRegressor.predict()
+        #       return np.average(self._predict(X), axis=1) <- wrong axis
+        #
+        if task == MULTIOUTPUT_REGRESSION and isinstance(model, VotingRegressor):
+            voting_regressor = model
+            prediction = np.average(voting_regressor.transform(X_), axis=2).T
+
         else:
-            if hasattr(model, 'batch_size'):
-                prediction = model.predict_proba(X_, batch_size=batch_size)
+            if task in CLASSIFICATION_TASKS:
+                predict_func = model.predict_proba
             else:
-                prediction = model.predict_proba(X_)
+                predict_func = model.predict
 
-            # Check that all probability values lie between 0 and 1.
-            assert(
-                (prediction >= 0).all() and (prediction <= 1).all()
-            ), "For {}, prediction probability not within [0, 1]!".format(
-                model
-            )
+            if batch_size is not None and hasattr(model, 'batch_size'):
+                prediction = predict_func(X_, batch_size=batch_size)
+            else:
+                prediction = predict_func(X_)
 
-    if len(prediction.shape) < 1 or len(X_.shape) < 1 or \
-            X_.shape[0] < 1 or prediction.shape[0] != X_.shape[0]:
-        logger.warning(
-            "Prediction shape for model %s is %s while X_.shape is %s",
-            model, str(prediction.shape), str(X_.shape)
-        )
+    # Check that probability values lie between 0 and 1.
+    if task in CLASSIFICATION_TASKS:
+        assert (prediction >= 0).all() and (prediction <= 1).all(), \
+            f"For {model}, prediction probability not within [0, 1]!"
+
+    assert prediction.shape[0] == X_.shape[0], \
+        f"Prediction shape {model} is {prediction.shape} while X_.shape is {X_.shape}"
+
     return prediction
 
 
@@ -1220,7 +1264,10 @@ class AutoML(BaseEstimator):
 
         all_predictions = joblib.Parallel(n_jobs=n_jobs)(
             joblib.delayed(_model_predict)(
-                models[identifier], X, batch_size, self._logger, self._task
+                model=models[identifier],
+                X=X,
+                task=self._task,
+                batch_size=batch_size
             )
             for identifier in self.ensemble_.get_selected_model_identifiers()
         )
