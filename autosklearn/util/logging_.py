@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+from contextlib import contextmanager
 import logging
 import logging.config
 import logging.handlers
@@ -11,9 +12,9 @@ import socketserver
 import struct
 import threading
 from typing import Any, Dict, Optional, Type
+import warnings
 
 import yaml
-
 
 def setup_logger(
     output_dir: str,
@@ -126,6 +127,7 @@ class PickableLoggerAdapter(object):
 
     def isEnabledFor(self, level: int) -> bool:
         return self.logger.isEnabledFor(level)
+
 
 
 def get_named_client_logger(
@@ -244,7 +246,6 @@ class PicklableClientLogger(PickableLoggerAdapter):
             port=self.port,
         )
 
-
 class LogRecordStreamHandler(socketserver.StreamRequestHandler):
     """Handler for a streaming logging request.
 
@@ -352,3 +353,26 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
                 self.handle_request()
             if self.event is not None and self.event.is_set():
                 break
+
+@contextmanager
+def warnings_to(logger: Optional[PicklableClientLogger] = None):
+    """ A context manager to catch warnings and send them to the logger
+
+    If no logger is passed, warnings propogate as they normally would.
+
+    Parameters
+    ----------
+    logger: Optional[PicklableClientLogger] = None
+        The logger to send the warnings to
+    """
+    # Send to a logger if one exists
+    if logger is not None:
+        def to_log(message, category, filename, lineno, file=None, line=None):
+            logger.warning(f"{filename}:{lineno} {category.__name__}:{message}")
+
+        with warnings.catch_warnings():
+            warnings.showwarning = to_log
+            yield
+    # Else do nothing, warnings go to wherever they would without this context
+    else:
+        yield

@@ -7,6 +7,7 @@ import time
 import glob
 import unittest
 import unittest.mock
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -22,6 +23,7 @@ import autosklearn.automl
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.metrics import accuracy, log_loss, balanced_accuracy
 from autosklearn.evaluation.abstract_evaluator import MyDummyClassifier, MyDummyRegressor
+from autosklearn.util.logging_ import PickableLoggerAdapter
 import autosklearn.pipeline.util as putil
 from autosklearn.constants import (
     MULTICLASS_CLASSIFICATION,
@@ -832,3 +834,41 @@ def test_model_predict_outputs_correct_shapes(model, data, task, expected_output
     X, y = data
     prediction = _model_predict(model=model, X=X, task=task)
     assert prediction.shape == expected_output_shape
+
+def test_model_predict_outputs_warnings_to_logs():
+    X = list(range(20))
+    task = REGRESSION
+    logger = PickableLoggerAdapter('test_model_predict_correctly_outputs_warnings')
+    logger.warning = unittest.mock.Mock()
+
+    class DummyModel:
+        def predict(self, x):
+            warnings.warn('test warning', Warning)
+            return x
+
+    model = DummyModel()
+
+    _model_predict(model, X, task, logger=logger)
+
+    assert logger.warning.call_count == 1, "Logger should have had warning called"
+
+def test_model_predict_outputs_to_stdout_if_no_logger():
+    X = list(range(20))
+    task = REGRESSION
+
+    class DummyModel:
+        def predict(self, x):
+            warnings.warn('test warning', Warning)
+            return x
+
+    model = DummyModel()
+
+
+    with warnings.catch_warnings(record=True) as w:
+        _model_predict(model, X, task, logger=None)
+
+        assert len(w) == 1, "One warning sould have been emmited"
+
+
+
+

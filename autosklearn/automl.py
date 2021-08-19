@@ -51,7 +51,8 @@ from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import (
     setup_logger,
     start_log_server,
-    get_named_client_logger,
+    warnings_to,
+    PicklableClientLogger,
 )
 from autosklearn.util import pipeline, RE_PATTERN
 from autosklearn.util.parallel import preload_modules
@@ -78,7 +79,8 @@ def _model_predict(
     model: Any,
     X: SUPPORTED_FEAT_TYPES,
     task: int,
-    batch_size: Optional[int] = None
+    batch_size: Optional[int] = None,
+    logger: Optional[PicklableClientLogger] = None,
 ) -> np.ndarray:
     """ Generates the predictions from a model.
 
@@ -101,6 +103,10 @@ def _model_predict(
         If the model supports batch_size predictions then it's possible to pass
         this in as an argument.
 
+    logger: Optional[PicklableClientLogger] = None
+        If a logger is passed, the warnings are writte to the logger. Otherwise
+        the warnings propogate as they would normally.
+
     Returns
     -------
     np.ndarray of shape (n_samples,) or (n_samples, n_outputs)
@@ -111,29 +117,30 @@ def _model_predict(
 
     assert X_.shape[0] >= 1, f"X must have more than 1 sample but has {X_.shape[0]}"
 
-    # TODO issue 1169
-    #   VotingRegressors aren't meant to be used for multioutput but we are
-    #   using them anyways. Hence we need to manually get their outputs and
-    #   average the right index as it averages on wrong dimension for us.
-    #   We should probaly move away from this in the future.
-    #
-    #   def VotingRegressor.predict()
-    #       return np.average(self._predict(X), axis=1) <- wrong axis
-    #
-    if task == MULTIOUTPUT_REGRESSION and isinstance(model, VotingRegressor):
-        voting_regressor = model
-        prediction = np.average(voting_regressor.transform(X_), axis=2).T
+    with warnings_to(logger=logger):
+        # TODO issue 1169
+        #   VotingRegressors aren't meant to be used for multioutput but we are
+        #   using them anyways. Hence we need to manually get their outputs and
+        #   average the right index as it averages on wrong dimension for us.
+        #   We should probaly move away from this in the future.
+        #
+        #   def VotingRegressor.predict()
+        #       return np.average(self._predict(X), axis=1) <- wrong axis
+        #
+        if task == MULTIOUTPUT_REGRESSION and isinstance(model, VotingRegressor):
+            voting_regressor = model
+            prediction = np.average(voting_regressor.transform(X_), axis=2).T
 
-    else:
-        if task in CLASSIFICATION_TASKS:
-            predict_func = model.predict_proba
         else:
-            predict_func = model.predict
+            if task in CLASSIFICATION_TASKS:
+                predict_func = model.predict_proba
+            else:
+                predict_func = model.predict
 
-        if batch_size is not None and hasattr(model, 'batch_size'):
-            prediction = predict_func(X_, batch_size=batch_size)
-        else:
-            prediction = predict_func(X_)
+            if batch_size is not None and hasattr(model, 'batch_size'):
+                prediction = predict_func(X_, batch_size=batch_size)
+            else:
+                prediction = predict_func(X_)
 
     # Check that probability values lie between 0 and 1.
     if task in CLASSIFICATION_TASKS:
