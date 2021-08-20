@@ -1,8 +1,13 @@
+from typing import Optional, Dict
+
 import unittest
 
 from autosklearn.pipeline.util import _test_classifier, \
     _test_classifier_predict_proba, _test_classifier_iterative_fit
 from autosklearn.pipeline.constants import SPARSE
+from autosklearn.pipeline.components.classification.gradient_boosting import (
+    GradientBoostingClassifier
+)
 
 import sklearn.metrics
 import numpy as np
@@ -221,70 +226,144 @@ class BaseClassificationComponentTest(unittest.TestCase):
             return
 
     def test_module_idempotent(self):
-
+        """ Fitting twice with the same config gives the same model params. """
         if self.__class__ == BaseClassificationComponentTest:
             return
 
-        def check_classifier(cls):
-            X = np.array([[0, 0], [0, 1], [1, 0], [1, 1],
-                          [0, 0], [0, 1], [1, 0], [1, 1],
-                          [0, 0], [0, 1], [1, 0], [1, 1],
-                          [0, 0], [0, 1], [1, 0], [1, 1]])
-            y = np.array([0, 1, 1, 0,
-                          0, 1, 1, 0,
-                          0, 1, 1, 0,
-                          0, 1, 1, 0])
-            params = []
+        classifier_cls = self.module
 
-            for i in range(2):
-                try:
-                    classifier.fit(X, y)
-                except ValueError as e:
-                    if (
-                        isinstance(e.args[0], str)
-                    ) and (
-                        "Numerical problems in QDA" in e.args[0]
-                    ):
-                        continue
-                    elif (
-                        "BaseClassifier in AdaBoostClassifier ensemble is "
-                        "worse than random, ensemble can not be fit." in e.args[0]
-                    ):
-                        continue
-                    else:
-                        raise e
-                except UnboundLocalError as e:
-                    if "local variable 'raw_predictions_val' referenced before assignment" in \
-                            e.args[0]:
-                        continue
+        X = np.array([
+            [0, 0], [0, 1], [1, 0], [1, 1],
+            [0, 0], [0, 1], [1, 0], [1, 1],
+            [0, 0], [0, 1], [1, 0], [1, 1],
+            [0, 0], [0, 1], [1, 0], [1, 1],
+        ])
+        y = np.array([
+            0, 1, 1, 0,
+            0, 1, 1, 0,
+            0, 1, 1, 0,
+            0, 1, 1, 0,
+        ])
 
-                p = classifier.estimator.get_params()
-                if 'random_state' in p:
-                    del p['random_state']
-                if 'base_estimator' in p:
-                    del p['base_estimator']
-                for ignore_hp in self.res.get('ignore_hps', []):
-                    del p[ignore_hp]
-                params.append(p)
+        # There are certain errors we ignore so we wrap this in a function
+        def fitted_params(model) -> Optional[Dict]:
+            """
+            Returns the params if fitted successfully, else None if an
+            acceptable error occurs
+            """
+            # We are okay with Numerical in Quadractic disciminant analysis
+            def is_QDA_error(err):
+                return "Numerical problems in QDA" in err.args[0]
 
-                if i > 0:
-                    self.assertEqual(
-                        params[-1],
-                        params[0],
-                    )
+            # We are okay if the BaseClassifier in AdaBoostClassifier is worse
+            # than random so no ensemble can be fit
+            def is_AdaBoostClassifier_error(err):
+                return ("BaseClassifier in AdaBoostClassifier ensemble is worse"
+                        + " than random, ensemble can not be fit." in err.args[0])
 
-        classifier = self.module
-        configuration_space = classifier.get_hyperparameter_search_space()
+            def is_unset_param_raw_predictions_val_error(err):
+                return ("local variable 'raw_predictions_val' referenced before"
+                        + " assignment" in err.args[0])
+
+            try:
+                model.fit(X.copy(), y.copy())
+            except ValueError as e:
+                if is_AdaBoostClassifier_error(e) or is_QDA_error(e):
+                    return None
+            except UnboundLocalError as e:
+                if is_unset_param_raw_predictions_val_error(e):
+                    return None
+
+            return model.estimator.get_params()
+
+        # We ignore certain keys when comparing
+        param_keys_ignored = [
+            'random_state', 'base_estimator', *self.res.get('ignore_hps', [])
+        ]
+
+        # We use the default config + sampled ones
+        configuration_space = classifier_cls.get_hyperparameter_search_space()
+
         default = configuration_space.get_default_configuration()
-        classifier = classifier(random_state=np.random.RandomState(1),
-                                **{hp_name: default[hp_name] for hp_name in
-                                   default if default[hp_name] is not None})
-        check_classifier(classifier)
+        sampled = [configuration_space.sample_configuration() for _ in range(10000)]
 
-        for i in range(5):
-            classifier = self.module
-            config = configuration_space.sample_configuration()
-            classifier = classifier(random_state=np.random.RandomState(1),
-                                    **{hp_name: config[hp_name] for hp_name in
-                                       config if config[hp_name] is not None})
-            check_classifier(classifier)
+        for config in [default] + sampled:
+            model_args = {
+                'random_state': np.random.RandomState(1),
+                ** {
+                    hp_name: config[hp_name]
+                    for hp_name in config
+                    if config[hp_name] is not None
+                }
+            }
+            classifier = classifier_cls(**model_args)
+
+            # Get the parameters on the first and second fit with config params
+            params_first = fitted_params(classifier)
+            params_second = fitted_params(classifier)
+
+            # An acceptable error occured, skip to next sample
+            if params_first is None or params_second is None:
+                continue
+
+            # Remove keys we don't wish to include in the comparison
+            for params in [params_first, params_second]:
+                for key in param_keys_ignored:
+                    if key in params:
+                        del params[key]
+
+            if params_first != params_second:
+                print(model_args)
+
+            # They should be equal
+            self.assertEqual(params_first, params_second)
+
+    @unittest.skip("Issue 1209")
+    def test_gradient_boosting_module_idempotent_max_iter(self):
+        """
+        Succesive calls to `fit` GradientBoostingClassifier actually call
+        iterativ fit. This means the estimator produced after two successive
+        calls does not result in the same output estimator.
+        """
+        if self.module != GradientBoostingClassifier:
+            pass
+
+        # Gotten from failing runs of test_module_idempotent
+        model_args = {
+            'random_state': np.random.RandomState(1),
+            'early_stop': 'valid',
+            'l2_regularization': 2.125626112922482e-06,
+            'learning_rate': 0.09554502382606479,
+            'loss': 'auto',
+            'max_bins': 255,
+            'max_depth': 'None',
+            'max_leaf_nodes': 15,
+            'min_samples_leaf': 3,
+            'scoring': 'loss',
+            'tol': 1e-07,
+            'n_iter_no_change': 11,
+            'validation_fraction': 0.2751790689986756
+        }
+
+        X = np.array([
+            [0, 0], [0, 1], [1, 0], [1, 1],
+            [0, 0], [0, 1], [1, 0], [1, 1],
+            [0, 0], [0, 1], [1, 0], [1, 1],
+            [0, 0], [0, 1], [1, 0], [1, 1],
+        ])
+        y = np.array([
+            0, 1, 1, 0,
+            0, 1, 1, 0,
+            0, 1, 1, 0,
+            0, 1, 1, 0,
+        ])
+
+        classifier = self.module(**model_args)
+
+        # Get the parameters on the first and second fit with config params
+        params_first = classifier.fit(X, y).estimator.get_params()
+        params_second = classifier.fit(X, y).estimator.get_params()
+
+        # Remove keys we don't wish to include in the comparison
+        # We ignore certain keys when comparing
+        assert params_first['max_iter'] == params_second['max_iter']
