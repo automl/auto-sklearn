@@ -312,11 +312,9 @@ class BaseClassificationComponentTest(unittest.TestCase):
                     if key in params:
                         del params[key]
 
-            if params_first != params_second:
-                print(model_args)
-
             # They should be equal
-            self.assertEqual(params_first, params_second)
+            self.assertEqual(params_first, params_second,
+                             f"Failed with model args {model_args}")
 
     @unittest.skip("Issue 1209")
     def test_gradient_boosting_module_idempotent_max_iter(self):
@@ -364,6 +362,4 @@ class BaseClassificationComponentTest(unittest.TestCase):
         params_first = classifier.fit(X, y).estimator.get_params()
         params_second = classifier.fit(X, y).estimator.get_params()
 
-        # Remove keys we don't wish to include in the comparison
-        # We ignore certain keys when comparing
         assert params_first['max_iter'] == params_second['max_iter']
