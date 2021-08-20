@@ -285,7 +285,7 @@ class BaseClassificationComponentTest(unittest.TestCase):
         configuration_space = classifier_cls.get_hyperparameter_search_space()
 
         default = configuration_space.get_default_configuration()
-        sampled = [configuration_space.sample_configuration() for _ in range(10000)]
+        sampled = [configuration_space.sample_configuration() for _ in range(5)]
 
         for config in [default] + sampled:
             model_args = {
