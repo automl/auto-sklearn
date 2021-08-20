@@ -768,6 +768,7 @@ def test_subsample_classification_unique_labels_stay_in_training_set(task, y):
     assert all(label in y_sampled for label in unique_labels), \
         "All unique labels present in the return sampled set"
 
+
 def data_test_model_predict_outsputs_correct_shapes():
     datasets = sklearn.datasets
     binary = datasets.make_classification(n_samples=5, n_classes=2)
