@@ -31,13 +31,15 @@ from smac.tae import StatusType
 from smac.stats.stats import Stats
 import joblib
 import sklearn.utils
+from scipy.sparse import spmatrix
 from sklearn.utils.validation import check_is_fitted
 from sklearn.metrics._classification import type_of_target
 from sklearn.dummy import DummyClassifier, DummyRegressor
 
-from autosklearn.metrics import Scorer
+from autosklearn.metrics import Scorer, default_metric_for_task
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.data.validation import (
+    convert_if_sparse,
     InputValidator,
     SUPPORTED_FEAT_TYPES,
     SUPPORTED_TARGET_TYPES,
@@ -60,7 +62,6 @@ from autosklearn.util.parallel import preload_modules
 from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.smbo import AutoMLSMBO
-from autosklearn.metrics import f1_macro, accuracy, r2
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
     REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION, \
     CLASSIFICATION_TASKS
@@ -473,19 +474,133 @@ class AutoML(BaseEstimator):
                 )
         return num_run
 
+    @classmethod
+    def _task_type_id(cls, task_type: str) -> int:
+        raise NotImplementedError
+
+    @classmethod
+    def _supports_task_type(cls, task_type: str) -> bool:
+        raise NotImplementedError
+
     def fit(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
-        task: int,
+        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
+        task: Optional[int] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         feat_type: Optional[List[str]] = None,
         dataset_name: Optional[str] = None,
-        only_return_configuration_space: Optional[bool] = False,
+        only_return_configuration_space: bool = False,
         load_models: bool = True,
         is_classification: bool = False,
     ):
+        """Fit AutoML to given training set (X, y).
+
+        Fit both optimizes the machine learning models and builds an ensemble
+        out of them. To disable ensembling, set ``ensemble_size==0``.
+
+        # TODO PR1213
+        #
+        #   `task: Optional[int]` and `is_classification`
+        #
+        #   `AutoML` tries to identify the task itself with
+        #   `sklearn.type_of_target`, leaving little for the subclasses to do.
+        #   Except this failes when type_of_target(y) == "multiclass".
+        #
+        #   "multiclass" be mean either REGRESSION or MULTICLASS_CLASSIFICATION,
+        #   and so this is where the subclasses are used to determine which.
+        #   However, this could also be deduced from the `is_classification`
+        #   paramaeter.
+        #
+        #   In the future, there is little need for the subclasses of `AutoML`
+        #   and no need for the `task` parameter. The extra functionality
+        #   provided by `AutoMLClassifier` in predict could be moved to
+        #   `AutoSklearnClassifier`, leaving `AutoML` to just produce raw
+        #   outputs and simplifying the heirarchy.
+        #
+        #  `load_models`
+        #
+        #   This parameter is likely not needed as they are loaded upon demand
+        #   throughout `AutoML`.
+        #   Creating a @property models that loads models into self.models_ is
+        #   not loaded would remove the need for this parameter and simplyify
+        #   the verification of `load if self.models_ is None` to one place.
+        #
+        #   `only_return_configuration_space`
+        #
+        #   This parameter is indicative of a need to create a seperate method
+        #   for this as the functionality of `fit` and what it returns can vary.
+
+        Parameters
+        ----------
+
+        X : {array-like, sparse matrix}, shape (n_samples, n_features)
+            The training input samples.
+
+        y : array-like, shape (n_samples) or (n_samples, n_outputs)
+            The target classes.
+
+        task : Optional[int]
+            The identifier for the task AutoML is to perform.
+
+        X_test : Optional[{array-like, sparse matrix}, shape (n_samples, n_features)]
+            Test data input samples. Will be used to save test predictions for
+            all models. This allows to evaluate the performance of Auto-sklearn
+            over time.
+
+        y_test : Optional[array-like, shape (n_samples) or (n_samples, n_outputs)]
+            Test data target classes. Will be used to calculate the test error
+            of all models. This allows to evaluate the performance of
+            Auto-sklearn over time.
+
+        feat_type : Optional[List],
+            List of str of `len(X.shape[1])` describing the attribute type.
+            Possible types are `Categorical` and `Numerical`. `Categorical`
+            attributes will be automatically One-Hot encoded. The values
+            used for a categorical attribute must be integers, obtained for
+            example by `sklearn.preprocessing.LabelEncoder
+            <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_.
+
+        dataset_name : Optional[str]
+            Create nicer output. If None, a string will be determined by the
+            md5 hash of the dataset.
+
+        only_return_configuration_space: bool = False
+            If set to true, fit will only return the configuration space that will
+            be used for model search. Otherwise fitting will be performed and an
+            ensemble created.
+
+        load_models: bool = True
+            If true, this will load the models into memory once complete.
+
+        is_classification: bool = False
+            Indicates whether this is a classification task if True or a
+            regression task if False.
+
+        Returns
+        -------
+        self
+
+        """
+
+        # AutoSklearn does not handle sparse y for now
+        y = convert_if_sparse(y)
+
+        # Get the task if it doesn't exist
+        if task is None:
+            y_task = type_of_target(y)
+            if not self._supports_task_type(y_task):
+                raise ValueError(f"{self.__class__.__name__} does not support"
+                                 f" task {y_task}")
+            self._task = self._task_type_id(y_task)
+        else:
+            self._task = task
+
+        # Assign a metric if it doesnt exist
+        if self._metric is None:
+            self._metric = default_metric_for_task[self._task]
+
         if dataset_name is None:
             dataset_name = str(uuid.uuid1(clock_seq=os.getpid()))
 
@@ -521,8 +636,6 @@ class AutoML(BaseEstimator):
         if X_test is not None:
             X_test, y_test = self.InputValidator.transform(X_test, y_test)
 
-        self._task = task
-
         X, y = self.subsample_if_too_large(
             X=X,
             y=y,
@@ -535,7 +648,7 @@ class AutoML(BaseEstimator):
         # Check the re-sampling strategy
         try:
             self._check_resampling_strategy(
-                X=X, y=y, task=task,
+                X=X, y=y, task=self._task,
             )
         except Exception as e:
             self._fit_cleanup()
@@ -647,7 +760,7 @@ class AutoML(BaseEstimator):
             X, y,
             X_test=X_test,
             y_test=y_test,
-            task=task,
+            task=self._task,
             feat_type=self._feat_type,
             dataset_name=dataset_name,
         )
@@ -717,7 +830,7 @@ class AutoML(BaseEstimator):
                 time_left_for_ensembles=time_left_for_ensembles,
                 backend=copy.deepcopy(self._backend),
                 dataset_name=dataset_name,
-                task=task,
+                task=self._task,
                 metric=self._metric,
                 ensemble_size=self._ensemble_size,
                 ensemble_nbest=self._ensemble_nbest,
@@ -1010,6 +1123,8 @@ class AutoML(BaseEstimator):
         return X, y
 
     def refit(self, X, y):
+        # AutoSklearn does not handle sparse y for now
+        y = convert_if_sparse(y)
 
         # Make sure input data is valid
         if self.InputValidator is None or not self.InputValidator._is_fitted:
@@ -1064,13 +1179,13 @@ class AutoML(BaseEstimator):
     def fit_pipeline(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
-        task: int,
+        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
         is_classification: bool,
         config: Union[Configuration,  Dict[str, Union[str, float, int]]],
+        task: Optional[int] = None,
         dataset_name: Optional[str] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         feat_type: Optional[List[str]] = None,
         **kwargs: Dict,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
@@ -1119,6 +1234,22 @@ class AutoML(BaseEstimator):
         run_value: RunValue
             A named tuple that contains the result of the run
         """
+        # AutoSklearn does not handle sparse y for now
+        y = convert_if_sparse(y)
+
+        # Get the task if it doesn't exist
+        if task is None:
+            y_task = type_of_target(y)
+            if not self._supports_task_type(y_task):
+                raise ValueError(f"{self.__class__.__name__} does not support"
+                                 f" task {y_task}")
+            self._task = self._task_type_id(y_task)
+        else:
+            self._task = task
+
+        # Assign a metric if it doesnt exist
+        if self._metric is None:
+            self._metric = default_metric_for_task[self._task]
 
         # Get the configuration space
         # This also ensures that the Backend has processed the
@@ -1292,6 +1423,9 @@ class AutoML(BaseEstimator):
     def fit_ensemble(self, y, task=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
+        # AutoSklearn does not handle sparse y for now
+        y = convert_if_sparse(y)
+
         if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit']:
             raise ValueError('Cannot call fit_ensemble with resampling '
                              'strategy %s.' % self._resampling_strategy)
@@ -1659,40 +1793,36 @@ class AutoML(BaseEstimator):
 
 
 class AutoMLClassifier(AutoML):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
-        self._task_mapping = {'multilabel-indicator': MULTILABEL_CLASSIFICATION,
-                              'multiclass': MULTICLASS_CLASSIFICATION,
-                              'binary': BINARY_CLASSIFICATION}
+    _task_mapping = {
+        'multilabel-indicator': MULTILABEL_CLASSIFICATION,
+        'multiclass': MULTICLASS_CLASSIFICATION,
+        'binary': BINARY_CLASSIFICATION,
+    }
+
+    @classmethod
+    def _task_type_id(cls, task_type: str) -> int:
+        return cls._task_mapping[task_type]
+
+    @classmethod
+    def _supports_task_type(cls, task_type: str) -> bool:
+        return task_type in cls._task_mapping.keys()
 
     def fit(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
+        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         feat_type: Optional[List[bool]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
     ):
-        y_task = type_of_target(y)
-        task = self._task_mapping.get(y_task)
-        if task is None:
-            raise ValueError('Cannot work on data of type %s' % y_task)
-
-        if self._metric is None:
-            if task == MULTILABEL_CLASSIFICATION:
-                self._metric = f1_macro
-            else:
-                self._metric = accuracy
-
         return super().fit(
             X, y,
             X_test=X_test,
             y_test=y_test,
-            task=task,
             feat_type=feat_type,
             dataset_name=dataset_name,
             only_return_configuration_space=only_return_configuration_space,
@@ -1703,31 +1833,19 @@ class AutoMLClassifier(AutoML):
     def fit_pipeline(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
+        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
         config: Union[Configuration,  Dict[str, Union[str, float, int]]],
         dataset_name: Optional[str] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         feat_type: Optional[List[str]] = None,
         **kwargs,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
-        y_task = type_of_target(y)
-        task = self._task_mapping.get(y_task)
-        if task is None:
-            raise ValueError('Cannot work on data of type %s' % y_task)
-
-        if self._metric is None:
-            if task == MULTILABEL_CLASSIFICATION:
-                self._metric = f1_macro
-            else:
-                self._metric = accuracy
-
         return super().fit_pipeline(
             X=X, y=y,
             X_test=X_test, y_test=y_test,
             dataset_name=dataset_name,
             config=config,
-            task=task,
             is_classification=True,
             feat_type=feat_type,
             **kwargs,
@@ -1752,39 +1870,36 @@ class AutoMLClassifier(AutoML):
 
 
 class AutoMLRegressor(AutoML):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._task_mapping = {'continuous-multioutput': MULTIOUTPUT_REGRESSION,
-                              'continuous': REGRESSION,
-                              'multiclass': REGRESSION}
+
+    _task_mapping = {
+        'continuous-multioutput': MULTIOUTPUT_REGRESSION,
+        'continuous': REGRESSION,
+        'multiclass': REGRESSION,
+    }
+
+    @classmethod
+    def _task_type_id(cls, task_type: str) -> int:
+        return cls._task_mapping[task_type]
+
+    @classmethod
+    def _supports_task_type(cls, task_type: str) -> bool:
+        return task_type in cls._task_mapping.keys()
 
     def fit(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
+        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         feat_type: Optional[List[bool]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
     ):
-
-        # Check the data provided in y
-        # After the y data type is validated,
-        # check the task type
-        y_task = type_of_target(y)
-        task = self._task_mapping.get(y_task)
-        if task is None:
-            raise ValueError('Cannot work on data of type %s' % y_task)
-        if self._metric is None:
-            self._metric = r2
-
         return super().fit(
             X, y,
             X_test=X_test,
             y_test=y_test,
-            task=task,
             feat_type=feat_type,
             dataset_name=dataset_name,
             only_return_configuration_space=only_return_configuration_space,
@@ -1795,30 +1910,18 @@ class AutoMLRegressor(AutoML):
     def fit_pipeline(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
+        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
         config: Union[Configuration,  Dict[str, Union[str, float, int]]],
         dataset_name: Optional[str] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         feat_type: Optional[List[str]] = None,
         **kwargs: Dict,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
-
-        # Check the data provided in y
-        # After the y data type is validated,
-        # check the task type
-        y_task = type_of_target(y)
-        task = self._task_mapping.get(y_task)
-        if task is None:
-            raise ValueError('Cannot work on data of type %s' % y_task)
-        if self._metric is None:
-            self._metric = r2
-
         return super().fit_pipeline(
             X=X, y=y,
             X_test=X_test, y_test=y_test,
             config=config,
-            task=task,
             feat_type=feat_type,
             dataset_name=dataset_name,
             is_classification=False,
