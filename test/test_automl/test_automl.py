@@ -760,9 +760,5 @@ def test_subsample_classification_unique_labels_stay_in_training_set(task, y):
 
     assert len(y_sampled) <= len(y), \
         "Ensure sampling took place"
-    # TODO issue 1190
-    #   Not a large fan on relying the warning call count to identify
-    #   if stratification did or didn't take place
-    assert mock.warning.call_count == 2
     assert all(label in y_sampled for label in unique_labels), \
         "All unique labels present in the return sampled set"

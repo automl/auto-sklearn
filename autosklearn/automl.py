@@ -949,7 +949,7 @@ class AutoML(BaseEstimator):
                         unique_X = X[idxs_of_unique]
                         unique_y = y[idxs_of_unique]
 
-                        # TODO optimization
+                        # NOTE optimization
                         #   If this ever turns out to be slow, this actually
                         #   copies the entire array. There might be a better
                         #   solution but it will probably require a lot more
