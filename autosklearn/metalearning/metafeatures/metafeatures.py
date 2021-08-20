@@ -14,8 +14,8 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.utils import check_array
 from sklearn.utils.multiclass import type_of_target
 
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
-    import DataPreprocessor
+from autosklearn.pipeline.components.data_preprocessing.feature_type \
+    import FeatTypeSplit
 from .metafeature import MetaFeature, HelperFunction, DatasetMetafeatures
 
 
@@ -1082,7 +1082,7 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name, logger,
                 # TODO make sure this is done as efficient as possible (no copy for
                 # sparse matrices because of wrong sparse format)
                 sparse = scipy.sparse.issparse(X)
-                DPP = DataPreprocessor(
+                DPP = FeatTypeSplit(
                     # The difference between feat_type and categorical, is that
                     # categorical has True/False instead of categorical/numerical
                     feat_type={key: 'categorical' if value else 'numerical'

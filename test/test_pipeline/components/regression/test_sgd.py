@@ -10,11 +10,11 @@ class SGDComponentTest(BaseRegressionComponentTest):
     # Values are extremely bad because the invscaling does not drop the
     # learning rate aggressively enough!
     res = dict()
-    res["default_boston"] = -1.1406255966671184e+28
+    res["default_boston"] = -3.7203740888187194e+28
     res["boston_n_calls"] = 6
-    res["default_boston_iterative"] = -1.1406255966671184e+28
-    res["default_boston_sparse"] = -2.5492867904339725e+28
-    res["default_boston_iterative_sparse"] = -2.5492867904339725e+28
+    res["default_boston_iterative"] = -3.7203740888187194e+28
+    res["default_boston_sparse"] = -2.5490406459756767e+28
+    res["default_boston_iterative_sparse"] = -2.5490406459756767e+28
     res["default_diabetes"] = 0.2731178369559112
     res["diabetes_n_calls"] = 10
     res["default_diabetes_iterative"] = 0.2731178369559112

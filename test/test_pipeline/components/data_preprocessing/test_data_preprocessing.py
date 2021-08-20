@@ -2,8 +2,8 @@ import unittest
 import numpy as np
 from scipy import sparse
 
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
-    import DataPreprocessor
+from autosklearn.pipeline.components.data_preprocessing.feature_type \
+    import FeatTypeSplit
 
 
 class PreprocessingPipelineTest(unittest.TestCase):
@@ -79,7 +79,7 @@ class PreprocessingPipelineTest(unittest.TestCase):
         Y = [Y[n] for n in cat_to_left_order]
         Y_comb = np.hstack(Y)
         # Data preprocessing
-        DPP = DataPreprocessor(feat_type=categ_feat)
+        DPP = FeatTypeSplit(feat_type=categ_feat)
         X_comb = sparse.csc_matrix(X_comb) if sparse_input else X_comb
         Y_comb_out_1 = DPP.fit_transform(X_comb)
         # Check if Y_comb_out is what we expect it to be:
@@ -120,4 +120,4 @@ class PreprocessingPipelineTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             categ_feat = {i: 'categorical' if feat else 'numerical'
                           for i, feat in enumerate(categ_feat)}
-            DataPreprocessor(feat_type=categ_feat).fit_transform(X_comb)
+            FeatTypeSplit(feat_type=categ_feat).fit_transform(X_comb)

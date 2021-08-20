@@ -65,6 +65,7 @@ def test_fit_n_jobs(tmp_dir):
     get_smac_object_wrapper_instance = get_smac_object_wrapper()
 
     automl = AutoSklearnClassifier(
+        delete_tmp_folder_after_terminate=False,
         time_left_for_this_task=30,
         per_run_time_limit=5,
         tmp_folder=tmp_dir,
@@ -72,8 +73,8 @@ def test_fit_n_jobs(tmp_dir):
         initial_configurations_via_metalearning=0,
         ensemble_size=5,
         n_jobs=2,
-        include_estimators=['sgd'],
-        include_preprocessors=['no_preprocessing'],
+        include={'classifier': ['sgd'],
+                 'feature_preprocessor': ['no_preprocessing']},
         get_smac_object_callback=get_smac_object_wrapper_instance,
         max_models_on_disc=None,
     )
@@ -459,7 +460,7 @@ def test_get_number_of_available_cores():
 
 
 @unittest.mock.patch('autosklearn.automl.AutoML.predict')
-def test_multiclass_prediction(predict_mock, backend, dask_client):
+def test_multiclass_prediction(predict_mock, dask_client):
     predicted_probabilities = [[0, 0, 0.99], [0, 0.99, 0], [0.99, 0, 0],
                                [0, 0.99, 0], [0, 0, 0.99]]
     predicted_indexes = [2, 1, 0, 1, 2]
@@ -470,7 +471,6 @@ def test_multiclass_prediction(predict_mock, backend, dask_client):
     classifier = AutoMLClassifier(
         time_left_for_this_task=1,
         per_run_time_limit=1,
-        backend=backend,
         dask_client=dask_client,
     )
     classifier.InputValidator = InputValidator(is_classification=True)
@@ -485,7 +485,7 @@ def test_multiclass_prediction(predict_mock, backend, dask_client):
 
 
 @unittest.mock.patch('autosklearn.automl.AutoML.predict')
-def test_multilabel_prediction(predict_mock, backend, dask_client):
+def test_multilabel_prediction(predict_mock, dask_client):
     predicted_probabilities = [[0.99, 0],
                                [0.99, 0],
                                [0, 0.99],
@@ -498,7 +498,6 @@ def test_multilabel_prediction(predict_mock, backend, dask_client):
     classifier = AutoMLClassifier(
         time_left_for_this_task=1,
         per_run_time_limit=1,
-        backend=backend,
         dask_client=dask_client,
     )
     classifier.InputValidator = InputValidator(is_classification=True)
@@ -517,6 +516,7 @@ def test_multilabel_prediction(predict_mock, backend, dask_client):
 def test_can_pickle_classifier(tmp_dir, dask_client):
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
     automl = AutoSklearnClassifier(time_left_for_this_task=30,
+                                   delete_tmp_folder_after_terminate=False,
                                    per_run_time_limit=5,
                                    tmp_folder=tmp_dir,
                                    dask_client=dask_client,
@@ -586,6 +586,7 @@ def test_binary(tmp_dir, dask_client):
     X_train, Y_train, X_test, Y_test = putil.get_dataset(
         'iris', make_binary=True)
     automl = AutoSklearnClassifier(time_left_for_this_task=40,
+                                   delete_tmp_folder_after_terminate=False,
                                    per_run_time_limit=10,
                                    tmp_folder=tmp_dir,
                                    dask_client=dask_client,
@@ -619,7 +620,7 @@ def test_classification_pandas_support(tmp_dir, dask_client):
     automl = AutoSklearnClassifier(
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        exclude_estimators=['libsvm_svc'],
+        exclude={'classifier': ['libsvm_svc']},
         dask_client=dask_client,
         seed=5,
         tmp_folder=tmp_dir,
@@ -724,10 +725,11 @@ def test_autosklearn_classification_methods_returns_self(dask_client):
     """
     X_train, y_train, X_test, y_test = putil.get_dataset('iris')
     automl = AutoSklearnClassifier(time_left_for_this_task=60,
+                                   delete_tmp_folder_after_terminate=False,
                                    per_run_time_limit=10,
                                    ensemble_size=0,
                                    dask_client=dask_client,
-                                   exclude_preprocessors=['fast_ica'])
+                                   exclude={'feature_preprocessor': ['fast_ica']})
 
     automl_fitted = automl.fit(X_train, y_train)
     assert automl is automl_fitted
@@ -744,6 +746,7 @@ def test_autosklearn_classification_methods_returns_self(dask_client):
 def test_autosklearn_regression_methods_returns_self(dask_client):
     X_train, y_train, X_test, y_test = putil.get_dataset('boston')
     automl = AutoSklearnRegressor(time_left_for_this_task=30,
+                                  delete_tmp_folder_after_terminate=False,
                                   per_run_time_limit=5,
                                   dask_client=dask_client,
                                   ensemble_size=0)
@@ -761,6 +764,7 @@ def test_autosklearn_regression_methods_returns_self(dask_client):
 def test_autosklearn2_classification_methods_returns_self(dask_client):
     X_train, y_train, X_test, y_test = putil.get_dataset('iris')
     automl = AutoSklearn2Classifier(time_left_for_this_task=60, ensemble_size=0,
+                                    delete_tmp_folder_after_terminate=False,
                                     dask_client=dask_client)
 
     automl_fitted = automl.fit(X_train, y_train)
@@ -825,11 +829,9 @@ def test_check_askl2_same_arguments_as_askl():
     extra_arguments = list(set(
         inspect.getfullargspec(AutoSklearnEstimator.__init__).args) - set(
             inspect.getfullargspec(AutoSklearn2Classifier.__init__).args))
-    expected_extra_args = ['exclude_estimators',
-                           'include_preprocessors',
+    expected_extra_args = ['exclude',
+                           'include',
                            'resampling_strategy_arguments',
-                           'exclude_preprocessors',
-                           'include_estimators',
                            'get_smac_object_callback',
                            'initial_configurations_via_metalearning',
                            'resampling_strategy',
@@ -852,14 +854,19 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
     )
     estimator = AutoSklearnClassifier if task_type == 'classification' else AutoSklearnRegressor
     seed = 3
+    if task_type == "classification":
+        include = {'classifier': ['random_forest']}
+    else:
+        include = {'regressor': ['random_forest']}
     automl = estimator(
+        delete_tmp_folder_after_terminate=False,
         time_left_for_this_task=120,
         # Time left for task plays no role
         # only per run time limit
         per_run_time_limit=30,
         ensemble_size=0,
         dask_client=dask_client,
-        include_estimators=['random_forest'],
+        include=include,
         seed=seed,
         # We cannot get the configuration space with 'test' not fit with it
         resampling_strategy=resampling_strategy if resampling_strategy != 'test' else 'holdout',
@@ -950,13 +957,14 @@ def test_pass_categorical_and_numeric_columns_to_pipeline(
 
     seed = 3
     automl = AutoSklearnClassifier(
+        delete_tmp_folder_after_terminate=False,
         time_left_for_this_task=120,
         # Time left for task plays no role
         # only per run time limit
         per_run_time_limit=30,
         ensemble_size=0,
         dask_client=dask_client,
-        include_estimators=['random_forest'],
+        include={'classifier': ['random_forest']},
         seed=seed,
     )
     config = automl.get_configuration_space(X_train, y_train,
@@ -978,7 +986,7 @@ def test_pass_categorical_and_numeric_columns_to_pipeline(
         expected_dict[X.shape[1] - 1] = 'categorical'
     else:
         expected_dict = {i: 'numerical' for i in range(np.shape(X)[1])}
-    assert expected_dict == pipeline.named_steps['data_preprocessing'].feat_type
+    assert expected_dict == pipeline.named_steps['data_preprocessor'].choice.feat_type
 
 
 @pytest.mark.parametrize("as_frame", [True, False])
@@ -990,8 +998,9 @@ def test_autosklearn_anneal(as_frame):
     """
     X, y = sklearn.datasets.fetch_openml(data_id=2, return_X_y=True, as_frame=as_frame)
     automl = AutoSklearnClassifier(time_left_for_this_task=60, ensemble_size=0,
+                                   delete_tmp_folder_after_terminate=False,
                                    initial_configurations_via_metalearning=0,
-                                   smac_scenario_args={'runcount_limit': 3},
+                                   smac_scenario_args={'runcount_limit': 6},
                                    resampling_strategy='holdout-iterative-fit')
 
     if as_frame:

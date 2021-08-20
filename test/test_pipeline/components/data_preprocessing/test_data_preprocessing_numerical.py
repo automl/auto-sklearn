@@ -3,7 +3,7 @@ import numpy as np
 
 from scipy import sparse
 
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_numerical \
+from autosklearn.pipeline.components.data_preprocessing.feature_type_numerical \
     import NumericalPreprocessingPipeline
 
 

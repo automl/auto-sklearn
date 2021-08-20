@@ -18,7 +18,6 @@ from autosklearn.data.validation import (
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, AutoML
 from autosklearn.metrics import Scorer
-from autosklearn.util.backend import create
 
 
 class AutoSklearnEstimator(BaseEstimator):
@@ -33,10 +32,8 @@ class AutoSklearnEstimator(BaseEstimator):
         max_models_on_disc=50,
         seed=1,
         memory_limit=3072,
-        include_estimators=None,
-        exclude_estimators=None,
-        include_preprocessors=None,
-        exclude_preprocessors=None,
+        include=None,
+        exclude=None,
         resampling_strategy='holdout',
         resampling_strategy_arguments=None,
         tmp_folder=None,
@@ -102,22 +99,16 @@ class AutoSklearnEstimator(BaseEstimator):
             In case of multi-processing, `memory_limit` will be per job.
             This memory limit also applies to the ensemble creation process.
 
-        include_estimators : list, optional (None)
-            If None, all possible estimators are used. Otherwise specifies
-            set of estimators to use.
+        include : dict, optional (None)
+            If None, all possible algorithms are used. Otherwise specifies
+            set of algorithms for each added component is used. Include and 
+            exclude are incompatible if used together on the same component
 
-        exclude_estimators : list, optional (None)
-            If None, all possible estimators are used. Otherwise specifies
-            set of estimators not to use. Incompatible with include_estimators.
-
-        include_preprocessors : list, optional (None)
-            If None all possible preprocessors are used. Otherwise specifies set
-            of preprocessors to use.
-
-        exclude_preprocessors : list, optional (None)
-            If None all possible preprocessors are used. Otherwise specifies set
-            of preprocessors not to use. Incompatible with
-            include_preprocessors.
+        exclude : dict, optional (None)
+            If None, all possible algorithms are used. Otherwise specifies
+            set of algorithms for each added component is not used.
+            Incompatible with include. Include and exclude are incompatible
+            if used together on the same component
 
         resampling_strategy : string or object, optional ('holdout')
             how to to handle overfitting, might need 'resampling_strategy_arguments'
@@ -161,7 +152,7 @@ class AutoSklearnEstimator(BaseEstimator):
             folder to store configuration output and log files, if ``None``
             automatically use ``/tmp/autosklearn_tmp_$pid_$random_number``
 
-        delete_tmp_folder_after_terminate: string, optional (True)
+        delete_tmp_folder_after_terminate: bool, optional (True)
             remove tmp_folder, when finished. If tmp_folder is None
             tmp_dir will always be deleted
 
@@ -254,10 +245,8 @@ class AutoSklearnEstimator(BaseEstimator):
         self.max_models_on_disc = max_models_on_disc
         self.seed = seed
         self.memory_limit = memory_limit
-        self.include_estimators = include_estimators
-        self.exclude_estimators = exclude_estimators
-        self.include_preprocessors = include_preprocessors
-        self.exclude_preprocessors = exclude_preprocessors
+        self.include = include
+        self.exclude = exclude
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_arguments = resampling_strategy_arguments
         self.tmp_folder = tmp_folder
@@ -294,13 +283,9 @@ class AutoSklearnEstimator(BaseEstimator):
 
     def build_automl(self):
 
-        backend = create(
+        automl = self._get_automl_class()(
             temporary_directory=self.tmp_folder,
             delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
-            )
-
-        automl = self._get_automl_class()(
-            backend=backend,
             time_left_for_this_task=self.time_left_for_this_task,
             per_run_time_limit=self.per_run_time_limit,
             initial_configurations_via_metalearning=self.initial_configurations_via_metalearning,
@@ -309,10 +294,8 @@ class AutoSklearnEstimator(BaseEstimator):
             max_models_on_disc=self.max_models_on_disc,
             seed=self.seed,
             memory_limit=self.memory_limit,
-            include_estimators=self.include_estimators,
-            exclude_estimators=self.exclude_estimators,
-            include_preprocessors=self.include_preprocessors,
-            exclude_preprocessors=self.exclude_preprocessors,
+            include=self.include,
+            exclude=self.exclude,
             resampling_strategy=self.resampling_strategy,
             resampling_strategy_arguments=self.resampling_strategy_arguments,
             n_jobs=self._n_jobs,

@@ -152,3 +152,46 @@ class BaseTest(unittest.TestCase):
             # object is a magic mock, calling the method doesn't set a new parameter
             with self.assertRaisesRegex(ValueError, "Cannot properly set the pair"):
                 base.set_hyperparameters(cs.sample_configuration(), init_params={'M:key': 'value'})
+
+    def test_include_exclude_validation(self):
+        """
+        Makes sure include and exclude arguments are validated and raises expected exception
+        on error
+        """
+        base = BasePipelineMock()
+        dataset_properties = {'target_type': 'classification'}
+        base.dataset_properties = dataset_properties
+        base.steps = [('p0',
+                       autosklearn.pipeline.components.feature_preprocessing
+                       .FeaturePreprocessorChoice(dataset_properties)),
+                      ('p1',
+                       autosklearn.pipeline.components.feature_preprocessing
+                       .FeaturePreprocessorChoice(dataset_properties)),
+                      ('c', autosklearn.pipeline.components.classification
+                       .ClassifierChoice(dataset_properties))]
+
+        def assert_value_error(include=None, exclude=None):
+            base.include = include
+            base.exclude = exclude
+            with self.assertRaises(ValueError):
+                base._validate_include_exclude_params()
+
+        # Same key in include and exclude argument
+        assert_value_error(include={'c': ['adaboost']}, exclude={'c': ['sgd']})
+
+        # Invalid key in the exclude argument
+        assert_value_error(exclude={'p2': ['pca']})
+
+        # Invalid value type for the key in the include argument
+        assert_value_error(include={'c': ('adaboost', 'sgd')}, exclude=None)
+
+        # Empty list of the key in the include argument
+        assert_value_error(include={'c': []})
+
+        # Invalid component in the list value for the key in the include argument
+        assert_value_error(include={'c': ['pca']})
+
+        # Case when all conditions passed for include and exclude
+        base.include = {'c': ['adaboost', 'sgd']}
+        base.exclude = {'p1': ['pca']}
+        self.assertIsNone(base._validate_include_exclude_params())

@@ -10,7 +10,9 @@ import select
 import socketserver
 import struct
 import threading
-from typing import Any, Dict, Optional, Type
+import warnings
+from contextlib import contextmanager
+from typing import Any, Dict, Iterator, Optional, TextIO, Type, cast
 
 import yaml
 
@@ -352,3 +354,41 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
                 self.handle_request()
             if self.event is not None and self.event.is_set():
                 break
+
+
+@contextmanager
+def warnings_to(logger: Optional[PicklableClientLogger] = None) -> Iterator[None]:
+    """ A context manager to catch warnings and send them to the logger
+
+    If no logger is passed, warnings propogate as they normally would.
+
+    Parameters
+    ----------
+    logger: Optional[PicklableClientLogger] = None
+        The logger to send the warnings to
+    """
+    # Send to a logger if one exists
+    if logger:
+
+        with warnings.catch_warnings():
+            def to_log(
+                logger: PicklableClientLogger,
+                message: str,
+                category: Type[Warning],  # Weird but that's what it is
+                filename: str,
+                lineno: int,
+                file: Optional[TextIO] = None,
+                line: Optional[str] = None
+            ) -> None:
+                logger.warning(f"{filename}:{lineno} {category.__name__}:{message}")
+
+            # Mypy was complaining that logger didn't exist in `to_log` see here:
+            # https://mypy.readthedocs.io/en/stable/common_issues.html#narrowing-and-inner-functions
+            # we explicitly pass it in and have to force it's type with `cast`
+            warnings.showwarning = lambda *args: \
+                to_log(cast(PicklableClientLogger, logger), *args)
+
+            yield
+    # Else do nothing, warnings go to wherever they would without this context
+    else:
+        yield

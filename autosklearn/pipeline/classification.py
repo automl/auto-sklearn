@@ -8,8 +8,8 @@ from sklearn.base import ClassifierMixin
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
-    import DataPreprocessor
+from autosklearn.pipeline.components.data_preprocessing import DataPreprocessorChoice
+
 from autosklearn.pipeline.components import classification as \
     classification_components
 from autosklearn.pipeline.components.data_preprocessing.balancing.balancing import \
@@ -72,6 +72,10 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                  include=None, exclude=None, random_state=None,
                  init_params=None):
         self._output_dtype = np.int32
+        if dataset_properties is None:
+            dataset_properties = dict()
+        if 'target_type' not in dataset_properties:
+            dataset_properties['target_type'] = 'classification'
         super().__init__(
             config, steps, dataset_properties, include, exclude,
             random_state, init_params)
@@ -286,8 +290,8 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
             default_dataset_properties.update(dataset_properties)
 
         steps.extend([
-            ["data_preprocessing",
-                DataPreprocessor(dataset_properties=default_dataset_properties)],
+            ["data_preprocessor",
+                DataPreprocessorChoice(dataset_properties=default_dataset_properties)],
             ["balancing",
                 Balancing()],
             ["feature_preprocessor",

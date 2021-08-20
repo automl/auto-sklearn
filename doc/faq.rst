@@ -213,7 +213,7 @@ Auto-sklearn wraps scikit-learn and therefore inherits its parallelism implement
 scikit-learn uses two modes of parallelizing computations:
 
 1. By using joblib to distribute independent function calls on multiple cores.
-2. By using lower level libraries such as OpenML and numpy to distribute more fine-grained
+2. By using lower level libraries such as OpenMP and numpy to distribute more fine-grained
    computation.
 
 This means that Auto-sklearn can use more resources than expected by the user. For technical
@@ -225,7 +225,7 @@ with the number of requested CPUs). This can be done by setting the following en
 variables: ``MKL_NUM_THREADS``, ``OPENBLAS_NUM_THREADS``, ``BLIS_NUM_THREADS`` and
 ``OMP_NUM_THREADS``.
 
-More details can be found in the `scikit-learn docs <https://scikit-learn.org/stable/computing/parallelism.html?highlight=joblib#parallelism>`
+More details can be found in the `scikit-learn docs <https://scikit-learn.org/stable/computing/parallelism.html?highlight=joblib#parallelism>`_.
 
 Meta-Learning
 =============
@@ -236,7 +236,7 @@ Which datasets are used for meta-learning?
 We updated the list of datasets used for meta-learning several times and this list now differs
 significantly from the original 140 datasets we used in 2015 when the paper and the package were
 released. An up-to-date list of `OpenML task IDs <https://docs.openml.org/#tasks>`_ can be found
-on `github <https://github.com/automl/auto-sklearn/blob/master/scripts/update_metadata_util.py>`_
+on `github <https://github.com/automl/auto-sklearn/blob/master/scripts/update_metadata_util.py>`_.
 
 How can datasets from the meta-data be excluded?
 ------------------------------------------------
