@@ -120,11 +120,13 @@
 <span class="kn">import</span> <span class="nn">joblib</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">scipy.sparse</span> <span class="kn">import</span> <span class="n">spmatrix</span>
 <span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">ClassifierMixin</span><span class="p">,</span> <span class="n">RegressorMixin</span>
 <span class="kn">from</span> <span class="nn">sklearn.utils.multiclass</span> <span class="kn">import</span> <span class="n">type_of_target</span>
 <span class="kn">from</span> <span class="nn">smac.runhistory.runhistory</span> <span class="kn">import</span> <span class="n">RunInfo</span><span class="p">,</span> <span class="n">RunValue</span>
 
 <span class="kn">from</span> <span class="nn">autosklearn.data.validation</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">convert_if_sparse</span><span class="p">,</span>
     <span class="n">SUPPORTED_FEAT_TYPES</span><span class="p">,</span>
     <span class="n">SUPPORTED_TARGET_TYPES</span><span class="p">,</span>
 <span class="p">)</span>
@@ -440,11 +442,11 @@
     <span class="k">def</span> <span class="nf">fit_pipeline</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">X</span><span class="p">:</span> <span class="n">SUPPORTED_FEAT_TYPES</span><span class="p">,</span>
-        <span class="n">y</span><span class="p">:</span> <span class="n">SUPPORTED_TARGET_TYPES</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SUPPORTED_TARGET_TYPES</span><span class="p">,</span> <span class="n">spmatrix</span><span class="p">],</span>
         <span class="n">config</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Configuration</span><span class="p">,</span>  <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]],</span>
         <span class="n">dataset_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">X_test</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SUPPORTED_FEAT_TYPES</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">y_test</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SUPPORTED_TARGET_TYPES</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">y_test</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">SUPPORTED_TARGET_TYPES</span><span class="p">,</span> <span class="n">spmatrix</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">feat_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
@@ -927,9 +929,9 @@
     <span class="k">def</span> <span class="nf">get_configuration_space</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">X</span><span class="p">:</span> <span class="n">SUPPORTED_FEAT_TYPES</span><span class="p">,</span>
-        <span class="n">y</span><span class="p">:</span> <span class="n">SUPPORTED_TARGET_TYPES</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SUPPORTED_TARGET_TYPES</span><span class="p">,</span> <span class="n">spmatrix</span><span class="p">],</span>
         <span class="n">X_test</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SUPPORTED_FEAT_TYPES</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">y_test</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SUPPORTED_TARGET_TYPES</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">y_test</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">SUPPORTED_TARGET_TYPES</span><span class="p">,</span> <span class="n">spmatrix</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">dataset_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">feat_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
@@ -1014,6 +1016,9 @@
 <span class="sd">        self</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># AutoSklearn does not handle sparse y for now</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">convert_if_sparse</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
         <span class="c1"># Before running anything else, first check that the</span>
         <span class="c1"># type of data is compatible with auto-sklearn. Legal target</span>
         <span class="c1"># types are: binary, multiclass, multilabel-indicator.</span>
@@ -1161,6 +1166,9 @@
         <span class="c1"># types are: continuous, continuous-multioutput, and the special cases:</span>
         <span class="c1"># multiclass : because [3.0, 1.0, 5.0] is considered as multiclass</span>
         <span class="c1"># binary: because [1.0, 0.0] is considered multiclass</span>
+        <span class="c1"># AutoSklearn does not handle sparse y for now</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">convert_if_sparse</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
         <span class="n">target_type</span> <span class="o">=</span> <span class="n">type_of_target</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
         <span class="n">supported_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;continuous&#39;</span><span class="p">,</span> <span class="s1">&#39;binary&#39;</span><span class="p">,</span> <span class="s1">&#39;multiclass&#39;</span><span class="p">,</span> <span class="s1">&#39;continuous-multioutput&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">target_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_types</span><span class="p">:</span>

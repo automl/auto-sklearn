@@ -122,8 +122,10 @@
 
 <span class="kn">from</span> <span class="nn">smac.utils.constants</span> <span class="kn">import</span> <span class="n">MAXINT</span>
 
-<span class="kn">from</span> <span class="nn">autosklearn.constants</span> <span class="kn">import</span> <span class="n">REGRESSION_TASKS</span><span class="p">,</span> <span class="n">TASK_TYPES</span>
-
+<span class="kn">from</span> <span class="nn">autosklearn.constants</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BINARY_CLASSIFICATION</span><span class="p">,</span> <span class="n">MULTICLASS_CLASSIFICATION</span><span class="p">,</span> <span class="n">MULTILABEL_CLASSIFICATION</span><span class="p">,</span>
+    <span class="n">MULTIOUTPUT_REGRESSION</span><span class="p">,</span> <span class="n">REGRESSION</span><span class="p">,</span> <span class="n">REGRESSION_TASKS</span><span class="p">,</span> <span class="n">TASK_TYPES</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">sanitize_array</span>
 
@@ -654,6 +656,16 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">score</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">prediction</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">score</span>
+
+
+<span class="c1"># Must be at bottom so all metrics are defined</span>
+<span class="n">default_metric_for_task</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Scorer</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">BINARY_CLASSIFICATION</span><span class="p">:</span> <span class="n">CLASSIFICATION_METRICS</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">],</span>
+    <span class="n">MULTICLASS_CLASSIFICATION</span><span class="p">:</span> <span class="n">CLASSIFICATION_METRICS</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">],</span>
+    <span class="n">MULTILABEL_CLASSIFICATION</span><span class="p">:</span> <span class="n">CLASSIFICATION_METRICS</span><span class="p">[</span><span class="s1">&#39;f1_macro&#39;</span><span class="p">],</span>
+    <span class="n">REGRESSION</span><span class="p">:</span> <span class="n">REGRESSION_METRICS</span><span class="p">[</span><span class="s1">&#39;r2&#39;</span><span class="p">],</span>
+    <span class="n">MULTIOUTPUT_REGRESSION</span><span class="p">:</span> <span class="n">REGRESSION_METRICS</span><span class="p">[</span><span class="s1">&#39;r2&#39;</span><span class="p">],</span>
+<span class="p">}</span>
 </pre></div>
 
     </div>

@@ -207,65 +207,69 @@ get further documentation about Scikit-Learn models here: &lt;<a class="referenc
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{&#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f3d8a749bb0&gt;, &#39;balancing&#39;: Balancing(), &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f3d904bf580&gt;, &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f3d90523a00&gt;}
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{&#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f722efe2a90&gt;, &#39;balancing&#39;: Balancing(), &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f72334d67f0&gt;, &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f722ff0cd90&gt;}
 RunInfo(config=Configuration:
   balancing:strategy, Value: &#39;none&#39;
   classifier:__choice__, Value: &#39;random_forest&#39;
-  classifier:random_forest:bootstrap, Value: &#39;True&#39;
-  classifier:random_forest:criterion, Value: &#39;entropy&#39;
+  classifier:random_forest:bootstrap, Value: &#39;False&#39;
+  classifier:random_forest:criterion, Value: &#39;gini&#39;
   classifier:random_forest:max_depth, Constant: &#39;None&#39;
-  classifier:random_forest:max_features, Value: 0.08985716259291088
+  classifier:random_forest:max_features, Value: 0.4441219275195133
   classifier:random_forest:max_leaf_nodes, Constant: &#39;None&#39;
   classifier:random_forest:min_impurity_decrease, Constant: 0.0
-  classifier:random_forest:min_samples_leaf, Value: 5
+  classifier:random_forest:min_samples_leaf, Value: 20
   classifier:random_forest:min_samples_split, Value: 11
   classifier:random_forest:min_weight_fraction_leaf, Constant: 0.0
   data_preprocessor:__choice__, Value: &#39;feature_type&#39;
-  data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__, Value: &#39;encoding&#39;
+  data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__, Value: &#39;one_hot_encoding&#39;
   data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__, Value: &#39;minority_coalescer&#39;
-  data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Value: 0.19148306464365114
-  data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Value: &#39;most_frequent&#39;
-  data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Value: &#39;robust_scaler&#39;
-  data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max, Value: 0.8103950116896029
-  data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min, Value: 0.26132579688128715
-  feature_preprocessor:__choice__, Value: &#39;fast_ica&#39;
-  feature_preprocessor:fast_ica:algorithm, Value: &#39;parallel&#39;
-  feature_preprocessor:fast_ica:fun, Value: &#39;cube&#39;
-  feature_preprocessor:fast_ica:whiten, Value: &#39;False&#39;
+  data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Value: 0.28297438239983974
+  data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Value: &#39;mean&#39;
+  data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Value: &#39;power_transformer&#39;
+  feature_preprocessor:__choice__, Value: &#39;random_trees_embedding&#39;
+  feature_preprocessor:random_trees_embedding:bootstrap, Value: &#39;False&#39;
+  feature_preprocessor:random_trees_embedding:max_depth, Value: 3
+  feature_preprocessor:random_trees_embedding:max_leaf_nodes, Constant: &#39;None&#39;
+  feature_preprocessor:random_trees_embedding:min_samples_leaf, Value: 16
+  feature_preprocessor:random_trees_embedding:min_samples_split, Value: 3
+  feature_preprocessor:random_trees_embedding:min_weight_fraction_leaf, Constant: 1.0
+  feature_preprocessor:random_trees_embedding:n_estimators, Value: 19
 , instance=None, instance_specific=None, seed=1, cutoff=60, capped=False, budget=0.0, source_id=0)
-RunValue(cost=0.05118483412322272, time=3.7905871868133545, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1629386305.6421454, endtime=1629386309.4581013, additional_info={&#39;duration&#39;: 3.685121774673462, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.0023353573096683844, &#39;configuration_origin&#39;: None})
+RunValue(cost=0.06919431279620858, time=2.334411382675171, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1629476808.7001038, endtime=1629476811.0546494, additional_info={&#39;duration&#39;: 2.2576048374176025, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.0583839327417095, &#39;configuration_origin&#39;: None})
 Passed Configuration: Configuration:
   balancing:strategy, Value: &#39;none&#39;
   classifier:__choice__, Value: &#39;random_forest&#39;
-  classifier:random_forest:bootstrap, Value: &#39;True&#39;
-  classifier:random_forest:criterion, Value: &#39;entropy&#39;
+  classifier:random_forest:bootstrap, Value: &#39;False&#39;
+  classifier:random_forest:criterion, Value: &#39;gini&#39;
   classifier:random_forest:max_depth, Constant: &#39;None&#39;
-  classifier:random_forest:max_features, Value: 0.08985716259291088
+  classifier:random_forest:max_features, Value: 0.4441219275195133
   classifier:random_forest:max_leaf_nodes, Constant: &#39;None&#39;
   classifier:random_forest:min_impurity_decrease, Constant: 0.0
-  classifier:random_forest:min_samples_leaf, Value: 5
+  classifier:random_forest:min_samples_leaf, Value: 20
   classifier:random_forest:min_samples_split, Value: 11
   classifier:random_forest:min_weight_fraction_leaf, Constant: 0.0
   data_preprocessor:__choice__, Value: &#39;feature_type&#39;
-  data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__, Value: &#39;encoding&#39;
+  data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__, Value: &#39;one_hot_encoding&#39;
   data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__, Value: &#39;minority_coalescer&#39;
-  data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Value: 0.19148306464365114
-  data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Value: &#39;most_frequent&#39;
-  data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Value: &#39;robust_scaler&#39;
-  data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max, Value: 0.8103950116896029
-  data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min, Value: 0.26132579688128715
-  feature_preprocessor:__choice__, Value: &#39;fast_ica&#39;
-  feature_preprocessor:fast_ica:algorithm, Value: &#39;parallel&#39;
-  feature_preprocessor:fast_ica:fun, Value: &#39;cube&#39;
-  feature_preprocessor:fast_ica:whiten, Value: &#39;False&#39;
+  data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Value: 0.28297438239983974
+  data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Value: &#39;mean&#39;
+  data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Value: &#39;power_transformer&#39;
+  feature_preprocessor:__choice__, Value: &#39;random_trees_embedding&#39;
+  feature_preprocessor:random_trees_embedding:bootstrap, Value: &#39;False&#39;
+  feature_preprocessor:random_trees_embedding:max_depth, Value: 3
+  feature_preprocessor:random_trees_embedding:max_leaf_nodes, Constant: &#39;None&#39;
+  feature_preprocessor:random_trees_embedding:min_samples_leaf, Value: 16
+  feature_preprocessor:random_trees_embedding:min_samples_split, Value: 3
+  feature_preprocessor:random_trees_embedding:min_weight_fraction_leaf, Constant: 1.0
+  feature_preprocessor:random_trees_embedding:n_estimators, Value: 19
 
-Random Forest: RandomForestClassifier(criterion=&#39;entropy&#39;, max_features=1, min_samples_leaf=5,
+Random Forest: RandomForestClassifier(bootstrap=False, max_features=7, min_samples_leaf=20,
                        min_samples_split=11, n_estimators=512, n_jobs=1,
-                       random_state=RandomState(MT19937) at 0x7F3D8D2AF940,
+                       random_state=RandomState(MT19937) at 0x7F7233532E40,
                        warm_start=True)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  6.973 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  15.779 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-single-configuration-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_single_configuration.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
