@@ -198,6 +198,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         metric: Optional[Scorer] = None,
         scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
+        compute_train_loss: bool = False,
     ):
 
         """
@@ -302,6 +303,10 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         load_models : bool, optional (True)
             Whether to load the models after fitting Auto-sklearn.
 
+        compute_train_loss: bool (False)
+            Computes the train loss for every pipeline explored and registers the result in
+            the RunHistory from SMAC.
+
         Attributes
         ----------
 
@@ -344,6 +349,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             metric=metric,
             scoring_functions=scoring_functions,
             load_models=load_models,
+            compute_train_loss=compute_train_loss,
         )
 
     def fit(self, X, y,

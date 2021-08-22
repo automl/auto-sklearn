@@ -263,7 +263,6 @@ class AbstractEvaluator(object):
             )
 
         self.Y_optimization: Optional[Union[List, np.ndarray]] = None
-        self.Y_actual_train = None
 
         self.budget = budget
         self.budget_type = budget_type

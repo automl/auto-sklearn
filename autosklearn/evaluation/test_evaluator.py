@@ -123,6 +123,7 @@ def eval_t(
     init_params: Optional[Dict[str, Any]] = None,
     budget: Optional[float] = None,
     budget_type: Optional[str] = None,
+    compute_train_loss: bool = False,
 ) -> None:
     evaluator = TestEvaluator(configuration=config,
                               backend=backend, metric=metric, seed=seed,

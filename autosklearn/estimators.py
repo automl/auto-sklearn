@@ -50,7 +50,8 @@ class AutoSklearnEstimator(BaseEstimator):
         metric=None,
         scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
-        get_trials_callback=None
+        get_trials_callback=None,
+        compute_train_loss: bool = False,
     ):
         """
         Parameters
@@ -103,7 +104,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
         include : dict, optional (None)
             If None, all possible algorithms are used. Otherwise specifies
-            set of algorithms for each added component is used. Include and 
+            set of algorithms for each added component is used. Include and
             exclude are incompatible if used together on the same component
 
         exclude : dict, optional (None)
@@ -218,12 +219,16 @@ class AutoSklearnEstimator(BaseEstimator):
 
         load_models : bool, optional (True)
             Whether to load the models after fitting Auto-sklearn.
-           
+
         get_trials_callback: callable
             Callback function to create an object of subclass defined in module
             `smac.callbacks <https://automl.github.io/SMAC3/master/apidoc/smac.callbacks.html>`_.
             This is an advanced feature. Use only if you are familiar with
             `SMAC <https://automl.github.io/SMAC3/master/index.html>`_.
+
+        compute_train_loss: bool (False)
+            Computes the train loss for every pipeline explored and registers the result in
+            the RunHistory from SMAC.
 
         Attributes
         ----------
@@ -269,6 +274,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.scoring_functions = scoring_functions
         self.load_models = load_models
         self.get_trials_callback = get_trials_callback
+        self.compute_train_loss = compute_train_loss
 
         self.automl_ = None  # type: Optional[AutoML]
 
@@ -314,7 +320,8 @@ class AutoSklearnEstimator(BaseEstimator):
             metadata_directory=self.metadata_directory,
             metric=self.metric,
             scoring_functions=self.scoring_functions,
-            get_trials_callback=self.get_trials_callback
+            get_trials_callback=self.get_trials_callback,
+            compute_train_loss=self.compute_train_loss,
         )
 
         return automl

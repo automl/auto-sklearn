@@ -130,6 +130,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         init_params: Optional[Dict[str, Any]] = None,
         budget_type: Optional[str] = None,
         ta: Optional[Callable] = None,
+        compute_train_loss: bool = False,
         **resampling_strategy_args: Any,
     ):
 
@@ -186,6 +187,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.disable_file_output = disable_file_output
         self.init_params = init_params
         self.budget_type = budget_type
+        self.compute_train_loss = compute_train_loss
 
         if memory_limit is not None:
             memory_limit = int(math.ceil(memory_limit))
@@ -336,6 +338,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             init_params=init_params,
             budget=budget,
             budget_type=self.budget_type,
+            compute_train_loss=self.compute_train_loss,
         )
 
         if self.resampling_strategy != 'test':
@@ -459,7 +462,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
             train_learning_curve = autosklearn.evaluation.util.extract_learning_curve(
                 info, 'train_loss'
-            )
+            ) if self.compute_train_loss else []
             if len(train_learning_curve) > 1:
                 additional_run_info['train_learning_curve'] = train_learning_curve
                 additional_run_info['learning_curve_runtime'] = learning_curve_runtime

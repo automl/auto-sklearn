@@ -104,6 +104,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
                                    port=self.port,
+                                   compute_train_loss=True,
                                    )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -170,6 +171,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
+                                   compute_train_loss=True,
                                    budget=0.0)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -268,6 +270,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
+                                   compute_train_loss=True,
                                    budget=0.0)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -337,6 +340,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy='holdout-iterative-fit',
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
+                                   compute_train_loss=True,
                                    metric=accuracy)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -379,6 +383,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 5},
                                    scoring_functions=None,
+                                   compute_train_loss=True,
                                    output_y_hat_optimization=True,
                                    metric=accuracy)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
@@ -434,6 +439,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy_args={'folds': 5},
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
+                                   compute_train_loss=True,
                                    metric=accuracy)
 
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
@@ -495,6 +501,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
+                                   compute_train_loss=True,
                                    budget=0.0)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -787,7 +794,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.model = unittest.mock.Mock()
         evaluator.model.estimator_supports_iterative_fit.return_value = False
         evaluator.Y_targets[0] = np.array([1] * 23)
-        evaluator.Y_train_targets = np.array([1] * 69)
         rval = evaluator.fit_predict_and_loss(iterative=False)
         self.assertIsNone(rval)
         element = queue_.get()
@@ -831,7 +837,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.file_output.return_value = (None, {})
         evaluator.Y_targets[0] = np.array([1] * 35)
         evaluator.Y_targets[1] = np.array([1] * 34)
-        evaluator.Y_train_targets = np.array([1] * 69)
 
         self.assertRaisesRegex(
             TAEAbortException,
@@ -883,7 +888,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
         evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
-        evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
         rval = evaluator.fit_predict_and_loss(iterative=True)
         self.assertIsNone(rval)
         self.assertEqual(finish_up_mock.call_count, 1)
@@ -921,7 +925,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.file_output.return_value = (None, {})
 
         evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
-        evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
         rval = evaluator.fit_predict_and_loss(iterative=True)
         self.assertIsNone(rval)
         self.assertEqual(finish_up_mock.call_count, 1)
@@ -971,7 +974,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.file_output.return_value = (None, {})
 
         evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
-        evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
         rval = evaluator.fit_predict_and_loss(iterative=False)
         self.assertIsNone(rval)
         self.assertEqual(finish_up_mock.call_count, 1)
@@ -1011,7 +1013,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.file_output.return_value = (None, {})
 
         evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
-        evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
         rval = evaluator.fit_predict_and_loss(iterative=False)
         self.assertIsNone(rval)
         self.assertEqual(finish_up_mock.call_count, 1)
@@ -2272,6 +2273,7 @@ class FunctionsTest(unittest.TestCase):
             disable_file_output=False,
             instance=self.dataset_name,
             metric=accuracy,
+            compute_train_loss=True,
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
@@ -2509,6 +2511,7 @@ class FunctionsTest(unittest.TestCase):
             disable_file_output=False,
             instance=self.dataset_name,
             metric=accuracy,
+            compute_train_loss=True,
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)

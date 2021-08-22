@@ -184,7 +184,8 @@ class AutoML(BaseEstimator):
                  logging_config=None,
                  metric=None,
                  scoring_functions=None,
-                 get_trials_callback=None
+                 get_trials_callback=None,
+                 compute_train_loss=False,
                  ):
         super(AutoML, self).__init__()
         self.configuration_space = None
@@ -211,6 +212,7 @@ class AutoML(BaseEstimator):
             if resampling_strategy_arguments is not None else {}
         self._n_jobs = n_jobs
         self._dask_client = dask_client
+        self.compute_train_loss = compute_train_loss
 
         self.precision = precision
         self._disable_evaluator_output = disable_evaluator_output
@@ -437,6 +439,7 @@ class AutoML(BaseEstimator):
                                     abort_on_first_run_crash=False,
                                     cost_for_crash=get_cost_of_crash(self._metric),
                                     port=self._logger_port,
+                                    compute_train_loss=self.compute_train_loss,
                                     pynisher_context=self._multiprocessing_context,
                                     **self._resampling_strategy_arguments)
 
@@ -919,7 +922,8 @@ class AutoML(BaseEstimator):
                 port=self._logger_port,
                 pynisher_context=self._multiprocessing_context,
                 ensemble_callback=proc_ensemble,
-                trials_callback=self._get_trials_callback
+                trials_callback=self._get_trials_callback,
+                compute_train_loss=self.compute_train_loss,
             )
 
             try:
@@ -1311,6 +1315,8 @@ class AutoML(BaseEstimator):
             kwargs['disable_file_output'] = self._disable_evaluator_output
         if 'pynisher_context' not in kwargs:
             kwargs['pynisher_context'] = self._multiprocessing_context
+        if 'compute_train_loss' not in kwargs:
+            kwargs['compute_train_loss'] = self.compute_train_loss
         if 'stats' not in kwargs:
             scenario_mock = unittest.mock.Mock()
             scenario_mock.wallclock_limit = self._time_for_task
