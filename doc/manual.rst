@@ -85,7 +85,7 @@ This can be turned off by setting
 Resampling strategies
 =====================
 
-Examples for using holdout and cross-validation can be found in `auto-sklearn/examples/ <examples/>`_
+Examples for using holdout and cross-validation can be found in :ref:`auto-sklearn/examples/ <examples>`
 
 Supported Inputs
 ================
