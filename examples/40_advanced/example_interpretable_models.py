@@ -8,7 +8,6 @@ The following example shows how to inspect the models which *auto-sklearn*
 optimizes over and how to restrict them to an interpretable subset.
 """
 import autosklearn.classification
-import autosklearn.pipeline.components.classification
 import sklearn.datasets
 import sklearn.metrics
 
@@ -19,16 +18,18 @@ import sklearn.metrics
 # We will first list all classifiers Auto-sklearn chooses from. A similar
 # call is available for preprocessors (see below) and regression (not shown)
 # as well.
-for name in autosklearn.pipeline.components.classification.ClassifierChoice.get_components():
+from autosklearn.pipeline.components.classification import ClassifierChoice
+
+for name in ClassifierChoice.get_components():
     print(name)
 
 ############################################################################
 # Show available preprocessors
 # ============================
 
-import autosklearn.pipeline.components.feature_preprocessing
+from autosklearn.pipeline.components.feature_preprocessing import FeaturePreprocessorChoice
 
-for name in autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice.get_components():
+for name in FeaturePreprocessorChoice.get_components():
     print(name)
 
 ############################################################################
@@ -53,8 +54,14 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
     per_run_time_limit=30,
     tmp_folder='/tmp/autosklearn_interpretable_models_example_tmp',
-    include={'classifier': ['decision_tree', 'lda', 'sgd'],
-             'feature_preprocessor': ['no_preprocessing', 'polynomial', 'select_percentile_classification']},
+    include={
+        'classifier': [
+            'decision_tree', 'lda', 'sgd'
+        ],
+        'feature_preprocessor': [
+            'no_preprocessing', 'polynomial', 'select_percentile_classification'
+        ]
+    },
     ensemble_size=1,
 )
 automl.fit(X_train, y_train, dataset_name='breast_cancer')

@@ -118,26 +118,30 @@ print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 # ===================================
 
 ensemble_performance_frame = pd.DataFrame(cls.automl_.ensemble_performance_history)
-best_values = pd.Series({'ensemble_optimization_score': -np.inf,
-                         'ensemble_test_score': -np.inf})
+
+best_values = pd.Series({
+    'ensemble_optimization_score': -np.inf,
+    'ensemble_test_score': -np.inf
+})
 for idx in ensemble_performance_frame.index:
-    if (
-        ensemble_performance_frame.loc[idx, 'ensemble_optimization_score']
-        > best_values['ensemble_optimization_score']
-    ):
+    ensemble_score = ensemble_performance_frame.loc[idx, 'ensemble_optimization_score']
+
+    if (opt_score > best_values['ensemble_optimization_score']):
         best_values = ensemble_performance_frame.loc[idx]
+
     ensemble_performance_frame.loc[idx] = best_values
 
 individual_performance_frame = get_runhistory_models_performance(cls)
-best_values = pd.Series({'single_best_optimization_score': -np.inf,
-                         'single_best_test_score': -np.inf,
-                         'single_best_train_score': -np.inf})
+best_values = pd.Series({
+    'single_best_optimization_score': -np.inf,
+    'single_best_test_score': -np.inf,
+    'single_best_train_score': -np.inf
+})
 for idx in individual_performance_frame.index:
-    if (
-        individual_performance_frame.loc[idx, 'single_best_optimization_score']
-        > best_values['single_best_optimization_score']
-    ):
+    single_best_score = individual_performance_frame.loc[idx, 'single_best_optimization_score']
+    if (single_best_score > best_values['single_best_optimization_score']):
         best_values = individual_performance_frame.loc[idx]
+
     individual_performance_frame.loc[idx] = best_values
 
 pd.merge(

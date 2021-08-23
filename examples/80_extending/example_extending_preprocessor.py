@@ -29,6 +29,7 @@ from sklearn.model_selection import train_test_split
 # Create LDA component for auto-sklearn
 # =====================================
 class LDA(AutoSklearnPreprocessingAlgorithm):
+
     def __init__(self, solver, tol, shrinkage=None, random_state=None):
         self.solver = solver
         self.shrinkage = shrinkage
@@ -44,12 +45,11 @@ class LDA(AutoSklearnPreprocessingAlgorithm):
         self.tol = float(self.tol)
 
         import sklearn.discriminant_analysis
-        self.preprocessor = \
-            sklearn.discriminant_analysis.LinearDiscriminantAnalysis(
-                shrinkage=self.shrinkage,
-                solver=self.solver,
-                tol=self.tol,
-            )
+        self.preprocessor = sklearn.discriminant_analysis.LinearDiscriminantAnalysis(
+            shrinkage=self.shrinkage,
+            solver=self.solver,
+            tol=self.tol,
+        )
         self.preprocessor.fit(X, y)
         return self
 
@@ -60,16 +60,18 @@ class LDA(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'LDA',
-                'name': 'Linear Discriminant Analysis',
-                'handles_regression': False,
-                'handles_classification': True,
-                'handles_multiclass': False,
-                'handles_multilabel': False,
-                'handles_multioutput': False,
-                'is_deterministic': True,
-                'input': (DENSE, UNSIGNED_DATA, SIGNED_DATA),
-                'output': (DENSE, UNSIGNED_DATA, SIGNED_DATA)}
+        return {
+            'shortname': 'LDA',
+            'name': 'Linear Discriminant Analysis',
+            'handles_regression': False,
+            'handles_classification': True,
+            'handles_multiclass': False,
+            'handles_multilabel': False,
+            'handles_multioutput': False,
+            'is_deterministic': True,
+            'input': (DENSE, UNSIGNED_DATA, SIGNED_DATA),
+            'output': (DENSE, UNSIGNED_DATA, SIGNED_DATA)
+        }
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
@@ -112,7 +114,9 @@ print(cs)
 
 clf = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=30,
-    include={'feature_preprocessor': ['LDA']},
+    include={
+        'feature_preprocessor': ['LDA']
+    },
     # Bellow two flags are provided to speed up calculations
     # Not recommended for a real implementation
     initial_configurations_via_metalearning=0,
