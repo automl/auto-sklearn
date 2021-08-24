@@ -69,7 +69,7 @@ jobs:
           mkdir $benchmark_dir/benchmark
           wget ${filesource}/${config_file} -O ${benchmark_dir}/${config_file}
           wget ${filesource}/${constraints_file} -O ${benchmark_dir}/${constraints_file}
-          wget ${filesource}/benchmark/${benchmark_file} -O ${benchmark_dir}/benchmark/${benchmark_file}
+          wget ${filesource}/benchmarks/${benchmark_file} -O ${benchmark_dir}/benchmarks/${benchmark_file}
           echo "::set-output name=benchmarkdir::$(pwd)/${benchmark_dir}"
           # outputs
           #   benchmarkdir: the dir with config in it
