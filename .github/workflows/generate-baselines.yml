@@ -63,7 +63,7 @@ jobs:
           benchmark_dir: 'baseline_benchmark'
           config_file: 'config.yaml'
           constraints_file: 'constraints.yaml'
-          benchmark_file: ${{ matrix.task_type }}_benchmark.yaml
+          benchmark_file: ${{ matrix.task_type }}.yaml
         run: |
           mkdir $benchmark_dir
           mkdir $benchmark_dir/benchmark
