@@ -1,0 +1,13 @@
+---
+
+# binary, 1000 instances, 23 features, 2 labels
+- name: credit-g
+  openml_task_id: 31
+
+# multi-label, 1080 instances, 857 features, 9 labels
+- name: cnae-9
+  openml_task_id: 9981
+
+# binary, highly imbalanced, 2109 instances, 22 features, 2 labels
+- name: kc1
+  openml_task_id: 3917
