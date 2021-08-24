@@ -77,7 +77,7 @@ jobs:
       - name: Run the automl benchmark
         id: bench
         env:
-          benchmarkdir: ${{ steps.gen_framework.outputs.benchmarkdir }}
+          benchmarkdir: ${{ steps.fetch.outputs.benchmarkdir }}
           framework: autosklearn:stable
           benchmark: ${{ matrix.task_type }}
           constraint: 10min10fold
