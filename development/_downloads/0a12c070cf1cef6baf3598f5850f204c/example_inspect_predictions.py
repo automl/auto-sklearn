@@ -28,9 +28,10 @@ dataset = sklearn.datasets.fetch_openml(data_id=40922)
 # Note: To speed up the example, we subsample the dataset
 dataset.data = dataset.data.sample(n=5000, random_state=1, axis="index")
 dataset.target = dataset.target[dataset.data.index]
-X_train, X_test, y_train, y_test = \
-    sklearn.model_selection.train_test_split(dataset.data, dataset.target, test_size=0.3,
-                                             random_state=1)
+
+X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+    dataset.data, dataset.target, test_size=0.3, random_state=1
+)
 
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
@@ -57,12 +58,12 @@ print(f"Test score {s}")
 # **Note:** There are some pitfalls in interpreting these numbers, which can be found
 # in the `scikit-learn docs <https://scikit-learn.org/stable/modules/permutation_importance.html>`_.
 
-r = permutation_importance(automl, X_test, y_test,
-                           n_repeats=10,
-                           random_state=0)
-
+r = permutation_importance(automl, X_test, y_test, n_repeats=10, random_state=0)
 sort_idx = r.importances_mean.argsort()[::-1]
-plt.boxplot(r.importances[sort_idx].T, labels=[dataset.feature_names[i] for i in sort_idx])
+
+plt.boxplot(r.importances[sort_idx].T,
+            labels=[dataset.feature_names[i] for i in sort_idx])
+
 plt.xticks(rotation=90)
 plt.tight_layout()
 plt.show()
@@ -89,9 +90,11 @@ for i in sort_idx[::-1]:
 # combining ICE (thin lines) and PD (thick line)
 
 features = [1, 2]
-plot_partial_dependence(automl, dataset.data, features=features, grid_resolution=5,
-                        kind="both", feature_names=dataset.feature_names,
-                        )
+plot_partial_dependence(automl, dataset.data,
+                        features=features,
+                        grid_resolution=5,
+                        kind="both",
+                        feature_names=dataset.feature_names)
 plt.tight_layout()
 plt.show()
 
@@ -103,8 +106,9 @@ plt.show()
 # these features. Again, we'll look at acceleration_y and acceleration_z.
 
 features = [[1, 2]]
-plot_partial_dependence(automl, dataset.data, features=features, grid_resolution=5,
-                        feature_names=dataset.feature_names,
-                        )
+plot_partial_dependence(automl, dataset.data,
+                        features=features,
+                        grid_resolution=5,
+                        feature_names=dataset.feature_names)
 plt.tight_layout()
 plt.show()

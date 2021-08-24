@@ -124,7 +124,7 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight              type          cost  duration
     model_id                                                                 
-    25           1              1.0  gaussian_process  1.496161e-09  5.021026
+    28           1              1.0  gaussian_process  2.800653e-07  3.220046
 
 
 
@@ -151,7 +151,7 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    [(1.000000, SimpleRegressionPipeline({'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'feature_agglomeration', 'regressor:__choice__': 'gaussian_process', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:feature_agglomeration:affinity': 'euclidean', 'feature_preprocessor:feature_agglomeration:linkage': 'average', 'feature_preprocessor:feature_agglomeration:n_clusters': 138, 'feature_preprocessor:feature_agglomeration:pooling_func': 'median', 'regressor:gaussian_process:alpha': 1.5157033718996852e-10, 'regressor:gaussian_process:thetaL': 1.7652863867557732e-06, 'regressor:gaussian_process:thetaU': 97009.84899972199},
+    [(1.000000, SimpleRegressionPipeline({'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'feature_agglomeration', 'regressor:__choice__': 'gaussian_process', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:feature_agglomeration:affinity': 'cosine', 'feature_preprocessor:feature_agglomeration:linkage': 'average', 'feature_preprocessor:feature_agglomeration:n_clusters': 68, 'feature_preprocessor:feature_agglomeration:pooling_func': 'median', 'regressor:gaussian_process:alpha': 1.7232846547723403e-07, 'regressor:gaussian_process:thetaL': 1.4946350062742585e-06, 'regressor:gaussian_process:thetaU': 68158.20370779387, 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.010000000000000004},
     dataset_properties={
       'task': 5,
       'sparse': False,
@@ -186,7 +186,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.9999999992733919
+    R2 score: 0.9999998541871248
 
 
 
@@ -409,7 +409,7 @@ Get the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  57.779 seconds)
+   **Total running time of the script:** ( 1 minutes  58.735 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multioutput_regression.py:

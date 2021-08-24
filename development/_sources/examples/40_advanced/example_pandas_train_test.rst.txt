@@ -214,7 +214,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score 0.863768115942029
+    Accuracy score 0.8724637681159421
 
 
 
@@ -224,32 +224,39 @@ Get the Score of the final ensemble
 Plot the ensemble performance
 ===================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 119-155
+.. GENERATED FROM PYTHON SOURCE LINES 119-162
 
 .. code-block:: default
 
 
     ensemble_performance_frame = pd.DataFrame(cls.automl_.ensemble_performance_history)
-    best_values = pd.Series({'ensemble_optimization_score': -np.inf,
-                             'ensemble_test_score': -np.inf})
+
+    best_values = pd.Series({
+        'ensemble_optimization_score': -np.inf,
+        'ensemble_test_score': -np.inf
+    })
     for idx in ensemble_performance_frame.index:
         if (
             ensemble_performance_frame.loc[idx, 'ensemble_optimization_score']
             > best_values['ensemble_optimization_score']
         ):
             best_values = ensemble_performance_frame.loc[idx]
+
         ensemble_performance_frame.loc[idx] = best_values
 
     individual_performance_frame = get_runhistory_models_performance(cls)
-    best_values = pd.Series({'single_best_optimization_score': -np.inf,
-                             'single_best_test_score': -np.inf,
-                             'single_best_train_score': -np.inf})
+    best_values = pd.Series({
+        'single_best_optimization_score': -np.inf,
+        'single_best_test_score': -np.inf,
+        'single_best_train_score': -np.inf
+    })
     for idx in individual_performance_frame.index:
         if (
-            individual_performance_frame.loc[idx, 'single_best_optimization_score']
+            individual_performance_frame.loc[idx, 'single_best_optimization_score'] 
             > best_values['single_best_optimization_score']
         ):
             best_values = individual_performance_frame.loc[idx]
+
         individual_performance_frame.loc[idx] = best_values
 
     pd.merge(
@@ -278,7 +285,7 @@ Plot the ensemble performance
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  56.695 seconds)
+   **Total running time of the script:** ( 2 minutes  0.570 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_pandas_train_test.py:

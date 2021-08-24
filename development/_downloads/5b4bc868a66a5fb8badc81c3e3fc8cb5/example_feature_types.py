@@ -37,7 +37,10 @@ X_train, X_test, y_train, y_test = \
 # when using numpy arrays, as there is no per-column dtype in this case.
 # feat_type is a list that tags each column from a DataFrame/ numpy array / list
 # with the case-insensitive string categorical or numerical, accordingly.
-feat_type = ['Categorical' if x.name == 'category' else 'Numerical' for x in bunch['data'].dtypes]
+feat_type = [
+    'Categorical' if x.name == 'category' else 'Numerical'
+    for x in bunch['data'].dtypes
+]
 
 ############################################################################
 # Build and fit a classifier

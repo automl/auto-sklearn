@@ -51,7 +51,7 @@ The following example demonstrates how to turn off data preprocessing step in au
 Create NoPreprocessing component for auto-sklearn
 =================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 22-60
+.. GENERATED FROM PYTHON SOURCE LINES 22-62
 
 .. code-block:: default
 
@@ -73,16 +73,18 @@ Create NoPreprocessing component for auto-sklearn
 
         @staticmethod
         def get_properties(dataset_properties=None):
-            return {'shortname': 'no',
-                    'name': 'NoPreprocessing',
-                    'handles_regression': True,
-                    'handles_classification': True,
-                    'handles_multiclass': True,
-                    'handles_multilabel': True,
-                    'handles_multioutput': True,
-                    'is_deterministic': True,
-                    'input': (SPARSE, DENSE, UNSIGNED_DATA),
-                    'output': (INPUT,)}
+            return {
+                'shortname': 'no',
+                'name': 'NoPreprocessing',
+                'handles_regression': True,
+                'handles_classification': True,
+                'handles_multiclass': True,
+                'handles_multilabel': True,
+                'handles_multioutput': True,
+                'is_deterministic': True,
+                'input': (SPARSE, DENSE, UNSIGNED_DATA),
+                'output': (INPUT,)
+            }
 
         @staticmethod
         def get_hyperparameter_search_space(dataset_properties=None):
@@ -100,12 +102,12 @@ Create NoPreprocessing component for auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 61-63
+.. GENERATED FROM PYTHON SOURCE LINES 63-65
 
 Create dataset
 ==============
 
-.. GENERATED FROM PYTHON SOURCE LINES 63-67
+.. GENERATED FROM PYTHON SOURCE LINES 65-69
 
 .. code-block:: default
 
@@ -120,19 +122,21 @@ Create dataset
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 68-70
+.. GENERATED FROM PYTHON SOURCE LINES 70-72
 
 Fit the model without performing data preprocessing
 ===================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 70-81
+.. GENERATED FROM PYTHON SOURCE LINES 72-85
 
 .. code-block:: default
 
 
     clf = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=120,
-        include={'data_preprocessor': ['NoPreprocessing']},
+        include={
+            'data_preprocessor': ['NoPreprocessing']
+        },
         # Bellow two flags are provided to speed up calculations
         # Not recommended for a real implementation
         initial_configurations_via_metalearning=0,
@@ -159,12 +163,12 @@ Fit the model without performing data preprocessing
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 82-84
+.. GENERATED FROM PYTHON SOURCE LINES 86-88
 
 Print prediction score and statistics
 =====================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 84-88
+.. GENERATED FROM PYTHON SOURCE LINES 88-92
 
 .. code-block:: default
 
@@ -182,7 +186,7 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    accuracy:  0.34265734265734266
+    accuracy:  0.36363636363636365
     [(1.000000, MyDummyClassifier(config=1,
                       init_params={'data_preprocessor:feat_type': {0: 'numerical',
                                                                    1: 'numerical',
@@ -224,7 +228,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  13.645 seconds)
+   **Total running time of the script:** ( 0 minutes  14.813 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_data_preprocessor.py:

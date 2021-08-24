@@ -63,10 +63,12 @@ def get_roar_object_callback(
 
 
 automl = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=60, per_run_time_limit=15,
+    time_left_for_this_task=60,
+    per_run_time_limit=15,
     tmp_folder='/tmp/autosklearn_random_search_example_tmp',
-    get_smac_object_callback=get_roar_object_callback,
     initial_configurations_via_metalearning=0,
+    # The callback to get the SMAC object
+    get_smac_object_callback=get_roar_object_callback,
 )
 automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
@@ -85,15 +87,15 @@ print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 # Fit a classifier using Random Search
 # ====================================
 def get_random_search_object_callback(
-        scenario_dict,
-        seed,
-        ta,
-        ta_kwargs,
-        metalearning_configurations,
-        n_jobs,
-        dask_client
+    scenario_dict,
+    seed,
+    ta,
+    ta_kwargs,
+    metalearning_configurations,
+    n_jobs,
+    dask_client
 ):
-    """Random search."""
+    """ Random search """
 
     if n_jobs > 1 or (dask_client and len(dask_client.nthreads()) > 1):
         raise ValueError("Please make sure to guard the code invoking Auto-sklearn by "
@@ -117,8 +119,9 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=60,
     per_run_time_limit=15,
     tmp_folder='/tmp/autosklearn_random_search_example_tmp',
-    get_smac_object_callback=get_random_search_object_callback,
     initial_configurations_via_metalearning=0,
+    # Passing the callback to get the SMAC object
+    get_smac_object_callback=get_random_search_object_callback,
 )
 automl.fit(X_train, y_train, dataset_name='breast_cancer')
 

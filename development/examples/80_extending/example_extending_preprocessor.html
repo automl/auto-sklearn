@@ -151,6 +151,7 @@ in auto-sklearn.</p>
 <section id="create-lda-component-for-auto-sklearn">
 <h2>Create LDA component for auto-sklearn<a class="headerlink" href="#create-lda-component-for-auto-sklearn" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">LDA</span><span class="p">(</span><span class="n">AutoSklearnPreprocessingAlgorithm</span><span class="p">):</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">solver</span><span class="p">,</span> <span class="n">tol</span><span class="p">,</span> <span class="n">shrinkage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">solver</span> <span class="o">=</span> <span class="n">solver</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shrinkage</span> <span class="o">=</span> <span class="n">shrinkage</span>
@@ -166,12 +167,11 @@ in auto-sklearn.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">tol</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">)</span>
 
         <span class="kn">import</span> <span class="nn">sklearn.discriminant_analysis</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span> <span class="o">=</span> \
-            <span class="n">sklearn</span><span class="o">.</span><span class="n">discriminant_analysis</span><span class="o">.</span><span class="n">LinearDiscriminantAnalysis</span><span class="p">(</span>
-                <span class="n">shrinkage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shrinkage</span><span class="p">,</span>
-                <span class="n">solver</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span>
-                <span class="n">tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">,</span>
-            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">discriminant_analysis</span><span class="o">.</span><span class="n">LinearDiscriminantAnalysis</span><span class="p">(</span>
+            <span class="n">shrinkage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shrinkage</span><span class="p">,</span>
+            <span class="n">solver</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span>
+            <span class="n">tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
@@ -182,16 +182,18 @@ in auto-sklearn.</p>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_properties</span><span class="p">(</span><span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;shortname&#39;</span><span class="p">:</span> <span class="s1">&#39;LDA&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Linear Discriminant Analysis&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;handles_regression&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="s1">&#39;handles_classification&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;handles_multiclass&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="s1">&#39;handles_multilabel&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="s1">&#39;handles_multioutput&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="s1">&#39;is_deterministic&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;input&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">DENSE</span><span class="p">,</span> <span class="n">UNSIGNED_DATA</span><span class="p">,</span> <span class="n">SIGNED_DATA</span><span class="p">),</span>
-                <span class="s1">&#39;output&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">DENSE</span><span class="p">,</span> <span class="n">UNSIGNED_DATA</span><span class="p">,</span> <span class="n">SIGNED_DATA</span><span class="p">)}</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;shortname&#39;</span><span class="p">:</span> <span class="s1">&#39;LDA&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Linear Discriminant Analysis&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;handles_regression&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;handles_classification&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;handles_multiclass&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;handles_multilabel&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;handles_multioutput&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;is_deterministic&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;input&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">DENSE</span><span class="p">,</span> <span class="n">UNSIGNED_DATA</span><span class="p">,</span> <span class="n">SIGNED_DATA</span><span class="p">),</span>
+            <span class="s1">&#39;output&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">DENSE</span><span class="p">,</span> <span class="n">UNSIGNED_DATA</span><span class="p">,</span> <span class="n">SIGNED_DATA</span><span class="p">)</span>
+        <span class="p">}</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_hyperparameter_search_space</span><span class="p">(</span><span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -244,7 +246,9 @@ in auto-sklearn.</p>
 <h2>Fit the model using LDA as preprocessor<a class="headerlink" href="#fit-the-model-using-lda-as-preprocessor" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">clf</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
     <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-    <span class="n">include</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;feature_preprocessor&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;LDA&#39;</span><span class="p">]},</span>
+    <span class="n">include</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;feature_preprocessor&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;LDA&#39;</span><span class="p">]</span>
+    <span class="p">},</span>
     <span class="c1"># Bellow two flags are provided to speed up calculations</span>
     <span class="c1"># Not recommended for a real implementation</span>
     <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
@@ -270,7 +274,7 @@ in auto-sklearn.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.972027972027972
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.958041958041958
 [(1.000000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;random_forest&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;LDA&#39;, &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;, &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;, &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;, &#39;classifier:random_forest:max_features&#39;: 0.5, &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0, &#39;classifier:random_forest:min_samples_leaf&#39;: 1, &#39;classifier:random_forest:min_samples_split&#39;: 2, &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:LDA:solver&#39;: &#39;svd&#39;, &#39;feature_preprocessor:LDA:tol&#39;: 0.0001, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01},
 dataset_properties={
   &#39;task&#39;: 1,
@@ -282,7 +286,7 @@ dataset_properties={
 ]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  23.329 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  18.119 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-extending-preprocessor-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_preprocessor.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>

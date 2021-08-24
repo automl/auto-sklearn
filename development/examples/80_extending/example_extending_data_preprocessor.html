@@ -158,16 +158,18 @@ to download the full example code or to run this example in your browser via Bin
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_properties</span><span class="p">(</span><span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;shortname&#39;</span><span class="p">:</span> <span class="s1">&#39;no&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;NoPreprocessing&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;handles_regression&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;handles_classification&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;handles_multiclass&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;handles_multilabel&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;handles_multioutput&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;is_deterministic&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;input&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">SPARSE</span><span class="p">,</span> <span class="n">DENSE</span><span class="p">,</span> <span class="n">UNSIGNED_DATA</span><span class="p">),</span>
-                <span class="s1">&#39;output&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">INPUT</span><span class="p">,)}</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;shortname&#39;</span><span class="p">:</span> <span class="s1">&#39;no&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;NoPreprocessing&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;handles_regression&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;handles_classification&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;handles_multiclass&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;handles_multilabel&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;handles_multioutput&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;is_deterministic&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;input&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">SPARSE</span><span class="p">,</span> <span class="n">DENSE</span><span class="p">,</span> <span class="n">UNSIGNED_DATA</span><span class="p">),</span>
+            <span class="s1">&#39;output&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">INPUT</span><span class="p">,)</span>
+        <span class="p">}</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_hyperparameter_search_space</span><span class="p">(</span><span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -191,7 +193,9 @@ to download the full example code or to run this example in your browser via Bin
 <h2>Fit the model without performing data preprocessing<a class="headerlink" href="#fit-the-model-without-performing-data-preprocessing" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">clf</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
     <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
-    <span class="n">include</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;data_preprocessor&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;NoPreprocessing&#39;</span><span class="p">]},</span>
+    <span class="n">include</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;data_preprocessor&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;NoPreprocessing&#39;</span><span class="p">]</span>
+    <span class="p">},</span>
     <span class="c1"># Bellow two flags are provided to speed up calculations</span>
     <span class="c1"># Not recommended for a real implementation</span>
     <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
@@ -217,7 +221,7 @@ to download the full example code or to run this example in your browser via Bin
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.34265734265734266
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.36363636363636365
 [(1.000000, MyDummyClassifier(config=1,
                   init_params={&#39;data_preprocessor:feat_type&#39;: {0: &#39;numerical&#39;,
                                                                1: &#39;numerical&#39;,
@@ -254,7 +258,7 @@ to download the full example code or to run this example in your browser via Bin
 ]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  13.645 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  14.813 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-extending-data-preprocessor-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_data_preprocessor.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>

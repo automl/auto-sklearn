@@ -156,7 +156,10 @@ types will be automatically inferred, as demonstrated in
 <span class="c1"># when using numpy arrays, as there is no per-column dtype in this case.</span>
 <span class="c1"># feat_type is a list that tags each column from a DataFrame/ numpy array / list</span>
 <span class="c1"># with the case-insensitive string categorical or numerical, accordingly.</span>
-<span class="n">feat_type</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Categorical&#39;</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;category&#39;</span> <span class="k">else</span> <span class="s1">&#39;Numerical&#39;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">bunch</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dtypes</span><span class="p">]</span>
+<span class="n">feat_type</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;Categorical&#39;</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;category&#39;</span> <span class="k">else</span> <span class="s1">&#39;Numerical&#39;</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">bunch</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dtypes</span>
+<span class="p">]</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
@@ -196,7 +199,7 @@ Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdo
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score 0.8786127167630058
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  11.771 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  10.378 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-feature-types-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_feature_types.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>

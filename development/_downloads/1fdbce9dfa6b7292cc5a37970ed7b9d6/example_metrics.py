@@ -34,15 +34,15 @@ def error(solution, prediction):
     return np.mean(solution != prediction)
 
 
-def accuracy_wk(solution, prediction, dummy):
+def accuracy_wk(solution, prediction, extra_argument):
     # custom function defining accuracy and accepting an additional argument
-    assert dummy is None
+    assert extra_argument is None
     return np.mean(solution == prediction)
 
 
-def error_wk(solution, prediction, dummy):
+def error_wk(solution, prediction, extra_argument):
     # custom function defining error and accepting an additional argument
-    assert dummy is None
+    assert extra_argument is None
     return np.mean(solution != prediction)
 
 
@@ -79,9 +79,9 @@ cls = autosklearn.classification.AutoSklearnClassifier(
 cls.fit(X_train, y_train)
 
 predictions = cls.predict(X_test)
-print("Accuracy score {:g} using {:s}".
-      format(sklearn.metrics.accuracy_score(y_test, predictions),
-             cls.automl_._metric.name))
+score = sklearn.metrics.accuracy_score(y_test, predictions)
+metric_name = cls.automl_._metric.name
+print(f"Accuracy score {score:.3f} using {metric_name}")
 
 ############################################################################
 # Second example: Use own accuracy metric
@@ -106,9 +106,13 @@ cls = autosklearn.classification.AutoSklearnClassifier(
 cls.fit(X_train, y_train)
 
 predictions = cls.predict(X_test)
-print("Accuracy score {:g} using {:s}".
-      format(sklearn.metrics.accuracy_score(y_test, predictions),
-             cls.automl_._metric.name))
+score = accuracy_scorer(y_test, predictions)
+metric_name = cls.automl_._metric.name
+print(f"Accuracy score {score:.3f} using {metric_name:s}")
+
+############################################################################
+# Third example: Use own error metric
+# ===================================
 
 print("#"*80)
 print("Use self defined error metric")
@@ -129,13 +133,13 @@ cls = autosklearn.classification.AutoSklearnClassifier(
 cls.fit(X_train, y_train)
 
 cls.predictions = cls.predict(X_test)
-print("Error rate {:g} using {:s}".
-      format(error_rate(y_test, predictions),
-             cls.automl_._metric.name))
+score = error_rate(y_test, predictions)
+metric_name = cls.automl_._metric.name
+print(f"Error score {score:.3f} using {metric_name:s}")
 
 ############################################################################
-# Third example: Use own accuracy metric with additional argument
-# ===============================================================
+# Fourth example: Use own accuracy metric with additional argument
+# ================================================================
 
 print("#"*80)
 print("Use self defined accuracy with additional argument")
@@ -146,7 +150,7 @@ accuracy_scorer = autosklearn.metrics.make_scorer(
     greater_is_better=True,
     needs_proba=False,
     needs_threshold=False,
-    dummy=None,
+    extra_argument=None,
 )
 cls = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=60,
@@ -157,12 +161,13 @@ cls = autosklearn.classification.AutoSklearnClassifier(
 cls.fit(X_train, y_train)
 
 predictions = cls.predict(X_test)
-print(
-    "Accuracy score {:g} using {:s}".format(
-        sklearn.metrics.accuracy_score(y_test, predictions),
-        cls.automl_._metric.name
-    )
-)
+score = accuracy_scorer(y_test, predictions)
+metric_name = cls.automl_._metric.name
+print(f"Accuracy score {score:.3f} using {metric_name:s}")
+
+############################################################################
+# Fifth example: Use own accuracy metric with additional argument
+# ===============================================================
 
 print("#"*80)
 print("Use self defined error with additional argument")
@@ -173,7 +178,7 @@ error_rate = autosklearn.metrics.make_scorer(
     greater_is_better=True,
     needs_proba=False,
     needs_threshold=False,
-    dummy=None,
+    extra_argument=None,
 )
 cls = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=60,
@@ -184,9 +189,6 @@ cls = autosklearn.classification.AutoSklearnClassifier(
 cls.fit(X_train, y_train)
 
 predictions = cls.predict(X_test)
-print(
-    "Error rate {:g} using {:s}".format(
-        error_rate(y_test, predictions),
-        cls.automl_._metric.name
-    )
-)
+score = error_rate(y_test, predictions)
+metric_name = cls.automl_._metric.name
+print(f"Error score {score:.3f} using {metric_name:s}")

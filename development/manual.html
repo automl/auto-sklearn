@@ -164,9 +164,12 @@ all preprocessing methods and restrict the configuration space to only
 random forests.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">include</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;classifier&#39;</span><span class="p">:[</span><span class="s2">&quot;random_forest&quot;</span><span class="p">,</span> <span class="p">],</span>
-<span class="gp">&gt;&gt;&gt; </span>                             <span class="s1">&#39;feature_preprocessors&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;no_preprocessing&quot;</span><span class="p">]},</span>
-<span class="gp">&gt;&gt;&gt; </span>            <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">include</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">&gt;&gt;&gt; </span>      <span class="s1">&#39;classifier&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;random_forest&quot;</span><span class="p">],</span>
+<span class="gp">&gt;&gt;&gt; </span>      <span class="s1">&#39;feature_preprocessors&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;no_preprocessing&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="p">},</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 </pre></div>
@@ -187,8 +190,9 @@ random forests.</p>
 <p>Preprocessing in <em>auto-sklearn</em> is divided into data preprocessing and
 feature preprocessing. Data preprocessing includes One-Hot encoding of
 categorical features, imputation of missing values and the normalization of
-features or samples. These steps currently cannot be turned off. Feature
-preprocessing is a single transformer which implements for example feature
+features or samples. Dataprerocessing steps cannot be turned off as this ensures
+autosklearn can actually pass the data to sklearn models without error.</p>
+<p>Feature preprocessing is a single transformer which implements for example feature
 selection or transformation of features into a different space (i.e. PCA).
 This can be turned off by setting
 <code class="docutils literal notranslate"><span class="pre">include={'feature_preprocessors'=[&quot;no_preprocessing&quot;]}</span></code> as shown in the example above.</p>
@@ -196,7 +200,7 @@ This can be turned off by setting
 </section>
 <section id="resampling-strategies">
 <h2>Resampling strategies<a class="headerlink" href="#resampling-strategies" title="Permalink to this headline">¶</a></h2>
-<p>Examples for using holdout and cross-validation can be found in <a class="reference external" href="examples/">auto-sklearn/examples/</a></p>
+<p>Examples for using holdout and cross-validation can be found in <a class="reference internal" href="examples/index.html#examples"><span class="std std-ref">auto-sklearn/examples/</span></a></p>
 </section>
 <section id="supported-inputs">
 <h2>Supported Inputs<a class="headerlink" href="#supported-inputs" title="Permalink to this headline">¶</a></h2>
@@ -301,7 +305,9 @@ from scikit-learn.</p>
 set <code class="docutils literal notranslate"><span class="pre">ensemble_size=1</span></code> and <code class="docutils literal notranslate"><span class="pre">initial_configurations_via_metalearning=0</span></code>:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">ensemble_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">ensemble_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">)</span>
 </pre></div>
 </div>
 <p>An ensemble of size one will result in always choosing the current best model
