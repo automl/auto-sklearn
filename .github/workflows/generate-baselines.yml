@@ -36,7 +36,7 @@ jobs:
 
       - name: Branch extract
         id: extract
-        run: echo "::set-output name=branch::${GITHUB_REF#/refs/heads/}"
+        run: echo "::set-output name=branch::$(echo ${GITHUB_REF#/refs/heads/})"
         # outputs
         #   branch: the branch name
 
@@ -56,7 +56,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Fetch util file env
+      - name: Fetch configs
         id: fetch
         env:
           filesource: ${{ env.GITHUB_RAW_URL }}/${{ github.repositry }}/${{ steps.extract.outputs.branch }}/${{ env.WORKFLOW_DIR }}
