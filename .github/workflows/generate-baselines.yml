@@ -14,7 +14,6 @@ env:
   GITHUB_RAW_URL: 'https://raw.githubusercontent.com'
   WORKFLOW_DIR: '.github/workflows/generate-baselines'
   PYTHON_UTIL_FILE: 'baseline-util.py'
-  BRANCH: ${GITHUB_REF##*/}
 
 jobs:
 
@@ -35,6 +34,12 @@ jobs:
           pwd
           ls -a
 
+      - name: Branch extract
+        id: extract
+        run: echo "::set-output name=branch::${GITHUB_REF#/refs/heads/}"
+        # outputs
+        #   branch: the branch name
+
       - name: Setup Python 3.9.6
         uses: actions/setup-python@v2
         with:
@@ -54,7 +59,7 @@ jobs:
       - name: Fetch util file env
         id: fetch
         env:
-          filesource: ${{ env.GITHUB_RAW_URL }}/${{ github.repositry }}/${{ env.BRANCH }}/${{ env.WORKFLOW_DIR }}/generate-baselines
+          filesource: ${{ env.GITHUB_RAW_URL }}/${{ github.repositry }}/${{ steps.extract.outputs.branch }}/${{ env.WORKFLOW_DIR }}/generate-baselines
           benchmark_dir: 'baseline_benchmark'
           config_file: 'config.yaml'
           constraints_file: 'constraints.yaml'
@@ -77,8 +82,7 @@ jobs:
           benchmark: ${{ matrix.task_type }}
           constraint: 10min10fold
           benchmark_output: results/results.csv'
-          results_to: baseline_${{ github.repository_owner }}_${{ github.sha }}_${{ matrix.task_type }}.csv
-
+          results_to: baseline_${{ matrix.task_type }}_${{ github.repository_owner }}_${{ steps.extract.outputs.branch }}_${{ github.sha }}.csv
         run: |
           python runbenchmark.py -u $benchmarkdir $framework $benchmark $constraint
           mv $benchmark_output $results_to
