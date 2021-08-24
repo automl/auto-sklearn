@@ -1,0 +1,17 @@
+---
+frameworks:
+
+  definition_file:  # this allows to add custom framework definitions (in {user}/frameworks.yaml) on top of the default ones.
+    - '{root}/resources/frameworks.yaml'
+    - '{user}/frameworks.yaml'
+
+benchmarks:
+
+  definition_dir:  # this allows to add custom benchmark definitions (under {user}/benchmarks) to the default ones.
+    - '{root}/resources/benchmarks'
+    - '{user}/benchmarks'
+
+  constraints_file: # this allows to add custom constraint definitions (in {user}/constraints.yaml) on top of the default ones.
+    - '{root}/resources/constraints.yaml'
+    - '{user}/constraints.yaml'
+
