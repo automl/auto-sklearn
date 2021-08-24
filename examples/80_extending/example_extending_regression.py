@@ -45,11 +45,13 @@ class KernelRidgeRegression(AutoSklearnRegressionAlgorithm):
         self.coef0 = float(self.coef0)
 
         import sklearn.kernel_ridge
-        self.estimator = sklearn.kernel_ridge.KernelRidge(alpha=self.alpha,
-                                                          kernel=self.kernel,
-                                                          gamma=self.gamma,
-                                                          degree=self.degree,
-                                                          coef0=self.coef0)
+        self.estimator = sklearn.kernel_ridge.KernelRidge(
+            alpha=self.alpha,
+            kernel=self.kernel,
+            gamma=self.gamma,
+            degree=self.degree,
+            coef0=self.coef0
+        )
         self.estimator.fit(X, y)
         return self
 

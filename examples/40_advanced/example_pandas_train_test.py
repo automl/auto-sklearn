@@ -124,9 +124,10 @@ best_values = pd.Series({
     'ensemble_test_score': -np.inf
 })
 for idx in ensemble_performance_frame.index:
-    ensemble_score = ensemble_performance_frame.loc[idx, 'ensemble_optimization_score']
-
-    if (ensemble_score > best_values['ensemble_optimization_score']):
+    if (
+        ensemble_performance_frame.loc[idx, 'ensemble_optimization_score']
+        > best_values['ensemble_optimization_score']
+    ):
         best_values = ensemble_performance_frame.loc[idx]
 
     ensemble_performance_frame.loc[idx] = best_values
@@ -138,8 +139,10 @@ best_values = pd.Series({
     'single_best_train_score': -np.inf
 })
 for idx in individual_performance_frame.index:
-    single_best_score = individual_performance_frame.loc[idx, 'single_best_optimization_score']
-    if (single_best_score > best_values['single_best_optimization_score']):
+    if (
+        individual_performance_frame.loc[idx, 'single_best_optimization_score'] 
+        > best_values['single_best_optimization_score']
+    ):
         best_values = individual_performance_frame.loc[idx]
 
     individual_performance_frame.loc[idx] = best_values
