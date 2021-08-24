@@ -51,7 +51,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Fetch util file env:
+      - name: Fetch util file env
         id: fetch
         env:
           filesource: ${{ env.GITHUB_RAW_URL }}/${{ github.repositry }}/${{ env.BRANCH }}/${{ env.WORKFLOW_DIR }}/generate-baselines
