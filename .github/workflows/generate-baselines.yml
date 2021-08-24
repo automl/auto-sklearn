@@ -59,7 +59,7 @@ jobs:
       - name: Fetch configs
         id: fetch
         env:
-          filesource: ${{ env.GITHUB_RAW_URL }}/${{ github.repositry }}/${{ steps.extract.outputs.branch }}/${{ env.WORKFLOW_DIR }}
+          filesource: ${{ env.GITHUB_RAW_URL }}/${{ github.repository }}/${{ steps.extract.outputs.branch }}/${{ env.WORKFLOW_DIR }}
           benchmark_dir: 'baseline_benchmark'
           config_file: 'config.yaml'
           constraints_file: 'constraints.yaml'
