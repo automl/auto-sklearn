@@ -1094,23 +1094,49 @@ class AutoML(BaseEstimator):
                     new_num_samples,
                 )
                 if task in CLASSIFICATION_TASKS:
-                    try:
+                    # Identify if it has unique labels and allow for
+                    # stratification, with unique labels in training set
+                    values, idxs, counts = np.unique(y, axis=0,
+                                                     return_index=True,
+                                                     return_counts=True)
+                    unique_labels = {
+                        idx: value
+                        for value, idx, count in zip(values, idxs, counts)
+                        if count == 1
+                    }
+
+                    # If there are unique labeled elements, remove them and
+                    # place them back in later
+                    if len(unique_labels) > 0:
+                        idxs_of_unique = np.asarray(list(unique_labels.keys()))
+                        unique_X = X[idxs_of_unique]
+                        unique_y = y[idxs_of_unique]
+
+                        # NOTE optimization
+                        #   If this ever turns out to be slow, this actually
+                        #   copies the entire array. There might be a better
+                        #   solution but it will probably require a lot more
+                        #   manual work in how splitting is done.
+                        X = np.delete(X, idxs_of_unique, axis=0)
+                        y = np.delete(y, idxs_of_unique, axis=0)
+
+                        X, _, y, _ = sklearn.model_selection.train_test_split(
+                            X, y,
+                            train_size=new_num_samples - len(unique_y),
+                            random_state=seed,
+                            stratify=y,
+                        )
+
+                        X = np.append(X, unique_X, axis=0)
+                        y = np.append(y, unique_y, axis=0)
+
+                    # Otherwise we should be able to stratify as normal
+                    else:
                         X, _, y, _ = sklearn.model_selection.train_test_split(
                             X, y,
                             train_size=new_num_samples,
                             random_state=seed,
                             stratify=y,
-                        )
-                    except Exception:
-                        logger.warning(
-                            'Could not sample dataset in stratified manner, resorting to random '
-                            'sampling',
-                            exc_info=True
-                        )
-                        X, _, y, _ = sklearn.model_selection.train_test_split(
-                            X, y,
-                            train_size=new_num_samples,
-                            random_state=seed,
                         )
                 elif task in REGRESSION_TASKS:
                     X, _, y, _ = sklearn.model_selection.train_test_split(
