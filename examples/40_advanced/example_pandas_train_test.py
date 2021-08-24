@@ -126,7 +126,7 @@ best_values = pd.Series({
 for idx in ensemble_performance_frame.index:
     ensemble_score = ensemble_performance_frame.loc[idx, 'ensemble_optimization_score']
 
-    if (opt_score > best_values['ensemble_optimization_score']):
+    if (ensemble_score > best_values['ensemble_optimization_score']):
         best_values = ensemble_performance_frame.loc[idx]
 
     ensemble_performance_frame.loc[idx] = best_values
