@@ -86,7 +86,7 @@ jobs:
         run: |
           python runbenchmark.py -u $benchmarkdir $framework $benchmark $constraint
           mv $benchmark_output $results_to
-          echo "::set-output name=pyutil::$(pwd)/${results_to}"
+          echo "::set-output name=results_path::$(pwd)/${results_to}"
           # outputs:
           #   results_path: path to the benchmark results
 
