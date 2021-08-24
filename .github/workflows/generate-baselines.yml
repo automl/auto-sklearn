@@ -80,7 +80,7 @@ jobs:
           benchmarkdir: ${{ steps.fetch.outputs.benchmarkdir }}
           framework: autosklearn:stable
           benchmark: ${{ matrix.task_type }}
-          constraint: 10min10fold
+          constraint: 10fold10min
           benchmark_output: results/results.csv'
           results_to: baseline_${{ matrix.task_type }}_${{ github.repository_owner }}_${{ steps.extract.outputs.branch }}_${{ github.sha }}.csv
         run: |
