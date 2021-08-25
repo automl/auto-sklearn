@@ -274,7 +274,7 @@ jobs:
       - name: Run comparison
         id: compare
         env:
-          pyutil: ${{ steps.fetch.outputs.pyscript }}
+          pyutil: ${{ steps.fetch.outputs.pyutil }}
           results_path: ${{ steps.benchmark.outputs.results_path}}
           filename: comparisons.csv
           dependancies: pandas numpy
