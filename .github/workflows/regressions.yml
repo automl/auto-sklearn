@@ -255,7 +255,7 @@ jobs:
 
       - name: Artifact paths as Vars
         id: artifacts
-        run:
+        run: |
           # Should only be one file in each
           BASELINE_CLASSIFICATION=$(ls | grep baseline_classification )
           BASELINE_REGRESSION=$(ls | grep baseline_regression )
@@ -289,9 +289,9 @@ jobs:
             --baseline-csv-classification ${{ steps.artifacts.outputs.baseline_classification }} \
             --baseline-csv-regression ${{ steps.artifacts.outputs.baseline_regression }} \
             --targeted-csv-classification ${{ steps.artifacts.outputs.targeted_classification }} \
-            --targeted-csv-regression ${{ steps.artifacts.outputs.targeted_regression }}
-            --baseline-means-to $baseline_means
-            --targeted-means-to $targeted_means
+            --targeted-csv-regression ${{ steps.artifacts.outputs.targeted_regression }} \
+            --baseline-means-to $baseline_means \
+            --targeted-means-to $targeted_means \
             --compared-means-to $compared_means
 
           echo "::set-output name=baseline_means::$(pwd)/${baseline_means}"

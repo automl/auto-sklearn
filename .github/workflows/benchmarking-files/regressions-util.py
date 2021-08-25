@@ -31,8 +31,8 @@ def _get_mean_results_across_folds(df) -> pd.DataFrame:
 def generate_framework_def(
     user_dir: str,
     username: str,
-    branch: str,  # Not used in this setup but perhaps in a different one
-    commit: str,
+    branch: str,
+    commit: str,  # Not used in this setup but perhaps in a different one
 ):
     """ Creates a framework definition to run an autosklearn repo.
 
@@ -69,6 +69,9 @@ def generate_framework_def(
     if commit[0] != '#':
         commit = '#' + commit
 
+    # Tried commit and ssh repo but was getting errors with ssh
+    # Tried commit and https but getting issues with commit ref
+    version = branch
     repo = f'https://github.com/{username}/auto-sklearn.git'
 
     # Create the framework file
@@ -76,7 +79,7 @@ def generate_framework_def(
         f"---",
         f"autosklearn_targeted:",
         f"  extends: autosklearn",
-        f"  version: '{commit}'",
+        f"  version: '{version}'",
         f"  repo: '{repo}'"
     ])
 
