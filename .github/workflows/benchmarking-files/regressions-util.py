@@ -3,13 +3,13 @@ from typing import Tuple
 import os
 import sys
 import argparse
+
 import numpy as np
 import pandas as pd
 
 CLASSIFICATION_METRICS = ['acc', 'auc', 'balacc', 'logloss']
 REGRESSION_METRICS = ['mae', 'r2', 'rmse']
 METRICS = CLASSIFICATION_METRICS + REGRESSION_METRICS
-TARGET_YAML_FILE = 'target.yaml'
 
 def _get_mean_results_across_folds(df) -> pd.DataFrame:
     """ Returns a dataframe with the task, id, metric and the mean values
@@ -131,10 +131,14 @@ def create_comparison(
 
 
     # Load in data and get the means across folds
-    df_baseline = pd.read_csv(baseline_csv)
+    df_baseline_classification = pd.read_csv(baseline_csv_classification)
+    df_baseline_regression = pd.read_csv(baseline_csv_regression)
+    df_baseline = pd.concat([df_baseline_classification, df_baseline_regression])
     df_baseline_means = _get_mean_results_across_folds(df_baseline)
 
-    df_targeted = pd.read_csv(targeted_csv)
+    df_targeted_classification = pd.read_csv(targeted_csv_classification)
+    df_targeted_regression = pd.read_csv(targeted_csv_regression)
+    df_targeted = pd.concat([df_targeted_classification, df_targeted_regression])
     df_targeted_means = _get_mean_results_across_folds(df_targeted)
 
     # Find the set intersection of tasks they have in common

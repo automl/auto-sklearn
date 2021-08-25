@@ -143,8 +143,11 @@ jobs:
       - name: Create the framework definition for the target branch
         env:
           pyutil: ${{ steps.fetch.outputs.util }}
+          dependancies: numpy pandas
         run: |-
           # Creates a framework file that automl benchmark can use
+          # First install dependancies
+          pip install $dependancies
           python $pyutil --generate-framework-def \
             --userdir ${{ steps.fetch.outputs.benchmarkdir }}
             --owner ${{ github.repository_owner }} \
