@@ -110,22 +110,6 @@ jobs:
         #   - classification: path to classification baseline
         #   - regression: path to regression baseline
 
-      - name: Setup Python 3.9.6
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-
-      - name: Checkout Automlbenchmark
-        uses: actions/checkout@v2
-        with:
-          repository: ${{ env.AUTOMLBENCHMARK_REPO }}
-          ref: ${{ env.AUTOMLBENCHMARK_REF }}
-
-      - name: Install Automlbenchmark
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
       - name: Fetch files
         id: fetch
         env:
@@ -151,6 +135,11 @@ jobs:
           #   benchmarkdir: the dir with config in it
           #   util: the util filepath
 
+      - name: Setup Python 3.9.6
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
       - name: Create the framework definition for the target branch
         env:
           pyutil: ${{ steps.fetch.outputs.util }}
@@ -161,6 +150,18 @@ jobs:
             --owner ${{ github.repository_owner }} \
             --branch ${{ steps.extract.outputs.branch }} \
             --commit ${{ github.sha }}
+
+
+      - name: Checkout Automlbenchmark
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ env.AUTOMLBENCHMARK_REPO }}
+          ref: ${{ env.AUTOMLBENCHMARK_REF }}
+
+      - name: Install Automlbenchmark
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Start benchmark
         id: benchmark
