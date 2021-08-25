@@ -241,10 +241,10 @@ def create_comparisons_markdown(
         '/': 'Missing Value',
         '---': 'Missing Task'
     }
-    legend = {
+    legend.update({
         key: colour(key)
         for key in set(colours.keys()) - set(['Worse', 'Better', 'Good', 'Bad'])
-    }
+    })
     # Worse and better are handled seperatly
 
     compared = pd.read_csv(compared_means_csv, index_col='task')

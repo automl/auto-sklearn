@@ -1,0 +1,180 @@
+name: Regression Tests
+
+on:
+
+  workflow_dispatch:
+    inputs:
+      config:
+        description: 'Config to run'
+        required: true
+        default: 'small.yml'
+
+  pull_request:
+    types: [labeled]
+
+env:
+  AUTOMLBENCHMARK_REPO: 'openml/automlbenchmark'
+  AUTOMLBENCHMARK_REF: 'master'
+  PYTHON_COMPARE_BRANCH: 'master'
+  PYTHON_COMPARE_URL: '.github/workflows/compare.py'
+  BASELINE_BRANCH: 'master'
+  BASELINE_URL: '.github/workflows/baseline.csv'
+  GITHUB_URL: 'https://github.com'
+  GITHUB_RAW_URL: 'https://raw.githubusercontent.com'
+
+jobs:
+
+  run-regression-tests-labeled:
+    name: Run the regression tests
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch'
+      || (
+        github.event_name == 'pull_request'
+        && github.event.action == 'labeled'
+        && github.event.label.name == 'regression-tests'
+      )
+
+    steps:
+      - name: Debug
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: |
+          echo "$GITHUB_CONTEXT"
+          pwd
+          ls -a
+
+      - name: Download baselines artificats
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: generate-baselines.yml
+          workflow_conclusion: "success"
+          branch: master
+          name: baselines
+        # Creates
+        #   ./baselines
+        #   -   baseline_classification_x_x_x.csv
+        #   -   baseline_regression_x_x_x.csv
+        #
+
+      - name: Debug again
+        run: |
+          ls
+          ls baselines
+          apt-get install unzip
+          exit 1
+
+
+      - name: Create comment
+        id: create_comment
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Hello @${{ github.event.pull_request.user.login }},
+            
+            We are doing regression tests for
+
+            * **Branch** ${{ github.event.pull_request.head.ref }}
+            * **Commit** ${{ github.event.pull_request.head.sha }}
+
+            [Progress and Artifacts](${{ env.GITHUB_URL }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+            A summary of the results will be show in this comment once complete but the full results will be available as an artifact at the above link.
+
+      - name: Setup Python 3.9.6
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Checkout Automlbenchmark
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ env.AUTOMLBENCHMARK_REPO }}
+          ref: ${{ env.AUTOMLBENCHMARK_REF }}
+
+      - name: Install Automlbenchmark
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Start benchmark
+        id: benchmark
+        env:
+          COMMIT_REF: ${{ github.event.pull_request.head.sha }}
+          BENCHMARK_ARGS: >-
+            autosklearn test -t iris
+        run: |
+          python runbenchmark.py $BENCHMARK_ARGS
+          ls
+          ls results
+          cat results/results.csv
+          echo "::set-output name=results_path::$(pwd)/results/results.csv"
+          # outputs:
+          #   results_path: path to the results of the benchmark
+
+      - name: Fetch the Python Script and Baseline from the Repo
+        id: fetch
+        env:
+          pyscript_url: ${{ env.GITHUB_RAW_URL }}/${{github.repository}}/${{ env.PYTHON_COMPARE_BRANCH}}/${{env.PYTHON_COMPARE_URL}}
+          baseline_url: ${{ env.GITHUB_RAW_URL }}/${{github.repository}}/${{ env.BASELINE_BRANCH }}/${{env.BASELINE_URL}}
+          baseline_to: 'baseline.csv'
+          pyscript_to: 'compare.py'
+        run: |
+          wget $pyscript_url -O $pyscript_to
+          wget $baseline_url -O $baseline_to
+          echo "::set-output name=pyscript::$(pwd)/${pyscript_to}"
+          echo "::set-output name=baseline::$(pwd)/${baseline_to}"
+          # outpts:
+          #   pyscript: path to the pyscript
+          #   baseline: path to the baseline
+
+      - name: Run comparison
+        id: compare
+        env:
+          pyscript_path: ${{ steps.fetch.outputs.pyscript }}
+          baseline_path: ${{ steps.fetch.outputs.baseline }}
+          results_path: ${{ steps.benchmark.outputs.results_path}}
+          filename: comparisons.csv
+        run: |
+          pip install pandas
+          python $pyscript_path $results_path $baseline_path $filename
+          echo "::set-output name=comparisons_path::$(pwd)/$filename"
+          # outputs:
+          #   comparisons_path: path to the results of regression test vs baseline
+
+      - name: Upload Results as Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: results
+          path: |
+            ${{ steps.benchmark.outputs.results_path }}
+            ${{ steps.compare.outputs.comparisons_path }}
+          retention-days: 1
+
+      - name: Create Comment Body
+        id: results_for_comment
+        if: >
+          github.event_name == 'pull_request'
+          && steps.create_comment.outputs.comment-id != ''
+        env:
+          results_path: ${{ steps.compare.outputs.comparisons_path }}
+        run: |
+          body="\n**Results**\n$(cat $results_path)"
+          body="${body//'%'/'%25'}"
+          body="${body//$'\n'/'%0A'}"
+          body="${body//$'\r'/'%0D'}"
+          echo ::set-output name=body::$body
+          # outputs:
+          #   body: the body of the comment update
+
+      - name: Update Comment
+        id: update_comment
+        if: >
+          github.event_name == 'pull_request'
+          && steps.create_comment.outputs.comment-id != ''
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{ steps.create_comment.outputs.comment-id }}
+          body: ${{ steps.results_for_comment.outputs.body }}
