@@ -47,7 +47,6 @@ jobs:
 
             A summary of the results will be show in this comment once complete but the full results will be available as an artifact at the above link.
 
-
   regression-tests:
     name: Regression Tests
     runs-on: ubuntu-latest
@@ -88,6 +87,12 @@ jobs:
         # outputs
         #   branch: the branch name
 
+      - name: Checkout Automlbenchmark
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ env.AUTOMLBENCHMARK_REPO }}
+          ref: ${{ env.AUTOMLBENCHMARK_REF }}
+
       - name: Download baselines artificats
         uses: dawidd6/action-download-artifact@v2
         with:
@@ -124,8 +129,8 @@ jobs:
           wget ${source}/${util_file} -O ${util_file}
 
           # set up the benchmark directories
-          mkdir $benchmark_dir
-          mkdir $benchmark_dir/benchmarks
+          mkdir ${benchmark_dir}
+          mkdir ${benchmark_dir}/benchmarks
           wget ${source}/${config_file} -O ${benchmark_dir}/${config_file}
           wget ${source}/${constraints_file} -O ${benchmark_dir}/${constraints_file}
           wget ${source}/benchmarks/${benchmark_file} -O ${benchmark_dir}/benchmarks/${benchmark_file}
@@ -154,12 +159,6 @@ jobs:
             --branch ${{ steps.extract.outputs.branch }} \
             --commit ${{ github.sha }}
 
-
-      - name: Checkout Automlbenchmark
-        uses: actions/checkout@v2
-        with:
-          repository: ${{ env.AUTOMLBENCHMARK_REPO }}
-          ref: ${{ env.AUTOMLBENCHMARK_REF }}
 
       - name: Install Automlbenchmark
         run: |
