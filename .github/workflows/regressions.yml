@@ -4,9 +4,10 @@ on:
 
   workflow_dispatch:
     inputs:
-      name: dummy
-      required: false
-      default: 'Dummy argument'
+      dummy:
+        description: 'Place holder'
+        required: false
+        default: 'Dummy argument'
 
   pull_request:
     types: [labeled]
