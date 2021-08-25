@@ -133,7 +133,7 @@ jobs:
           benchmark_dir: 'baseline_benchmark'
           util_file: 'regressions-util.py'
           config_file: 'config.yaml'
-          constraints_file: 'constraints.py'
+          constraints_file: 'constraints.yaml'
           benchmark_file: ${{ matrix.task_type }}.yaml
         run: |
           # Get the util file
