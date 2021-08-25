@@ -149,7 +149,7 @@ jobs:
           # First install dependancies
           pip install $dependancies
           python $pyutil --generate-framework-def \
-            --userdir ${{ steps.fetch.outputs.benchmarkdir }}
+            --user-dir ${{ steps.fetch.outputs.benchmarkdir }} \
             --owner ${{ github.repository_owner }} \
             --branch ${{ steps.extract.outputs.branch }} \
             --commit ${{ github.sha }}

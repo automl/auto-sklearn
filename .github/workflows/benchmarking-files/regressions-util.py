@@ -29,7 +29,7 @@ def _get_mean_results_across_folds(df) -> pd.DataFrame:
     return df_info.join(df_means)
 
 def generate_framework_def(
-    userdir: str,
+    user_dir: str,
     username: str,
     branch: str,  # Not used in this setup but perhaps in a different one
     commit: str,
@@ -41,7 +41,7 @@ def generate_framework_def(
 
     Parameters
     ----------
-    userdir: str
+    user_dir: str
         The path to where the framework definition should be placed
 
     username: str
@@ -80,7 +80,7 @@ def generate_framework_def(
         f"  repo: '{repo}'"
     ])
 
-    filepath = os.path.join(userdir, 'frameworks.yaml')
+    filepath = os.path.join(user_dir, 'frameworks.yaml')
     with open(filepath, 'w') as f:
         f.writelines(lines)
 
@@ -422,7 +422,7 @@ if __name__ == "__main__":
     # Generates a framework definition for automlbenchmark so that we can target
     # auto-sklearn versions that are not our own
     parser.add_argument('--generate-framework-def', action='store_true')
-    parser.add_argument('--userdir', type=str)
+    parser.add_argument('--user_dir', type=str)
     parser.add_argument('--owner', type=str)
     parser.add_argument('--branch', type=str)
     parser.add_argument('--commit', type=str)
@@ -442,7 +442,6 @@ if __name__ == "__main__":
 
     # For generating markdown that can be posted to github that shows the results
     parser.add_argument('--generate-markdown', action='store_true')
-    parser.add_argument('--userdir', type=str)
     parser.add_argument('--compared-means-csv', type=str)
     parser.add_argument('--baseline-means-csv', type=str)
     parser.add_argument('--targeted-means-csv', type=str)
@@ -451,9 +450,9 @@ if __name__ == "__main__":
 
     if args.generate_framework_def:
 
-        assert args.owner and args.branch and args.commit and args.userdir
+        assert args.owner and args.branch and args.commit and args.user_dir
 
-        generate_framework_def(args.userdir, args.owner, args.branch, args.commit)
+        generate_framework_def(args.user_dir, args.owner, args.branch, args.commit)
 
     elif args.compare_results:
 
