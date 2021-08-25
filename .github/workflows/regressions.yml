@@ -18,7 +18,7 @@ env:
   GITHUB_URL: 'https://github.com'
   GITHUB_RAW_URL: 'https://raw.githubusercontent.com'
   WORKFLOW_DIR: '.github/workflows/benchmarking-files'
-  UTIL_FILE: 'regressions-util.py
+  UTIL_FILE: 'regressions-util.py'
 
 jobs:
 
