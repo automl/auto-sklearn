@@ -148,7 +148,8 @@ jobs:
 
       - name: Start benchmark
         id: benchmark
-        env: benchmarkdir: ${{ steps.fetch.outputs.benchmarkdir }}
+        env:
+          benchmarkdir: ${{ steps.fetch.outputs.benchmarkdir }}
           framework: autosklearn_targeted
           benchmark: ${{ matrix.task_type }}
           constraint: 10fold10min
