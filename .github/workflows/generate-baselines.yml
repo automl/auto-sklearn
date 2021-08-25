@@ -1,7 +1,11 @@
 name: Generate Baselines
 
 on:
-  workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      name: dummy
+      required: false
+      default: 'Dummy argument
 
   push:
     branches:

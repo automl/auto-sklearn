@@ -2,7 +2,11 @@ name: Regression Tests
 
 on:
 
-  workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      name: dummy
+      required: false
+      default: 'Dummy argument
 
   pull_request:
     types: [labeled]
