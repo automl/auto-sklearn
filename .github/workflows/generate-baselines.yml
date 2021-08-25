@@ -41,8 +41,8 @@ jobs:
       - name: Branch extract
         id: extract
         env:
-          head_ref: github.head_ref
-        run:
+          head_ref: ${{ github.head_ref }}
+        run: |
           # Sometimes a pull request does or doesn't have head_ref (branch) set.
           # When it is not, GITHUB_REF holds the branch
           if [[ -z $head_ref ]]
