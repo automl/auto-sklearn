@@ -84,7 +84,7 @@ jobs:
         with:
           workflow: generate-baselines.yml
           workflow_conclusion: "success"
-          branch: master
+          branch: development
           name: baselines
         # Downloads
         #   - baseline_classification_x_x_x.csv
