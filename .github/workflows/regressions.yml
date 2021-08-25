@@ -18,7 +18,6 @@ env:
   GITHUB_URL: 'https://github.com'
   GITHUB_RAW_URL: 'https://raw.githubusercontent.com'
   WORKFLOW_DIR: '.github/workflows/benchmarking-files'
-  PYTHON_UTIL_FILE: 'regressions-util.py'
 
 jobs:
 
@@ -132,7 +131,7 @@ jobs:
         env:
           source: ${{ env.GITHUB_RAW_URL }}/${{ github.repository }}/${{ steps.extract.outputs.branch }}/${{ env.WORKFLOW_DIR }}
           benchmark_dir: 'baseline_benchmark'
-          util_file: 'regression-util.py'
+          util_file: 'regressions-util.py'
           config_file: 'config.yaml'
           constraint_file: 'constraints.py'
           benchmark_file: ${{ matrix.task_type }}.yaml
