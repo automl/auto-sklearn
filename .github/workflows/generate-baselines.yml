@@ -5,7 +5,7 @@ on:
 
   push:
     branches:
-      - master
+      - development
 
 env:
   AUTOMLBENCHMARK_REPO: 'openml/automlbenchmark'
@@ -77,7 +77,7 @@ jobs:
         id: bench
         env:
           benchmarkdir: ${{ steps.fetch.outputs.benchmarkdir }}
-          framework: autosklearn:stable
+          framework: autosklearn:latest
           benchmark: ${{ matrix.task_type }}
           constraint: 10fold10min
           benchmark_output: results/results.csv
