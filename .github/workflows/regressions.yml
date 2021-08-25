@@ -324,7 +324,6 @@ jobs:
           #   body: the body of the comment update
 
       - name: Update comment
-        if: steps.comment_finder.outputs.comment-id != ''
         if: >
           (
             github.event_name == 'pull_request'
@@ -337,4 +336,3 @@ jobs:
           comment-id: ${{ steps.comment_finder.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: ${{ steps.comparison_comment.outputs.body }}
-
