@@ -131,15 +131,10 @@ def create_comparison(
 
 
     # Load in data and get the means across folds
-    df_baseline_classificiation = pd.read_csv(baseline_csv_classification)
-    df_baseline_regression = pd.read_csv(baseline_csv_regression)
-    df_baseline = pd.concat([df_baseline_classificiation, df_baseline_regression])
-
+    df_baseline = pd.read_csv(baseline_csv)
     df_baseline_means = _get_mean_results_across_folds(df_baseline)
 
-    df_targeted_classificiation = pd.read_csv(targeted_csv_classification)
-    df_targeted_regression = pd.read_csv(targeted_csv_regression)
-    df_targeted = pd.concat([df_targeted_classificiation, df_targeted_regression])
+    df_targeted = pd.read_csv(targeted_csv)
     df_targeted_means = _get_mean_results_across_folds(df_targeted)
 
     # Find the set intersection of tasks they have in common
