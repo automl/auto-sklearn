@@ -176,9 +176,10 @@ jobs:
           benchmark_output: results/results.csv
           results_to: baseline_${{ matrix.task_type }}_${{ github.repository_owner }}_${{ steps.extract.outputs.branch }}_${{ github.sha }}.csv
         run: |
+          ls -R | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
+          pwd
           python runbenchmark.py -u $benchmarkdir $framework $benchmark $constraint
-          ls
-          ls results
+          ls -R | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
           cat results/results.csv
           mv $benchmark_output $results_to
           echo "::set-output name=results_path::$(pwd)/${results_to}"
