@@ -422,7 +422,7 @@ if __name__ == "__main__":
     # Generates a framework definition for automlbenchmark so that we can target
     # auto-sklearn versions that are not our own
     parser.add_argument('--generate-framework-def', action='store_true')
-    parser.add_argument('--user_dir', type=str)
+    parser.add_argument('--user-dir', type=str)
     parser.add_argument('--owner', type=str)
     parser.add_argument('--branch', type=str)
     parser.add_argument('--commit', type=str)
