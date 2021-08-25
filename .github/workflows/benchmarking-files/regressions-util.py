@@ -442,6 +442,7 @@ if __name__ == "__main__":
 
     # For generating markdown that can be posted to github that shows the results
     parser.add_argument('--generate-markdown', action='store_true')
+    parser.add_argument('--userdir', type=str)
     parser.add_argument('--compared-means-csv', type=str)
     parser.add_argument('--baseline-means-csv', type=str)
     parser.add_argument('--targeted-means-csv', type=str)
@@ -450,7 +451,7 @@ if __name__ == "__main__":
 
     if args.generate_framework_def:
 
-        assert args.owner and args.branch and args.commit and args.user_dir
+        assert args.owner and args.branch and args.commit and args.userdir
 
         generate_framework_def(args.userdir, args.owner, args.branch, args.commit)
 
