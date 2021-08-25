@@ -6,7 +6,7 @@ on:
     inputs:
       name: dummy
       required: false
-      default: 'Dummy argument
+      default: 'Dummy argument'
 
   pull_request:
     types: [labeled]
