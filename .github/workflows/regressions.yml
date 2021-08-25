@@ -24,26 +24,34 @@ jobs:
 
   create-notification-comment:
     name: Create comment body
-    if: github.event_name == 'pull_request' && github.event.action == 'labeled'
-    uses: peter-evans/create-or-update-comment@v1
-    with:
-      issue-number: ${{ github.event.pull_request.number }}
-      body: |
-        Hello @${{ github.event.pull_request.user.login }},
+    runs-on: ubuntu-latest
+    if: >
+      (
+        github.event_name == 'pull_request'
+        && github.event.action == 'labeled'
+        && github.event.label.name == 'regression-tests'
+      )
+    steps:
+      - name: Create comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Hello @${{ github.event.pull_request.user.login }},
 
-        We are doing regression tests for
+            We are doing regression tests for
 
-        * **Branch** ${{ github.event.pull_request.head.ref }}
-        * **Commit** ${{ github.event.pull_request.head.sha }}
+            * **Branch** ${{ github.event.pull_request.head.ref }}
+            * **Commit** ${{ github.event.pull_request.head.sha }}
 
-        [Progress and Artifacts](${{ env.GITHUB_URL }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            [Progress and Artifacts](${{ env.GITHUB_URL }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
-        A summary of the results will be show in this comment once complete but the full results will be available as an artifact at the above link.
+            A summary of the results will be show in this comment once complete but the full results will be available as an artifact at the above link.
 
 
   regression-tests:
     name: Regression Tests
-    runs: on ubuntu-latest
+    runs-on: ubuntu-latest
     if: >
       github.event_name == 'workflow_dispatch'
       || (
@@ -174,6 +182,8 @@ jobs:
 
   run-comparison:
     needs: regression-tests
+    runs-on: ubuntu-latest
+
     steps:
 
       - name: Setup Python 3.9.6
@@ -275,7 +285,12 @@ jobs:
 
 
       - name: Find Comment
-        if: github.event_name == 'pull_request' && github.event.action == 'labeled'
+        if: >
+          (
+            github.event_name == 'pull_request'
+            && github.event.action == 'labeled'
+            && github.event.label.name == 'regression-tests'
+          )
         uses: peter-evans/find-comment@v1
         id: comment_finder
         with:
@@ -288,7 +303,13 @@ jobs:
 
       - name: Create Comment Body
         id: comparison_comment
-        if: github.event_name == 'pull_request' && steps.create_comment.outputs.comment-id != ''
+        if: >
+          (
+            github.event_name == 'pull_request'
+            && github.event.action == 'labeled'
+            && github.event.label.name == 'regression-tests'
+            && steps.comment_finder.outputs.comment-id != ''
+          )
         env:
           results_path: ${{ steps.compare.outputs.comparisons_path }}
           pyutil: ${{ steps.fetch.outputs.util }}
@@ -304,6 +325,13 @@ jobs:
 
       - name: Update comment
         if: steps.comment_finder.outputs.comment-id != ''
+        if: >
+          (
+            github.event_name == 'pull_request'
+            && github.event.action == 'labeled'
+            && github.event.label.name == 'regression-tests'
+            && steps.comment_finder.outputs.comment-id != ''
+          )
         uses: peter-evans/create-or-update-comment@v1
         with:
           comment-id: ${{ steps.comment_finder.outputs.comment-id }}
