@@ -5,7 +5,7 @@ on:
     inputs:
       name: dummy
       required: false
-      default: 'Dummy argument
+      default: 'Dummy argument'
 
   push:
     branches:
