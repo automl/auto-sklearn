@@ -75,7 +75,7 @@ jobs:
 
       - name: Branch extract
         id: extract
-        run: echo "##[set-output name=branch;]${GITHUB_REF#refs/heads/}"
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         # outputs
         #   branch: the branch name
 
