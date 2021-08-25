@@ -69,7 +69,7 @@ def generate_framework_def(
     if commit[0] != '#':
         commit = '#' + commit
 
-    repo = f'git@github.com:{username}/auto-sklearn.git'
+    repo = f'https://github.com/{username}/auto-sklearn.git'
 
     # Create the framework file
     lines = '\n'.join([

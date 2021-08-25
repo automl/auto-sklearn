@@ -72,21 +72,6 @@ jobs:
           pwd
           ls -a
 
-      - name: Branch extract
-        id: extract
-        env:
-          head_ref: ${{ github.head_ref }}
-        run: |
-          # Sometimes a pull request does or doesn't have head_ref (branch) set.
-          # When it is not, GITHUB_REF holds the branch
-          if [[ -z $head_ref ]]
-          then
-            echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-          else
-            echo "##[set-output name=branch;]$(echo $head_ref)"
-          fi
-        # outputs
-        #   branch: the branch name
 
       - name: Checkout Automlbenchmark
         uses: actions/checkout@v2
@@ -160,7 +145,6 @@ jobs:
             --branch ${{ steps.extract.outputs.branch }} \
             --commit ${{ github.sha }}
 
-
       - name: Install Automlbenchmark
         run: |
           python -m pip install --upgrade pip
@@ -204,6 +188,22 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
+
+      - name: Branch extract
+        id: extract
+        env:
+          head_ref: ${{ github.head_ref }}
+        run: |
+          # Sometimes a pull request does or doesn't have head_ref (branch) set.
+          # When it is not, GITHUB_REF holds the branch
+          if [[ -z $head_ref ]]
+          then
+            echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+          else
+            echo "##[set-output name=branch;]$(echo $head_ref)"
+          fi
+        # outputs
+        #   branch: the branch name
 
       - name: Fetch files
         id: fetch
