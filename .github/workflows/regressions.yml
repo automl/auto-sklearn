@@ -22,12 +22,9 @@ env:
 
 jobs:
 
-
-  create-comment:
+  create-notification-comment:
     name: Create comment body
-    id: create_comment
-    if: >
-      github.event_name == 'pull_request' && github.event.action == 'labeled'
+    if: github.event_name == 'pull_request' && github.event.action == 'labeled'
     uses: peter-evans/create-or-update-comment@v1
     with:
       issue-number: ${{ github.event.pull_request.number }}
