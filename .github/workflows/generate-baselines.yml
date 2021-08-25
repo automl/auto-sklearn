@@ -3,17 +3,16 @@ name: Generate Baselines
 on:
   workflow_dispatch
 
-  #push:
-  #  branches:
-  #    - master
+  push:
+    branches:
+      - master
 
 env:
   AUTOMLBENCHMARK_REPO: 'openml/automlbenchmark'
   AUTOMLBENCHMARK_REF: 'master'
   GITHUB_URL: 'https://github.com'
   GITHUB_RAW_URL: 'https://raw.githubusercontent.com'
-  WORKFLOW_DIR: '.github/workflows/generate-baselines'
-  PYTHON_UTIL_FILE: 'baseline-util.py'
+  FILE_SOURCE_DIR: '.github/workflows/benchmarking-files'
 
 jobs:
 
@@ -59,7 +58,7 @@ jobs:
       - name: Fetch configs
         id: fetch
         env:
-          filesource: ${{ env.GITHUB_RAW_URL }}/${{ github.repository }}/${{ steps.extract.outputs.branch }}/${{ env.WORKFLOW_DIR }}
+          source: ${{ env.GITHUB_RAW_URL }}/${{ github.repository }}/${{ steps.extract.outputs.branch }}/${{ env.FILE_SOURCE_DIR }}
           benchmark_dir: 'baseline_benchmark'
           config_file: 'config.yaml'
           constraints_file: 'constraints.yaml'
@@ -67,9 +66,9 @@ jobs:
         run: |
           mkdir $benchmark_dir
           mkdir $benchmark_dir/benchmarks
-          wget ${filesource}/${config_file} -O ${benchmark_dir}/${config_file}
-          wget ${filesource}/${constraints_file} -O ${benchmark_dir}/${constraints_file}
-          wget ${filesource}/benchmarks/${benchmark_file} -O ${benchmark_dir}/benchmarks/${benchmark_file}
+          wget ${source}/${config_file} -O ${benchmark_dir}/${config_file}
+          wget ${source}/${constraints_file} -O ${benchmark_dir}/${constraints_file}
+          wget ${source}/benchmarks/${benchmark_file} -O ${benchmark_dir}/benchmarks/${benchmark_file}
           echo "::set-output name=benchmarkdir::$(pwd)/${benchmark_dir}"
           # outputs
           #   benchmarkdir: the dir with config in it
