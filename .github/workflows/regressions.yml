@@ -22,25 +22,6 @@ env:
 
 jobs:
 
-  create-comment:
-    name: Create comment body
-    id: create_comment
-    if: >
-      github.event_name == 'pull_request' && github.event.action == 'labeled'
-    uses: peter-evans/create-or-update-comment@v1
-    with:
-      issue-number: ${{ github.event.pull_request.number }}
-      body: |
-        Hello @${{ github.event.pull_request.user.login }},
-
-        We are doing regression tests for
-
-        * **Branch** ${{ github.event.pull_request.head.ref }}
-        * **Commit** ${{ github.event.pull_request.head.sha }}
-
-        [Progress and Artifacts](${{ env.GITHUB_URL }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
-
-        A summary of the results will be show in this comment once complete but the full results will be available as an artifact at the above link.
 
   regression-tests:
     name: Regression Tests
