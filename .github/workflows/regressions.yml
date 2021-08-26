@@ -254,7 +254,7 @@ jobs:
           echo "::set-output name=baseline_classification::$(pwd)/${BASELINE_CLASSIFICATION}"
           echo "::set-output name=baseline_regression::$(pwd)/${BASELINE_REGRESSION}"
           echo "::set-output name=targeted_classification::$(pwd)/artifacts/results_classification/${TARGETED_CLASSIFICATION}"
-          echo "::set-output name=targeted_regression::$(pwd)artificats/results_regression/${TARGETED_REGRESSION}"
+          echo "::set-output name=targeted_regression::$(pwd)artifacts/results_regression/${TARGETED_REGRESSION}"
         # outputs:
         #   baseline_classification: path to the baseline results for classification
         #   baseline_regression: path to the baseline results for regression
