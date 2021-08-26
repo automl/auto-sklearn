@@ -151,6 +151,7 @@ jobs:
         run: |-
           # Creates a framework file that automl benchmark can use
           # First install dependancies
+          python -m pip install --upgrade pip
           pip install $dependancies
           python $pyutil --generate-framework-def \
             --user-dir ${{ steps.fetch.outputs.benchmarkdir }} \
@@ -273,6 +274,7 @@ jobs:
           compared_means: 'compared_means.csv'
         run: |
           # Install dependancies
+          python -m pip install –upgrade pip
           pip install $dependancies
 
           python $pyutil --compare-results \
@@ -283,6 +285,8 @@ jobs:
             --baseline-means-to $baseline_means \
             --targeted-means-to $targeted_means \
             --compared-means-to $compared_means
+
+          echo "Complete comparison"
 
           echo "::set-output name=baseline_means::$(pwd)/${baseline_means}"
           echo "::set-output name=targeted_means::$(pwd)/${targeted_means"
