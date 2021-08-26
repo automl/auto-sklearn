@@ -274,7 +274,7 @@ jobs:
           compared_means: 'compared_means.csv'
         run: |
           # Install dependancies
-          python -m pip install –upgrade pip
+          python -m pip install --upgrade pip
           pip install $dependancies
 
           python $pyutil --compare-results \
