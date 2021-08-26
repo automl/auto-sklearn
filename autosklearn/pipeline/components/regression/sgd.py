@@ -2,6 +2,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, UnParametrizedHyperparameter
 from ConfigSpace.conditions import InCondition, EqualsCondition
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import (
     AutoSklearnRegressionAlgorithm,
@@ -29,7 +30,8 @@ class SGD(
         self.epsilon = epsilon
         self.eta0 = eta0
         self.power_t = power_t
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.average = average
 
         self.estimator = None
@@ -86,7 +88,7 @@ class SGD(
                                           power_t=self.power_t,
                                           shuffle=True,
                                           average=self.average,
-                                          random_state=self.random_state,
+                                          random_state=self._random_seed,
                                           warm_start=True)
 
             self.scaler = sklearn.preprocessing.StandardScaler(copy=True)

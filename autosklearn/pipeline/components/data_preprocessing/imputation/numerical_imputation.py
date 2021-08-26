@@ -2,6 +2,7 @@ from typing import Dict, Optional, Tuple, Union
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
+from sklearn.utils.validation import check_random_state
 
 import numpy as np
 
@@ -13,9 +14,10 @@ from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 class NumericalImputation(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(self, strategy: str = 'mean',
-                 random_state: Optional[np.random.RandomState] = None):
+                 random_state: Optional[Union[int, np.random.RandomState]] = None):
         self.strategy = strategy
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
     def fit(self, X: PIPELINE_DATA_DTYPE,
             y: Optional[PIPELINE_DATA_DTYPE] = None) -> 'NumericalImputation':

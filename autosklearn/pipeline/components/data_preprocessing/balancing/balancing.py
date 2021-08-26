@@ -6,6 +6,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
 from sklearn.base import BaseEstimator
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import \
@@ -15,9 +16,10 @@ from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, SIGNED_
 
 class Balancing(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, strategy: str = 'none',
-                 random_state: Optional[np.random.RandomState] = None,):
+                 random_state: Optional[Union[int, np.random.RandomState]] = None,):
         self.strategy = strategy
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
     def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None) -> 'Balancing':
         self.fitted_ = True

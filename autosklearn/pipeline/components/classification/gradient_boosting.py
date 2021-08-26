@@ -5,6 +5,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, UnParametrizedHyperparameter, Constant, \
     CategoricalHyperparameter
 from ConfigSpace.conditions import EqualsCondition, InCondition
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import (
     AutoSklearnClassificationAlgorithm,
@@ -34,10 +35,11 @@ class GradientBoostingClassifier(
         self.scoring = scoring
         self.n_iter_no_change = n_iter_no_change
         self.validation_fraction = validation_fraction
-        self.random_state = random_state
         self.verbose = verbose
         self.estimator = None
         self.fully_fit_ = False
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
     @staticmethod
     def get_max_iter():
@@ -115,7 +117,7 @@ class GradientBoostingClassifier(
                 validation_fraction=self.validation_fraction_,
                 verbose=self.verbose,
                 warm_start=True,
-                random_state=self.random_state,
+                random_state=self._random_seed,
             )
         else:
             self.estimator.max_iter += n_iter

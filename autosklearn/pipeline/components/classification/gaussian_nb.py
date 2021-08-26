@@ -1,6 +1,7 @@
 import numpy as np
 
 from ConfigSpace.configuration_space import ConfigurationSpace
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import (
     AutoSklearnClassificationAlgorithm,
@@ -11,10 +12,10 @@ from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS
 class GaussianNB(AutoSklearnClassificationAlgorithm):
 
     def __init__(self, random_state=None, verbose=0):
-
-        self.random_state = random_state
         self.verbose = int(verbose)
         self.estimator = None
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
     def fit(self, X, y):
         import sklearn.naive_bayes

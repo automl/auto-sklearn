@@ -1,6 +1,7 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, UnParametrizedHyperparameter
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import (
     AutoSklearnRegressionAlgorithm,
@@ -31,7 +32,8 @@ class ExtraTreesRegressor(
         self.min_impurity_decrease = min_impurity_decrease
         self.oob_score = oob_score
         self.n_jobs = n_jobs
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.verbose = verbose
         self.estimator = None
 
@@ -88,7 +90,7 @@ class ExtraTreesRegressor(
                                  oob_score=self.oob_score,
                                  n_jobs=self.n_jobs,
                                  verbose=self.verbose,
-                                 random_state=self.random_state,
+                                 random_state=self._random_seed,
                                  warm_start=True)
         else:
             self.estimator.n_estimators += n_iter

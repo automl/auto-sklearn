@@ -1,6 +1,7 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
     UniformIntegerHyperparameter
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
@@ -11,7 +12,8 @@ class KNearestNeighborsRegressor(AutoSklearnRegressionAlgorithm):
         self.n_neighbors = n_neighbors
         self.weights = weights
         self.p = p
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
     def fit(self, X, Y):
         import sklearn.neighbors

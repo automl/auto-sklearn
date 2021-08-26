@@ -1,6 +1,7 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
@@ -11,7 +12,8 @@ class AdaboostRegressor(AutoSklearnRegressionAlgorithm):
         self.n_estimators = n_estimators
         self.learning_rate = learning_rate
         self.loss = loss
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.max_depth = max_depth
         self.estimator = None
 
@@ -30,7 +32,7 @@ class AdaboostRegressor(AutoSklearnRegressionAlgorithm):
             n_estimators=self.n_estimators,
             learning_rate=self.learning_rate,
             loss=self.loss,
-            random_state=self.random_state
+            random_state=self._random_seed
         )
         self.estimator.fit(X, Y)
         return self

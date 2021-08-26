@@ -1,6 +1,7 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
@@ -13,9 +14,11 @@ class AdaboostClassifier(AutoSklearnClassificationAlgorithm):
         self.n_estimators = n_estimators
         self.learning_rate = learning_rate
         self.algorithm = algorithm
-        self.random_state = random_state
         self.max_depth = max_depth
         self.estimator = None
+
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
     def fit(self, X, Y, sample_weight=None):
         import sklearn.ensemble
@@ -31,7 +34,7 @@ class AdaboostClassifier(AutoSklearnClassificationAlgorithm):
             n_estimators=self.n_estimators,
             learning_rate=self.learning_rate,
             algorithm=self.algorithm,
-            random_state=self.random_state
+            random_state=self._random_seed
         )
 
         estimator.fit(X, Y, sample_weight=sample_weight)

@@ -1,6 +1,7 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import SPARSE, DENSE, UNSIGNED_DATA, INPUT
@@ -18,7 +19,8 @@ class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
         """
         self.gamma = gamma
         self.n_components = n_components
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
     def fit(self, X, Y=None):
         import sklearn.kernel_approximation
@@ -27,7 +29,7 @@ class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
         self.gamma = float(self.gamma)
 
         self.preprocessor = sklearn.kernel_approximation.RBFSampler(
-            self.gamma, self.n_components, self.random_state)
+            self.gamma, self.n_components, self._random_seed)
         self.preprocessor.fit(X)
         return self
 

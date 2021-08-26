@@ -39,7 +39,7 @@ class DataPreprocessor(TransformerMixin, AutoSklearnComponent):
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
         include: Optional[Dict[str, str]] = None,
         exclude: Optional[Dict[str, str]] = None,
-        random_state: Optional[np.random.RandomState] = None,
+        random_state: Optional[Union[int, np.random.RandomState]] = None,
         init_params: Optional[Dict[str, Any]] = None,
         feat_type: Optional[Dict[Union[str, int], str]] = None,
         force_sparse_output: bool = False,
@@ -54,7 +54,8 @@ class DataPreprocessor(TransformerMixin, AutoSklearnComponent):
         self.dataset_properties = dataset_properties
         self.include = include
         self.exclude = exclude
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.init_params = init_params
         self.feat_type = feat_type
         self.force_sparse_output = force_sparse_output
@@ -68,7 +69,7 @@ class DataPreprocessor(TransformerMixin, AutoSklearnComponent):
         # pipeline if needed
         self.categ_ppl = CategoricalPreprocessingPipeline(
             config=None, steps=pipeline, dataset_properties=dataset_properties,
-            include=include, exclude=exclude, random_state=random_state,
+            include=include, exclude=exclude, random_state=self._random_seed,
             init_params=init_params)
         # The pipeline that will be applied to the numerical features (i.e. columns)
         # of the dataset
@@ -79,7 +80,7 @@ class DataPreprocessor(TransformerMixin, AutoSklearnComponent):
         # pipeline if needed
         self.numer_ppl = NumericalPreprocessingPipeline(
             config=None, steps=pipeline, dataset_properties=dataset_properties,
-            include=include, exclude=exclude, random_state=random_state,
+            include=include, exclude=exclude, random_state=self._random_seed,
             init_params=init_params)
         self._transformers: List[Tuple[str, AutoSklearnComponent]] = [
             ("categorical_transformer", self.categ_ppl),

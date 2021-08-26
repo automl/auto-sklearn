@@ -1,5 +1,6 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import \
     AutoSklearnClassificationAlgorithm
@@ -14,6 +15,8 @@ class QDA(AutoSklearnClassificationAlgorithm):
     def __init__(self, reg_param, random_state=None):
         self.reg_param = float(reg_param)
         self.estimator = None
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
     def fit(self, X, Y):
         import sklearn.discriminant_analysis

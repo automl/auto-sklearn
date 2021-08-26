@@ -3,6 +3,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, Constant
 from ConfigSpace.forbidden import ForbiddenEqualsClause, \
     ForbiddenAndConjunction
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
@@ -20,7 +21,8 @@ class LibLinear_SVR(AutoSklearnRegressionAlgorithm):
         self.C = C
         self.fit_intercept = fit_intercept
         self.intercept_scaling = intercept_scaling
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.estimator = None
 
     def fit(self, X, Y):
@@ -41,7 +43,7 @@ class LibLinear_SVR(AutoSklearnRegressionAlgorithm):
                                                C=self.C,
                                                fit_intercept=self.fit_intercept,
                                                intercept_scaling=self.intercept_scaling,
-                                               random_state=self.random_state)
+                                               random_state=self._random_seed)
         self.estimator.fit(X, Y)
         return self
 

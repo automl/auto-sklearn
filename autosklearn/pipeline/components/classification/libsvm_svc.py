@@ -6,6 +6,7 @@ from ConfigSpace.conditions import EqualsCondition, InCondition
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
@@ -25,8 +26,9 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
         self.tol = tol
         self.class_weight = class_weight
         self.max_iter = max_iter
-        self.random_state = random_state
         self.estimator = None
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
     def fit(self, X, Y):
         import sklearn.svm
@@ -89,7 +91,7 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
                                          tol=self.tol,
                                          class_weight=self.class_weight,
                                          max_iter=self.max_iter,
-                                         random_state=self.random_state,
+                                         random_state=self._random_seed,
                                          cache_size=cache_size,
                                          decision_function_shape='ovr')
         self.estimator.fit(X, Y)

@@ -2,6 +2,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter, Constant
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
@@ -34,7 +35,8 @@ class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
 
         self.oob_score = oob_score
         self.n_jobs = n_jobs
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.verbose = verbose
         self.class_weight = class_weight
         self.preprocessor = None
@@ -77,7 +79,7 @@ class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
             oob_score=self.oob_score,
             n_jobs=self.n_jobs,
             verbose=self.verbose,
-            random_state=self.random_state,
+            random_state=self._random_seed,
             class_weight=self.class_weight)
         estimator.fit(X, Y, sample_weight=sample_weight)
         self.preprocessor = SelectFromModel(estimator=estimator,

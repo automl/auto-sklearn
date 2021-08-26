@@ -1,6 +1,7 @@
 from typing import Dict, Optional, Tuple, Union
 
 from ConfigSpace.configuration_space import ConfigurationSpace
+from sklearn.utils.validation import check_random_state
 
 import numpy as np
 
@@ -17,8 +18,9 @@ class CategoryShift(AutoSklearnPreprocessingAlgorithm):
     is not used, so to provide compatibility with sparse matrices.
     """
 
-    def __init__(self, random_state: Optional[np.random.RandomState] = None):
-        self.random_state = random_state
+    def __init__(self, random_state: Optional[Union[int, np.random.RandomState]] = None):
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
     def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
             ) -> 'CategoryShift':

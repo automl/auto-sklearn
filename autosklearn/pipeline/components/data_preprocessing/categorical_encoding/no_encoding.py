@@ -10,7 +10,7 @@ from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
 
 class NoEncoding(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, random_state: Optional[np.random.RandomState] = None):
+    def __init__(self, random_state: Optional[Union[int, np.random.RandomState]] = None):
         pass
 
     def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None

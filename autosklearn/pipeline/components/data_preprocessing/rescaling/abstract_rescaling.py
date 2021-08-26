@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 
@@ -13,7 +13,7 @@ from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorit
 
 class Rescaling(object):
     # Rescaling does not support fit_transform (as of 0.19.1)!
-    def __init__(self, random_state: Optional[np.random.RandomState] = None):
+    def __init__(self, random_state: Optional[Union[int, np.random.RandomState]] = None):
         self.preprocessor: Optional[BaseEstimator] = None
 
     def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None

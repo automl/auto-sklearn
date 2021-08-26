@@ -6,6 +6,7 @@ from ConfigSpace.conditions import InCondition
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
@@ -26,7 +27,8 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
         self.coef0 = coef0
         self.verbose = verbose
         self.max_iter = max_iter
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.estimator = None
 
     def fit(self, X, Y):

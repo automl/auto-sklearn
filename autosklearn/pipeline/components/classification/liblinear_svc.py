@@ -3,6 +3,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, Constant
 from ConfigSpace.forbidden import ForbiddenEqualsClause, \
     ForbiddenAndConjunction
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.implementations.util import softmax
@@ -24,8 +25,9 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
         self.fit_intercept = fit_intercept
         self.intercept_scaling = intercept_scaling
         self.class_weight = class_weight
-        self.random_state = random_state
         self.estimator = None
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
     def fit(self, X, Y):
         import sklearn.svm
@@ -52,7 +54,7 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
                                           fit_intercept=self.fit_intercept,
                                           intercept_scaling=self.intercept_scaling,
                                           multi_class=self.multi_class,
-                                          random_state=self.random_state)
+                                          random_state=self._random_seed)
 
         if len(Y.shape) == 2 and Y.shape[1] > 1:
             self.estimator = sklearn.multiclass.OneVsRestClassifier(estimator, n_jobs=1)

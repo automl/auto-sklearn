@@ -3,6 +3,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, Constant
 from ConfigSpace.forbidden import ForbiddenEqualsClause, \
     ForbiddenAndConjunction
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import SPARSE, DENSE, UNSIGNED_DATA, INPUT
@@ -23,7 +24,8 @@ class LibLinear_Preprocessor(AutoSklearnPreprocessingAlgorithm):
         self.fit_intercept = fit_intercept
         self.intercept_scaling = intercept_scaling
         self.class_weight = class_weight
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.preprocessor = None
 
     def fit(self, X, Y):
@@ -48,7 +50,7 @@ class LibLinear_Preprocessor(AutoSklearnPreprocessingAlgorithm):
                                           fit_intercept=self.fit_intercept,
                                           intercept_scaling=self.intercept_scaling,
                                           multi_class=self.multi_class,
-                                          random_state=self.random_state)
+                                          random_state=self._random_seed)
 
         estimator.fit(X, Y)
         self.preprocessor = SelectFromModel(estimator=estimator,

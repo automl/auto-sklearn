@@ -1,3 +1,4 @@
+import copy
 from collections import OrderedDict
 import importlib
 import inspect
@@ -340,10 +341,8 @@ class AutoSklearnChoice(object):
         # self.configuration = self.get_hyperparameter_search_space(
         #     dataset_properties).get_default_configuration()
 
-        if random_state is None:
-            self.random_state = check_random_state(1)
-        else:
-            self.random_state = check_random_state(random_state)
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
         # Since the pipeline will initialize the hyperparameters, it is not
         # necessary to do this upon the construction of this object
@@ -408,7 +407,8 @@ class AutoSklearnChoice(object):
                 param = param.replace(choice, '').replace(':', '')
                 new_params[param] = value
 
-        new_params['random_state'] = self.random_state
+        # Copy current random state
+        new_params['random_state'] = copy.copy(self.random_state)
 
         self.new_params = new_params
         self.choice = self.get_components()[choice](**new_params)

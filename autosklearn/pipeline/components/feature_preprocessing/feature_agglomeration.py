@@ -5,6 +5,7 @@ from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
     UniformIntegerHyperparameter
 from ConfigSpace.forbidden import ForbiddenInClause, \
     ForbiddenAndConjunction, ForbiddenEqualsClause
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
@@ -18,7 +19,8 @@ class FeatureAgglomeration(AutoSklearnPreprocessingAlgorithm):
         self.affinity = affinity
         self.linkage = linkage
         self.pooling_func = pooling_func
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
         self.pooling_func_mapping = dict(mean=np.mean,
                                          median=np.median,

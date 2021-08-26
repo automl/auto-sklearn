@@ -1,5 +1,6 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformIntegerHyperparameter
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import SPARSE, UNSIGNED_DATA, DENSE, INPUT
@@ -8,7 +9,8 @@ from autosklearn.pipeline.constants import SPARSE, UNSIGNED_DATA, DENSE, INPUT
 class TruncatedSVD(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, target_dim, random_state=None):
         self.target_dim = target_dim
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.preprocessor = None
 
     def fit(self, X, Y):

@@ -46,7 +46,7 @@ class NumericalPreprocessingPipeline(BasePipeline):
                  dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
                  include: Optional[Dict[str, str]] = None,
                  exclude: Optional[Dict[str, str]] = None,
-                 random_state: Optional[np.random.RandomState] = None,
+                 random_state: Optional[Union[int, np.random.RandomState]] = None,
                  init_params: Optional[Dict[str, Any]] = None):
         self._output_dtype = np.int32
         super().__init__(

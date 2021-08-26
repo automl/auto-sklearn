@@ -4,6 +4,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter
 from ConfigSpace.conditions import InCondition, EqualsCondition
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import SPARSE, DENSE, UNSIGNED_DATA, INPUT, SIGNED_DATA
@@ -17,7 +18,8 @@ class Nystroem(AutoSklearnPreprocessingAlgorithm):
         self.gamma = gamma
         self.degree = degree
         self.coef0 = coef0
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
     def fit(self, X, Y=None):
         import scipy.sparse
@@ -31,7 +33,7 @@ class Nystroem(AutoSklearnPreprocessingAlgorithm):
         self.preprocessor = sklearn.kernel_approximation.Nystroem(
             kernel=self.kernel, n_components=self.n_components,
             gamma=self.gamma, degree=self.degree, coef0=self.coef0,
-            random_state=self.random_state)
+            random_state=self._random_seed)
 
         # Because the pipeline guarantees that each feature is positive,
         # clip all values below zero to zero

@@ -6,6 +6,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
     UniformIntegerHyperparameter, UniformFloatHyperparameter
 from ConfigSpace.conditions import EqualsCondition, InCondition
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
@@ -20,7 +21,8 @@ class KernelPCA(AutoSklearnPreprocessingAlgorithm):
         self.degree = degree
         self.gamma = gamma
         self.coef0 = coef0
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
     def fit(self, X, Y=None):
         import scipy.sparse
@@ -34,7 +36,7 @@ class KernelPCA(AutoSklearnPreprocessingAlgorithm):
         self.preprocessor = sklearn.decomposition.KernelPCA(
             n_components=self.n_components, kernel=self.kernel,
             degree=self.degree, gamma=self.gamma, coef0=self.coef0,
-            remove_zero_eig=True, random_state=self.random_state)
+            remove_zero_eig=True, random_state=self._random_seed)
         if scipy.sparse.issparse(X):
             X = X.astype(np.float64)
         with warnings.catch_warnings():

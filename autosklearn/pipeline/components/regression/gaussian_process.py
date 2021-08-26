@@ -1,5 +1,6 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS
@@ -11,7 +12,8 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
         self.thetaL = thetaL
         self.thetaU = thetaU
         # We ignore it
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.estimator = None
         self.scaler = None
 
@@ -34,7 +36,7 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
             optimizer='fmin_l_bfgs_b',
             alpha=self.alpha,
             copy_X_train=True,
-            random_state=self.random_state,
+            random_state=self._random_seed,
             normalize_y=True)
 
         self.estimator.fit(X, y)

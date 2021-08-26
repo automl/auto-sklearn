@@ -4,6 +4,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
     UniformIntegerHyperparameter
 from ConfigSpace.conditions import EqualsCondition
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
@@ -19,7 +20,8 @@ class FastICA(AutoSklearnPreprocessingAlgorithm):
         self.fun = fun
         self.n_components = n_components
 
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
     def fit(self, X, Y=None):
         import sklearn.decomposition
@@ -32,7 +34,7 @@ class FastICA(AutoSklearnPreprocessingAlgorithm):
 
         self.preprocessor = sklearn.decomposition.FastICA(
             n_components=self.n_components, algorithm=self.algorithm,
-            fun=self.fun, whiten=self.whiten, random_state=self.random_state
+            fun=self.fun, whiten=self.whiten, random_state=self._random_seed
         )
         # Make the RuntimeWarning an Exception!
         with warnings.catch_warnings():

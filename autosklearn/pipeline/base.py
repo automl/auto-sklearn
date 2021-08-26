@@ -71,10 +71,8 @@ class BasePipeline(Pipeline):
 
         self.set_hyperparameters(self.config, init_params=init_params)
 
-        if random_state is None:
-            self.random_state = check_random_state(1)
-        else:
-            self.random_state = check_random_state(random_state)
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         super().__init__(steps=self.steps)
 
         self._additional_run_info = {}

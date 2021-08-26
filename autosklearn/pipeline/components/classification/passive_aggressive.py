@@ -3,6 +3,7 @@ import numpy as np
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, UnParametrizedHyperparameter
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import (
     AutoSklearnClassificationAlgorithm,
@@ -23,7 +24,8 @@ class PassiveAggressive(
         self.average = average
         self.tol = tol
         self.loss = loss
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.estimator = None
         self.max_iter = self.get_max_iter()
         self.n_iter_ = None
@@ -65,7 +67,7 @@ class PassiveAggressive(
                 tol=self.tol,
                 loss=self.loss,
                 shuffle=True,
-                random_state=self.random_state,
+                random_state=self._random_seed,
                 warm_start=True,
                 average=self.average,
             )

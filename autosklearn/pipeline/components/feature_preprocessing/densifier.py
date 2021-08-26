@@ -1,3 +1,7 @@
+from typing import Union, Optional
+
+import numpy as np
+
 from ConfigSpace.configuration_space import ConfigurationSpace
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
@@ -5,7 +9,7 @@ from autosklearn.pipeline.constants import SPARSE, UNSIGNED_DATA, DENSE, INPUT
 
 
 class Densifier(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, random_state=None):
+    def __init__(self, random_state: Optional[Union[int, np.random.RandomState]] = None):
         pass
 
     def fit(self, X, y=None):

@@ -1,4 +1,3 @@
-import copy
 import numpy as np
 
 from ConfigSpace.configuration_space import ConfigurationSpace
@@ -6,6 +5,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, UnParametrizedHyperparameter, Constant, \
     CategoricalHyperparameter
 from ConfigSpace.conditions import InCondition
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import (
     AutoSklearnRegressionAlgorithm,
@@ -41,7 +41,8 @@ class MLPRegressor(
         self.epsilon = epsilon
         self.beta_1 = beta_1
 
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.verbose = verbose
         self.estimator = None
 
@@ -120,7 +121,7 @@ class MLPRegressor(
                 learning_rate_init=self.learning_rate_init,
                 max_iter=n_iter,
                 shuffle=self.shuffle,
-                random_state=copy.copy(self.random_state),
+                random_state=self._random_seed,
                 verbose=self.verbose,
                 warm_start=True,
                 early_stopping=self.early_stopping_val,

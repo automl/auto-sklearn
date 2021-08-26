@@ -13,7 +13,8 @@ class SelectClassificationRates(AutoSklearnPreprocessingAlgorithm):
                  score_func="chi2", random_state=None):
         import sklearn.feature_selection
 
-        self.random_state = random_state  # We don't use this
+        self.random_state = check_random_state(random_state)  # We don't use this
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.alpha = alpha
         self.mode = mode
 

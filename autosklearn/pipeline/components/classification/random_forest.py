@@ -1,6 +1,7 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, UnParametrizedHyperparameter
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import (
     AutoSklearnClassificationAlgorithm,
@@ -30,7 +31,8 @@ class RandomForest(
         self.bootstrap = bootstrap
         self.max_leaf_nodes = max_leaf_nodes
         self.min_impurity_decrease = min_impurity_decrease
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.n_jobs = n_jobs
         self.class_weight = class_weight
         self.estimator = None
@@ -85,7 +87,7 @@ class RandomForest(
                 bootstrap=self.bootstrap,
                 max_leaf_nodes=self.max_leaf_nodes,
                 min_impurity_decrease=self.min_impurity_decrease,
-                random_state=self.random_state,
+                random_state=self._random_seed,
                 n_jobs=self.n_jobs,
                 class_weight=self.class_weight,
                 warm_start=True)

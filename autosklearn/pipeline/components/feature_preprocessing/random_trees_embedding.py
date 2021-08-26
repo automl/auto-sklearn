@@ -1,6 +1,7 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformIntegerHyperparameter, \
     UnParametrizedHyperparameter, Constant, CategoricalHyperparameter
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, SIGNED_DATA
@@ -21,7 +22,8 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
         self.bootstrap = bootstrap
         self.sparse_output = sparse_output
         self.n_jobs = n_jobs
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
     def _fit(self, X, Y=None):
         import sklearn.ensemble
@@ -48,7 +50,7 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
             max_leaf_nodes=self.max_leaf_nodes,
             sparse_output=self.sparse_output,
             n_jobs=self.n_jobs,
-            random_state=self.random_state
+            random_state=self._random_seed
         )
         self.preprocessor.fit(X, Y)
         return self

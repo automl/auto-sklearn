@@ -3,6 +3,7 @@ import numpy as np
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import (
     AutoSklearnClassificationAlgorithm,
@@ -16,7 +17,8 @@ class MultinomialNB(AutoSklearnClassificationAlgorithm):
     def __init__(self, alpha, fit_prior, random_state=None, verbose=0):
         self.alpha = alpha
         self.fit_prior = fit_prior
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
+        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.verbose = int(verbose)
         self.estimator = None
 
