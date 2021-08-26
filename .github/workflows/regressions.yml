@@ -69,8 +69,6 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
           echo "$GITHUB_CONTEXT"
-          pwd
-          ls -a
 
       - name: Branch extract
         id: extract
@@ -173,13 +171,9 @@ jobs:
           benchmark: ${{ matrix.task_type }}
           constraint: 10fold10min
           benchmark_output: results/results.csv
-          results_to: baseline_${{ matrix.task_type }}_${{ github.repository_owner }}_${{ steps.extract.outputs.branch }}_${{ github.sha }}.csv
+          results_to: targeted_${{ matrix.task_type }}_${{ github.repository_owner }}_${{ steps.extract.outputs.branch }}_${{ github.sha }}.csv
         run: |
-          ls -R | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
-          pwd
           python runbenchmark.py -u $benchmarkdir $framework $benchmark $constraint
-          ls -R | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
-          cat results/results.csv
           mv $benchmark_output $results_to
           echo "::set-output name=results_path::$(pwd)/${results_to}"
           # outputs:
@@ -248,23 +242,19 @@ jobs:
         with:
           path: artifacts
 
-      - name: Debug
-        run: |
-          ls -a
-          ls -a artifacts
-
       - name: Artifact paths as Vars
         id: artifacts
+
         run: |
           # Should only be one file in each
           BASELINE_CLASSIFICATION=$(ls | grep baseline_classification )
           BASELINE_REGRESSION=$(ls | grep baseline_regression )
           TARGETED_CLASSIFICATION=$(ls artifacts/results_classification)
-          TARGETED_REGRESSION=$(ls artifacts/results_classification)
+          TARGETED_REGRESSION=$(ls artifacts/results_regression)
           echo "::set-output name=baseline_classification::$(pwd)/${BASELINE_CLASSIFICATION}"
           echo "::set-output name=baseline_regression::$(pwd)/${BASELINE_REGRESSION}"
-          echo "::set-output name=targeted_classification::$(pwd)/${TARGETED_CLASSIFICATION}"
-          echo "::set-output name=targeted_regression::$(pwd)/${TARGETED_REGRESSION}"
+          echo "::set-output name=targeted_classification::$(pwd)/artifacts/results_classification/${TARGETED_CLASSIFICATION}"
+          echo "::set-output name=targeted_regression::$(pwd)artificats/results_regression/${TARGETED_REGRESSION}"
         # outputs:
         #   baseline_classification: path to the baseline results for classification
         #   baseline_regression: path to the baseline results for regression
@@ -311,7 +301,6 @@ jobs:
             ${{ steps.compare.outputs.targeted_means }}
             ${{ steps.compare.outputs.compared_means }}
           retention-days: 90
-
 
       - name: Find Comment
         if: >
