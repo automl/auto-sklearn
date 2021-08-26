@@ -269,9 +269,9 @@ jobs:
           results_path: ${{ steps.benchmark.outputs.results_path}}
           filename: comparisons.csv
           dependancies: pandas numpy
-          baseline_means: 'baseline_means.csv'
-          targeted_means: 'targeted_means.csv'
-          compared_means: 'compared_means.csv'
+          baseline_means: baseline_means.csv
+          targeted_means: targeted_means.csv
+          compared_means: compared_means.csv
         run: |
           # Install dependancies
           python -m pip install --upgrade pip
@@ -289,7 +289,7 @@ jobs:
           echo "Complete comparison"
 
           echo "::set-output name=baseline_means::$(pwd)/${baseline_means}"
-          echo "::set-output name=targeted_means::$(pwd)/${targeted_means"
+          echo "::set-output name=targeted_means::$(pwd)/${targeted_means}"
           echo "::set-output name=compared_means::$(pwd)/${compared_means}"
           # outputs:
           #   baseline_means: path to the results of regression test vs baseline
