@@ -1,3 +1,5 @@
+import numpy as np
+
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UnParametrizedHyperparameter
@@ -12,7 +14,7 @@ class ARDRegression(AutoSklearnRegressionAlgorithm):
     def __init__(self, n_iter, tol, alpha_1, alpha_2, lambda_1, lambda_2,
                  threshold_lambda, fit_intercept, random_state=None):
         self.random_state = check_random_state(random_state)
-        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
+        self._random_seed = self.random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.estimator = None
 
         self.n_iter = n_iter

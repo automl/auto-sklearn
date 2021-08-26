@@ -25,7 +25,7 @@ class PassiveAggressive(
         self.tol = tol
         self.loss = loss
         self.random_state = check_random_state(random_state)
-        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
+        self._random_seed = self.random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.estimator = None
         self.max_iter = self.get_max_iter()
         self.n_iter_ = None

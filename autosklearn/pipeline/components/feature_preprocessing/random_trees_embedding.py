@@ -1,3 +1,5 @@
+import numpy as np
+
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformIntegerHyperparameter, \
     UnParametrizedHyperparameter, Constant, CategoricalHyperparameter
@@ -23,7 +25,7 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
         self.sparse_output = sparse_output
         self.n_jobs = n_jobs
         self.random_state = check_random_state(random_state)
-        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
+        self._random_seed = self.random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
     def _fit(self, X, Y=None):
         import sklearn.ensemble

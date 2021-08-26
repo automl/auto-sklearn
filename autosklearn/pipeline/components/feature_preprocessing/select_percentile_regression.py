@@ -1,3 +1,5 @@
+import numpy as np
+
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, CategoricalHyperparameter
 from sklearn.utils.validation import check_random_state
@@ -21,7 +23,7 @@ class SelectPercentileRegression(SelectPercentileBase,
         import sklearn.feature_selection
 
         self.random_state = check_random_state(random_state)  # We don't use this
-        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
+        self._random_seed = self.random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.percentile = int(float(percentile))
         if score_func == "f_regression":
             self.score_func = sklearn.feature_selection.f_regression

@@ -1,6 +1,8 @@
 import resource
 import sys
 
+import numpy as np
+
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.conditions import InCondition
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -28,7 +30,7 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
         self.verbose = verbose
         self.max_iter = max_iter
         self.random_state = check_random_state(random_state)
-        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
+        self._random_seed = self.random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.estimator = None
 
     def fit(self, X, Y):

@@ -55,7 +55,7 @@ class DataPreprocessor(TransformerMixin, AutoSklearnComponent):
         self.include = include
         self.exclude = exclude
         self.random_state = check_random_state(random_state)
-        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
+        self._random_seed = self.random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.init_params = init_params
         self.feat_type = feat_type
         self.force_sparse_output = force_sparse_output

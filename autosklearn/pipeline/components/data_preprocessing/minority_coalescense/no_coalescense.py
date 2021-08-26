@@ -1,9 +1,9 @@
 from typing import Dict, Optional, Tuple, Union
 
+import numpy as np
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 
-import numpy as np
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm

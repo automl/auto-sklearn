@@ -2,7 +2,6 @@ from typing import Dict, Optional, Tuple, Union
 
 import numpy as np
 
-
 from scipy import sparse
 from sklearn.exceptions import NotFittedError
 from ConfigSpace.configuration_space import ConfigurationSpace

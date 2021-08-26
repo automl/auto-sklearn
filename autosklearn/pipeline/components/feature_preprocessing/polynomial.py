@@ -1,3 +1,5 @@
+import numpy as np
+
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
     UniformIntegerHyperparameter
@@ -16,7 +18,7 @@ class PolynomialFeatures(AutoSklearnPreprocessingAlgorithm):
         self.include_bias = include_bias
 
         self.random_state = check_random_state(random_state)
-        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
+        self._random_seed = self.random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.preprocessor = None
 
     def fit(self, X, Y):

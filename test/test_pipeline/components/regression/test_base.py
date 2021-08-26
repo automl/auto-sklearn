@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Union
 
 import unittest
 
@@ -234,12 +234,16 @@ class BaseRegressionComponentTest(unittest.TestCase):
             model.fit(X.copy(), y.copy())
             return model.estimator.get_params()
 
-        def random_state_keys(model) -> Optional[Tuple]:
-            """ Gets the keys used for random number generation """
+        def random_state(model) -> Optional[Union[np.random.RandomState, int]]:
+            """ Gets the keys used for random number generation if it exists """
             if model.estimator is None:
                 return None  # An acceptable error occured in fitting
             else:
-                return model.estimator.random_state.get_state()[1]
+                if model.estimator.random_state:
+                    return model.estimator.random_state
+                else:
+                    return None
+
 
         # We ignore certain keys when comparing
         # Random state objects don't compare so we manually compare it's keys
@@ -268,10 +272,10 @@ class BaseRegressionComponentTest(unittest.TestCase):
             # We also ensure their random state has been correctly reset such
             # that the state of their RandomState is the same after each fit call
             params_first = fitted_params(regressor)
-            rand_state_keys_first = random_state_keys(regressor)
+            rand_state_first = random_state(regressor)
 
             params_second = fitted_params(regressor)
-            rand_state_keys_second = random_state_keys(regressor)
+            rand_state_second = random_state(regressor)
 
             # An acceptable error occured, skip to next sample
             if params_first is None or params_second is None:
@@ -287,7 +291,25 @@ class BaseRegressionComponentTest(unittest.TestCase):
             self.assertEqual(params_first, params_second,
                              f"Failed with model args {model_args}")
 
-            # Their random state keys (np.ndarray) should be the same
-            assert all(rand_state_keys_first == rand_state_keys_second), \
-                             f"The random states for {self.module} changed")
+            # Their random state should be the same if the estimator uses
+            # a random seed or RandomState
+            if rand_state_first and rand_state_second:
 
+                # Some sklearn models turn a seed number into a RandomState object
+                #   for which we have retrieved their random_state_keys used for
+                #   generation
+                if isinstance(rand_state_first, np.random.RandomState):
+                    # The get_state returns a tuple for which [1] are the keys
+                    assert all(
+                        rand_state_first.get_state()[1]
+                        == rand_state_second.get_state()[1]
+                    ), f"The random states for {self.module.estimator} changed"
+
+                # Others simply use the int number passed to it
+                elif isinstance(rand_state_first, int):
+                    assert rand_state_first == rand_state_second, \
+                        f"The random states for {self.module.estimator} changed"
+                else:
+                    raise RuntimeError(
+                        f"Unrecognized type for rand_state={rand_state_first}"
+                    )

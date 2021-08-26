@@ -1,3 +1,5 @@
+import numpy as np
+
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter
@@ -20,7 +22,7 @@ class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
         self.gamma = gamma
         self.n_components = n_components
         self.random_state = check_random_state(random_state)
-        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
+        self._random_seed = self.random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
     def fit(self, X, Y=None):
         import sklearn.kernel_approximation

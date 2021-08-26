@@ -25,7 +25,7 @@ class DecisionTree(AutoSklearnRegressionAlgorithm):
         self.min_weight_fraction_leaf = min_weight_fraction_leaf
         self.min_impurity_decrease = min_impurity_decrease
         self.random_state = check_random_state(random_state)
-        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
+        self._random_seed = self.random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
         self.estimator = None
 
     def fit(self, X, y, sample_weight=None):

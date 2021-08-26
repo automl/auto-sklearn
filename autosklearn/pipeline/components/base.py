@@ -5,6 +5,8 @@ import inspect
 import pkgutil
 import sys
 
+import numpy as np
+
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils import check_random_state
 
@@ -342,7 +344,7 @@ class AutoSklearnChoice(object):
         #     dataset_properties).get_default_configuration()
 
         self.random_state = check_random_state(random_state)
-        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
+        self._random_seed = self.random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
         # Since the pipeline will initialize the hyperparameters, it is not
         # necessary to do this upon the construction of this object

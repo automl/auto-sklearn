@@ -19,7 +19,7 @@ class Nystroem(AutoSklearnPreprocessingAlgorithm):
         self.degree = degree
         self.coef0 = coef0
         self.random_state = check_random_state(random_state)
-        self._random_seed = random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
+        self._random_seed = self.random_state.randint(np.iinfo(np.uint32).max, dtype='u8')
 
     def fit(self, X, Y=None):
         import scipy.sparse

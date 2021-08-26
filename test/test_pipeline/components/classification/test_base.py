@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Tuple
+from typing import Optional, Dict, Union
 
 import unittest
 
@@ -273,11 +273,15 @@ class BaseClassificationComponentTest(unittest.TestCase):
 
             return model.estimator.get_params()
 
-        def random_state(model) -> Optional[Tuple]:
+        def random_state(model) -> Optional[Union[np.random.RandomState, np.uint]]:
+            """ Gets the keys used for random number generation """
             if model.estimator is None:
                 return None  # An acceptable error occured in fitting
             else:
-                return model.estimator.random_state.get_state()
+                if hasattr(model.estimator, 'random_state'):
+                    return model.estimator.random_state
+                else:
+                    return None
 
         # We ignore certain keys when comparing
         param_keys_ignored = [
@@ -323,6 +327,27 @@ class BaseClassificationComponentTest(unittest.TestCase):
             # They should have equal parameters and random states
             self.assertEqual(params_first, params_second,
                              f"Failed with model args {model_args}")
-            self.assertEqual(rand_state_first, rand_state_second,
-                             f"The random states for {self.module} changed")
 
+            # Their random state should be the same if the estimator uses
+            # a random seed or RandomState
+            if rand_state_first and rand_state_second:
+
+                # Some sklearn models turn a seed number into a RandomState object
+                #   for which we have retrieved their random_state_keys used for
+                #   generation
+                if isinstance(rand_state_first, np.random.RandomState):
+                    # The get_state returns a tuple for which [1] are the keys
+                    assert all(
+                        rand_state_first.get_state()[1]
+                        == rand_state_second.get_state()[1]
+                    ), f"The random states for {self.module.estimator} changed"
+
+                # Others simply use the int number passed to it
+                elif isinstance(rand_state_first, np.uint):
+                    assert rand_state_first == rand_state_second, \
+                        f"The random states for {self.module.estimator} changed"
+                else:
+                    raise RuntimeError(
+                        f"Unrecognized type={type(rand_state_first)}"
+                        f" for rand_state={rand_state_first}"
+                    )
