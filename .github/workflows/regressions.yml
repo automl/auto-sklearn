@@ -177,13 +177,15 @@ jobs:
           python runbenchmark.py -u $benchmarkdir $framework $benchmark $constraint
           mv $benchmark_output $results_to
           echo "::set-output name=results_path::$(pwd)/${results_to}"
+          echo "::set-output name=filename::${results_to}"
           # outputs:
+          #   filename: name of the results file
           #   results_path: path to the results of the benchmark
 
       - name: Upload ${{matrix.task_type}} results as artifact
         uses: actions/upload-artifact@v2
         with:
-          name: results_${{ matrix.task_type }}
+          name: ${{ steps.benchmark.outputs.filename }}
           path: |
             ${{ steps.benchmark.outputs.results_path }}
           retention-days: 90
@@ -295,11 +297,13 @@ jobs:
           #   targeted_means: path to the results of regression test vs baseline
           #   compared_means: path to the results of regression test vs baseline
 
-      - name: Upload ${{matrix.task_type}} results as artifact
+      - name: Upload means results as artifact
         uses: actions/upload-artifact@v2
         with:
-          name: results_${{ matrix.task_type }}
+          name: results_means
           path: |
+            ${{ steps.artifacts.outputs.baseline_classification }}
+            ${{ steps.artifacts.outputs.baseline_regression }}
             ${{ steps.compare.outputs.baseline_means }}
             ${{ steps.compare.outputs.targeted_means }}
             ${{ steps.compare.outputs.compared_means }}
@@ -334,13 +338,15 @@ jobs:
         env:
           results_path: ${{ steps.compare.outputs.comparisons_path }}
           pyutil: ${{ steps.fetch.outputs.pyutil }}
+          markdown_file: body.md
         run: |
-          COMPARISON_OUTPUT=$(python $pyutil --generate-markdown \
+          python $pyutil --generate-markdown \
             --compared-means-csv ${{ steps.compare.outputs.compared_means }} \
             --baseline-means-csv ${{ steps.compare.outputs.baseline_means }} \
             --targeted-means-csv ${{ steps.compare.outputs.targeted_means }} \
-          )
-          echo "::set-output name=body::$(pwd)/${COMPARISON_OUTPUT}"
+            > $markdown_file
+          # Requires double quotes around the multiline output to capture it all
+          echo ::set-output name=body::"$(cat ${markdown_file})"
           # outputs:
           #   body: the body of the comment update
 
