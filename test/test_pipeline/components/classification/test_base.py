@@ -1,13 +1,10 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, Tuple
 
 import unittest
 
 from autosklearn.pipeline.util import _test_classifier, \
     _test_classifier_predict_proba, _test_classifier_iterative_fit
 from autosklearn.pipeline.constants import SPARSE
-from autosklearn.pipeline.components.classification.gradient_boosting import (
-    GradientBoostingClassifier
-)
 
 import sklearn.metrics
 import numpy as np
@@ -276,6 +273,12 @@ class BaseClassificationComponentTest(unittest.TestCase):
 
             return model.estimator.get_params()
 
+        def random_state(model) -> Optional[Tuple]:
+            if model.estimator is None:
+                return None  # An acceptable error occured in fitting
+            else:
+                return model.estimator.random_state.get_state()
+
         # We ignore certain keys when comparing
         param_keys_ignored = [
             'random_state', 'base_estimator', *self.res.get('ignore_hps', [])
@@ -299,8 +302,13 @@ class BaseClassificationComponentTest(unittest.TestCase):
             classifier = classifier_cls(**model_args)
 
             # Get the parameters on the first and second fit with config params
+            # We also ensure their random state has been correctly reset such
+            # that the state of their RandomState is the same after each fit call
             params_first = fitted_params(classifier)
+            rand_state_first = random_state(classifier)
+
             params_second = fitted_params(classifier)
+            rand_state_second = random_state(classifier)
 
             # An acceptable error occured, skip to next sample
             if params_first is None or params_second is None:
@@ -312,54 +320,9 @@ class BaseClassificationComponentTest(unittest.TestCase):
                     if key in params:
                         del params[key]
 
-            # They should be equal
+            # They should have equal parameters and random states
             self.assertEqual(params_first, params_second,
                              f"Failed with model args {model_args}")
+            self.assertEqual(rand_state_first, rand_state_second,
+                             f"The random states for {self.module} changed")
 
-    @unittest.skip("Issue 1209")
-    def test_gradient_boosting_module_idempotent_max_iter(self):
-        """
-        Succesive calls to `fit` GradientBoostingClassifier actually call
-        iterativ fit. This means the estimator produced after two successive
-        calls does not result in the same output estimator.
-        """
-        if self.module != GradientBoostingClassifier:
-            pass
-
-        # Gotten from failing runs of test_module_idempotent
-        model_args = {
-            'random_state': np.random.RandomState(1),
-            'early_stop': 'valid',
-            'l2_regularization': 2.125626112922482e-06,
-            'learning_rate': 0.09554502382606479,
-            'loss': 'auto',
-            'max_bins': 255,
-            'max_depth': 'None',
-            'max_leaf_nodes': 15,
-            'min_samples_leaf': 3,
-            'scoring': 'loss',
-            'tol': 1e-07,
-            'n_iter_no_change': 11,
-            'validation_fraction': 0.2751790689986756
-        }
-
-        X = np.array([
-            [0, 0], [0, 1], [1, 0], [1, 1],
-            [0, 0], [0, 1], [1, 0], [1, 1],
-            [0, 0], [0, 1], [1, 0], [1, 1],
-            [0, 0], [0, 1], [1, 0], [1, 1],
-        ])
-        y = np.array([
-            0, 1, 1, 0,
-            0, 1, 1, 0,
-            0, 1, 1, 0,
-            0, 1, 1, 0,
-        ])
-
-        classifier = self.module(**model_args)
-
-        # Get the parameters on the first and second fit with config params
-        params_first = classifier.fit(X, y).estimator.get_params()
-        params_second = classifier.fit(X, y).estimator.get_params()
-
-        assert params_first['max_iter'] == params_second['max_iter']
