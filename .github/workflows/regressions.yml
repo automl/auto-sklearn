@@ -266,7 +266,6 @@ jobs:
         id: compare
         env:
           pyutil: ${{ steps.fetch.outputs.pyutil }}
-          results_path: ${{ steps.benchmark.outputs.results_path}}
           filename: comparisons.csv
           dependancies: pandas numpy
           baseline_means: baseline_means.csv
@@ -339,7 +338,7 @@ jobs:
           COMPARISON_OUTPUT=$(python $pyutil --generate-markdown \
             --compared-means-csv ${{ steps.compare.outputs.compared_means }} \
             --baseline-means-csv ${{ steps.compare.outputs.baseline_means }} \
-            --targeted-means-csv ${{ steps.targeted.outputs.targeted_means }}\
+            --targeted-means-csv ${{ steps.compare.outputs.targeted_means }} \
           )
           echo "::set-output name=body::$(pwd)/${COMPARISON_OUTPUT}"
           # outputs:
