@@ -334,7 +334,7 @@ jobs:
           )
         env:
           results_path: ${{ steps.compare.outputs.comparisons_path }}
-          pyutil: ${{ steps.fetch.outputs.util }}
+          pyutil: ${{ steps.fetch.outputs.pyutil }}
         run: |
           COMPARISON_OUTPUT=$(python $pyutil --generate-markdown \
             --compared-means-csv ${{ steps.compare.outputs.compared_means }} \
