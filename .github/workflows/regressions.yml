@@ -255,7 +255,7 @@ jobs:
           BASELINE_CLASSIFICATION=$(ls | grep baseline_classification )
           BASELINE_REGRESSION=$(ls | grep baseline_regression )
           TARGETED_CLASSIFICATION=$(ls artifacts/targeted_classification* | grep .csv)
-          TARGETED_REGRESSION=$(ls artifacts/targeted_regression* | grep.csv)
+          TARGETED_REGRESSION=$(ls artifacts/targeted_regression* | grep .csv)
           echo "::set-output name=baseline_classification::$(pwd)/${BASELINE_CLASSIFICATION}"
           echo "::set-output name=baseline_regression::$(pwd)/${BASELINE_REGRESSION}"
           echo "::set-output name=targeted_classification::$(pwd)/artifacts/results_classification/${TARGETED_CLASSIFICATION}"
