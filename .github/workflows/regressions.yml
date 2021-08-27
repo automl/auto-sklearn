@@ -343,13 +343,15 @@ jobs:
           pyutil: ${{ steps.fetch.outputs.pyutil }}
           markdown_file: body.md
         run: |
-          BODY="$(python $pyutil --generate-markdown \
+          body="$(python $pyutil --generate-markdown \
             --compared-means-csv ${{ steps.compare.outputs.compared_means }} \
             --baseline-means-csv ${{ steps.compare.outputs.baseline_means }} \
             --targeted-means-csv ${{ steps.compare.outputs.targeted_means }} \
           )"
-          # Requires double quotes around the multiline output to capture it all
-          echo ::set-output name=body::"${BODY}"
+          body="${body//'%'/'%25'}"
+          body="${body//$'\n'/'%0A'}"
+          body="${body//$'\r'/'%0D'}" 
+          echo "::set-output name=body::$body"
           # outputs:
           #   body: the body of the comment update
 
