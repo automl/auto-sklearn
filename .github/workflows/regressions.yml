@@ -259,12 +259,14 @@ jobs:
 
           BASELINE_CLASSIFICATION=$(ls | grep baseline_classification )
           BASELINE_REGRESSION=$(ls | grep baseline_regression )
-          TARGETED_CLASSIFICATION=$(ls artifacts/targeted_classification* | grep .csv)
-          TARGETED_REGRESSION=$(ls artifacts/targeted_regression* | grep .csv)
+          TARGETED_CLASSIFICATION_FOLDER=$(ls artifacts | grep targeted_classification)
+          TARGETED_REGRESSION_FOLDER=$(ls artifacts | grep targeted_regression)
+          TARGETED_CLASSIFICATION=$(ls ${TARGETED_CLASSIFICATION_FOLDER} | grep .csv)
+          TARGETED_REGRESSION=$(ls ${TARGETED_REGRESSION_FOLDER} | grep .csv)
           echo "::set-output name=baseline_classification::$(pwd)/${BASELINE_CLASSIFICATION}"
           echo "::set-output name=baseline_regression::$(pwd)/${BASELINE_REGRESSION}"
-          echo "::set-output name=targeted_classification::$(pwd)/artifacts/results_classification/${TARGETED_CLASSIFICATION}"
-          echo "::set-output name=targeted_regression::$(pwd)/artifacts/results_regression/${TARGETED_REGRESSION}"
+          echo "::set-output name=targeted_classification::$(pwd)/artifacts/${TARGETED_CLASSIFICATION_FOLDER}/${TARGETED_CLASSIFICATION}"
+          echo "::set-output name=targeted_regression::$(pwd)/artifacts/${TARGETED_REGRESSION_FOLDER}/${TARGETED_REGRESSION}"
         # outputs:
         #   baseline_classification: path to the baseline results for classification
         #   baseline_regression: path to the baseline results for regression
