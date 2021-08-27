@@ -298,13 +298,15 @@ jobs:
           #   targeted_means: path to the results of regression test vs baseline
           #   compared_means: path to the results of regression test vs baseline
 
-      - name: Upload means results as artifact
+      - name: Upload all results together as an artifact
         uses: actions/upload-artifact@v2
         with:
-          name: results_means
+          name: ${{ github.repository_owner }}_${{ steps.extract.outputs.branch }}_${{ github.sha }}
           path: |
             ${{ steps.artifacts.outputs.baseline_classification }}
             ${{ steps.artifacts.outputs.baseline_regression }}
+            ${{ steps.artifacts.outputs.targeted_classification }}
+            ${{ steps.artifacts.outputs.targeted_regression }}
             ${{ steps.compare.outputs.baseline_means }}
             ${{ steps.compare.outputs.targeted_means }}
             ${{ steps.compare.outputs.compared_means }}
@@ -341,13 +343,13 @@ jobs:
           pyutil: ${{ steps.fetch.outputs.pyutil }}
           markdown_file: body.md
         run: |
-          python $pyutil --generate-markdown \
+          BODY="$(python $pyutil --generate-markdown \
             --compared-means-csv ${{ steps.compare.outputs.compared_means }} \
             --baseline-means-csv ${{ steps.compare.outputs.baseline_means }} \
             --targeted-means-csv ${{ steps.compare.outputs.targeted_means }} \
-            > $markdown_file
+          )"
           # Requires double quotes around the multiline output to capture it all
-          echo ::set-output name=body::"$(cat ${markdown_file})"
+          echo ::set-output name=body::"${BODY}"
           # outputs:
           #   body: the body of the comment update
 
