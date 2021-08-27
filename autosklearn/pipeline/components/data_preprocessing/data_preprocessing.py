@@ -5,6 +5,7 @@ from scipy import sparse
 
 from ConfigSpace import Configuration
 from ConfigSpace.configuration_space import ConfigurationSpace
+from sklearn.utils.validation import check_random_state
 
 import numpy as np
 

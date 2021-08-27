@@ -9,8 +9,6 @@ from autosklearn.pipeline.components.base import \
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS
 from autosklearn.pipeline.implementations.util import softmax
 
-import numpy as np
-
 
 class QDA(AutoSklearnClassificationAlgorithm):
 

@@ -4,6 +4,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter
 from ConfigSpace import NotEqualsCondition
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm

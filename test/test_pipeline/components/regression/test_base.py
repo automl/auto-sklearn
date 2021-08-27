@@ -258,7 +258,6 @@ class BaseRegressionComponentTest(unittest.TestCase):
                 else:
                     return None
 
-
         # We ignore certain keys when comparing
         # Random state objects don't compare so we manually compare it's keys
         param_keys_ignored = [
