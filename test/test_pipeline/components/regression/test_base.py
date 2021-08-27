@@ -46,6 +46,8 @@ class BaseRegressionComponentTest(unittest.TestCase):
                 score = sklearn.metrics.r2_score(targets, predictions)
                 fixture = self.res["default_boston"]
                 if score < -1e10:
+                    print(f"original score {score}")
+                    print(f"original fixture {fixture}")
                     score = np.log(-score)
                     fixture = np.log(-fixture)
                 self.assertAlmostEqual(
@@ -73,6 +75,8 @@ class BaseRegressionComponentTest(unittest.TestCase):
             fixture = self.res["default_boston_iterative"]
 
             if score < -1e10:
+                print(f"original score {score}")
+                print(f"original fixture {fixture}")
                 score = np.log(-score)
                 fixture = np.log(-fixture)
 
@@ -220,8 +224,18 @@ class BaseRegressionComponentTest(unittest.TestCase):
 
         regressor_cls = self.module
 
-        X = np.array([[0.5, 0.5], [0.0, 1.0], [1.0, 0.5], [1.0, 1.0]])
-        y = np.array([1, 1, 1, 1])
+        X = np.array([
+            [0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5],
+            [0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5],
+            [0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5],
+            [0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5],
+        ])
+        y = np.array([
+            1, 1, 1, 1,
+            1, 1, 1, 1,
+            1, 1, 1, 1,
+            1, 1, 1, 1,
+        ])
 
         # There are certain errors we ignore so we wrap this in a function
         def fitted_params(model) -> Dict:
@@ -239,7 +253,7 @@ class BaseRegressionComponentTest(unittest.TestCase):
             if model.estimator is None:
                 return None  # An acceptable error occured in fitting
             else:
-                if model.estimator.random_state:
+                if hasattr(model.estimator, 'random_state'):
                     return model.estimator.random_state
                 else:
                     return None
@@ -255,7 +269,7 @@ class BaseRegressionComponentTest(unittest.TestCase):
         configuration_space = regressor_cls.get_hyperparameter_search_space()
 
         default = configuration_space.get_default_configuration()
-        sampled = [configuration_space.sample_configuration() for _ in range(5)]
+        sampled = [configuration_space.sample_configuration() for _ in range(2)]
 
         for config in [default] + sampled:
             model_args = {
@@ -306,7 +320,7 @@ class BaseRegressionComponentTest(unittest.TestCase):
                     ), f"The random states for {self.module.estimator} changed"
 
                 # Others simply use the int number passed to it
-                elif isinstance(rand_state_first, int):
+                elif isinstance(rand_state_first, np.uint):
                     assert rand_state_first == rand_state_second, \
                         f"The random states for {self.module.estimator} changed"
                 else:

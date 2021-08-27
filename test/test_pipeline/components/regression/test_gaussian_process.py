@@ -16,7 +16,7 @@ class GaussianProcessComponentTest(BaseRegressionComponentTest):
     res["default_boston_iterative"] = None
     res["default_boston_sparse"] = None
     res["default_boston_iterative_sparse"] = None
-    res["default_diabetes"] = -7.4131230585194885e-06
+    res["default_diabetes"] = -0.027054338057708627
     res["default_diabetes_iterative"] = None
     res["default_diabetes_sparse"] = None
     res["default_diabetes_iterative_sparse"] = None
