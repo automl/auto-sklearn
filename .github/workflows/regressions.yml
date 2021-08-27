@@ -172,15 +172,15 @@ jobs:
           benchmark: ${{ matrix.task_type }}
           constraint: 10fold10min
           benchmark_output: results/results.csv
-          results_to: targeted_${{ matrix.task_type }}_${{ github.repository_owner }}_${{ steps.extract.outputs.branch }}_${{ github.sha }}.csv
+          filename: targeted_${{ matrix.task_type }}_${{ github.repository_owner }}_${{ steps.extract.outputs.branch }}_${{ github.sha }}
         run: |
           python runbenchmark.py -u $benchmarkdir $framework $benchmark $constraint
-          mv $benchmark_output $results_to
-          echo "::set-output name=results_path::$(pwd)/${results_to}"
-          echo "::set-output name=filename::${results_to}"
+          mv $benchmark_output ${filename}.csv
+          echo "::set-output name=results_path::$(pwd)/${filename}.csv"
+          echo "::set-output name=filename::${filename}"
           # outputs:
-          #   filename: name of the results file
           #   results_path: path to the results of the benchmark
+          #   filename: name of the results file
 
       - name: Upload ${{matrix.task_type}} results as artifact
         uses: actions/upload-artifact@v2
@@ -229,7 +229,7 @@ jobs:
         # outputs:
         #   pyutil: path to the python util file
 
-      - name: Download baselines artificats
+      - name: Download baselines artifacts
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: generate-baselines.yml
@@ -251,7 +251,12 @@ jobs:
         run: |
           # Should only be one file in each
           ls
+          echo ""
           ls artifacts
+          echo ""
+          ls artifacts/targeted_classification*
+          echo ""
+
           BASELINE_CLASSIFICATION=$(ls | grep baseline_classification )
           BASELINE_REGRESSION=$(ls | grep baseline_regression )
           TARGETED_CLASSIFICATION=$(ls artifacts/targeted_classification* | grep .csv)
