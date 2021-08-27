@@ -92,7 +92,7 @@ jobs:
           repository: ${{ env.AUTOMLBENCHMARK_REPO }}
           ref: ${{ env.AUTOMLBENCHMARK_REF }}
 
-      - name: Download baselines artificats
+      - name: Download baselines artifacts
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: generate-baselines.yml
@@ -249,20 +249,12 @@ jobs:
         id: artifacts
 
         run: |
-          # Should only be one file in each
-          ls
-          echo ""
-          ls artifacts
-          echo ""
-          ls artifacts/targeted_classification*
-          echo ""
-
           BASELINE_CLASSIFICATION=$(ls | grep baseline_classification )
           BASELINE_REGRESSION=$(ls | grep baseline_regression )
           TARGETED_CLASSIFICATION_FOLDER=$(ls artifacts | grep targeted_classification)
           TARGETED_REGRESSION_FOLDER=$(ls artifacts | grep targeted_regression)
-          TARGETED_CLASSIFICATION=$(ls ${TARGETED_CLASSIFICATION_FOLDER} | grep .csv)
-          TARGETED_REGRESSION=$(ls ${TARGETED_REGRESSION_FOLDER} | grep .csv)
+          TARGETED_CLASSIFICATION=$(ls artifacts/${TARGETED_CLASSIFICATION_FOLDER} | grep .csv)
+          TARGETED_REGRESSION=$(ls artifacts/${TARGETED_REGRESSION_FOLDER} | grep .csv)
           echo "::set-output name=baseline_classification::$(pwd)/${BASELINE_CLASSIFICATION}"
           echo "::set-output name=baseline_regression::$(pwd)/${BASELINE_REGRESSION}"
           echo "::set-output name=targeted_classification::$(pwd)/artifacts/${TARGETED_CLASSIFICATION_FOLDER}/${TARGETED_CLASSIFICATION}"
