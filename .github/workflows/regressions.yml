@@ -250,6 +250,8 @@ jobs:
 
         run: |
           # Should only be one file in each
+          ls
+          ls artifacts
           BASELINE_CLASSIFICATION=$(ls | grep baseline_classification )
           BASELINE_REGRESSION=$(ls | grep baseline_regression )
           TARGETED_CLASSIFICATION=$(ls artifacts/results_classification)
