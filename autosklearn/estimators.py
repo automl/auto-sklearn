@@ -235,7 +235,7 @@ class AutoSklearnEstimator(BaseEstimator):
         performance_over_time\_ : pandas.core.frame.DataFrame
             A ``DataFrame`` containing the models performance over time data. Can be
             used for plotting directly. Please refer to the example
-            :ref:`Train and Test Inputs <sphx_glr_examples_40_advanced_example_pandas_train_test.py>`_.
+            :ref:`Train and Test Inputs <sphx_glr_examples_40_advanced_example_pandas_train_test.py>`.
 
         """  # noqa (links are too long)
         # Raise error if the given total time budget is less than 30 seconds.
