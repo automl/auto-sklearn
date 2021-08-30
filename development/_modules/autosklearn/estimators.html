@@ -347,8 +347,13 @@
 
 <span class="sd">            Not all keys returned by scikit-learn are supported yet.</span>
 
+<span class="sd">        performance_over_time\_ : pandas.core.frame.DataFrame</span>
+<span class="sd">            A ``DataFrame`` containing the models performance over time data. Can be</span>
+<span class="sd">            used for plotting directly. Please refer to the example</span>
+<span class="sd">            :ref:`Train and Test Inputs &lt;sphx_glr_examples_40_advanced_example_pandas_train_test.py&gt;`.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa (links are too long)</span>
-        <span class="c1"># Raise error if the given total time budget is less than 60 seconds.</span>
+        <span class="c1"># Raise error if the given total time budget is less than 30 seconds.</span>
         <span class="k">if</span> <span class="n">time_left_for_this_task</span> <span class="o">&lt;</span> <span class="mi">30</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Time left for this task must be at least &quot;</span>
                              <span class="s2">&quot;30 seconds. &quot;</span><span class="p">)</span>
@@ -618,6 +623,10 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">get_models_with_weights</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">performance_over_time_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">performance_over_time_</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">cv_results_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

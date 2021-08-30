@@ -217,7 +217,7 @@ ensemble of pipelines as described in the next section. This X_train/y_train dat
 to one of the supported formats: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.
 Optionally, you can measure the ability of this fitted model to generalize to unseen data by
 providing an optional testing pair (X_test/Y_test). For further details, please refer to the
-Example <a class="reference internal" href="examples/40_advanced/example_pandas_train_test.html#sphx-glr-examples-40-advanced-example-pandas-train-test-py"><span class="std std-ref">Test and Train data with Pandas</span></a>.
+Example <a class="reference internal" href="examples/40_advanced/example_pandas_train_test.html#sphx-glr-examples-40-advanced-example-pandas-train-test-py"><span class="std std-ref">Performance-over-time plot</span></a>.
 Supported formats for these training and testing pairs are: np.ndarray,
 pd.DataFrame, scipy.sparse.csr_matrix and python lists.</p>
 <p>If your data contains categorical values (in the features or targets), autosklearn will automatically encode your data using a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html">sklearn.preprocessing.LabelEncoder</a> for unidimensional data and a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html">sklearn.preprocessing.OrdinalEncoder</a> for multidimensional data.</p>
@@ -254,11 +254,21 @@ statistics can be printed for the inspection.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span><span class="o">.</span><span class="n">cv_results_</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span><span class="o">.</span><span class="n">performance_over_time_</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">x</span><span class="o">=</span><span class="s1">&#39;Timestamp&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;line&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Auto-sklearn accuracy over time&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span><span class="o">.</span><span class="n">sprint_statistics</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">()</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">cv_results_</span></code> returns a dict with keys as column headers and values as columns, that can be imported into a pandas DataFrame.
+<code class="docutils literal notranslate"><span class="pre">performance_over_time_</span></code>  returns a DataFrame containing the models performance over time data, which can be used for plotting directly (Here is an example: <a class="reference internal" href="examples/40_advanced/example_pandas_train_test.html#sphx-glr-examples-40-advanced-example-pandas-train-test-py"><span class="std std-ref">Performance-over-time plot</span></a>).
 <code class="docutils literal notranslate"><span class="pre">sprint_statistics()</span></code> is a method that prints the name of the  dataset, the metric used, and the best validation score
 obtained by running <em>auto-sklearn</em>. It additionally prints the number of both successful and unsuccessful
 algorithm runs.</p>

@@ -145,10 +145,20 @@ statistics can be printed for the inspection.
 >>> automl = autosklearn.classification.AutoSklearnClassifier()
 >>> automl.fit(X_train, y_train)
 >>> automl.cv_results_
+>>> automl.performance_over_time_.plot(
+>>>    x='Timestamp',
+>>>    kind='line',
+>>>    legend=True,
+>>>    title='Auto-sklearn accuracy over time',
+>>>    grid=True,
+>>> )
+>>> plt.show()
+>>> 
 >>> automl.sprint_statistics()
 >>> automl.show_models()
 
 ``cv_results_`` returns a dict with keys as column headers and values as columns, that can be imported into a pandas DataFrame.
+``performance_over_time_``  returns a DataFrame containing the models performance over time data, which can be used for plotting directly (Here is an example: :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py`).
 ``sprint_statistics()`` is a method that prints the name of the  dataset, the metric used, and the best validation score
 obtained by running *auto-sklearn*. It additionally prints the number of both successful and unsuccessful
 algorithm runs.

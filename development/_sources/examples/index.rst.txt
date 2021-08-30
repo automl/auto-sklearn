@@ -221,6 +221,27 @@ procedure.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="    - ensemble_optimization_score     - ensemble_test_score     - single_best_optimization_scor...">
+
+.. only:: html
+
+ .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_pandas_train_test_thumb.png
+     :alt: Performance-over-time plot
+
+     :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/40_advanced/example_pandas_train_test
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to provide a custom logging configuration to *auto-sklearn*. We will be ...">
 
 .. only:: html
@@ -323,27 +344,6 @@ procedure.
    :hidden:
 
    /examples/40_advanced/example_metrics
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="*auto-sklearn* can automatically encode categorical columns using a label/ordinal encoder. This...">
-
-.. only:: html
-
- .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_pandas_train_test_thumb.png
-     :alt: Test and Train data with Pandas
-
-     :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/40_advanced/example_pandas_train_test
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>

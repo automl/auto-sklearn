@@ -18,29 +18,37 @@
 .. _sphx_glr_examples_40_advanced_example_pandas_train_test.py:
 
 
-===============================
-Test and Train data with Pandas
-===============================
+==========================
+Performance-over-time plot
+==========================
+This example shows, how to use the *performance_over_time_* attribute to plot the performance
+over train time.  *performance_over_time_* can contain multiple metrics within a pandas dataframe, namely:
+
+    - ensemble_optimization_score
+    - ensemble_test_score
+    - single_best_optimization_score
+    - single_best_test_score
+    - single_best_train_score
 
 *auto-sklearn* can automatically encode categorical columns using a label/ordinal encoder.
 This example highlights how to properly set the dtype in a DataFrame for this to happen,
 and showcase how to input also testing data to autosklearn.
+
 The X_train/y_train arguments to the fit function will be used to fit the scikit-learn model,
 whereas the X_test/y_test will be used to evaluate how good this scikit-learn model generalizes
 to unseen data (i.e. data not in X_train/y_train). Using test data is a good mechanism to measure
 if the trained model suffers from overfit, and more details can be found on `evaluating estimator
 performance <https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation>`_.
-This example further highlights through a plot, the best individual models found by *auto-sklearn*
-through time (under single_best_optimization_score/single_best_test_score's legend).
-It also shows the training and test performance of the ensemble build using the best
-performing models (under ensemble_optimization_score and ensemble_test_score respectively).
+
+In order to provide *\*_test_score* metrics, X_test and y_test must be provided to the AutoML-Model, as 
+shown in this example.
 
 There is also support to manually indicate the feature types (whether a column is categorical
 or numerical) via the argument feat_types from fit(). This is important when working with
 list or numpy arrays as there is no per-column dtype (further details in the example
 :ref:`sphx_glr_examples_40_advanced_example_feature_types.py`).
 
-.. GENERATED FROM PYTHON SOURCE LINES 25-62
+.. GENERATED FROM PYTHON SOURCE LINES 33-46
 
 .. code-block:: default
 
@@ -58,42 +66,18 @@ list or numpy arrays as there is no per-column dtype (further details in the exa
     import autosklearn.classification
 
 
-    def get_runhistory_models_performance(automl):
-        metric = automl.automl_._metric
-        data = automl.automl_.runhistory_.data
-        performance_list = []
-        for run_key, run_value in data.items():
-            if run_value.status != StatusType.SUCCESS:
-                # Ignore crashed runs
-                continue
-            # Alternatively, it is possible to also obtain the start time with ``run_value.starttime``
-            endtime = pd.Timestamp(time.strftime('%Y-%m-%d %H:%M:%S',
-                                                 time.localtime(run_value.endtime)))
-            val_score = metric._optimum - (metric._sign * run_value.cost)
-            test_score = metric._optimum - (metric._sign * run_value.additional_info['test_loss'])
-            train_score = metric._optimum - (metric._sign * run_value.additional_info['train_loss'])
-            performance_list.append({
-                'Timestamp': endtime,
-                'single_best_optimization_score': val_score,
-                'single_best_test_score': test_score,
-                'single_best_train_score': train_score,
-            })
-        return pd.DataFrame(performance_list)
 
 
 
 
 
 
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 63-65
+.. GENERATED FROM PYTHON SOURCE LINES 47-49
 
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 65-99
+.. GENERATED FROM PYTHON SOURCE LINES 49-83
 
 .. code-block:: default
 
@@ -160,12 +144,12 @@ Data Loading
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 100-102
+.. GENERATED FROM PYTHON SOURCE LINES 84-86
 
 Build and fit a classifier
 ==========================
 
-.. GENERATED FROM PYTHON SOURCE LINES 102-109
+.. GENERATED FROM PYTHON SOURCE LINES 86-93
 
 .. code-block:: default
 
@@ -191,12 +175,12 @@ Build and fit a classifier
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 110-112
+.. GENERATED FROM PYTHON SOURCE LINES 94-96
 
 Get the Score of the final ensemble
 ===================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 112-116
+.. GENERATED FROM PYTHON SOURCE LINES 96-100
 
 .. code-block:: default
 
@@ -219,51 +203,20 @@ Get the Score of the final ensemble
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 117-119
+.. GENERATED FROM PYTHON SOURCE LINES 101-105
 
 Plot the ensemble performance
 ===================================
+The *performance_over_time_* attribute returns a pandas dataframe, which can 
+be directly used for plotting
 
-.. GENERATED FROM PYTHON SOURCE LINES 119-162
+.. GENERATED FROM PYTHON SOURCE LINES 105-115
 
 .. code-block:: default
 
 
-    ensemble_performance_frame = pd.DataFrame(cls.automl_.ensemble_performance_history)
-
-    best_values = pd.Series({
-        'ensemble_optimization_score': -np.inf,
-        'ensemble_test_score': -np.inf
-    })
-    for idx in ensemble_performance_frame.index:
-        if (
-            ensemble_performance_frame.loc[idx, 'ensemble_optimization_score']
-            > best_values['ensemble_optimization_score']
-        ):
-            best_values = ensemble_performance_frame.loc[idx]
-
-        ensemble_performance_frame.loc[idx] = best_values
-
-    individual_performance_frame = get_runhistory_models_performance(cls)
-    best_values = pd.Series({
-        'single_best_optimization_score': -np.inf,
-        'single_best_test_score': -np.inf,
-        'single_best_train_score': -np.inf
-    })
-    for idx in individual_performance_frame.index:
-        if (
-            individual_performance_frame.loc[idx, 'single_best_optimization_score'] 
-            > best_values['single_best_optimization_score']
-        ):
-            best_values = individual_performance_frame.loc[idx]
-
-        individual_performance_frame.loc[idx] = best_values
-
-    pd.merge(
-        ensemble_performance_frame,
-        individual_performance_frame,
-        on="Timestamp", how='outer'
-    ).sort_values('Timestamp').fillna(method='ffill').plot(
+    poT = cls.performance_over_time_
+    poT.plot(
         x='Timestamp',
         kind='line',
         legend=True,
@@ -285,7 +238,7 @@ Plot the ensemble performance
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  57.635 seconds)
+   **Total running time of the script:** ( 2 minutes  10.728 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_pandas_train_test.py:
