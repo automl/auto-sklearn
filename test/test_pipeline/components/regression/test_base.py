@@ -210,3 +210,65 @@ class BaseRegressionComponentTest(unittest.TestCase):
                                                             predictions),
                                    places=self.res.get(
                                            "default_diabetes_sparse_places", 7))
+
+    def test_module_idempotent(self):
+        """ Fitting twice with the same config gives the same model params.
+        
+            This is only valid when the random_state passed is an int. If a
+            RandomState object is passed then repeated calls to fit will have
+            different results. See the section on "Controlling Randomness" in the
+            sklearn docs.
+
+            https://scikit-learn.org/0.24/common_pitfalls.html#controlling-randomness
+        """
+        if self.__class__ == BaseRegressionComponentTest:
+            return
+
+        classifier_cls = self.module
+
+        X = np.array([
+            [0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5],
+            [0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5],
+            [0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5],
+            [0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5],
+        ])
+        y = np.array([
+            1, 1, 1, 1,
+            1, 1, 1, 1,
+            1, 1, 1, 1,
+            1, 1, 1, 1,
+        ])
+
+        # We ignore certain keys when comparing
+        param_keys_ignored = ['base_estimator', *self.res.get('ignore_hps', [])]
+
+        # We use the default config + sampled ones
+        configuration_space = classifier_cls.get_hyperparameter_search_space()
+
+        default = configuration_space.get_default_configuration()
+        sampled = [configuration_space.sample_configuration() for _ in range(2)]
+
+        for seed, config in enumerate([default] + sampled):
+            model_args = {
+                'random_state': seed,  # This must be an int, see test doc
+                ** {
+                    hp_name: config[hp_name]
+                    for hp_name in config
+                    if config[hp_name] is not None
+                }
+            }
+            classifier = classifier_cls(**model_args)
+
+            # Get the parameters on the first and second fit with config params
+            params_first = classifier.fit(X.copy(), y.copy()).estimator.get_params()
+            params_second = classifier.fit(X.copy(), y.copy()).estimator.get_params()
+
+            # Remove keys we don't wish to include in the comparison
+            for params in [params_first, params_second]:
+                for key in param_keys_ignored:
+                    if key in params:
+                        del params[key]
+
+            # They should have equal parameters
+            self.assertEqual(params_first, params_second,
+                             f"Failed with model args {model_args}")
