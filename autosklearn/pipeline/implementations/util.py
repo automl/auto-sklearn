@@ -18,20 +18,55 @@ def softmax(df):
 
 
 def convert_multioutput_multiclass_to_multilabel(probas):
-    if isinstance(probas, np.ndarray) and len(probas.shape) > 2:
-        raise ValueError('New unsupported sklearn output!')
+    """ Converts the model predicted probabilities to useable format.
+
+    In some cases, models predicted_proba can output an array of shape
+    (2, n_samples, n_labels) where the 2 stands for the probability of positive
+    or negative. This function will convert this to an (n_samples, n_labels)
+    array where the probability of a label being true is kept.
+
+    Parameters
+    ----------
+    probas: array_like (1 or 2, n_samples, n_labels) or (n_samples, n_labels)
+        The output of predict_proba of a classifier model
+
+    Returns
+    -------
+    np.ndarray shape of (n_samples, n_labels)
+        The probabilities of each label for every sample
+    """
     if isinstance(probas, list):
-        multioutput_probas = np.ndarray((probas[0].shape[0], len(probas)))
-        for i, output in enumerate(probas):
-            if output.shape[1] > 2:
+        # probas = shape of (prob of positive/negative label, n_samples, n_labels)
+        n_samples = probas[0].shape[0]
+        n_labels = len(probas)
+        multioutput_probas = np.ndarray((n_samples, n_labels))
+
+        for i, label_scores in enumerate(probas):
+            n_probabilities = label_scores.shape[1]
+
+            # Label was never observed so it has a probability of 0
+            if n_probabilities == 1:
+                multioutput_probas[:, i] = 0
+
+            # Label has a probability score for true or false
+            elif n_probabilities == 2:
+                multioutput_probas[:, i] = label_scores[:, 1]
+
+            # In case multioutput-multiclass input was used, where we have
+            # a probability for each class
+            elif n_probabilities > 2:
                 raise ValueError('Multioutput-Multiclass supported by '
                                  'scikit-learn, but not by auto-sklearn!')
-            # Only copy the probability of something having class 1
-            elif output.shape[1] == 2:
-                multioutput_probas[:, i] = output[:, 1]
-            # This label was never observed positive in the training data,
-            # therefore it is only the probability for the label being False
             else:
-                multioutput_probas[:, i] = 0
-        probas = multioutput_probas
-    return probas
+                RuntimeError(f"Unkown predict_proba output={probas}")
+
+        return multioutput_probas
+
+    elif isinstance(probas, np.ndarray):
+        if len(probas.shape) > 2:
+            raise ValueError('New unsupported sklearn output!')
+        else:
+            return probas
+
+    else:
+        return ValueError(f"Unrecognized probas\n{type(probas)}\n{probas}")

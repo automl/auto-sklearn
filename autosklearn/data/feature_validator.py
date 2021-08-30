@@ -18,13 +18,7 @@ SUPPORTED_FEAT_TYPES = typing.Union[
     typing.List,
     pd.DataFrame,
     np.ndarray,
-    scipy.sparse.bsr_matrix,
-    scipy.sparse.coo_matrix,
-    scipy.sparse.csc_matrix,
-    scipy.sparse.csr_matrix,
-    scipy.sparse.dia_matrix,
-    scipy.sparse.dok_matrix,
-    scipy.sparse.lil_matrix,
+    scipy.sparse.spmatrix,
 ]
 
 

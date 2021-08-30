@@ -4,12 +4,40 @@ import typing
 
 import numpy as np
 
+from scipy.sparse import issparse, spmatrix
+
 from sklearn.base import BaseEstimator
 from sklearn.exceptions import NotFittedError
 
 from autosklearn.data.feature_validator import FeatureValidator, SUPPORTED_FEAT_TYPES
 from autosklearn.data.target_validator import SUPPORTED_TARGET_TYPES, TargetValidator
 from autosklearn.util.logging_ import get_named_client_logger
+
+
+def convert_if_sparse(
+    y: typing.Union[SUPPORTED_TARGET_TYPES, spmatrix]
+) -> SUPPORTED_TARGET_TYPES:
+    """If the labels `y` are sparse, it will convert it to its dense representation
+
+    Parameters
+    ----------
+    y: {array-like, sparse matrix} of shape (n_samples,) or (n_samples, n_outputs)
+        The labels to 'densify' if sparse
+
+    Returns
+    -------
+    np.ndarray of shape (n_samples, ) or (n_samples, n_outputs)
+    """
+    if issparse(y):
+        y = typing.cast(spmatrix, y)
+        y = y.toarray()
+        y = typing.cast(np.ndarray, y)
+
+        # For one dimensional data, toarray will return (1, nrows)
+        if y.shape[0] == 1:
+            y = y.flatten()
+
+    return y
 
 
 class InputValidator(BaseEstimator):

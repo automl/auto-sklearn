@@ -48,9 +48,12 @@ random forests.
 
 >>> import autosklearn.classification
 >>> automl = autosklearn.classification.AutoSklearnClassifier(
->>>     include={'classifier':["random_forest", ],
->>>				 'feature_preprocessors': ["no_preprocessing"]},
->>>		exclude=None)
+>>>     include = {
+>>>       'classifier': ["random_forest"],
+>>>       'feature_preprocessors': ["no_preprocessing"]
+>>>     },
+>>>     exclude=None
+>>> )
 >>> automl.fit(X_train, y_train)
 >>> predictions = automl.predict(X_test)
 
@@ -71,8 +74,10 @@ Turning off preprocessing
 Preprocessing in *auto-sklearn* is divided into data preprocessing and
 feature preprocessing. Data preprocessing includes One-Hot encoding of
 categorical features, imputation of missing values and the normalization of
-features or samples. These steps currently cannot be turned off. Feature
-preprocessing is a single transformer which implements for example feature
+features or samples. Dataprerocessing steps cannot be turned off as this ensures
+autosklearn can actually pass the data to sklearn models without error.
+
+Feature preprocessing is a single transformer which implements for example feature
 selection or transformation of features into a different space (i.e. PCA).
 This can be turned off by setting
 ``include={'feature_preprocessors'=["no_preprocessing"]}`` as shown in the example above.
@@ -80,7 +85,7 @@ This can be turned off by setting
 Resampling strategies
 =====================
 
-Examples for using holdout and cross-validation can be found in `auto-sklearn/examples/ <examples/>`_
+Examples for using holdout and cross-validation can be found in :ref:`auto-sklearn/examples/ <examples>`
 
 Supported Inputs
 ================
@@ -212,7 +217,9 @@ set ``ensemble_size=1`` and ``initial_configurations_via_metalearning=0``:
 
 >>> import autosklearn.classification
 >>> automl = autosklearn.classification.AutoSklearnClassifier(
->>>     ensemble_size=1, initial_configurations_via_metalearning=0)
+>>>     ensemble_size=1,
+>>>     initial_configurations_via_metalearning=0
+>>> )
 
 An ensemble of size one will result in always choosing the current best model
 according to its performance on the validation set. Setting the initial

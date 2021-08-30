@@ -37,16 +37,18 @@ class NoPreprocessing(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'no',
-                'name': 'NoPreprocessing',
-                'handles_regression': True,
-                'handles_classification': True,
-                'handles_multiclass': True,
-                'handles_multilabel': True,
-                'handles_multioutput': True,
-                'is_deterministic': True,
-                'input': (SPARSE, DENSE, UNSIGNED_DATA),
-                'output': (INPUT,)}
+        return {
+            'shortname': 'no',
+            'name': 'NoPreprocessing',
+            'handles_regression': True,
+            'handles_classification': True,
+            'handles_multiclass': True,
+            'handles_multilabel': True,
+            'handles_multioutput': True,
+            'is_deterministic': True,
+            'input': (SPARSE, DENSE, UNSIGNED_DATA),
+            'output': (INPUT,)
+        }
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
@@ -70,7 +72,9 @@ X_train, X_test, y_train, y_test = train_test_split(X, y)
 
 clf = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
-    include={'data_preprocessor': ['NoPreprocessing']},
+    include={
+        'data_preprocessor': ['NoPreprocessing']
+    },
     # Bellow two flags are provided to speed up calculations
     # Not recommended for a real implementation
     initial_configurations_via_metalearning=0,

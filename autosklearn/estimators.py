@@ -7,11 +7,13 @@ import dask.distributed
 import joblib
 import numpy as np
 import pandas as pd
+from scipy.sparse import spmatrix
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.utils.multiclass import type_of_target
 from smac.runhistory.runhistory import RunInfo, RunValue
 
 from autosklearn.data.validation import (
+    convert_if_sparse,
     SUPPORTED_FEAT_TYPES,
     SUPPORTED_TARGET_TYPES,
 )
@@ -332,11 +334,11 @@ class AutoSklearnEstimator(BaseEstimator):
     def fit_pipeline(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
+        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
         config: Union[Configuration,  Dict[str, Union[str, float, int]]],
         dataset_name: Optional[str] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         feat_type: Optional[List[str]] = None,
         *args,
         **kwargs: Dict,
@@ -823,9 +825,9 @@ class AutoSklearnEstimator(BaseEstimator):
     def get_configuration_space(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
+        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         dataset_name: Optional[str] = None,
         feat_type: Optional[List[str]] = None,
     ):
@@ -910,6 +912,9 @@ class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
         self
 
         """
+        # AutoSklearn does not handle sparse y for now
+        y = convert_if_sparse(y)
+
         # Before running anything else, first check that the
         # type of data is compatible with auto-sklearn. Legal target
         # types are: binary, multiclass, multilabel-indicator.
@@ -1057,6 +1062,9 @@ class AutoSklearnRegressor(AutoSklearnEstimator, RegressorMixin):
         # types are: continuous, continuous-multioutput, and the special cases:
         # multiclass : because [3.0, 1.0, 5.0] is considered as multiclass
         # binary: because [1.0, 0.0] is considered multiclass
+        # AutoSklearn does not handle sparse y for now
+        y = convert_if_sparse(y)
+
         target_type = type_of_target(y)
         supported_types = ['continuous', 'binary', 'multiclass', 'continuous-multioutput']
         if target_type not in supported_types:
