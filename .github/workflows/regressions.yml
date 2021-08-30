@@ -64,12 +64,6 @@ jobs:
         task_type: [regression, classification]
 
     steps:
-      - name: Debug
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: |
-          echo "$GITHUB_CONTEXT"
-
       - name: Branch extract
         id: extract
         env:
@@ -247,7 +241,6 @@ jobs:
 
       - name: Artifact paths as Vars
         id: artifacts
-
         run: |
           BASELINE_CLASSIFICATION=$(ls | grep baseline_classification )
           BASELINE_REGRESSION=$(ls | grep baseline_regression )

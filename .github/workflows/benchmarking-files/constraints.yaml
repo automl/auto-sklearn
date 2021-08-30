@@ -1,4 +1,4 @@
 ---
 10fold10min:
-  folds: 1
-  max_runtime_seconds: 30
+  folds: 10
+  max_runtime_seconds: 600
