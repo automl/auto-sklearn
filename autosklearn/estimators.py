@@ -234,8 +234,13 @@ class AutoSklearnEstimator(BaseEstimator):
 
             Not all keys returned by scikit-learn are supported yet.
 
+        performance_over_time\_ : pandas.core.frame.DataFrame
+            A ``DataFrame`` containing the models performance over time data. Can be
+            used for plotting directly. Please refer to the example
+            :ref:`Train and Test Inputs <sphx_glr_examples_40_advanced_example_pandas_train_test.py>`.
+
         """  # noqa (links are too long)
-        # Raise error if the given total time budget is less than 60 seconds.
+        # Raise error if the given total time budget is less than 30 seconds.
         if time_left_for_this_task < 30:
             raise ValueError("Time left for this task must be at least "
                              "30 seconds. ")
@@ -505,6 +510,10 @@ class AutoSklearnEstimator(BaseEstimator):
 
         """
         return self.automl_.get_models_with_weights()
+
+    @property
+    def performance_over_time_(self):
+        return self.automl_.performance_over_time_
 
     @property
     def cv_results_(self):
