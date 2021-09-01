@@ -71,6 +71,7 @@ def generate_framework_def(
 
     # Tried commit and ssh repo but was getting errors with ssh
     # Tried commit and https but getting issues with commit ref
+    # Using branch and https
     version = branch
     repo = f'https://github.com/{username}/auto-sklearn.git'
 
@@ -95,7 +96,6 @@ def create_comparison(
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """ Creates a csv with comparisons between the baseline and results.
 
-
     Scores are averaged across folds for a given task.
 
     The baseline and results should have the following fields as given by
@@ -105,7 +105,6 @@ def create_comparison(
      'metric', 'mode', 'version', 'params', 'app_version', 'utc', 'duration',
      'training_duration', 'predict_duration', 'models_count', 'seed', 'info',
      'acc', 'auc', 'balacc', 'logloss', 'mae', 'r2', 'rmse']
-
 
     Parameters
     ----------
@@ -145,12 +144,10 @@ def create_comparison(
 
     # Find the set intersection of tasks they have in common
     common_tasks = set(df_baseline_means.index).intersection(set(df_targeted_means.index))
-    missing_tasks = set(df_baseline_means.index) - common_tasks
 
     # Find the set of metrics that are comparable
     baseline_metrics = set(METRICS).intersection(set(df_baseline_means.columns))
     common_metrics = baseline_metrics.intersection(set(df_targeted_means.columns))
-    missing_metrics = baseline_metrics - set(df_targeted_means.columns)
 
     # Calculate the differences for in common tasks, across all available metrics
     df_differences = df_targeted_means.loc[common_tasks][common_metrics] \
@@ -172,15 +169,20 @@ def create_comparisons_markdown(
 
     Parameters
     ----------
-    baseline_means_csv: path
+    baseline_means_csv: str
         path to the csv baseline results with their mean across folds.
 
-    targeted_means_csv: path
+    targeted_means_csv: str
         path to the csv with the results of the targeted branch with their mean
         across folds.
 
-    compared_means_csv: path
+    compared_means_csv: str
         path to the csv containing the comparisons results
+
+    Returns
+    -------
+    str
+        The results written in markdown.
     """
     # Create colours and func to create the markdown for it
     colours = {

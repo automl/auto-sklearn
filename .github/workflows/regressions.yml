@@ -133,10 +133,10 @@ jobs:
           #   benchmarkdir: the dir with config in it
           #   util: the util filepath
 
-      - name: Setup Python 3.9.6
+      - name: Setup Python 3.8
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: 3.8
 
       - name: Create the framework definition for the target branch
         env:
