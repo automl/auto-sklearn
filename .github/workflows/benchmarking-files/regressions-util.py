@@ -109,16 +109,16 @@ def create_comparison(
 
     Parameters
     ----------
-    baseline_csv_classification: path
+    baseline_csv_classification: str
         Path to the csv containing the baseline classification results
 
-    baseline_csv_regression: path
+    baseline_csv_regression: str
         Path to the csv containing the baseline regression results
 
-    targeted_csv_classification: path
+    targeted_csv_classification: str
         Path to the csv containing the targeted classification results
 
-    targeted_csv_regression: path
+    targeted_csv_regression: str
         Path to the csv containing the targeted regression results
 
     Returns
@@ -131,7 +131,6 @@ def create_comparison(
         Comparisons here is the difference between (targeted - baseline)
         Returns them in that specific order
     """
-
 
     # Load in data and get the means across folds
     df_baseline_classification = pd.read_csv(baseline_csv_classification)
