@@ -352,7 +352,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     check_is_fitted(step)
 
             try:
-                print(cls.steps)
                 cls.fit(X_train, Y_train)
 
                 # After fit, all components should be tagged as fitted
