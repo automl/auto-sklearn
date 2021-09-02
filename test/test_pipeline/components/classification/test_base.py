@@ -282,7 +282,7 @@ class BaseClassificationComponentTest(unittest.TestCase):
             return model.estimator.get_params()
 
         # We ignore certain keys when comparing
-        param_keys_ignored = ['base_estimator', *self.res.get('ignore_hps', [])]
+        param_keys_ignored = ['base_estimator']
 
         # We use the default config + sampled ones
         configuration_space = classifier_cls.get_hyperparameter_search_space()

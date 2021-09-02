@@ -24,7 +24,6 @@ class PassiveAggressiveComponentTest(BaseClassificationComponentTest):
     res["default_digits_binary"] = 0.99210686095932
     res["default_digits_multilabel"] = 0.910908768565592
     res["default_digits_multilabel_proba"] = 1.0
-    #res['ignore_hps'] = ['max_iter']
 
     sk_mod = sklearn.linear_model.PassiveAggressiveClassifier
     module = PassiveAggressive

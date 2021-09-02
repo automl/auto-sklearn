@@ -215,7 +215,7 @@ class BaseRegressionComponentTest(unittest.TestCase):
 
     def test_module_idempotent(self):
         """ Fitting twice with the same config gives the same model params.
-        
+
             This is only valid when the random_state passed is an int. If a
             RandomState object is passed then repeated calls to fit will have
             different results. See the section on "Controlling Randomness" in the
@@ -242,7 +242,7 @@ class BaseRegressionComponentTest(unittest.TestCase):
         ])
 
         # We ignore certain keys when comparing
-        param_keys_ignored = ['base_estimator', *self.res.get('ignore_hps', [])]
+        param_keys_ignored = ['base_estimator']
 
         # We use the default config + sampled ones
         configuration_space = classifier_cls.get_hyperparameter_search_space()

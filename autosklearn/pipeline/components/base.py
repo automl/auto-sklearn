@@ -4,7 +4,6 @@ import inspect
 import pkgutil
 import sys
 
-import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 
 from autosklearn.pipeline.constants import SPARSE

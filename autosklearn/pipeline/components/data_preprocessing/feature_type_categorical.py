@@ -45,7 +45,8 @@ class CategoricalPreprocessingPipeline(BasePipeline):
         If None, the random number generator is the RandomState instance
         used by `np.random`."""
 
-    def __init__(self,
+    def __init__(
+        self,
         config: Optional[Configuration] = None,
         steps: Optional[List[Tuple[str, BaseEstimator]]] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,

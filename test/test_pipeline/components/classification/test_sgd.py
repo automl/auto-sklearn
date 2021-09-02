@@ -20,7 +20,6 @@ class SGDComponentTest(BaseClassificationComponentTest):
     res["default_digits_binary"] = 0.9951426836672739
     res["default_digits_multilabel"] = -1
     res["default_digits_multilabel_proba"] = -1
-    #res['ignore_hps'] = ['max_iter']
 
     sk_mod = sklearn.linear_model.SGDClassifier
     module = SGD

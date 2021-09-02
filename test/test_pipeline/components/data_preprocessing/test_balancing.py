@@ -97,7 +97,7 @@ class BalancingComponentTest(unittest.TestCase):
 
                 model_args = {
                     "random_state": 1,
-                    "include":{
+                    "include": {
                         'classifier': [name],
                         'feature_preprocessor': ['no_preprocessing']
                     }

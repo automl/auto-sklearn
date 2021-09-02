@@ -1,8 +1,9 @@
 import random
 from collections import Counter
-from typing import Any, Dict, List, Tuple, Union, Optional, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
+
 from sklearn.utils import check_random_state
 
 from autosklearn.constants import TASK_TYPES
