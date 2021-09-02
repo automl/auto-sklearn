@@ -54,10 +54,10 @@ jobs:
         # outputs
         #   branch: the branch name
 
-      - name: Setup Python 3.9.6
+      - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: $(python3 -V)
 
       - name: Checkout Automlbenchmark
         uses: actions/checkout@v2

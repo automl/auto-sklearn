@@ -373,7 +373,6 @@ def create_comparisons_markdown(
     lines.append(legend_str)
 
     # Create a textual summary to go at the top
-    baseline_metrics = list(set(METRICS).intersection(baseline.columns))
     compared_metrics = list(set(METRICS).intersection(compared.columns))
     compared_tasks = list(compared.index)
     non_compared_tasks = list(set(baseline.index) - set(compared_tasks))
