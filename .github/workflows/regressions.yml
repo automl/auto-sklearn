@@ -133,10 +133,17 @@ jobs:
           #   benchmarkdir: the dir with config in it
           #   util: the util filepath
 
+      - name: Get System Python Version
+        id: python-version
+        run: |
+          echo "::set-output name=value::$(python3 -V)"
+          # outputs
+          #   value: The python version used by the installed system
+
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: $(python3 -V)
+          python-version: ${{ steps.python-version.outputs.value }}
 
       - name: Create the framework definition for the target branch
         env:
