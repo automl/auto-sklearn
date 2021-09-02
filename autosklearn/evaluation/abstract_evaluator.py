@@ -46,7 +46,7 @@ class MyDummyClassifier(DummyClassifier):
     def __init__(
         self,
         config: Configuration,
-        random_state: np.random.RandomState,
+        random_state: Optional[Union[int, np.random.RandomState]],
         init_params: Optional[Dict[str, Any]] = None,
         dataset_properties: Dict[str, Any] = {},
         include: Optional[List[str]] = None,
@@ -102,7 +102,7 @@ class MyDummyRegressor(DummyRegressor):
     def __init__(
         self,
         config: Configuration,
-        random_state: np.random.RandomState,
+        random_state: Optional[Union[int, np.random.RandomState]],
         init_params: Optional[Dict[str, Any]] = None,
         dataset_properties: Dict[str, Any] = {},
         include: Optional[List[str]] = None,

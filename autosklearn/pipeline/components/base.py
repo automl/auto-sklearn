@@ -4,8 +4,8 @@ import inspect
 import pkgutil
 import sys
 
+import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.utils import check_random_state
 
 from autosklearn.pipeline.constants import SPARSE
 
@@ -340,10 +340,7 @@ class AutoSklearnChoice(object):
         # self.configuration = self.get_hyperparameter_search_space(
         #     dataset_properties).get_default_configuration()
 
-        if random_state is None:
-            self.random_state = check_random_state(1)
-        else:
-            self.random_state = check_random_state(random_state)
+        self.random_state = random_state
 
         # Since the pipeline will initialize the hyperparameters, it is not
         # necessary to do this upon the construction of this object

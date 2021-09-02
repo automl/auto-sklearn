@@ -14,7 +14,7 @@ def testEnsembleSelection():
 
     ensemble = EnsembleSelection(ensemble_size=10,
                                  task_type=REGRESSION,
-                                 random_state=np.random.RandomState(0),
+                                 random_state=0,
                                  metric=root_mean_squared_error)
 
     # We create a problem such that we encourage the addition of members to the ensemble
@@ -56,7 +56,7 @@ def testPredict():
     # If none of the above is the case, predict() raises Error.
     ensemble = EnsembleSelection(ensemble_size=3,
                                  task_type=BINARY_CLASSIFICATION,
-                                 random_state=np.random.RandomState(0),
+                                 random_state=0,
                                  metric=accuracy,
                                  )
     # Test for case 1. Create (3, 2, 2) predictions.

@@ -14,10 +14,11 @@ from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, SIGNED_
 
 
 class Balancing(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, strategy: str = 'none',
-                 random_state: Optional[np.random.RandomState] = None,):
+    def __init__(
+        self,
+        strategy: str = 'none',
+    ) -> None:
         self.strategy = strategy
-        self.random_state = random_state
 
     def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None) -> 'Balancing':
         self.fitted_ = True

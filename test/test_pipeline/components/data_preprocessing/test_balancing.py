@@ -73,17 +73,17 @@ class BalancingComponentTest(unittest.TestCase):
             n_repeated=2, n_clusters_per_class=2, weights=[0.8, 0.2],
             random_state=1)
 
-        for name, clf, acc_no_weighting, acc_weighting, places in \
-                [('adaboost', AdaboostClassifier, 0.810, 0.735, 3),
-                 ('decision_tree', DecisionTree, 0.780, 0.643, 3),
-                 ('extra_trees', ExtraTreesClassifier, 0.780, 0.8, 3),
-                 ('random_forest', RandomForest, 0.75, 0.789, 3),
-                 ('libsvm_svc', LibSVM_SVC, 0.769, 0.72, 3),
-                 ('liblinear_svc', LibLinear_SVC, 0.762, 0.735, 3),
-                 ('passive_aggressive', PassiveAggressive, 0.091, 0.762, 3),
-                 ('sgd', SGD, 0.818, 0.567, 2),
-                 ('gradient_boosting', GradientBoostingClassifier, 0.666, 0.682, 2)
-                 ]:
+        for name, clf, acc_no_weighting, acc_weighting, places in [
+            ('adaboost', AdaboostClassifier, 0.810, 0.735, 3),
+            ('decision_tree', DecisionTree, 0.780, 0.643, 3),
+            ('extra_trees', ExtraTreesClassifier, 0.78, 0.8, 3),
+            ('random_forest', RandomForest, 0.75, 0.789, 3),
+            ('libsvm_svc', LibSVM_SVC, 0.769, 0.72, 3),
+            ('liblinear_svc', LibLinear_SVC, 0.762, 0.735, 3),
+            ('passive_aggressive', PassiveAggressive, 0.16, 0.222, 3),
+            ('sgd', SGD, 0.818, 0.567, 2),
+            ('gradient_boosting', GradientBoostingClassifier, 0.666, 0.682, 2)
+         ]:
             for strategy, acc in [
                 ('none', acc_no_weighting),
                 ('weighting', acc_weighting)
@@ -95,20 +95,29 @@ class BalancingComponentTest(unittest.TestCase):
                 X_test = data_[0][100:]
                 Y_test = data_[1][100:]
 
-                include = {'classifier': [name],
-                           'feature_preprocessor': ['no_preprocessing']}
-                classifier = SimpleClassificationPipeline(
-                    random_state=1, include=include)
+                model_args = {
+                    "random_state": 1,
+                    "include":{
+                        'classifier': [name],
+                        'feature_preprocessor': ['no_preprocessing']
+                    }
+                }
+
+                classifier = SimpleClassificationPipeline(**model_args)
                 cs = classifier.get_hyperparameter_search_space()
                 default = cs.get_default_configuration()
                 default._values['balancing:strategy'] = strategy
+
                 classifier = SimpleClassificationPipeline(
-                    default, random_state=1, include=include)
-                predictor = classifier.fit(X_train, Y_train)
-                predictions = predictor.predict(X_test)
+                    config=default, **model_args
+                )
+                classifier.fit(X_train, Y_train)
+
+                predictions1 = classifier.predict(X_test)
                 self.assertAlmostEqual(
-                    sklearn.metrics.f1_score(predictions, Y_test), acc,
-                    places=places, msg=(name, strategy))
+                    sklearn.metrics.f1_score(predictions1, Y_test), acc,
+                    places=places, msg=(name, strategy)
+                )
 
                 # fit_transformer and fit_estimator
                 data_ = copy.copy(data)
@@ -118,14 +127,20 @@ class BalancingComponentTest(unittest.TestCase):
                 Y_test = data_[1][100:]
 
                 classifier = SimpleClassificationPipeline(
-                    default, random_state=1, include=include)
-                classifier.set_hyperparameters(configuration=default)
+                    config=default, **model_args
+                )
                 Xt, fit_params = classifier.fit_transformer(X_train, Y_train)
                 classifier.fit_estimator(Xt, Y_train, **fit_params)
-                predictions = classifier.predict(X_test)
+
+                predictions2 = classifier.predict(X_test)
+                np.testing.assert_allclose(
+                    predictions1, predictions2,
+                    err_msg=f"name = {name}, strategy = {strategy}"
+                )
                 self.assertAlmostEqual(
-                    sklearn.metrics.f1_score(predictions, Y_test), acc,
-                    places=places)
+                    sklearn.metrics.f1_score(predictions2, Y_test), acc,
+                    places=places, msg=(name, strategy)
+                )
 
         for name, pre, acc_no_weighting, acc_weighting in \
                 [('extra_trees_preproc_for_classification',

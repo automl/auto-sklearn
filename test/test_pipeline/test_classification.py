@@ -212,8 +212,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self._test_configurations(configurations_space=cs, data=data)
 
     def test_configurations(self):
-        cs = SimpleClassificationPipeline().get_hyperparameter_search_space()
-
+        cls = SimpleClassificationPipeline()
+        cs = cls.get_hyperparameter_search_space()
         self._test_configurations(configurations_space=cs)
 
     def test_configurations_signed_data(self):
@@ -300,8 +300,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         limit = 3072 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
-        print(configurations_space)
-
         for i in range(10):
             config = configurations_space.sample_configuration()
             config._populate_values()
@@ -329,8 +327,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                         config[restrict_parameter] is not None:
                     config._values[restrict_parameter] = restrict_to
 
-            print(config)
-
             if data is None:
                 X_train, Y_train, X_test, Y_test = get_dataset(
                     dataset='digits', make_sparse=make_sparse, add_NaNs=True)
@@ -341,9 +337,11 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 data['Y_test'].copy()
 
             init_params_ = copy.deepcopy(init_params)
-            cls = SimpleClassificationPipeline(random_state=1,
-                                               dataset_properties=dataset_properties,
-                                               init_params=init_params_,)
+            cls = SimpleClassificationPipeline(
+                random_state=1,
+                dataset_properties=dataset_properties,
+                init_params=init_params_,
+            )
             cls.set_hyperparameters(config, init_params=init_params_)
 
             # First make sure that for this configuration, setting the parameters
@@ -354,6 +352,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     check_is_fitted(step)
 
             try:
+                print(cls.steps)
                 cls.fit(X_train, Y_train)
 
                 # After fit, all components should be tagged as fitted

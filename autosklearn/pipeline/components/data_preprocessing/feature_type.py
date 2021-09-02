@@ -40,7 +40,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
         include: Optional[Dict[str, str]] = None,
         exclude: Optional[Dict[str, str]] = None,
-        random_state: Optional[np.random.RandomState] = None,
+        random_state: Optional[Union[int, np.random.RandomState]] = None,
         init_params: Optional[Dict[str, Any]] = None,
         feat_type: Optional[Dict[Union[str, int], str]] = None,
         force_sparse_output: bool = False,

@@ -224,7 +224,7 @@ class BaseClassificationComponentTest(unittest.TestCase):
 
     def test_module_idempotent(self):
         """ Fitting twice with the same config gives the same model params.
-        
+
             This is only valid when the random_state passed is an int. If a
             RandomState object is passed then repeated calls to fit will have
             different results. See the section on "Controlling Randomness" in the
@@ -291,14 +291,7 @@ class BaseClassificationComponentTest(unittest.TestCase):
         sampled = [configuration_space.sample_configuration() for _ in range(2)]
 
         for seed, config in enumerate([default] + sampled):
-            model_args = {
-                'random_state': seed,  # This must be an int, see test doc
-                ** {
-                    hp_name: config[hp_name]
-                    for hp_name in config
-                    if config[hp_name] is not None
-                }
-            }
+            model_args = {"random_state": seed, **config}
             classifier = classifier_cls(**model_args)
 
             # Get the parameters on the first and second fit with config params

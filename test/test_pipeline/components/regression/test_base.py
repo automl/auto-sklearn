@@ -44,6 +44,7 @@ class BaseRegressionComponentTest(unittest.TestCase):
                 score = sklearn.metrics.r2_score(targets, predictions)
                 fixture = self.res["default_boston"]
                 if score < -1e10:
+                    print(f"score = {score}, fixture = {fixture}")
                     score = np.log(-score)
                     fixture = np.log(-fixture)
                 self.assertAlmostEqual(
@@ -71,6 +72,7 @@ class BaseRegressionComponentTest(unittest.TestCase):
             fixture = self.res["default_boston_iterative"]
 
             if score < -1e10:
+                print(f"score = {score}, fixture = {fixture}")
                 score = np.log(-score)
                 fixture = np.log(-fixture)
 
@@ -249,14 +251,7 @@ class BaseRegressionComponentTest(unittest.TestCase):
         sampled = [configuration_space.sample_configuration() for _ in range(2)]
 
         for seed, config in enumerate([default] + sampled):
-            model_args = {
-                'random_state': seed,  # This must be an int, see test doc
-                ** {
-                    hp_name: config[hp_name]
-                    for hp_name in config
-                    if config[hp_name] is not None
-                }
-            }
+            model_args = {"random_state": seed, **config}
             classifier = classifier_cls(**model_args)
 
             # Get the parameters on the first and second fit with config params

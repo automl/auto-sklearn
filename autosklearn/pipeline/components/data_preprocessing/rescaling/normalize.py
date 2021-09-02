@@ -10,7 +10,10 @@ from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorit
 
 
 class NormalizerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, random_state: Optional[np.random.RandomState] = None):
+    def __init__(
+        self,
+        random_state: Optional[Union[int, np.random.RandomState]] = None
+    ) -> None:
         # Use custom implementation because sklearn implementation cannot
         # handle float32 input matrix
         from sklearn.preprocessing import Normalizer

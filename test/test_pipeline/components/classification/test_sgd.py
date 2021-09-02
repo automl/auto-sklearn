@@ -11,16 +11,16 @@ class SGDComponentTest(BaseClassificationComponentTest):
     res = dict()
     res["default_iris"] = 0.69999999999999996
     res["iris_n_calls"] = 9
-    res["default_iris_iterative"] = 0.7
-    res["default_iris_proba"] = 0.599538539014923
+    res["default_iris_iterative"] = res['default_iris']
+    res["default_iris_proba"] = 0.5996114465819011
     res["default_iris_sparse"] = 0.54
-    res["default_digits"] = 0.9234972677595629
+    res["default_digits"] = 0.9198542805100182
     res["digits_n_calls"] = 7
-    res["default_digits_iterative"] = 0.9234972677595629
-    res["default_digits_binary"] = 0.9933211900425015
+    res["default_digits_iterative"] = res['default_digits']
+    res["default_digits_binary"] = 0.9951426836672739
     res["default_digits_multilabel"] = -1
     res["default_digits_multilabel_proba"] = -1
-    res['ignore_hps'] = ['max_iter']
+    #res['ignore_hps'] = ['max_iter']
 
     sk_mod = sklearn.linear_model.SGDClassifier
     module = SGD
