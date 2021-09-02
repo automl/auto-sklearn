@@ -57,7 +57,7 @@ jobs:
       - name: Get System Python Version
         id: python-version
         run: |
-          echo "::set-output name=value::$(python3 -V)"
+          echo "::set-output name=value::$(python3 -V | grep -o -e '[0-9\.]*$')"
           # outputs
           #   value: The python version used by the installed system
 
