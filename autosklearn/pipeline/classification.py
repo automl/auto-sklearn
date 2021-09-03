@@ -308,7 +308,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
                     random_state=self.random_state)
             ],
             [
-                "balancing", Balancing()
+                "balancing", Balancing(random_state=self.random_state)
             ],
             [
                 "feature_preprocessor", FeaturePreprocessorChoice(

@@ -57,7 +57,7 @@ class EnsembleSelection(AbstractEnsemble):
         #   int - Deteriministic with succesive calls to fit
         #   RandomState - Successive calls to fit will produce differences
         #   None - Uses numpmys global singleton RandomState
-        # https://scikit-learn.org/0.24/common_pitfalls.html#controlling-randomness
+        # https://scikit-learn.org/stable/common_pitfalls.html#controlling-randomness
         self.random_state = random_state
 
     def __getstate__(self) -> Dict[str, Any]:

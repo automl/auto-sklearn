@@ -17,8 +17,10 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
     def __init__(
         self,
         strategy: str = 'none',
+        random_state: Optional[Union[int, np.random.RandomState]] = None,
     ) -> None:
         self.strategy = strategy
+        self.random_state = random_state
 
     def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None) -> 'Balancing':
         self.fitted_ = True
