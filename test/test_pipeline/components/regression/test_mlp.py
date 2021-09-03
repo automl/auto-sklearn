@@ -6,12 +6,29 @@ from .test_base import BaseRegressionComponentTest
 
 
 class MLPComponentTest(BaseRegressionComponentTest):
+    # NOTE: `default_boston`
+    #
+    # Github runners seem to indeterministicly fail `test_boston`
+    # meaning 'default_irish_proba_places' needs to be set.
+    # There are known differences to occur on different platforms.
+    # https://github.com/scikit-learn/scikit-learn/issues/13108#issuecomment-461696681
+    #
+    # We are assuming results are deterministic on a given platform as locally
+    # there is no randomness i.e. performing the same test 100 times yeilds the
+    # same predictions 100 times.
+    #
+    # Github runners indicate that they run on microsoft Azure with DS2-v2.
+    # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#cloud-hosts-for-github-hosted-runners
+    #
+    # These seem to have consistent CPU's so I'm unsure what the underlying reason
+    # for this to randomly fail only sometimes on Github runners
+    __test__ = True
 
     __test__ = True
 
     res = dict()
     res["default_boston"] = 0.2750079862455884
-    res["default_boston_places"] = 4
+    res["default_boston_places"] = 3
     res["boston_n_calls"] = 8
     res["boston_iterative_n_iter"] = 236
     res["default_boston_iterative"] = res["default_boston"]
