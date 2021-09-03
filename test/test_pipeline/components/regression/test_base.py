@@ -6,6 +6,7 @@ import sklearn.metrics
 from autosklearn.pipeline.util import _test_regressor, \
     _test_regressor_iterative_fit
 from autosklearn.pipeline.constants import SPARSE
+from autosklearn.pipeline.components.regression.libsvm_svr import LibSVM_SVR
 
 
 class BaseRegressionComponentTest(unittest.TestCase):
@@ -25,21 +26,21 @@ class BaseRegressionComponentTest(unittest.TestCase):
         if self.__class__ == BaseRegressionComponentTest:
             return
 
-        for i in range(2):
-            predictions, targets, n_calls = \
-                _test_regressor(dataset="boston",
-                                Regressor=self.module)
+        for _ in range(2):
+            predictions, targets, n_calls = _test_regressor(
+                dataset="boston", Regressor=self.module
+            )
 
             if "default_boston_le_ge" in self.res:
                 # Special treatment for Gaussian Process Regression
                 self.assertLessEqual(
-                    sklearn.metrics.r2_score(y_true=targets,
-                                             y_pred=predictions),
-                    self.res["default_boston_le_ge"][0])
+                    sklearn.metrics.r2_score(y_true=targets, y_pred=predictions),
+                    self.res["default_boston_le_ge"][0]
+                )
                 self.assertGreaterEqual(
-                    sklearn.metrics.r2_score(y_true=targets,
-                                             y_pred=predictions),
-                    self.res["default_boston_le_ge"][1])
+                    sklearn.metrics.r2_score(y_true=targets, y_pred=predictions),
+                    self.res["default_boston_le_ge"][1]
+                )
             else:
                 score = sklearn.metrics.r2_score(targets, predictions)
                 fixture = self.res["default_boston"]
@@ -226,7 +227,7 @@ class BaseRegressionComponentTest(unittest.TestCase):
         if self.__class__ == BaseRegressionComponentTest:
             return
 
-        classifier_cls = self.module
+        regressor_cls = self.module
 
         X = np.array([
             [0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5],
@@ -245,18 +246,26 @@ class BaseRegressionComponentTest(unittest.TestCase):
         param_keys_ignored = ['base_estimator']
 
         # We use the default config + sampled ones
-        configuration_space = classifier_cls.get_hyperparameter_search_space()
+        configuration_space = regressor_cls.get_hyperparameter_search_space()
 
         default = configuration_space.get_default_configuration()
         sampled = [configuration_space.sample_configuration() for _ in range(2)]
 
         for seed, config in enumerate([default] + sampled):
             model_args = {"random_state": seed, **config}
-            classifier = classifier_cls(**model_args)
+            regressor = regressor_cls(**model_args)
 
             # Get the parameters on the first and second fit with config params
-            params_first = classifier.fit(X.copy(), y.copy()).estimator.get_params()
-            params_second = classifier.fit(X.copy(), y.copy()).estimator.get_params()
+            # Also compare their random state
+            params_first = regressor.fit(X.copy(), y.copy()).estimator.get_params()
+            if hasattr(regressor.estimator, 'random_state'):
+                rs_1 = regressor.random_state
+                rs_estimator_1 = regressor.estimator.random_state
+
+            params_second = regressor.fit(X.copy(), y.copy()).estimator.get_params()
+            if hasattr(regressor.estimator, 'random_state'):
+                rs_2 = regressor.random_state
+                rs_estimator_2 = regressor.estimator.random_state
 
             # Remove keys we don't wish to include in the comparison
             for params in [params_first, params_second]:
@@ -267,3 +276,13 @@ class BaseRegressionComponentTest(unittest.TestCase):
             # They should have equal parameters
             self.assertEqual(params_first, params_second,
                              f"Failed with model args {model_args}")
+            if (
+                hasattr(regressor.estimator, 'random_state') 
+                and not isinstance(regressor, LibSVM_SVR)
+            ):
+                # sklearn.svm.SVR has it as an attribute but does not use it and
+                # defaults it to None, even if a value is passed in
+                assert all([
+                    seed == random_state
+                    for random_state in [rs_1, rs_estimator_1, rs_2, rs_estimator_2]
+                ])

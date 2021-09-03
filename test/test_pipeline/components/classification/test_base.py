@@ -77,14 +77,15 @@ class BaseClassificationComponentTest(unittest.TestCase):
         if self.__class__ == BaseClassificationComponentTest:
             return
 
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier_predict_proba(dataset="iris",
-                                               classifier=self.module)
-            self.assertAlmostEqual(self.res["default_iris_proba"],
-                                   sklearn.metrics.log_loss(targets, predictions),
-                                   places=self.res.get(
-                                           "default_iris_proba_places", 7))
+        for _ in range(2):
+            predictions, targets =  _test_classifier_predict_proba(
+                dataset="iris", classifier=self.module
+            )
+            self.assertAlmostEqual(
+                self.res["default_iris_proba"],
+                sklearn.metrics.log_loss(targets, predictions),
+                places=self.res.get("default_iris_proba_places", 7)
+            )
 
     def test_default_iris_sparse(self):
 
@@ -296,7 +297,14 @@ class BaseClassificationComponentTest(unittest.TestCase):
 
             # Get the parameters on the first and second fit with config params
             params_first = fitted_params(classifier)
+            if hasattr(classifier.estimator, 'random_state'):
+                rs_1 = classifier.random_state
+                rs_estimator_1 = classifier.estimator.random_state
+
             params_second = fitted_params(classifier)
+            if hasattr(classifier.estimator, 'random_state'):
+                rs_2 = classifier.random_state
+                rs_estimator_2 = classifier.estimator.random_state
 
             # An acceptable error occured, skip to next sample
             if params_first is None or params_second is None:
@@ -311,3 +319,8 @@ class BaseClassificationComponentTest(unittest.TestCase):
             # They should have equal parameters
             self.assertEqual(params_first, params_second,
                              f"Failed with model args {model_args}")
+            if hasattr(classifier.estimator, 'random_state'):
+                assert all([
+                    seed == random_state
+                    for random_state in [rs_1, rs_estimator_1, rs_2, rs_estimator_2]
+                ])
