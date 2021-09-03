@@ -559,6 +559,9 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         that comply with the given configuration. It iterates trough the pipeline to
         make sure we did not miss a step, but also checks at the end that every
         configuration from Config was checked
+
+        Also considers random_state and ensures pipeline steps correctly recieve
+        the right random_state
         """
 
         all_combinations = list(itertools.product([True, False], repeat=4))
@@ -569,8 +572,9 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 'multiclass': multiclass,
                 'signed': signed,
             }
+            random_state = 1
             auto = SimpleRegressionPipeline(
-                random_state=1,
+                random_state=random_state,
                 dataset_properties=dataset_properties,
             )
             cs = auto.get_hyperparameter_search_space()
@@ -592,25 +596,21 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                             'data_preprocessor:__choice__', step, config_dict
                         )
                     )
-                elif name == 'balancing':
-                    keys_checked.extend(
-                        self._test_set_hyperparameter_component(
-                            'balancing',
-                            step, config_dict
-                        )
-                    )
+                    self.assertEqual(step.random_state, random_state)
                 elif name == 'feature_preprocessor':
                     keys_checked.extend(
                         self._test_set_hyperparameter_choice(
                             'feature_preprocessor:__choice__', step, config_dict
                         )
                     )
+                    self.assertEqual(step.random_state, random_state)
                 elif name == 'regressor':
                     keys_checked.extend(
                         self._test_set_hyperparameter_choice(
                             'regressor:__choice__', step, config_dict
                         )
                     )
+                    self.assertEqual(step.random_state, random_state)
                 else:
                     raise ValueError("Found another type of step! Need to update this check"
                                      " {}. ".format(name)

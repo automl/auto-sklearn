@@ -232,13 +232,27 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
             default_dataset_properties.update(dataset_properties)
 
         steps.extend([
-            ['data_preprocessor',
-                DataPreprocessorChoice(dataset_properties=default_dataset_properties)],
-            ['feature_preprocessor',
+            [
+                'data_preprocessor',
+                DataPreprocessorChoice(
+                    dataset_properties=default_dataset_properties,
+                    random_state=self.random_state
+                )
+            ],
+            [
+                'feature_preprocessor',
                 feature_preprocessing_components.FeaturePreprocessorChoice(
-                    default_dataset_properties)],
-            ['regressor',
-                regression_components.RegressorChoice(default_dataset_properties)]
+                    dataset_properties=default_dataset_properties,
+                    random_state=self.random_state
+                )
+            ],
+            [
+                'regressor',
+                regression_components.RegressorChoice(
+                    default_dataset_properties,
+                    random_state=self.random_state
+                )
+            ]
         ])
 
         return steps
