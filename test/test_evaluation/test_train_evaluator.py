@@ -2281,7 +2281,7 @@ class FunctionsTest(unittest.TestCase):
             'f1_macro': 0.032036613272311221,
             'f1_micro': 0.030303030303030276,
             'f1_weighted': 0.030441716940572849,
-            'log_loss': 0.06569589991969141,
+            'log_loss': 0.06376745642134637,
             'precision_macro': 0.02777777777777779,
             'precision_micro': 0.030303030303030276,
             'precision_weighted': 0.027777777777777901,
@@ -2351,7 +2351,7 @@ class FunctionsTest(unittest.TestCase):
         )
         info = read_queue(self.queue)
         self.assertEqual(len(info), 1)
-        self.assertAlmostEqual(info[0]['loss'], 0.030303030303030276, places=3)
+        self.assertAlmostEqual(info[0]['loss'], 0.06060606060606055, places=3)
         self.assertEqual(info[0]['status'], StatusType.SUCCESS)
         self.assertNotIn('bac_metric', info[0]['additional_run_info'])
 
@@ -2434,7 +2434,7 @@ class FunctionsTest(unittest.TestCase):
         )
         info = read_queue(self.queue)
         self.assertEqual(len(info), 1)
-        self.assertAlmostEqual(info[0]['loss'], 0.030303030303030276)
+        self.assertAlmostEqual(info[0]['loss'], 0.06060606060606055)
 
     def test_eval_holdout_budget_mixed_subsample(self):
         configuration = get_configuration_space(
@@ -2518,7 +2518,7 @@ class FunctionsTest(unittest.TestCase):
             'f1_macro': 0.052793650793650775,
             'f1_micro': 0.04999999999999997,
             'f1_weighted': 0.050090909090909096,
-            'log_loss': 0.12640966003295034,
+            'log_loss': 0.12108563414774837,
             'precision_macro': 0.04963636363636359,
             'precision_micro': 0.04999999999999997,
             'precision_weighted': 0.045757575757575664,
