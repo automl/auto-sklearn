@@ -1,0 +1,377 @@
+name: Regression Tests
+
+on:
+
+  workflow_dispatch:
+    inputs:
+      dummy:
+        description: 'Place holder'
+        required: false
+        default: 'Dummy argument'
+
+  pull_request:
+    types: [labeled]
+
+env:
+  AUTOMLBENCHMARK_REPO: 'openml/automlbenchmark'
+  AUTOMLBENCHMARK_REF: 'master'
+  GITHUB_URL: 'https://github.com'
+  GITHUB_RAW_URL: 'https://raw.githubusercontent.com'
+  WORKFLOW_DIR: '.github/workflows/benchmarking-files'
+  UTIL_FILE: 'regressions-util.py'
+
+jobs:
+
+  create-notification-comment:
+    name: Create comment body
+    runs-on: ubuntu-latest
+    if: >
+      (
+        github.event_name == 'pull_request'
+        && github.event.action == 'labeled'
+        && github.event.label.name == 'regression-tests'
+      )
+    steps:
+      - name: Create comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Hello @${{ github.event.pull_request.user.login }},
+
+            We are doing regression tests for
+
+            * **Branch** ${{ github.event.pull_request.head.ref }}
+            * **Commit** ${{ github.event.pull_request.head.sha }}
+
+            [Progress and Artifacts](${{ env.GITHUB_URL }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+            A summary of the results will be show in this comment once complete but the full results will be available as an artifact at the above link.
+
+  regression-tests:
+    name: Regression Tests
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch'
+      || (
+        github.event_name == 'pull_request'
+        && github.event.action == 'labeled'
+        && github.event.label.name == 'regression-tests'
+      )
+
+    strategy:
+      matrix:
+        task_type: [regression, classification]
+
+    steps:
+      - name: Branch extract
+        id: extract
+        env:
+          head_ref: ${{ github.head_ref }}
+        run: |
+          # Sometimes a pull request does or doesn't have head_ref (branch) set.
+          # When it is not, GITHUB_REF holds the branch
+          if [[ -z $head_ref ]]
+          then
+            echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+          else
+            echo "##[set-output name=branch;]$(echo $head_ref)"
+          fi
+        # outputs
+        #   branch: the branch name
+
+      - name: Checkout Automlbenchmark
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ env.AUTOMLBENCHMARK_REPO }}
+          ref: ${{ env.AUTOMLBENCHMARK_REF }}
+
+      - name: Download baselines artifacts
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: generate-baselines.yml
+          workflow_conclusion: "success"
+          branch: development
+          name: baselines
+        # Downloads
+        #   - baseline_classification_x_x_x.csv
+        #   - baseline_regression_x_x_x.csv
+
+      - name: Create variables for baselinefiles
+        id: baseline_files
+        run: |
+          BASELINE_CLASSIFICATION=$(ls | grep baseline_classification)
+          BASELINE_REGRESSION=$(ls | grep baseline_regression)
+          echo "::set-output name=classification::$(pwd)/${BASELINE_CLASSIFICATION}"
+          echo "::set-output name=regression::$(pwd)/${BASELINE_REGRESSION}"
+        # Outputs:
+        #   - classification: path to classification baseline
+        #   - regression: path to regression baseline
+
+      - name: Fetch files
+        id: fetch
+        env:
+          source: ${{ env.GITHUB_RAW_URL }}/${{ github.repository }}/${{ steps.extract.outputs.branch }}/${{ env.WORKFLOW_DIR }}
+          benchmark_dir: 'baseline_benchmark'
+          util_file: ${{ env.UTIL_FILE }}
+          config_file: 'config.yaml'
+          constraints_file: 'constraints.yaml'
+          benchmark_file: ${{ matrix.task_type }}.yaml
+        run: |
+          # Get the util file
+          wget ${source}/${util_file} -O ${util_file}
+
+          # set up the benchmark directories
+          mkdir ${benchmark_dir}
+          mkdir ${benchmark_dir}/benchmarks
+          wget ${source}/${config_file} -O ${benchmark_dir}/${config_file}
+          wget ${source}/${constraints_file} -O ${benchmark_dir}/${constraints_file}
+          wget ${source}/benchmarks/${benchmark_file} -O ${benchmark_dir}/benchmarks/${benchmark_file}
+          echo "::set-output name=benchmarkdir::$(pwd)/${benchmark_dir}"
+          echo "::set-output name=util::$(pwd)/${util_file}"
+          # outputs
+          #   benchmarkdir: the dir with config in it
+          #   util: the util filepath
+
+      - name: Get System Python Version
+        id: python-version
+        run: |
+          echo "::set-output name=value::$(python3 -V | grep -o -e '[0-9\.]*$')"
+          # outputs
+          #   value: The python version used by the installed system
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ steps.python-version.outputs.value }}
+
+      - name: Create the framework definition for the target branch
+        env:
+          pyutil: ${{ steps.fetch.outputs.util }}
+          dependancies: numpy pandas
+        run: |-
+          # Creates a framework file that automl benchmark can use
+          # First install dependancies
+          python -m pip install --upgrade pip
+          pip install $dependancies
+          python $pyutil --generate-framework-def \
+            --user-dir ${{ steps.fetch.outputs.benchmarkdir }} \
+            --owner ${{ github.repository_owner }} \
+            --branch ${{ steps.extract.outputs.branch }} \
+            --commit ${{ github.sha }}
+
+      - name: Install Automlbenchmark
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Start benchmark
+        id: benchmark
+        env:
+          benchmarkdir: ${{ steps.fetch.outputs.benchmarkdir }}
+          framework: autosklearn_targeted
+          benchmark: ${{ matrix.task_type }}
+          constraint: 10fold10min
+          benchmark_output: results/results.csv
+          filename: targeted_${{ matrix.task_type }}_${{ github.repository_owner }}_${{ steps.extract.outputs.branch }}_${{ github.sha }}
+        run: |
+          python runbenchmark.py -u $benchmarkdir $framework $benchmark $constraint
+          mv $benchmark_output ${filename}.csv
+          echo "::set-output name=results_path::$(pwd)/${filename}.csv"
+          echo "::set-output name=filename::${filename}"
+          # outputs:
+          #   results_path: path to the results of the benchmark
+          #   filename: name of the results file
+
+      - name: Upload ${{matrix.task_type}} results as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.benchmark.outputs.filename }}
+          path: |
+            ${{ steps.benchmark.outputs.results_path }}
+          retention-days: 90
+
+  run-comparison:
+    needs: regression-tests
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Get System Python Version
+        id: python-version
+        run: |
+          echo "::set-output name=value::$(python3 -V | grep -o -e '[0-9\.]*$')"
+          # outputs
+          #   value: The python version used by the installed system
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ steps.python-version.outputs.value }}
+
+      - name: Branch extract
+        id: extract
+        env:
+          head_ref: ${{ github.head_ref }}
+        run: |
+          # Sometimes a pull request does or doesn't have head_ref (branch) set.
+          # When it is not, GITHUB_REF holds the branch
+          if [[ -z $head_ref ]]
+          then
+            echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+          else
+            echo "##[set-output name=branch;]$(echo $head_ref)"
+          fi
+        # outputs
+        #   branch: the branch name
+
+      - name: Fetch files
+        id: fetch
+        env:
+          source: ${{ env.GITHUB_RAW_URL }}/${{ github.repository }}/${{ steps.extract.outputs.branch }}/${{ env.WORKFLOW_DIR }}
+          util_file: ${{ env.UTIL_FILE }}
+        run: |
+          # Get the util file
+          wget ${source}/${util_file} -O ${util_file}
+          echo "::set-output name=pyutil::$(pwd)/${util_file}"
+        # outputs:
+        #   pyutil: path to the python util file
+
+      - name: Download baselines artifacts
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: generate-baselines.yml
+          workflow_conclusion: "success"
+          branch: master
+          name: baselines
+        # Downloads
+        #   - baseline_classification_x_x_x.csv
+        #   - baseline_regression_x_x_x.csv
+
+      - name: Download workflow artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: artifacts
+
+      - name: Artifact paths as Vars
+        id: artifacts
+        run: |
+          BASELINE_CLASSIFICATION=$(ls | grep baseline_classification )
+          BASELINE_REGRESSION=$(ls | grep baseline_regression )
+          TARGETED_CLASSIFICATION_FOLDER=$(ls artifacts | grep targeted_classification)
+          TARGETED_REGRESSION_FOLDER=$(ls artifacts | grep targeted_regression)
+          TARGETED_CLASSIFICATION=$(ls artifacts/${TARGETED_CLASSIFICATION_FOLDER} | grep .csv)
+          TARGETED_REGRESSION=$(ls artifacts/${TARGETED_REGRESSION_FOLDER} | grep .csv)
+          echo "::set-output name=baseline_classification::$(pwd)/${BASELINE_CLASSIFICATION}"
+          echo "::set-output name=baseline_regression::$(pwd)/${BASELINE_REGRESSION}"
+          echo "::set-output name=targeted_classification::$(pwd)/artifacts/${TARGETED_CLASSIFICATION_FOLDER}/${TARGETED_CLASSIFICATION}"
+          echo "::set-output name=targeted_regression::$(pwd)/artifacts/${TARGETED_REGRESSION_FOLDER}/${TARGETED_REGRESSION}"
+        # outputs:
+        #   baseline_classification: path to the baseline results for classification
+        #   baseline_regression: path to the baseline results for regression
+        #   targeted_classification: path to the targeted results for classification
+        #   targeted_regression: path to the targeted results for regression
+
+      - name: Run comparison
+        id: compare
+        env:
+          pyutil: ${{ steps.fetch.outputs.pyutil }}
+          filename: comparisons.csv
+          dependancies: pandas numpy
+          baseline_means: baseline_means.csv
+          targeted_means: targeted_means.csv
+          compared_means: compared_means.csv
+        run: |
+          # Install dependancies
+          python -m pip install --upgrade pip
+          pip install $dependancies
+
+          python $pyutil --compare-results \
+            --baseline-csv-classification ${{ steps.artifacts.outputs.baseline_classification }} \
+            --baseline-csv-regression ${{ steps.artifacts.outputs.baseline_regression }} \
+            --targeted-csv-classification ${{ steps.artifacts.outputs.targeted_classification }} \
+            --targeted-csv-regression ${{ steps.artifacts.outputs.targeted_regression }} \
+            --baseline-means-to $baseline_means \
+            --targeted-means-to $targeted_means \
+            --compared-means-to $compared_means
+
+          echo "Complete comparison"
+
+          echo "::set-output name=baseline_means::$(pwd)/${baseline_means}"
+          echo "::set-output name=targeted_means::$(pwd)/${targeted_means}"
+          echo "::set-output name=compared_means::$(pwd)/${compared_means}"
+          # outputs:
+          #   baseline_means: path to the results of regression test vs baseline
+          #   targeted_means: path to the results of regression test vs baseline
+          #   compared_means: path to the results of regression test vs baseline
+
+      - name: Upload all results together as an artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ github.repository_owner }}_${{ steps.extract.outputs.branch }}_${{ github.sha }}
+          path: |
+            ${{ steps.artifacts.outputs.baseline_classification }}
+            ${{ steps.artifacts.outputs.baseline_regression }}
+            ${{ steps.artifacts.outputs.targeted_classification }}
+            ${{ steps.artifacts.outputs.targeted_regression }}
+            ${{ steps.compare.outputs.baseline_means }}
+            ${{ steps.compare.outputs.targeted_means }}
+            ${{ steps.compare.outputs.compared_means }}
+          retention-days: 90
+
+      - name: Find Comment
+        if: >
+          (
+            github.event_name == 'pull_request'
+            && github.event.action == 'labeled'
+            && github.event.label.name == 'regression-tests'
+          )
+        uses: peter-evans/find-comment@v1
+        id: comment_finder
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: regression tests
+          direction: last
+        # outputs:
+        #   comment-id: the comment id found or else '' if none
+
+      - name: Create Comment Body
+        id: comparison_comment
+        if: >
+          (
+            github.event_name == 'pull_request'
+            && github.event.action == 'labeled'
+            && github.event.label.name == 'regression-tests'
+            && steps.comment_finder.outputs.comment-id != ''
+          )
+        env:
+          results_path: ${{ steps.compare.outputs.comparisons_path }}
+          pyutil: ${{ steps.fetch.outputs.pyutil }}
+          markdown_file: body.md
+        run: |
+          body="$(python $pyutil --generate-markdown \
+            --compared-means-csv ${{ steps.compare.outputs.compared_means }} \
+            --baseline-means-csv ${{ steps.compare.outputs.baseline_means }} \
+            --targeted-means-csv ${{ steps.compare.outputs.targeted_means }} \
+          )"
+          body="${body//'%'/'%25'}"
+          body="${body//$'\n'/'%0A'}"
+          body="${body//$'\r'/'%0D'}" 
+          echo "::set-output name=body::$body"
+          # outputs:
+          #   body: the body of the comment update
+
+      - name: Update comment
+        if: >
+          (
+            github.event_name == 'pull_request'
+            && github.event.action == 'labeled'
+            && github.event.label.name == 'regression-tests'
+            && steps.comment_finder.outputs.comment-id != ''
+          )
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{ steps.comment_finder.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: ${{ steps.comparison_comment.outputs.body }}

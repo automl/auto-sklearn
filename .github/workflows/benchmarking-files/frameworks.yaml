@@ -1,0 +1,5 @@
+---
+# This file is unused but just marks the structure of what is created
+# in github action runners.
+# For generating baselines we require no additional files
+# For creating regression tests we dynamically create this file

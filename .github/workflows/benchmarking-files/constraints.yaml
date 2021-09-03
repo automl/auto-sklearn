@@ -1,0 +1,4 @@
+---
+10fold10min:
+  folds: 10
+  max_runtime_seconds: 600
