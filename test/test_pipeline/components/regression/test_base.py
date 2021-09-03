@@ -277,7 +277,7 @@ class BaseRegressionComponentTest(unittest.TestCase):
             self.assertEqual(params_first, params_second,
                              f"Failed with model args {model_args}")
             if (
-                hasattr(regressor.estimator, 'random_state') 
+                hasattr(regressor.estimator, 'random_state')
                 and not isinstance(regressor, LibSVM_SVR)
             ):
                 # sklearn.svm.SVR has it as an attribute but does not use it and

@@ -78,7 +78,7 @@ class BaseClassificationComponentTest(unittest.TestCase):
             return
 
         for _ in range(2):
-            predictions, targets =  _test_classifier_predict_proba(
+            predictions, targets = _test_classifier_predict_proba(
                 dataset="iris", classifier=self.module
             )
             self.assertAlmostEqual(
