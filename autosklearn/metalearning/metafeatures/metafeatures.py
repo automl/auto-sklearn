@@ -1106,9 +1106,11 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name, logger,
                 X_transformed = check_array(X_transformed,
                                             force_all_finite=True,
                                             accept_sparse='csr')
-                rs = np.random.RandomState(42)
                 indices = np.arange(X_transformed.shape[0])
+
+                rs = np.random.RandomState(42)
                 rs.shuffle(indices)
+
                 # TODO Shuffle inplace
                 X_transformed = X_transformed[indices]
                 y_transformed = y[indices]

@@ -1,26 +1,25 @@
 import copy
 from itertools import product
+from typing import Optional, Union
 
 import numpy as np
 
 from sklearn.base import ClassifierMixin
 
-from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.configuration_space import ConfigurationSpace, Configuration
 from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
 from autosklearn.pipeline.components.data_preprocessing import DataPreprocessorChoice
 
-from autosklearn.pipeline.components import classification as \
-    classification_components
+from autosklearn.pipeline.components.classification import ClassifierChoice
 from autosklearn.pipeline.components.data_preprocessing.balancing.balancing import \
     Balancing
-from autosklearn.pipeline.components import feature_preprocessing as \
-    feature_preprocessing_components
+from autosklearn.pipeline.components.feature_preprocessing import FeaturePreprocessorChoice
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.constants import SPARSE
 
 
-class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
+class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
     """This class implements the classification task.
 
     It implements a pipeline, which includes one preprocessing step and one
@@ -38,7 +37,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
     config : ConfigSpace.configuration_space.Configuration
         The configuration to evaluate.
 
-    random_state : int, RandomState instance or None, optional (default=None)
+    random_state : Optional[int | RandomState]
         If int, random_state is the seed used by the random number generator;
         If RandomState instance, random_state is the random number generator;
         If None, the random number generator is the RandomState instance
@@ -68,17 +67,30 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
     """
 
-    def __init__(self, config=None, steps=None, dataset_properties=None,
-                 include=None, exclude=None, random_state=None,
-                 init_params=None):
+    def __init__(
+        self,
+        config: Optional[Configuration] = None,
+        steps=None,
+        dataset_properties=None,
+        include=None,
+        exclude=None,
+        random_state: Optional[Union[int, np.random.RandomState]] = None,
+        init_params=None
+    ):
         self._output_dtype = np.int32
         if dataset_properties is None:
             dataset_properties = dict()
         if 'target_type' not in dataset_properties:
             dataset_properties['target_type'] = 'classification'
         super().__init__(
-            config, steps, dataset_properties, include, exclude,
-            random_state, init_params)
+            config=config,
+            steps=steps,
+            dataset_properties=dataset_properties,
+            include=include,
+            exclude=exclude,
+            random_state=random_state,
+            init_params=init_params
+        )
 
     def fit_transformer(self, X, y, fit_params=None):
 
@@ -290,16 +302,24 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
             default_dataset_properties.update(dataset_properties)
 
         steps.extend([
-            ["data_preprocessor",
-                DataPreprocessorChoice(dataset_properties=default_dataset_properties)],
-            ["balancing",
-                Balancing()],
-            ["feature_preprocessor",
-                feature_preprocessing_components.FeaturePreprocessorChoice(
-                    default_dataset_properties)],
-            ['classifier',
-                classification_components.ClassifierChoice(
-                    default_dataset_properties)]
+            [
+                "data_preprocessor", DataPreprocessorChoice(
+                    dataset_properties=default_dataset_properties,
+                    random_state=self.random_state)
+            ],
+            [
+                "balancing", Balancing(random_state=self.random_state)
+            ],
+            [
+                "feature_preprocessor", FeaturePreprocessorChoice(
+                    dataset_properties=default_dataset_properties,
+                    random_state=self.random_state)
+            ],
+            [
+                'classifier', ClassifierChoice(
+                    dataset_properties=default_dataset_properties,
+                    random_state=self.random_state)
+            ]
         ])
 
         return steps

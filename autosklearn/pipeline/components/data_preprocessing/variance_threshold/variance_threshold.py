@@ -12,7 +12,10 @@ import sklearn.feature_selection
 
 
 class VarianceThreshold(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, random_state: Optional[np.random.RandomState] = None):
+    def __init__(
+        self,
+        random_state: Optional[Union[int, np.random.RandomState]] = None
+    ) -> None:
         # VarianceThreshold does not support fit_transform (as of 0.19.1)!
         self.random_state = random_state
 

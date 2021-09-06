@@ -262,7 +262,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
             )
             ae.model = sklearn.dummy.DummyClassifier()
 
-            rs = np.random.RandomState()
+            rs = np.random.RandomState(1)
             ae.Y_optimization = rs.rand(33, 3)
             predictions_ensemble = rs.rand(33, 3)
             predictions_test = rs.rand(25, 3)

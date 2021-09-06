@@ -58,6 +58,7 @@ def test_fit(dask_client):
 
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
     automl = autosklearn.automl.AutoML(
+        seed=0,
         time_left_for_this_task=30,
         per_run_time_limit=5,
         metric=accuracy,
@@ -212,8 +213,10 @@ def test_delete_non_candidate_models(dask_client):
         seed=seed,
         initial_configurations_via_metalearning=0,
         resampling_strategy='holdout',
-        include={'classifier': ['sgd'],
-                 'feature_preprocessor': ['no_preprocessing']},
+        include={
+            'classifier': ['sgd'],
+            'feature_preprocessor': ['no_preprocessing']
+        },
         metric=accuracy,
         dask_client=dask_client,
         # Force model to be deleted. That is, from 50 which is the
@@ -874,19 +877,16 @@ def data_test_model_predict_outsputs_correct_shapes():
     #
     #   tldr; thats why we use MyDummyX here instead of the default models
     #         from sklearn
-    def seed():
-        return np.random.RandomState(42)
-
     def classifier(X, y):
-        return MyDummyClassifier(config=1, random_state=seed()).fit(X, y)
+        return MyDummyClassifier(config=1, random_state=0).fit(X, y)
 
     def regressor(X, y):
-        return MyDummyRegressor(config=1, random_state=seed()).fit(X, y)
+        return MyDummyRegressor(config=1, random_state=0).fit(X, y)
 
     # How cross validation models are currently grouped together
     def voting_classifier(X, y):
         classifiers = [
-            MyDummyClassifier(config=1, random_state=seed()).fit(X, y)
+            MyDummyClassifier(config=1, random_state=0).fit(X, y)
             for _ in range(5)
         ]
         vc = VotingClassifier(estimators=None, voting='soft')
@@ -895,7 +895,7 @@ def data_test_model_predict_outsputs_correct_shapes():
 
     def voting_regressor(X, y):
         regressors = [
-            MyDummyRegressor(config=1, random_state=seed()).fit(X, y)
+            MyDummyRegressor(config=1, random_state=0).fit(X, y)
             for _ in range(5)
         ]
         vr = VotingRegressor(estimators=None)

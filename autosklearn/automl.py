@@ -32,6 +32,7 @@ from smac.stats.stats import Stats
 import joblib
 import sklearn.utils
 from scipy.sparse import spmatrix
+from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
 from sklearn.metrics._classification import type_of_target
 from sklearn.dummy import DummyClassifier, DummyRegressor
@@ -1165,7 +1166,7 @@ class AutoML(BaseEstimator):
         if self.ensemble_ is None:
             raise ValueError("Refit can only be called if 'ensemble_size != 0'")
 
-        random_state = np.random.RandomState(self._seed)
+        random_state = check_random_state(self._seed)
         for identifier in self.models_:
             model = self.models_[identifier]
             # this updates the model inplace, it can then later be used in

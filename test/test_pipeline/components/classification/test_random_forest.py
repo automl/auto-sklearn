@@ -13,15 +13,14 @@ class RandomForestComponentTest(BaseClassificationComponentTest):
     res = dict()
     res["default_iris"] = 0.96
     res["iris_n_calls"] = 9
-    res["default_iris_iterative"] = 0.95999999999999996
-    res["default_iris_proba"] = 0.09922562116542713
+    res["default_iris_iterative"] = res['default_iris']
+    res["default_iris_proba"] = 0.0996785324703419
     res["default_iris_sparse"] = 0.85999999999999999
-    # TODO find source of discrepancy!
-    res["default_digits"] = 0.9058894960534305
+    res["default_digits"] = 0.8998178506375227
     res["digits_n_calls"] = 9
-    res["default_digits_iterative"] = 0.9058894960534305
-    res["default_digits_binary"] = 0.9914996964177292
-    res["default_digits_multilabel"] = 0.9957676902536715
+    res["default_digits_iterative"] = res['default_digits']
+    res["default_digits_binary"] = 0.9896782027929569
+    res["default_digits_multilabel"] = 0.9973653110879388
     res["default_digits_multilabel_proba"] = 0.9965660960196189
 
     sk_mod = sklearn.ensemble.RandomForestClassifier

@@ -39,24 +39,27 @@ class CategoricalPreprocessingPipeline(BasePipeline):
     config : ConfigSpace.configuration_space.Configuration
         The configuration to evaluate.
 
-    random_state : int, RandomState instance or None, optional (default=None)
+    random_state : Optional[int | RandomState]
         If int, random_state is the seed used by the random number generator;
         If RandomState instance, random_state is the random number generator;
         If None, the random number generator is the RandomState instance
         used by `np.random`."""
 
-    def __init__(self,
-                 config: Optional[Configuration] = None,
-                 steps: Optional[List[Tuple[str, BaseEstimator]]] = None,
-                 dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
-                 include: Optional[Dict[str, str]] = None,
-                 exclude: Optional[Dict[str, str]] = None,
-                 random_state: Optional[np.random.RandomState] = None,
-                 init_params: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self,
+        config: Optional[Configuration] = None,
+        steps: Optional[List[Tuple[str, BaseEstimator]]] = None,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+        include: Optional[Dict[str, str]] = None,
+        exclude: Optional[Dict[str, str]] = None,
+        random_state: Optional[Union[int, np.random.RandomState]] = None,
+        init_params: Optional[Dict[str, Any]] = None
+    ) -> None:
         self._output_dtype = np.int32
         super().__init__(
             config, steps, dataset_properties, include, exclude,
-            random_state, init_params)
+            random_state, init_params
+        )
 
     @staticmethod
     def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None

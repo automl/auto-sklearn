@@ -1,5 +1,6 @@
 import copy
 from itertools import product
+from typing import Optional, Union
 
 import numpy as np
 from sklearn.base import RegressorMixin
@@ -9,7 +10,7 @@ from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 from autosklearn.pipeline.components.data_preprocessing import DataPreprocessorChoice
 
 
-from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.configuration_space import ConfigurationSpace, Configuration
 from autosklearn.pipeline.components import regression as \
     regression_components
 from autosklearn.pipeline.components import feature_preprocessing as \
@@ -36,7 +37,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     config : ConfigSpace.configuration_space.Configuration
         The configuration to evaluate.
 
-    random_state : int, RandomState instance or None, optional (default=None)
+    random_state : Optional[int | RandomState]
         If int, random_state is the seed used by the random number generator;
         If RandomState instance, random_state is the random number generator;
         If None, the random number generator is the RandomState instance
@@ -65,9 +66,16 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     --------
 
     """
-    def __init__(self, config=None, steps=None, dataset_properties=None,
-                 include=None, exclude=None, random_state=None,
-                 init_params=None):
+    def __init__(
+        self,
+        config: Optional[Configuration] = None,
+        steps=None,
+        dataset_properties=None,
+        include=None,
+        exclude=None,
+        random_state: Optional[Union[int, np.random.RandomState]] = None,
+        init_params=None
+    ):
         self._output_dtype = np.float32
         if dataset_properties is None:
             dataset_properties = dict()
@@ -224,13 +232,27 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
             default_dataset_properties.update(dataset_properties)
 
         steps.extend([
-            ['data_preprocessor',
-                DataPreprocessorChoice(dataset_properties=default_dataset_properties)],
-            ['feature_preprocessor',
+            [
+                'data_preprocessor',
+                DataPreprocessorChoice(
+                    dataset_properties=default_dataset_properties,
+                    random_state=self.random_state
+                )
+            ],
+            [
+                'feature_preprocessor',
                 feature_preprocessing_components.FeaturePreprocessorChoice(
-                    default_dataset_properties)],
-            ['regressor',
-                regression_components.RegressorChoice(default_dataset_properties)]
+                    dataset_properties=default_dataset_properties,
+                    random_state=self.random_state
+                )
+            ],
+            [
+                'regressor',
+                regression_components.RegressorChoice(
+                    default_dataset_properties,
+                    random_state=self.random_state
+                )
+            ]
         ])
 
         return steps

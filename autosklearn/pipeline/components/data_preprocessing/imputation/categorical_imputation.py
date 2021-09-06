@@ -18,7 +18,10 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
         numerical data and “missing_value” for strings or object data types.
     """
 
-    def __init__(self, random_state: Optional[np.random.RandomState] = None):
+    def __init__(
+        self,
+        random_state: Optional[Union[int, np.random.RandomState]] = None
+    ) -> None:
         self.random_state = random_state
 
     def fit(self, X: PIPELINE_DATA_DTYPE,

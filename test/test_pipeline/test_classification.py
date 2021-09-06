@@ -142,7 +142,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
     def test_default_configuration(self):
         for i in range(2):
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris')
-            auto = SimpleClassificationPipeline()
+            auto = SimpleClassificationPipeline(random_state=1)
             auto = auto.fit(X_train, Y_train)
             predictions = auto.predict(X_test)
             self.assertAlmostEqual(0.96, sklearn.metrics.accuracy_score(predictions, Y_test))
@@ -150,9 +150,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
     def test_default_configuration_multilabel(self):
         for i in range(2):
-            dataset_properties = {'multilabel': True}
             classifier = SimpleClassificationPipeline(
-                dataset_properties=dataset_properties)
+                random_state=1,
+                dataset_properties={'multilabel': True}
+            )
             cs = classifier.get_hyperparameter_search_space()
             default = cs.get_default_configuration()
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris',
@@ -167,14 +168,19 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
     def test_default_configuration_iterative_fit(self):
         classifier = SimpleClassificationPipeline(
-            include={'classifier': ['random_forest'],
-                     'feature_preprocessor': ['no_preprocessing']})
+            random_state=1,
+            include={
+                'classifier': ['random_forest'],
+                'feature_preprocessor': ['no_preprocessing']
+            }
+        )
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris')
         classifier.fit_transformer(X_train, Y_train)
         for i in range(1, 11):
             classifier.iterative_fit(X_train, Y_train)
-            self.assertEqual(classifier.steps[-1][-1].choice.estimator.n_estimators,
-                             i)
+            self.assertEqual(
+                classifier.steps[-1][-1].choice.estimator.n_estimators, i
+            )
 
     def test_repr(self):
         representation = repr(SimpleClassificationPipeline())
@@ -212,8 +218,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self._test_configurations(configurations_space=cs, data=data)
 
     def test_configurations(self):
-        cs = SimpleClassificationPipeline().get_hyperparameter_search_space()
-
+        cls = SimpleClassificationPipeline()
+        cs = cls.get_hyperparameter_search_space()
         self._test_configurations(configurations_space=cs)
 
     def test_configurations_signed_data(self):
@@ -233,6 +239,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
     def test_configurations_categorical_data(self):
         cs = SimpleClassificationPipeline(
             dataset_properties={'sparse': False},
+            random_state=1,
             include={
                 'feature_preprocessor': ['no_preprocessing'],
                 'classifier': ['sgd', 'adaboost']
@@ -300,8 +307,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         limit = 3072 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
-        print(configurations_space)
-
         for i in range(10):
             config = configurations_space.sample_configuration()
             config._populate_values()
@@ -329,8 +334,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                         config[restrict_parameter] is not None:
                     config._values[restrict_parameter] = restrict_to
 
-            print(config)
-
             if data is None:
                 X_train, Y_train, X_test, Y_test = get_dataset(
                     dataset='digits', make_sparse=make_sparse, add_NaNs=True)
@@ -341,9 +344,11 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 data['Y_test'].copy()
 
             init_params_ = copy.deepcopy(init_params)
-            cls = SimpleClassificationPipeline(random_state=1,
-                                               dataset_properties=dataset_properties,
-                                               init_params=init_params_,)
+            cls = SimpleClassificationPipeline(
+                random_state=1,
+                dataset_properties=dataset_properties,
+                init_params=init_params_,
+            )
             cls.set_hyperparameters(config, init_params=init_params_)
 
             # First make sure that for this configuration, setting the parameters
@@ -782,7 +787,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         This method tests that the set hyperparameters actually create objects
         that comply with the given configuration. It iterates trough the pipeline to
         make sure we did not miss a step, but also checks at the end that every
-        configuration from Config was checked
+        configuration from Config was checked.
+
+        Also considers random_state and ensures pipeline steps correctly recieve
+        the right random_state
         """
 
         all_combinations = list(itertools.product([True, False], repeat=4))
@@ -793,8 +801,9 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 'multiclass': multiclass,
                 'signed': signed,
             }
+            random_state = 1
             cls = SimpleClassificationPipeline(
-                random_state=1,
+                random_state=random_state,
                 dataset_properties=dataset_properties,
             )
             cs = cls.get_hyperparameter_search_space()
@@ -816,6 +825,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                             'data_preprocessor:__choice__', step, config_dict
                         )
                     )
+                    self.assertEqual(step.random_state, random_state)
                 elif name == 'balancing':
                     keys_checked.extend(
                         self._test_set_hyperparameter_component(
@@ -829,12 +839,14 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                             'feature_preprocessor:__choice__', step, config_dict
                         )
                     )
+                    self.assertEqual(step.random_state, random_state)
                 elif name == 'classifier':
                     keys_checked.extend(
                         self._test_set_hyperparameter_choice(
                             'classifier:__choice__', step, config_dict
                         )
                     )
+                    self.assertEqual(step.random_state, random_state)
                 else:
                     raise ValueError("Found another type of step! Need to update this check")
 
