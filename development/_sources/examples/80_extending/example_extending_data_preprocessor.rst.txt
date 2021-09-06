@@ -186,7 +186,7 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    accuracy:  0.4125874125874126
+    accuracy:  0.3916083916083916
     [(1.000000, MyDummyClassifier(config=1,
                       init_params={'data_preprocessor:feat_type': {0: 'numerical',
                                                                    1: 'numerical',
@@ -228,7 +228,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  14.898 seconds)
+   **Total running time of the script:** ( 0 minutes  20.640 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_data_preprocessor.py:
