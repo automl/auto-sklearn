@@ -123,7 +123,7 @@ Alternatively, you can use the command `xdg-open doc/build/hmtl/index.html` whic
     *   How much other parts of auto-sklearn are you relying on readers to know before hand, maybe link to those sections if you do.
 
 *   If you want to contribute an example, it's a great way to really illustrate an entire flow of some feature.
-    `sphinx-gallery` will run any python file `examle_*.py` in one of the example folders.
+    `sphinx-gallery` will run any python file `example_*.py` in one of the example folders.
     This allows you to have both ReStructured Markdown (rst) and python code with it's output into a [single html page](https://automl.github.io/auto-sklearn/master/examples/40_advanced/example_calc_multiple_metrics.html#sphx-glr-examples-40-advanced-example-calc-multiple-metrics-py)!
     You'll want to check out some of the [other examples](https://github.com/automl/auto-sklearn/tree/master/examples) to see how to embed rst into a `.py` file.
 
@@ -243,7 +243,7 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     # This will push my_new_branch to your fork located at `origin`
     git push --set-upstream origin my_new_branch
     ```
-    
+
 *   At this point, we need to create a pull request (PR) to the [automl/autosklearn](https://github.com/automl/auto-sklearn) repository with our new changes.
     This can be done simply by going to your own forked repo, clicking **'Contribute'**, and selecting
     the **development** branch of `automl/auto-sklearn`.
