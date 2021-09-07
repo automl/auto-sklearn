@@ -99,7 +99,7 @@ plugins that you can see in (`doc/conf.py`)[https://github.com/automl/auto-sklea
 All of your changes can be viewed by first [building the docs](#testing) and then opening `doc/build/html/index.html` with your favourite browser.
 Alternatively, you can use the command `xdg-open doc/build/hmtl/index.html` which opens it up with your default browser.
 
-*   If your simply fixing a typo, there shouldn't be much to do accept make the PR and we'll accept it without much issue.
+*   If you're simply fixing a typo, there shouldn't be much to do except make the PR and we'll accept it without much issue.
 *   If you want to fix a link you should know how linking with `sphinx` works
     *   For links to internal documentation, you can create a label with
     ```.rst
@@ -112,8 +112,9 @@ Alternatively, you can use the command `xdg-open doc/build/hmtl/index.html` whic
     *   Now if you want to link some external documentation you'll need
         to do something like
     ```.rst
-    Here's a `link<https://sublime-and-sphinx-guide.readthedocs.io/en/latest/references.html>` to the external documentation on linking for sphinx
+    Here's a `link<https://sublime-and-sphinx-guide.readthedocs.io/en/latest/references.html>`_ to the external documentation on linking for sphinx
     ```
+    Notice the trailing `_` which is used to specify that it is an external link.
     
 *   If you want to make some more detailed documentation about some feature that you introduced or you think is not well documented, you'll have to think about a few things.
     
@@ -127,9 +128,61 @@ Alternatively, you can use the command `xdg-open doc/build/hmtl/index.html` whic
     You'll want to check out some of the [other examples](https://github.com/automl/auto-sklearn/tree/master/examples) to see how to embed rst into a `.py` file.
 
 #### Bug Fixes
-* TODO
+Auto-sklearn has been through quite a few iterations, been used for many purposes and is constantly used in ways we didn't even think of.
+Like any maturing software, there will be bugs, old and new.
+While we try to create unit tests to catch as many of these as we can, some slip through and new bugs get introduced as dependencies update and new features introduced.
+
+If you're looking to help by fixing some bugs, or you've encountered your own bugs you'd like fixed in the official version of auto-sklearn, we would greatly appreciate any help!
+We'd be happy to guide you through what we think may be the underlying cause or at least point you in the right direction if it's something you wish to work on.
+
+Some core things to consider in fixing a bug:
+*   What's the minimal working example that reproduces this bug?
+    *   This is usually the first step.
+        The process of creating a minimal piece of code that reproduces a bug often illuminates what needs to be fixed.
+
+*   What's the quick fix and what's the long term fix?
+    *   Sometimes it's a code typo, a quick correction and problem solved.
+        Other times, the bug is an artifact of some larger underlying issue that has gone unnoticed and might require some restructuring.
+        
+        If this is the case, let us know as you work on it!
+        If it's breaking, sometimes a quick patch and fix will do and larger fixes can be tackled in a timely manner.
+        As a rule of thumb, if a bug requires modifying more then 50-100 lines of code it's probably something we would like to talk through on how best to tackle it.
+
+*   How can we create a test for this bug in the future?
+    *   Of course, once a bug is squashed, we'd like it to not show again and having a test to catch it for the future will future-proof against any changes down the line.
+    
+        Thankfully, most of this is usually captured in the minimal working example and all that is left is to turn it into a comprehensive test!
+
+What's important once fixing a bug is writing a good PR that let's us now how you identified the bug, what the problem was and how it was fixed.
+This lets use review your code with all this in mind and follow the same thought process that lead you to fix it in the first place!
+
 #### Features
-* TODO
+While auto-sklearn has many features we're proud of, there's always room for more and better functionality.
+Features don't have to be performance driven, in fact, most of the new features we'd love to see are to improve a users ability to interact with auto-sklearn, whether it be usability or an ability to inspect the inner workings in an intuitive manner!
+
+However, features are usually a bigger project and for this we'd really advise getting in touch with us first about the feature in mind.
+There are some things we believe best left for external libraries or integrations that we don't wish to consider at this time.
+Another reason to get in touch is to nail exactly what this feature will look like before going to far, the more direct and concise the feature is, the better.
+
+Some things to keep in mind with new features:
+*   A new feature is great, but will this change any existing default behaviours?
+    Unexpected changes for existing users can be detrimental and sometimes it has to be done ... but often these new features can be presented as an option the user can enable.
+*   If you're introducing some new API:
+    *   Creating some code samples of how you'd like your feature to be used is a great start.
+    *   What current way is there to do the same thing, can any functionality already present be used to help with this new API?
+    *   Are you going to deprecate any current API? This is an important fact to consider and something that will definitely have to be discussed.
+
+Writing features are great but new features means new bugs, but thankfully that's what we can write tests for.
+How to test your feature is always tricky, especially if the feature is big in scope.
+Unfortunately there's no secrete or rule of thumb other than try to cover every case you can think of.
+The more it's tested the better!
+Bugs will still get through, that's okay, we will have done what we can and we can fix those in the future but as long as the usual use-cases are covered, this shouldn't be too much of a problem.
+
+Now how are people going to know about your new feature you've introduced?
+This is what documentation is so great for and it's how almost all software functionality is expressed.
+If the feature is enabled by a simple parameter, great, almost all the documentation is present by the in-code docstring and automatically gets rendered in the online docs ... that docstring that was updated ... right?
+Sometimes, the new functionality isn't so clear from a simple parameter description and so maybe something needs to be added to the `manual.rst`, a short paragraph suffices and much appreciated.
+Lastly, if the feature really is a game changer or you're very proud of it, consider making an `example_*.py` that will be run and rendered in the online docs!
 
 ## Testing
 *   Let's assume you've made some changes, now we have to make sure they work.
@@ -236,8 +289,6 @@ Alternatively, you can use the command `xdg-open doc/build/hmtl/index.html` whic
     If they all pass locally they will very often have no issues in the automated tests.
 
     Once everyone is happy, it's time for us to hit (*squash*) merge, get it into the development branch and have one more contribution to autosklearn!
-
-
 
 # Pull Request Overview
 * Create a [fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) of the [automl/auto-sklearn](https://github.com/automl/auto-sklearn) git repo
