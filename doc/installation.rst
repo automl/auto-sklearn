@@ -27,24 +27,18 @@ check the Section `Windows/OSX compatibility`_.
 Installing auto-sklearn
 =======================
 
-Please install all dependencies manually with:
+You can install *auto-sklearn* with `pip` in the usual manner:
 
 .. code:: bash
 
-    curl https://raw.githubusercontent.com/automl/auto-sklearn/master/requirements.txt | xargs -n 1 -L 1 pip3 install
-
-Then install *auto-sklearn*:
-
-.. code:: bash
-
-    pip3 install auto-sklearn
+    pip install auto-sklearn
 
 We recommend installing *auto-sklearn* into a
 `virtual environment <https://docs.python-guide.org/dev/virtualenvs/>`_
 or an
 `Anaconda environment <https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_.
 
-If the ``pip3`` installation command fails, make sure you have the `System requirements`_ installed correctly.
+If the ``pip`` installation command fails, make sure you have the `System requirements`_ installed correctly.
 
 Ubuntu installation
 ===================
