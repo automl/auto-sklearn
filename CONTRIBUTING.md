@@ -114,7 +114,7 @@ Alternatively, you can use the command `xdg-open doc/build/hmtl/index.html` whic
     ```.rst
     Here's a `link<https://sublime-and-sphinx-guide.readthedocs.io/en/latest/references.html>`_ to the external documentation on linking for sphinx
     ```
-    Notice the trailing `_` which is used to specify that it is an external link.
+    Notice the trailing `_` which is important
     
 *   If you want to make some more detailed documentation about some feature that you introduced or you think is not well documented, you'll have to think about a few things.
     
