@@ -1,16 +1,29 @@
+import warnings
+
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter
+from sklearn.exceptions import ConvergenceWarning
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS
 
+IGNORED_WARNINGS = [
+    # Guassian process issues a convergence warning if it's not fitted for very
+    # long which we can't control during tests. We assume the user does not need
+    # the multiple warnings either.
+    (
+        ConvergenceWarning,
+        (r'The optimal value found for dimension \d+ of parameter length_scale '
+         r'is close to the specified lower bound .+\. Decreasing the bound and '
+         r'calling fit again may find a better value\.')
+    )
+]
 
 class GaussianProcess(AutoSklearnRegressionAlgorithm):
     def __init__(self, alpha, thetaL, thetaU, random_state=None):
         self.alpha = alpha
         self.thetaL = thetaL
         self.thetaU = thetaU
-        # We ignore it
         self.random_state = random_state
         self.estimator = None
         self.scaler = None
@@ -25,7 +38,8 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
         n_features = X.shape[1]
         kernel = sklearn.gaussian_process.kernels.RBF(
             length_scale=[1.0]*n_features,
-            length_scale_bounds=[(self.thetaL, self.thetaU)]*n_features)
+            length_scale_bounds=[(self.thetaL, self.thetaU)]*n_features
+        )
 
         # Instanciate a Gaussian Process model
         self.estimator = sklearn.gaussian_process.GaussianProcessRegressor(
@@ -35,9 +49,14 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
             alpha=self.alpha,
             copy_X_train=True,
             random_state=self.random_state,
-            normalize_y=True)
+            normalize_y=True
+        )
+        with warnings.catch_warnings():
+            for category, message in IGNORED_WARNINGS:
+                warnings.filterwarnings('ignore', category=category, message=message)
 
-        self.estimator.fit(X, y)
+            self.estimator.fit(X, y)
+
         return self
 
     def predict(self, X):
