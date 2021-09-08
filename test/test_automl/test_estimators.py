@@ -636,7 +636,7 @@ def test_classification_pandas_support(tmp_dir, dask_client):
     )
 
     # Drop NAN!!
-    X = X.dropna('columns')
+    X = X.dropna(axis='columns')
 
     # This test only make sense if input is dataframe
     assert isinstance(X, pd.DataFrame)
