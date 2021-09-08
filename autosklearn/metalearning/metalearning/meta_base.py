@@ -65,7 +65,7 @@ class MetaBase(object):
             self.metafeatures.drop(name.lower(), inplace=True)
         self.metafeatures = self.metafeatures.append(metafeatures)
 
-        runs = pd.Series([], name=name)
+        runs = pd.Series([], name=name, dtype=object)
         for metric in self.algorithm_runs.keys():
             self.algorithm_runs[metric].append(runs)
 
