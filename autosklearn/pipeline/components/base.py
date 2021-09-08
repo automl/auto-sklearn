@@ -10,7 +10,6 @@ from sklearn.exceptions import ConvergenceWarning
 
 from autosklearn.pipeline.constants import SPARSE
 
-
 def find_components(package, directory, base_class):
     components = OrderedDict()
 
