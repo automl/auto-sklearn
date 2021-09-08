@@ -35,14 +35,12 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
             # Series, sparse and numpy have dtype
             # Only DataFrame does not
             kind = X.dtype.kind
+
         if kind in ("i", "u", "f"):
             # We do not want to impute a category with the default
             # value (0 is the default) in case such default is in the
             # train data already!
-            fill_value = 0
-            unique = np.unique(X)
-            while fill_value in unique:
-                fill_value -= 1
+            fill_value = min(np.unique(X)) - 1
 
         self.preprocessor = sklearn.impute.SimpleImputer(
             strategy='constant', copy=False, fill_value=fill_value)
