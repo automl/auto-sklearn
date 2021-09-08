@@ -349,9 +349,11 @@ for (base_name, sklearn_metric), average in product(
     ['macro', 'micro', 'samples', 'weighted']
 ):
     name = f'{base_name}_{average}'
-    CLASSIFICATION_METRICS[name] = make_scorer(
+    scorer = make_scorer(
         name, partial(sklearn_metric, pos_label=None, average=average, zero_division=0)
     )
+    globals()[name] = scorer  # Adds scorer to the module scope
+    CLASSIFICATION_METRICS[name] = scorer
 
 
 def calculate_score(
