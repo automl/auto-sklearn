@@ -387,7 +387,7 @@ class TestMetric(unittest.TestCase):
         # labels predicted in y_pred and the number of labels in y_true.
         # This triggers several warnings but we are aware.
         #
-        # TODO convert to pytest with fixture 
+        # TODO convert to pytest with fixture
         #
         #   This test should be parameterized so we can identify which metrics
         #   cause which warning specifically and rectify if needed.

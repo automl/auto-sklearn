@@ -20,6 +20,7 @@ IGNORED_WARNINGS = [
     )
 ]
 
+
 class Rescaling(object):
     # Rescaling does not support fit_transform (as of 0.19.1)!
     def __init__(
