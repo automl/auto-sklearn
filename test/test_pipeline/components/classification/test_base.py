@@ -173,7 +173,7 @@ class BaseClassificationComponentTest(unittest.TestCase):
             return
 
         for _ in range(2):
-            predictions, targets, _ =  _test_classifier(
+            predictions, targets, _ = _test_classifier(
                 classifier=self.module, dataset='digits', make_multilabel=True
             )
 

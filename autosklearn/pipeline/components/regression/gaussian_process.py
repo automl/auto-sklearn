@@ -19,6 +19,7 @@ IGNORED_WARNINGS = [
     )
 ]
 
+
 class GaussianProcess(AutoSklearnRegressionAlgorithm):
     def __init__(self, alpha, thetaL, thetaU, random_state=None):
         self.alpha = alpha

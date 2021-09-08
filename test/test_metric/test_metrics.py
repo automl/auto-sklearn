@@ -5,7 +5,6 @@ import pytest
 
 import numpy as np
 import sklearn.metrics
-from sklearn.exceptions import UndefinedMetricWarning
 
 import autosklearn.metrics
 
