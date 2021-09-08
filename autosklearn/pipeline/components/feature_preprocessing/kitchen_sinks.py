@@ -1,3 +1,6 @@
+from typing import Optional, Union
+
+from numpy.random import RandomState
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter
@@ -8,13 +11,23 @@ from autosklearn.pipeline.constants import SPARSE, DENSE, UNSIGNED_DATA, INPUT
 
 class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
 
-    def __init__(self, gamma, n_components, random_state=None):
-        """ Parameters:
+    def __init__(
+        self,
+        gamma: float,
+        n_components: int,
+        random_state: Optional[Union[int, RandomState]] = None
+    ) -> None:
+        """
+        Parameters
+        ----------
         gamma: float
-               Parameter of the rbf kernel to be approximated exp(-gamma * x^2)
+            Parameter of the rbf kernel to be approximated exp(-gamma * x^2)
 
         n_components: int
-               Number of components (output dimensionality) used to approximate the kernel
+            Number of components (output dimensionality) used to approximate the kernel
+
+        random_state: Optional[int | RandomState]
+            The random state to pass to the underlying estimator
         """
         self.gamma = gamma
         self.n_components = n_components
@@ -27,7 +40,10 @@ class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
         self.gamma = float(self.gamma)
 
         self.preprocessor = sklearn.kernel_approximation.RBFSampler(
-            self.gamma, self.n_components, self.random_state)
+            gamma=self.gamma,
+            n_components=self.n_components,
+            random_state=self.random_state
+        )
         self.preprocessor.fit(X)
         return self
 
