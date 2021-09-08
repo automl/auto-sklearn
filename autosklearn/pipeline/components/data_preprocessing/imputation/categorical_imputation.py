@@ -3,6 +3,7 @@ from typing import Dict, Optional, Tuple, Union
 from ConfigSpace.configuration_space import ConfigurationSpace
 
 import numpy as np
+from scipy.sparse import issparse
 
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
@@ -40,7 +41,11 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
             # We do not want to impute a category with the default
             # value (0 is the default) in case such default is in the
             # train data already!
-            fill_value = min(np.unique(X)) - 1
+            if issparse(X):
+                fill_value = min(np.unique(X)) - 1
+            else:
+                # X.data doesn't return 0's
+                fill_value = min([*X.data, 0]) - 1
 
         self.preprocessor = sklearn.impute.SimpleImputer(
             strategy='constant', copy=False, fill_value=fill_value)
