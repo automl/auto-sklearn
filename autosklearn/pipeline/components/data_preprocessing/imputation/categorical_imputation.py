@@ -42,10 +42,10 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
             # value (0 is the default) in case such default is in the
             # train data already!
             if issparse(X):
-                fill_value = min(np.unique(X)) - 1
-            else:
                 # X.data doesn't return 0's
                 fill_value = min([*X.data, 0]) - 1
+            else:
+                fill_value = min(np.unique(X)) - 1
 
         self.preprocessor = sklearn.impute.SimpleImputer(
             strategy='constant', copy=False, fill_value=fill_value)
