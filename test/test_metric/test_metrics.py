@@ -392,9 +392,7 @@ class TestMetric(unittest.TestCase):
         #   This test should be parameterized so we can identify which metrics
         #   cause which warning specifically and rectify if needed.
         ignored_warnings = [
-            (UserWarning, 'y_pred contains classes not in y_true'),
-            (UndefinedMetricWarning, 'Recall is ill-defined and being set to 0.0'),
-            (UndefinedMetricWarning, 'Precision is ill-defined and being set to 0.0')
+            (UserWarning, 'y_pred contains classes not in y_true')
         ]
 
         for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
@@ -459,9 +457,7 @@ class TestMetric(unittest.TestCase):
                 [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
             )
 
-            # See note at top of test
             with warnings.catch_warnings():
-
                 for category, message in ignored_warnings:
                     warnings.filterwarnings(
                         'ignore', category=category, message=message

@@ -172,16 +172,18 @@ class BaseClassificationComponentTest(unittest.TestCase):
         if not self.module.get_properties()["handles_multilabel"]:
             return
 
-        for i in range(2):
-            predictions, targets, _ = \
-                _test_classifier(classifier=self.module,
-                                 dataset='digits',
-                                 make_multilabel=True)
-            self.assertAlmostEqual(self.res["default_digits_multilabel"],
-                                   sklearn.metrics.precision_score(
-                                       targets, predictions, average='macro'),
-                                   places=self.res.get(
-                                           "default_digits_multilabel_places", 7))
+        for _ in range(2):
+            predictions, targets, _ =  _test_classifier(
+                classifier=self.module, dataset='digits', make_multilabel=True
+            )
+
+            score = sklearn.metrics.precision_score(
+                targets, predictions, average='macro', zero_division=0
+            )
+            self.assertAlmostEqual(
+                self.res["default_digits_multilabel"], score,
+                places=self.res.get("default_digits_multilabel_places", 7)
+            )
 
     def test_default_digits_multilabel_predict_proba(self):
 
