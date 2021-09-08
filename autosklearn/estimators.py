@@ -228,7 +228,7 @@ class AutoSklearnEstimator(BaseEstimator):
         Attributes
         ----------
 
-        cv_results\_ : dict of numpy (masked) ndarrays
+        cv_results_ : dict of numpy (masked) ndarrays
             A dict with keys as column headers and values as columns, that can be
             imported into a pandas ``DataFrame``.
 
