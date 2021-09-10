@@ -133,7 +133,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score holdout:  0.958041958041958
+    Accuracy score holdout:  0.9440559440559441
 
 
 
@@ -329,7 +329,7 @@ splitting it on the first feature.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 6 minutes  31.489 seconds)
+   **Total running time of the script:** ( 6 minutes  18.103 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_resampling.py:
