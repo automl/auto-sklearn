@@ -38,7 +38,7 @@ We recommend installing *auto-sklearn* into a
 or an
 `Anaconda environment <https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_.
 
-If the ``pip`` installation command fails, make sure you have the `System requirements`_ installed correctly.
+If the ``pip3`` installation command fails, make sure you have the `System requirements`_ installed correctly.
 
 Ubuntu installation
 ===================
