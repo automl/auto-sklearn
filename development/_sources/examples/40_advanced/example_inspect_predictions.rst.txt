@@ -230,7 +230,7 @@ these features. Again, we'll look at acceleration_y and acceleration_z.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 3 minutes  56.604 seconds)
+   **Total running time of the script:** ( 3 minutes  59.718 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_inspect_predictions.py:
@@ -245,7 +245,7 @@ these features. Again, we'll look at acceleration_y and acceleration_z.
   .. container:: binder-badge
 
     .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_inspect_predictions.ipynb
+      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/40_advanced/example_inspect_predictions.ipynb
       :alt: Launch binder
       :width: 150 px
 

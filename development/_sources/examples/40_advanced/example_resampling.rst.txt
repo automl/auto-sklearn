@@ -329,7 +329,7 @@ splitting it on the first feature.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 6 minutes  18.103 seconds)
+   **Total running time of the script:** ( 6 minutes  25.729 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_resampling.py:
@@ -344,7 +344,7 @@ splitting it on the first feature.
   .. container:: binder-badge
 
     .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_resampling.ipynb
+      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/40_advanced/example_resampling.ipynb
       :alt: Launch binder
       :width: 150 px
 

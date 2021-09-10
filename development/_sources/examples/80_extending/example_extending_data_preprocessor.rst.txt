@@ -186,7 +186,7 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    accuracy:  0.32167832167832167
+    accuracy:  0.40559440559440557
     [(1.000000, MyDummyClassifier(config=1,
                       init_params={'data_preprocessor:feat_type': {0: 'numerical',
                                                                    1: 'numerical',
@@ -228,7 +228,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  18.148 seconds)
+   **Total running time of the script:** ( 0 minutes  18.269 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_data_preprocessor.py:
@@ -243,7 +243,7 @@ Print prediction score and statistics
   .. container:: binder-badge
 
     .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_data_preprocessor.ipynb
+      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_data_preprocessor.ipynb
       :alt: Launch binder
       :width: 150 px
 

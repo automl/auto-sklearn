@@ -198,7 +198,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score 0.855072463768116
+    Accuracy score 0.8579710144927536
 
 
 
@@ -238,7 +238,7 @@ be directly used for plotting
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  3.179 seconds)
+   **Total running time of the script:** ( 2 minutes  8.859 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_pandas_train_test.py:
@@ -253,7 +253,7 @@ be directly used for plotting
   .. container:: binder-badge
 
     .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_pandas_train_test.ipynb
+      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/40_advanced/example_pandas_train_test.ipynb
       :alt: Launch binder
       :width: 150 px
 

@@ -120,27 +120,27 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight               type      cost  duration
     model_id                                                              
-    34           1             0.12        extra_trees  0.014184  1.983284
-    7            2             0.08        extra_trees  0.014184  1.829100
-    29           3             0.04        extra_trees  0.021277  1.944260
-    16           4             0.06  gradient_boosting  0.021277  1.226113
-    26           5             0.02        extra_trees  0.028369  2.583099
-    22           6             0.06  gradient_boosting  0.028369  1.302908
-    19           7             0.02        extra_trees  0.028369  3.311465
-    14           8             0.02                mlp  0.028369  2.517828
-    2            9             0.02      random_forest  0.028369  2.197732
-    10          10             0.02      random_forest  0.028369  2.369831
-    3           11             0.10                mlp  0.028369  1.259228
-    8           12             0.02      random_forest  0.035461  2.466589
-    5           13             0.02      random_forest  0.035461  2.455498
-    12          14             0.02  gradient_boosting  0.035461  1.541626
-    17          15             0.04  gradient_boosting  0.035461  2.026395
-    9           16             0.02        extra_trees  0.042553  2.140951
-    27          17             0.02        extra_trees  0.042553  2.295733
-    30          18             0.08      liblinear_svc  0.042553  1.123919
-    32          19             0.14        extra_trees  0.049645  2.060066
-    33          20             0.02      random_forest  0.056738  2.278709
-    28          21             0.06       bernoulli_nb  0.070922  1.038995
+    34           1             0.12        extra_trees  0.014184  2.026128
+    7            2             0.08        extra_trees  0.014184  1.830551
+    29           3             0.04        extra_trees  0.021277  2.098109
+    16           4             0.06  gradient_boosting  0.021277  1.190567
+    26           5             0.02        extra_trees  0.028369  2.699003
+    22           6             0.06  gradient_boosting  0.028369  1.349554
+    19           7             0.02        extra_trees  0.028369  3.305519
+    14           8             0.02                mlp  0.028369  2.496433
+    2            9             0.02      random_forest  0.028369  2.128099
+    10          10             0.02      random_forest  0.028369  2.326047
+    3           11             0.10                mlp  0.028369  1.250914
+    8           12             0.02      random_forest  0.035461  2.407362
+    5           13             0.02      random_forest  0.035461  2.419789
+    12          14             0.02  gradient_boosting  0.035461  1.535241
+    17          15             0.04  gradient_boosting  0.035461  1.993817
+    9           16             0.02        extra_trees  0.042553  2.188112
+    27          17             0.02        extra_trees  0.042553  2.302904
+    30          18             0.08      liblinear_svc  0.042553  1.140731
+    32          19             0.14        extra_trees  0.049645  2.178031
+    33          20             0.02      random_forest  0.056738  2.363511
+    28          21             0.06       bernoulli_nb  0.070922  1.074733
 
 
 
@@ -371,7 +371,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  59.570 seconds)
+   **Total running time of the script:** ( 2 minutes  0.745 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_classification.py:
@@ -386,7 +386,7 @@ Get the Score of the final ensemble
   .. container:: binder-badge
 
     .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/20_basic/example_classification.ipynb
+      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/20_basic/example_classification.ipynb
       :alt: Launch binder
       :width: 150 px
 
