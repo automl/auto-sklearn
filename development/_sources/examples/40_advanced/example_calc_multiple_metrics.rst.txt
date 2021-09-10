@@ -150,7 +150,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score 0.9370629370629371
+    Accuracy score 0.9440559440559441
     ################################################################################
     Metric results
      rank_test_scores param_classifier:__choice__  mean_test_score  metric_balanced_accuracy  metric_precision  metric_recall  metric_f1  metric_custom_error
@@ -187,7 +187,6 @@ Get the Score of the final ensemble
                    25                 extra_trees         0.950355                  0.936690          0.936170       0.988764   0.961749             0.049645
                    28               random_forest         0.943262                  0.943064          0.965517       0.943820   0.954545             0.056738
                     1                 extra_trees         0.985816                  0.984767          0.988764       0.988764   0.988764             0.014184
-                   34                 extra_trees         0.914894                  0.884615          0.881188       1.000000   0.936842             0.085106
 
 
 
@@ -195,7 +194,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  58.620 seconds)
+   **Total running time of the script:** ( 2 minutes  2.337 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_calc_multiple_metrics.py:

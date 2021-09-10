@@ -143,7 +143,7 @@
 are provided (see <a class="reference external" href="https://pypi.org/project/pyrfr/#files">here</a> for available wheels) you also
 need:</p>
 <ul class="simple">
-<li><p>SWIG (version 3.0.* is required; &gt;=4.0.0 is not supported) (<a class="reference external" href="http://www.swig.org/survey.html">get SWIG here</a>).</p></li>
+<li><p>SWIG (<a class="reference external" href="http://www.swig.org/survey.html">get SWIG here</a>).</p></li>
 </ul>
 <p>For an explanation of missing Microsoft Windows and MAC OSX support please
 check the Section <a class="reference internal" href="#windows-osx-compatibility">Windows/OSX compatibility</a>.</p>
@@ -257,7 +257,7 @@ use:</p>
 </pre></div>
 </div>
 <p>To start a Jupyter notebook, you could instead run e.g.:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker run -it -v <span class="nv">$PWD</span>:/opt/nb -p <span class="m">8888</span>:8888 mfeurer/auto-sklearn:master /bin/bash -c <span class="s2">&quot;mkdir -p /opt/nb &amp;&amp; jupyter notebook --notebook-dir=/opt/nb --ip=&#39;0.0.0.0&#39; --port=8888 --no-browser --allow-root&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker run -it -v <span class="si">${</span><span class="nv">PWD</span><span class="si">}</span>:/opt/nb -p <span class="m">8888</span>:8888 mfeurer/auto-sklearn:master /bin/bash -c <span class="s2">&quot;mkdir -p /opt/nb &amp;&amp; jupyter notebook --notebook-dir=/opt/nb --ip=&#39;0.0.0.0&#39; --port=8888 --no-browser --allow-root&quot;</span>
 </pre></div>
 </div>
 <p>Alternatively, it is possible to use the development version of auto-sklearn by replacing all
