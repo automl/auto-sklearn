@@ -31,7 +31,7 @@ You can install *auto-sklearn* with `pip` in the usual manner:
 
 .. code:: bash
 
-    pip install auto-sklearn
+    pip3 install auto-sklearn
 
 We recommend installing *auto-sklearn* into a
 `virtual environment <https://docs.python-guide.org/dev/virtualenvs/>`_
