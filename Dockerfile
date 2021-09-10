@@ -25,9 +25,7 @@ RUN apt install -y python3-dev python3-pip
 RUN pip3 install --upgrade setuptools
 RUN apt install -y build-essential
 
-# https://github.com/automl/auto-sklearn/issues/314
-RUN apt install -y swig3.0
-RUN ln -s /usr/bin/swig3.0 /usr/bin/swig
+RUN apt install -y swig
 
 # Copy the checkout autosklearn version for installation
 ADD . /auto-sklearn/

@@ -19,7 +19,7 @@ In case you try to install Auto-sklearn on a system where no wheel files for the
 are provided (see `here <https://pypi.org/project/pyrfr/#files>`_ for available wheels) you also
 need:
 
-* SWIG (version 3.0.* is required; >=4.0.0 is not supported) (`get SWIG here <http://www.swig.org/survey.html>`_).
+* SWIG (`get SWIG here <http://www.swig.org/survey.html>`_).
 
 For an explanation of missing Microsoft Windows and MAC OSX support please
 check the Section `Windows/OSX compatibility`_.

@@ -84,9 +84,7 @@ following:
 1. Check if you can use a pre-compiled version of the pyrfr to avoid compiling it yourself. We
    provide pre-compiled versions of the pyrfr on `pypi <https://pypi.org/project/pyrfr/#files>`_.
 2. Check if the dependencies specified under :ref:`installation` are correctly installed,
-   especially that you have ``swig`` and a ``C++`` compiler. If you are using an older version of
-   the pyrfr (``<=0.8.0``) the dependency on SWIG as stricter and you actually need SWIG3 to
-   compile the pyrfr.
+   especially that you have ``swig`` and a ``C++`` compiler.
 3. If you are not yet using Conda, consider using it; it simplifies installation of the correct
    dependencies.
 4. Install correct build dependencies before installing the pyrfr, you can check the following
