@@ -27,13 +27,7 @@ check the Section `Windows/OSX compatibility`_.
 Installing auto-sklearn
 =======================
 
-Please install all dependencies manually with:
-
-.. code:: bash
-
-    curl https://raw.githubusercontent.com/automl/auto-sklearn/master/requirements.txt | xargs -n 1 -L 1 pip3 install
-
-Then install *auto-sklearn*:
+You can install *auto-sklearn* with `pip` in the usual manner:
 
 .. code:: bash
 
