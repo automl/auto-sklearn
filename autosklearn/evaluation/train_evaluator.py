@@ -1,5 +1,6 @@
 import logging
 import multiprocessing
+import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import copy
@@ -21,6 +22,7 @@ from autosklearn.evaluation.abstract_evaluator import (
     TYPE_ADDITIONAL_INFO,
     _fit_and_suppress_warnings,
 )
+from autosklearn.evaluation.splitter import CustomStratifiedShuffleSplit, CustomStratifiedKFold
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.constants import (
     CLASSIFICATION_TASKS,
@@ -1037,15 +1039,20 @@ class TrainEvaluator(AbstractEvaluator):
 
                 if shuffle:
                     try:
-                        cv = StratifiedShuffleSplit(n_splits=1,
-                                                    test_size=test_size,
-                                                    random_state=1)
+                        cv = StratifiedShuffleSplit(
+                            n_splits=1,
+                            test_size=test_size,
+                            random_state=1,
+                        )
                         test_cv = copy.deepcopy(cv)
                         next(test_cv.split(y, y))
                     except ValueError as e:
                         if 'The least populated class in y has only' in e.args[0]:
-                            cv = ShuffleSplit(n_splits=1, test_size=test_size,
-                                              random_state=1)
+                            cv = CustomStratifiedShuffleSplit(
+                                n_splits=1,
+                                test_size=test_size,
+                                random_state=1,
+                            )
                         else:
                             raise e
                 else:
@@ -1057,9 +1064,26 @@ class TrainEvaluator(AbstractEvaluator):
             elif self.resampling_strategy in ['cv', 'cv-iterative-fit', 'partial-cv',
                                               'partial-cv-iterative-fit']:
                 if shuffle:
-                    cv = StratifiedKFold(
-                        n_splits=self.resampling_strategy_args['folds'],
-                        shuffle=shuffle, random_state=1)
+                    try:
+                        with warnings.catch_warnings():
+                            warnings.simplefilter('error')
+                            cv = StratifiedKFold(
+                                n_splits=self.resampling_strategy_args['folds'],
+                                shuffle=shuffle,
+                                random_state=1,
+                            )
+                            test_cv = copy.deepcopy(cv)
+                            next(test_cv.split(y, y))
+                    except UserWarning as e:
+                        print(e)
+                        if 'The least populated class in y has only' in e.args[0]:
+                            cv = CustomStratifiedKFold(
+                                n_splits=self.resampling_strategy_args['folds'],
+                                shuffle=shuffle,
+                                random_state=1,
+                            )
+                        else:
+                            raise e
                 else:
                     cv = KFold(n_splits=self.resampling_strategy_args['folds'],
                                shuffle=shuffle)
