@@ -19,6 +19,7 @@ from sklearn.model_selection import GroupKFold, GroupShuffleSplit, \
 import sklearn.model_selection
 from smac.tae import StatusType, TAEAbortException
 
+import autosklearn.evaluation.splitter
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.evaluation.util import read_queue
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, \
@@ -1080,17 +1081,17 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertIsInstance(cv,
                               sklearn.model_selection.PredefinedSplit)
 
-        # holdout, binary classification, fallback to shuffle split
+        # holdout, binary classification, fallback to custom shuffle split
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1, 2])
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = 'holdout'
         evaluator.resampling_strategy_args = {}
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv,
-                              sklearn.model_selection._split.ShuffleSplit)
+                              autosklearn.evaluation.splitter.CustomStratifiedShuffleSplit)
 
         # cv, binary classification
-        D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
+        D.data['Y_train'] = np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1])
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = 'cv'
         evaluator.resampling_strategy_args = {'folds': 5}
@@ -1099,7 +1100,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                               sklearn.model_selection._split.StratifiedKFold)
 
         # cv, binary classification, shuffle is True
-        D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
+        D.data['Y_train'] = np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1])
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = 'cv'
         evaluator.resampling_strategy_args = {'folds': 5}
@@ -1118,14 +1119,14 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                               sklearn.model_selection._split.KFold)
         self.assertFalse(cv.shuffle)
 
-        # cv, binary classification, no fallback anticipated
-        D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1, 2])
+        # cv, binary classification, fallback to custom splitter
+        D.data['Y_train'] = np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2])
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = 'cv'
         evaluator.resampling_strategy_args = {'folds': 5}
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv,
-                              sklearn.model_selection._split.StratifiedKFold)
+                              autosklearn.evaluation.splitter.CustomStratifiedKFold)
 
         # regression, shuffle split
         D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
