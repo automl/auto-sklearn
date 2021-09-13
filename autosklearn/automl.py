@@ -1187,7 +1187,7 @@ class AutoML(BaseEstimator):
                             budget_type=self._budget_type,
                             logger=self._logger,
                             model=model,
-                            train_indices=np.arange(len(X), dtype=int),
+                            train_indices=np.arange(X.shape[0], dtype=int),
                             task_type=self._task,
                         )
                     break
