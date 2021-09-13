@@ -816,6 +816,31 @@ def test_autosklearn2_classification_methods_returns_self(dask_client):
     pickle.dumps(automl_fitted)
 
 
+def test_autosklearn2_classification_methods_returns_self_sparse(dask_client):
+    X_train, y_train, X_test, y_test = putil.get_dataset('breast_cancer', make_sparse=True)
+    automl = AutoSklearn2Classifier(time_left_for_this_task=60, ensemble_size=0,
+                                    delete_tmp_folder_after_terminate=False,
+                                    dask_client=dask_client)
+
+    automl_fitted = automl.fit(X_train, y_train)
+    assert automl is automl_fitted
+
+    automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
+    assert automl is automl_ensemble_fitted
+
+    automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+    assert automl is automl_refitted
+
+    predictions = automl_fitted.predict(X_test)
+    assert sklearn.metrics.accuracy_score(
+        y_test, predictions
+    ) >= 2 / 3, print_debug_information(automl)
+
+    assert "boosting" not in str(automl.get_configuration_space(X=X_train, y=y_train))
+
+    pickle.dumps(automl_fitted)
+
+
 @pytest.mark.parametrize("class_", [AutoSklearnClassifier, AutoSklearnRegressor,
                                     AutoSklearn2Classifier])
 def test_check_estimator_signature(class_):
