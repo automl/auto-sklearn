@@ -119,6 +119,7 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">dask.distributed</span>
+<span class="kn">import</span> <span class="nn">scipy.sparse</span>
 
 <span class="kn">from</span> <span class="nn">ConfigSpace</span> <span class="kn">import</span> <span class="n">Configuration</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -205,9 +206,14 @@
 
         <span class="n">scenario</span> <span class="o">=</span> <span class="n">Scenario</span><span class="p">(</span><span class="n">scenario_dict</span><span class="p">)</span>
 
-        <span class="n">initial_configurations</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">Configuration</span><span class="p">(</span><span class="n">configuration_space</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">member</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="n">initial_configurations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">initial_configurations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">Configuration</span><span class="p">(</span><span class="n">configuration_space</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">member</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">pass</span>
 
         <span class="n">rh2EPM</span> <span class="o">=</span> <span class="n">RunHistory2EPM4LogCost</span>
         <span class="k">return</span> <span class="n">SMAC4AC</span><span class="p">(</span>
@@ -247,9 +253,15 @@
         <span class="kn">from</span> <span class="nn">smac.scenario.scenario</span> <span class="kn">import</span> <span class="n">Scenario</span>
 
         <span class="n">scenario</span> <span class="o">=</span> <span class="n">Scenario</span><span class="p">(</span><span class="n">scenario_dict</span><span class="p">)</span>
-        <span class="n">initial_configurations</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">Configuration</span><span class="p">(</span><span class="n">configuration_space</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">member</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+
+        <span class="n">initial_configurations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">initial_configurations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">Configuration</span><span class="p">(</span><span class="n">configuration_space</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">member</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">pass</span>
 
         <span class="n">rh2EPM</span> <span class="o">=</span> <span class="n">RunHistory2EPM4LogCost</span>
         <span class="n">ta_kwargs</span><span class="p">[</span><span class="s1">&#39;budget_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">budget_type</span>
@@ -453,6 +465,25 @@
             <span class="n">metric</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">feat_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">dataset_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># TODO</span>
+        <span class="c1"># regularly check https://github.com/scikit-learn/scikit-learn/issues/15336 whether</span>
+        <span class="c1"># histogram gradient boosting in scikit-learn finally support sparse data</span>
+        <span class="n">is_sparse</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">issparse</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_sparse</span><span class="p">:</span>
+            <span class="n">include_estimators</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s1">&#39;extra_trees&#39;</span><span class="p">,</span> <span class="s1">&#39;passive_aggressive&#39;</span><span class="p">,</span> <span class="s1">&#39;random_forest&#39;</span><span class="p">,</span> <span class="s1">&#39;sgd&#39;</span><span class="p">,</span> <span class="s1">&#39;mlp&#39;</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">include_estimators</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s1">&#39;extra_trees&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;passive_aggressive&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;random_forest&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;sgd&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;gradient_boosting&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;mlp&#39;</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">include</span><span class="p">[</span><span class="s1">&#39;classifier&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">include_estimators</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>

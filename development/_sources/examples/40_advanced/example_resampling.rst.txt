@@ -177,7 +177,7 @@ Cross-validation
  .. code-block:: none
 
     Before re-fit
-    Accuracy score CV 0.958041958041958
+    Accuracy score CV 0.965034965034965
 
 
 
@@ -329,7 +329,7 @@ splitting it on the first feature.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 6 minutes  4.389 seconds)
+   **Total running time of the script:** ( 6 minutes  5.877 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_resampling.py:
