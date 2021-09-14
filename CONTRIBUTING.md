@@ -1,131 +1,96 @@
 # Contributing to auto-sklearn
 Thanks for checking out the contribution guide!
-We included a [quick overview](#pull-request-overview) at the end for anyone familiar with open-source contribution or autosklearn and simply wants to see our workflow.
+We included a [quick overview](#pull-request-overview) at the end for anyone familiar with open-source contribution or familiar with autosklearn and simply wants to see our workflow.
 
 If you're new to contributing then hopefully this guide helps with contributing to open-source and auto-sklearn, whether it be a simple doc fix, a small bug fix or even new features that everyone can get use out of.
-Even if you're new to open-source or even new to Python but you want to get your hands dirty, we'll try to be as helpful as possible.
 If you're looking for a particular project to work on, check out the [Issues](https://github.com/automl/auto-sklearn/issues) for things you might be interested in!
 
 For experienced contributors, you can skip the overview and find the quick walkthrough [here](#pull-request-overview)!
-Newer contributors, we provide full documentation to help walk you through everything!
 
 This guide is only aimed towards Unix command line users as that's what we know but the same principles apply.
 
-
 # Contributing
-There are many kinds of contributions you can make to auto-sklearn but we'll focus on three main ones **Documentation**, **Bug Fixes** and **Features**, each of which require a little bit of a different flow to make sure it meets code standards and won't cause any issues later on.
-Following that we'll tell you about how you can test your changes locally and then how to submit your pull request!
+There are many kinds of contributions you can make to auto-sklearn but we'll focus on three main ones **Documentation**, **Bug Fixes** and **Features**, each of which require a little bit of a different flow.
+We need to perform several checks to make sure it meets code standards and won't cause any issues later on.
 
 First we'll go over the general flow, what each step does and then later look at making more specific kinds of changes, what we'd like to see and how you might create a workflow.
+Following that we'll tell you about how you can test your changes locally and then how to submit your pull request!
 
 ## General steps
 *   The first thing to do is create your own [fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
-    This gives you a nice place to work on your changes without impacting any code from the original repository.
+    This is to give you a nice place to work on your changes without impacting any code from the original repository.
+
     To do this, navigate to [automl/auto-sklearn](https://github.com/automl/auto-sklearn) and hit the **fork** button in the top-right corner.
-    This will copy the repository as it is, including all its different branches, to you own account.
+    This will copy the repository to your own account, including all of its different branches.
     You'll be able to access this at `https://github.com/{your-username}/auto-sklearn`.
 
 *   The next steps are to download **your own fork** and to create a new [branch](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-branches) where all your changes will go.
+    It's important to work off the latest changes on the **development** branch.
     ```bash
     # With https
     git clone https://github.com/{your-username}/auto-sklearn
-    
-    # ... or With ssh
-    git clone git@github.com:automl/auto-sklearn.git
-    
+
+    # ... or with ssh
+    git clone git@github.com:{your-username}/auto-sklearn.git
+
     # Navigate into the cloned repo
     cd auto-sklearn
-    
+
+    # Create a new branch based off the development one
+    git checkout -b my_new_branch development
+
+    # ... Alternativly, if you would prefer a more manual method
+    # Show all the available branches with a * beside your current one
+    git branch
+
     # Switch to the development branch
     git checkout development
-    
-    # Show all branches and also a * beside the one you are on
-    git branch
-    
-    # Create a new branch based off the development one
+
+    # Create a new branch based on the currently active branch
     git checkout -b my_new_branch
     ```
-    The reason to create a new branch is two fold
-    
-    *   It lets us keep the commit history cleaner once you want to make a pull
-    request.
-    *   If you have to perform a **rebase** or a **merge** later on, this will be
-    much easier.
-        
+
+    The reason to create a new branch is two fold:
+
+    *   One, it keeps the commit history for your changes much cleaner once we merge them in.
+    *   If you have to perform a **rebase** or a **merge** later on, this will be much easier.
+
 *   You'll need a [virtual environment](https://docs.python.org/3/tutorial/venv.html) to work in.
     If you've never used them before, now is definitely the time to start as a virtual environment lets you keep packages for a project separate.
     ```bash
     # Create a virtual environment in a folder called my-virtual-env
     python -m venv my-virtual-env
-    
+
     # Activate the virtual environment
     source my-virtual-env/bin/activate
     ```
-    *   A popular alternative to managing Python projects is [conda](https://docs.conda.io/en/latest/) for which we refer you to their documentation.
-    *   This is the folder where downloaded packages you will need for auto-sklearn will go.
-        In general, anything you install with `pip install` will now go into the virtual environment.
-        If at any time you want to deactivate it simply type `deactivate` in the shell or just close the shell and open a new one
-    *   As extra steps, if you use Python 3.6 or lower on your machine, unfortunately auto-sklearn doesn't support this.
-        You can check out [pyenv](https://github.com/pyenv/pyenv) which lets you switch between Python versions on the fly and manages them all for you
-    
+    *   A popular alternative to managing Python projects is [conda](https://docs.conda.io/en/latest/).
+    *   The folder `my-virtual-env` is where dependancy packages that are required for auto-sklearn will go.
+    *   In general, once you have activated the virtual environment with `source my-virtual-env/bin/activate`, anything you install with `pip install` will now go into the virtual environment.
+        While this environment is active, any python you run will have access to the packages here.
+        If at any time you want to deactivate it simply type `deactivate` in the shell or just close the shell and open a new one.
+    *   If you use Python 3.6 or lower on your machine then unfortunately auto-sklearn doesn't support this.
+        Fortunatly, you can check out [pyenv](https://github.com/pyenv/pyenv) which lets you switch between Python versions on the fly!
+
 *   Now that we have a virtual environment, it's time to install all the dependencies into it.
     ```bash
     pip install -e .[test,examples,doc]
-    
+
     # If you're using shells other than bash you'll need to use
     pip install -e ".[test,examples,doc]"
     ```
     *   If you're only exposure to using pip is `pip install package_name` then this might be a bit confusing.
-    *   If we type `pip install -e .` (notice the 'dot'), this tells `pip` to install a local package located here, in this directory, `.`.
-        The `-e` flag indicates that it should be editable.
-        This means that you will not have to run `pip install .` every time you make a change and want to use it.
+    *   If we type `pip install -e .` (notice the 'dot'), this tells `pip` to install a package located here, in this directory, `.`.
+        The `-e` flag indicates that it should be editable, meaning you will not have to run `pip install .` every time you make a change and want to tryit.
     *   Finally the `[test,examples,doc]` tells `pip` that there's some extra optional dependencies that we want to install.
-        These are used in development but dependencies that aren't required to actually run autosklearn itself.
-        You can check out what these are in the `setup.py` file!
-    *   If you're new to virtual environments, this is a great time to check out what actually exists in the `my-virtual-env` folder.
+        These are dependancies used in development but ones that are not required to actually run autosklearn itself.
+        You can check out what these are in the `setup.py` file.
+    *   If you're new to virtual environments, after performing all this, it's a great time to check out what actually exists in the `my-virtual-env` folder.
 
 *   Now it's time to make some changes, whether it be for [documentation](#documentation), a [bug fix](#bug-fixes) or a new [features](#features).
 
 ## Making Changes
-We'll go over three main categories of contributions but don't feel limited by these headers, adding to our tests, improving python Typing or even some compliance changes are all super useful!
-
-#### Documentation
-Anything to contribute to better documentation is always appreciated and the main way users can get to know about auto-sklearn.
-Whether it's a typo fix, something you didn't find clear or something you think we didn't explain properly, we'd love to improve it!
-
-All of our documentation is done with (`sphinx`)[https://www.sphinx-doc.org/en/master/] with some various
-plugins that you can see in (`doc/conf.py`)[https://github.com/automl/auto-sklearn/blob/master/doc/conf.py#L42].
-
-All of your changes can be viewed by first [building the docs](#testing) and then opening `doc/build/html/index.html` with your favourite browser.
-Alternatively, you can use the command `xdg-open doc/build/hmtl/index.html` which opens it up with your default browser.
-
-*   If you're simply fixing a typo, there shouldn't be much to do except make the PR and we'll accept it without much issue.
-*   If you want to fix a link you should know how linking with `sphinx` works
-    *   For links to internal documentation, you can create a label with
-    ```.rst
-    .. _mylabel:
-    ```
-    *   Later on you can reference this label by
-    ```.rst
-    I am reference to :ref:`the above label<mylabel>`
-    ```
-    *   Now if you want to link some external documentation you'll need
-        to do something like
-    ```.rst
-    Here's a `link<https://sublime-and-sphinx-guide.readthedocs.io/en/latest/references.html>`_ to the external documentation on linking for sphinx
-    ```
-    Notice the trailing `_` which is important
-    
-*   If you want to make some more detailed documentation about some feature that you introduced or you think is not well documented, you'll have to think about a few things.
-    
-    *   Can you include a code snippet to illustrate what you mean?
-    *   Are there other relevant parts of the documentation or code that should be linked to?
-    *   How much other parts of auto-sklearn are you relying on readers to know before hand, maybe link to those sections if you do.
-
-*   If you want to contribute an example, it's a great way to really illustrate an entire flow of some feature.
-    `sphinx-gallery` will run any python file `example_*.py` in one of the example folders.
-    This allows you to have both ReStructured Markdown (rst) and python code with it's output into a [single html page](https://automl.github.io/auto-sklearn/master/examples/40_advanced/example_calc_multiple_metrics.html#sphx-glr-examples-40-advanced-example-calc-multiple-metrics-py)!
-    You'll want to check out some of the [other examples](https://github.com/automl/auto-sklearn/tree/master/examples) to see how to embed rst into a `.py` file.
+We'll go over three main categories of contributions but don't feel limited by these headers, adding to our tests, improving the typing of functions and methods or even some compliance changes are also super useful!
 
 #### Bug Fixes
 Auto-sklearn has been through quite a few iterations, been used for many purposes and is constantly used in ways we didn't even think of.
@@ -143,18 +108,54 @@ Some core things to consider in fixing a bug:
 *   What's the quick fix and what's the long term fix?
     *   Sometimes it's a code typo, a quick correction and problem solved.
         Other times, the bug is an artifact of some larger underlying issue that has gone unnoticed and might require some restructuring.
-        
+
         If this is the case, let us know as you work on it!
-        If it's breaking, sometimes a quick patch and fix will do and larger fixes can be tackled in a timely manner.
+        If it requires breaking, such as changing default behaviour or public API, sometimes a quick patch and fix will do and larger restructing fixes can be tackled in a timely manner.
         As a rule of thumb, if a bug requires modifying more then 50-100 lines of code it's probably something we would like to talk through on how best to tackle it.
 
 *   How can we create a test for this bug in the future?
     *   Of course, once a bug is squashed, we'd like it to not show again and having a test to catch it for the future will future-proof against any changes down the line.
-    
+
         Thankfully, most of this is usually captured in the minimal working example and all that is left is to turn it into a comprehensive test!
 
-What's important once fixing a bug is writing a good PR that let's us now how you identified the bug, what the problem was and how it was fixed.
+What's important once fixing a bug is [writing a good PR](#creating-the-pr) that let's us now how you identified the bug, what the problem was and how it was fixed.
 This lets use review your code with all this in mind and follow the same thought process that lead you to fix it in the first place!
+
+#### Documentation
+Anything to contribute to better documentation is always appreciated and the main way users can get to know about auto-sklearn.
+Whether it's a typo fix, something you didn't find clear or something you think we didn't explain properly, we'd love to improve it!
+
+All of our documentation is done with [`sphinx`](https://www.sphinx-doc.org/en/master/) with some various
+plugins that you can see in [`doc/conf.py`](https://github.com/automl/auto-sklearn/blob/master/doc/conf.py#L42).
+
+All of your changes can be viewed by first [building the docs](#testing) and then opening `doc/build/html/index.html` in a browser.
+
+*   If you're simply fixing a typo, there shouldn't be much to do except make the PR and we'll accept it without much issue.
+*   If you want to fix a link you should know how linking with `sphinx` works
+    *   For links to internal documentation, you can create a label with
+    ```.rst
+    .. _mylabel:
+    ```
+    *   Later on you can reference this label by
+    ```.rst
+    I am reference to :ref:`the above label<mylabel>`
+    ```
+    *   Now if you want to link some external documentation you'll need
+        to do something like
+    ```.rst
+    Here's a `link<https://sublime-and-sphinx-guide.readthedocs.io/en/latest/references.html>`_ to the external documentation on linking for sphinx
+    ```
+    Notice the trailing `_` which is important
+
+*   If you want to make some more detailed documentation about some feature that you introduced or you think is not well documented, you'll have to think about a few things.
+    *   Can you include a code snippet to illustrate what you mean?
+    *   Are there other relevant parts of the documentation or code that should be linked to?
+    *   How much other parts of auto-sklearn are you relying on readers to know before hand, maybe link to those sections if you do.
+
+*   If you want to contribute an example, it's a great way to really illustrate an entire flow of some feature.
+    `sphinx-gallery` will run any python file `example_*.py` in one of the example folders.
+    This allows you to have both ReStructured Markdown (rst) and python code with it's output into a [single html page](https://automl.github.io/auto-sklearn/master/examples/40_advanced/example_calc_multiple_metrics.html#sphx-glr-examples-40-advanced-example-calc-multiple-metrics-py)!
+    You'll want to check out some of the [other examples](https://github.com/automl/auto-sklearn/tree/master/examples) to see how to embed rst into a `.py` file.
 
 #### Features
 While auto-sklearn has many features we're proud of, there's always room for more and better functionality.
@@ -162,25 +163,26 @@ Features don't have to be performance driven, in fact, most of the new features 
 
 However, features are usually a bigger project and for this we'd really advise getting in touch with us first about the feature in mind.
 There are some things we believe best left for external libraries or integrations that we don't wish to consider at this time.
-Another reason to get in touch is to nail exactly what this feature will look like before going to far, the more direct and concise the feature is, the better.
+Another reason to get in touch is to nail exactly what this feature will look like beforehand, the more direct and concise the feature is, the better.
 
 Some things to keep in mind with new features:
 *   A new feature is great, but will this change any existing default behaviours?
-    Unexpected changes for existing users can be detrimental and sometimes it has to be done ... but often these new features can be presented as an option the user can enable.
+    Unexpected changes for existing users can be detrimental and unexpected.
+    Sometimes it has to be done but often these new features can be presented as an option the user can enable.
 *   If you're introducing some new API:
     *   Creating some code samples of how you'd like your feature to be used is a great start.
     *   What current way is there to do the same thing, can any functionality already present be used to help with this new API?
     *   Are you going to deprecate any current API? This is an important fact to consider and something that will definitely have to be discussed.
 
-Writing features are great but new features means new bugs, but thankfully that's what we can write tests for.
-How to test your feature is always tricky, especially if the feature is big in scope.
-Unfortunately there's no secrete or rule of thumb other than try to cover every case you can think of.
+**Testing Features** - Writing features are great but new features means new bugs, but thankfully that's what we can write tests for.
+How to [test your feature](#testing) is always tricky, especially if the feature is big in scope.
+Unfortunately there's no secret or rule of thumb other than try to cover every case you can think of.
 The more it's tested the better!
 Bugs will still get through, that's okay, we will have done what we can and we can fix those in the future but as long as the usual use-cases are covered, this shouldn't be too much of a problem.
 
-Now how are people going to know about your new feature you've introduced?
-This is what documentation is so great for and it's how almost all software functionality is expressed.
-If the feature is enabled by a simple parameter, great, almost all the documentation is present by the in-code docstring and automatically gets rendered in the online docs ... that docstring that was updated ... right?
+**Documenting Features** - Now how are people going to know about your new feature you've introduced?
+This is what [documentation](#documentation) is so great for and it's how almost all software functionality is expressed.
+If the feature is enabled by a parameter, great, almost all the documentation is already present in the code docstring, automatically being rendered in the online docs ... that docstring that was updated when you made changes ... right?
 Sometimes, the new functionality isn't so clear from a simple parameter description and so maybe something needs to be added to the `manual.rst`, a short paragraph suffices and much appreciated.
 Lastly, if the feature really is a game changer or you're very proud of it, consider making an `example_*.py` that will be run and rendered in the online docs!
 
@@ -194,6 +196,27 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     *   Note that these may take a while so check out `pytest --help` to see how you can run tests so that only previous failures run or only certain tests are run.
         This can help you try changes and get results faster.
         Do however run one last full `pytest` once you are finished and happy!
+    *   Here are some we find particularly useful
+        ```
+        # Run tests in specific file like 'test_estimators.py'
+        pytest "test/test_automl/test_estimators.py"
+
+        # Run an entire directory of tests such as 'pipeline'
+        pytest "test/test_pipeline"
+
+        # Run a specific test 'test_mytest' in a specific directory 'test_automl'
+        pytest -k "test_mytest" "test/test_automl"
+
+        # Rerun all the tests that failed in the last `pytest` command
+        pytest --last-failed
+
+        # Rerun all tests but run the failed ones first
+        pytest --failed-first
+
+        # Exit on the first test failure
+        pytest -x
+        ```
+    *   More advanced editors like PyCharm may have built in integrations which could be good to check out!
 
 *   Now we are going to use [sphinx](https://www.sphinx-doc.org/en/master/) to generate all the documentation and make sure there are no issues.
     ```bash
@@ -229,12 +252,12 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     pip install pre-commit
     pre-commit run --all-files
     ```
-    *   The reason we use a code standard (e.g. `flake8` )is to make sure that when we review code:
+    *   The reason we use a code standard like `flake8` is to make sure that when we review code:
         *   There are no extra blank spaces and blank lines.
         *   Lines don't end up too long
         *   Code from multiple source keeps a similar appearance.
     *   We perform static type checking with `mypy` as this can remove a majority of bugs, before a test is even run.
-        It points out programmer errors and what makes compiled languages so safe so that is why we try to use it as much as possible.
+        It points out programmer errors and is what makes compiled languages so safe.
         If you are new to Python types, or stuck with how something should be 'typed', please feel free to push the pull request in the following steps and we should be able to help you out.
     * If interested, the configuration for `pre-commit` can be found in `.pre-commit-config.yaml`
 
@@ -243,10 +266,13 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
 *   We've made sure all the changes work, we've maybe added a test for them and run all the tests locally.
     It's time to commit the changes, push them up to your fork and create a pull request!
     ```bash
-    # Add your changes and make a commit
+    # Get an overview of all the files changes
+    git status
+
+    # Add your changed files
     git add {changed files}
     git commit -m "Something as meaningful as possible"
-    
+
     # This will push my_new_branch to your fork located at `origin`
     git push --set-upstream origin my_new_branch
     ```
@@ -254,11 +280,13 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
 *   At this point, we need to create a pull request (PR) to the [automl/autosklearn](https://github.com/automl/auto-sklearn) repository with our new changes.
     This can be done simply by going to your own forked repo, clicking **'Contribute'**, and selecting
     the **development** branch of `automl/auto-sklearn`.
+
     *   `automl/auto-sklearn` | `development` <- `your-username/auto-sklearn` | `my_new_branch`
-    The reason we don't want to directly merge new PR's into master is to make
-    sure we always have a stable version. With a development branch, we can safely
-    accumulate certain changes and makes sure they all work together before creating
-    a new master version.
+
+        The reason we don't want to directly merge new PR's into master is to make
+        sure we always have a stable version. With a development branch, we can safely
+        accumulate certain changes and makes sure they all work together before creating
+        a new master version.
 
 *   Now you've got to describe what you've changed.
     You'll likely want to check out [this blogpost](https://hugooodias.medium.com/the-anatomy-of-a-perfect-pull-request-567382bb6067) which we believe to give a good overview of what a good PR looks like and will help us get your changes in sooner rather than later!
@@ -301,49 +329,52 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
 * Create a [fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) of the [automl/auto-sklearn](https://github.com/automl/auto-sklearn) git repo
 * Clone your own fork and create a new branch from the branch to work on
     ```bash
-    git clone git@github.com:automl/auto-sklearn.git
+    git clone git@github.com:your-username/auto-sklearn.git
     cd auto-sklearn
     git checkout -b my_new_branch development
-    
+
     # Create a virtual environemnt and activate it so there are no package
     # conflicts
     python -m venv my-virtual-env
     source my-virtual-env/bin/activate
-    
+
     pip install -e .[test,docs,examples] # zsh users need quotes ".[test,...]"
-    
+
     # Edit files...
-    
+
     # If you changed documentation:
     # This will generate all documentation, run examples and check links
     cd doc
+    make html
     make linkcheck
-    
+
     # ... fix any issues
-    
+
     # If you edited any code
     # Check out pytest --help if you want to only run specific tests
     pytest
-    
+
     # ... fix any issues
-    
+
     # Use pre-commit for style and typing checks
     pip install pre-commit
     pre-commit run --all-files
-    
+
     # ... fix any issues
-    
+
+    # Check the changed files
+    git status
+
     # Add the changes
     git add {changed files}
     git commit -m "Meaningful as you can make it message"
-    
+
     # Push back to your fork
     git push --set-upstream origin my_new_branch
     ```
-* Go to github, go to your fork and then make a pull request using the *Contribute*
-icon.
+* Go to github, go to your fork and then make a pull request using the **Contribute** button.
     * `automl/auto-sklearn` | `development` <- `your-username/auto-sklearn` | `my_new_branch`
-* Write a description of the changes, why you implemented them and any implications.
+* Write a [PR](#creating-the-pr) with a description of the changes, why you implemented them and any implications.
     * Check out this [blog post](https://hugooodias.medium.com/the-anatomy-of-a-perfect-pull-request-567382bb6067) for some inspiration!
 * Once we see this, we will run some automated tests on the pull request. These
 tests are the same as the ones you can run manually and are mentioned in the
@@ -360,11 +391,12 @@ tests are the same as the ones you can run manually and are mentioned in the
 ### I've been asked to rebase my pull request, why and what do I do?
 *   It can often be the case that while you were working on some changes, we may have merged something new into the development branch.
 
-    This can be a problem because the branch you created was based off the old development branch in and so there are new changes in the automl/auto-sklearn code base you don't have in your branch.
-    This is not always an issue, as generally if different parts of the code were touched, they can be merged safely.
+    This can be a problem because the branch you created was based off the old development branch.
+    This means there are new changes in the automl/auto-sklearn code base you don't have in your forked repo or locally.
+    This is not always an issue, generally if different parts of the code were touched they can be merged safely.
     Either way, if we ask you to [rebase](https://www.atlassian.com/git/tutorials/merging-vs-rebasing), it is because it won't merge or we think there may have been overlapping changes between what you were working on and the new code put into the development branch.
 *   First, update the development branch on **your fork**
-    *   The easiest way to do this is go to github.com/{your-username}/auto-sklearn navigate to the development branch and click *fetch upstream*.
+    *   The easiest way to do this is go to *https://github.com/your-username/auto-sklearn*, navigate to the development branch and hit **fetch upstream**.
     *   This will make it so your fork of auto-sklearn is now up to date
 *   Second, we need to go to our clone and pull in these new changes to development
     ```bash
