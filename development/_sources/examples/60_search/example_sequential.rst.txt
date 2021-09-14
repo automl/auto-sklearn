@@ -330,7 +330,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  5.106 seconds)
+   **Total running time of the script:** ( 1 minutes  58.720 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_sequential.py:
@@ -345,7 +345,7 @@ Get the Score of the final ensemble
   .. container:: binder-badge
 
     .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/60_search/example_sequential.ipynb
+      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/60_search/example_sequential.ipynb
       :alt: Launch binder
       :width: 150 px
 
