@@ -47,7 +47,7 @@ Contributors v0.14.0
 * Rohit Agarwal
 * hnishi
 * Francisco Rivera Valverde
-* Eddie Bergman <eddiebergmanhs@gmail.com>
+* Eddie Bergman
 * Satyam Jha
 * Joel Jose
 * Oli
