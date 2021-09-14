@@ -3,11 +3,55 @@
 ..
     The following command allows to retrieve all commiters since a specified
     commit. From https://stackoverflow.com/questions/6482436/list-of-authors-in-git-since-a-given-commit
-    git log 275d0d6b20d16822252d8b50bf71b1c787187f09.. --format="%aN <%aE>" --reverse | perl -e 'my %dedupe; while (<STDIN>) { print unless $dedupe{$_}++}'
+    git log 3d53cd9b5011258c4fdcce9d02e252d0248e5f1d.. --format="%aN <%aE>" --reverse | perl -e 'my %dedupe; while (<STDIN>) { print unless $dedupe{$_}++}'
 
 ========
 Releases
 ========
+
+Version 0.14.0
+==============
+
+* ADD #900: Make data preprocessing more configurable, for example allow to completely disable it.
+* ADD #1128: Adds new functionality to retrieve data for an accuracy over time plot from
+  Auto-sklearn without additional code.
+* FIX #1149: Stops Auto-sklearn from printing weird warnings (`Exception ignored in [...]`) at
+  shutdown.
+* FIX #1169: Fixes a bug which made cross-validation and multi-output regression incompatible.
+* FIX #1170: Make all preprocessing techniques deterministic.
+* FIX #1190: Fixes a bug which could make predictive probabilities contain too few classes in
+  case one class was only present a single time.
+* FIX #1209: Pass random states to pipeline objects.
+* FIX #1204: Add support for sparse data in Auto-sklearn 2.0.
+* FIX #1210: Add support for sparse `y` labels.
+* FIX #1245: Fixes a bug which could result in Auto-sklearn crashing in case a class was present
+  only once.
+* DOC #532,#1242: Simplify installation instructions.
+* DOC #1144: Document installation via `conda`
+* DOC #1195,#1201,#1214: Fix a few typos and links. Make some http links https links.
+* DOC #1200: Fixes variable name in an example.
+* DOC #1229: Improve code formatting in the documentation.
+* DOC #1235: Improve docker startup command so it also work on Windows.
+* MAINT #1198: Use latest Ubuntu LTS (20:04) for github actions.
+* MAINT #1231: The command `make linkcheck` no longer builds the documentation, speeding up
+  link-checking.
+* MAINT #1233: Enable regression testing with 3 classification and 3 regression datasets on
+  github actions.
+* MAINT #1239: Increase the timeout for github actions to 60 minutes.
+
+Contributors v0.14.0
+********************
+
+* Pieter Gijsbers
+* Taneli Mielikäinen
+* Rohit Agarwal
+* hnishi
+* Francisco Rivera Valverde
+* Eddie Bergman <eddiebergmanhs@gmail.com>
+* Satyam Jha
+* Joel Jose
+* Oli
+* Matthias Feurer
 
 Version 0.13.0
 ==============
@@ -29,7 +73,7 @@ Version 0.13.0
 * DOC #1109: Add an FAQ.
 * DOC #1126: Add new examples on how to use scikit-learn's inspect module.
 * DOC #1136: Add a new example on how to perform multi-output regression.
-* DOC #1152: Enable link checking when buiding the documentation.
+* DOC #1152: Enable link checking when building the documentation.
 * DOC #1158: New example on how to configure the logger for Auto-sklearn.
 * DOC #1165: Improve the readme page.
 
