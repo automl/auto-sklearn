@@ -300,7 +300,7 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     *   Do you think this might have any implications in the future or how would
         further work on this look like?
     *   If you've introduced some new feature, write about who might use it,
-        give a breif code sample to show it and let us know how you tested it!
+        give a brief code sample to show it and let us know how you tested it!
     *   If you've fixed a bug, write about why this bug exists in the first place,
         how you solved it and how a test makes sure it won't pop up again!
 
@@ -333,7 +333,7 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     cd auto-sklearn
     git checkout -b my_new_branch development
 
-    # Create a virtual environemnt and activate it so there are no package
+    # Create a virtual environment and activate it so there are no package
     # conflicts
     python -m venv my-virtual-env
     source my-virtual-env/bin/activate
