@@ -1,11 +1,11 @@
 # Contributing to auto-sklearn
 Thanks for checking out the contribution guide!
-We included a [quick overview](#pull-request-overview) at the end for anyone familiar with open-source contribution or familiar with autosklearn and simply wants to see our workflow.
+We included a [quick overview](#pull-request-overview) at the end for anyone familiar with open-source contribution or familiar with auto-sklearn and simply wants to see our workflow.
 
 If you're new to contributing then hopefully this guide helps with contributing to open-source and auto-sklearn, whether it be a simple doc fix, a small bug fix or even new features that everyone can get use out of.
 If you're looking for a particular project to work on, check out the [Issues](https://github.com/automl/auto-sklearn/issues) for things you might be interested in!
 
-For experienced contributors, you can skip the overview and find the quick walkthrough [here](#pull-request-overview)!
+For experienced contributors, you can skip the overview and find the quick walk-through [here](#pull-request-overview)!
 
 This guide is only aimed towards Unix command line users as that's what we know but the same principles apply.
 
@@ -28,10 +28,10 @@ Following that we'll tell you about how you can test your changes locally and th
     It's important to work off the latest changes on the **development** branch.
     ```bash
     # With https
-    git clone https://github.com/{your-username}/auto-sklearn
+    git clone https://github.com/your-username/auto-sklearn
 
     # ... or with ssh
-    git clone git@github.com:{your-username}/auto-sklearn.git
+    git clone git@github.com:your-username/auto-sklearn.git
 
     # Navigate into the cloned repo
     cd auto-sklearn
@@ -39,7 +39,7 @@ Following that we'll tell you about how you can test your changes locally and th
     # Create a new branch based off the development one
     git checkout -b my_new_branch development
 
-    # ... Alternativly, if you would prefer a more manual method
+    # ... Alternatively, if you would prefer a more manual method
     # Show all the available branches with a * beside your current one
     git branch
 
@@ -65,12 +65,12 @@ Following that we'll tell you about how you can test your changes locally and th
     source my-virtual-env/bin/activate
     ```
     *   A popular alternative to managing Python projects is [conda](https://docs.conda.io/en/latest/).
-    *   The folder `my-virtual-env` is where dependancy packages that are required for auto-sklearn will go.
+    *   The folder `my-virtual-env` is where dependency packages that are required for auto-sklearn will go.
     *   In general, once you have activated the virtual environment with `source my-virtual-env/bin/activate`, anything you install with `pip install` will now go into the virtual environment.
         While this environment is active, any python you run will have access to the packages here.
         If at any time you want to deactivate it simply type `deactivate` in the shell or just close the shell and open a new one.
     *   If you use Python 3.6 or lower on your machine then unfortunately auto-sklearn doesn't support this.
-        Fortunatly, you can check out [pyenv](https://github.com/pyenv/pyenv) which lets you switch between Python versions on the fly!
+        Fortunately, you can check out [pyenv](https://github.com/pyenv/pyenv) which lets you switch between Python versions on the fly!
 
 *   Now that we have a virtual environment, it's time to install all the dependencies into it.
     ```bash
@@ -81,9 +81,9 @@ Following that we'll tell you about how you can test your changes locally and th
     ```
     *   If you're only exposure to using pip is `pip install package_name` then this might be a bit confusing.
     *   If we type `pip install -e .` (notice the 'dot'), this tells `pip` to install a package located here, in this directory, `.`.
-        The `-e` flag indicates that it should be editable, meaning you will not have to run `pip install .` every time you make a change and want to tryit.
+        The `-e` flag indicates that it should be editable, meaning you will not have to run `pip install .` every time you make a change and want to try it.
     *   Finally the `[test,examples,doc]` tells `pip` that there's some extra optional dependencies that we want to install.
-        These are dependancies used in development but ones that are not required to actually run autosklearn itself.
+        These are dependencies used in development but ones that are not required to actually run auto-sklearn itself.
         You can check out what these are in the `setup.py` file.
     *   If you're new to virtual environments, after performing all this, it's a great time to check out what actually exists in the `my-virtual-env` folder.
 
@@ -110,7 +110,7 @@ Some core things to consider in fixing a bug:
         Other times, the bug is an artifact of some larger underlying issue that has gone unnoticed and might require some restructuring.
 
         If this is the case, let us know as you work on it!
-        If it requires breaking, such as changing default behaviour or public API, sometimes a quick patch and fix will do and larger restructing fixes can be tackled in a timely manner.
+        If it requires breaking, such as changing default behaviour or public API, sometimes a quick patch and fix will do and larger restricting fixes can be tackled in a timely manner.
         As a rule of thumb, if a bug requires modifying more then 50-100 lines of code it's probably something we would like to talk through on how best to tackle it.
 
 *   How can we create a test for this bug in the future?
@@ -277,7 +277,7 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     git push --set-upstream origin my_new_branch
     ```
 
-*   At this point, we need to create a pull request (PR) to the [automl/autosklearn](https://github.com/automl/auto-sklearn) repository with our new changes.
+*   At this point, we need to create a pull request (PR) to the [automl/auto-sklearn](https://github.com/automl/auto-sklearn) repository with our new changes.
     This can be done simply by going to your own forked repo, clicking **'Contribute'**, and selecting
     the **development** branch of `automl/auto-sklearn`.
 
@@ -323,7 +323,7 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     The simplest way to reduce the time needed and to help us too is to run the tests, code formatting check and doc building locally.
     If they all pass locally they will very often have no issues in the automated tests.
 
-    Once everyone is happy, it's time for us to hit (*squash*) merge, get it into the development branch and have one more contribution to autosklearn!
+    Once everyone is happy, it's time for us to hit (*squash*) merge, get it into the development branch and have one more contribution to auto-sklearn!
 
 # Pull Request Overview
 * Create a [fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) of the [automl/auto-sklearn](https://github.com/automl/auto-sklearn) git repo
