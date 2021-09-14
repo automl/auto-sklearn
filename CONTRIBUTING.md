@@ -130,7 +130,7 @@ Alternatively, you can use the command `xdg-open doc/build/hmtl/index.html` whic
 #### Bug Fixes
 Auto-sklearn has been through quite a few iterations, been used for many purposes and is constantly used in ways we didn't even think of.
 Like any maturing software, there will be bugs, old and new.
-While we try to create unit tests to catch as many of these as we can, some slip through and new bugs get introduced as dependencies update and new features introduced.
+While we try to create unit tests to catch as many of these as we can, some slip through and new bugs get introduced as dependencies are updated and new features are introduced.
 
 If you're looking to help by fixing some bugs, or you've encountered your own bugs you'd like fixed in the official version of auto-sklearn, we would greatly appreciate any help!
 We'd be happy to guide you through what we think may be the underlying cause or at least point you in the right direction if it's something you wish to work on.
@@ -214,7 +214,14 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     cd doc
     make linkcheck
     ```
-    *   To view the documentation itself, 
+    *   To view the documentation itself, make sure it is built with the above commands and then open `doc/build/html/index.html` with your favourite browser:
+    ```bash
+    # Firefox
+    firefox ./doc/build/html/index.html
+
+    # Using your default browser
+    xdg-open ./doc/build/html/index.html
+    ```
 
 *   Once you've made all your changes and all the tests pass successfully, we need to make sure that the code fits a certain format and that the [typing](https://docs.python.org/3/library/typing.html) is correct.
     To do this, we use a tool call `pre-commit` which runs `flake8`, a code checker and `mypy`, a static type checker against the code.
