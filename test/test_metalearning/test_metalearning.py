@@ -78,7 +78,7 @@ class Test(unittest.TestCase):
                         'task': task,
                         'is_sparse': False
                     },
-                    include_preprocessors=['no_preprocessing'])
+                    include={'feature_preprocessor': ['no_preprocessing']})
 
                 X_train, Y_train, X_test, Y_test = get_dataset(dataset_name)
                 categorical = {i: False for i in range(X_train.shape[1])}

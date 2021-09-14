@@ -19,6 +19,7 @@ from sklearn.model_selection import GroupKFold, GroupShuffleSplit, \
 import sklearn.model_selection
 from smac.tae import StatusType, TAEAbortException
 
+import autosklearn.evaluation.splitter
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.evaluation.util import read_queue
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, \
@@ -1080,17 +1081,17 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertIsInstance(cv,
                               sklearn.model_selection.PredefinedSplit)
 
-        # holdout, binary classification, fallback to shuffle split
+        # holdout, binary classification, fallback to custom shuffle split
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1, 2])
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = 'holdout'
         evaluator.resampling_strategy_args = {}
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv,
-                              sklearn.model_selection._split.ShuffleSplit)
+                              autosklearn.evaluation.splitter.CustomStratifiedShuffleSplit)
 
         # cv, binary classification
-        D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
+        D.data['Y_train'] = np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1])
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = 'cv'
         evaluator.resampling_strategy_args = {'folds': 5}
@@ -1099,7 +1100,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                               sklearn.model_selection._split.StratifiedKFold)
 
         # cv, binary classification, shuffle is True
-        D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
+        D.data['Y_train'] = np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1])
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = 'cv'
         evaluator.resampling_strategy_args = {'folds': 5}
@@ -1118,14 +1119,14 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                               sklearn.model_selection._split.KFold)
         self.assertFalse(cv.shuffle)
 
-        # cv, binary classification, no fallback anticipated
-        D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1, 2])
+        # cv, binary classification, fallback to custom splitter
+        D.data['Y_train'] = np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2])
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = 'cv'
         evaluator.resampling_strategy_args = {'folds': 5}
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv,
-                              sklearn.model_selection._split.StratifiedKFold)
+                              autosklearn.evaluation.splitter.CustomStratifiedKFold)
 
         # regression, shuffle split
         D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
@@ -2281,7 +2282,7 @@ class FunctionsTest(unittest.TestCase):
             'f1_macro': 0.032036613272311221,
             'f1_micro': 0.030303030303030276,
             'f1_weighted': 0.030441716940572849,
-            'log_loss': 0.06731761928478425,
+            'log_loss': 0.06376745642134637,
             'precision_macro': 0.02777777777777779,
             'precision_micro': 0.030303030303030276,
             'precision_weighted': 0.027777777777777901,
@@ -2357,7 +2358,7 @@ class FunctionsTest(unittest.TestCase):
 
     def test_eval_holdout_budget_iterations_converged(self):
         configuration = get_configuration_space(
-            exclude_estimators=['random_forest', 'liblinear_svc'],
+            exclude={'classifier': ['random_forest', 'liblinear_svc']},
             info={'task': MULTICLASS_CLASSIFICATION, 'is_sparse': False},
         ).get_default_configuration()
         eval_holdout(
@@ -2435,12 +2436,10 @@ class FunctionsTest(unittest.TestCase):
         info = read_queue(self.queue)
         self.assertEqual(len(info), 1)
         self.assertAlmostEqual(info[0]['loss'], 0.06060606060606055)
-        self.assertEqual(info[0]['status'], StatusType.SUCCESS)
-        self.assertNotIn('bac_metric', info[0]['additional_run_info'])
 
     def test_eval_holdout_budget_mixed_subsample(self):
         configuration = get_configuration_space(
-            exclude_estimators=['random_forest'],
+            exclude={'classifier': ['random_forest']},
             info={'task': MULTICLASS_CLASSIFICATION, 'is_sparse': False},
         ).get_default_configuration()
         self.assertEqual(configuration['classifier:__choice__'], 'liblinear_svc')
@@ -2520,7 +2519,7 @@ class FunctionsTest(unittest.TestCase):
             'f1_macro': 0.052793650793650775,
             'f1_micro': 0.04999999999999997,
             'f1_weighted': 0.050090909090909096,
-            'log_loss': 0.12033827614970506,
+            'log_loss': 0.12108563414774837,
             'precision_macro': 0.04963636363636359,
             'precision_micro': 0.04999999999999997,
             'precision_weighted': 0.045757575757575664,

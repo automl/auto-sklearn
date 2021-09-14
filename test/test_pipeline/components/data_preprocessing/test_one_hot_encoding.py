@@ -36,12 +36,9 @@ class OneHotEncoderTest(unittest.TestCase):
         transformations = []
         for i in range(2):
             configuration_space = OneHotEncoder.get_hyperparameter_search_space()
-            default = configuration_space.get_default_configuration()
+            default_config = configuration_space.get_default_configuration()
 
-            preprocessor = OneHotEncoder(
-                random_state=1,
-                **{hp_name: default[hp_name] for hp_name in default if default[hp_name] is not None}
-                )
+            preprocessor = OneHotEncoder(random_state=1, **default_config)
 
             transformer = preprocessor.fit(self.X_train.copy())
             Xt = transformer.transform(self.X_train.copy())
@@ -68,13 +65,9 @@ class OneHotEncoderTest(unittest.TestCase):
 
         for i in range(2):
             configuration_space = OneHotEncoder.get_hyperparameter_search_space()
-            default = configuration_space.get_default_configuration()
+            default_config = configuration_space.get_default_configuration()
 
-            preprocessor = OneHotEncoder(random_state=1,
-                                         **{hp_name: default[hp_name] for
-                                            hp_name in
-                                            default if
-                                            default[hp_name] is not None})
+            preprocessor = OneHotEncoder(random_state=1, **default_config)
 
             transformer = preprocessor.fit(self.X_train.copy())
             Xt = transformer.transform(self.X_train.copy())

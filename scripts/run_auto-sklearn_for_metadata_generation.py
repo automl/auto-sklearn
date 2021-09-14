@@ -70,13 +70,11 @@ if __name__ == '__main__':
     if is_test:
         automl_arguments['resampling_strategy_arguments'] = {'folds': 2}
         if task_type == 'classification':
-            automl_arguments['include_estimators'] = ['libsvm_svc']
-            automl_arguments['include_preprocessors'] = ['no_preprocessing']
             include = {'classifier': ['libsvm_svc'], 'feature_preprocessor': ['no_preprocessing']}
+            automl_arguments['include'] = include
         elif task_type == 'regression':
-            automl_arguments['include_estimators'] = ['extra_trees']
-            automl_arguments['include_preprocessors'] = ['no_preprocessing']
             include = {'regressor': ['extra_trees'], 'feature_preprocessor': ['no_preprocessing']}
+            automl_arguments['include'] = include
         else:
             raise ValueError('Unsupported task type: %s' % str(task_type))
     else:

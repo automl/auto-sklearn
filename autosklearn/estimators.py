@@ -7,18 +7,19 @@ import dask.distributed
 import joblib
 import numpy as np
 import pandas as pd
+from scipy.sparse import spmatrix
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.utils.multiclass import type_of_target
 from smac.runhistory.runhistory import RunInfo, RunValue
 
 from autosklearn.data.validation import (
+    convert_if_sparse,
     SUPPORTED_FEAT_TYPES,
     SUPPORTED_TARGET_TYPES,
 )
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, AutoML
 from autosklearn.metrics import Scorer
-from autosklearn.util.backend import create
 
 
 class AutoSklearnEstimator(BaseEstimator):
@@ -33,10 +34,8 @@ class AutoSklearnEstimator(BaseEstimator):
         max_models_on_disc=50,
         seed=1,
         memory_limit=3072,
-        include_estimators=None,
-        exclude_estimators=None,
-        include_preprocessors=None,
-        exclude_preprocessors=None,
+        include=None,
+        exclude=None,
         resampling_strategy='holdout',
         resampling_strategy_arguments=None,
         tmp_folder=None,
@@ -102,22 +101,16 @@ class AutoSklearnEstimator(BaseEstimator):
             In case of multi-processing, `memory_limit` will be per job.
             This memory limit also applies to the ensemble creation process.
 
-        include_estimators : list, optional (None)
-            If None, all possible estimators are used. Otherwise specifies
-            set of estimators to use.
+        include : dict, optional (None)
+            If None, all possible algorithms are used. Otherwise specifies
+            set of algorithms for each added component is used. Include and 
+            exclude are incompatible if used together on the same component
 
-        exclude_estimators : list, optional (None)
-            If None, all possible estimators are used. Otherwise specifies
-            set of estimators not to use. Incompatible with include_estimators.
-
-        include_preprocessors : list, optional (None)
-            If None all possible preprocessors are used. Otherwise specifies set
-            of preprocessors to use.
-
-        exclude_preprocessors : list, optional (None)
-            If None all possible preprocessors are used. Otherwise specifies set
-            of preprocessors not to use. Incompatible with
-            include_preprocessors.
+        exclude : dict, optional (None)
+            If None, all possible algorithms are used. Otherwise specifies
+            set of algorithms for each added component is not used.
+            Incompatible with include. Include and exclude are incompatible
+            if used together on the same component
 
         resampling_strategy : string or object, optional ('holdout')
             how to to handle overfitting, might need 'resampling_strategy_arguments'
@@ -161,7 +154,7 @@ class AutoSklearnEstimator(BaseEstimator):
             folder to store configuration output and log files, if ``None``
             automatically use ``/tmp/autosklearn_tmp_$pid_$random_number``
 
-        delete_tmp_folder_after_terminate: string, optional (True)
+        delete_tmp_folder_after_terminate: bool, optional (True)
             remove tmp_folder, when finished. If tmp_folder is None
             tmp_dir will always be deleted
 
@@ -241,8 +234,13 @@ class AutoSklearnEstimator(BaseEstimator):
 
             Not all keys returned by scikit-learn are supported yet.
 
+        performance_over_time\_ : pandas.core.frame.DataFrame
+            A ``DataFrame`` containing the models performance over time data. Can be
+            used for plotting directly. Please refer to the example
+            :ref:`Train and Test Inputs <sphx_glr_examples_40_advanced_example_pandas_train_test.py>`.
+
         """  # noqa (links are too long)
-        # Raise error if the given total time budget is less than 60 seconds.
+        # Raise error if the given total time budget is less than 30 seconds.
         if time_left_for_this_task < 30:
             raise ValueError("Time left for this task must be at least "
                              "30 seconds. ")
@@ -254,10 +252,8 @@ class AutoSklearnEstimator(BaseEstimator):
         self.max_models_on_disc = max_models_on_disc
         self.seed = seed
         self.memory_limit = memory_limit
-        self.include_estimators = include_estimators
-        self.exclude_estimators = exclude_estimators
-        self.include_preprocessors = include_preprocessors
-        self.exclude_preprocessors = exclude_preprocessors
+        self.include = include
+        self.exclude = exclude
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_arguments = resampling_strategy_arguments
         self.tmp_folder = tmp_folder
@@ -294,13 +290,9 @@ class AutoSklearnEstimator(BaseEstimator):
 
     def build_automl(self):
 
-        backend = create(
+        automl = self._get_automl_class()(
             temporary_directory=self.tmp_folder,
             delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
-            )
-
-        automl = self._get_automl_class()(
-            backend=backend,
             time_left_for_this_task=self.time_left_for_this_task,
             per_run_time_limit=self.per_run_time_limit,
             initial_configurations_via_metalearning=self.initial_configurations_via_metalearning,
@@ -309,10 +301,8 @@ class AutoSklearnEstimator(BaseEstimator):
             max_models_on_disc=self.max_models_on_disc,
             seed=self.seed,
             memory_limit=self.memory_limit,
-            include_estimators=self.include_estimators,
-            exclude_estimators=self.exclude_estimators,
-            include_preprocessors=self.include_preprocessors,
-            exclude_preprocessors=self.exclude_preprocessors,
+            include=self.include,
+            exclude=self.exclude,
             resampling_strategy=self.resampling_strategy,
             resampling_strategy_arguments=self.resampling_strategy_arguments,
             n_jobs=self._n_jobs,
@@ -344,11 +334,11 @@ class AutoSklearnEstimator(BaseEstimator):
     def fit_pipeline(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
+        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
         config: Union[Configuration,  Dict[str, Union[str, float, int]]],
         dataset_name: Optional[str] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         feat_type: Optional[List[str]] = None,
         *args,
         **kwargs: Dict,
@@ -520,6 +510,10 @@ class AutoSklearnEstimator(BaseEstimator):
 
         """
         return self.automl_.get_models_with_weights()
+
+    @property
+    def performance_over_time_(self):
+        return self.automl_.performance_over_time_
 
     @property
     def cv_results_(self):
@@ -831,9 +825,9 @@ class AutoSklearnEstimator(BaseEstimator):
     def get_configuration_space(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
+        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         dataset_name: Optional[str] = None,
         feat_type: Optional[List[str]] = None,
     ):
@@ -918,6 +912,9 @@ class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
         self
 
         """
+        # AutoSklearn does not handle sparse y for now
+        y = convert_if_sparse(y)
+
         # Before running anything else, first check that the
         # type of data is compatible with auto-sklearn. Legal target
         # types are: binary, multiclass, multilabel-indicator.
@@ -1065,6 +1062,9 @@ class AutoSklearnRegressor(AutoSklearnEstimator, RegressorMixin):
         # types are: continuous, continuous-multioutput, and the special cases:
         # multiclass : because [3.0, 1.0, 5.0] is considered as multiclass
         # binary: because [1.0, 0.0] is considered multiclass
+        # AutoSklearn does not handle sparse y for now
+        y = convert_if_sparse(y)
+
         target_type = type_of_target(y)
         supported_types = ['continuous', 'binary', 'multiclass', 'continuous-multioutput']
         if target_type not in supported_types:

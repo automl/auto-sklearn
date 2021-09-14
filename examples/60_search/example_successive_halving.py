@@ -69,7 +69,8 @@ def get_smac_object_callback(budget_type):
                 'initial_budget': 10.0,
                 'max_budget': 100,
                 'eta': 2,
-                'min_chall': 1},
+                'min_chall': 1
+            },
             n_jobs=n_jobs,
             dask_client=dask_client,
         )
@@ -98,9 +99,13 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     # for demonstrational purpose.
     resampling_strategy='holdout',
     resampling_strategy_arguments={'train_size': 0.67},
-    include_estimators=['extra_trees', 'gradient_boosting', 'random_forest', 'sgd',
-                        'passive_aggressive'],
-    include_preprocessors=['no_preprocessing'],
+    include={
+        'classifier': [
+            'extra_trees', 'gradient_boosting', 'random_forest',
+            'sgd', 'passive_aggressive'
+        ],
+        'feature_preprocessor': ['no_preprocessing']
+    },
     get_smac_object_callback=get_smac_object_callback('iterations'),
 )
 automl.fit(X_train, y_train, dataset_name='breast_cancer')
@@ -126,9 +131,13 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     tmp_folder='/tmp/autosklearn_sh_example_tmp_01',
     disable_evaluator_output=False,
     resampling_strategy='cv',
-    include_estimators=['extra_trees', 'gradient_boosting', 'random_forest', 'sgd',
-                        'passive_aggressive'],
-    include_preprocessors=['no_preprocessing'],
+    include={
+        'classifier': [
+            'extra_trees', 'gradient_boosting', 'random_forest', 
+            'sgd', 'passive_aggressive'
+        ],
+        'feature_preprocessor': ['no_preprocessing']
+    },
     get_smac_object_callback=get_smac_object_callback('iterations'),
 )
 automl.fit(X_train, y_train, dataset_name='breast_cancer')
@@ -156,9 +165,13 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     tmp_folder='/tmp/autosklearn_sh_example_tmp_cv_02',
     disable_evaluator_output=False,
     resampling_strategy='cv-iterative-fit',
-    include_estimators=['extra_trees', 'gradient_boosting', 'random_forest', 'sgd',
-                        'passive_aggressive'],
-    include_preprocessors=['no_preprocessing'],
+    include={
+        'classifier': [
+            'extra_trees', 'gradient_boosting', 'random_forest',
+            'sgd', 'passive_aggressive'
+        ],
+        'feature_preprocessor': ['no_preprocessing']
+    },
     get_smac_object_callback=get_smac_object_callback('iterations'),
 )
 automl.fit(X_train, y_train, dataset_name='breast_cancer')
@@ -222,7 +235,11 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     # for demonstrational purpose.
     resampling_strategy='holdout',
     resampling_strategy_arguments={'train_size': 0.67},
-    include_estimators=['extra_trees', 'gradient_boosting', 'random_forest', 'sgd'],
+    include={
+        'classifier': [
+            'extra_trees', 'gradient_boosting', 'random_forest', 'sgd'
+        ]
+    },
     get_smac_object_callback=get_smac_object_callback('mixed'),
 )
 automl.fit(X_train, y_train, dataset_name='breast_cancer')

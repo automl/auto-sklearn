@@ -17,7 +17,7 @@ class TruncatedSVD(AutoSklearnPreprocessingAlgorithm):
         self.target_dim = int(self.target_dim)
         target_dim = min(self.target_dim, X.shape[1] - 1)
         self.preprocessor = sklearn.decomposition.TruncatedSVD(
-            target_dim, algorithm='randomized')
+            target_dim, algorithm='randomized',  random_state=self.random_state)
         # TODO: remove when migrating to sklearn 0.16
         # Circumvents a bug in sklearn
         # https://github.com/scikit-learn/scikit-learn/commit/f08b8c8e52663167819f242f605db39f3b5a6d0c

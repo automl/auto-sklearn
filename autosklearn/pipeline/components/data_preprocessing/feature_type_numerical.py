@@ -6,17 +6,13 @@ import numpy as np
 
 from sklearn.base import BaseEstimator
 
-from autosklearn.pipeline.components.data_preprocessing.category_shift.\
-    category_shift import CategoryShift
-from autosklearn.pipeline.components.data_preprocessing.imputation.\
-    categorical_imputation import CategoricalImputation
-from autosklearn.pipeline.components.data_preprocessing.minority_coalescense \
-    import CoalescenseChoice
-from autosklearn.pipeline.components.data_preprocessing.categorical_encoding \
-    import OHEChoice
-from autosklearn.pipeline.components.data_preprocessing.categorical_encoding.encoding import (
-    OrdinalEncoding
-)
+from autosklearn.pipeline.components.data_preprocessing import rescaling as \
+    rescaling_components
+from autosklearn.pipeline.components.data_preprocessing.imputation.numerical_imputation \
+    import NumericalImputation
+from autosklearn.pipeline.components.data_preprocessing.variance_threshold\
+    .variance_threshold import VarianceThreshold
+
 from autosklearn.pipeline.base import (
     BasePipeline,
     DATASET_PROPERTIES_TYPE,
@@ -24,45 +20,47 @@ from autosklearn.pipeline.base import (
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
 
-class CategoricalPreprocessingPipeline(BasePipeline):
-    """This class implements a pipeline for data preprocessing of categorical features.
-    It assumes that the data to be transformed is made only of categorical features.
+class NumericalPreprocessingPipeline(BasePipeline):
+    """This class implements a pipeline for data preprocessing of numerical features.
+    It assumes that the data to be transformed is made only of numerical features.
     The steps of this pipeline are:
-        1 - Category shift: Adds 3 to every category value
-        2 - Imputation: Assign category 2 to missing values (NaN).
-        3 - Minority coalescence: Assign category 1 to all categories whose occurrence
-            don't sum-up to a certain minimum fraction
-        4 - One hot encoding: usual sklearn one hot encoding
+        1 - Imputation: Substitution of missing values (NaN)
+        2 - VarianceThreshold: Removes low-variance features
+        3 - Rescaling: rescale features according to a certain rule (e.g. normalization,
+            standartization or min-max)
 
     Parameters
     ----------
     config : ConfigSpace.configuration_space.Configuration
         The configuration to evaluate.
 
-    random_state : int, RandomState instance or None, optional (default=None)
+    random_state : Optional[int | RandomState]
         If int, random_state is the seed used by the random number generator;
         If RandomState instance, random_state is the random number generator;
         If None, the random number generator is the RandomState instance
         used by `np.random`."""
 
-    def __init__(self,
-                 config: Optional[Configuration] = None,
-                 steps: Optional[List[Tuple[str, BaseEstimator]]] = None,
-                 dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
-                 include: Optional[Dict[str, str]] = None,
-                 exclude: Optional[Dict[str, str]] = None,
-                 random_state: Optional[np.random.RandomState] = None,
-                 init_params: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self,
+        config: Optional[Configuration] = None,
+        steps: Optional[List[Tuple[str, BaseEstimator]]] = None,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+        include: Optional[Dict[str, str]] = None,
+        exclude: Optional[Dict[str, str]] = None,
+        random_state: Optional[Union[int, np.random.RandomState]] = None,
+        init_params: Optional[Dict[str, Any]] = None
+    ) -> None:
         self._output_dtype = np.int32
         super().__init__(
             config, steps, dataset_properties, include, exclude,
-            random_state, init_params)
+            random_state, init_params
+        )
 
     @staticmethod
     def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
                        ) -> Dict[str, Optional[Union[str, int, bool, Tuple]]]:
-        return {'shortname': 'cat_datapreproc',
-                'name': 'categorical data preprocessing',
+        return {'shortname': 'num_datapreproc',
+                'name': 'numeric data preprocessing',
                 'handles_missing_values': True,
                 'handles_nominal_values': True,
                 'handles_numerical_features': True,
@@ -87,6 +85,9 @@ class CategoricalPreprocessingPipeline(BasePipeline):
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         """Create the hyperparameter configuration space.
+
+        Parameters
+        ----------
 
         Returns
         -------
@@ -114,14 +115,12 @@ class CategoricalPreprocessingPipeline(BasePipeline):
             default_dataset_properties.update(dataset_properties)
 
         steps.extend([
-            ("imputation", CategoricalImputation()),
-            ("encoding", OrdinalEncoding()),
-            ("category_shift", CategoryShift()),
-            ("category_coalescence", CoalescenseChoice(default_dataset_properties)),
-            ("categorical_encoding", OHEChoice(default_dataset_properties)),
+            ("imputation", NumericalImputation()),
+            ("variance_threshold", VarianceThreshold()),
+            ("rescaling", rescaling_components.RescalingChoice(default_dataset_properties)),
             ])
 
         return steps
 
     def _get_estimator_hyperparameter_name(self) -> str:
-        return "categorical data preprocessing"
+        return "numerical data preprocessing"

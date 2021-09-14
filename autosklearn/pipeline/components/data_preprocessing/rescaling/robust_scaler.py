@@ -17,8 +17,12 @@ from autosklearn.pipeline.components.base import \
 
 
 class RobustScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, q_min: float, q_max: float,
-                 random_state: Optional[np.random.RandomState] = None):
+    def __init__(
+        self,
+        q_min: float,
+        q_max: float,
+        random_state: Optional[Union[int, np.random.RandomState]] = None
+    ) -> None:
         from sklearn.preprocessing import RobustScaler
         self.q_min = q_min
         self.q_max = q_max

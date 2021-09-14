@@ -14,9 +14,10 @@ from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
 
 class OrdinalEncoding(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self,
-                 random_state: Optional[np.random.RandomState] = None,
-                 ):
+    def __init__(
+        self,
+        random_state: Optional[Union[int, np.random.RandomState]] = None
+    ) -> None:
         self.random_state = random_state
 
     def fit(self, X: PIPELINE_DATA_DTYPE,

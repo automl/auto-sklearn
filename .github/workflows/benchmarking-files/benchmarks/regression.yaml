@@ -1,0 +1,13 @@
+---
+
+# Regression, 303 instances, 14 features, 1 target
+- name: cholesterol
+  openml_task_id: 2295
+
+# Regression, 345 instances, 6 features, 1 target
+- name: liver-disorders
+  openml_task_id: 52948
+
+# Regression, 1460 instances, 80 features, 1 target
+- name: house-prices-nominal
+  openml_task_id: 359951

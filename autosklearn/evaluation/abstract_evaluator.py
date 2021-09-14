@@ -46,7 +46,7 @@ class MyDummyClassifier(DummyClassifier):
     def __init__(
         self,
         config: Configuration,
-        random_state: np.random.RandomState,
+        random_state: Optional[Union[int, np.random.RandomState]],
         init_params: Optional[Dict[str, Any]] = None,
         dataset_properties: Dict[str, Any] = {},
         include: Optional[List[str]] = None,
@@ -102,7 +102,7 @@ class MyDummyRegressor(DummyRegressor):
     def __init__(
         self,
         config: Configuration,
-        random_state: np.random.RandomState,
+        random_state: Optional[Union[int, np.random.RandomState]],
         init_params: Optional[Dict[str, Any]] = None,
         dataset_properties: Dict[str, Any] = {},
         include: Optional[List[str]] = None,
@@ -241,8 +241,7 @@ class AbstractEvaluator(object):
             self.predict_function = self._predict_proba
 
         self._init_params = {
-            'data_preprocessing:feat_type':
-                self.datamanager.feat_type
+            'data_preprocessor:feat_type': self.datamanager.feat_type
         }
 
         if init_params is not None:

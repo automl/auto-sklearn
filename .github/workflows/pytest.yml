@@ -9,8 +9,8 @@ on:
 
 jobs:
   ubuntu:
+    runs-on: ubuntu-20.04
 
-    runs-on: ubuntu-18.04
     strategy:
       matrix:
         python-version: [3.7, 3.8, 3.9]
@@ -25,6 +25,7 @@ jobs:
       fail-fast: false
 
     steps:
+
     - uses: actions/checkout@v2
     - name: Setup Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -33,6 +34,7 @@ jobs:
       # Otherwise, uses the default branch (master) is used.
       with:
         python-version: ${{ matrix.python-version }}
+
     - name: Conda Install test dependencies
       if: matrix.use-conda == true
       run: |
@@ -40,6 +42,7 @@ jobs:
         $CONDA/bin/conda create -n testenv --yes pip wheel gxx_linux-64 gcc_linux-64 swig python=${{ matrix.python-version }}
         $CONDA/envs/testenv/bin/python3 -m pip install --upgrade pip
         $CONDA/envs/testenv/bin/pip3 install -e .[test]
+
     - name: Install test dependencies
       if: matrix.use-conda == false && matrix.use-dist == false
       run: |
@@ -53,6 +56,7 @@ jobs:
         sudo apt-get remove swig
         sudo apt-get install swig3.0
         sudo ln -s /usr/bin/swig3.0 /usr/bin/swig
+
     - name: Dist Install test dependencies
       if: matrix.use-conda == false && matrix.use-dist == true
       run: |
@@ -65,12 +69,14 @@ jobs:
         python setup.py sdist
         last_dist=$(ls -t dist/auto-sklearn-*.tar.gz | head -n 1)
         pip install $last_dist[test]
+
     - name: Store repository status
       id: status-before
       run: |
         echo "::set-output name=BEFORE::$(git status --porcelain -b)"
+
     - name: Conda Run tests
-      timeout-minutes: 45
+      timeout-minutes: 60
       if: matrix.use-conda == true
       run: |
         export OPENBLAS_NUM_THREADS=1
@@ -81,8 +87,9 @@ jobs:
         export PATH="$CONDA/envs/testenv/bin:$PATH"
         if [ ${{ matrix.code-cov }} ]; then codecov='--cov=autosklearn --cov-report=xml'; fi
         $CONDA/envs/testenv/bin/python3 -m pytest --durations=20 --timeout=300 --timeout-method=thread -v $codecov test
+
     - name: Run tests
-      timeout-minutes: 45
+      timeout-minutes: 60
       if: matrix.use-conda == false
       run: |
         export OPENBLAS_NUM_THREADS=1
@@ -90,6 +97,7 @@ jobs:
         export MKL_NUM_THREADS=1
         if [ ${{ matrix.code-cov }} ]; then codecov='--cov=autosklearn --cov-report=xml'; fi
         pytest --durations=20 --timeout=300 --timeout-method=thread -v $codecov test
+
     - name: Check for files left behind by test
       if: ${{ always() }}
       run: |
@@ -101,6 +109,7 @@ jobs:
             echo "Not all generated files have been deleted!"
             exit 1
         fi
+
     - name: Upload coverage
       if: matrix.code-cov && always()
       uses: codecov/codecov-action@v1

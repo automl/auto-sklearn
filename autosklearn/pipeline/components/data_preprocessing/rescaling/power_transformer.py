@@ -10,7 +10,10 @@ from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorit
 
 
 class PowerTransformerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, random_state: Optional[np.random.RandomState] = None):
+    def __init__(
+        self,
+        random_state: Optional[Union[int, np.random.RandomState]] = None,
+    ) -> None:
         from sklearn.preprocessing import PowerTransformer
         self.preprocessor = PowerTransformer(copy=False)
 

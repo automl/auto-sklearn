@@ -15,15 +15,20 @@ from autosklearn.pipeline.components.base import \
 
 
 class QuantileTransformerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, n_quantiles: int, output_distribution: str,
-                 random_state: Optional[np.random.RandomState] = None):
+    def __init__(
+        self,
+        n_quantiles: int,
+        output_distribution: str,
+        random_state: Optional[Union[int, np.random.RandomState]] = None
+    ) -> None:
         from sklearn.preprocessing import QuantileTransformer
         self.n_quantiles = n_quantiles
         self.output_distribution = output_distribution
         self.preprocessor = QuantileTransformer(
             n_quantiles=n_quantiles,
             output_distribution=output_distribution,
-            copy=False
+            copy=False,
+            random_state=random_state
         )
 
     @staticmethod

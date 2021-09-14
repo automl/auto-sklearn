@@ -8,18 +8,19 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 
 import numpy as np
 
-from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.base import BaseEstimator
 
 from autosklearn.pipeline.base import (
      BasePipeline,
      DATASET_PROPERTIES_TYPE,
      PIPELINE_DATA_DTYPE,
  )
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_categorical \
+from autosklearn.pipeline.components.data_preprocessing.feature_type_categorical \
     import CategoricalPreprocessingPipeline
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_numerical \
+from autosklearn.pipeline.components.data_preprocessing.feature_type_numerical \
     import NumericalPreprocessingPipeline
-from autosklearn.pipeline.components.base import AutoSklearnComponent, AutoSklearnChoice
+from autosklearn.pipeline.components.base import AutoSklearnComponent, AutoSklearnChoice, \
+    AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 from autosklearn.data.validation import (
     SUPPORTED_FEAT_TYPES,
@@ -27,7 +28,7 @@ from autosklearn.data.validation import (
 )
 
 
-class DataPreprocessor(TransformerMixin, AutoSklearnComponent):
+class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
     """ This component is used to apply distinct transformations to categorical and
     numerical features of a dataset. It is built on top of sklearn's ColumnTransformer.
     """
@@ -39,7 +40,7 @@ class DataPreprocessor(TransformerMixin, AutoSklearnComponent):
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
         include: Optional[Dict[str, str]] = None,
         exclude: Optional[Dict[str, str]] = None,
-        random_state: Optional[np.random.RandomState] = None,
+        random_state: Optional[Union[int, np.random.RandomState]] = None,
         init_params: Optional[Dict[str, Any]] = None,
         feat_type: Optional[Dict[Union[str, int], str]] = None,
         force_sparse_output: bool = False,
@@ -64,7 +65,7 @@ class DataPreprocessor(TransformerMixin, AutoSklearnComponent):
         # Configuration of the data-preprocessor is different from the configuration of
         # the categorical pipeline. Hence, force to None
         # It is actually the call to set_hyperparameter who properly sets this argument
-        # TODO: Extract the child configuration space from the datapreprocessor to the
+        # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
         self.categ_ppl = CategoricalPreprocessingPipeline(
             config=None, steps=pipeline, dataset_properties=dataset_properties,
@@ -75,7 +76,7 @@ class DataPreprocessor(TransformerMixin, AutoSklearnComponent):
         # Configuration of the data-preprocessor is different from the configuration of
         # the numerical pipeline. Hence, force to None
         # It is actually the call to set_hyperparameter who properly sets this argument
-        # TODO: Extract the child configuration space from the datapreprocessor to the
+        # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
         self.numer_ppl = NumericalPreprocessingPipeline(
             config=None, steps=pipeline, dataset_properties=dataset_properties,
@@ -90,7 +91,7 @@ class DataPreprocessor(TransformerMixin, AutoSklearnComponent):
         self.column_transformer = column_transformer
 
     def fit(self, X: SUPPORTED_FEAT_TYPES, y: Optional[SUPPORTED_TARGET_TYPES] = None
-            ) -> 'DataPreprocessor':
+            ) -> 'FeatTypeSplit':
 
         n_feats = X.shape[1]
         categorical_features = []
@@ -165,6 +166,7 @@ class DataPreprocessor(TransformerMixin, AutoSklearnComponent):
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
+                'handles_multioutput': True,
                 # TODO find out of this is right!
                 'handles_sparse': True,
                 'handles_dense': True,
@@ -172,7 +174,7 @@ class DataPreprocessor(TransformerMixin, AutoSklearnComponent):
                 'output': (INPUT,), }
 
     def set_hyperparameters(self, configuration: Configuration,
-                            init_params: Optional[Dict[str, Any]] = None) -> 'DataPreprocessor':
+                            init_params: Optional[Dict[str, Any]] = None) -> 'FeatTypeSplit':
         if init_params is not None and 'feat_type' in init_params.keys():
             self.feat_type = init_params['feat_type']
 
@@ -216,7 +218,7 @@ class DataPreprocessor(TransformerMixin, AutoSklearnComponent):
     ) -> ConfigurationSpace:
         self.dataset_properties = dataset_properties
         cs = ConfigurationSpace()
-        cs = DataPreprocessor._get_hyperparameter_search_space_recursevely(
+        cs = FeatTypeSplit._get_hyperparameter_search_space_recursevely(
             dataset_properties, cs, self._transformers)
         return cs
 
@@ -232,6 +234,6 @@ class DataPreprocessor(TransformerMixin, AutoSklearnComponent):
                     st_name,
                     st_operation.get_hyperparameter_search_space(dataset_properties))
             else:
-                return DataPreprocessor._get_hyperparameter_search_space_recursevely(
+                return FeatTypeSplit._get_hyperparameter_search_space_recursevely(
                     dataset_properties, cs, st_operation)
         return cs

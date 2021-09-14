@@ -48,8 +48,12 @@ random forests.
 
 >>> import autosklearn.classification
 >>> automl = autosklearn.classification.AutoSklearnClassifier(
->>>     include_estimators=["random_forest", ], exclude_estimators=None,
->>>     include_preprocessors=["no_preprocessing", ], exclude_preprocessors=None)
+>>>     include = {
+>>>       'classifier': ["random_forest"],
+>>>       'feature_preprocessors': ["no_preprocessing"]
+>>>     },
+>>>     exclude=None
+>>> )
 >>> automl.fit(X_train, y_train)
 >>> predictions = automl.predict(X_test)
 
@@ -70,16 +74,18 @@ Turning off preprocessing
 Preprocessing in *auto-sklearn* is divided into data preprocessing and
 feature preprocessing. Data preprocessing includes One-Hot encoding of
 categorical features, imputation of missing values and the normalization of
-features or samples. These steps currently cannot be turned off. Feature
-preprocessing is a single transformer which implements for example feature
+features or samples. Dataprerocessing steps cannot be turned off as this ensures
+autosklearn can actually pass the data to sklearn models without error.
+
+Feature preprocessing is a single transformer which implements for example feature
 selection or transformation of features into a different space (i.e. PCA).
 This can be turned off by setting
-``include_preprocessors=["no_preprocessing"]`` as shown in the example above.
+``include={'feature_preprocessors'=["no_preprocessing"]}`` as shown in the example above.
 
 Resampling strategies
 =====================
 
-Examples for using holdout and cross-validation can be found in `auto-sklearn/examples/ <examples/>`_
+Examples for using holdout and cross-validation can be found in :ref:`auto-sklearn/examples/ <examples>`
 
 Supported Inputs
 ================
@@ -139,10 +145,20 @@ statistics can be printed for the inspection.
 >>> automl = autosklearn.classification.AutoSklearnClassifier()
 >>> automl.fit(X_train, y_train)
 >>> automl.cv_results_
+>>> automl.performance_over_time_.plot(
+>>>    x='Timestamp',
+>>>    kind='line',
+>>>    legend=True,
+>>>    title='Auto-sklearn accuracy over time',
+>>>    grid=True,
+>>> )
+>>> plt.show()
+>>> 
 >>> automl.sprint_statistics()
 >>> automl.show_models()
 
 ``cv_results_`` returns a dict with keys as column headers and values as columns, that can be imported into a pandas DataFrame.
+``performance_over_time_``  returns a DataFrame containing the models performance over time data, which can be used for plotting directly (Here is an example: :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py`).
 ``sprint_statistics()`` is a method that prints the name of the  dataset, the metric used, and the best validation score
 obtained by running *auto-sklearn*. It additionally prints the number of both successful and unsuccessful
 algorithm runs.
@@ -201,7 +217,9 @@ set ``ensemble_size=1`` and ``initial_configurations_via_metalearning=0``:
 
 >>> import autosklearn.classification
 >>> automl = autosklearn.classification.AutoSklearnClassifier(
->>>     ensemble_size=1, initial_configurations_via_metalearning=0)
+>>>     ensemble_size=1,
+>>>     initial_configurations_via_metalearning=0
+>>> )
 
 An ensemble of size one will result in always choosing the current best model
 according to its performance on the validation set. Setting the initial

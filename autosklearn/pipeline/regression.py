@@ -1,15 +1,16 @@
 import copy
 from itertools import product
+from typing import Optional, Union
 
 import numpy as np
 from sklearn.base import RegressorMixin
 
 from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
-    import DataPreprocessor
+from autosklearn.pipeline.components.data_preprocessing import DataPreprocessorChoice
 
-from ConfigSpace.configuration_space import ConfigurationSpace
+
+from ConfigSpace.configuration_space import ConfigurationSpace, Configuration
 from autosklearn.pipeline.components import regression as \
     regression_components
 from autosklearn.pipeline.components import feature_preprocessing as \
@@ -36,7 +37,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     config : ConfigSpace.configuration_space.Configuration
         The configuration to evaluate.
 
-    random_state : int, RandomState instance or None, optional (default=None)
+    random_state : Optional[int | RandomState]
         If int, random_state is the seed used by the random number generator;
         If RandomState instance, random_state is the random number generator;
         If None, the random number generator is the RandomState instance
@@ -65,10 +66,21 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     --------
 
     """
-    def __init__(self, config=None, steps=None, dataset_properties=None,
-                 include=None, exclude=None, random_state=None,
-                 init_params=None):
+    def __init__(
+        self,
+        config: Optional[Configuration] = None,
+        steps=None,
+        dataset_properties=None,
+        include=None,
+        exclude=None,
+        random_state: Optional[Union[int, np.random.RandomState]] = None,
+        init_params=None
+    ):
         self._output_dtype = np.float32
+        if dataset_properties is None:
+            dataset_properties = dict()
+        if 'target_type' not in dataset_properties:
+            dataset_properties['target_type'] = 'regression'
         super().__init__(
             config=config, steps=steps,
             dataset_properties=dataset_properties,
@@ -102,31 +114,16 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
         Parameters
         ----------
-        include_estimators : list of str
-            If include_estimators is given, only the regressors specified
+        include : dict
+            If include is given, only the modules specified for nodes
             are used. Specify them by their module name; e.g., to include
-            only the SVM use :python:`include_regressors=['svr']`.
-            Cannot be used together with :python:`exclude_regressors`.
+            only the SVM use :python:`include={'regressor':['svr']}`.
 
-        exclude_estimators : list of str
-            If exclude_estimators is given, only the regressors specified
+        exclude : dict
+            If exclude is given, only the components specified for nodes
             are used. Specify them by their module name; e.g., to include
             all regressors except the SVM use
-            :python:`exclude_regressors=['svr']`.
-            Cannot be used together with :python:`include_regressors`.
-
-        include_preprocessors : list of str
-            If include_preprocessors is given, only the preprocessors specified
-            are used. Specify them by their module name; e.g., to include
-            only the PCA use :python:`include_preprocessors=['pca']`.
-            Cannot be used together with :python:`exclude_preprocessors`.
-
-        exclude_preprocessors : list of str
-            If include_preprocessors is given, only the preprocessors specified
-            are used. Specify them by their module name; e.g., to include
-            all preprocessors except the PCA use
-            :python:`exclude_preprocessors=['pca']`.
-            Cannot be used together with :python:`include_preprocessors`.
+            :python:`exclude=['regressor': 'svr']`.
 
         Returns
         -------
@@ -235,13 +232,27 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
             default_dataset_properties.update(dataset_properties)
 
         steps.extend([
-            ['data_preprocessing',
-                DataPreprocessor(dataset_properties=default_dataset_properties)],
-            ['feature_preprocessor',
+            [
+                'data_preprocessor',
+                DataPreprocessorChoice(
+                    dataset_properties=default_dataset_properties,
+                    random_state=self.random_state
+                )
+            ],
+            [
+                'feature_preprocessor',
                 feature_preprocessing_components.FeaturePreprocessorChoice(
-                    default_dataset_properties)],
-            ['regressor',
-                regression_components.RegressorChoice(default_dataset_properties)]
+                    dataset_properties=default_dataset_properties,
+                    random_state=self.random_state
+                )
+            ],
+            [
+                'regressor',
+                regression_components.RegressorChoice(
+                    default_dataset_properties,
+                    random_state=self.random_state
+                )
+            ]
         ])
 
         return steps

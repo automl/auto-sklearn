@@ -7,6 +7,14 @@ import typing
 import numpy as np
 
 
+scores_dict = {
+    'train_single': ["single_best_train_score", "single_best_optimization_score"],
+    'test_single': ["single_best_test_score"],
+    'train_ensamble': ["ensemble_optimization_score"],
+    'test_ensamble': ["ensemble_test_score"]
+}
+
+
 def print_debug_information(automl):
 
     # In case it is called with estimator,
@@ -52,11 +60,41 @@ def print_debug_information(automl):
     return os.linesep.join(content)
 
 
+def _includes(scores, all_scores):
+    return all(score in all_scores for score in scores) and len(scores) == len(all_scores)
+
+
 def count_succeses(cv_results):
     return np.sum(
         [status in ['Success', 'Success (but do not advance to higher budget)']
          for status in cv_results['status']]
     )
+
+
+def includes_all_scores(scores):
+    all_scores = scores_dict["train_single"] + scores_dict["test_single"] + \
+                 scores_dict["train_ensamble"] + scores_dict["test_ensamble"] + ["Timestamp"]
+    return _includes(scores, all_scores)
+
+
+def include_single_scores(scores):
+    all_scores = scores_dict["train_single"] + scores_dict["test_single"] + ["Timestamp"]
+    return _includes(scores, all_scores)
+
+
+def includes_train_scores(scores):
+    all_scores = scores_dict["train_single"] + scores_dict["train_ensamble"] + ["Timestamp"]
+    return _includes(scores, all_scores)
+
+
+def performance_over_time_is_plausible(poT):
+    if len(poT) < 1:
+        return False
+    if len(poT.drop(columns=["Timestamp"]).dropna()) < 1:
+        return False
+    if not poT["Timestamp"].is_monotonic:
+        return False
+    return True
 
 
 class AutoMLLogParser(object):

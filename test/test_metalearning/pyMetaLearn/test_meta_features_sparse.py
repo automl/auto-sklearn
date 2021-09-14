@@ -12,10 +12,9 @@ from scipy import sparse
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
-
+from autosklearn.pipeline.components.data_preprocessing.feature_type \
+    import FeatTypeSplit
 import autosklearn.metalearning.metafeatures.metafeatures as meta_features
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
-    import DataPreprocessor
 
 
 @pytest.fixture
@@ -97,7 +96,7 @@ def sparse_data_transformed():
     X_sparse[NaNs] = 0
     X_sparse = sparse.csr_matrix(X_sparse)
 
-    ohe = DataPreprocessor(feat_type={
+    ohe = FeatTypeSplit(feat_type={
         col: 'categorical' if category else 'numerical'
         for col, category in categorical.items()
     })

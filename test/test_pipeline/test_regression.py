@@ -166,8 +166,10 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 X_test = data['X_test'].copy()
                 data['Y_test'].copy()
 
-            cls = SimpleRegressionPipeline(random_state=1,
-                                           dataset_properties=dataset_properties)
+            cls = SimpleRegressionPipeline(
+                random_state=1,
+                dataset_properties=dataset_properties
+            )
             cls.set_hyperparameters(config)
 
             # First make sure that for this configuration, setting the parameters
@@ -247,7 +249,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
     def test_default_configuration(self):
         for i in range(2):
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes')
-            auto = SimpleRegressionPipeline()
+            auto = SimpleRegressionPipeline(random_state=1)
             auto = auto.fit(X_train, Y_train)
             predictions = auto.predict(copy.deepcopy(X_test))
             # The lower the worse
@@ -258,8 +260,12 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
 
     def test_default_configuration_iterative_fit(self):
         regressor = SimpleRegressionPipeline(
-            include={'regressor': ['random_forest'],
-                     'feature_preprocessor': ['no_preprocessing']})
+            random_state=1,
+            include={
+                'regressor': ['random_forest'],
+                'feature_preprocessor': ['no_preprocessing']
+            }
+        )
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
         regressor.fit_transformer(X_train, Y_train)
         for i in range(1, 11):
@@ -278,47 +284,58 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
         forbiddens = cs.get_forbiddens()
-        self.assertEqual(155, len(hyperparameters))
-        self.assertEqual(len(hyperparameters) - 6, len(conditions))
+        self.assertEqual(156, len(hyperparameters))
+        self.assertEqual(len(hyperparameters) - 3, len(conditions))
         self.assertEqual(len(forbiddens), 35)
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
-        cs = SimpleRegressionPipeline(
-            include={'regressor': ['random_forest']}).get_hyperparameter_search_space()
+        regressor = SimpleRegressionPipeline(
+            include={'regressor': ['random_forest']}
+        )
+        cs = regressor.get_hyperparameter_search_space()
         self.assertEqual(
             cs.get_hyperparameter('regressor:__choice__'),
             CategoricalHyperparameter('regressor:__choice__', ['random_forest']),
-            )
+        )
 
         # TODO add this test when more than one regressor is present
-        cs = SimpleRegressionPipeline(exclude={'regressor': ['random_forest']}).\
-            get_hyperparameter_search_space()
+        regressor = SimpleRegressionPipeline(
+            exclude={'regressor': ['random_forest']}
+        )
+        cs = regressor.get_hyperparameter_search_space()
         self.assertNotIn('random_forest', str(cs))
 
-        cs = SimpleRegressionPipeline(include={'feature_preprocessor': ['pca']}).\
-            get_hyperparameter_search_space()
+        regressor = SimpleRegressionPipeline(
+            include={'feature_preprocessor': ['pca']}
+        )
+        cs = regressor.get_hyperparameter_search_space()
         self.assertEqual(cs.get_hyperparameter(
             'feature_preprocessor:__choice__'),
             CategoricalHyperparameter('feature_preprocessor:__choice__', ['pca']))
 
-        cs = SimpleRegressionPipeline(
-            exclude={'feature_preprocessor': ['no_preprocessing']}).\
-            get_hyperparameter_search_space()
+        regressor = SimpleRegressionPipeline(
+            exclude={'feature_preprocessor': ['no_preprocessing']}
+        )
+        cs = regressor.get_hyperparameter_search_space()
         self.assertNotIn('no_preprocessing', str(cs))
 
     def test_get_hyperparameter_search_space_preprocessor_contradicts_default_classifier(
-            self):
-        cs = SimpleRegressionPipeline(include={'feature_preprocessor': ['densifier']},
-                                      dataset_properties={'sparse': True}).\
-            get_hyperparameter_search_space()
+        self
+    ):
+        regressor = SimpleRegressionPipeline(
+            include={'feature_preprocessor': ['densifier']},
+            dataset_properties={'sparse': True}
+        )
+        cs = regressor.get_hyperparameter_search_space()
         self.assertEqual(
             cs.get_hyperparameter('regressor:__choice__').default_value,
             'gradient_boosting'
         )
 
-        cs = SimpleRegressionPipeline(
-            include={'feature_preprocessor': ['nystroem_sampler']}).\
-            get_hyperparameter_search_space()
+        regressor = SimpleRegressionPipeline(
+            include={'feature_preprocessor': ['nystroem_sampler']}
+        )
+        cs = regressor.get_hyperparameter_search_space()
         self.assertEqual(
             cs.get_hyperparameter('regressor:__choice__').default_value,
             'sgd'
@@ -385,7 +402,11 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         include = {'regressor': ['decision_tree']}
         cs = SimpleRegressionPipeline(include=include).get_hyperparameter_search_space()
         default = cs.get_default_configuration()
-        regressor = SimpleRegressionPipeline(default, include=include)
+        regressor = SimpleRegressionPipeline(
+            config=default,
+            random_state=1,
+            include=include
+        )
 
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
         regressor.fit(X_train, Y_train)
@@ -401,12 +422,19 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
     def test_predict_batched_sparse(self):
         dataset_properties = {'sparse': True}
         include = {'regressor': ['decision_tree']}
-        cs = SimpleRegressionPipeline(dataset_properties=dataset_properties,
-                                      include=include).get_hyperparameter_search_space()
+
+        cs = SimpleRegressionPipeline(
+            dataset_properties=dataset_properties,
+            include=include
+        ).get_hyperparameter_search_space()
+
         default = cs.get_default_configuration()
-        regressor = SimpleRegressionPipeline(default,
-                                             dataset_properties=dataset_properties,
-                                             include=include)
+        regressor = SimpleRegressionPipeline(
+            config=default,
+            random_state=1,
+            dataset_properties=dataset_properties,
+            include=include
+        )
 
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston',
                                                        make_sparse=True)
@@ -434,7 +462,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
 
     def test_pipeline_clonability(self):
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
-        auto = SimpleRegressionPipeline()
+        auto = SimpleRegressionPipeline(random_state=1)
         auto = auto.fit(X_train, Y_train)
         auto_clone = clone(auto)
         auto_clone_params = auto_clone.get_params()
@@ -477,10 +505,45 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         # A choice component might have attribute requirements that we need to check
         expected_sub_key = expected_key.replace(':__choice__', ':') + implementation_type
         expected_attributes = {}
-        for key, value in config_dict.items():
-            if key != expected_key and expected_sub_key in key:
-                expected_attributes[key.split(':')[-1]] = value
-                keys_checked.append(key)
+        if 'data_preprocessor:__choice__' in expected_key:
+            # We have to check both the numerical and categorical
+            to_check = {
+                'numerical_transformer': implementation.choice.numer_ppl.named_steps,
+                'categorical_transformer': implementation.choice.categ_ppl.named_steps,
+            }
+
+            for data_type, pipeline in to_check.items():
+                for sub_name, sub_step in pipeline.items():
+                    # If it is a Choice, make sure it is the correct one!
+                    if isinstance(sub_step, AutoSklearnChoice):
+                        key = "data_preprocessor:feature_type:{}:{}:__choice__".format(
+                            data_type,
+                            sub_name
+                        )
+                        keys_checked.extend(
+                            self._test_set_hyperparameter_choice(
+                                key, sub_step, config_dict
+                            )
+                        )
+                    # If it is a component, make sure it has the correct hyperparams
+                    elif isinstance(sub_step, AutoSklearnComponent):
+                        keys_checked.extend(
+                            self._test_set_hyperparameter_component(
+                                "data_preprocessor:feature_type:{}:{}".format(
+                                    data_type,
+                                    sub_name
+                                ),
+                                sub_step, config_dict
+                            )
+                        )
+                    else:
+                        raise ValueError("New type of pipeline component!")
+            return keys_checked
+        else:
+            for key, value in config_dict.items():
+                if key != expected_key and expected_sub_key in key:
+                    expected_attributes[key.split(':')[-1]] = value
+                    keys_checked.append(key)
         if expected_attributes:
             attributes = vars(implementation.choice)
             # Cannot check the whole dictionary, just names, as some
@@ -524,6 +587,9 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         that comply with the given configuration. It iterates trough the pipeline to
         make sure we did not miss a step, but also checks at the end that every
         configuration from Config was checked
+
+        Also considers random_state and ensures pipeline steps correctly recieve
+        the right random_state
         """
 
         all_combinations = list(itertools.product([True, False], repeat=4))
@@ -534,8 +600,9 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 'multiclass': multiclass,
                 'signed': signed,
             }
+            random_state = 1
             auto = SimpleRegressionPipeline(
-                random_state=1,
+                random_state=random_state,
                 dataset_properties=dataset_properties,
             )
             cs = auto.get_hyperparameter_search_space()
@@ -551,58 +618,27 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             keys_checked = []
 
             for name, step in auto.named_steps.items():
-                if name == 'data_preprocessing':
-                    # We have to check both the numerical and categorical
-                    to_check = {
-                        'numerical_transformer': step.numer_ppl.named_steps,
-                        'categorical_transformer': step.categ_ppl.named_steps,
-                    }
-
-                    for data_type, pipeline in to_check.items():
-                        for sub_name, sub_step in pipeline.items():
-                            # If it is a Choice, make sure it is the correct one!
-                            if isinstance(sub_step, AutoSklearnChoice):
-                                key = "data_preprocessing:{}:{}:__choice__".format(
-                                    data_type,
-                                    sub_name
-                                )
-                                keys_checked.extend(
-                                    self._test_set_hyperparameter_choice(
-                                        key, sub_step, config_dict
-                                    )
-                                )
-                            # If it is a component, make sure it has the correct hyperparams
-                            elif isinstance(sub_step, AutoSklearnComponent):
-                                keys_checked.extend(
-                                    self._test_set_hyperparameter_component(
-                                        "data_preprocessing:{}:{}".format(
-                                            data_type,
-                                            sub_name
-                                        ),
-                                        sub_step, config_dict
-                                    )
-                                )
-                            else:
-                                raise ValueError("New type of pipeline component!")
-                elif name == 'balancing':
+                if name == 'data_preprocessor':
                     keys_checked.extend(
-                        self._test_set_hyperparameter_component(
-                            'balancing',
-                            step, config_dict
+                        self._test_set_hyperparameter_choice(
+                            'data_preprocessor:__choice__', step, config_dict
                         )
                     )
+                    self.assertEqual(step.random_state, random_state)
                 elif name == 'feature_preprocessor':
                     keys_checked.extend(
                         self._test_set_hyperparameter_choice(
                             'feature_preprocessor:__choice__', step, config_dict
                         )
                     )
+                    self.assertEqual(step.random_state, random_state)
                 elif name == 'regressor':
                     keys_checked.extend(
                         self._test_set_hyperparameter_choice(
                             'regressor:__choice__', step, config_dict
                         )
                     )
+                    self.assertEqual(step.random_state, random_state)
                 else:
                     raise ValueError("Found another type of step! Need to update this check"
                                      " {}. ".format(name)

@@ -16,8 +16,11 @@ class MinorityCoalescer(AutoSklearnPreprocessingAlgorithm):
     """ Group together categories which occurence is less than a specified minimum fraction.
     """
 
-    def __init__(self, minimum_fraction: float = 0.01,
-                 random_state: Optional[np.random.RandomState] = None):
+    def __init__(
+        self,
+        minimum_fraction: float = 0.01,
+        random_state: Optional[Union[int, np.random.RandomState]] = None
+    ) -> None:
         self.minimum_fraction = minimum_fraction
 
     def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None

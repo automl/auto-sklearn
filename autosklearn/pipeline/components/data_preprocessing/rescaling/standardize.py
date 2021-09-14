@@ -15,7 +15,10 @@ from autosklearn.pipeline.components.base import \
 
 
 class StandardScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, random_state: Optional[np.random.RandomState] = None):
+    def __init__(
+        self,
+        random_state: Optional[Union[int, np.random.RandomState]] = None
+    ) -> None:
         from sklearn.preprocessing import StandardScaler
         self.preprocessor = StandardScaler(copy=False)
 

@@ -6,6 +6,7 @@ import pickle
 from typing import Any, Dict, List, Optional, Union
 
 import dask.distributed
+import scipy.sparse
 
 from ConfigSpace import Configuration
 import numpy as np
@@ -92,9 +93,14 @@ class SmacObjectCallback:
 
         scenario = Scenario(scenario_dict)
 
-        initial_configurations = [
-            Configuration(configuration_space=scenario.cs, values=member)
-            for member in self.portfolio.values()]
+        initial_configurations = []
+        for member in self.portfolio.values():
+            try:
+                initial_configurations.append(
+                    Configuration(configuration_space=scenario.cs, values=member)
+                )
+            except ValueError:
+                pass
 
         rh2EPM = RunHistory2EPM4LogCost
         return SMAC4AC(
@@ -134,9 +140,15 @@ class SHObjectCallback:
         from smac.scenario.scenario import Scenario
 
         scenario = Scenario(scenario_dict)
-        initial_configurations = [
-            Configuration(configuration_space=scenario.cs, values=member)
-            for member in self.portfolio.values()]
+
+        initial_configurations = []
+        for member in self.portfolio.values():
+            try:
+                initial_configurations.append(
+                    Configuration(configuration_space=scenario.cs, values=member)
+                )
+            except ValueError:
+                pass
 
         rh2EPM = RunHistory2EPM4LogCost
         ta_kwargs['budget_type'] = self.budget_type
@@ -305,6 +317,8 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             'extra_trees', 'passive_aggressive', 'random_forest', 'sgd', 'gradient_boosting', 'mlp',
         ]
         include_preprocessors = ["no_preprocessing"]
+        include = {'classifier': include_estimators,
+                   'feature_preprocessor': include_preprocessors}
         super().__init__(
             time_left_for_this_task=time_left_for_this_task,
             per_run_time_limit=per_run_time_limit,
@@ -314,10 +328,8 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             max_models_on_disc=max_models_on_disc,
             seed=seed,
             memory_limit=memory_limit,
-            include_estimators=include_estimators,
-            exclude_estimators=None,
-            include_preprocessors=include_preprocessors,
-            exclude_preprocessors=None,
+            include=include,
+            exclude=None,
             resampling_strategy=None,
             resampling_strategy_arguments=None,
             tmp_folder=tmp_folder,
@@ -340,6 +352,25 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             metric=None,
             feat_type=None,
             dataset_name=None):
+
+        # TODO
+        # regularly check https://github.com/scikit-learn/scikit-learn/issues/15336 whether
+        # histogram gradient boosting in scikit-learn finally support sparse data
+        is_sparse = scipy.sparse.issparse(X)
+        if is_sparse:
+            include_estimators = [
+                'extra_trees', 'passive_aggressive', 'random_forest', 'sgd', 'mlp',
+            ]
+        else:
+            include_estimators = [
+                'extra_trees',
+                'passive_aggressive',
+                'random_forest',
+                'sgd',
+                'gradient_boosting',
+                'mlp',
+            ]
+        self.include['classifier'] = include_estimators
 
         if self.metric is None:
             if len(y.shape) == 1 or y.shape[1] == 1:

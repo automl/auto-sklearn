@@ -19,7 +19,6 @@ import dask.distributed
 import numpy as np
 import pandas as pd
 import pynisher
-from sklearn.utils.validation import check_random_state
 from smac.callbacks import IncorporateRunResultCallback
 from smac.optimizer.smbo import SMBO
 from smac.runhistory.runhistory import RunInfo, RunValue
@@ -57,7 +56,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         max_iterations: Optional[int],
         read_at_most: int,
         ensemble_memory_limit: Optional[int],
-        random_state: int,
+        random_state: Union[int, np.random.RandomState],
         logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
         pynisher_context: str = 'fork',
     ):
@@ -228,7 +227,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
                     precision=self.precision,
                     memory_limit=self.ensemble_memory_limit,
                     read_at_most=self.read_at_most,
-                    random_state=self.seed,
+                    random_state=self.random_state,
                     end_at=self.start_time + self.time_left_for_ensembles,
                     iteration=self.iteration,
                     return_predictions=False,
@@ -266,15 +265,15 @@ def fit_and_return_ensemble(
     max_models_on_disc: Union[float, int],
     seed: int,
     precision: int,
-    memory_limit: Optional[int],
     read_at_most: int,
-    random_state: int,
     end_at: float,
     iteration: int,
     return_predictions: bool,
     pynisher_context: str,
     logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
     unit_test: bool = False,
+    memory_limit: Optional[int] = None,
+    random_state: Optional[Union[int, np.random.RandomState]] = None,
 ) -> Tuple[
         List[Tuple[int, float, float, float]],
         int,
@@ -318,8 +317,6 @@ def fit_and_return_ensemble(
             random seed
         precision: [16,32,64,128]
             precision of floats to read the predictions
-        memory_limit: Optional[int]
-            memory limit in mb. If ``None``, no memory limit is enforced.
         read_at_most: int
             read at most n new prediction files in each iteration
         end_at: float
@@ -329,13 +326,17 @@ def fit_and_return_ensemble(
             The current iteration
         pynisher_context: str
             Context to use for multiprocessing, can be either fork, spawn or forkserver.
-        logger_port: int
+        logger_port: int = DEFAULT_TCP_LOGGING_PORT
             The port where the logging server is listening to.
-        unit_test: bool
+        unit_test: bool = False
             Turn on unit testing mode. This currently makes fit_ensemble raise a MemoryError.
             Having this is very bad coding style, but I did not find a way to make
             unittest.mock work through the pynisher with all spawn contexts. If you know a
             better solution, please let us know by opening an issue.
+        memory_limit: Optional[int] = None
+            memory limit in mb. If ``None``, no memory limit is enforced.
+        random_state: Optional[int | RandomState] = None
+            A random state used for the ensemble selection process.
 
     Returns
     -------
@@ -376,15 +377,15 @@ class EnsembleBuilder(object):
         task_type: int,
         metric: Scorer,
         ensemble_size: int = 10,
-        ensemble_nbest: int = 100,
+        ensemble_nbest: Union[int, float] = 100,
         max_models_on_disc: int = 100,
         performance_range_threshold: float = 0,
         seed: int = 1,
         precision: int = 32,
         memory_limit: Optional[int] = 1024,
         read_at_most: int = 5,
-        random_state: Optional[Union[int, np.random.RandomState]] = None,
         logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
+        random_state: Optional[Union[int, np.random.RandomState]] = None,
         unit_test: bool = False,
     ):
         """
@@ -400,14 +401,14 @@ class EnsembleBuilder(object):
                 type of ML task
             metric: str
                 name of metric to compute the loss of the given predictions
-            ensemble_size: int
+            ensemble_size: int = 10
                 maximal size of ensemble (passed to autosklearn.ensemble.ensemble_selection)
-            ensemble_nbest: int/float
+            ensemble_nbest: int | float = 100
                 if int: consider only the n best prediction
                 if float: consider only this fraction of the best models
-                Both wrt to validation predictions
+                Both with respect to the validation predictions
                 If performance_range_threshold > 0, might return less models
-            max_models_on_disc: int
+            max_models_on_disc: int = 100
                Defines the maximum number of models that are kept in the disc.
                If int, it must be greater or equal than 1, and dictates the max number of
                models to keep.
@@ -417,23 +418,25 @@ class EnsembleBuilder(object):
                Models and predictions of the worst-performing models will be deleted then.
                If None, the feature is disabled.
                It defines an upper bound on the models that can be used in the ensemble.
-            performance_range_threshold: float
+            performance_range_threshold: float = 0
                 Keep only models that are better than:
                     dummy + (best - dummy)*performance_range_threshold
                 E.g dummy=2, best=4, thresh=0.5 --> only consider models with loss > 3
                 Will at most return the minimum between ensemble_nbest models,
                 and max_models_on_disc. Might return less
-            seed: int
-                random seed
-            precision: [16,32,64,128]
+            seed: int = 1
+                random seed that is used as part of the filename
+            precision: int in [16,32,64,128] = 32
                 precision of floats to read the predictions
-            memory_limit: Optional[int]
+            memory_limit: Optional[int] = 1024
                 memory limit in mb. If ``None``, no memory limit is enforced.
-            read_at_most: int
+            read_at_most: int = 5
                 read at most n new prediction files in each iteration
-            logger_port: int
+            logger_port: int = DEFAULT_TCP_LOGGING_PORT
                 port that receives logging records
-            unit_test: bool
+            random_state: Optional[int | RandomState] = None
+                An int or RandomState object used for generating the ensemble.
+            unit_test: bool = False
                 Turn on unit testing mode. This currently makes fit_ensemble raise a MemoryError.
                 Having this is very bad coding style, but I did not find a way to make
                 unittest.mock work through the pynisher with all spawn contexts. If you know a
@@ -475,7 +478,7 @@ class EnsembleBuilder(object):
         self.precision = precision
         self.memory_limit = memory_limit
         self.read_at_most = read_at_most
-        self.random_state = check_random_state(random_state)
+        self.random_state = random_state
         self.unit_test = unit_test
 
         # Setup the logger

@@ -19,7 +19,7 @@ In case you try to install Auto-sklearn on a system where no wheel files for the
 are provided (see `here <https://pypi.org/project/pyrfr/#files>`_ for available wheels) you also
 need:
 
-* SWIG (version 3.0.* is required; >=4.0.0 is not supported) (`get SWIG here <http://www.swig.org/survey.html>`_).
+* SWIG (`get SWIG here <http://www.swig.org/survey.html>`_).
 
 For an explanation of missing Microsoft Windows and MAC OSX support please
 check the Section `Windows/OSX compatibility`_.
@@ -27,13 +27,7 @@ check the Section `Windows/OSX compatibility`_.
 Installing auto-sklearn
 =======================
 
-Please install all dependencies manually with:
-
-.. code:: bash
-
-    curl https://raw.githubusercontent.com/automl/auto-sklearn/master/requirements.txt | xargs -n 1 -L 1 pip3 install
-
-Then install *auto-sklearn*:
+You can install *auto-sklearn* with `pip` in the usual manner:
 
 .. code:: bash
 
@@ -169,7 +163,7 @@ To start a Jupyter notebook, you could instead run e.g.:
 
 .. code:: bash
 
-    docker run -it -v $PWD:/opt/nb -p 8888:8888 mfeurer/auto-sklearn:master /bin/bash -c "mkdir -p /opt/nb && jupyter notebook --notebook-dir=/opt/nb --ip='0.0.0.0' --port=8888 --no-browser --allow-root"
+    docker run -it -v ${PWD}:/opt/nb -p 8888:8888 mfeurer/auto-sklearn:master /bin/bash -c "mkdir -p /opt/nb && jupyter notebook --notebook-dir=/opt/nb --ip='0.0.0.0' --port=8888 --no-browser --allow-root"
 
 Alternatively, it is possible to use the development version of auto-sklearn by replacing all
 occurences of ``master`` by ``development``.

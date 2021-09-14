@@ -107,11 +107,12 @@ def _test_classifier(classifier, dataset='iris', sparse=False,
                                                    make_binary=make_binary)
 
     configuration_space = classifier.get_hyperparameter_search_space(
-        dataset_properties={'sparse': sparse})
-    default = configuration_space.get_default_configuration()
-    classifier = classifier(random_state=np.random.RandomState(1),
-                            **{hp_name: default[hp_name] for hp_name in
-                               default if default[hp_name] is not None})
+        dataset_properties={'sparse': sparse}
+    )
+    default_config = configuration_space.get_default_configuration()
+
+    classifier = classifier(random_state=0, **default_config)
+
     if hasattr(classifier, 'iterative_fit'):
         class counter(object):
             def __init__(self, func):
@@ -138,13 +139,13 @@ def _test_classifier_iterative_fit(classifier, dataset='iris', sparse=False):
     X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
                                                    make_sparse=sparse)
     configuration_space = classifier.get_hyperparameter_search_space(
-        dataset_properties={'sparse': sparse})
-    default = configuration_space.get_default_configuration()
-    classifier = classifier(random_state=np.random.RandomState(1),
-                            **{hp_name: default[hp_name] for hp_name in
-                               default if default[hp_name] is not None})
+        dataset_properties={'sparse': sparse}
+    )
+    default_config = configuration_space.get_default_configuration()
 
+    classifier = classifier(random_state=0, **default_config)
     classifier.iterative_fit(X_train, Y_train, n_iter=2, refit=True)
+
     iteration = 2
     while not classifier.configuration_fully_fitted():
         n_iter = int(2 ** iteration / 2)
@@ -165,10 +166,10 @@ def _test_classifier_predict_proba(classifier, dataset='iris', sparse=False,
                                                    make_multilabel=make_multilabel,
                                                    make_binary=make_binary)
     configuration_space = classifier.get_hyperparameter_search_space()
-    default = configuration_space.get_default_configuration()
-    classifier = classifier(random_state=np.random.RandomState(1),
-                            **{hp_name: default[hp_name] for hp_name in
-                               default})
+
+    default_config = configuration_space.get_default_configuration()
+    classifier = classifier(random_state=0, **default_config)
+
     predictor = classifier.fit(X_train, Y_train)
     predictions = predictor.predict_proba(X_test)
     return predictions, Y_test
@@ -181,11 +182,9 @@ def _test_preprocessing(Preprocessor, dataset='iris', make_sparse=False,
                                                    train_size_maximum=train_size_maximum)
     original_X_train = X_train.copy()
     configuration_space = Preprocessor.get_hyperparameter_search_space()
-    default = configuration_space.get_default_configuration()
+    default_config = configuration_space.get_default_configuration()
 
-    preprocessor = Preprocessor(random_state=np.random.RandomState(1),
-                                **{hp_name: default[hp_name] for hp_name in
-                                   default if default[hp_name] is not None})
+    preprocessor = Preprocessor(random_state=0, **default_config)
 
     transformer = preprocessor.fit(X_train, Y_train)
     return transformer.transform(X_train), original_X_train
@@ -200,10 +199,9 @@ class PreprocessingTestCase(unittest.TestCase):
         self.assertEqual(X_train.dtype, np.float32)
 
         configuration_space = Preprocessor.get_hyperparameter_search_space()
-        default = configuration_space.get_default_configuration()
-        preprocessor = Preprocessor(random_state=np.random.RandomState(1),
-                                    **{hp_name: default[hp_name] for hp_name in
-                                       default})
+        default_config = configuration_space.get_default_configuration()
+        preprocessor = Preprocessor(random_state=0, **default_config)
+
         preprocessor.fit(X_train, Y_train)
         preprocessor.transform(X_train)
         # self.assertEqual(Xt.dtype, np.float32)
@@ -212,10 +210,9 @@ class PreprocessingTestCase(unittest.TestCase):
         X_train, Y_train, X_test, Y_test = get_dataset(dataset, add_NaNs=add_NaNs)
         X_train = X_train.astype(np.float64)
         configuration_space = Preprocessor.get_hyperparameter_search_space()
-        default = configuration_space.get_default_configuration()
-        preprocessor = Preprocessor(random_state=np.random.RandomState(1),
-                                    **{hp_name: default[hp_name] for hp_name in
-                                       default})
+        default_config = configuration_space.get_default_configuration()
+
+        preprocessor = Preprocessor(random_state=0, **default_config)
         preprocessor.fit(X_train, Y_train)
         preprocessor.transform(X_train)
         # self.assertEqual(Xt.dtype, np.float64)
@@ -227,10 +224,9 @@ class PreprocessingTestCase(unittest.TestCase):
                                                            add_NaNs=add_NaNs)
             self.assertEqual(X_train.dtype, np.float32)
             configuration_space = Preprocessor.get_hyperparameter_search_space()
-            default = configuration_space.get_default_configuration()
-            preprocessor = Preprocessor(random_state=np.random.RandomState(1),
-                                        **{hp_name: default[hp_name] for hp_name
-                                           in default})
+            default_config = configuration_space.get_default_configuration()
+            preprocessor = Preprocessor(random_state=0, **default_config)
+
             preprocessor.fit(X_train, Y_train)
             preprocessor.transform(X_train)
             # self.assertEqual(Xt.dtype, np.float32)
@@ -241,10 +237,9 @@ class PreprocessingTestCase(unittest.TestCase):
                                                            add_NaNs=add_NaNs)
             X_train = X_train.astype(np.float64)
             configuration_space = Preprocessor.get_hyperparameter_search_space()
-            default = configuration_space.get_default_configuration()
-            preprocessor = Preprocessor(random_state=np.random.RandomState(1),
-                                        **{hp_name: default[hp_name] for hp_name
-                                           in default})
+            default_config = configuration_space.get_default_configuration()
+
+            preprocessor = Preprocessor(random_state=0, **default_config)
             preprocessor.fit(X_train, Y_train)
             preprocessor.transform(X_train)
             # self.assertEqual(Xt.dtype, np.float64)
@@ -254,10 +249,10 @@ def _test_regressor(Regressor, dataset='diabetes', sparse=False):
     X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
                                                    make_sparse=sparse)
     configuration_space = Regressor.get_hyperparameter_search_space()
-    default = configuration_space.get_default_configuration()
-    regressor = Regressor(random_state=np.random.RandomState(1),
-                          **{hp_name: default[hp_name] for hp_name in
-                             default})
+    default_config = configuration_space.get_default_configuration()
+
+    regressor = Regressor(random_state=0, **default_config)
+
     # Dumb incomplete hacky test to check that we do not alter the data
     X_train_hash = hash(str(X_train))
     X_test_hash = hash(str(X_test))
@@ -294,11 +289,10 @@ def _test_regressor_iterative_fit(Regressor, dataset='diabetes', sparse=False):
     X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
                                                    make_sparse=sparse)
     configuration_space = Regressor.get_hyperparameter_search_space(
-        dataset_properties={'sparse': sparse})
-    default = configuration_space.get_default_configuration()
-    regressor = Regressor(random_state=np.random.RandomState(1),
-                          **{hp_name: default[hp_name] for hp_name in
-                             default})
+        dataset_properties={'sparse': sparse}
+    )
+    default_config = configuration_space.get_default_configuration()
+    regressor = Regressor(random_state=0, **default_config)
 
     regressor.iterative_fit(X_train, Y_train, n_iter=2, refit=True)
     iteration = 2

@@ -8,7 +8,6 @@ import numpy as np
 import scipy.sparse
 
 from sklearn.pipeline import Pipeline
-from sklearn.utils.validation import check_random_state
 
 from .components.base import AutoSklearnChoice, AutoSklearnComponent
 import autosklearn.pipeline.create_searchspace_util
@@ -43,11 +42,14 @@ class BasePipeline(Pipeline):
         self.exclude = exclude if exclude is not None else {}
         self.dataset_properties = dataset_properties if \
             dataset_properties is not None else {}
+        self.random_state = random_state
 
         if steps is None:
             self.steps = self._get_pipeline_steps(dataset_properties=dataset_properties)
         else:
             self.steps = steps
+
+        self._validate_include_exclude_params()
 
         self.config_space = self.get_hyperparameter_search_space()
 
@@ -71,10 +73,6 @@ class BasePipeline(Pipeline):
 
         self.set_hyperparameters(self.config, init_params=init_params)
 
-        if random_state is None:
-            self.random_state = check_random_state(1)
-        else:
-            self.random_state = check_random_state(random_state)
         super().__init__(steps=self.steps)
 
         self._additional_run_info = {}
@@ -394,7 +392,7 @@ class BasePipeline(Pipeline):
                                  )
                                  )
                 continue
-            variable_name = key.split(':')[1]
+            variable_name = key.split(':')[-1]
             node = self.named_steps[node_name]
             if isinstance(node, BasePipeline):
                 # If dealing with a sub pipe,
@@ -470,3 +468,37 @@ class BasePipeline(Pipeline):
         the optimization algorithm.
         """
         return self._additional_run_info
+
+    def _validate_include_exclude_params(self):
+        if self.include is not None and self.exclude is not None:
+            for key in self.include.keys():
+                if key in self.exclude.keys():
+                    raise ValueError("Cannot specify include and exclude for same step '{}'."
+                                     .format(key))
+
+        supported_steps = {step[0]: step[1] for step in self.steps
+                           if isinstance(step[1], AutoSklearnChoice)}
+        for arg in ['include', 'exclude']:
+            argument = getattr(self, arg)
+            if not argument:
+                continue
+            for key in list(argument.keys()):
+                if key not in supported_steps:
+                    raise ValueError("The provided key '{}' in the '{}' argument is not valid. The"
+                                     " only supported keys for this task are {}"
+                                     .format(key, arg, list(supported_steps.keys())))
+
+                candidate_components = argument[key]
+                if not (isinstance(candidate_components, list) and candidate_components):
+                    raise ValueError("The provided value of the key '{}' in the '{}' argument is "
+                                     "not valid. The value must be a non-empty list."
+                                     .format(key, arg))
+
+                available_components = list(supported_steps[key].get_available_components(
+                    dataset_properties=self.dataset_properties).keys())
+                for component in candidate_components:
+                    if component not in available_components:
+                        raise ValueError("The provided component '{}' for the key '{}' in the '{}'"
+                                         " argument is not valid. The supported components for the"
+                                         " step '{}' for this task are {}"
+                                         .format(component, key, arg, key, available_components))

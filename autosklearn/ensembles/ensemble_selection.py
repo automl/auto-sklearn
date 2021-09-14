@@ -1,8 +1,10 @@
 import random
 from collections import Counter
-from typing import Any, Dict, List, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
+
+from sklearn.utils import check_random_state
 
 from autosklearn.constants import TASK_TYPES
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
@@ -16,15 +18,46 @@ class EnsembleSelection(AbstractEnsemble):
         ensemble_size: int,
         task_type: int,
         metric: Scorer,
-        random_state: np.random.RandomState,
         bagging: bool = False,
         mode: str = 'fast',
+        random_state: Optional[Union[int, np.random.RandomState]] = None,
     ) -> None:
+        """ An ensemble of selected algorithms
+
+        Fitting an EnsembleSelection generates an ensemble from the the models
+        generated during the search process. Can be further used for prediction.
+
+        Parameters
+        ----------
+        task_type: int
+            An identifier indicating which task is being performed.
+        metric: Scorer
+            The metric used to evaluate the models
+        bagging: bool = False
+            Whether to use bagging in ensemble selection
+        mode: str in ['fast', 'slow'] = 'fast'
+            Which kind of ensemble generation to use
+            *   'slow' - The original method used in Rich Caruana's ensemble selection.
+            *   'fast' - A faster version of Rich Caruanas' ensemble selection.
+
+        random_state: Optional[int | RandomState] = None
+            The random_state used for ensemble selection.
+            *   None - Uses numpy's default RandomState object
+            *   int - Successive calls to fit will produce the same results
+            *   RandomState - Truely random, each call to fit will produce
+                              different results, even with the same object.
+        """
         self.ensemble_size = ensemble_size
         self.task_type = task_type
         self.metric = metric
         self.bagging = bagging
         self.mode = mode
+
+        # Behaviour similar to sklearn
+        #   int - Deteriministic with succesive calls to fit
+        #   RandomState - Successive calls to fit will produce differences
+        #   None - Uses numpmys global singleton RandomState
+        # https://scikit-learn.org/stable/common_pitfalls.html#controlling-randomness
         self.random_state = random_state
 
     def __getstate__(self) -> Dict[str, Any]:
@@ -84,6 +117,7 @@ class EnsembleSelection(AbstractEnsemble):
     ) -> None:
         """Fast version of Rich Caruana's ensemble selection method."""
         self.num_input_models_ = len(predictions)
+        rand = check_random_state(self.random_state)
 
         ensemble = []  # type: List[np.ndarray]
         trajectory = []
@@ -143,7 +177,9 @@ class EnsembleSelection(AbstractEnsemble):
                 )
 
             all_best = np.argwhere(losses == np.nanmin(losses)).flatten()
-            best = self.random_state.choice(all_best)
+
+            best = rand.choice(all_best)
+
             ensemble.append(predictions[best])
             trajectory.append(losses[best])
             order.append(best)

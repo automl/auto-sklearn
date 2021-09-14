@@ -59,8 +59,8 @@ class VerifyTrialsCallBack(unittest.TestCase):
                                     memory_limit=1024,
                                     delete_tmp_folder_after_terminate=False,
                                     n_jobs=1,
-                                    include_estimators=["sgd"],
-                                    include_preprocessors=["no_preprocessing"],
+                                    include={'feature_preprocessor': ['pca'],
+                                             'classifier': ['sgd']},
                                     get_trials_callback=AutoMLTrialsCallBack(trials_summary_fname)
                                     )
         cls.fit(X_train, Y_train, X_test, Y_test)

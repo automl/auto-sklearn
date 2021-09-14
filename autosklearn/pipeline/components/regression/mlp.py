@@ -1,4 +1,3 @@
-import copy
 import numpy as np
 
 from ConfigSpace.configuration_space import ConfigurationSpace
@@ -120,7 +119,7 @@ class MLPRegressor(
                 learning_rate_init=self.learning_rate_init,
                 max_iter=n_iter,
                 shuffle=self.shuffle,
-                random_state=copy.copy(self.random_state),
+                random_state=self.random_state,
                 verbose=self.verbose,
                 warm_start=True,
                 early_stopping=self.early_stopping_val,
