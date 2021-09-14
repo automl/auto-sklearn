@@ -30,11 +30,8 @@ from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SP
 # tunes the number of estimators (``n_estimators``).
 
 class CustomRandomForest(AutoSklearnClassificationAlgorithm):
-    def __init__(self,
-                 n_estimators,
-                 max_features,
-                 random_state=None,
-                 ):
+
+    def __init__(self, n_estimators, max_features, random_state=None):
         self.n_estimators = n_estimators
         self.max_features = max_features
         self.random_state = random_state
@@ -69,16 +66,18 @@ class CustomRandomForest(AutoSklearnClassificationAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'RF',
-                'name': 'Random Forest Classifier',
-                'handles_regression': False,
-                'handles_classification': True,
-                'handles_multiclass': True,
-                'handles_multilabel': True,
-                'handles_multioutput': False,
-                'is_deterministic': True,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (PREDICTIONS,)}
+        return {
+            'shortname': 'RF',
+            'name': 'Random Forest Classifier',
+            'handles_regression': False,
+            'handles_classification': True,
+            'handles_multiclass': True,
+            'handles_multilabel': True,
+            'handles_multioutput': False,
+            'is_deterministic': True,
+            'input': (DENSE, SPARSE, UNSIGNED_DATA),
+            'output': (PREDICTIONS,)
+        }
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
@@ -115,7 +114,9 @@ clf = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=30,
     per_run_time_limit=10,
     # Here we exclude auto-sklearn's default random forest component
-    exclude_estimators=['random_forest'],
+    exclude={
+        'classifier': ['random_forest']
+    },
     # Bellow two flags are provided to speed up calculations
     # Not recommended for a real implementation
     initial_configurations_via_metalearning=0,

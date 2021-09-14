@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Restricting the number of hyperparameters for an existing component &#8212; AutoSklearn 0.13.0 documentation</title>
+    <title>Restricting the number of hyperparameters for an existing component &#8212; AutoSklearn 0.14.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -22,9 +22,9 @@
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="../../_static/js/jquery-1.12.4.min.js "></script>
 <script type="text/javascript" src="../../_static/js/jquery-fix.js "></script>
-<script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-3.4.1/js/bootstrap.min.js "></script>
 <script type="text/javascript" src="../../_static/bootstrap-sphinx.js "></script>
 
   </head><body>
@@ -55,7 +55,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.13.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -150,11 +150,8 @@ but with different hyperparameters .</p>
 <span class="c1"># tunes the number of estimators (``n_estimators``).</span>
 
 <span class="k">class</span> <span class="nc">CustomRandomForest</span><span class="p">(</span><span class="n">AutoSklearnClassificationAlgorithm</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">n_estimators</span><span class="p">,</span>
-                 <span class="n">max_features</span><span class="p">,</span>
-                 <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_estimators</span><span class="p">,</span> <span class="n">max_features</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span> <span class="o">=</span> <span class="n">n_estimators</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_features</span> <span class="o">=</span> <span class="n">max_features</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
@@ -189,16 +186,18 @@ but with different hyperparameters .</p>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_properties</span><span class="p">(</span><span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;shortname&#39;</span><span class="p">:</span> <span class="s1">&#39;RF&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Random Forest Classifier&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;handles_regression&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="s1">&#39;handles_classification&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;handles_multiclass&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;handles_multilabel&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;handles_multioutput&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="s1">&#39;is_deterministic&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s1">&#39;input&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">DENSE</span><span class="p">,</span> <span class="n">SPARSE</span><span class="p">,</span> <span class="n">UNSIGNED_DATA</span><span class="p">),</span>
-                <span class="s1">&#39;output&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">PREDICTIONS</span><span class="p">,)}</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;shortname&#39;</span><span class="p">:</span> <span class="s1">&#39;RF&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Random Forest Classifier&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;handles_regression&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;handles_classification&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;handles_multiclass&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;handles_multilabel&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;handles_multioutput&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;is_deterministic&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;input&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">DENSE</span><span class="p">,</span> <span class="n">SPARSE</span><span class="p">,</span> <span class="n">UNSIGNED_DATA</span><span class="p">),</span>
+            <span class="s1">&#39;output&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">PREDICTIONS</span><span class="p">,)</span>
+        <span class="p">}</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_hyperparameter_search_space</span><span class="p">(</span><span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -242,7 +241,9 @@ but with different hyperparameters .</p>
     <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
     <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
     <span class="c1"># Here we exclude auto-sklearn&#39;s default random forest component</span>
-    <span class="n">exclude_estimators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;random_forest&#39;</span><span class="p">],</span>
+    <span class="n">exclude</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;classifier&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;random_forest&#39;</span><span class="p">]</span>
+    <span class="p">},</span>
     <span class="c1"># Bellow two flags are provided to speed up calculations</span>
     <span class="c1"># Not recommended for a real implementation</span>
     <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
@@ -252,7 +253,7 @@ but with different hyperparameters .</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(exclude_estimators=[&#39;random_forest&#39;],
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(exclude={&#39;classifier&#39;: [&#39;random_forest&#39;]},
                       initial_configurations_via_metalearning=0,
                       per_run_time_limit=10,
                       smac_scenario_args={&#39;runcount_limit&#39;: 1},
@@ -367,15 +368,16 @@ but with different hyperparameters .</p>
     classifier:sgd:penalty, Type: Categorical, Choices: {l1, l2, elasticnet}, Default: l2
     classifier:sgd:power_t, Type: UniformFloat, Range: [1e-05, 1.0], Default: 0.5
     classifier:sgd:tol, Type: UniformFloat, Range: [1e-05, 0.1], Default: 0.0001, on log-scale
-    data_preprocessing:categorical_transformer:categorical_encoding:__choice__, Type: Categorical, Choices: {encoding, no_encoding, one_hot_encoding}, Default: one_hot_encoding
-    data_preprocessing:categorical_transformer:category_coalescence:__choice__, Type: Categorical, Choices: {minority_coalescer, no_coalescense}, Default: minority_coalescer
-    data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Type: UniformFloat, Range: [0.0001, 0.5], Default: 0.01, on log-scale
-    data_preprocessing:numerical_transformer:imputation:strategy, Type: Categorical, Choices: {mean, median, most_frequent}, Default: mean
-    data_preprocessing:numerical_transformer:rescaling:__choice__, Type: Categorical, Choices: {minmax, none, normalize, power_transformer, quantile_transformer, robust_scaler, standardize}, Default: standardize
-    data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles, Type: UniformInteger, Range: [10, 2000], Default: 1000
-    data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution, Type: Categorical, Choices: {uniform, normal}, Default: uniform
-    data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max, Type: UniformFloat, Range: [0.7, 0.999], Default: 0.75
-    data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min, Type: UniformFloat, Range: [0.001, 0.3], Default: 0.25
+    data_preprocessor:__choice__, Type: Categorical, Choices: {feature_type, NoPreprocessing}, Default: feature_type
+    data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__, Type: Categorical, Choices: {encoding, no_encoding, one_hot_encoding}, Default: one_hot_encoding
+    data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__, Type: Categorical, Choices: {minority_coalescer, no_coalescense}, Default: minority_coalescer
+    data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Type: UniformFloat, Range: [0.0001, 0.5], Default: 0.01, on log-scale
+    data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Type: Categorical, Choices: {mean, median, most_frequent}, Default: mean
+    data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Type: Categorical, Choices: {minmax, none, normalize, power_transformer, quantile_transformer, robust_scaler, standardize}, Default: standardize
+    data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles, Type: UniformInteger, Range: [10, 2000], Default: 1000
+    data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution, Type: Categorical, Choices: {uniform, normal}, Default: uniform
+    data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max, Type: UniformFloat, Range: [0.7, 0.999], Default: 0.75
+    data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min, Type: UniformFloat, Range: [0.001, 0.3], Default: 0.25
     feature_preprocessor:LDA:shrinkage, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.5
     feature_preprocessor:LDA:solver, Type: Categorical, Choices: {svd, lsqr, eigen}, Default: svd
     feature_preprocessor:LDA:tol, Type: UniformFloat, Range: [0.0001, 1.0], Default: 0.0001
@@ -529,11 +531,15 @@ but with different hyperparameters .</p>
     classifier:sgd:penalty | classifier:__choice__ == &#39;sgd&#39;
     classifier:sgd:power_t | classifier:sgd:learning_rate == &#39;invscaling&#39;
     classifier:sgd:tol | classifier:__choice__ == &#39;sgd&#39;
-    data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction | data_preprocessing:categorical_transformer:category_coalescence:__choice__ == &#39;minority_coalescer&#39;
-    data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles | data_preprocessing:numerical_transformer:rescaling:__choice__ == &#39;quantile_transformer&#39;
-    data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution | data_preprocessing:numerical_transformer:rescaling:__choice__ == &#39;quantile_transformer&#39;
-    data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max | data_preprocessing:numerical_transformer:rescaling:__choice__ == &#39;robust_scaler&#39;
-    data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min | data_preprocessing:numerical_transformer:rescaling:__choice__ == &#39;robust_scaler&#39;
+    data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__ | data_preprocessor:__choice__ == &#39;feature_type&#39;
+    data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__ | data_preprocessor:__choice__ == &#39;feature_type&#39;
+    data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction | data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__ == &#39;minority_coalescer&#39;
+    data_preprocessor:feature_type:numerical_transformer:imputation:strategy | data_preprocessor:__choice__ == &#39;feature_type&#39;
+    data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ | data_preprocessor:__choice__ == &#39;feature_type&#39;
+    data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == &#39;quantile_transformer&#39;
+    data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == &#39;quantile_transformer&#39;
+    data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == &#39;robust_scaler&#39;
+    data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == &#39;robust_scaler&#39;
     feature_preprocessor:LDA:shrinkage | feature_preprocessor:LDA:solver in {&#39;lsqr&#39;, &#39;eigen&#39;}
     feature_preprocessor:LDA:solver | feature_preprocessor:__choice__ == &#39;LDA&#39;
     feature_preprocessor:LDA:tol | feature_preprocessor:__choice__ == &#39;LDA&#39;
@@ -645,7 +651,7 @@ but with different hyperparameters .</p>
     (Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  6.414 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  9.417 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-restrict-number-of-hyperparameters-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_restrict_number_of_hyperparameters.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>
@@ -681,7 +687,7 @@ but with different hyperparameters .</p>
     </p>
     <p>
         &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br/>
     </p>
   </div>
 </footer>

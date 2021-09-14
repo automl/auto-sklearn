@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Logging and debugging &#8212; AutoSklearn 0.13.0 documentation</title>
+    <title>Logging and debugging &#8212; AutoSklearn 0.14.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -22,9 +22,9 @@
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="../../_static/js/jquery-1.12.4.min.js "></script>
 <script type="text/javascript" src="../../_static/js/jquery-fix.js "></script>
-<script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-3.4.1/js/bootstrap.min.js "></script>
 <script type="text/javascript" src="../../_static/bootstrap-sphinx.js "></script>
 
   </head><body>
@@ -55,7 +55,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.13.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -224,16 +224,16 @@ We will instead create a custom one as follows:</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2021-08-10 13:53:42,442 - Client-EnsembleBuilder - INFO - DummyFuture: ([{&#39;Timestamp&#39;: Timestamp(&#39;2021-08-10 13:53:42.426511&#39;), &#39;ensemble_optimization_score&#39;: 0.9886363636363636, &#39;ensemble_test_score&#39;: 0.9899874843554443}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2021.08.10-13.53.42 for iteration 0.
-2021-08-10 13:53:45,501 - Client-EnsembleBuilder - INFO - DummyFuture: ([{&#39;Timestamp&#39;: Timestamp(&#39;2021-08-10 13:53:45.484462&#39;), &#39;ensemble_optimization_score&#39;: 0.9936868686868687, &#39;ensemble_test_score&#39;: 0.9924906132665833}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2021.08.10-13.53.45 for iteration 1.
-tmp_folder/space.json
-tmp_folder/distributed.log
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2021-09-14 16:06:12,216 - Client-EnsembleBuilder - INFO - DummyFuture: ([{&#39;Timestamp&#39;: Timestamp(&#39;2021-09-14 16:06:12.199098&#39;), &#39;ensemble_optimization_score&#39;: 0.47853535353535354, &#39;ensemble_test_score&#39;: 0.47434292866082606}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2021.09.14-16.06.12 for iteration 0.
+2021-09-14 16:06:17,620 - Client-EnsembleBuilder - INFO - DummyFuture: ([{&#39;Timestamp&#39;: Timestamp(&#39;2021-09-14 16:06:17.599841&#39;), &#39;ensemble_optimization_score&#39;: 0.9734848484848485, &#39;ensemble_test_score&#39;: 0.9774718397997497}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2021.09.14-16.06.17 for iteration 1.
 tmp_folder/.auto-sklearn
+tmp_folder/space.json
+tmp_folder/AutoML(1):aa72550e-1575-11ec-8640-8feecadf318b.log
+tmp_folder/distributed.log
 tmp_folder/smac3-output
-tmp_folder/AutoML(1):5cafc63f-f9e2-11eb-867b-211510bf9672.log
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  15.160 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  19.955 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-debug-logging-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_debug_logging.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
@@ -269,7 +269,7 @@ tmp_folder/AutoML(1):5cafc63f-f9e2-11eb-867b-211510bf9672.log
     </p>
     <p>
         &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br/>
     </p>
   </div>
 </footer>

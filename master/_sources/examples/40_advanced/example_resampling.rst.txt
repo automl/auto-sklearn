@@ -133,7 +133,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score holdout:  0.951048951048951
+    Accuracy score holdout:  0.9440559440559441
 
 
 
@@ -177,7 +177,7 @@ Cross-validation
  .. code-block:: none
 
     Before re-fit
-    Accuracy score CV 0.958041958041958
+    Accuracy score CV 0.965034965034965
 
 
 
@@ -232,13 +232,14 @@ Below is an example of using a predefined split. We split the training
 data by the first feature. In practice, one would use a splitting according
 to the use case at hand.
 
-.. GENERATED FROM PYTHON SOURCE LINES 100-113
+.. GENERATED FROM PYTHON SOURCE LINES 100-114
 
 .. code-block:: default
 
 
     resampling_strategy = sklearn.model_selection.PredefinedSplit(
-        test_fold=np.where(X_train[:, 0] < np.mean(X_train[:, 0]))[0])
+        test_fold=np.where(X_train[:, 0] < np.mean(X_train[:, 0]))[0]
+    )
 
     automl = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=120,
@@ -267,12 +268,12 @@ to the use case at hand.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 114-116
+.. GENERATED FROM PYTHON SOURCE LINES 115-117
 
 For custom resampling strategies (i.e. resampling strategies that are not
 defined as strings by Auto-sklearn) it is necessary to perform a refit:
 
-.. GENERATED FROM PYTHON SOURCE LINES 116-118
+.. GENERATED FROM PYTHON SOURCE LINES 117-119
 
 .. code-block:: default
 
@@ -296,7 +297,7 @@ defined as strings by Auto-sklearn) it is necessary to perform a refit:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 119-124
+.. GENERATED FROM PYTHON SOURCE LINES 120-125
 
 Get the Score of the final ensemble (again)
 ===========================================
@@ -304,7 +305,7 @@ Get the Score of the final ensemble (again)
 Obviously, this score is pretty bad as we "destroyed" the dataset by
 splitting it on the first feature.
 
-.. GENERATED FROM PYTHON SOURCE LINES 124-126
+.. GENERATED FROM PYTHON SOURCE LINES 125-127
 
 .. code-block:: default
 
@@ -328,7 +329,7 @@ splitting it on the first feature.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 6 minutes  6.895 seconds)
+   **Total running time of the script:** ( 6 minutes  52.272 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_resampling.py:

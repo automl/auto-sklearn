@@ -46,7 +46,9 @@ cls = autosklearn.classification.AutoSklearnClassifier(
     # We will limit the configuration space only to
     # have RandomForest as a valid model. We recommend enabling all
     # possible models to get a better performance.
-    include_estimators=['random_forest'],
+    include={
+        'classifier': ['random_forest']
+    },
     delete_tmp_folder_after_terminate=False,
 )
 

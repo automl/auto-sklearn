@@ -60,11 +60,12 @@ in auto-sklearn.
 Create LDA component for auto-sklearn
 =====================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-95
+.. GENERATED FROM PYTHON SOURCE LINES 31-97
 
 .. code-block:: default
 
     class LDA(AutoSklearnPreprocessingAlgorithm):
+
         def __init__(self, solver, tol, shrinkage=None, random_state=None):
             self.solver = solver
             self.shrinkage = shrinkage
@@ -80,12 +81,11 @@ Create LDA component for auto-sklearn
             self.tol = float(self.tol)
 
             import sklearn.discriminant_analysis
-            self.preprocessor = \
-                sklearn.discriminant_analysis.LinearDiscriminantAnalysis(
-                    shrinkage=self.shrinkage,
-                    solver=self.solver,
-                    tol=self.tol,
-                )
+            self.preprocessor = sklearn.discriminant_analysis.LinearDiscriminantAnalysis(
+                shrinkage=self.shrinkage,
+                solver=self.solver,
+                tol=self.tol,
+            )
             self.preprocessor.fit(X, y)
             return self
 
@@ -96,16 +96,18 @@ Create LDA component for auto-sklearn
 
         @staticmethod
         def get_properties(dataset_properties=None):
-            return {'shortname': 'LDA',
-                    'name': 'Linear Discriminant Analysis',
-                    'handles_regression': False,
-                    'handles_classification': True,
-                    'handles_multiclass': False,
-                    'handles_multilabel': False,
-                    'handles_multioutput': False,
-                    'is_deterministic': True,
-                    'input': (DENSE, UNSIGNED_DATA, SIGNED_DATA),
-                    'output': (DENSE, UNSIGNED_DATA, SIGNED_DATA)}
+            return {
+                'shortname': 'LDA',
+                'name': 'Linear Discriminant Analysis',
+                'handles_regression': False,
+                'handles_classification': True,
+                'handles_multiclass': False,
+                'handles_multilabel': False,
+                'handles_multioutput': False,
+                'is_deterministic': True,
+                'input': (DENSE, UNSIGNED_DATA, SIGNED_DATA),
+                'output': (DENSE, UNSIGNED_DATA, SIGNED_DATA)
+            }
 
         @staticmethod
         def get_hyperparameter_search_space(dataset_properties=None):
@@ -135,12 +137,12 @@ Create LDA component for auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 96-98
+.. GENERATED FROM PYTHON SOURCE LINES 98-100
 
 Create dataset
 ==============
 
-.. GENERATED FROM PYTHON SOURCE LINES 98-102
+.. GENERATED FROM PYTHON SOURCE LINES 100-104
 
 .. code-block:: default
 
@@ -155,12 +157,12 @@ Create dataset
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 103-105
+.. GENERATED FROM PYTHON SOURCE LINES 105-107
 
 Configuration space
 ===================
 
-.. GENERATED FROM PYTHON SOURCE LINES 105-109
+.. GENERATED FROM PYTHON SOURCE LINES 107-111
 
 .. code-block:: default
 
@@ -190,19 +192,21 @@ Configuration space
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 110-112
+.. GENERATED FROM PYTHON SOURCE LINES 112-114
 
 Fit the model using LDA as preprocessor
 =======================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 112-123
+.. GENERATED FROM PYTHON SOURCE LINES 114-127
 
 .. code-block:: default
 
 
     clf = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=30,
-        include_preprocessors=['LDA'],
+        include={
+            'feature_preprocessor': ['LDA']
+        },
         # Bellow two flags are provided to speed up calculations
         # Not recommended for a real implementation
         initial_configurations_via_metalearning=0,
@@ -221,7 +225,7 @@ Fit the model using LDA as preprocessor
  .. code-block:: none
 
 
-    AutoSklearnClassifier(include_preprocessors=['LDA'],
+    AutoSklearnClassifier(include={'feature_preprocessor': ['LDA']},
                           initial_configurations_via_metalearning=0,
                           per_run_time_limit=3,
                           smac_scenario_args={'runcount_limit': 5},
@@ -229,12 +233,12 @@ Fit the model using LDA as preprocessor
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 124-126
+.. GENERATED FROM PYTHON SOURCE LINES 128-130
 
 Print prediction score and statistics
 =====================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 126-130
+.. GENERATED FROM PYTHON SOURCE LINES 130-134
 
 .. code-block:: default
 
@@ -252,32 +256,8 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    accuracy:  0.965034965034965
-    [(0.360000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'mlp', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'power_transformer', 'feature_preprocessor:__choice__': 'LDA', 'classifier:mlp:activation': 'tanh', 'classifier:mlp:alpha': 4.233522890362087e-06, 'classifier:mlp:batch_size': 'auto', 'classifier:mlp:beta_1': 0.9, 'classifier:mlp:beta_2': 0.999, 'classifier:mlp:early_stopping': 'train', 'classifier:mlp:epsilon': 1e-08, 'classifier:mlp:hidden_layer_depth': 1, 'classifier:mlp:learning_rate_init': 0.02034538294303729, 'classifier:mlp:n_iter_no_change': 32, 'classifier:mlp:num_nodes_per_layer': 20, 'classifier:mlp:shuffle': 'True', 'classifier:mlp:solver': 'adam', 'classifier:mlp:tol': 0.0001, 'feature_preprocessor:LDA:solver': 'svd', 'feature_preprocessor:LDA:tol': 0.05611155038267959},
-    dataset_properties={
-      'task': 1,
-      'sparse': False,
-      'multilabel': False,
-      'multiclass': False,
-      'target_type': 'classification',
-      'signed': False})),
-    (0.320000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'gaussian_nb', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'feature_preprocessor:__choice__': 'LDA', 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 1238, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'normal', 'feature_preprocessor:LDA:solver': 'eigen', 'feature_preprocessor:LDA:tol': 0.26066646066459004, 'feature_preprocessor:LDA:shrinkage': 0.035080985456066305},
-    dataset_properties={
-      'task': 1,
-      'sparse': False,
-      'multilabel': False,
-      'multiclass': False,
-      'target_type': 'classification',
-      'signed': False})),
-    (0.220000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'LDA', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'feature_preprocessor:LDA:solver': 'svd', 'feature_preprocessor:LDA:tol': 0.0001},
-    dataset_properties={
-      'task': 1,
-      'sparse': False,
-      'multilabel': False,
-      'multiclass': False,
-      'target_type': 'classification',
-      'signed': False})),
-    (0.100000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'mlp', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'feature_preprocessor:__choice__': 'LDA', 'classifier:mlp:activation': 'relu', 'classifier:mlp:alpha': 6.818832697392617e-05, 'classifier:mlp:batch_size': 'auto', 'classifier:mlp:beta_1': 0.9, 'classifier:mlp:beta_2': 0.999, 'classifier:mlp:early_stopping': 'valid', 'classifier:mlp:epsilon': 1e-08, 'classifier:mlp:hidden_layer_depth': 2, 'classifier:mlp:learning_rate_init': 0.001386389558524906, 'classifier:mlp:n_iter_no_change': 32, 'classifier:mlp:num_nodes_per_layer': 161, 'classifier:mlp:shuffle': 'True', 'classifier:mlp:solver': 'adam', 'classifier:mlp:tol': 0.0001, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max': 0.8244618493731622, 'data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min': 0.04907375134705274, 'feature_preprocessor:LDA:solver': 'eigen', 'feature_preprocessor:LDA:tol': 0.35897433855233396, 'classifier:mlp:validation_fraction': 0.1, 'feature_preprocessor:LDA:shrinkage': 0.4218640024476501},
+    accuracy:  0.958041958041958
+    [(1.000000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'LDA', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:LDA:solver': 'svd', 'feature_preprocessor:LDA:tol': 0.0001, 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -293,7 +273,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  16.533 seconds)
+   **Total running time of the script:** ( 0 minutes  19.089 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_preprocessor.py:

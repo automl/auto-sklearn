@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>autosklearn.estimators &#8212; AutoSklearn 0.13.0 documentation</title>
+    <title>autosklearn.estimators &#8212; AutoSklearn 0.14.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -21,9 +21,9 @@
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="../../_static/js/jquery-1.12.4.min.js "></script>
 <script type="text/javascript" src="../../_static/js/jquery-fix.js "></script>
-<script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-3.4.1/js/bootstrap.min.js "></script>
 <script type="text/javascript" src="../../_static/bootstrap-sphinx.js "></script>
 
   </head><body>
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.13.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -120,18 +120,19 @@
 <span class="kn">import</span> <span class="nn">joblib</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">scipy.sparse</span> <span class="kn">import</span> <span class="n">spmatrix</span>
 <span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">ClassifierMixin</span><span class="p">,</span> <span class="n">RegressorMixin</span>
 <span class="kn">from</span> <span class="nn">sklearn.utils.multiclass</span> <span class="kn">import</span> <span class="n">type_of_target</span>
 <span class="kn">from</span> <span class="nn">smac.runhistory.runhistory</span> <span class="kn">import</span> <span class="n">RunInfo</span><span class="p">,</span> <span class="n">RunValue</span>
 
 <span class="kn">from</span> <span class="nn">autosklearn.data.validation</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">convert_if_sparse</span><span class="p">,</span>
     <span class="n">SUPPORTED_FEAT_TYPES</span><span class="p">,</span>
     <span class="n">SUPPORTED_TARGET_TYPES</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">autosklearn.pipeline.base</span> <span class="kn">import</span> <span class="n">BasePipeline</span>
 <span class="kn">from</span> <span class="nn">autosklearn.automl</span> <span class="kn">import</span> <span class="n">AutoMLClassifier</span><span class="p">,</span> <span class="n">AutoMLRegressor</span><span class="p">,</span> <span class="n">AutoML</span>
 <span class="kn">from</span> <span class="nn">autosklearn.metrics</span> <span class="kn">import</span> <span class="n">Scorer</span>
-<span class="kn">from</span> <span class="nn">autosklearn.util.backend</span> <span class="kn">import</span> <span class="n">create</span>
 
 
 <span class="k">class</span> <span class="nc">AutoSklearnEstimator</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">):</span>
@@ -146,10 +147,8 @@
         <span class="n">max_models_on_disc</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
         <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">memory_limit</span><span class="o">=</span><span class="mi">3072</span><span class="p">,</span>
-        <span class="n">include_estimators</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">exclude_estimators</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">include_preprocessors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">exclude_preprocessors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">resampling_strategy</span><span class="o">=</span><span class="s1">&#39;holdout&#39;</span><span class="p">,</span>
         <span class="n">resampling_strategy_arguments</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">tmp_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -215,22 +214,16 @@
 <span class="sd">            In case of multi-processing, `memory_limit` will be per job.</span>
 <span class="sd">            This memory limit also applies to the ensemble creation process.</span>
 
-<span class="sd">        include_estimators : list, optional (None)</span>
-<span class="sd">            If None, all possible estimators are used. Otherwise specifies</span>
-<span class="sd">            set of estimators to use.</span>
+<span class="sd">        include : dict, optional (None)</span>
+<span class="sd">            If None, all possible algorithms are used. Otherwise specifies</span>
+<span class="sd">            set of algorithms for each added component is used. Include and </span>
+<span class="sd">            exclude are incompatible if used together on the same component</span>
 
-<span class="sd">        exclude_estimators : list, optional (None)</span>
-<span class="sd">            If None, all possible estimators are used. Otherwise specifies</span>
-<span class="sd">            set of estimators not to use. Incompatible with include_estimators.</span>
-
-<span class="sd">        include_preprocessors : list, optional (None)</span>
-<span class="sd">            If None all possible preprocessors are used. Otherwise specifies set</span>
-<span class="sd">            of preprocessors to use.</span>
-
-<span class="sd">        exclude_preprocessors : list, optional (None)</span>
-<span class="sd">            If None all possible preprocessors are used. Otherwise specifies set</span>
-<span class="sd">            of preprocessors not to use. Incompatible with</span>
-<span class="sd">            include_preprocessors.</span>
+<span class="sd">        exclude : dict, optional (None)</span>
+<span class="sd">            If None, all possible algorithms are used. Otherwise specifies</span>
+<span class="sd">            set of algorithms for each added component is not used.</span>
+<span class="sd">            Incompatible with include. Include and exclude are incompatible</span>
+<span class="sd">            if used together on the same component</span>
 
 <span class="sd">        resampling_strategy : string or object, optional (&#39;holdout&#39;)</span>
 <span class="sd">            how to to handle overfitting, might need &#39;resampling_strategy_arguments&#39;</span>
@@ -274,7 +267,7 @@
 <span class="sd">            folder to store configuration output and log files, if ``None``</span>
 <span class="sd">            automatically use ``/tmp/autosklearn_tmp_$pid_$random_number``</span>
 
-<span class="sd">        delete_tmp_folder_after_terminate: string, optional (True)</span>
+<span class="sd">        delete_tmp_folder_after_terminate: bool, optional (True)</span>
 <span class="sd">            remove tmp_folder, when finished. If tmp_folder is None</span>
 <span class="sd">            tmp_dir will always be deleted</span>
 
@@ -354,8 +347,13 @@
 
 <span class="sd">            Not all keys returned by scikit-learn are supported yet.</span>
 
+<span class="sd">        performance_over_time\_ : pandas.core.frame.DataFrame</span>
+<span class="sd">            A ``DataFrame`` containing the models performance over time data. Can be</span>
+<span class="sd">            used for plotting directly. Please refer to the example</span>
+<span class="sd">            :ref:`Train and Test Inputs &lt;sphx_glr_examples_40_advanced_example_pandas_train_test.py&gt;`.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa (links are too long)</span>
-        <span class="c1"># Raise error if the given total time budget is less than 60 seconds.</span>
+        <span class="c1"># Raise error if the given total time budget is less than 30 seconds.</span>
         <span class="k">if</span> <span class="n">time_left_for_this_task</span> <span class="o">&lt;</span> <span class="mi">30</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Time left for this task must be at least &quot;</span>
                              <span class="s2">&quot;30 seconds. &quot;</span><span class="p">)</span>
@@ -367,10 +365,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">max_models_on_disc</span> <span class="o">=</span> <span class="n">max_models_on_disc</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">memory_limit</span> <span class="o">=</span> <span class="n">memory_limit</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">include_estimators</span> <span class="o">=</span> <span class="n">include_estimators</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">exclude_estimators</span> <span class="o">=</span> <span class="n">exclude_estimators</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">include_preprocessors</span> <span class="o">=</span> <span class="n">include_preprocessors</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">exclude_preprocessors</span> <span class="o">=</span> <span class="n">exclude_preprocessors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">include</span> <span class="o">=</span> <span class="n">include</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exclude</span> <span class="o">=</span> <span class="n">exclude</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">resampling_strategy</span> <span class="o">=</span> <span class="n">resampling_strategy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">resampling_strategy_arguments</span> <span class="o">=</span> <span class="n">resampling_strategy_arguments</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tmp_folder</span> <span class="o">=</span> <span class="n">tmp_folder</span>
@@ -407,13 +403,9 @@
 
     <span class="k">def</span> <span class="nf">build_automl</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="n">backend</span> <span class="o">=</span> <span class="n">create</span><span class="p">(</span>
+        <span class="n">automl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_automl_class</span><span class="p">()(</span>
             <span class="n">temporary_directory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tmp_folder</span><span class="p">,</span>
             <span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">delete_tmp_folder_after_terminate</span><span class="p">,</span>
-            <span class="p">)</span>
-
-        <span class="n">automl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_automl_class</span><span class="p">()(</span>
-            <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">,</span>
             <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">time_left_for_this_task</span><span class="p">,</span>
             <span class="n">per_run_time_limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">per_run_time_limit</span><span class="p">,</span>
             <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_configurations_via_metalearning</span><span class="p">,</span>
@@ -422,10 +414,8 @@
             <span class="n">max_models_on_disc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_models_on_disc</span><span class="p">,</span>
             <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
             <span class="n">memory_limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">memory_limit</span><span class="p">,</span>
-            <span class="n">include_estimators</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">include_estimators</span><span class="p">,</span>
-            <span class="n">exclude_estimators</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exclude_estimators</span><span class="p">,</span>
-            <span class="n">include_preprocessors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">include_preprocessors</span><span class="p">,</span>
-            <span class="n">exclude_preprocessors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exclude_preprocessors</span><span class="p">,</span>
+            <span class="n">include</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">include</span><span class="p">,</span>
+            <span class="n">exclude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exclude</span><span class="p">,</span>
             <span class="n">resampling_strategy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resampling_strategy</span><span class="p">,</span>
             <span class="n">resampling_strategy_arguments</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resampling_strategy_arguments</span><span class="p">,</span>
             <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_jobs</span><span class="p">,</span>
@@ -457,11 +447,11 @@
     <span class="k">def</span> <span class="nf">fit_pipeline</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">X</span><span class="p">:</span> <span class="n">SUPPORTED_FEAT_TYPES</span><span class="p">,</span>
-        <span class="n">y</span><span class="p">:</span> <span class="n">SUPPORTED_TARGET_TYPES</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SUPPORTED_TARGET_TYPES</span><span class="p">,</span> <span class="n">spmatrix</span><span class="p">],</span>
         <span class="n">config</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Configuration</span><span class="p">,</span>  <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]],</span>
         <span class="n">dataset_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">X_test</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SUPPORTED_FEAT_TYPES</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">y_test</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SUPPORTED_TARGET_TYPES</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">y_test</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">SUPPORTED_TARGET_TYPES</span><span class="p">,</span> <span class="n">spmatrix</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">feat_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
@@ -633,6 +623,10 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">get_models_with_weights</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">performance_over_time_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">performance_over_time_</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">cv_results_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -944,9 +938,9 @@
     <span class="k">def</span> <span class="nf">get_configuration_space</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">X</span><span class="p">:</span> <span class="n">SUPPORTED_FEAT_TYPES</span><span class="p">,</span>
-        <span class="n">y</span><span class="p">:</span> <span class="n">SUPPORTED_TARGET_TYPES</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SUPPORTED_TARGET_TYPES</span><span class="p">,</span> <span class="n">spmatrix</span><span class="p">],</span>
         <span class="n">X_test</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SUPPORTED_FEAT_TYPES</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">y_test</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SUPPORTED_TARGET_TYPES</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">y_test</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">SUPPORTED_TARGET_TYPES</span><span class="p">,</span> <span class="n">spmatrix</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">dataset_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">feat_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
@@ -1031,6 +1025,9 @@
 <span class="sd">        self</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># AutoSklearn does not handle sparse y for now</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">convert_if_sparse</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
         <span class="c1"># Before running anything else, first check that the</span>
         <span class="c1"># type of data is compatible with auto-sklearn. Legal target</span>
         <span class="c1"># types are: binary, multiclass, multilabel-indicator.</span>
@@ -1178,6 +1175,9 @@
         <span class="c1"># types are: continuous, continuous-multioutput, and the special cases:</span>
         <span class="c1"># multiclass : because [3.0, 1.0, 5.0] is considered as multiclass</span>
         <span class="c1"># binary: because [1.0, 0.0] is considered multiclass</span>
+        <span class="c1"># AutoSklearn does not handle sparse y for now</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">convert_if_sparse</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
         <span class="n">target_type</span> <span class="o">=</span> <span class="n">type_of_target</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
         <span class="n">supported_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;continuous&#39;</span><span class="p">,</span> <span class="s1">&#39;binary&#39;</span><span class="p">,</span> <span class="s1">&#39;multiclass&#39;</span><span class="p">,</span> <span class="s1">&#39;continuous-multioutput&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">target_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_types</span><span class="p">:</span>
@@ -1239,7 +1239,7 @@
     </p>
     <p>
         &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br/>
     </p>
   </div>
 </footer>

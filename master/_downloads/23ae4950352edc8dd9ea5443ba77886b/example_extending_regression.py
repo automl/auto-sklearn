@@ -28,6 +28,7 @@ from sklearn.model_selection import train_test_split
 # ============================================================
 
 class KernelRidgeRegression(AutoSklearnRegressionAlgorithm):
+
     def __init__(self, alpha, kernel, gamma, degree, coef0, random_state=None):
         self.alpha = alpha
         self.kernel = kernel
@@ -44,12 +45,13 @@ class KernelRidgeRegression(AutoSklearnRegressionAlgorithm):
         self.coef0 = float(self.coef0)
 
         import sklearn.kernel_ridge
-        self.estimator = sklearn.kernel_ridge.KernelRidge(alpha=self.alpha,
-                                                          kernel=self.kernel,
-                                                          gamma=self.gamma,
-                                                          degree=self.degree,
-                                                          coef0=self.coef0,
-                                                          )
+        self.estimator = sklearn.kernel_ridge.KernelRidge(
+            alpha=self.alpha,
+            kernel=self.kernel,
+            gamma=self.gamma,
+            degree=self.degree,
+            coef0=self.coef0
+        )
         self.estimator.fit(X, y)
         return self
 
@@ -60,22 +62,25 @@ class KernelRidgeRegression(AutoSklearnRegressionAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'KRR',
-                'name': 'Kernel Ridge Regression',
-                'handles_regression': True,
-                'handles_classification': False,
-                'handles_multiclass': False,
-                'handles_multilabel': False,
-                'handles_multioutput': True,
-                'is_deterministic': True,
-                'input': (SPARSE, DENSE, UNSIGNED_DATA, SIGNED_DATA),
-                'output': (PREDICTIONS,)}
+        return {
+            'shortname': 'KRR',
+            'name': 'Kernel Ridge Regression',
+            'handles_regression': True,
+            'handles_classification': False,
+            'handles_multiclass': False,
+            'handles_multilabel': False,
+            'handles_multioutput': True,
+            'is_deterministic': True,
+            'input': (SPARSE, DENSE, UNSIGNED_DATA, SIGNED_DATA),
+            'output': (PREDICTIONS,)
+        }
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
         alpha = UniformFloatHyperparameter(
-            name='alpha', lower=10 ** -5, upper=1, log=True, default_value=1.0)
+            name='alpha', lower=10 ** -5, upper=1, log=True, default_value=1.0
+        )
         kernel = CategoricalHyperparameter(
             name='kernel',
             # We restrict ourselves to two possible kernels for this example
@@ -117,7 +122,9 @@ X_train, X_test, y_train, y_test = train_test_split(X, y)
 reg = autosklearn.regression.AutoSklearnRegressor(
     time_left_for_this_task=30,
     per_run_time_limit=10,
-    include_estimators=['KernelRidgeRegression'],
+    include={
+        'regressor': ['KernelRidgeRegression']
+    },
     # Bellow two flags are provided to speed up calculations
     # Not recommended for a real implementation
     initial_configurations_via_metalearning=0,

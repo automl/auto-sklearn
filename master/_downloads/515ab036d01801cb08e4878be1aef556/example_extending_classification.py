@@ -28,14 +28,16 @@ from sklearn.model_selection import train_test_split
 # ================================================
 
 class MLPClassifier(AutoSklearnClassificationAlgorithm):
-    def __init__(self,
-                 hidden_layer_depth,
-                 num_nodes_per_layer,
-                 activation,
-                 alpha,
-                 solver,
-                 random_state=None,
-                 ):
+
+    def __init__(
+        self,
+        hidden_layer_depth,
+        num_nodes_per_layer,
+        activation,
+        alpha,
+        solver,
+        random_state=None,
+    ):
         self.hidden_layer_depth = hidden_layer_depth
         self.num_nodes_per_layer = num_nodes_per_layer
         self.activation = activation
@@ -49,14 +51,15 @@ class MLPClassifier(AutoSklearnClassificationAlgorithm):
         self.alpha = float(self.alpha)
 
         from sklearn.neural_network import MLPClassifier
-        hidden_layer_sizes = tuple(self.num_nodes_per_layer for i in range(self.hidden_layer_depth))
+        hidden_layer_sizes = tuple(
+            self.num_nodes_per_layer for i in range(self.hidden_layer_depth)
+        )
 
         self.estimator = MLPClassifier(hidden_layer_sizes=hidden_layer_sizes,
                                        activation=self.activation,
                                        alpha=self.alpha,
                                        solver=self.solver,
-                                       random_state=self.random_state,
-                                       )
+                                       random_state=self.random_state)
         self.estimator.fit(X, y)
         return self
 
@@ -72,18 +75,19 @@ class MLPClassifier(AutoSklearnClassificationAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'MLP Classifier',
-                'name': 'MLP CLassifier',
-                'handles_regression': False,
-                'handles_classification': True,
-                'handles_multiclass': True,
-                'handles_multilabel': False,
-                'handles_multioutput': False,
-                'is_deterministic': False,
-                # Both input and output must be tuple(iterable)
-                'input': [DENSE, SIGNED_DATA, UNSIGNED_DATA],
-                'output': [PREDICTIONS]
-                }
+        return {
+            'shortname': 'MLP Classifier',
+            'name': 'MLP CLassifier',
+            'handles_regression': False,
+            'handles_classification': True,
+            'handles_multiclass': True,
+            'handles_multilabel': False,
+            'handles_multioutput': False,
+            'is_deterministic': False,
+            # Both input and output must be tuple(iterable)
+            'input': [DENSE, SIGNED_DATA, UNSIGNED_DATA],
+            'output': [PREDICTIONS]
+        }
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
@@ -104,12 +108,9 @@ class MLPClassifier(AutoSklearnClassificationAlgorithm):
         solver = CategoricalHyperparameter(
             name="solver", choices=['lbfgs', 'sgd', 'adam'], default_value='adam'
         )
-        cs.add_hyperparameters([hidden_layer_depth,
-                                num_nodes_per_layer,
-                                activation,
-                                alpha,
-                                solver,
-                                ])
+        cs.add_hyperparameters([
+            hidden_layer_depth, num_nodes_per_layer, activation, alpha, solver,
+        ])
         return cs
 
 
@@ -132,7 +133,9 @@ X_train, X_test, y_train, y_test = train_test_split(X, y)
 clf = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=30,
     per_run_time_limit=10,
-    include_estimators=['MLPClassifier'],
+    include={
+        'classifier': ['MLPClassifier']
+    },
     # Bellow two flags are provided to speed up calculations
     # Not recommended for a real implementation
     initial_configurations_via_metalearning=0,

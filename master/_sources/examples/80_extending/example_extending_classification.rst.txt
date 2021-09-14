@@ -58,20 +58,22 @@ component for using in auto-sklearn.
 Create MLP classifier component for auto-sklearn
 ================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 29-121
+.. GENERATED FROM PYTHON SOURCE LINES 29-122
 
 .. code-block:: default
 
 
     class MLPClassifier(AutoSklearnClassificationAlgorithm):
-        def __init__(self,
-                     hidden_layer_depth,
-                     num_nodes_per_layer,
-                     activation,
-                     alpha,
-                     solver,
-                     random_state=None,
-                     ):
+
+        def __init__(
+            self,
+            hidden_layer_depth,
+            num_nodes_per_layer,
+            activation,
+            alpha,
+            solver,
+            random_state=None,
+        ):
             self.hidden_layer_depth = hidden_layer_depth
             self.num_nodes_per_layer = num_nodes_per_layer
             self.activation = activation
@@ -85,14 +87,15 @@ Create MLP classifier component for auto-sklearn
             self.alpha = float(self.alpha)
 
             from sklearn.neural_network import MLPClassifier
-            hidden_layer_sizes = tuple(self.num_nodes_per_layer for i in range(self.hidden_layer_depth))
+            hidden_layer_sizes = tuple(
+                self.num_nodes_per_layer for i in range(self.hidden_layer_depth)
+            )
 
             self.estimator = MLPClassifier(hidden_layer_sizes=hidden_layer_sizes,
                                            activation=self.activation,
                                            alpha=self.alpha,
                                            solver=self.solver,
-                                           random_state=self.random_state,
-                                           )
+                                           random_state=self.random_state)
             self.estimator.fit(X, y)
             return self
 
@@ -108,18 +111,19 @@ Create MLP classifier component for auto-sklearn
 
         @staticmethod
         def get_properties(dataset_properties=None):
-            return {'shortname': 'MLP Classifier',
-                    'name': 'MLP CLassifier',
-                    'handles_regression': False,
-                    'handles_classification': True,
-                    'handles_multiclass': True,
-                    'handles_multilabel': False,
-                    'handles_multioutput': False,
-                    'is_deterministic': False,
-                    # Both input and output must be tuple(iterable)
-                    'input': [DENSE, SIGNED_DATA, UNSIGNED_DATA],
-                    'output': [PREDICTIONS]
-                    }
+            return {
+                'shortname': 'MLP Classifier',
+                'name': 'MLP CLassifier',
+                'handles_regression': False,
+                'handles_classification': True,
+                'handles_multiclass': True,
+                'handles_multilabel': False,
+                'handles_multioutput': False,
+                'is_deterministic': False,
+                # Both input and output must be tuple(iterable)
+                'input': [DENSE, SIGNED_DATA, UNSIGNED_DATA],
+                'output': [PREDICTIONS]
+            }
 
         @staticmethod
         def get_hyperparameter_search_space(dataset_properties=None):
@@ -140,12 +144,9 @@ Create MLP classifier component for auto-sklearn
             solver = CategoricalHyperparameter(
                 name="solver", choices=['lbfgs', 'sgd', 'adam'], default_value='adam'
             )
-            cs.add_hyperparameters([hidden_layer_depth,
-                                    num_nodes_per_layer,
-                                    activation,
-                                    alpha,
-                                    solver,
-                                    ])
+            cs.add_hyperparameters([
+                hidden_layer_depth, num_nodes_per_layer, activation, alpha, solver,
+            ])
             return cs
 
 
@@ -176,12 +177,12 @@ Create MLP classifier component for auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 122-124
+.. GENERATED FROM PYTHON SOURCE LINES 123-125
 
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 124-128
+.. GENERATED FROM PYTHON SOURCE LINES 125-129
 
 .. code-block:: default
 
@@ -196,12 +197,12 @@ Data Loading
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 129-131
+.. GENERATED FROM PYTHON SOURCE LINES 130-132
 
 Fit MLP classifier to the data
 ==============================
 
-.. GENERATED FROM PYTHON SOURCE LINES 131-143
+.. GENERATED FROM PYTHON SOURCE LINES 132-146
 
 .. code-block:: default
 
@@ -209,7 +210,9 @@ Fit MLP classifier to the data
     clf = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=30,
         per_run_time_limit=10,
-        include_estimators=['MLPClassifier'],
+        include={
+            'classifier': ['MLPClassifier']
+        },
         # Bellow two flags are provided to speed up calculations
         # Not recommended for a real implementation
         initial_configurations_via_metalearning=0,
@@ -228,7 +231,7 @@ Fit MLP classifier to the data
  .. code-block:: none
 
 
-    AutoSklearnClassifier(include_estimators=['MLPClassifier'],
+    AutoSklearnClassifier(include={'classifier': ['MLPClassifier']},
                           initial_configurations_via_metalearning=0,
                           per_run_time_limit=10,
                           smac_scenario_args={'runcount_limit': 5},
@@ -236,12 +239,12 @@ Fit MLP classifier to the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 144-146
+.. GENERATED FROM PYTHON SOURCE LINES 147-149
 
 Print test accuracy and statistics
 ==================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 146-150
+.. GENERATED FROM PYTHON SOURCE LINES 149-153
 
 .. code-block:: default
 
@@ -259,8 +262,8 @@ Print test accuracy and statistics
 
  .. code-block:: none
 
-    accuracy:  0.972027972027972
-    [(0.380000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'select_rates_classification', 'classifier:MLPClassifier:activation': 'logistic', 'classifier:MLPClassifier:alpha': 0.4002926647969067, 'classifier:MLPClassifier:hidden_layer_depth': 2, 'classifier:MLPClassifier:num_nodes_per_layer': 141, 'classifier:MLPClassifier:solver': 'lbfgs', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.00016869772227646307, 'feature_preprocessor:select_rates_classification:alpha': 0.14167907583397624, 'feature_preprocessor:select_rates_classification:score_func': 'f_classif', 'feature_preprocessor:select_rates_classification:mode': 'fwe'},
+    accuracy:  0.9440559440559441
+    [(0.520000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'select_rates_classification', 'classifier:MLPClassifier:activation': 'relu', 'classifier:MLPClassifier:alpha': 0.054648061621061846, 'classifier:MLPClassifier:hidden_layer_depth': 1, 'classifier:MLPClassifier:num_nodes_per_layer': 187, 'classifier:MLPClassifier:solver': 'adam', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'feature_preprocessor:select_rates_classification:alpha': 0.17677801820619737, 'feature_preprocessor:select_rates_classification:score_func': 'mutual_info_classif', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.06846183238648647, 'data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max': 0.8465036896999549, 'data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min': 0.14555017892884228},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -268,23 +271,7 @@ Print test accuracy and statistics
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.320000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:MLPClassifier:activation': 'relu', 'classifier:MLPClassifier:alpha': 0.0001, 'classifier:MLPClassifier:hidden_layer_depth': 1, 'classifier:MLPClassifier:num_nodes_per_layer': 32, 'classifier:MLPClassifier:solver': 'adam', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01},
-    dataset_properties={
-      'task': 1,
-      'sparse': False,
-      'multilabel': False,
-      'multiclass': False,
-      'target_type': 'classification',
-      'signed': False})),
-    (0.260000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:__choice__': 'extra_trees_preproc_for_classification', 'classifier:MLPClassifier:activation': 'logistic', 'classifier:MLPClassifier:alpha': 0.482214123114762, 'classifier:MLPClassifier:hidden_layer_depth': 3, 'classifier:MLPClassifier:num_nodes_per_layer': 173, 'classifier:MLPClassifier:solver': 'adam', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.004052168667402396, 'feature_preprocessor:extra_trees_preproc_for_classification:bootstrap': 'True', 'feature_preprocessor:extra_trees_preproc_for_classification:criterion': 'entropy', 'feature_preprocessor:extra_trees_preproc_for_classification:max_depth': 'None', 'feature_preprocessor:extra_trees_preproc_for_classification:max_features': 0.054683807330069945, 'feature_preprocessor:extra_trees_preproc_for_classification:max_leaf_nodes': 'None', 'feature_preprocessor:extra_trees_preproc_for_classification:min_impurity_decrease': 0.0, 'feature_preprocessor:extra_trees_preproc_for_classification:min_samples_leaf': 11, 'feature_preprocessor:extra_trees_preproc_for_classification:min_samples_split': 13, 'feature_preprocessor:extra_trees_preproc_for_classification:min_weight_fraction_leaf': 0.0, 'feature_preprocessor:extra_trees_preproc_for_classification:n_estimators': 100},
-    dataset_properties={
-      'task': 1,
-      'sparse': False,
-      'multilabel': False,
-      'multiclass': False,
-      'target_type': 'classification',
-      'signed': False})),
-    (0.040000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessing:numerical_transformer:imputation:strategy': 'median', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'feature_preprocessor:__choice__': 'kitchen_sinks', 'classifier:MLPClassifier:activation': 'tanh', 'classifier:MLPClassifier:alpha': 0.053780053609706543, 'classifier:MLPClassifier:hidden_layer_depth': 3, 'classifier:MLPClassifier:num_nodes_per_layer': 193, 'classifier:MLPClassifier:solver': 'lbfgs', 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 727, 'data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'normal', 'feature_preprocessor:kitchen_sinks:gamma': 0.18106365725445817, 'feature_preprocessor:kitchen_sinks:n_components': 116},
+    (0.480000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:MLPClassifier:activation': 'relu', 'classifier:MLPClassifier:alpha': 0.0001, 'classifier:MLPClassifier:hidden_layer_depth': 1, 'classifier:MLPClassifier:num_nodes_per_layer': 32, 'classifier:MLPClassifier:solver': 'adam', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -300,7 +287,7 @@ Print test accuracy and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  26.936 seconds)
+   **Total running time of the script:** ( 0 minutes  14.477 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_classification.py:

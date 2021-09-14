@@ -58,12 +58,13 @@ component for using in auto-sklearn.
 Implement kernel ridge regression component for auto-sklearn
 ============================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 29-106
+.. GENERATED FROM PYTHON SOURCE LINES 29-111
 
 .. code-block:: default
 
 
     class KernelRidgeRegression(AutoSklearnRegressionAlgorithm):
+
         def __init__(self, alpha, kernel, gamma, degree, coef0, random_state=None):
             self.alpha = alpha
             self.kernel = kernel
@@ -80,12 +81,13 @@ Implement kernel ridge regression component for auto-sklearn
             self.coef0 = float(self.coef0)
 
             import sklearn.kernel_ridge
-            self.estimator = sklearn.kernel_ridge.KernelRidge(alpha=self.alpha,
-                                                              kernel=self.kernel,
-                                                              gamma=self.gamma,
-                                                              degree=self.degree,
-                                                              coef0=self.coef0,
-                                                              )
+            self.estimator = sklearn.kernel_ridge.KernelRidge(
+                alpha=self.alpha,
+                kernel=self.kernel,
+                gamma=self.gamma,
+                degree=self.degree,
+                coef0=self.coef0
+            )
             self.estimator.fit(X, y)
             return self
 
@@ -96,22 +98,25 @@ Implement kernel ridge regression component for auto-sklearn
 
         @staticmethod
         def get_properties(dataset_properties=None):
-            return {'shortname': 'KRR',
-                    'name': 'Kernel Ridge Regression',
-                    'handles_regression': True,
-                    'handles_classification': False,
-                    'handles_multiclass': False,
-                    'handles_multilabel': False,
-                    'handles_multioutput': True,
-                    'is_deterministic': True,
-                    'input': (SPARSE, DENSE, UNSIGNED_DATA, SIGNED_DATA),
-                    'output': (PREDICTIONS,)}
+            return {
+                'shortname': 'KRR',
+                'name': 'Kernel Ridge Regression',
+                'handles_regression': True,
+                'handles_classification': False,
+                'handles_multiclass': False,
+                'handles_multilabel': False,
+                'handles_multioutput': True,
+                'is_deterministic': True,
+                'input': (SPARSE, DENSE, UNSIGNED_DATA, SIGNED_DATA),
+                'output': (PREDICTIONS,)
+            }
 
         @staticmethod
         def get_hyperparameter_search_space(dataset_properties=None):
             cs = ConfigurationSpace()
             alpha = UniformFloatHyperparameter(
-                name='alpha', lower=10 ** -5, upper=1, log=True, default_value=1.0)
+                name='alpha', lower=10 ** -5, upper=1, log=True, default_value=1.0
+            )
             kernel = CategoricalHyperparameter(
                 name='kernel',
                 # We restrict ourselves to two possible kernels for this example
@@ -164,12 +169,12 @@ Implement kernel ridge regression component for auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 107-109
+.. GENERATED FROM PYTHON SOURCE LINES 112-114
 
 Generate data
 =============
 
-.. GENERATED FROM PYTHON SOURCE LINES 109-113
+.. GENERATED FROM PYTHON SOURCE LINES 114-118
 
 .. code-block:: default
 
@@ -184,12 +189,12 @@ Generate data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 114-116
+.. GENERATED FROM PYTHON SOURCE LINES 119-121
 
 Fit the model using KRR
 =======================
 
-.. GENERATED FROM PYTHON SOURCE LINES 116-128
+.. GENERATED FROM PYTHON SOURCE LINES 121-135
 
 .. code-block:: default
 
@@ -197,7 +202,9 @@ Fit the model using KRR
     reg = autosklearn.regression.AutoSklearnRegressor(
         time_left_for_this_task=30,
         per_run_time_limit=10,
-        include_estimators=['KernelRidgeRegression'],
+        include={
+            'regressor': ['KernelRidgeRegression']
+        },
         # Bellow two flags are provided to speed up calculations
         # Not recommended for a real implementation
         initial_configurations_via_metalearning=0,
@@ -216,7 +223,7 @@ Fit the model using KRR
  .. code-block:: none
 
 
-    AutoSklearnRegressor(include_estimators=['KernelRidgeRegression'],
+    AutoSklearnRegressor(include={'regressor': ['KernelRidgeRegression']},
                          initial_configurations_via_metalearning=0,
                          per_run_time_limit=10,
                          smac_scenario_args={'runcount_limit': 5},
@@ -224,12 +231,12 @@ Fit the model using KRR
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 129-131
+.. GENERATED FROM PYTHON SOURCE LINES 136-138
 
 Print prediction score and statistics
 =====================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 131-134
+.. GENERATED FROM PYTHON SOURCE LINES 138-141
 
 .. code-block:: default
 
@@ -246,8 +253,8 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    r2 score:  -0.034633785245204995
-    [(1.000000, SimpleRegressionPipeline({'data_preprocessing:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessing:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessing:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessing:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'KernelRidgeRegression', 'data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'regressor:KernelRidgeRegression:alpha': 1.0, 'regressor:KernelRidgeRegression:gamma': 0.1, 'regressor:KernelRidgeRegression:kernel': 'polynomial', 'regressor:KernelRidgeRegression:coef0': 1.0, 'regressor:KernelRidgeRegression:degree': 3},
+    r2 score:  -0.015872183612174462
+    [(1.000000, SimpleRegressionPipeline({'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'KernelRidgeRegression', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'regressor:KernelRidgeRegression:alpha': 1.0, 'regressor:KernelRidgeRegression:gamma': 0.1, 'regressor:KernelRidgeRegression:kernel': 'polynomial', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'regressor:KernelRidgeRegression:coef0': 1.0, 'regressor:KernelRidgeRegression:degree': 3},
     dataset_properties={
       'task': 4,
       'sparse': False,
@@ -262,7 +269,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  15.942 seconds)
+   **Total running time of the script:** ( 0 minutes  13.592 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_regression.py:

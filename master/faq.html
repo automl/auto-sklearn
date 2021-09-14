@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>FAQ &#8212; AutoSklearn 0.13.0 documentation</title>
+    <title>FAQ &#8212; AutoSklearn 0.14.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
@@ -22,9 +22,9 @@
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script type="text/javascript" src="_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="_static/js/jquery-1.12.4.min.js "></script>
 <script type="text/javascript" src="_static/js/jquery-fix.js "></script>
-<script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="_static/bootstrap-3.4.1/js/bootstrap.min.js "></script>
 <script type="text/javascript" src="_static/bootstrap-sphinx.js "></script>
 
   </head><body>
@@ -55,7 +55,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.13.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -223,9 +223,7 @@ following:</p>
 <li><p>Check if you can use a pre-compiled version of the pyrfr to avoid compiling it yourself. We
 provide pre-compiled versions of the pyrfr on <a class="reference external" href="https://pypi.org/project/pyrfr/#files">pypi</a>.</p></li>
 <li><p>Check if the dependencies specified under <a class="reference internal" href="installation.html#installation"><span class="std std-ref">Installation</span></a> are correctly installed,
-especially that you have <code class="docutils literal notranslate"><span class="pre">swig</span></code> and a <code class="docutils literal notranslate"><span class="pre">C++</span></code> compiler. If you are using an older version of
-the pyrfr (<code class="docutils literal notranslate"><span class="pre">&lt;=0.8.0</span></code>) the dependency on SWIG as stricter and you actually need SWIG3 to
-compile the pyrfr.</p></li>
+especially that you have <code class="docutils literal notranslate"><span class="pre">swig</span></code> and a <code class="docutils literal notranslate"><span class="pre">C++</span></code> compiler.</p></li>
 <li><p>If you are not yet using Conda, consider using it; it simplifies installation of the correct
 dependencies.</p></li>
 <li><p>Install correct build dependencies before installing the pyrfr, you can check the following
@@ -336,7 +334,7 @@ memory or time limit, please increase the respective limit and rerun the optimiz
 scikit-learn uses two modes of parallelizing computations:</p>
 <ol class="arabic simple">
 <li><p>By using joblib to distribute independent function calls on multiple cores.</p></li>
-<li><p>By using lower level libraries such as OpenML and numpy to distribute more fine-grained
+<li><p>By using lower level libraries such as OpenMP and numpy to distribute more fine-grained
 computation.</p></li>
 </ol>
 <p>This means that Auto-sklearn can use more resources than expected by the user. For technical
@@ -347,7 +345,7 @@ adjust this, but when using a compute cluster it is necessary to align the paral
 with the number of requested CPUs). This can be done by setting the following environment
 variables: <code class="docutils literal notranslate"><span class="pre">MKL_NUM_THREADS</span></code>, <code class="docutils literal notranslate"><span class="pre">OPENBLAS_NUM_THREADS</span></code>, <code class="docutils literal notranslate"><span class="pre">BLIS_NUM_THREADS</span></code> and
 <code class="docutils literal notranslate"><span class="pre">OMP_NUM_THREADS</span></code>.</p>
-<p>More details can be found in the <cite>scikit-learn docs &lt;https://scikit-learn.org/stable/computing/parallelism.html?highlight=joblib#parallelism&gt;</cite></p>
+<p>More details can be found in the <a class="reference external" href="https://scikit-learn.org/stable/computing/parallelism.html?highlight=joblib#parallelism">scikit-learn docs</a>.</p>
 </section>
 </section>
 <section id="meta-learning">
@@ -357,7 +355,7 @@ variables: <code class="docutils literal notranslate"><span class="pre">MKL_NUM_
 <p>We updated the list of datasets used for meta-learning several times and this list now differs
 significantly from the original 140 datasets we used in 2015 when the paper and the package were
 released. An up-to-date list of <a class="reference external" href="https://docs.openml.org/#tasks">OpenML task IDs</a> can be found
-on <a class="reference external" href="https://github.com/automl/auto-sklearn/blob/master/scripts/update_metadata_util.py">github</a></p>
+on <a class="reference external" href="https://github.com/automl/auto-sklearn/blob/master/scripts/update_metadata_util.py">github</a>.</p>
 </section>
 <section id="how-can-datasets-from-the-meta-data-be-excluded">
 <h3>How can datasets from the meta-data be excluded?<a class="headerlink" href="#how-can-datasets-from-the-meta-data-be-excluded" title="Permalink to this headline">¶</a></h3>
@@ -412,7 +410,7 @@ model we know of.</p>
     </p>
     <p>
         &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br/>
     </p>
   </div>
 </footer>

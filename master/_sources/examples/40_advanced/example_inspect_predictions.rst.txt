@@ -53,7 +53,7 @@ For this dataset, the goal is to predict whether a person is running or walking 
 accelerometer and gyroscope data collected by a phone. For more information see
 `here <https://www.openml.org/d/40922>`_.
 
-.. GENERATED FROM PYTHON SOURCE LINES 25-47
+.. GENERATED FROM PYTHON SOURCE LINES 25-48
 
 .. code-block:: default
 
@@ -63,9 +63,10 @@ accelerometer and gyroscope data collected by a phone. For more information see
     # Note: To speed up the example, we subsample the dataset
     dataset.data = dataset.data.sample(n=5000, random_state=1, axis="index")
     dataset.target = dataset.target[dataset.data.index]
-    X_train, X_test, y_train, y_test = \
-        sklearn.model_selection.train_test_split(dataset.data, dataset.target, test_size=0.3,
-                                                 random_state=1)
+
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+        dataset.data, dataset.target, test_size=0.3, random_state=1
+    )
 
     automl = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=120,
@@ -89,13 +90,13 @@ accelerometer and gyroscope data collected by a phone. For more information see
 
  .. code-block:: none
 
-    Train score 0.9948571428571429
+    Train score 0.9951428571428571
     Test score 0.982
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 48-59
+.. GENERATED FROM PYTHON SOURCE LINES 49-60
 
 Compute permutation importance - part 1
 =======================================
@@ -109,17 +110,17 @@ the more does the model's predictions depend on this feature.
 **Note:** There are some pitfalls in interpreting these numbers, which can be found
 in the `scikit-learn docs <https://scikit-learn.org/stable/modules/permutation_importance.html>`_.
 
-.. GENERATED FROM PYTHON SOURCE LINES 59-74
+.. GENERATED FROM PYTHON SOURCE LINES 60-75
 
 .. code-block:: default
 
 
-    r = permutation_importance(automl, X_test, y_test,
-                               n_repeats=10,
-                               random_state=0)
-
+    r = permutation_importance(automl, X_test, y_test, n_repeats=10, random_state=0)
     sort_idx = r.importances_mean.argsort()[::-1]
-    plt.boxplot(r.importances[sort_idx].T, labels=[dataset.feature_names[i] for i in sort_idx])
+
+    plt.boxplot(r.importances[sort_idx].T,
+                labels=[dataset.feature_names[i] for i in sort_idx])
+
     plt.xticks(rotation=90)
     plt.tight_layout()
     plt.show()
@@ -142,17 +143,17 @@ in the `scikit-learn docs <https://scikit-learn.org/stable/modules/permutation_i
 
  .. code-block:: none
 
-    gyro_y    : -0.000 +/- 0.001
-    gyro_x    : 0.017 +/- 0.002
-    gyro_z    : 0.034 +/- 0.003
-    acceleration_x: 0.060 +/- 0.008
-    acceleration_z: 0.146 +/- 0.006
-    acceleration_y: 0.258 +/- 0.007
+    gyro_y    : 0.000 +/- 0.001
+    gyro_x    : 0.019 +/- 0.002
+    gyro_z    : 0.036 +/- 0.004
+    acceleration_x: 0.066 +/- 0.008
+    acceleration_z: 0.130 +/- 0.005
+    acceleration_y: 0.267 +/- 0.008
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 75-90
+.. GENERATED FROM PYTHON SOURCE LINES 76-91
 
 Create partial dependence (PD) and individual conditional expectation (ICE) plots - part 2
 ==========================================================================================
@@ -170,15 +171,17 @@ Since ``acceleration_y`` and ``acceleration_z`` turned out to have the largest i
 value according to the permutation dependence, we'll first look at them and generate a plot
 combining ICE (thin lines) and PD (thick line)
 
-.. GENERATED FROM PYTHON SOURCE LINES 90-98
+.. GENERATED FROM PYTHON SOURCE LINES 91-101
 
 .. code-block:: default
 
 
     features = [1, 2]
-    plot_partial_dependence(automl, dataset.data, features=features, grid_resolution=5,
-                            kind="both", feature_names=dataset.feature_names,
-                            )
+    plot_partial_dependence(automl, dataset.data,
+                            features=features,
+                            grid_resolution=5,
+                            kind="both",
+                            feature_names=dataset.feature_names)
     plt.tight_layout()
     plt.show()
 
@@ -193,7 +196,7 @@ combining ICE (thin lines) and PD (thick line)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 99-104
+.. GENERATED FROM PYTHON SOURCE LINES 102-107
 
 Create partial dependence (PDP) plots for more than one feature - part 3
 ========================================================================
@@ -201,15 +204,16 @@ Create partial dependence (PDP) plots for more than one feature - part 3
 A PD plot can also be generated for two features and thus allow to inspect the interaction between
 these features. Again, we'll look at acceleration_y and acceleration_z.
 
-.. GENERATED FROM PYTHON SOURCE LINES 104-111
+.. GENERATED FROM PYTHON SOURCE LINES 107-115
 
 .. code-block:: default
 
 
     features = [[1, 2]]
-    plot_partial_dependence(automl, dataset.data, features=features, grid_resolution=5,
-                            feature_names=dataset.feature_names,
-                            )
+    plot_partial_dependence(automl, dataset.data,
+                            features=features,
+                            grid_resolution=5,
+                            feature_names=dataset.feature_names)
     plt.tight_layout()
     plt.show()
 
@@ -226,7 +230,7 @@ these features. Again, we'll look at acceleration_y and acceleration_z.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 4 minutes  12.804 seconds)
+   **Total running time of the script:** ( 3 minutes  55.411 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_inspect_predictions.py:

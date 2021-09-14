@@ -143,10 +143,10 @@ self-contained example:
 
 
     def cli_start_scheduler(scheduler_file_name):
-        call_string = (
-            "dask-scheduler --scheduler-file %s --idle-timeout 10"
-        ) % scheduler_file_name
-        proc = subprocess.run(call_string, stdout=subprocess.PIPE,
+        command = (
+            f"dask-scheduler --scheduler-file {scheduler_file_name} --idle-timeout 10"
+        )
+        proc = subprocess.run(command, stdout=subprocess.PIPE,
                               stderr=subprocess.STDOUT, shell=True, check=True)
         while proc.returncode is None:
             time.sleep(1)
@@ -198,12 +198,12 @@ Auto-sklearn does the memory management itself.
 
 
     def cli_start_worker(scheduler_file_name):
-        call_string = (
+        command = (
             "DASK_DISTRIBUTED__WORKER__DAEMON=False "
             "dask-worker --nthreads 1 --lifetime 35 --memory-limit 0 "
-            "--scheduler-file %s"
-        ) % scheduler_file_name
-        proc = subprocess.run(call_string, stdout=subprocess.PIPE,
+            f"--scheduler-file {scheduler_file_name}"
+        )
+        proc = subprocess.run(command, stdout=subprocess.PIPE,
                               stderr=subprocess.STDOUT, shell=True)
         while proc.returncode is None:
             time.sleep(1)
@@ -254,7 +254,7 @@ the information in the file created by the scheduler.
 Start Auto-sklearn
 ~~~~~~~~~~~~~~~~~~
 
-.. GENERATED FROM PYTHON SOURCE LINES 173-203
+.. GENERATED FROM PYTHON SOURCE LINES 173-205
 
 .. code-block:: default
 
@@ -262,7 +262,9 @@ Start Auto-sklearn
         X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
         X_train, X_test, y_train, y_test = \
             sklearn.model_selection.train_test_split(X, y, random_state=1)
+
         automl = AutoSklearnClassifier(
+            delete_tmp_folder_after_terminate=False,
             time_left_for_this_task=30,
             per_run_time_limit=10,
             memory_limit=1024,
@@ -299,21 +301,21 @@ Start Auto-sklearn
  .. code-block:: none
 
     auto-sklearn results:
-      Dataset name: 369ba5f3-f9e5-11eb-867b-211510bf9672
+      Dataset name: 5e707d89-1578-11ec-8640-8feecadf318b
       Metric: accuracy
-      Best validation score: 0.985816
-      Number of target algorithm runs: 13
-      Number of successful target algorithm runs: 11
+      Best validation score: 0.992908
+      Number of target algorithm runs: 10
+      Number of successful target algorithm runs: 9
       Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 2
+      Number of target algorithms that exceeded the time limit: 1
       Number of target algorithms that exceeded the memory limit: 0
 
-    Accuracy score 0.951048951048951
+    Accuracy score 0.958041958041958
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 204-210
+.. GENERATED FROM PYTHON SOURCE LINES 206-212
 
 Wait until all workers are closed
 =================================
@@ -322,7 +324,7 @@ This is only necessary if the workers are started from within this python
 script. In a real application one would start them directly from the command
 line.
 
-.. GENERATED FROM PYTHON SOURCE LINES 210-214
+.. GENERATED FROM PYTHON SOURCE LINES 212-216
 
 .. code-block:: default
 
@@ -340,7 +342,7 @@ line.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  38.510 seconds)
+   **Total running time of the script:** ( 0 minutes  38.209 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_manual_spawning_cli.py:

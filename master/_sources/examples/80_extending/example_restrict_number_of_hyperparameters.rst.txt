@@ -56,7 +56,7 @@ but with different hyperparameters .
 Subclass auto-sklearn's random forest classifier
 ================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 27-103
+.. GENERATED FROM PYTHON SOURCE LINES 27-102
 
 .. code-block:: default
 
@@ -66,11 +66,8 @@ Subclass auto-sklearn's random forest classifier
     # tunes the number of estimators (``n_estimators``).
 
     class CustomRandomForest(AutoSklearnClassificationAlgorithm):
-        def __init__(self,
-                     n_estimators,
-                     max_features,
-                     random_state=None,
-                     ):
+
+        def __init__(self, n_estimators, max_features, random_state=None):
             self.n_estimators = n_estimators
             self.max_features = max_features
             self.random_state = random_state
@@ -105,16 +102,18 @@ Subclass auto-sklearn's random forest classifier
 
         @staticmethod
         def get_properties(dataset_properties=None):
-            return {'shortname': 'RF',
-                    'name': 'Random Forest Classifier',
-                    'handles_regression': False,
-                    'handles_classification': True,
-                    'handles_multiclass': True,
-                    'handles_multilabel': True,
-                    'handles_multioutput': False,
-                    'is_deterministic': True,
-                    'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                    'output': (PREDICTIONS,)}
+            return {
+                'shortname': 'RF',
+                'name': 'Random Forest Classifier',
+                'handles_regression': False,
+                'handles_classification': True,
+                'handles_multiclass': True,
+                'handles_multilabel': True,
+                'handles_multioutput': False,
+                'is_deterministic': True,
+                'input': (DENSE, SPARSE, UNSIGNED_DATA),
+                'output': (PREDICTIONS,)
+            }
 
         @staticmethod
         def get_hyperparameter_search_space(dataset_properties=None):
@@ -155,12 +154,12 @@ Subclass auto-sklearn's random forest classifier
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 104-106
+.. GENERATED FROM PYTHON SOURCE LINES 103-105
 
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 106-110
+.. GENERATED FROM PYTHON SOURCE LINES 105-109
 
 .. code-block:: default
 
@@ -175,12 +174,12 @@ Data Loading
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 111-113
+.. GENERATED FROM PYTHON SOURCE LINES 110-112
 
 Fit Random forest classifier to the data
 ========================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 113-126
+.. GENERATED FROM PYTHON SOURCE LINES 112-127
 
 .. code-block:: default
 
@@ -189,7 +188,9 @@ Fit Random forest classifier to the data
         time_left_for_this_task=30,
         per_run_time_limit=10,
         # Here we exclude auto-sklearn's default random forest component
-        exclude_estimators=['random_forest'],
+        exclude={
+            'classifier': ['random_forest']
+        },
         # Bellow two flags are provided to speed up calculations
         # Not recommended for a real implementation
         initial_configurations_via_metalearning=0,
@@ -208,7 +209,7 @@ Fit Random forest classifier to the data
  .. code-block:: none
 
 
-    AutoSklearnClassifier(exclude_estimators=['random_forest'],
+    AutoSklearnClassifier(exclude={'classifier': ['random_forest']},
                           initial_configurations_via_metalearning=0,
                           per_run_time_limit=10,
                           smac_scenario_args={'runcount_limit': 1},
@@ -216,12 +217,12 @@ Fit Random forest classifier to the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 127-129
+.. GENERATED FROM PYTHON SOURCE LINES 128-130
 
 Print the configuration space
 =============================
 
-.. GENERATED FROM PYTHON SOURCE LINES 129-135
+.. GENERATED FROM PYTHON SOURCE LINES 130-136
 
 .. code-block:: default
 
@@ -338,15 +339,16 @@ Print the configuration space
         classifier:sgd:penalty, Type: Categorical, Choices: {l1, l2, elasticnet}, Default: l2
         classifier:sgd:power_t, Type: UniformFloat, Range: [1e-05, 1.0], Default: 0.5
         classifier:sgd:tol, Type: UniformFloat, Range: [1e-05, 0.1], Default: 0.0001, on log-scale
-        data_preprocessing:categorical_transformer:categorical_encoding:__choice__, Type: Categorical, Choices: {encoding, no_encoding, one_hot_encoding}, Default: one_hot_encoding
-        data_preprocessing:categorical_transformer:category_coalescence:__choice__, Type: Categorical, Choices: {minority_coalescer, no_coalescense}, Default: minority_coalescer
-        data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Type: UniformFloat, Range: [0.0001, 0.5], Default: 0.01, on log-scale
-        data_preprocessing:numerical_transformer:imputation:strategy, Type: Categorical, Choices: {mean, median, most_frequent}, Default: mean
-        data_preprocessing:numerical_transformer:rescaling:__choice__, Type: Categorical, Choices: {minmax, none, normalize, power_transformer, quantile_transformer, robust_scaler, standardize}, Default: standardize
-        data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles, Type: UniformInteger, Range: [10, 2000], Default: 1000
-        data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution, Type: Categorical, Choices: {uniform, normal}, Default: uniform
-        data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max, Type: UniformFloat, Range: [0.7, 0.999], Default: 0.75
-        data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min, Type: UniformFloat, Range: [0.001, 0.3], Default: 0.25
+        data_preprocessor:__choice__, Type: Categorical, Choices: {feature_type, NoPreprocessing}, Default: feature_type
+        data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__, Type: Categorical, Choices: {encoding, no_encoding, one_hot_encoding}, Default: one_hot_encoding
+        data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__, Type: Categorical, Choices: {minority_coalescer, no_coalescense}, Default: minority_coalescer
+        data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Type: UniformFloat, Range: [0.0001, 0.5], Default: 0.01, on log-scale
+        data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Type: Categorical, Choices: {mean, median, most_frequent}, Default: mean
+        data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Type: Categorical, Choices: {minmax, none, normalize, power_transformer, quantile_transformer, robust_scaler, standardize}, Default: standardize
+        data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles, Type: UniformInteger, Range: [10, 2000], Default: 1000
+        data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution, Type: Categorical, Choices: {uniform, normal}, Default: uniform
+        data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max, Type: UniformFloat, Range: [0.7, 0.999], Default: 0.75
+        data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min, Type: UniformFloat, Range: [0.001, 0.3], Default: 0.25
         feature_preprocessor:LDA:shrinkage, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.5
         feature_preprocessor:LDA:solver, Type: Categorical, Choices: {svd, lsqr, eigen}, Default: svd
         feature_preprocessor:LDA:tol, Type: UniformFloat, Range: [0.0001, 1.0], Default: 0.0001
@@ -500,11 +502,15 @@ Print the configuration space
         classifier:sgd:penalty | classifier:__choice__ == 'sgd'
         classifier:sgd:power_t | classifier:sgd:learning_rate == 'invscaling'
         classifier:sgd:tol | classifier:__choice__ == 'sgd'
-        data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction | data_preprocessing:categorical_transformer:category_coalescence:__choice__ == 'minority_coalescer'
-        data_preprocessing:numerical_transformer:rescaling:quantile_transformer:n_quantiles | data_preprocessing:numerical_transformer:rescaling:__choice__ == 'quantile_transformer'
-        data_preprocessing:numerical_transformer:rescaling:quantile_transformer:output_distribution | data_preprocessing:numerical_transformer:rescaling:__choice__ == 'quantile_transformer'
-        data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_max | data_preprocessing:numerical_transformer:rescaling:__choice__ == 'robust_scaler'
-        data_preprocessing:numerical_transformer:rescaling:robust_scaler:q_min | data_preprocessing:numerical_transformer:rescaling:__choice__ == 'robust_scaler'
+        data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__ | data_preprocessor:__choice__ == 'feature_type'
+        data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__ | data_preprocessor:__choice__ == 'feature_type'
+        data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction | data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__ == 'minority_coalescer'
+        data_preprocessor:feature_type:numerical_transformer:imputation:strategy | data_preprocessor:__choice__ == 'feature_type'
+        data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ | data_preprocessor:__choice__ == 'feature_type'
+        data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == 'quantile_transformer'
+        data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == 'quantile_transformer'
+        data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == 'robust_scaler'
+        data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == 'robust_scaler'
         feature_preprocessor:LDA:shrinkage | feature_preprocessor:LDA:solver in {'lsqr', 'eigen'}
         feature_preprocessor:LDA:solver | feature_preprocessor:__choice__ == 'LDA'
         feature_preprocessor:LDA:tol | feature_preprocessor:__choice__ == 'LDA'
@@ -622,7 +628,7 @@ Print the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  6.414 seconds)
+   **Total running time of the script:** ( 0 minutes  9.417 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_restrict_number_of_hyperparameters.py:

@@ -84,9 +84,7 @@ following:
 1. Check if you can use a pre-compiled version of the pyrfr to avoid compiling it yourself. We
    provide pre-compiled versions of the pyrfr on `pypi <https://pypi.org/project/pyrfr/#files>`_.
 2. Check if the dependencies specified under :ref:`installation` are correctly installed,
-   especially that you have ``swig`` and a ``C++`` compiler. If you are using an older version of
-   the pyrfr (``<=0.8.0``) the dependency on SWIG as stricter and you actually need SWIG3 to
-   compile the pyrfr.
+   especially that you have ``swig`` and a ``C++`` compiler.
 3. If you are not yet using Conda, consider using it; it simplifies installation of the correct
    dependencies.
 4. Install correct build dependencies before installing the pyrfr, you can check the following
@@ -213,7 +211,7 @@ Auto-sklearn wraps scikit-learn and therefore inherits its parallelism implement
 scikit-learn uses two modes of parallelizing computations:
 
 1. By using joblib to distribute independent function calls on multiple cores.
-2. By using lower level libraries such as OpenML and numpy to distribute more fine-grained
+2. By using lower level libraries such as OpenMP and numpy to distribute more fine-grained
    computation.
 
 This means that Auto-sklearn can use more resources than expected by the user. For technical
@@ -225,7 +223,7 @@ with the number of requested CPUs). This can be done by setting the following en
 variables: ``MKL_NUM_THREADS``, ``OPENBLAS_NUM_THREADS``, ``BLIS_NUM_THREADS`` and
 ``OMP_NUM_THREADS``.
 
-More details can be found in the `scikit-learn docs <https://scikit-learn.org/stable/computing/parallelism.html?highlight=joblib#parallelism>`
+More details can be found in the `scikit-learn docs <https://scikit-learn.org/stable/computing/parallelism.html?highlight=joblib#parallelism>`_.
 
 Meta-Learning
 =============
@@ -236,7 +234,7 @@ Which datasets are used for meta-learning?
 We updated the list of datasets used for meta-learning several times and this list now differs
 significantly from the original 140 datasets we used in 2015 when the paper and the package were
 released. An up-to-date list of `OpenML task IDs <https://docs.openml.org/#tasks>`_ can be found
-on `github <https://github.com/automl/auto-sklearn/blob/master/scripts/update_metadata_util.py>`_
+on `github <https://github.com/automl/auto-sklearn/blob/master/scripts/update_metadata_util.py>`_.
 
 How can datasets from the meta-data be excluded?
 ------------------------------------------------

@@ -99,7 +99,8 @@ print("Accuracy score CV", sklearn.metrics.accuracy_score(y_test, predictions))
 # to the use case at hand.
 
 resampling_strategy = sklearn.model_selection.PredefinedSplit(
-    test_fold=np.where(X_train[:, 0] < np.mean(X_train[:, 0]))[0])
+    test_fold=np.where(X_train[:, 0] < np.mean(X_train[:, 0]))[0]
+)
 
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,

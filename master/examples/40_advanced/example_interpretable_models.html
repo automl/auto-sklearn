@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Interpretable models &#8212; AutoSklearn 0.13.0 documentation</title>
+    <title>Interpretable models &#8212; AutoSklearn 0.14.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -22,9 +22,9 @@
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="../../_static/js/jquery-1.12.4.min.js "></script>
 <script type="text/javascript" src="../../_static/js/jquery-fix.js "></script>
-<script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-3.4.1/js/bootstrap.min.js "></script>
 <script type="text/javascript" src="../../_static/bootstrap-sphinx.js "></script>
 
   </head><body>
@@ -55,7 +55,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.13.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -131,10 +131,9 @@ to download the full example code or to run this example in your browser via Bin
 <span id="sphx-glr-examples-40-advanced-example-interpretable-models-py"></span><h1>Interpretable models<a class="headerlink" href="#interpretable-models" title="Permalink to this headline">¶</a></h1>
 <p>The following example shows how to inspect the models which <em>auto-sklearn</em>
 optimizes over and how to restrict them to an interpretable subset.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sklearn.datasets</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
+<span class="kn">import</span> <span class="nn">sklearn.datasets</span>
 <span class="kn">import</span> <span class="nn">sklearn.metrics</span>
-
-<span class="kn">import</span> <span class="nn">autosklearn.classification</span>
 </pre></div>
 </div>
 <section id="show-available-classification-models">
@@ -142,8 +141,9 @@ optimizes over and how to restrict them to an interpretable subset.</p>
 <p>We will first list all classifiers Auto-sklearn chooses from. A similar
 call is available for preprocessors (see below) and regression (not shown)
 as well.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">autosklearn.pipeline.components.classification</span>
-<span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">ClassifierChoice</span><span class="o">.</span><span class="n">get_components</span><span class="p">():</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">autosklearn.pipeline.components.classification</span> <span class="kn">import</span> <span class="n">ClassifierChoice</span>
+
+<span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">ClassifierChoice</span><span class="o">.</span><span class="n">get_components</span><span class="p">():</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -169,8 +169,9 @@ sgd
 </section>
 <section id="show-available-preprocessors">
 <h2>Show available preprocessors<a class="headerlink" href="#show-available-preprocessors" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">autosklearn.pipeline.components.feature_preprocessing</span>
-<span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">feature_preprocessing</span><span class="o">.</span><span class="n">FeaturePreprocessorChoice</span><span class="o">.</span><span class="n">get_components</span><span class="p">():</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">autosklearn.pipeline.components.feature_preprocessing</span> <span class="kn">import</span> <span class="n">FeaturePreprocessorChoice</span>
+
+<span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">FeaturePreprocessorChoice</span><span class="o">.</span><span class="n">get_components</span><span class="p">():</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -215,8 +216,14 @@ and can change from use case to use case.</p>
     <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
     <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
     <span class="n">tmp_folder</span><span class="o">=</span><span class="s1">&#39;/tmp/autosklearn_interpretable_models_example_tmp&#39;</span><span class="p">,</span>
-    <span class="n">include_estimators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;decision_tree&#39;</span><span class="p">,</span> <span class="s1">&#39;lda&#39;</span><span class="p">,</span> <span class="s1">&#39;sgd&#39;</span><span class="p">],</span>
-    <span class="n">include_preprocessors</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;no_preprocessing&#39;</span><span class="p">,</span> <span class="s1">&#39;polynomial&#39;</span><span class="p">,</span> <span class="s1">&#39;select_percentile_classification&#39;</span><span class="p">],</span>
+    <span class="n">include</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;classifier&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s1">&#39;decision_tree&#39;</span><span class="p">,</span> <span class="s1">&#39;lda&#39;</span><span class="p">,</span> <span class="s1">&#39;sgd&#39;</span>
+        <span class="p">],</span>
+        <span class="s1">&#39;feature_preprocessor&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s1">&#39;no_preprocessing&#39;</span><span class="p">,</span> <span class="s1">&#39;polynomial&#39;</span><span class="p">,</span> <span class="s1">&#39;select_percentile_classification&#39;</span>
+        <span class="p">]</span>
+    <span class="p">},</span>
     <span class="n">ensemble_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">dataset_name</span><span class="o">=</span><span class="s1">&#39;breast_cancer&#39;</span><span class="p">)</span>
@@ -224,9 +231,10 @@ and can change from use case to use case.</p>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(ensemble_size=1,
-                      include_estimators=[&#39;decision_tree&#39;, &#39;lda&#39;, &#39;sgd&#39;],
-                      include_preprocessors=[&#39;no_preprocessing&#39;, &#39;polynomial&#39;,
-                                             &#39;select_percentile_classification&#39;],
+                      include={&#39;classifier&#39;: [&#39;decision_tree&#39;, &#39;lda&#39;, &#39;sgd&#39;],
+                               &#39;feature_preprocessor&#39;: [&#39;no_preprocessing&#39;,
+                                                        &#39;polynomial&#39;,
+                                                        &#39;select_percentile_classification&#39;]},
                       per_run_time_limit=30, time_left_for_this_task=120,
                       tmp_folder=&#39;/tmp/autosklearn_interpretable_models_example_tmp&#39;)
 </pre></div>
@@ -238,7 +246,7 @@ and can change from use case to use case.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(1.000000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;sgd&#39;, &#39;data_preprocessing:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessing:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessing:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessing:numerical_transformer:rescaling:__choice__&#39;: &#39;power_transformer&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;polynomial&#39;, &#39;classifier:sgd:alpha&#39;: 3.483552316120441e-05, &#39;classifier:sgd:average&#39;: &#39;False&#39;, &#39;classifier:sgd:fit_intercept&#39;: &#39;True&#39;, &#39;classifier:sgd:learning_rate&#39;: &#39;invscaling&#39;, &#39;classifier:sgd:loss&#39;: &#39;log&#39;, &#39;classifier:sgd:penalty&#39;: &#39;l1&#39;, &#39;classifier:sgd:tol&#39;: 0.007084931991527506, &#39;data_preprocessing:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.002425019975981927, &#39;feature_preprocessor:polynomial:degree&#39;: 3, &#39;feature_preprocessor:polynomial:include_bias&#39;: &#39;True&#39;, &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;True&#39;, &#39;classifier:sgd:eta0&#39;: 0.00820845633304734, &#39;classifier:sgd:power_t&#39;: 0.5},
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(1.000000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;sgd&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;polynomial&#39;, &#39;classifier:sgd:alpha&#39;: 0.0003336259810364362, &#39;classifier:sgd:average&#39;: &#39;False&#39;, &#39;classifier:sgd:fit_intercept&#39;: &#39;True&#39;, &#39;classifier:sgd:learning_rate&#39;: &#39;invscaling&#39;, &#39;classifier:sgd:loss&#39;: &#39;log&#39;, &#39;classifier:sgd:penalty&#39;: &#39;l2&#39;, &#39;classifier:sgd:tol&#39;: 0.006915066463246923, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:polynomial:degree&#39;: 3, &#39;feature_preprocessor:polynomial:include_bias&#39;: &#39;True&#39;, &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;False&#39;, &#39;classifier:sgd:eta0&#39;: 0.010000000000000014, &#39;classifier:sgd:power_t&#39;: 0.5, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.012199160249499144},
 dataset_properties={
   &#39;task&#39;: 1,
   &#39;sparse&#39;: False,
@@ -257,10 +265,10 @@ dataset_properties={
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score: 0.972027972027972
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score: 0.958041958041958
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  56.014 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  0.997 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-interpretable-models-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_interpretable_models.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
@@ -296,7 +304,7 @@ dataset_properties={
     </p>
     <p>
         &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br/>
     </p>
   </div>
 </footer>

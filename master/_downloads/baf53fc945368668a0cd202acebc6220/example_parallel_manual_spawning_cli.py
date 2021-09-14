@@ -94,10 +94,10 @@ scheduler_file_name = 'scheduler-file.json'
 # self-contained example:
 
 def cli_start_scheduler(scheduler_file_name):
-    call_string = (
-        "dask-scheduler --scheduler-file %s --idle-timeout 10"
-    ) % scheduler_file_name
-    proc = subprocess.run(call_string, stdout=subprocess.PIPE,
+    command = (
+        f"dask-scheduler --scheduler-file {scheduler_file_name} --idle-timeout 10"
+    )
+    proc = subprocess.run(command, stdout=subprocess.PIPE,
                           stderr=subprocess.STDOUT, shell=True, check=True)
     while proc.returncode is None:
         time.sleep(1)
@@ -136,12 +136,12 @@ if __name__ == "__main__":
 # Auto-sklearn does the memory management itself.
 
 def cli_start_worker(scheduler_file_name):
-    call_string = (
+    command = (
         "DASK_DISTRIBUTED__WORKER__DAEMON=False "
         "dask-worker --nthreads 1 --lifetime 35 --memory-limit 0 "
-        "--scheduler-file %s"
-    ) % scheduler_file_name
-    proc = subprocess.run(call_string, stdout=subprocess.PIPE,
+        f"--scheduler-file {scheduler_file_name}"
+    )
+    proc = subprocess.run(command, stdout=subprocess.PIPE,
                           stderr=subprocess.STDOUT, shell=True)
     while proc.returncode is None:
         time.sleep(1)
@@ -174,7 +174,9 @@ if __name__ == "__main__":
     X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
     X_train, X_test, y_train, y_test = \
         sklearn.model_selection.train_test_split(X, y, random_state=1)
+
     automl = AutoSklearnClassifier(
+        delete_tmp_folder_after_terminate=False,
         time_left_for_this_task=30,
         per_run_time_limit=10,
         memory_limit=1024,

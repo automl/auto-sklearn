@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Installation &#8212; AutoSklearn 0.13.0 documentation</title>
+    <title>Installation &#8212; AutoSklearn 0.14.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
@@ -22,9 +22,9 @@
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script type="text/javascript" src="_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="_static/js/jquery-1.12.4.min.js "></script>
 <script type="text/javascript" src="_static/js/jquery-fix.js "></script>
-<script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="_static/bootstrap-3.4.1/js/bootstrap.min.js "></script>
 <script type="text/javascript" src="_static/bootstrap-sphinx.js "></script>
 
   </head><body>
@@ -55,7 +55,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.13.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -143,18 +143,14 @@
 are provided (see <a class="reference external" href="https://pypi.org/project/pyrfr/#files">here</a> for available wheels) you also
 need:</p>
 <ul class="simple">
-<li><p>SWIG (version 3.0.* is required; &gt;=4.0.0 is not supported) (<a class="reference external" href="http://www.swig.org/survey.html">get SWIG here</a>).</p></li>
+<li><p>SWIG (<a class="reference external" href="http://www.swig.org/survey.html">get SWIG here</a>).</p></li>
 </ul>
 <p>For an explanation of missing Microsoft Windows and MAC OSX support please
 check the Section <a class="reference internal" href="#windows-osx-compatibility">Windows/OSX compatibility</a>.</p>
 </section>
 <section id="installing-auto-sklearn">
 <h2>Installing auto-sklearn<a class="headerlink" href="#installing-auto-sklearn" title="Permalink to this headline">¶</a></h2>
-<p>Please install all dependencies manually with:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl https://raw.githubusercontent.com/automl/auto-sklearn/master/requirements.txt <span class="p">|</span> xargs -n <span class="m">1</span> -L <span class="m">1</span> pip3 install
-</pre></div>
-</div>
-<p>Then install <em>auto-sklearn</em>:</p>
+<p>You can install <em>auto-sklearn</em> with <cite>pip</cite> in the usual manner:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3 install auto-sklearn
 </pre></div>
 </div>
@@ -257,7 +253,7 @@ use:</p>
 </pre></div>
 </div>
 <p>To start a Jupyter notebook, you could instead run e.g.:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker run -it -v <span class="nv">$PWD</span>:/opt/nb -p <span class="m">8888</span>:8888 mfeurer/auto-sklearn:master /bin/bash -c <span class="s2">&quot;mkdir -p /opt/nb &amp;&amp; jupyter notebook --notebook-dir=/opt/nb --ip=&#39;0.0.0.0&#39; --port=8888 --no-browser --allow-root&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker run -it -v <span class="si">${</span><span class="nv">PWD</span><span class="si">}</span>:/opt/nb -p <span class="m">8888</span>:8888 mfeurer/auto-sklearn:master /bin/bash -c <span class="s2">&quot;mkdir -p /opt/nb &amp;&amp; jupyter notebook --notebook-dir=/opt/nb --ip=&#39;0.0.0.0&#39; --port=8888 --no-browser --allow-root&quot;</span>
 </pre></div>
 </div>
 <p>Alternatively, it is possible to use the development version of auto-sklearn by replacing all
@@ -285,7 +281,7 @@ occurences of <code class="docutils literal notranslate"><span class="pre">maste
     </p>
     <p>
         &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br/>
     </p>
   </div>
 </footer>

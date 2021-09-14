@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Releases &#8212; AutoSklearn 0.13.0 documentation</title>
+    <title>Releases &#8212; AutoSklearn 0.14.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
@@ -22,9 +22,9 @@
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script type="text/javascript" src="_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="_static/js/jquery-1.12.4.min.js "></script>
 <script type="text/javascript" src="_static/js/jquery-fix.js "></script>
-<script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="_static/bootstrap-3.4.1/js/bootstrap.min.js "></script>
 <script type="text/javascript" src="_static/bootstrap-sphinx.js "></script>
 
   </head><body>
@@ -55,7 +55,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.13.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -108,6 +108,10 @@
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
 <li><a class="reference internal" href="#">Releases</a><ul>
+<li><a class="reference internal" href="#version-0-14-0">Version 0.14.0</a><ul>
+<li><a class="reference internal" href="#contributors-v0-14-0">Contributors v0.14.0</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#version-0-13-0">Version 0.13.0</a><ul>
 <li><a class="reference internal" href="#contributors-v0-13-0">Contributors v0.13.0</a></li>
 </ul>
@@ -230,6 +234,52 @@
       
   <section id="releases">
 <h1>Releases<a class="headerlink" href="#releases" title="Permalink to this headline">¶</a></h1>
+<section id="version-0-14-0">
+<h2>Version 0.14.0<a class="headerlink" href="#version-0-14-0" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ADD #900: Make data preprocessing more configurable, for example allow to completely disable it.</p></li>
+<li><p>ADD #1128: Adds new functionality to retrieve data for an accuracy over time plot from
+Auto-sklearn without additional code.</p></li>
+<li><p>FIX #1149: Stops Auto-sklearn from printing weird warnings (<cite>Exception ignored in […]</cite>) at
+shutdown.</p></li>
+<li><p>FIX #1169: Fixes a bug which made cross-validation and multi-output regression incompatible.</p></li>
+<li><p>FIX #1170: Make all preprocessing techniques deterministic.</p></li>
+<li><p>FIX #1190: Fixes a bug which could make predictive probabilities contain too few classes in
+case one class was only present a single time.</p></li>
+<li><p>FIX #1209: Pass random states to pipeline objects.</p></li>
+<li><p>FIX #1204: Add support for sparse data in Auto-sklearn 2.0.</p></li>
+<li><p>FIX #1210: Add support for sparse <cite>y</cite> labels.</p></li>
+<li><p>FIX #1245: Fixes a bug which could result in Auto-sklearn crashing in case a class was present
+only once.</p></li>
+<li><p>DOC #532,#1242: Simplify installation instructions.</p></li>
+<li><p>DOC #1144: Document installation via <cite>conda</cite></p></li>
+<li><p>DOC #1195,#1201,#1214: Fix a few typos and links. Make some http links https links.</p></li>
+<li><p>DOC #1200: Fixes variable name in an example.</p></li>
+<li><p>DOC #1229: Improve code formatting in the documentation.</p></li>
+<li><p>DOC #1235: Improve docker startup command so it also work on Windows.</p></li>
+<li><p>MAINT #1198: Use latest Ubuntu LTS (20:04) for github actions.</p></li>
+<li><p>MAINT #1231: The command <cite>make linkcheck</cite> no longer builds the documentation, speeding up
+link-checking.</p></li>
+<li><p>MAINT #1233: Enable regression testing with 3 classification and 3 regression datasets on
+github actions.</p></li>
+<li><p>MAINT #1239: Increase the timeout for github actions to 60 minutes.</p></li>
+</ul>
+<section id="contributors-v0-14-0">
+<h3>Contributors v0.14.0<a class="headerlink" href="#contributors-v0-14-0" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Pieter Gijsbers</p></li>
+<li><p>Taneli Mielikäinen</p></li>
+<li><p>Rohit Agarwal</p></li>
+<li><p>hnishi</p></li>
+<li><p>Francisco Rivera Valverde</p></li>
+<li><p>Eddie Bergman &lt;<a class="reference external" href="mailto:eddiebergmanhs&#37;&#52;&#48;gmail&#46;com">eddiebergmanhs<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>Satyam Jha</p></li>
+<li><p>Joel Jose</p></li>
+<li><p>Oli</p></li>
+<li><p>Matthias Feurer</p></li>
+</ul>
+</section>
+</section>
 <section id="version-0-13-0">
 <h2>Version 0.13.0<a class="headerlink" href="#version-0-13-0" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -250,7 +300,7 @@ challenges.</p></li>
 <li><p>DOC #1109: Add an FAQ.</p></li>
 <li><p>DOC #1126: Add new examples on how to use scikit-learn’s inspect module.</p></li>
 <li><p>DOC #1136: Add a new example on how to perform multi-output regression.</p></li>
-<li><p>DOC #1152: Enable link checking when buiding the documentation.</p></li>
+<li><p>DOC #1152: Enable link checking when building the documentation.</p></li>
 <li><p>DOC #1158: New example on how to configure the logger for Auto-sklearn.</p></li>
 <li><p>DOC #1165: Improve the readme page.</p></li>
 </ul>
@@ -957,7 +1007,7 @@ the pyninsher.</p></li>
     </p>
     <p>
         &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br/>
     </p>
   </div>
 </footer>
