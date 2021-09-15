@@ -50,6 +50,7 @@ from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, _fit_with_budget
 from autosklearn.metrics import calculate_metric
 from autosklearn.util.backend import Backend, create
+from autosklearn.util.data import reduce_dataset_size_if_too_large
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import (
     setup_logger,
@@ -637,14 +638,14 @@ class AutoML(BaseEstimator):
         if X_test is not None:
             X_test, y_test = self.InputValidator.transform(X_test, y_test)
 
-        X, y = self.subsample_if_too_large(
-            X=X,
-            y=y,
-            logger=self._logger,
-            seed=self._seed,
-            memory_limit=self._memory_limit,
-            task=self._task,
-        )
+        with warnings_to(self._logger):
+            X, y = reduce_dataset_size_if_too_large(
+                X=X,
+                y=y,
+                seed=self._seed,
+                memory_limit=self._memory_limit,
+                is_classification=is_classification,
+            )
 
         # Check the re-sampling strategy
         try:
@@ -1037,117 +1038,6 @@ class AutoML(BaseEstimator):
             self._resampling_strategy_arguments['folds'] = 5
 
         return
-
-    @staticmethod
-    def subsample_if_too_large(
-        X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
-        logger,
-        seed: int,
-        memory_limit: int,
-        task: int,
-    ):
-        if memory_limit and isinstance(X, np.ndarray):
-
-            if X.dtype == np.float32:
-                multiplier = 4
-            elif X.dtype in (np.float64, float):
-                multiplier = 8
-            elif (
-                # In spite of the names, np.float96 and np.float128
-                # provide only as much precision as np.longdouble,
-                # that is, 80 bits on most x86 machines and 64 bits
-                # in standard Windows builds.
-                (hasattr(np, 'float128') and X.dtype == np.float128)
-                or (hasattr(np, 'float96') and X.dtype == np.float96)
-            ):
-                multiplier = 16
-            else:
-                # Just assuming some value - very unlikely
-                multiplier = 8
-                logger.warning('Unknown dtype for X: %s, assuming it takes 8 bit/number',
-                               str(X.dtype))
-
-            megabytes = X.shape[0] * X.shape[1] * multiplier / 1024 / 1024
-            if memory_limit <= megabytes * 10 and X.dtype != np.float32:
-                cast_to = {
-                    8: np.float32,
-                    16: np.float64,
-                }.get(multiplier, np.float32)
-                logger.warning(
-                    'Dataset too large for memory limit %dMB, reducing the precision from %s to %s',
-                    memory_limit,
-                    X.dtype,
-                    cast_to,
-                )
-                X = X.astype(cast_to)
-
-            megabytes = X.shape[0] * X.shape[1] * multiplier / 1024 / 1024
-            if memory_limit <= megabytes * 10:
-                new_num_samples = int(
-                    memory_limit / (10 * X.shape[1] * multiplier / 1024 / 1024)
-                )
-                logger.warning(
-                    'Dataset too large for memory limit %dMB, reducing number of samples from '
-                    '%d to %d.',
-                    memory_limit,
-                    X.shape[0],
-                    new_num_samples,
-                )
-                if task in CLASSIFICATION_TASKS:
-                    # Identify if it has unique labels and allow for
-                    # stratification, with unique labels in training set
-                    values, idxs, counts = np.unique(y, axis=0,
-                                                     return_index=True,
-                                                     return_counts=True)
-                    unique_labels = {
-                        idx: value
-                        for value, idx, count in zip(values, idxs, counts)
-                        if count == 1
-                    }
-
-                    # If there are unique labeled elements, remove them and
-                    # place them back in later
-                    if len(unique_labels) > 0:
-                        idxs_of_unique = np.asarray(list(unique_labels.keys()))
-                        unique_X = X[idxs_of_unique]
-                        unique_y = y[idxs_of_unique]
-
-                        # NOTE optimization
-                        #   If this ever turns out to be slow, this actually
-                        #   copies the entire array. There might be a better
-                        #   solution but it will probably require a lot more
-                        #   manual work in how splitting is done.
-                        X = np.delete(X, idxs_of_unique, axis=0)
-                        y = np.delete(y, idxs_of_unique, axis=0)
-
-                        X, _, y, _ = sklearn.model_selection.train_test_split(
-                            X, y,
-                            train_size=new_num_samples - len(unique_y),
-                            random_state=seed,
-                            stratify=y,
-                        )
-
-                        X = np.append(X, unique_X, axis=0)
-                        y = np.append(y, unique_y, axis=0)
-
-                    # Otherwise we should be able to stratify as normal
-                    else:
-                        X, _, y, _ = sklearn.model_selection.train_test_split(
-                            X, y,
-                            train_size=new_num_samples,
-                            random_state=seed,
-                            stratify=y,
-                        )
-                elif task in REGRESSION_TASKS:
-                    X, _, y, _ = sklearn.model_selection.train_test_split(
-                        X, y,
-                        train_size=new_num_samples,
-                        random_state=seed,
-                    )
-                else:
-                    raise ValueError(task)
-        return X, y
 
     def refit(self, X, y):
         # AutoSklearn does not handle sparse y for now
