@@ -28,7 +28,6 @@ from sklearn.base import ClassifierMixin, RegressorMixin
 from sklearn.base import is_classifier
 from smac.tae import StatusType
 
-from autosklearn.constants import CLASSIFICATION_TASKS
 from autosklearn.data.validation import InputValidator
 import autosklearn.pipeline.util as putil
 from autosklearn.ensemble_builder import MODEL_FN_RE
@@ -36,9 +35,7 @@ import autosklearn.estimators  # noqa F401
 from autosklearn.estimators import (
     AutoSklearnEstimator, AutoSklearnRegressor, AutoSklearnClassifier
 )
-from autosklearn.metrics import (
-    accuracy, f1_macro, mean_squared_error, r2, default_metric_for_task
-)
+from autosklearn.metrics import accuracy, f1_macro, mean_squared_error, r2
 from autosklearn.automl import AutoMLClassifier
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 from autosklearn.smbo import get_smac_object
@@ -78,7 +75,7 @@ def test_fit_n_jobs(tmp_dir):
         n_jobs=2,
         include={
             'classifier': ['sgd'],
-             'feature_preprocessor': ['no_preprocessing']
+            'feature_preprocessor': ['no_preprocessing']
         },
         get_smac_object_callback=get_smac_object_wrapper_instance,
         max_models_on_disc=None,

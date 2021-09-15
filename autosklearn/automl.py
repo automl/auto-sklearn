@@ -1003,7 +1003,6 @@ class AutoML(BaseEstimator):
             self._resampling_strategy,
             (BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit)
         )
-        print(self._resampling_strategy)
 
         if self._resampling_strategy not in [
                 'holdout',
