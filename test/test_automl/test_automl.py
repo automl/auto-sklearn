@@ -35,7 +35,6 @@ from autosklearn.constants import (
     REGRESSION,
     MULTIOUTPUT_REGRESSION,
     CLASSIFICATION_TASKS,
-    REGRESSION_TASKS,
 )
 from smac.tae import StatusType
 
@@ -673,75 +672,6 @@ def test_fail_if_feat_type_on_pandas_input(dask_client):
         )
 
 
-@pytest.mark.parametrize(
-    'memory_limit,precision,task',
-    [
-        (memory_limit, precision, task)
-        for task in itertools.chain(CLASSIFICATION_TASKS, REGRESSION_TASKS)
-        for precision in (float, np.float32, np.float64, np.float128)
-        for memory_limit in (1, 100, None)
-    ]
-)
-def test_subsample_if_too_large(memory_limit, precision, task):
-    fixture = {
-        BINARY_CLASSIFICATION: {
-            1: {float: 1310, np.float32: 2621, np.float64: 1310, np.float128: 655},
-            100: {float: 12000, np.float32: 12000, np.float64: 12000, np.float128: 12000},
-            None: {float: 12000, np.float32: 12000, np.float64: 12000, np.float128: 12000},
-        },
-        MULTICLASS_CLASSIFICATION: {
-            1: {float: 204, np.float32: 409, np.float64: 204, np.float128: 102},
-            100: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
-            None: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
-        },
-        MULTILABEL_CLASSIFICATION: {
-            1: {float: 204, np.float32: 409, np.float64: 204, np.float128: 102},
-            100: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
-            None: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
-        },
-        REGRESSION: {
-            1: {float: 655, np.float32: 1310, np.float64: 655, np.float128: 327},
-            100: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
-            None: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
-        },
-        MULTIOUTPUT_REGRESSION: {
-            1: {float: 655, np.float32: 1310, np.float64: 655, np.float128: 327},
-            100: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
-            None: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
-        }
-    }
-    mock = unittest.mock.Mock()
-    if task == BINARY_CLASSIFICATION:
-        X, y = sklearn.datasets.make_hastie_10_2()
-    elif task == MULTICLASS_CLASSIFICATION:
-        X, y = sklearn.datasets.load_digits(return_X_y=True)
-    elif task == MULTILABEL_CLASSIFICATION:
-        X, y_ = sklearn.datasets.load_digits(return_X_y=True)
-        y = np.zeros((X.shape[0], 10))
-        for i, j in enumerate(y_):
-            y[i, j] = 1
-    elif task == REGRESSION:
-        X, y = sklearn.datasets.make_friedman1(n_samples=5000, n_features=20)
-    elif task == MULTIOUTPUT_REGRESSION:
-        X, y = sklearn.datasets.make_friedman1(n_samples=5000, n_features=20)
-        y = np.vstack((y, y)).transpose()
-    else:
-        raise ValueError(task)
-    X = X.astype(precision)
-
-    assert X.shape[0] == y.shape[0]
-
-    X_new, y_new = AutoML.subsample_if_too_large(X, y, mock, 1, memory_limit, task)
-    assert X_new.shape[0] == fixture[task][memory_limit][precision]
-    if memory_limit == 1:
-        if precision in (np.float128, np.float64, float):
-            assert mock.warning.call_count == 2
-        else:
-            assert mock.warning.call_count == 1
-    else:
-        assert mock.warning.call_count == 0
-
-
 def data_input_and_target_types():
     n_rows = 100
 
@@ -987,39 +917,3 @@ def test_model_predict_outputs_to_stdout_if_no_logger():
         _model_predict(model, X, task, logger=None)
 
         assert len(w) == 1, "One warning sould have been emmited"
-
-
-@pytest.mark.parametrize("task, y", [
-    (BINARY_CLASSIFICATION, np.asarray(
-        9999 * [0] + 1 * [1]
-    )),
-    (MULTICLASS_CLASSIFICATION, np.asarray(
-        4999 * [1] + 4999 * [2] + 1 * [3] + 1 * [4]
-    )),
-    (MULTILABEL_CLASSIFICATION, np.asarray(
-        4999 * [[0, 1, 1]] + 4999 * [[1, 1, 0]] + 1 * [[1, 0, 1]] + 1 * [[0, 0, 0]]
-    ))
-])
-def test_subsample_classification_unique_labels_stay_in_training_set(task, y):
-    n_samples = 10000
-    X = np.random.random(size=(n_samples, 3))
-    memory_limit = 1  # Force subsampling
-    mock = unittest.mock.Mock()
-
-    # Make sure our test assumptions are correct
-    assert len(y) == n_samples, "Ensure tests are correctly setup"
-
-    values, counts = np.unique(y, axis=0, return_counts=True)
-    unique_labels = [value for value, count in zip(values, counts) if count == 1]
-    assert len(unique_labels), "Ensure we have unique labels in the test"
-
-    _, y_sampled = AutoML.subsample_if_too_large(X, y,
-                                                 logger=mock,
-                                                 seed=1,
-                                                 memory_limit=memory_limit,
-                                                 task=task)
-
-    assert len(y_sampled) <= len(y), \
-        "Ensure sampling took place"
-    assert all(label in y_sampled for label in unique_labels), \
-        "All unique labels present in the return sampled set"

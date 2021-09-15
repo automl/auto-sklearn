@@ -7,6 +7,7 @@ import unittest
 import numpy as np
 import scipy.sparse
 import sklearn
+import sklearn.model_selection
 import sklearn.base
 import sklearn.datasets
 
