@@ -270,7 +270,6 @@ class AutoSklearnEstimator(ABC, BaseEstimator):
         self.load_models = load_models
         self.get_trials_callback = get_trials_callback
 
-
         # Handle the number of jobs and the time for them
         self._n_jobs = 1
         if n_jobs is None:
@@ -370,7 +369,7 @@ class AutoSklearnEstimator(ABC, BaseEstimator):
 
         # Validate the type of target
         target_type = type_of_target(y)
-        if not target_type in self._supported_target_types:
+        if target_type not in self._supported_target_types:
             raise ValueError(
                 f"{self.__class__.__name__} with data of type {target_type} is "
                 f"not supported, must be in: {self._supported_target_types}.\n"
@@ -862,7 +861,6 @@ class AutoSklearnEstimator(ABC, BaseEstimator):
         ]
         detailed = all
         return {'all': all, 'detailed': detailed, 'simple': simple}
-
 
     def get_configuration_space(
         self,
