@@ -15,7 +15,7 @@ from autosklearn.util.logging_ import get_named_client_logger
 
 
 def convert_if_sparse(
-    y: typing.Union[SUPPORTED_TARGET_TYPES, spmatrix]
+    y: SUPPORTED_TARGET_TYPES
 ) -> SUPPORTED_TARGET_TYPES:
     """If the labels `y` are sparse, it will convert it to its dense representation
 

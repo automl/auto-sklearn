@@ -29,6 +29,7 @@ from sklearn.base import ClassifierMixin, RegressorMixin
 from sklearn.base import is_classifier
 from smac.tae import StatusType
 
+from autosklearn.constants import CLASSIFICATION_TASKS
 from autosklearn.data.validation import InputValidator
 import autosklearn.pipeline.util as putil
 from autosklearn.ensemble_builder import MODEL_FN_RE
@@ -36,7 +37,9 @@ import autosklearn.estimators  # noqa F401
 from autosklearn.estimators import (
     AutoSklearnEstimator, AutoSklearnRegressor, AutoSklearnClassifier
 )
-from autosklearn.metrics import accuracy, f1_macro, mean_squared_error, r2
+from autosklearn.metrics import (
+    accuracy, f1_macro, mean_squared_error, r2, default_metric_for_task
+)
 from autosklearn.automl import AutoMLClassifier
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 from autosklearn.smbo import get_smac_object
@@ -74,8 +77,10 @@ def test_fit_n_jobs(tmp_dir):
         initial_configurations_via_metalearning=0,
         ensemble_size=5,
         n_jobs=2,
-        include={'classifier': ['sgd'],
-                 'feature_preprocessor': ['no_preprocessing']},
+        include={
+            'classifier': ['sgd'],
+             'feature_preprocessor': ['no_preprocessing']
+        },
         get_smac_object_callback=get_smac_object_wrapper_instance,
         max_models_on_disc=None,
     )
@@ -150,8 +155,8 @@ def test_feat_type_wrong_arguments():
         cls.fit(X=X, y=y, feat_type=['Car']*100)
 
 
-# Mock AutoSklearnEstimator.fit so the test doesn't actually run fit().
-@unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.fit')
+# Mock AutoML.fit so the test doesn't actually run fit().
+@unittest.mock.patch('autosklearn.automl.AutoML.fit')
 def test_type_of_target(mock_estimator):
     # Test that classifier raises error for illegal target types.
     X = np.array([[1, 2],
@@ -186,17 +191,17 @@ def test_type_of_target(mock_estimator):
 
     # Illegal target types for classification: continuous,
     # multiclass-multioutput, continuous-multioutput.
-    expected_msg = r".*Classification with data of type"
+    expected_msg = r".*AutoSklearnClassifier with data of type"
     " multiclass-multioutput is not supported.*"
     with pytest.raises(ValueError, match=expected_msg):
         cls.fit(X=X, y=y_multiclass_multioutput)
 
-    expected_msg = r".*Classification with data of type"
+    expected_msg = r".*AutoSklearnClassifier with data of type"
     " continuous is not supported.*"
     with pytest.raises(ValueError, match=expected_msg):
         cls.fit(X=X, y=y_continuous)
 
-    expected_msg = r".*Classification with data of type"
+    expected_msg = r".*AutoSklearnClassifier with data of type"
     " continuous-multioutput is not supported.*"
     with pytest.raises(ValueError, match=expected_msg):
         cls.fit(X=X, y=y_continuous_multioutput)
@@ -225,12 +230,12 @@ def test_type_of_target(mock_estimator):
     reg = AutoSklearnRegressor(ensemble_size=0)
     # Illegal target types for regression: multilabel-indicator
     # multiclass-multioutput
-    expected_msg = r".*Regression with data of type"
+    expected_msg = r".*AutoSklearnRegressor with data of type"
     " multilabel-indicator is not supported.*"
     with pytest.raises(ValueError, match=expected_msg):
         reg.fit(X=X, y=y_multilabel,)
 
-    expected_msg = r".*Regression with data of type"
+    expected_msg = r".*AutoSklearnRegressor with data of type"
     " multiclass-multioutput is not supported.*"
     with pytest.raises(ValueError, match=expected_msg):
         reg.fit(X=X, y=y_multiclass_multioutput,)
@@ -465,11 +470,9 @@ def test_leaderboard(
                 assert all(leaderboard['ensemble_weight'] > 0)
 
 
-@unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.build_automl')
-def test_fit_n_jobs_negative(build_automl_patch):
+def test_fit_n_jobs_negative():
     n_cores = cpu_count()
-    cls = AutoSklearnEstimator(n_jobs=-1, ensemble_size=0)
-    cls.fit()
+    cls = AutoSklearnClassifier(n_jobs=-1, ensemble_size=0)
     assert cls._n_jobs == n_cores
 
 

@@ -834,7 +834,6 @@ def data_input_and_target_types():
 
 @pytest.mark.parametrize("X, y, X_test, y_test, task", data_input_and_target_types())
 def test_input_and_target_types(dask_client, X, y, X_test, y_test, task):
-
     if task in CLASSIFICATION_TASKS:
         automl = AutoMLClassifier(
             time_left_for_this_task=15,
