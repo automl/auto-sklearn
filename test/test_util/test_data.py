@@ -1,6 +1,4 @@
 import itertools
-import unittest
-import unittest.mock
 import warnings
 
 import pytest
@@ -12,6 +10,7 @@ from autosklearn.constants import (
     REGRESSION, MULTIOUTPUT_REGRESSION, CLASSIFICATION_TASKS, REGRESSION_TASKS
 )
 from autosklearn.util.data import reduce_dataset_size_if_too_large
+
 
 @pytest.mark.parametrize("task, y", [
     (BINARY_CLASSIFICATION, np.asarray(
@@ -28,7 +27,6 @@ def test_subsample_classification_unique_labels_stay_in_training_set(task, y):
     n_samples = 10000
     X = np.random.random(size=(n_samples, 3))
     memory_limit = 1  # Force subsampling
-    mock = unittest.mock.Mock()
 
     # Make sure our test assumptions are correct
     assert len(y) == n_samples, "Ensure tests are correctly setup"
@@ -50,6 +48,7 @@ def test_subsample_classification_unique_labels_stay_in_training_set(task, y):
         "Ensure sampling took place"
     assert all(label in y_sampled for label in unique_labels), \
         "All unique labels present in the return sampled set"
+
 
 @pytest.mark.parametrize(
     'memory_limit,precision,task',
@@ -88,7 +87,6 @@ def test_reduce_dataset_size_if_too_large(memory_limit, precision, task):
             None: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
         }
     }
-    mock = unittest.mock.Mock()
     if task == BINARY_CLASSIFICATION:
         X, y = sklearn.datasets.make_hastie_10_2()
     elif task == MULTICLASS_CLASSIFICATION:
