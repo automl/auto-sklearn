@@ -317,8 +317,10 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             'extra_trees', 'passive_aggressive', 'random_forest', 'sgd', 'gradient_boosting', 'mlp',
         ]
         include_preprocessors = ["no_preprocessing"]
-        include = {'classifier': include_estimators,
-                   'feature_preprocessor': include_preprocessors}
+        include = {
+            'classifier': include_estimators,
+            'feature_preprocessor': include_preprocessors
+        }
         super().__init__(
             time_left_for_this_task=time_left_for_this_task,
             per_run_time_limit=per_run_time_limit,
@@ -371,12 +373,15 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
                 'mlp',
             ]
         self.include['classifier'] = include_estimators
+        self.automl_._include['classifier'] = include_estimators
 
         if self.metric is None:
             if len(y.shape) == 1 or y.shape[1] == 1:
                 self.metric = accuracy
             else:
                 self.metric = log_loss
+
+            self.automl_._metric = self.metric
 
         if self.metric in metrics:
             metric_name = self.metric.name
@@ -450,9 +455,16 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         else:
             smac_callback = SmacObjectCallback(portfolio)
 
+        # Set the variables in the SklearnEstimator
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_arguments = resampling_strategy_kwargs
         self.get_smac_object_callback = smac_callback
+
+        # Set the variables in the SklearnEstimator.automl
+        self.automl_._resampling_strategy = resampling_strategy
+        self.automl_._resampling_strategy_arguments = resampling_strategy_kwargs
+        self.automl_._get_smac_object_callback = smac_callback
+
         return super().fit(
             X=X,
             y=y,

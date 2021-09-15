@@ -31,7 +31,6 @@ from smac.tae import StatusType
 from smac.stats.stats import Stats
 import joblib
 import sklearn.utils
-from scipy.sparse import spmatrix
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
 from sklearn.metrics._classification import type_of_target
@@ -486,10 +485,10 @@ class AutoML(BaseEstimator):
     def fit(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
+        y: SUPPORTED_TARGET_TYPES,
         task: Optional[int] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
+        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
         feat_type: Optional[List[str]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
@@ -587,6 +586,7 @@ class AutoML(BaseEstimator):
 
         # AutoSklearn does not handle sparse y for now
         y = convert_if_sparse(y)
+        y_test = convert_if_sparse(y_test) if y_test is not None else None
 
         # Get the task if it doesn't exist
         if task is None:
@@ -1003,6 +1003,7 @@ class AutoML(BaseEstimator):
             self._resampling_strategy,
             (BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit)
         )
+        print(self._resampling_strategy)
 
         if self._resampling_strategy not in [
                 'holdout',
@@ -1012,7 +1013,7 @@ class AutoML(BaseEstimator):
                 'partial-cv',
                 'partial-cv-iterative-fit',
         ] and not is_split_object:
-            raise ValueError('Illegal resampling strategy: %s' % self._resampling_strategy)
+            raise ValueError(f'Illegal resampling strategy: {self._resampling_strategy}')
 
         elif is_split_object:
             TrainEvaluator.check_splitter_resampling_strategy(
@@ -1206,13 +1207,13 @@ class AutoML(BaseEstimator):
     def fit_pipeline(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
+        y: SUPPORTED_TARGET_TYPES,
         is_classification: bool,
         config: Union[Configuration,  Dict[str, Union[str, float, int]]],
         task: Optional[int] = None,
         dataset_name: Optional[str] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
+        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
         feat_type: Optional[List[str]] = None,
         **kwargs: Dict,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
@@ -1263,6 +1264,7 @@ class AutoML(BaseEstimator):
         """
         # AutoSklearn does not handle sparse y for now
         y = convert_if_sparse(y)
+        y_test = convert_if_sparse(y_test) if y_test is not None else None
 
         # Get the task if it doesn't exist
         if task is None:
@@ -1903,10 +1905,10 @@ class AutoMLClassifier(AutoML):
     def fit(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
+        y: SUPPORTED_TARGET_TYPES,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
-        feat_type: Optional[List[bool]] = None,
+        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        feat_type: Optional[List[str]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
@@ -1925,11 +1927,11 @@ class AutoMLClassifier(AutoML):
     def fit_pipeline(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
+        y: SUPPORTED_TARGET_TYPES,
         config: Union[Configuration,  Dict[str, Union[str, float, int]]],
         dataset_name: Optional[str] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
+        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
         feat_type: Optional[List[str]] = None,
         **kwargs,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
@@ -1980,10 +1982,10 @@ class AutoMLRegressor(AutoML):
     def fit(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
+        y: SUPPORTED_TARGET_TYPES,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
-        feat_type: Optional[List[bool]] = None,
+        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        feat_type: Optional[List[str]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
@@ -2002,11 +2004,11 @@ class AutoMLRegressor(AutoML):
     def fit_pipeline(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
+        y: SUPPORTED_TARGET_TYPES,
         config: Union[Configuration,  Dict[str, Union[str, float, int]]],
         dataset_name: Optional[str] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
+        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
         feat_type: Optional[List[str]] = None,
         **kwargs: Dict,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
