@@ -114,8 +114,8 @@ def reduce_dataset_size_if_too_large(
 
     multiplier: float | int
         When performing reductions, satisfies the conditions that:
-        * Reduce precision if `size(X) * 10 >= memory_limit
-        * Subsample so that `size(X) * 10 = memory_limit` is satisfied
+        * Reduce precision if `size(X) * multiplier >= memory_limit`
+        * Subsample so that `size(X) * mulitplier = memory_limit` is satisfied``
 
     is_classification: bool
         Whether it's a classificaiton dataset or not. This is important when
