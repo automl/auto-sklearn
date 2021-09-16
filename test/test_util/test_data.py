@@ -44,10 +44,9 @@ def test_subsample_classification_unique_labels_stay_in_training_set(task, y):
             is_classification=task in CLASSIFICATION_TASKS
         )
 
-    assert len(y_sampled) <= len(y), \
-        "Ensure sampling took place"
+    assert len(y_sampled) <= len(y)
     assert all(label in y_sampled for label in unique_labels), \
-        "All unique labels present in the return sampled set"
+        f"sampled unique = {np.unique(y_sampled)}, original unique = {unique_labels}"
 
 
 @pytest.mark.parametrize(
@@ -62,27 +61,27 @@ def test_subsample_classification_unique_labels_stay_in_training_set(task, y):
 def test_reduce_dataset_size_if_too_large(memory_limit, precision, task):
     fixture = {
         BINARY_CLASSIFICATION: {
-            1: {float: 1310, np.float32: 2621, np.float64: 1310, np.float128: 655},
+            1: {float: 2500, np.float32: 2500, np.float64: 2500, np.float128: 1250},
             100: {float: 12000, np.float32: 12000, np.float64: 12000, np.float128: 12000},
             None: {float: 12000, np.float32: 12000, np.float64: 12000, np.float128: 12000},
         },
         MULTICLASS_CLASSIFICATION: {
-            1: {float: 204, np.float32: 409, np.float64: 204, np.float128: 102},
+            1: {float: 390, np.float32: 390, np.float64: 390, np.float128: 195},
             100: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
             None: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
         },
         MULTILABEL_CLASSIFICATION: {
-            1: {float: 204, np.float32: 409, np.float64: 204, np.float128: 102},
+            1: {float: 390, np.float32: 390, np.float64: 390, np.float128: 195},
             100: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
             None: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
         },
         REGRESSION: {
-            1: {float: 655, np.float32: 1310, np.float64: 655, np.float128: 327},
+            1: {float: 1250, np.float32: 1250, np.float64: 1250, np.float128: 625},
             100: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
             None: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
         },
         MULTIOUTPUT_REGRESSION: {
-            1: {float: 655, np.float32: 1310, np.float64: 655, np.float128: 327},
+            1: {float: 1250, np.float32: 1250, np.float64: 1250, np.float128: 625},
             100: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
             None: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
         }
@@ -120,7 +119,7 @@ def test_reduce_dataset_size_if_too_large(memory_limit, precision, task):
     # Assert there was subsampling when expected
     assert X_new.shape[0] == fixture[task][memory_limit][precision]
 
-    # Assert precision reduction
+    # Assert precision reduction whewn we have a memory limit of 1MB
     if memory_limit == 1:
         expected_dtypes = {
             np.float128: np.float64,
@@ -128,6 +127,6 @@ def test_reduce_dataset_size_if_too_large(memory_limit, precision, task):
             np.float32: np.float32,
             float: np.float32
         }
-        assert X.dtype == expected_dtypes[X.dtype]
+        assert X_new.dtype == expected_dtypes[precision]
     else:
-        assert old_dtype == X.dtype
+        assert old_dtype == X_new.dtype
