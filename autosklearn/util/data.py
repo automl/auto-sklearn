@@ -2,7 +2,7 @@
 # Functions performing various data conversions for the ChaLearn AutoML
 # challenge
 import warnings
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Optional
 
 import numpy as np
 
@@ -79,17 +79,21 @@ def predict_RAM_usage(X: np.ndarray, categorical: List[bool]) -> float:
 
 
 def reduce_dataset_size_if_too_large(
-    X: SUPPORTED_FEAT_TYPES,
-    y: SUPPORTED_TARGET_TYPES,
+    X: np.ndarray,
+    y: np.ndarray,
     seed: int,
     memory_limit: int,
-    is_classification: bool
-) -> Tuple[SUPPORTED_FEAT_TYPES, SUPPORTED_TARGET_TYPES]:
+    include: List[str] = ['precision', 'subsampling'],
+    multiplier: Union[float, int] = 10,
+    is_classification: Optional[bool] = None
+) -> Tuple[np.ndarray, np.ndarray]:
     """ Reduces the size of the dataset if it's too close to the memory limit.
 
     Attempts to do the following in the order:
         * Reduce precision if necessary
         * Subsample
+
+    Relies on the input being of type np.ndarray for information
 
     Parameters
     ----------
@@ -105,6 +109,15 @@ def reduce_dataset_size_if_too_large(
     memory_limit: int
         The amount of memory allocated in megabytes
 
+    include: List[str] = ['precision', 'subsampling']
+        A list of operations that are permitted to be performed to reduce
+        the size of the dataset.
+
+    multiplier: float | int
+        When performing reductions, satisfies the conditions that:
+        * Reduce precision if `size(X) * 10 >= memory_limit
+        * Subsample so that `size(X) * 10 = memory_limit` is satisfied
+
     is_classification: bool
         Whether it's a classificaiton dataset or not. This is important when
         considering how to subsample.
@@ -115,15 +128,7 @@ def reduce_dataset_size_if_too_large(
         The reduced X, y if reductions were needed
     """
 
-    # There is no memory limit, we can't decide how to reduce
-    if not memory_limit:
-        return X, y
-
-    # If it's not np.ndarray, we can't manipulate
-    if not isinstance(X, np.ndarray):
-        return X, y
-
-    def bits_for_dtype(dtype: np.dtype) -> int:
+    def byte_size(dtype: np.dtype) -> int:
         """ Returns the amount of bits required for an element of dtype """
         if dtype == np.float32:
             return 4
@@ -145,31 +150,38 @@ def reduce_dataset_size_if_too_large(
             )
             return 8
 
-    def megabytes(X_: np.ndarray) -> int:
+    def megabytes(X_: np.ndarray) -> float:
         """ Estimate how large X is in megabytes """
-        return int(X_.shape[0] * X_.shape[1] * bits_for_dtype(X_.dtype) / 1e-6)
+        return X_.shape[0] * X_.shape[1] * byte_size(X_.dtype) * 1e-6
 
     def reduce_precision(X_: np.ndarray) -> Tuple[np.ndarray, str]:
         """ Reduces the precision of a dataset, only works for X.dtype > np.float32 """
+        if X_.dtype == np.float32:
+            return X_, str(np.float32)
+
         precision_mapping = {
+            4: np.float32,
             8: np.float32,
             16: np.float64,
         }
-        precision = precision_mapping.get(bits_for_dtype(X_.dtype), np.float32)
+        precision = precision_mapping.get(byte_size(X_.dtype), np.float32)
+
         return X_.astype(precision), str(precision)
 
     def subsample(
         X_: np.ndarray,
-        y_: SUPPORTED_TARGET_TYPES,
+        y_: np.ndarray,
         sample_size: int
-    ) -> Tuple[np.ndarray, SUPPORTED_TARGET_TYPES]:
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """ Subsamples the array so it fits into the memory limit """
         if is_classification:
             splitter = CustomStratifiedShuffleSplit(
                 train_size=sample_size,
                 random_state=seed
             )
-            X_, y_ = next(splitter.split(X=X_, y=y_))
+            left_idxs, right_idxs = next(splitter.split(X=X_, y=y_))
+            X_ = X_[left_idxs]
+            y_ = y_[left_idxs]
 
         else:
             X_, _, y_, _ = train_test_split(
@@ -180,19 +192,27 @@ def reduce_dataset_size_if_too_large(
 
         return X_, y_
 
-    # If the dataset is too big, we can try to reduce precision
-    if memory_limit <= megabytes(X) * 10:
+    if 'subsampling' in include:
+        assert is_classification is not None
+
+    # There is no memory limit, we can't decide how to reduce
+    if not memory_limit:
+        return X, y
+
+    # If 10 times the dataset is too big for memory, we try to reduce the
+    # precision if it's a high precision dataset
+    if megabytes(X) * multiplier > memory_limit:
         X, precision = reduce_precision(X)
         warnings.warn(
             f'Dataset too large for memory limit {memory_limit}MB, '
             f'reduced the precision from {X.dtype} to {precision}',
         )
 
-    # If the dataset is still too big, we subsample it
-    if memory_limit <= megabytes(X) * 10:
-        new_num_samples = int(
-            memory_limit / (10 * X.shape[1]) * (bits_for_dtype(X.dtype) / 1e-6)
-        )
+    # If the dataset is still too big such that we couldn't fit 10 of them in
+    # memory, we subsample such that we can
+    if megabytes(X) * multiplier > memory_limit:
+        reduction_factor = float(memory_limit) / (megabytes(X) * multiplier)
+        new_num_samples = int(reduction_factor * len(X))
         X, y = subsample(X, y, new_num_samples)
         warnings.warn(
             f"Dataset too large for memory limit {memory_limit}MB, reduced"
