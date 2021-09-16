@@ -96,10 +96,10 @@ def reduce_dataset_size_if_too_large(
 
     Parameters
     ----------
-    X: array-like
+    X: np.ndarray
         The features of the dataset.
 
-    y: array-like
+    y: np.ndarray
         The labels of the dataset.
 
     seed: int
@@ -123,7 +123,7 @@ def reduce_dataset_size_if_too_large(
 
     Returns
     -------
-    Tuple[array-like, array-like]
+    Tuple[np.ndarray, np.ndarray]
         The reduced X, y if reductions were needed
     """
 
