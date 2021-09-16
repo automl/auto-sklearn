@@ -2,13 +2,12 @@
 # Functions performing various data conversions for the ChaLearn AutoML
 # challenge
 import warnings
-from typing import List, Tuple, Union, Optional
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 
 from sklearn.model_selection import train_test_split
 
-from autosklearn.data.validation import SUPPORTED_FEAT_TYPES, SUPPORTED_TARGET_TYPES
 from autosklearn.evaluation.splitter import CustomStratifiedShuffleSplit
 
 __all__ = [

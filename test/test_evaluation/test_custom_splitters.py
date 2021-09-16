@@ -7,19 +7,20 @@ from autosklearn.constants import (
     BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION
 )
 
+
 @pytest.mark.parametrize("task, X, y", [
     (
         BINARY_CLASSIFICATION,
-        np.asarray(10000 * [[1,1,1,1,1]]),
-        np.asarray( 9999 * [0] + 1 * [1])
+        np.asarray(10000 * [[1, 1, 1, 1, 1]]),
+        np.asarray(9999 * [0] + 1 * [1])
     ),
     (
         MULTICLASS_CLASSIFICATION,
-        np.asarray(10000 * [[1,1,1,1,1]]),
+        np.asarray(10000 * [[1, 1, 1, 1, 1]]),
         np.asarray(4999 * [1] + 4999 * [2] + 1 * [3] + 1 * [4])),
     (
         MULTILABEL_CLASSIFICATION,
-        np.asarray(10000 * [[1,1,1,1,1]]),
+        np.asarray(10000 * [[1, 1, 1, 1, 1]]),
         np.asarray(4999 * [[0, 1, 1]] + 4999 * [[1, 1, 0]] + 1 * [[1, 0, 1]] + 1 * [[0, 0, 0]])
     )
 ])
