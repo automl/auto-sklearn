@@ -33,7 +33,6 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
     def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         if self.preprocessor is None:
             raise NotImplementedError()
-        print("Bag of word represetation", self.preprocessor.transform(X))
         return self.preprocessor.transform(X)
 
     @staticmethod

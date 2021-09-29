@@ -114,5 +114,4 @@ class BOWChoice(AutoSklearnChoice):
         return self
 
     def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
-        print("transform text", X)
         return self.choice.transform(X)
