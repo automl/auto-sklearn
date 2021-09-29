@@ -6,9 +6,9 @@ import numpy as np
 
 from sklearn.base import BaseEstimator
 
-from autosklearn.pipeline.components.data_preprocessing.category_shift.\
+from autosklearn.pipeline.components.data_preprocessing.category_shift. \
     category_shift import CategoryShift
-from autosklearn.pipeline.components.data_preprocessing.imputation.\
+from autosklearn.pipeline.components.data_preprocessing.imputation. \
     categorical_imputation import CategoricalImputation
 from autosklearn.pipeline.components.data_preprocessing.minority_coalescense \
     import CoalescenseChoice
@@ -41,16 +41,17 @@ class TextPreprocessingPipeline(BasePipeline):
         If RandomState instance, random_state is the random number generator;
         If None, the random number generator is the RandomState instance
         used by `np.random`."""
+
     # raise NotImplementedError
     def __init__(
-        self,
-        config: Optional[Configuration] = None,
-        steps: Optional[List[Tuple[str, BaseEstimator]]] = None,
-        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
-        include: Optional[Dict[str, str]] = None,
-        exclude: Optional[Dict[str, str]] = None,
-        random_state: Optional[Union[int, np.random.RandomState]] = None,
-        init_params: Optional[Dict[str, Any]] = None
+            self,
+            config: Optional[Configuration] = None,
+            steps: Optional[List[Tuple[str, BaseEstimator]]] = None,
+            dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+            include: Optional[Dict[str, str]] = None,
+            exclude: Optional[Dict[str, str]] = None,
+            random_state: Optional[Union[int, np.random.RandomState]] = None,
+            init_params: Optional[Dict[str, Any]] = None
     ) -> None:
         self._output_dtype = np.int32
         super().__init__(
@@ -81,10 +82,10 @@ class TextPreprocessingPipeline(BasePipeline):
                 'preferred_dtype': None}
 
     def _get_hyperparameter_search_space(
-        self,
-        include: Optional[Dict[str, str]] = None,
-        exclude: Optional[Dict[str, str]] = None,
-        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+            self,
+            include: Optional[Dict[str, str]] = None,
+            exclude: Optional[Dict[str, str]] = None,
+            dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         """Create the hyperparameter configuration space.
 
@@ -101,8 +102,8 @@ class TextPreprocessingPipeline(BasePipeline):
             dataset_properties = dict()
 
         cs = self._get_base_search_space(
-             cs=cs, dataset_properties=dataset_properties,
-             exclude=exclude, include=include, pipeline=self.steps)
+            cs=cs, dataset_properties=dataset_properties,
+            exclude=exclude, include=include, pipeline=self.steps)
 
         return cs
 
@@ -115,11 +116,11 @@ class TextPreprocessingPipeline(BasePipeline):
         if dataset_properties is not None and isinstance(dataset_properties, dict):
             default_dataset_properties.update(dataset_properties)
 
-        #ToDo implemenent the steps for text features
+        # ToDo implemenent the feature reduction
         steps.extend([
-            ("text_encoding", BOWChoice(default_dataset_properties))
-            ])
-
+            ("text_encoding", BOWChoice(default_dataset_properties)),
+            # ("feature_reduction", FeatureReduction(default_dataset_properties))
+        ])
         return steps
 
     def _get_estimator_hyperparameter_name(self) -> str:

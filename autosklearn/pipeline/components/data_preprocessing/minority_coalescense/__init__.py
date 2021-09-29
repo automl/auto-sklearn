@@ -107,16 +107,4 @@ class CoalescenseChoice(AutoSklearnChoice):
         return self
 
     def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
-        X_new = self.preprocessor.transform(X)
-
-        sdatei = open('/home/lukas/Python_Projects/AutoSklearnDevelopment/sample.txt')
-        l = sdatei.readlines()
-        sdatei.close()
-        l.append(
-            '\nMinX:{}\n\nX_new: {}\nX_new_type: {}\nX_new_shape: {}\n\n'.format(X, X_new, type(X_new), X_new.shape))
-        sdatei = open('/home/lukas/Python_Projects/AutoSklearnDevelopment/sample.txt', 'w')
-        sdatei.write("".join(l))
-        sdatei.close()
-
-        # return self.preprocessor.transform(X)
-        return X_new
+        return self.choice.transform(X)
