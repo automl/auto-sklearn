@@ -35,12 +35,7 @@ class FeatureReduction(AutoSklearnPreprocessingAlgorithm):
     def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         if self.preprocessor is None:
             raise NotImplementedError()
-        X_new = self.preprocessor.transform(X)
-        file = open("/home/lukas/Python_Projects/AutoSklearnDevelopment/sample.txt", "a")
-        file.write("\nX: {}\nX_new: {}\n\n".format(X.shape, X_new.shape))
-        file.close()
-        return X_new
-        # return self.preprocessor.transform(X)
+        return self.preprocessor.transform(X)
 
     @staticmethod
     def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
