@@ -61,11 +61,11 @@ class TextPreprocessingPipeline(BasePipeline):
     @staticmethod
     def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
                        ) -> Dict[str, Optional[Union[str, int, bool, Tuple]]]:
-        return {'shortname': 'cat_datapreproc',
-                'name': 'categorical data preprocessing',
+        return {'shortname': 'txt_datapreproc',
+                'name': 'text data preprocessing',
                 'handles_missing_values': True,
-                'handles_nominal_values': True,
-                'handles_numerical_features': True,
+                'handles_nominal_values': False,
+                'handles_numerical_features': False,
                 'prefers_data_scaled': False,
                 'prefers_data_normalized': False,
                 'handles_regression': True,

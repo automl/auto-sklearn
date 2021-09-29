@@ -11,10 +11,10 @@ import numpy as np
 from sklearn.base import BaseEstimator
 
 from autosklearn.pipeline.base import (
-     BasePipeline,
-     DATASET_PROPERTIES_TYPE,
-     PIPELINE_DATA_DTYPE,
- )
+    BasePipeline,
+    DATASET_PROPERTIES_TYPE,
+    PIPELINE_DATA_DTYPE,
+)
 from autosklearn.pipeline.components.data_preprocessing.feature_type_categorical \
     import CategoricalPreprocessingPipeline
 from autosklearn.pipeline.components.data_preprocessing.feature_type_numerical \
@@ -36,17 +36,17 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
     """
 
     def __init__(
-        self,
-        config: Optional[Configuration] = None,
-        pipeline: Optional[BasePipeline] = None,
-        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
-        include: Optional[Dict[str, str]] = None,
-        exclude: Optional[Dict[str, str]] = None,
-        random_state: Optional[Union[int, np.random.RandomState]] = None,
-        init_params: Optional[Dict[str, Any]] = None,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
-        force_sparse_output: bool = False,
-        column_transformer: Optional[sklearn.compose.ColumnTransformer] = None,
+            self,
+            config: Optional[Configuration] = None,
+            pipeline: Optional[BasePipeline] = None,
+            dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+            include: Optional[Dict[str, str]] = None,
+            exclude: Optional[Dict[str, str]] = None,
+            random_state: Optional[Union[int, np.random.RandomState]] = None,
+            init_params: Optional[Dict[str, Any]] = None,
+            feat_type: Optional[Dict[Union[str, int], str]] = None,
+            force_sparse_output: bool = False,
+            column_transformer: Optional[sklearn.compose.ColumnTransformer] = None,
     ):
 
         if pipeline is not None:
@@ -131,7 +131,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
             numerical_features = [key for key, value in self.feat_type.items()
                                   if value.lower() == 'numerical']
             text_features = [key for key, value in self.feat_type.items()
-                                  if value.lower() == "string"]
+                             if value.lower() == "string"]
 
         # If no categorical features, assume we have a numerical only pipeline
         if len(numerical_features) != 0 and len(categorical_features) == 0 and len(text_features) == 0:
@@ -177,15 +177,15 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         if total_columns != n_feats:
             raise ValueError("Missing columns in the specification of the data validator"
                              " for train data={} and spec={}".format(
-                                 np.shape(X),
-                                 sklearn_transf_spec,
-                             ))
+                np.shape(X),
+                sklearn_transf_spec,
+            ))
 
         self.sparse_ = sparse.issparse(X) or self.force_sparse_output
         self.column_transformer = sklearn.compose.ColumnTransformer(
             transformers=sklearn_transf_spec,
             sparse_threshold=float(self.sparse_),
-            )
+        )
         self.column_transformer.fit(X, y)
         return self
 
@@ -253,8 +253,8 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         return self
 
     def get_hyperparameter_search_space(
-        self,
-        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+            self,
+            dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         self.dataset_properties = dataset_properties
         cs = ConfigurationSpace()
@@ -264,9 +264,9 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def _get_hyperparameter_search_space_recursevely(
-        dataset_properties: DATASET_PROPERTIES_TYPE,
-        cs: ConfigurationSpace,
-        transformer: BaseEstimator,
+            dataset_properties: DATASET_PROPERTIES_TYPE,
+            cs: ConfigurationSpace,
+            transformer: BaseEstimator,
     ) -> ConfigurationSpace:
         for st_name, st_operation in transformer:
             if hasattr(st_operation, "get_hyperparameter_search_space"):
