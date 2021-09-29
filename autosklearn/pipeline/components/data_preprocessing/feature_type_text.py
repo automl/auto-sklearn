@@ -14,6 +14,7 @@ from autosklearn.pipeline.components.data_preprocessing.minority_coalescense \
     import CoalescenseChoice
 from autosklearn.pipeline.components.data_preprocessing.text_encoding \
     import BOWChoice
+from autosklearn.pipeline.components.data_preprocessing.feature_reduction.truncated_svd import FeatureReduction
 from autosklearn.pipeline.components.data_preprocessing.categorical_encoding.encoding import (
     OrdinalEncoding
 )
@@ -119,7 +120,7 @@ class TextPreprocessingPipeline(BasePipeline):
         # ToDo implemenent the feature reduction
         steps.extend([
             ("text_encoding", BOWChoice(default_dataset_properties)),
-            # ("feature_reduction", FeatureReduction(default_dataset_properties))
+            ("feature_reduction", FeatureReduction())
         ])
         return steps
 
