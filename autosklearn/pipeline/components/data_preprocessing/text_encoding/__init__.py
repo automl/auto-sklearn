@@ -58,12 +58,14 @@ class BOWChoice(AutoSklearnChoice):
 
         if default is None:
             #ToDo add the different verision
-            defaults = ['bag_of_encoding']
+            # how using 'relative' version
+            defaults = ['bag_of_words_encoding', 'relative_bag_of_words_encoding']
             for default_ in defaults:
                 if default_ in available_preprocessors:
                     default = default_
                     break
 
+        # Todo how to add hps to available_preprocessors
         preprocessor = CategoricalHyperparameter('__choice__',
                                                  list(
                                                      available_preprocessors.keys()),
