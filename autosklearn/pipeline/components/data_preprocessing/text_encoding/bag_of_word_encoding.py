@@ -24,62 +24,27 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
 
     def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
             ) -> 'BagOfWordEncoder':
-        # ToDo define the Vecotizer
-
-        sdatei = open('/home/lukas/Python_Projects/AutoSklearnDevelopment/sample.txt')
-        l = sdatei.readlines()
-        sdatei.close()
-        l.append('\nX_fit:{}\n'.format(X, ))
-        sdatei = open('/home/lukas/Python_Projects/AutoSklearnDevelopment/sample.txt', 'w')
-        sdatei.write("".join(l))
-        sdatei.close()
 
         if isinstance(X, pd.DataFrame):
+            # define a CountVectorizer for every feature (implicitly defined by order of columns, maybe change the list
+            # to a dictionary with features as keys)
             self.preprocessor = [CountVectorizer().fit(X[feature]) for feature in X.columns]
         else:
-            raise NotImplementedError
+            raise ValueError("Your text data is not encoded in a pandas.DataFrame\n"
+                             "Please make sure to use a pandas.DataFrame and ensure"
+                             "that the text features are encoded as strings.")
         return self
 
     def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         X_new = None
-
-        sdatei = open('/home/lukas/Python_Projects/AutoSklearnDevelopment/sample.txt')
-        l = sdatei.readlines()
-        sdatei.close()
-        l.append('\nself.pre:{}\n'.format(self.preprocessor))
-        sdatei = open('/home/lukas/Python_Projects/AutoSklearnDevelopment/sample.txt', 'w')
-        sdatei.write("".join(l))
-        sdatei.close()
-
         if self.preprocessor is None:
             raise NotImplementedError()
+        # iterate over the pretrained preprocessors and columns and transform the data
         for preprocessor, feature in zip(self.preprocessor, X.columns):
             if X_new is None:
                 X_new = preprocessor.transform(X[feature])
-
-                sdatei = open('/home/lukas/Python_Projects/AutoSklearnDevelopment/sample.txt')
-                l = sdatei.readlines()
-                sdatei.close()
-                l.append(
-                    '\nX_if:{}\n\nX_new: {}\nX_new_type: {}\nX_new_shape: {}\n\n'.format(X[feature], X_new, type(X_new),
-                                                                                         X_new.shape))
-                sdatei = open('/home/lukas/Python_Projects/AutoSklearnDevelopment/sample.txt', 'w')
-                sdatei.write("".join(l))
-                sdatei.close()
-
             else:
                 X_new = hstack([X_new, preprocessor.transform(X[feature])])
-
-                sdatei = open('/home/lukas/Python_Projects/AutoSklearnDevelopment/sample.txt')
-                l = sdatei.readlines()
-                sdatei.close()
-                l.append('\nX_else:{}\n\nX_new: {}\nX_new_type: {}\nX_new_shape: {}\n\n'.format(X[feature], X_new,
-                                                                                                type(X_new),
-                                                                                                X_new.shape))
-                sdatei = open('/home/lukas/Python_Projects/AutoSklearnDevelopment/sample.txt', 'w')
-                sdatei.write("".join(l))
-                sdatei.close()
-        # return self.preprocessor.transform(X)
         return X_new
 
     @staticmethod
