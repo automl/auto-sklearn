@@ -1,6 +1,8 @@
 from typing import Dict, Optional, Tuple, Union
 
 from ConfigSpace.configuration_space import ConfigurationSpace
+import ConfigSpace.hyperparameters as CSH
+from ConfigSpace import EqualsCondition
 
 import scipy.sparse
 
@@ -19,9 +21,17 @@ from sklearn.feature_extraction.text import TfidfTransformer
 class RelativeBagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
     def __init__(
             self,
+            use_idf=None,
+            min_df_choice=None,
+            min_df_absolute=None,
+            min_df_relative=None,
             random_state: Optional[Union[int, np.random.RandomState]] = None
     ) -> None:
         self.random_state = random_state
+        self.use_idf = use_idf
+        self.min_df_choice = min_df_choice
+        self.min_df_absolute = min_df_absolute
+        self.min_df_relative = min_df_relative
 
     def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
             ) -> 'BagOfWordEncoder':
@@ -29,7 +39,14 @@ class RelativeBagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
         if isinstance(X, pd.DataFrame):
             # define a CountVectorizer for every feature (implicitly defined by order of columns, maybe change the list
             # to a dictionary with features as keys)
-            self.preprocessor = [CountVectorizer().fit(X[feature]) for feature in X.columns]
+            if self.min_df_choice == "min_df_absolute":
+                self.preprocessor = [CountVectorizer(min_df=self.min_df_absolute).fit(X[feature]) for feature in
+                                     X.columns]
+            elif self.min_df_choice == "min_df_relative":
+                self.preprocessor = [CountVectorizer(min_df=self.min_df_relative).fit(X[feature]) for feature in
+                                     X.columns]
+            else:
+                raise KeyError()
         else:
             raise ValueError("Your text data is not encoded in a pandas.DataFrame\n"
                              "Please make sure to use a pandas.DataFrame and ensure"
@@ -44,10 +61,10 @@ class RelativeBagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
         for preprocessor, feature in zip(self.preprocessor, X.columns):
             if X_new is None:
                 X_new = preprocessor.transform(X[feature])
-                X_new = TfidfTransformer(use_idf=False).fit_transform(X_new)
+                X_new = TfidfTransformer(use_idf=self.use_idf).fit_transform(X_new)
             else:
                 X_bg = preprocessor.transform(X[feature])
-                X_tf = TfidfTransformer(use_idf=False).fit_transform(X_bg)
+                X_tf = TfidfTransformer(use_idf=self.use_idf).fit_transform(X_bg)
                 X_new = hstack([X_new, X_tf])
         return X_new
 
@@ -70,4 +87,21 @@ class RelativeBagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
                                         ) -> ConfigurationSpace:
-        return ConfigurationSpace()
+        cs = ConfigurationSpace()
+
+        hp_use_idf = CSH.CategoricalHyperparameter("use_idf", choices=[False, True])
+        hp_min_df_choice = CSH.CategoricalHyperparameter("min_df_choice",
+                                                         choices=["min_df_absolute", "min_df_relative"])
+        hp_min_df_absolute = CSH.UniformIntegerHyperparameter(name="min_df_absolute", lower=0, upper=10,
+                                                              default_value=0)
+        hp_min_df_relative = CSH.UniformFloatHyperparameter(name="min_df_relative", lower=0.01, upper=1.0,
+                                                            default_value=0.01, log=True)
+        cs.add_hyperparameters([hp_use_idf, hp_min_df_choice, hp_min_df_absolute, hp_min_df_relative])
+
+        cond_min_df_absolute = EqualsCondition(hp_min_df_absolute, hp_min_df_choice, "min_df_absolute")
+        cond_min_df_relative = EqualsCondition(hp_min_df_relative, hp_min_df_choice, "min_df_relative")
+        cs.add_conditions([cond_min_df_absolute, cond_min_df_relative])
+
+        # maybe add bigrams ...
+
+        return cs

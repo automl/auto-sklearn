@@ -59,7 +59,7 @@ class BOWChoice(AutoSklearnChoice):
         if default is None:
             #ToDo add the different verision
             # how using 'relative' version
-            defaults = ['bag_of_words_encoding', 'relative_bag_of_words_encoding']
+            defaults = ['bag_of_words_encoding']
             for default_ in defaults:
                 if default_ in available_preprocessors:
                     default = default_

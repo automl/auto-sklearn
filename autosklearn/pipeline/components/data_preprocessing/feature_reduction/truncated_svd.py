@@ -1,6 +1,8 @@
 from typing import Dict, Optional, Tuple, Union
 
 from ConfigSpace.configuration_space import ConfigurationSpace
+import ConfigSpace.hyperparameters as CSH
+from ConfigSpace import EqualsCondition
 
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -20,21 +22,37 @@ class FeatureReduction(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(
         self,
+        n_components=None,
         random_state: Optional[Union[int, np.random.RandomState]] = None
     ) -> None:
+        self.n_components = n_components
         self.random_state = random_state
 
     def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
             ) -> 'FeatureReduction':
         X = csr_matrix(X)
-        n = X.shape[1]
-        self.preprocessor = TruncatedSVD(n_components=int((n//10)+2))
-        self.preprocessor.fit(X)
+        if X.shape[1] > int(2**self.n_components):
+            self.preprocessor = TruncatedSVD(n_components=int(2**self.n_components))
+            self.preprocessor.fit(X)
+        elif X.shape[1] <= int(2**self.n_components) and X.shape[1] != 1:
+            self.preprocessor = TruncatedSVD(n_components=X.shape[1]-1)
+            self.preprocessor.fit(X)
+        else:
+            raise ValueError("The text embedding concistes only of a one dimension.\n"
+                             "Are you sure that your text data is necessery ?\n")
         return self
 
     def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         if self.preprocessor is None:
             raise NotImplementedError()
+        # file = open("/home/lukas/Python_Projects/AutoSklearnDevelopment/sample.txt", "a")
+        # file.write("\n X shape: {}\n\n".format(X.shape))
+        # file.close()
+
+        # file = open("/home/lukas/Python_Projects/AutoSklearnDevelopment/sample.txt", "a")
+        # file.write("\n X_new shape: {}\n\n".format(self.preprocessor.transform(X).shape))
+        # file.close()
+
         return self.preprocessor.transform(X)
 
     @staticmethod
@@ -63,4 +81,6 @@ class FeatureReduction(AutoSklearnPreprocessingAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
                                         ) -> ConfigurationSpace:
-        return ConfigurationSpace()
+        cs = ConfigurationSpace()
+        cs.add_hyperparameter(CSH.UniformIntegerHyperparameter("n_components", lower=3, upper=10, default_value=7))
+        return cs

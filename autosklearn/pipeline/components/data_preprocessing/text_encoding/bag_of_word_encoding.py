@@ -1,6 +1,8 @@
 from typing import Dict, Optional, Tuple, Union
 
 from ConfigSpace.configuration_space import ConfigurationSpace
+import ConfigSpace.hyperparameters as CSH
+from ConfigSpace import EqualsCondition
 
 import scipy.sparse
 
@@ -18,9 +20,18 @@ from sklearn.feature_extraction.text import CountVectorizer
 class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
     def __init__(
             self,
+            min_df_choice=None,
+            min_df_absolute=None,
+            min_df_relative=None,
             random_state: Optional[Union[int, np.random.RandomState]] = None
     ) -> None:
         self.random_state = random_state
+        self.min_df_choice = min_df_choice
+        self.min_df_absolute = min_df_absolute
+        self.min_df_relative = min_df_relative
+        # file = open("/home/lukas/Python_Projects/AutoSklearnDevelopment/sample.txt", "a")
+        # file.write("\ninit BOW: {}\n\n".format(random_state))
+        # file.close()
 
     def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
             ) -> 'BagOfWordEncoder':
@@ -28,7 +39,14 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
         if isinstance(X, pd.DataFrame):
             # define a CountVectorizer for every feature (implicitly defined by order of columns, maybe change the list
             # to a dictionary with features as keys)
-            self.preprocessor = [CountVectorizer().fit(X[feature]) for feature in X.columns]
+            if self.min_df_choice == "min_df_absolute":
+                self.preprocessor = [CountVectorizer(min_df=self.min_df_absolute).fit(X[feature]) for feature in
+                                     X.columns]
+            elif self.min_df_choice == "min_df_relative":
+                self.preprocessor = [CountVectorizer(min_df=self.min_df_relative).fit(X[feature]) for feature in
+                                     X.columns]
+            else:
+                raise KeyError()
         else:
             raise ValueError("Your text data is not encoded in a pandas.DataFrame\n"
                              "Please make sure to use a pandas.DataFrame and ensure"
@@ -66,4 +84,19 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
                                         ) -> ConfigurationSpace:
-        return ConfigurationSpace()
+        cs = ConfigurationSpace()
+        hp_min_df_choice_bow = CSH.CategoricalHyperparameter("min_df_choice",
+                                                             choices=["min_df_absolute", "min_df_relative"])
+        hp_min_df_absolute_bow = CSH.UniformIntegerHyperparameter(name="min_df_absolute", lower=0, upper=10,
+                                                                  default_value=0)
+        hp_min_df_relative_bow = CSH.UniformFloatHyperparameter(name="min_df_relative", lower=0.01, upper=1.0,
+                                                                default_value=0.01, log=True)
+        cs.add_hyperparameters([hp_min_df_choice_bow, hp_min_df_absolute_bow, hp_min_df_relative_bow])
+
+        cond_min_df_absolute_bow = EqualsCondition(hp_min_df_absolute_bow, hp_min_df_choice_bow, "min_df_absolute")
+        cond_min_df_relative_bow = EqualsCondition(hp_min_df_relative_bow, hp_min_df_choice_bow, "min_df_relative")
+        cs.add_conditions([cond_min_df_absolute_bow, cond_min_df_relative_bow])
+
+        # maybe add bigrams ...
+
+        return cs
