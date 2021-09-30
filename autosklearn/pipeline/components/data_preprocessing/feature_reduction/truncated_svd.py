@@ -35,7 +35,7 @@ class FeatureReduction(AutoSklearnPreprocessingAlgorithm):
             self.preprocessor = TruncatedSVD(n_components=int(2**self.n_components))
             self.preprocessor.fit(X)
         elif X.shape[1] <= int(2**self.n_components) and X.shape[1] != 1:
-            self.preprocessor = TruncatedSVD(n_components=X.shape[1]-1)
+            self.preprocessor = TruncatedSVD(n_components=Int(2**(np.floor(np.log2(self.n_components)).astype(int))))
             self.preprocessor.fit(X)
         else:
             raise ValueError("The text embedding concistes only of a one dimension.\n"

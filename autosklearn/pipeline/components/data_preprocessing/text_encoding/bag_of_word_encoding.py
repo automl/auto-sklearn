@@ -60,6 +60,7 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
         # iterate over the pretrained preprocessors and columns and transform the data
         for preprocessor, feature in zip(self.preprocessor, X.columns):
             if X_new is None:
+                # possiblity to add TruncatedSVD here
                 X_new = preprocessor.transform(X[feature])
             else:
                 X_new = hstack([X_new, preprocessor.transform(X[feature])])
