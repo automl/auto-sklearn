@@ -161,63 +161,59 @@ Fit an user provided configuration
 
  .. code-block:: none
 
-    {'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fdc96914d30>, 'balancing': Balancing(random_state=1, strategy='weighting'), 'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fdc91924190>, 'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fdc91924280>}
+    {'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f2d0f82fca0>, 'balancing': Balancing(random_state=1), 'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2d0ff284f0>, 'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2d0ff283d0>}
     RunInfo(config=Configuration:
-      balancing:strategy, Value: 'weighting'
+      balancing:strategy, Value: 'none'
       classifier:__choice__, Value: 'random_forest'
-      classifier:random_forest:bootstrap, Value: 'False'
+      classifier:random_forest:bootstrap, Value: 'True'
       classifier:random_forest:criterion, Value: 'gini'
       classifier:random_forest:max_depth, Constant: 'None'
-      classifier:random_forest:max_features, Value: 0.9467933744680831
+      classifier:random_forest:max_features, Value: 0.7153285987862764
       classifier:random_forest:max_leaf_nodes, Constant: 'None'
       classifier:random_forest:min_impurity_decrease, Constant: 0.0
-      classifier:random_forest:min_samples_leaf, Value: 13
+      classifier:random_forest:min_samples_leaf, Value: 15
       classifier:random_forest:min_samples_split, Value: 11
       classifier:random_forest:min_weight_fraction_leaf, Constant: 0.0
       data_preprocessor:__choice__, Value: 'feature_type'
       data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__, Value: 'no_encoding'
       data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__, Value: 'no_coalescense'
-      data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Value: 'median'
-      data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Value: 'standardize'
-      feature_preprocessor:__choice__, Value: 'liblinear_svc_preprocessor'
-      feature_preprocessor:liblinear_svc_preprocessor:C, Value: 421.5481232660722
-      feature_preprocessor:liblinear_svc_preprocessor:dual, Constant: 'False'
-      feature_preprocessor:liblinear_svc_preprocessor:fit_intercept, Constant: 'True'
-      feature_preprocessor:liblinear_svc_preprocessor:intercept_scaling, Constant: 1
-      feature_preprocessor:liblinear_svc_preprocessor:loss, Value: 'squared_hinge'
-      feature_preprocessor:liblinear_svc_preprocessor:multi_class, Constant: 'ovr'
-      feature_preprocessor:liblinear_svc_preprocessor:penalty, Constant: 'l1'
-      feature_preprocessor:liblinear_svc_preprocessor:tol, Value: 0.001001348716775123
+      data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Value: 'mean'
+      data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Value: 'robust_scaler'
+      data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max, Value: 0.8730805182850571
+      data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min, Value: 0.19102897258941637
+      feature_preprocessor:__choice__, Value: 'feature_agglomeration'
+      feature_preprocessor:feature_agglomeration:affinity, Value: 'euclidean'
+      feature_preprocessor:feature_agglomeration:linkage, Value: 'average'
+      feature_preprocessor:feature_agglomeration:n_clusters, Value: 20
+      feature_preprocessor:feature_agglomeration:pooling_func, Value: 'max'
     , instance=None, instance_specific=None, seed=1, cutoff=60, capped=False, budget=0.0, source_id=0)
-    RunValue(cost=0.034123222748815185, time=2.5348589420318604, status=<StatusType.SUCCESS: 1>, starttime=1631635770.2157514, endtime=1631635772.773577, additional_info={'duration': 2.446598768234253, 'num_run': 2, 'train_loss': 0.043437645959831905, 'configuration_origin': None})
+    RunValue(cost=0.023696682464455, time=2.393437385559082, status=<StatusType.SUCCESS: 1>, starttime=1633051089.929452, endtime=1633051092.3452094, additional_info={'duration': 2.30415940284729, 'num_run': 2, 'train_loss': 0.03596450256889305, 'configuration_origin': None})
     Passed Configuration: Configuration:
-      balancing:strategy, Value: 'weighting'
+      balancing:strategy, Value: 'none'
       classifier:__choice__, Value: 'random_forest'
-      classifier:random_forest:bootstrap, Value: 'False'
+      classifier:random_forest:bootstrap, Value: 'True'
       classifier:random_forest:criterion, Value: 'gini'
       classifier:random_forest:max_depth, Constant: 'None'
-      classifier:random_forest:max_features, Value: 0.9467933744680831
+      classifier:random_forest:max_features, Value: 0.7153285987862764
       classifier:random_forest:max_leaf_nodes, Constant: 'None'
       classifier:random_forest:min_impurity_decrease, Constant: 0.0
-      classifier:random_forest:min_samples_leaf, Value: 13
+      classifier:random_forest:min_samples_leaf, Value: 15
       classifier:random_forest:min_samples_split, Value: 11
       classifier:random_forest:min_weight_fraction_leaf, Constant: 0.0
       data_preprocessor:__choice__, Value: 'feature_type'
       data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__, Value: 'no_encoding'
       data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__, Value: 'no_coalescense'
-      data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Value: 'median'
-      data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Value: 'standardize'
-      feature_preprocessor:__choice__, Value: 'liblinear_svc_preprocessor'
-      feature_preprocessor:liblinear_svc_preprocessor:C, Value: 421.5481232660722
-      feature_preprocessor:liblinear_svc_preprocessor:dual, Constant: 'False'
-      feature_preprocessor:liblinear_svc_preprocessor:fit_intercept, Constant: 'True'
-      feature_preprocessor:liblinear_svc_preprocessor:intercept_scaling, Constant: 1
-      feature_preprocessor:liblinear_svc_preprocessor:loss, Value: 'squared_hinge'
-      feature_preprocessor:liblinear_svc_preprocessor:multi_class, Constant: 'ovr'
-      feature_preprocessor:liblinear_svc_preprocessor:penalty, Constant: 'l1'
-      feature_preprocessor:liblinear_svc_preprocessor:tol, Value: 0.001001348716775123
+      data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Value: 'mean'
+      data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Value: 'robust_scaler'
+      data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max, Value: 0.8730805182850571
+      data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min, Value: 0.19102897258941637
+      feature_preprocessor:__choice__, Value: 'feature_agglomeration'
+      feature_preprocessor:feature_agglomeration:affinity, Value: 'euclidean'
+      feature_preprocessor:feature_agglomeration:linkage, Value: 'average'
+      feature_preprocessor:feature_agglomeration:n_clusters, Value: 20
+      feature_preprocessor:feature_agglomeration:pooling_func, Value: 'max'
 
-    Random Forest: RandomForestClassifier(bootstrap=False, max_features=8, min_samples_leaf=13,
+    Random Forest: RandomForestClassifier(max_features=8, min_samples_leaf=15,
                            min_samples_split=11, n_estimators=512, n_jobs=1,
                            random_state=1, warm_start=True)
 
@@ -227,7 +223,7 @@ Fit an user provided configuration
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  7.839 seconds)
+   **Total running time of the script:** ( 2 minutes  6.752 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_single_configuration.py:

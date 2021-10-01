@@ -581,10 +581,10 @@ Fit a classifier using Random Search
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.992908
-      Number of target algorithm runs: 33
+      Number of target algorithm runs: 32
       Number of successful target algorithm runs: 31
       Number of crashed target algorithm runs: 1
-      Number of target algorithms that exceeded the time limit: 1
+      Number of target algorithms that exceeded the time limit: 0
       Number of target algorithms that exceeded the memory limit: 0
 
     Accuracy score 0.9440559440559441
@@ -595,7 +595,7 @@ Fit a classifier using Random Search
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  56.079 seconds)
+   **Total running time of the script:** ( 1 minutes  51.189 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_random_search.py:

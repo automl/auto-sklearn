@@ -132,9 +132,10 @@ in the `scikit-learn docs <https://scikit-learn.org/stable/modules/permutation_i
 
 
 
-.. image:: /examples/40_advanced/images/sphx_glr_example_inspect_predictions_001.png
-    :alt: example inspect predictions
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/40_advanced/images/sphx_glr_example_inspect_predictions_001.png
+   :alt: example inspect predictions
+   :srcset: /examples/40_advanced/images/sphx_glr_example_inspect_predictions_001.png
+   :class: sphx-glr-single-img
 
 
 .. rst-class:: sphx-glr-script-out
@@ -188,9 +189,10 @@ combining ICE (thin lines) and PD (thick line)
 
 
 
-.. image:: /examples/40_advanced/images/sphx_glr_example_inspect_predictions_002.png
-    :alt: example inspect predictions
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/40_advanced/images/sphx_glr_example_inspect_predictions_002.png
+   :alt: example inspect predictions
+   :srcset: /examples/40_advanced/images/sphx_glr_example_inspect_predictions_002.png
+   :class: sphx-glr-single-img
 
 
 
@@ -219,9 +221,10 @@ these features. Again, we'll look at acceleration_y and acceleration_z.
 
 
 
-.. image:: /examples/40_advanced/images/sphx_glr_example_inspect_predictions_003.png
-    :alt: example inspect predictions
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/40_advanced/images/sphx_glr_example_inspect_predictions_003.png
+   :alt: example inspect predictions
+   :srcset: /examples/40_advanced/images/sphx_glr_example_inspect_predictions_003.png
+   :class: sphx-glr-single-img
 
 
 
@@ -230,7 +233,7 @@ these features. Again, we'll look at acceleration_y and acceleration_z.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 4 minutes  1.667 seconds)
+   **Total running time of the script:** ( 4 minutes  3.044 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_inspect_predictions.py:

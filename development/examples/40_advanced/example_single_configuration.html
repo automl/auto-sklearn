@@ -8,10 +8,10 @@
     <title>Fit a single configuration &#8212; AutoSklearn 0.14.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/gallery-binder.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/gallery-dataframe.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/gallery-rendered-html.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
@@ -209,68 +209,64 @@ get further documentation about Scikit-Learn models here: &lt;<a class="referenc
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{&#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fdc96914d30&gt;, &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;), &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fdc91924190&gt;, &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fdc91924280&gt;}
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{&#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f2d0f82fca0&gt;, &#39;balancing&#39;: Balancing(random_state=1), &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2d0ff284f0&gt;, &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2d0ff283d0&gt;}
 RunInfo(config=Configuration:
-  balancing:strategy, Value: &#39;weighting&#39;
+  balancing:strategy, Value: &#39;none&#39;
   classifier:__choice__, Value: &#39;random_forest&#39;
-  classifier:random_forest:bootstrap, Value: &#39;False&#39;
+  classifier:random_forest:bootstrap, Value: &#39;True&#39;
   classifier:random_forest:criterion, Value: &#39;gini&#39;
   classifier:random_forest:max_depth, Constant: &#39;None&#39;
-  classifier:random_forest:max_features, Value: 0.9467933744680831
+  classifier:random_forest:max_features, Value: 0.7153285987862764
   classifier:random_forest:max_leaf_nodes, Constant: &#39;None&#39;
   classifier:random_forest:min_impurity_decrease, Constant: 0.0
-  classifier:random_forest:min_samples_leaf, Value: 13
+  classifier:random_forest:min_samples_leaf, Value: 15
   classifier:random_forest:min_samples_split, Value: 11
   classifier:random_forest:min_weight_fraction_leaf, Constant: 0.0
   data_preprocessor:__choice__, Value: &#39;feature_type&#39;
   data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__, Value: &#39;no_encoding&#39;
   data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__, Value: &#39;no_coalescense&#39;
-  data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Value: &#39;median&#39;
-  data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Value: &#39;standardize&#39;
-  feature_preprocessor:__choice__, Value: &#39;liblinear_svc_preprocessor&#39;
-  feature_preprocessor:liblinear_svc_preprocessor:C, Value: 421.5481232660722
-  feature_preprocessor:liblinear_svc_preprocessor:dual, Constant: &#39;False&#39;
-  feature_preprocessor:liblinear_svc_preprocessor:fit_intercept, Constant: &#39;True&#39;
-  feature_preprocessor:liblinear_svc_preprocessor:intercept_scaling, Constant: 1
-  feature_preprocessor:liblinear_svc_preprocessor:loss, Value: &#39;squared_hinge&#39;
-  feature_preprocessor:liblinear_svc_preprocessor:multi_class, Constant: &#39;ovr&#39;
-  feature_preprocessor:liblinear_svc_preprocessor:penalty, Constant: &#39;l1&#39;
-  feature_preprocessor:liblinear_svc_preprocessor:tol, Value: 0.001001348716775123
+  data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Value: &#39;mean&#39;
+  data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Value: &#39;robust_scaler&#39;
+  data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max, Value: 0.8730805182850571
+  data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min, Value: 0.19102897258941637
+  feature_preprocessor:__choice__, Value: &#39;feature_agglomeration&#39;
+  feature_preprocessor:feature_agglomeration:affinity, Value: &#39;euclidean&#39;
+  feature_preprocessor:feature_agglomeration:linkage, Value: &#39;average&#39;
+  feature_preprocessor:feature_agglomeration:n_clusters, Value: 20
+  feature_preprocessor:feature_agglomeration:pooling_func, Value: &#39;max&#39;
 , instance=None, instance_specific=None, seed=1, cutoff=60, capped=False, budget=0.0, source_id=0)
-RunValue(cost=0.034123222748815185, time=2.5348589420318604, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1631635770.2157514, endtime=1631635772.773577, additional_info={&#39;duration&#39;: 2.446598768234253, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.043437645959831905, &#39;configuration_origin&#39;: None})
+RunValue(cost=0.023696682464455, time=2.393437385559082, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1633051089.929452, endtime=1633051092.3452094, additional_info={&#39;duration&#39;: 2.30415940284729, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.03596450256889305, &#39;configuration_origin&#39;: None})
 Passed Configuration: Configuration:
-  balancing:strategy, Value: &#39;weighting&#39;
+  balancing:strategy, Value: &#39;none&#39;
   classifier:__choice__, Value: &#39;random_forest&#39;
-  classifier:random_forest:bootstrap, Value: &#39;False&#39;
+  classifier:random_forest:bootstrap, Value: &#39;True&#39;
   classifier:random_forest:criterion, Value: &#39;gini&#39;
   classifier:random_forest:max_depth, Constant: &#39;None&#39;
-  classifier:random_forest:max_features, Value: 0.9467933744680831
+  classifier:random_forest:max_features, Value: 0.7153285987862764
   classifier:random_forest:max_leaf_nodes, Constant: &#39;None&#39;
   classifier:random_forest:min_impurity_decrease, Constant: 0.0
-  classifier:random_forest:min_samples_leaf, Value: 13
+  classifier:random_forest:min_samples_leaf, Value: 15
   classifier:random_forest:min_samples_split, Value: 11
   classifier:random_forest:min_weight_fraction_leaf, Constant: 0.0
   data_preprocessor:__choice__, Value: &#39;feature_type&#39;
   data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__, Value: &#39;no_encoding&#39;
   data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__, Value: &#39;no_coalescense&#39;
-  data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Value: &#39;median&#39;
-  data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Value: &#39;standardize&#39;
-  feature_preprocessor:__choice__, Value: &#39;liblinear_svc_preprocessor&#39;
-  feature_preprocessor:liblinear_svc_preprocessor:C, Value: 421.5481232660722
-  feature_preprocessor:liblinear_svc_preprocessor:dual, Constant: &#39;False&#39;
-  feature_preprocessor:liblinear_svc_preprocessor:fit_intercept, Constant: &#39;True&#39;
-  feature_preprocessor:liblinear_svc_preprocessor:intercept_scaling, Constant: 1
-  feature_preprocessor:liblinear_svc_preprocessor:loss, Value: &#39;squared_hinge&#39;
-  feature_preprocessor:liblinear_svc_preprocessor:multi_class, Constant: &#39;ovr&#39;
-  feature_preprocessor:liblinear_svc_preprocessor:penalty, Constant: &#39;l1&#39;
-  feature_preprocessor:liblinear_svc_preprocessor:tol, Value: 0.001001348716775123
+  data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Value: &#39;mean&#39;
+  data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Value: &#39;robust_scaler&#39;
+  data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max, Value: 0.8730805182850571
+  data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min, Value: 0.19102897258941637
+  feature_preprocessor:__choice__, Value: &#39;feature_agglomeration&#39;
+  feature_preprocessor:feature_agglomeration:affinity, Value: &#39;euclidean&#39;
+  feature_preprocessor:feature_agglomeration:linkage, Value: &#39;average&#39;
+  feature_preprocessor:feature_agglomeration:n_clusters, Value: 20
+  feature_preprocessor:feature_agglomeration:pooling_func, Value: &#39;max&#39;
 
-Random Forest: RandomForestClassifier(bootstrap=False, max_features=8, min_samples_leaf=13,
+Random Forest: RandomForestClassifier(max_features=8, min_samples_leaf=15,
                        min_samples_split=11, n_estimators=512, n_jobs=1,
                        random_state=1, warm_start=True)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  7.839 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  6.752 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-single-configuration-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_single_configuration.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
