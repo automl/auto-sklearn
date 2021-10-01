@@ -10,6 +10,7 @@ import pandas as pd
 CLASSIFICATION_METRICS = ['acc', 'auc', 'balacc', 'logloss']
 REGRESSION_METRICS = ['mae', 'r2', 'rmse']
 METRICS = CLASSIFICATION_METRICS + REGRESSION_METRICS
+
 def _get_mean_results_across_folds(df) -> pd.DataFrame:
     """ Returns a dataframe with the task, id, metric and the mean values
         across folds
@@ -73,7 +74,7 @@ def generate_framework_def(
     # Using branch and https
     version = branch
     repo = f'https://github.com/{username}/auto-sklearn.git'
-    
+
     # Create the framework file
     lines = '\n'.join([
         f"---",
@@ -129,6 +130,7 @@ def create_comparison(
         Comparisons here is the difference between (targeted - baseline)
         Returns them in that specific order
     """
+
     # Load in data and get the means across folds
     df_baseline_classification = pd.read_csv(baseline_csv_classification)
     df_baseline_regression = pd.read_csv(baseline_csv_regression)
@@ -138,7 +140,6 @@ def create_comparison(
     df_targeted_classification = pd.read_csv(targeted_csv_classification)
     df_targeted_regression = pd.read_csv(targeted_csv_regression)
     df_targeted = pd.concat([df_targeted_classification, df_targeted_regression])
-
     df_targeted_means = _get_mean_results_across_folds(df_targeted)
 
     # Find the set intersection of tasks they have in common
@@ -453,6 +454,7 @@ if __name__ == "__main__":
     if args.generate_framework_def:
 
         assert args.owner and args.branch and args.commit and args.user_dir
+
         generate_framework_def(args.user_dir, args.owner, args.branch, args.commit)
 
     elif args.compare_results:
