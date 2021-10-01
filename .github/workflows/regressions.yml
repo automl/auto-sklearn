@@ -164,7 +164,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
       - name: Start benchmark
         id: benchmark
         env:
@@ -252,7 +251,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           path: artifacts
-
       - name: Artifact paths as Vars
         id: artifacts
         run: |

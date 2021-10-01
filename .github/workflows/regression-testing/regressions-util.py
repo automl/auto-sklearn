@@ -3,13 +3,14 @@ from typing import Tuple
 import os
 import sys
 import argparse
-
 import numpy as np
 import pandas as pd
 
 CLASSIFICATION_METRICS = ['acc', 'auc', 'balacc', 'logloss']
 REGRESSION_METRICS = ['mae', 'r2', 'rmse']
 METRICS = CLASSIFICATION_METRICS + REGRESSION_METRICS
+TARGET_YAML_FILE = 'target.yaml'
+
 def _get_mean_results_across_folds(df) -> pd.DataFrame:
     """ Returns a dataframe with the task, id, metric and the mean values
         across folds
@@ -28,10 +29,10 @@ def _get_mean_results_across_folds(df) -> pd.DataFrame:
     return df_info.join(df_means)
 
 def generate_framework_def(
-    user_dir: str,
+    userdir: str,
     username: str,
-    branch: str,
-    commit: str,  # Not used in this setup but perhaps in a different one
+    branch: str,  # Not used in this setup but perhaps in a different one
+    commit: str,
 ):
     """ Creates a framework definition to run an autosklearn repo.
 
@@ -40,7 +41,7 @@ def generate_framework_def(
 
     Parameters
     ----------
-    user_dir: str
+    userdir: str
         The path to where the framework definition should be placed
 
     username: str
@@ -68,22 +69,18 @@ def generate_framework_def(
     if commit[0] != '#':
         commit = '#' + commit
 
-    # Tried commit and ssh repo but was getting errors with ssh
-    # Tried commit and https but getting issues with commit ref
-    # Using branch and https
-    version = branch
-    repo = f'https://github.com/{username}/auto-sklearn.git'
-    
+    repo = f'git@github.com:{username}/auto-sklearn.git'
+
     # Create the framework file
     lines = '\n'.join([
         f"---",
         f"autosklearn_targeted:",
         f"  extends: autosklearn",
-        f"  version: '{version}'",
+        f"  version: '{commit}'",
         f"  repo: '{repo}'"
     ])
 
-    filepath = os.path.join(user_dir, 'frameworks.yaml')
+    filepath = os.path.join(userdir, 'frameworks.yaml')
     with open(filepath, 'w') as f:
         f.writelines(lines)
 
@@ -95,6 +92,7 @@ def create_comparison(
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """ Creates a csv with comparisons between the baseline and results.
 
+
     Scores are averaged across folds for a given task.
 
     The baseline and results should have the following fields as given by
@@ -105,18 +103,19 @@ def create_comparison(
      'training_duration', 'predict_duration', 'models_count', 'seed', 'info',
      'acc', 'auc', 'balacc', 'logloss', 'mae', 'r2', 'rmse']
 
+
     Parameters
     ----------
-    baseline_csv_classification: str
+    baseline_csv_classification: path
         Path to the csv containing the baseline classification results
 
-    baseline_csv_regression: str
+    baseline_csv_regression: path
         Path to the csv containing the baseline regression results
 
-    targeted_csv_classification: str
+    targeted_csv_classification: path
         Path to the csv containing the targeted classification results
 
-    targeted_csv_regression: str
+    targeted_csv_regression: path
         Path to the csv containing the targeted regression results
 
     Returns
@@ -129,24 +128,28 @@ def create_comparison(
         Comparisons here is the difference between (targeted - baseline)
         Returns them in that specific order
     """
+
+
     # Load in data and get the means across folds
-    df_baseline_classification = pd.read_csv(baseline_csv_classification)
+    df_baseline_classificiation = pd.read_csv(baseline_csv_classification)
     df_baseline_regression = pd.read_csv(baseline_csv_regression)
-    df_baseline = pd.concat([df_baseline_classification, df_baseline_regression])
+    df_baseline = pd.concat([df_baseline_classificiation, df_baseline_regression])
+
     df_baseline_means = _get_mean_results_across_folds(df_baseline)
 
-    df_targeted_classification = pd.read_csv(targeted_csv_classification)
+    df_targeted_classificiation = pd.read_csv(targeted_csv_classification)
     df_targeted_regression = pd.read_csv(targeted_csv_regression)
-    df_targeted = pd.concat([df_targeted_classification, df_targeted_regression])
-
+    df_targeted = pd.concat([df_targeted_classificiation, df_targeted_regression])
     df_targeted_means = _get_mean_results_across_folds(df_targeted)
 
     # Find the set intersection of tasks they have in common
     common_tasks = set(df_baseline_means.index).intersection(set(df_targeted_means.index))
+    missing_tasks = set(df_baseline_means.index) - common_tasks
 
     # Find the set of metrics that are comparable
     baseline_metrics = set(METRICS).intersection(set(df_baseline_means.columns))
     common_metrics = baseline_metrics.intersection(set(df_targeted_means.columns))
+    missing_metrics = baseline_metrics - set(df_targeted_means.columns)
 
     # Calculate the differences for in common tasks, across all available metrics
     df_differences = df_targeted_means.loc[common_tasks][common_metrics] \
@@ -168,20 +171,15 @@ def create_comparisons_markdown(
 
     Parameters
     ----------
-    baseline_means_csv: str
+    baseline_means_csv: path
         path to the csv baseline results with their mean across folds.
 
-    targeted_means_csv: str
+    targeted_means_csv: path
         path to the csv with the results of the targeted branch with their mean
         across folds.
 
-    compared_means_csv: str
+    compared_means_csv: path
         path to the csv containing the comparisons results
-
-    Returns
-    -------
-    str
-        The results written in markdown.
     """
     # Create colours and func to create the markdown for it
     colours = {
@@ -372,6 +370,7 @@ def create_comparisons_markdown(
     lines.append(legend_str)
 
     # Create a textual summary to go at the top
+    baseline_metrics = list(set(METRICS).intersection(baseline.columns))
     compared_metrics = list(set(METRICS).intersection(compared.columns))
     compared_tasks = list(compared.index)
     non_compared_tasks = list(set(baseline.index) - set(compared_tasks))
@@ -453,7 +452,8 @@ if __name__ == "__main__":
     if args.generate_framework_def:
 
         assert args.owner and args.branch and args.commit and args.user_dir
-        generate_framework_def(args.user_dir, args.owner, args.branch, args.commit)
+
+        generate_framework_def(args.userdir, args.owner, args.branch, args.commit)
 
     elif args.compare_results:
 
