@@ -2,7 +2,6 @@ from typing import cast
 import warnings
 
 import pytest
-parametrize = pytest.mark.parametrize
 
 import numpy as np
 import pandas as pd
@@ -16,7 +15,10 @@ from autosklearn.constants import (
 from autosklearn.util.data import reduce_dataset_size_if_too_large
 
 
-@pytest.mark.parametrize("task, y", [
+parametrize = pytest.mark.parametrize
+
+
+@parametrize("task, y", [
     (BINARY_CLASSIFICATION, np.asarray(
         9999 * [0] + 1 * [1]
     )),
@@ -129,7 +131,6 @@ def test_reduce_dataset_size_if_too_large(memory_limit, precision, task, Xtype):
     else:
         pass
 
-
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         X_new, _ = reduce_dataset_size_if_too_large(
@@ -154,12 +155,12 @@ def test_reduce_dataset_size_if_too_large(memory_limit, precision, task, Xtype):
         assert X_new.dtype == expected_dtypes[precision]
     elif Xtype == 'list':
         if precision == np.float128:
-        #   ndarray[np.float128] -> List[np.float128]
-        #   List[np.float128] -> ndarray[np.float128]
+            #   ndarray[np.float128] -> List[np.float128]
+            #   List[np.float128] -> ndarray[np.float128]
             assert X_new.dtype == old_dtype
         else:
-        #   ndarray[np.float{64,32}] -> List[float]
-        #   List[float] -> ndarray[np.float64]
+            #   ndarray[np.float{64,32}] -> List[float]
+            #   List[float] -> ndarray[np.float64]
             assert X_new.dtype == np.float64
     else:
         assert X_new.dtype == old_dtype
