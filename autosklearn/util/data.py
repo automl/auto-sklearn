@@ -1,26 +1,18 @@
-# -*- encoding: utf-8 -*-
-# Functions performing various data conversions for the ChaLearn AutoML
-# challenge
-from typing import List, Optional, Tuple, Union, cast
 import warnings
+from typing import List, Optional, Tuple, Union, cast
 
 import numpy as np
+
 import pandas as pd
 
 from scipy.sparse import spmatrix
 
 from sklearn.model_selection import train_test_split
 
-from autosklearn.evaluation.splitter import CustomStratifiedShuffleSplit
 from autosklearn.data.validation import (
     SUPPORTED_FEAT_TYPES, SUPPORTED_TARGET_TYPES, convert_if_sparse
 )
-
-__all__ = [
-    'predict_RAM_usage',
-    'convert_to_num',
-    'convert_to_bin'
-]
+from autosklearn.evaluation.splitter import CustomStratifiedShuffleSplit
 
 
 def binarization(array: Union[List, np.ndarray]) -> np.ndarray:
