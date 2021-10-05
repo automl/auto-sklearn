@@ -19,9 +19,10 @@ def test_dummy_pipeline(task_type):
         data_maker = make_regression
     else:
         pytest.fail(task_type)
+        return
 
     estimator = estimator_class(config=1, random_state=0)
-    X, y = data_maker()
+    X, y = data_maker(random_state=0)
     estimator.fit(X, y)
     check_is_fitted(estimator)
 

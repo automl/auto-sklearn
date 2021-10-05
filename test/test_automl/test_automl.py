@@ -856,11 +856,21 @@ def test_input_and_target_types(dask_client, X, y, task):
 
 def data_test_model_predict_outsputs_correct_shapes():
     datasets = sklearn.datasets
-    binary = datasets.make_classification(n_samples=5, n_classes=2)
-    multiclass = datasets.make_classification(n_samples=5, n_informative=3, n_classes=3)
-    multilabel = datasets.make_multilabel_classification(n_samples=5, n_classes=3)
-    regression = datasets.make_regression(n_samples=5)
-    multioutput = datasets.make_regression(n_samples=5, n_targets=3)
+    binary = datasets.make_classification(
+        n_samples=5, n_classes=2, random_state=0
+    )
+    multiclass = datasets.make_classification(
+        n_samples=5, n_informative=3, n_classes=3, random_state=0
+    )
+    multilabel = datasets.make_multilabel_classification(
+        n_samples=5, n_classes=3, random_state=0
+    )
+    regression = datasets.make_regression(
+        n_samples=5, random_state=0
+    )
+    multioutput = datasets.make_regression(
+        n_samples=5, n_targets=3, random_state=0
+    )
 
     # TODO issue 1169
     #   While testing output shapes, realised all models are wrapped to provide
