@@ -1,14 +1,20 @@
 # -*- encoding: utf-8 -*-
 # Functions performing various data conversions for the ChaLearn AutoML
 # challenge
+from typing import List, Optional, Tuple, Union, cast
 import warnings
-from typing import List, Optional, Tuple, Union
 
 import numpy as np
+import pandas as pd
+
+from scipy.sparse import spmatrix
 
 from sklearn.model_selection import train_test_split
 
 from autosklearn.evaluation.splitter import CustomStratifiedShuffleSplit
+from autosklearn.data.validation import (
+    SUPPORTED_FEAT_TYPES, SUPPORTED_TARGET_TYPES, convert_if_sparse
+)
 
 __all__ = [
     'predict_RAM_usage',
@@ -77,22 +83,22 @@ def predict_RAM_usage(X: np.ndarray, categorical: List[bool]) -> float:
     return estimated_ram
 
 
+XT = Union[spmatrix, np.ndarray]
+YT = np.ndarray
 def reduce_dataset_size_if_too_large(
-    X: np.ndarray,
-    y: np.ndarray,
+    X: SUPPORTED_FEAT_TYPES,
+    y: SUPPORTED_TARGET_TYPES,
     seed: int,
     memory_limit: int,
     include: List[str] = ['precision', 'subsampling'],
     multiplier: Union[float, int] = 10,
     is_classification: Optional[bool] = None
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> Tuple[XT, YT]:
     """ Reduces the size of the dataset if it's too close to the memory limit.
 
     Attempts to do the following in the order:
         * Reduce precision if necessary
         * Subsample
-
-    Relies on the input being of type np.ndarray for information
 
     Parameters
     ----------
@@ -123,9 +129,23 @@ def reduce_dataset_size_if_too_large(
 
     Returns
     -------
-    Tuple[np.ndarray, np.ndarray]
+    Tuple[Union[spmatrix, np.ndarray], Union[spmatrix, np.ndarray]]:
         The reduced X, y if reductions were needed
     """
+    # Convert X,y to np.ndarray or spmatrix
+    # TODO: remove this once typing for X, y has been updated per issue #1624
+    if isinstance(X, list):
+        X = np.asarray(X)
+    elif isinstance(X, pd.DataFrame):
+        X = X.to_numpy()
+
+    if isinstance(y, list):
+        y = np.asarray(y)
+    elif isinstance(y, pd.Series) or isinstance(y, pd.DataFrame):
+        y = y.to_numpy()
+    elif isinstance(y, spmatrix):
+        y = convert_if_sparse(y)
+        y = cast(np.ndarray, y)
 
     def byte_size(dtype: np.dtype) -> int:
         """ Returns the amount of bits required for an element of dtype """
@@ -149,11 +169,11 @@ def reduce_dataset_size_if_too_large(
             )
             return 8
 
-    def megabytes(X_: np.ndarray) -> float:
+    def megabytes(X_: XT) -> float:
         """ Estimate how large X is in megabytes """
         return X_.shape[0] * X_.shape[1] * byte_size(X_.dtype) * 1e-6
 
-    def reduce_precision(X_: np.ndarray) -> Tuple[np.ndarray, str]:
+    def reduce_precision(X_: XT) -> Tuple[XT, str]:
         """ Reduces the precision of a dataset, only works for X.dtype > np.float32 """
         if X_.dtype == np.float32:
             return X_, str(np.float32)
@@ -168,10 +188,10 @@ def reduce_dataset_size_if_too_large(
         return X_.astype(precision), str(precision)
 
     def subsample(
-        X_: np.ndarray,
-        y_: np.ndarray,
+        X_: XT,
+        y_: YT,
         sample_size: int
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    ) -> Tuple[XT, YT]:
         """ Subsamples the array so it fits into the memory limit """
         if is_classification:
             splitter = CustomStratifiedShuffleSplit(
@@ -211,7 +231,7 @@ def reduce_dataset_size_if_too_large(
     # memory, we subsample such that we can
     if megabytes(X) * multiplier > memory_limit:
         reduction_factor = float(memory_limit) / (megabytes(X) * multiplier)
-        new_num_samples = int(reduction_factor * len(X))
+        new_num_samples = int(reduction_factor * X.shape[0])
         X, y = subsample(X, y, new_num_samples)
         warnings.warn(
             f"Dataset too large for memory limit {memory_limit}MB, reduced"
