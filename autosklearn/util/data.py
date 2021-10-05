@@ -83,8 +83,6 @@ def predict_RAM_usage(X: np.ndarray, categorical: List[bool]) -> float:
     return estimated_ram
 
 
-XT = Union[spmatrix, np.ndarray]
-YT = np.ndarray
 def reduce_dataset_size_if_too_large(
     X: SUPPORTED_FEAT_TYPES,
     y: SUPPORTED_TARGET_TYPES,
@@ -93,7 +91,7 @@ def reduce_dataset_size_if_too_large(
     include: List[str] = ['precision', 'subsampling'],
     multiplier: Union[float, int] = 10,
     is_classification: Optional[bool] = None
-) -> Tuple[XT, YT]:
+) -> Tuple[Union[spmatrix, np.ndarray], np.ndarray]:
     """ Reduces the size of the dataset if it's too close to the memory limit.
 
     Attempts to do the following in the order:
@@ -169,11 +167,13 @@ def reduce_dataset_size_if_too_large(
             )
             return 8
 
-    def megabytes(X_: XT) -> float:
+    def megabytes(X_: Union[spmatrix, np.ndarray]) -> float:
         """ Estimate how large X is in megabytes """
         return X_.shape[0] * X_.shape[1] * byte_size(X_.dtype) * 1e-6
 
-    def reduce_precision(X_: XT) -> Tuple[XT, str]:
+    def reduce_precision(
+        X_: Union[spmatrix, np.ndarray]
+    ) -> Tuple[Union[spmatrix, np.ndarray], str]:
         """ Reduces the precision of a dataset, only works for X.dtype > np.float32 """
         if X_.dtype == np.float32:
             return X_, str(np.float32)
@@ -188,10 +188,10 @@ def reduce_dataset_size_if_too_large(
         return X_.astype(precision), str(precision)
 
     def subsample(
-        X_: XT,
-        y_: YT,
+        X_: Union[spmatrix, np.ndarray],
+        y_: np.ndarray,
         sample_size: int
-    ) -> Tuple[XT, YT]:
+    ) -> Tuple[Union[spmatrix, np.ndarray], np.ndarray]:
         """ Subsamples the array so it fits into the memory limit """
         if is_classification:
             splitter = CustomStratifiedShuffleSplit(
