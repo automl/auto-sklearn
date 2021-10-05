@@ -14,7 +14,7 @@ import unittest
 import unittest.mock
 import pytest
 
-from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
+from ConfigSpace.configuration_space import Configuration
 import joblib
 from joblib import cpu_count
 import numpy as np
@@ -1023,7 +1023,7 @@ def test_pass_categorical_and_numeric_columns_to_pipeline(
     # Time left for task plays no role for fit_pipeline
     automl = AutoSklearnClassifier(
         delete_tmp_folder_after_terminate=False,
-        time_left_for_this_task=120, 
+        time_left_for_this_task=120,
         per_run_time_limit=30,
         ensemble_size=0,
         seed=0,
