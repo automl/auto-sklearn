@@ -92,10 +92,10 @@ def reduce_dataset_size_if_too_large(
 
     Parameters
     ----------
-    X: np.ndarray
+    X: SUPPORTED_FEAT_TYPES
         The features of the dataset.
 
-    y: np.ndarray
+    y: SUPPORTED_TARGET_TYPES
         The labels of the dataset.
 
     seed: int
@@ -119,9 +119,10 @@ def reduce_dataset_size_if_too_large(
 
     Returns
     -------
-    Tuple[Union[spmatrix, np.ndarray], Union[spmatrix, np.ndarray]]:
+    Tuple[spmatrix | np.ndarray, np.ndarray]:
         The reduced X, y if reductions were needed
     """
+
     # Convert X,y to np.ndarray or spmatrix
     # TODO: remove this once typing for X, y has been updated per issue #1624
     if isinstance(X, list):
