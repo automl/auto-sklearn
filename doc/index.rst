@@ -84,7 +84,7 @@ reference to the following paper:
 
     @inproceedings{feurer-neurips15a,
         title     = {Efficient and Robust Automated Machine Learning},
-        author    = {Matthias Feurer, Aaron Klein, Katharina Eggensperger, Jost Springenberg, Manuel Blum and Frank Hutter},
+        author    = {Feurer, Matthias and Klein, Aaron and Eggensperger, Katharina  Springenberg, Jost and Blum, Manuel and Hutter, Frank},
         booktitle = {Advances in Neural Information Processing Systems 28 (2015)},
         pages     = {2962--2970},
         year      = {2015}
