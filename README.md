@@ -49,9 +49,9 @@ arXiv:2007.04074 [cs.LG], 2020
 
 [Link](https://arxiv.org/abs/2007.04074) to publication.
 ```
-@inproceedings{feurer-arxiv20a,
-  title     = {Auto-Sklearn 2.0: The Next Generation},
-  author    = {Matthias Feurer, Katharina Eggensperger, Stefan Falkner, Marius Lindauer and Frank Hutter},
+@article{feurer-arxiv20a,
+  title     = {Auto-Sklearn 2.0: Hands-free AutoML via Meta-Learning},
+  author    = {Feurer, Matthias and Eggensperger, Katharina and Falkner, Stefan and Lindauer, Marius and Hutter, Frank},
   booktitle = {arXiv:2007.04074 [cs.LG]},
   year      = {2020}
 }
