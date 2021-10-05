@@ -13,6 +13,8 @@ This guide is only aimed towards Unix command line users as that's what we know 
 There are many kinds of contributions you can make to auto-sklearn but we'll focus on three main ones **Documentation**, **Bug Fixes** and **Features**, each of which require a little bit of a different flow.
 We need to perform several checks to make sure it meets code standards and won't cause any issues later on.
 
+We tend to follow a development cycle which could be called _Gitflow_ which you are new to git or git-based projects, you can see a nice summary [here](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow).
+
 First we'll go over the general flow, what each step does and then later look at making more specific kinds of changes, what we'd like to see and how you might create a workflow.
 Following that we'll tell you about how you can test your changes locally and then how to submit your pull request!
 
