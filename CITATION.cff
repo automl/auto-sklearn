@@ -94,19 +94,17 @@ preferred-citation:
     - family-names: "Hutter"
       given-names: "Frank"
       affiliation: "University of Freiburg, Germany"
-...
 
 references:
-    title: "SMAC3: A Versatile Bayesian Optimization Package for Hyperparameter Optimization"
-    type: "article"
-    url: "https://arxiv.org/abs/2109.09831",
-    month: "9"
-    year: "2021"
+    - title: "SMAC3: A Versatile Bayesian Optimization Package for Hyperparameter Optimization"
+      type: "article"
+      url: "https://arxiv.org/abs/2109.09831"
+      month: "9"
+      year: "2021"
 
-    repository-code: "https://github.com/automl/SMAC3"
-    created-at: "2016-08-17"
+      repository-code: "https://github.com/automl/SMAC3"
 
-    authors:
+      authors:
         - family-names: "Lindauer"
           given-names: "Marius"
           affiliation: "Leibniz Universität Hannover"
@@ -141,3 +139,4 @@ references:
         - family-names: "Hutter"
           given-names: "Frank"
           affiliation: "University of Freiburg, Germany"
+...
