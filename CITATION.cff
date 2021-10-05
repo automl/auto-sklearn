@@ -1,0 +1,143 @@
+---
+cff-version: 1.2.0
+
+message: "If you use auto-sklearn in a scientific publication, we would appreciate a reference to the following paper"
+
+title: "auto-sklearn"
+date-released: "2015-07-02"
+
+url: "https://automl.github.io/auto-sklearn/master/"
+repository-code: "https://github.com/automl/auto-sklearn"
+
+version: "0.14.0"
+
+type: "software"
+keywords:
+  - "automated machine learning"
+  - "machine learning"
+
+license: "BSD-3-Clause"
+
+authors:
+  - family-names: "Feurer"
+    given-names: "Matthias"
+    orcid: "https://orcid.org/0000-0001-9611-8588"
+    affiliation: "University of Freiburg, Germany"
+
+  - family-names: "Eggensperger"
+    given-names: "Katharina" 
+    orcid: "https://orcid.org/0000-0002-0309-401X"
+    affiliation: "University of Freiburg, Germany"
+
+  - family-names: "Jost"
+    given-names: "Springenberg"
+    orcid: "https://orcid.org/0000-0002-9392-1006"
+    affiliation: "University of Freiburg, Germany"
+
+  - family-names: "Manuel"
+    given-names: "Blum"
+    affiliation: "University of Freiburg, Germany"
+
+  - family-names: "Hutter"
+    given-names: "Frank"
+    affiliation: "University of Freiburg, Germany"
+
+preferred-citation:
+  type: "proceedings"
+  title: "Efficient and Robust Automated Machine Learning"
+  collection-title: "Advances in Nerual Infromation Processing Systems 28 (2015)"
+  year: 2015
+  pages: "2962--2970"
+  url: "https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf"
+
+  publisher:
+    name: "Curran Associates, Inc."
+
+  editors:
+
+    - family-names: "Cortes"
+      given-names: "C."
+
+    - family-names: "Lawrence"
+      given-names: "N."
+
+    - family-names: "Lee"
+      given-names: "D."
+
+    - family-names: "Sugiyama"
+      given-names: "M."
+
+    - family-names: "Garnett"
+      given-names: "R."
+
+  authors:
+
+    - family-names: "Feurer"
+      given-names: "Matthias" 
+      orcid: "https://orcid.org/0000-0001-9611-8588"
+      affiliation: "University of Freiburg, Germany"
+
+    - family-names: "Eggensperger"
+      given-names: "Katharina" 
+      orcid: "https://orcid.org/0000-0002-0309-401X"
+      affiliation: "University of Freiburg, Germany"
+
+    - family-names: "Jost"
+      given-names: "Springenberg"
+      orcid: "https://orcid.org/0000-0002-9392-1006"
+      affiliation: "University of Freiburg, Germany"
+
+    - family-names: "Manuel"
+      given-names: "Blum"
+      affiliation: "University of Freiburg, Germany"
+
+    - family-names: "Hutter"
+      given-names: "Frank"
+      affiliation: "University of Freiburg, Germany"
+...
+
+references:
+    title: "SMAC3: A Versatile Bayesian Optimization Package for Hyperparameter Optimization"
+    type: "article"
+    url: "https://arxiv.org/abs/2109.09831",
+    month: "9"
+    year: "2021"
+
+    repository-code: "https://github.com/automl/SMAC3"
+    created-at: "2016-08-17"
+
+    authors:
+        - family-names: "Lindauer"
+          given-names: "Marius"
+          affiliation: "Leibniz Universität Hannover"
+
+        - family-names: "Eggensperger"
+          given-names: "Katharina" 
+          orcid: "https://orcid.org/0000-0002-0309-401X"
+          affiliation: "University of Freiburg, Germany"
+
+        - family-names: "Feurer"
+          given-names: "Matthias"
+          orcid: "https://orcid.org/0000-0001-9611-8588"
+          affiliation: "University of Freiburg, Germany"
+
+        - family-names: "Biedenkapp"
+          given-names: "André "
+          orcid: "https://orcid.org/0000-0002-8703-8559"
+          affiliation: "University of Freiburg, Germany"
+
+        - family-names: "Deng"
+          given-names: "Difan"
+          affiliation: "Leibniz Universität Hannover"
+
+        - family-names: "Benjamins"
+          given-names: "Carolin"
+          affiliation: "Leibniz Universität Hannover"
+
+        - family-names: "Sass"
+          given-names: "René"
+          affiliation: "Leibniz Universität Hannover"
+
+        - family-names: "Hutter"
+          given-names: "Frank"
+          affiliation: "University of Freiburg, Germany"
