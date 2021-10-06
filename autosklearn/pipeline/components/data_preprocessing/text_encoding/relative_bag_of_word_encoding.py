@@ -40,13 +40,13 @@ class RelativeBagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
             # define a CountVectorizer for every feature (implicitly defined by order of columns, maybe change the list
             # to a dictionary with features as keys)
             if self.min_df_choice == "min_df_absolute":
-                self.preprocessor = [CountVectorizer(min_df=self.min_df_absolute).fit(X[feature]) for feature in
-                                     X.columns]
+                self.preprocessor = CountVectorizer(min_df=self.min_df_absolute)
             elif self.min_df_choice == "min_df_relative":
-                self.preprocessor = [CountVectorizer(min_df=self.min_df_relative).fit(X[feature]) for feature in
-                                     X.columns]
+                self.preprocessor = CountVectorizer(min_df=self.min_df_relative)
             else:
                 raise KeyError()
+            for feature in X.columns:
+                self.preprocessor = self.preprocessor.fit(X[feature])
         else:
             raise ValueError("Your text data is not encoded in a pandas.DataFrame\n"
                              "Please make sure to use a pandas.DataFrame and ensure"
@@ -58,14 +58,12 @@ class RelativeBagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
         if self.preprocessor is None:
             raise NotImplementedError()
         # iterate over the pretrained preprocessors and columns and transform the data
-        for preprocessor, feature in zip(self.preprocessor, X.columns):
+        for feature in X.columns:
             if X_new is None:
-                X_new = preprocessor.transform(X[feature])
-                X_new = TfidfTransformer(use_idf=self.use_idf).fit_transform(X_new)
+                X_new = self.preprocessor.transform(X[feature])
             else:
-                X_bg = preprocessor.transform(X[feature])
-                X_tf = TfidfTransformer(use_idf=self.use_idf).fit_transform(X_bg)
-                X_new = hstack([X_new, X_tf])
+                X_new += self.preprocessor.transform(X[feature])
+        X_new = TfidfTransformer(use_idf=self.use_idf).fit_transform(X_new)
         return X_new
 
     @staticmethod

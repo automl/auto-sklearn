@@ -40,13 +40,13 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
             # define a CountVectorizer for every feature (implicitly defined by order of columns, maybe change the list
             # to a dictionary with features as keys)
             if self.min_df_choice == "min_df_absolute":
-                self.preprocessor = CountVectorizer(min_df=self.min_df_absolute)
+                self.preprocessor = [CountVectorizer(min_df=self.min_df_absolute).fit(X[feature]) for feature in
+                                     X.columns]
             elif self.min_df_choice == "min_df_relative":
-                self.preprocessor = CountVectorizer(min_df=self.min_df_relative)
+                self.preprocessor = [CountVectorizer(min_df=self.min_df_relative).fit(X[feature]) for feature in
+                                     X.columns]
             else:
                 raise KeyError()
-            for feature in X.columns:
-                self.preprocessor = self.preprocessor.fit(X[feature])
         else:
             raise ValueError("Your text data is not encoded in a pandas.DataFrame\n"
                              "Please make sure to use a pandas.DataFrame and ensure"
@@ -58,22 +58,12 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
         if self.preprocessor is None:
             raise NotImplementedError()
         # iterate over the pretrained preprocessors and columns and transform the data
-        for feature in X.columns:
-
-            file = open("sample.txt", "a")
-            file.write("X[feature]:\n{}\n\n".format(X[feature]))
-            file.close()
-
+        for preprocessor, feature in zip(self.preprocessor, X.columns):
             if X_new is None:
-                X_new = self.preprocessor.transform(X[feature])
-                file = open("sample.txt", "a")
-                file.write("X_new:\n{}\n\n".format(X_new))
-                file.close()
+                # possiblity to add TruncatedSVD here
+                X_new = preprocessor.transform(X[feature])
             else:
-                X_new += self.preprocessor.transform(X[feature])
-                file = open("sample.txt", "a")
-                file.write("X_new:\n{}\n\n".format(X_new))
-                file.close()
+                X_new = hstack([X_new, preprocessor.transform(X[feature])])
         return X_new
 
     @staticmethod
