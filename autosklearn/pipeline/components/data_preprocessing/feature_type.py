@@ -134,34 +134,40 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
                              if value.lower() == "string"]
 
         # If no categorical features, assume we have a numerical only pipeline
-        if len(numerical_features) != 0 and len(categorical_features) == 0 and len(text_features) == 0:
+        if len(numerical_features) != 0 and len(categorical_features) == 0 and len(
+                text_features) == 0:
             sklearn_transf_spec: List[Tuple[str, BaseEstimator, List[Union[str, bool, int]]]] = [
                 ("numerical_transformer", self.numer_ppl, [True] * n_feats)
             ]
         # If all features are categorical, then just the categorical transformer is used
-        elif len(numerical_features) == 0 and len(categorical_features) != 0 and len(text_features) == 0:
+        elif len(numerical_features) == 0 and len(categorical_features) != 0 and len(
+                text_features) == 0:
             sklearn_transf_spec = [
                 ("categorical_transformer", self.categ_ppl, [True] * n_feats)
             ]
         # For the other cases, both transformers are used
-        elif len(numerical_features) != 0 and len(categorical_features) != 0 and len(text_features) == 0:
+        elif len(numerical_features) != 0 and len(categorical_features) != 0 and len(
+                text_features) == 0:
             sklearn_transf_spec = [
                 ("categorical_transformer", self.categ_ppl, categorical_features),
                 ("numerical_transformer", self.numer_ppl, numerical_features)
             ]
-        elif len(numerical_features) != 0 and len(categorical_features) == 0 and len(text_features) != 0:
+        elif len(numerical_features) != 0 and len(categorical_features) == 0 and len(
+                text_features) != 0:
             sklearn_transf_spec = [
                 ("text_transformer", self.txt_ppl, text_features),
                 ("numerical_transformer", self.numer_ppl, numerical_features)
             ]
         # If all features are categorical, then just the categorical transformer is used
-        elif len(numerical_features) == 0 and len(categorical_features) != 0 and len(text_features) != 0:
+        elif len(numerical_features) == 0 and len(categorical_features) != 0 and len(
+                text_features) != 0:
             sklearn_transf_spec = [
                 ("text_transformer", self.txt_ppl, text_features),
                 ("categorical_transformer", self.categ_ppl, categorical_features)
             ]
         # For the other cases, both transformers are used
-        elif len(numerical_features) != 0 and len(categorical_features) != 0 and len(text_features) != 0:
+        elif len(numerical_features) != 0 and len(categorical_features) != 0 and len(
+                text_features) != 0:
             sklearn_transf_spec = [
                 ("text_transformer", self.txt_ppl, text_features),
                 ("categorical_transformer", self.categ_ppl, categorical_features),

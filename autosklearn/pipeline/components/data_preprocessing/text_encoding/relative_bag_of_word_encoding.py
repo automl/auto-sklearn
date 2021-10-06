@@ -31,7 +31,7 @@ class RelativeBagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
         self.min_df_relative = min_df_relative
 
     def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
-            ) -> 'BagOfWordEncoder':
+            ) -> 'RelativeBagOfWordEncoder':
 
         if isinstance(X, pd.DataFrame):
             # define a CountVectorizer for every feature (implicitly defined by order of columns,
