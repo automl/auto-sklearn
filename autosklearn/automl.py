@@ -50,7 +50,7 @@ from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, _fit_with_budget
 from autosklearn.metrics import calculate_metric
 from autosklearn.util.backend import Backend, create
-from autosklearn.util.data import reduce_dataset_size_if_too_large
+from autosklearn.util.data import reduce_dataset_size_if_too_large, supported_dtypes
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import (
     setup_logger,
@@ -487,10 +487,10 @@ class AutoML(BaseEstimator):
     def fit(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
+        y: SUPPORTED_TARGET_TYPES,
         task: Optional[int] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
+        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
         feat_type: Optional[List[str]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
@@ -506,8 +506,7 @@ class AutoML(BaseEstimator):
         #
         #   `task: Optional[int]` and `is_classification`
         #
-        #   `AutoML` tries to identify the task itself with
-        #   `sklearn.type_of_target`, leaving little for the subclasses to do.
+        #   `AutoML` tries to identify the task itself with `sklearn.type_of_target`, leaving little for the subclasses to do.
         #   Except this failes when type_of_target(y) == "multiclass".
         #
         #   "multiclass" be mean either REGRESSION or MULTICLASS_CLASSIFICATION,
@@ -585,9 +584,13 @@ class AutoML(BaseEstimator):
         self
 
         """
+        if (X_test is not None) ^ (y_test is not None):
+            raise ValueError(f"Must provide both X_test and y_test together")
 
         # AutoSklearn does not handle sparse y for now
         y = convert_if_sparse(y)
+        if y_test is not None:
+            y_test = convert_if_sparse(y_test)
 
         # Get the task if it doesn't exist
         if task is None:
@@ -635,17 +638,18 @@ class AutoML(BaseEstimator):
         self.InputValidator.fit(X_train=X, y_train=y, X_test=X_test, y_test=y_test)
         X, y = self.InputValidator.transform(X, y)
 
-        if X_test is not None:
+        if X_test is not None and y_test is not None:
             X_test, y_test = self.InputValidator.transform(X_test, y_test)
 
-        with warnings_to(self._logger):
-            X, y = reduce_dataset_size_if_too_large(
-                X=X,
-                y=y,
-                seed=self._seed,
-                memory_limit=self._memory_limit,
-                is_classification=is_classification,
-            )
+        if not isinstance(X, pd.DataFrame) and X.dtype not in supported_dtypes:
+            with warnings_to(self._logger):
+                X, y = reduce_dataset_size_if_too_large(
+                    X=X,
+                    y=y,
+                    is_classification=is_classification,
+                    random_state=self._seed,
+                    memory_limit=self._memory_limit
+                )
 
         # Check the re-sampling strategy
         try:
