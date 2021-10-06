@@ -1,5 +1,5 @@
 import warnings
-from typing import List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 
 import numpy as np
 
@@ -9,11 +9,12 @@ from scipy.sparse import spmatrix
 
 from sklearn.model_selection import train_test_split
 
-from autosklearn.data.validation import (
-    SUPPORTED_FEAT_TYPES, SUPPORTED_TARGET_TYPES, convert_if_sparse
-)
+from autosklearn.data.validation import SUPPORTED_FEAT_TYPES, SUPPORTED_TARGET_TYPES
 from autosklearn.evaluation.splitter import CustomStratifiedShuffleSplit
 
+supported_dtypes = [np.float32, np.float64]
+supported_dtypes.append(np.float96 if hasattr(np, 'float96') else None)
+supported_dtypes.append(np.float128 if hasattr(np, 'float128') else None)
 
 def binarization(array: Union[List, np.ndarray]) -> np.ndarray:
     # Takes a binary-class datafile and turn the max value (positive class)
@@ -74,161 +75,249 @@ def predict_RAM_usage(X: np.ndarray, categorical: List[bool]) -> float:
     estimated_ram = estimated_columns * X.shape[0] * X.dtype.itemsize
     return estimated_ram
 
+def byte_size(dtype: np.dtype) -> int:
+    """ Returns the amount of bytes required for an element of dtype
+
+    Only supports np.float{32,64,96,128} for now.
+
+    Parameters
+    ----------
+    dtype: np.dtype
+        the dtype to estimate bits for
+
+    safe: bool = True
+        Whether to raise an error if the dtype is unknown
+
+    Returns
+    -------
+    int
+        The number of bytes
+    """
+    if dtype not in supported_dtypes:
+        raise ValueError(f"{dtype} not in supported {supported_dtypes}")
+
+    mapping: Dict[Any, int] = {
+        np.float32: 4,
+        np.float64: 8,
+    }
+    # In spite of the names, np.float96 and np.float128
+    # provide only as much precision as np.longdouble,
+    # that is, 80 bits on most x86 machines and 64 bits
+    # in standard Windows builds.
+    if hasattr(np, 'float96'):
+        mapping[np.float96] = 16
+
+    if hasattr(np, 'float128'):
+        mapping[np.float128] = 16
+
+    return mapping[dtype]
+
+def megabytes(
+    X: Union[spmatrix, np.ndarray]
+) -> float:
+    """ Estimate how large X is in megabytes
+
+    If ndarray is not a uniform type, this estimation does not work.
+    Also does not support pandas dataframes for now as a result
+
+    Parameters
+    ----------
+    X: ndarray | spmatrix
+        The data to estimate the size of
+    """
+    if X.dtype not in supported_dtypes:
+        raise ValueError(f"{X.dtype} not in {supported_dtypes}")
+
+    return X.shape[0] * X.shape[1] * byte_size(X.dtype) * 1e-6
+
+XT = TypeVar("XT", bound=SUPPORTED_FEAT_TYPES)
+YT = TypeVar("YT", bound=SUPPORTED_TARGET_TYPES)
+def subsample(
+    X: XT,
+    y: YT,
+    is_classification: bool,
+    sample_size: Union[float, int],
+    random_state: Optional[Union[int, np.random.RandomState]] = None,
+) -> Tuple[XT, YT]:
+    """ Subsamples the array so it fits into the memory limit
+
+    Returns the same type as it recieved where
+    *   XT is bound to [List, np.ndarray, spmatrix, pd.DataFrame]
+    *   YT is bound to [List, np.ndarray, spmatrix, pd.Series, pd.DataFrame]
+
+    Parameters
+    ----------
+    X: XT
+        The X's to subsample
+
+    Y: YT
+        The Y's to subsample
+
+    is_classification: bool
+        Whether this is classification data or regression data. Required for
+        knowing how to split.
+
+    sample_size: float | int
+        If float, percentage of data to take otherwise if int, an absolute 
+        count of samples to take.
+
+    random_state: int | RandomState = None
+        The random state to pass to the splitted
+
+    Returns
+    -------
+    (XT, YT)
+        The X and y subsampled
+    """
+    if is_classification:
+        splitter = CustomStratifiedShuffleSplit(
+            train_size=sample_size,
+            random_state=random_state
+        )
+        left_idxs, _ = next(splitter.split(X=X, y=y))
+        if isinstance(X, pd.DataFrame):
+            idxs = X.index[left_idxs]
+            X = X.loc[idxs]
+        else:
+            X = X[left_idxs]
+
+        if isinstance(y, pd.DataFrame) or isinstance(y, pd.Series):
+            idxs = y.index[left_idxs]
+            y = y.loc[idxs]
+        else:
+            y = y[left_idxs]
+
+    else:
+        X, _, y, _ = train_test_split(  # type: ignore - we know it returns same type
+            X, y,
+            train_size=sample_size,
+            random_state=random_state,
+        )
+
+    return X, y
+
+def reduce_precision(X: Union[np.ndarray, spmatrix]) -> Tuple[Union[np.ndarray, spmatrix], Type]:
+    """ Reduces the precision of an arraylike
+
+    Does not support ndarray a non-numeric type.
+    Will convert a List[float] to ndarray.
+
+    Parameters
+    ----------
+    X: List[float] | np.ndarray | spmatrix
+        The data to reduce precision of
+
+    safe: bool = True
+        Whether to force `X.astype(np.float32)` even if `X.dtype` is not listed.
+
+    Returns
+    -------
+    (List[Float] | ndarray | spmatrix, str )
+        Returns the reduced data X along with the dtype it was reduced to.
+    """
+    bytes_to_precision_mapping = {
+        4: np.float32,
+        8: np.float32,
+        16: np.float64,
+    }
+
+    bytes = byte_size(X.dtype)
+    precision = bytes_to_precision_mapping.get(bytes, None)
+
+    return X.astype(precision), precision
 
 def reduce_dataset_size_if_too_large(
-    X: SUPPORTED_FEAT_TYPES,
-    y: SUPPORTED_TARGET_TYPES,
-    seed: int,
+    X: Union[np.ndarray, spmatrix],
+    y: np.ndarray,
     memory_limit: int,
+    is_classification: bool,
+    random_state: Union[int, np.random.RandomState] = None,
     include: List[str] = ['precision', 'subsampling'],
     multiplier: Union[float, int] = 10,
-    is_classification: Optional[bool] = None
-) -> Tuple[Union[spmatrix, np.ndarray], np.ndarray]:
+) -> Tuple[Union[spmatrix, np.ndarray], SUPPORTED_TARGET_TYPES]:
     """ Reduces the size of the dataset if it's too close to the memory limit.
 
     Attempts to do the following in the order:
         * Reduce precision if necessary
         * Subsample
 
+    This retains the type of input if it's pd.DataFrame, spmatrix or ndarray.
+
+    NOTE: limitations
+
+        Does not precision reduce:
+        *   ndarray with type != float{32,64,96,128} - Could be done using feat_type
+        *   DataFrame - Could be done using feat_type
+
+        Does not support subsampling
+        *   When Dataframe as we can't easily estimate size - Could be done
+
     Parameters
     ----------
-    X: SUPPORTED_FEAT_TYPES
+    X: np.ndarray | spmatrix
         The features of the dataset.
 
-    y: SUPPORTED_TARGET_TYPES
+    y: np.ndarray
         The labels of the dataset.
-
-    seed: int
-        The seed to use for subsampling.
 
     memory_limit: int
         The amount of memory allocated in megabytes
+
+    is_classification: bool
+        Whether it's a classificaiton dataset or not. This is important when
+        considering how to subsample.
+
+    seed: int | RandomState = None
+        The seed to use for subsampling.
 
     include: List[str] = ['precision', 'subsampling']
         A list of operations that are permitted to be performed to reduce
         the size of the dataset.
 
-    multiplier: float | int
+    multiplier: float | int = 10
         When performing reductions, satisfies the conditions that:
         * Reduce precision if `size(X) * multiplier >= memory_limit`
         * Subsample so that `size(X) * mulitplier = memory_limit` is satisfied``
-
-    is_classification: bool
-        Whether it's a classificaiton dataset or not. This is important when
-        considering how to subsample.
 
     Returns
     -------
     Tuple[spmatrix | np.ndarray, np.ndarray]:
         The reduced X, y if reductions were needed
     """
+    # Validation
+    assert memory_limit > 0
 
-    # Convert X,y to np.ndarray or spmatrix
-    # TODO: remove this once typing for X, y has been updated per issue #1624
-    if isinstance(X, list):
-        X = np.asarray(X)
-    elif isinstance(X, pd.DataFrame):
-        X = X.to_numpy()
+    if 'precision' in include and X.dtype not in supported_dtypes:
+            raise ValueError(f"Unsupported {X.dtype} for precision reduction")
 
-    if isinstance(y, list):
-        y = np.asarray(y)
-    elif isinstance(y, pd.Series) or isinstance(y, pd.DataFrame):
-        y = y.to_numpy()
-    elif isinstance(y, spmatrix):
-        y = convert_if_sparse(y)
-        y = cast(np.ndarray, y)
+    for operation in include:
 
-    def byte_size(dtype: np.dtype) -> int:
-        """ Returns the amount of bits required for an element of dtype """
-        if dtype == np.float32:
-            return 4
-        elif dtype in (np.float64, float):
-            return 8
-        elif (
-            (hasattr(np, 'float128') and dtype == np.float128)
-            or (hasattr(np, 'float96') and dtype == np.float96)
-        ):
-            # In spite of the names, np.float96 and np.float128
-            # provide only as much precision as np.longdouble,
-            # that is, 80 bits on most x86 machines and 64 bits
-            # in standard Windows builds.
-            return 16
-        else:
-            # Just assuming some value - very unlikely
-            warnings.warn(
-                f'Unknown dtype for X: {dtype}, assuming it takes 8 bit/number'
-            )
-            return 8
+        if operation == 'precision':
+            # If `multiplier` times the dataset is too big for memory, we try
+            # to reduce the precision if it's a high precision dataset
+            if megabytes(X) * multiplier > memory_limit:
+                X, precision = reduce_precision(X)
+                warnings.warn(
+                    f'Dataset too large for memory limit {memory_limit}MB, '
+                    f'reduced the precision from {X.dtype} to {precision}',
+                )
+        elif operation == 'subsampling':
+            # If the dataset is still too big such that we couldn't fit
+            # `multiplier` of them in memory, we subsample such that we can
+            if  memory_limit < megabytes(X) * multiplier:
 
-    def megabytes(X_: Union[spmatrix, np.ndarray]) -> float:
-        """ Estimate how large X is in megabytes """
-        return X_.shape[0] * X_.shape[1] * byte_size(X_.dtype) * 1e-6
+                reduction_percent = float(memory_limit) / (megabytes(X) * multiplier)
+                X, y = subsample(
+                    X, y,
+                    sample_size=reduction_percent,
+                    is_classification=is_classification,
+                    random_state=random_state
+                )
 
-    def reduce_precision(
-        X_: Union[spmatrix, np.ndarray]
-    ) -> Tuple[Union[spmatrix, np.ndarray], str]:
-        """ Reduces the precision of a dataset, only works for X.dtype > np.float32 """
-        if X_.dtype == np.float32:
-            return X_, str(np.float32)
-
-        precision_mapping = {
-            4: np.float32,
-            8: np.float32,
-            16: np.float64,
-        }
-        precision = precision_mapping.get(byte_size(X_.dtype), np.float32)
-
-        return X_.astype(precision), str(precision)
-
-    def subsample(
-        X_: Union[spmatrix, np.ndarray],
-        y_: np.ndarray,
-        sample_size: int
-    ) -> Tuple[Union[spmatrix, np.ndarray], np.ndarray]:
-        """ Subsamples the array so it fits into the memory limit """
-        if is_classification:
-            splitter = CustomStratifiedShuffleSplit(
-                train_size=sample_size,
-                random_state=seed
-            )
-            left_idxs, right_idxs = next(splitter.split(X=X_, y=y_))
-            X_ = X_[left_idxs]
-            y_ = y_[left_idxs]
-
-        else:
-            X_, _, y_, _ = train_test_split(
-                X_, y_,
-                train_size=sample_size,
-                random_state=seed,
-            )  # type: ignore
-
-        return X_, y_
-
-    if 'subsampling' in include:
-        assert is_classification is not None
-
-    # There is no memory limit, we can't decide how to reduce
-    if not memory_limit:
-        return X, y
-
-    # If 10 times the dataset is too big for memory, we try to reduce the
-    # precision if it's a high precision dataset
-    if megabytes(X) * multiplier > memory_limit:
-        X, precision = reduce_precision(X)
-        warnings.warn(
-            f'Dataset too large for memory limit {memory_limit}MB, '
-            f'reduced the precision from {X.dtype} to {precision}',
-        )
-
-    # If the dataset is still too big such that we couldn't fit 10 of them in
-    # memory, we subsample such that we can
-    if megabytes(X) * multiplier > memory_limit:
-        reduction_factor = float(memory_limit) / (megabytes(X) * multiplier)
-        new_num_samples = int(reduction_factor * X.shape[0])
-        X, y = subsample(X, y, new_num_samples)
-        warnings.warn(
-            f"Dataset too large for memory limit {memory_limit}MB, reduced"
-            f" number of samples from {X.shape[0]} to {new_num_samples}."
-        )
+                new_num_samples = int(reduction_percent * X.shape[0])
+                warnings.warn(
+                    f"Dataset too large for memory limit {memory_limit}MB, reduced"
+                    f" number of samples from {X.shape[0]} to {new_num_samples}."
+                )
 
     return X, y
