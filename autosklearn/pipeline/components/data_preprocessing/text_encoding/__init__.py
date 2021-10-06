@@ -35,11 +35,11 @@ class BOWChoice(AutoSklearnChoice):
         return components
 
     def get_hyperparameter_search_space(
-        self,
-        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
-        default: Optional[str] = None,
-        include: Optional[Dict[str, str]] = None,
-        exclude: Optional[Dict[str, str]] = None,
+            self,
+            dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+            default: Optional[str] = None,
+            include: Optional[Dict[str, str]] = None,
+            exclude: Optional[Dict[str, str]] = None,
     ) -> ConfigurationSpace:
         cs = ConfigurationSpace()
 
@@ -57,7 +57,7 @@ class BOWChoice(AutoSklearnChoice):
                 "component.")
 
         if default is None:
-            #ToDo add the different verision
+            # ToDo add the different verision
             # how using 'relative' version
             defaults = ['bag_of_words_encoding']
             for default_ in defaults:
@@ -70,7 +70,7 @@ class BOWChoice(AutoSklearnChoice):
                                                  list(
                                                      available_preprocessors.keys()),
                                                  default_value=default)
-        #ToDo add hiracical hps for the different choices
+        # ToDo add hiracical hps for the different choices
         cs.add_hyperparameter(preprocessor)
         for name in available_preprocessors:
             preprocessor_configuration_space = available_preprocessors[name]. \
@@ -88,9 +88,9 @@ class BOWChoice(AutoSklearnChoice):
                             ) -> 'BOWChoice':
         new_params = {}
 
-        params = configuration.get_dictionary()#
+        params = configuration.get_dictionary()  #
         print(params)
-        #ToDo implement a conig space entry for choice bag of word
+        # ToDo implement a conig space entry for choice bag of word
         choice = params['__choice__']
         del params['__choice__']
 
