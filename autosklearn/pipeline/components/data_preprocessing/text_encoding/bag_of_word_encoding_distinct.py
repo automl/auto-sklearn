@@ -4,8 +4,6 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 import ConfigSpace.hyperparameters as CSH
 from ConfigSpace import EqualsCondition
 
-import scipy.sparse
-
 import numpy as np
 import pandas as pd
 from scipy.sparse import hstack

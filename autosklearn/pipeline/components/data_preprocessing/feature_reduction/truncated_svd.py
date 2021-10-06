@@ -2,13 +2,11 @@ from typing import Dict, Optional, Tuple, Union
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 import ConfigSpace.hyperparameters as CSH
-from ConfigSpace import EqualsCondition
 
 import numpy as np
 from scipy.sparse import csr_matrix
 
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
-import autosklearn.pipeline.implementations.CategoryShift
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
@@ -45,14 +43,6 @@ class FeatureReduction(AutoSklearnPreprocessingAlgorithm):
     def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         if self.preprocessor is None:
             raise NotImplementedError()
-        file = open("/home/lukas/Python_Projects/AutoSklearnDevelopment/sample.txt", "a")
-        file.write("\n X shape: {}\n\n".format(X.shape))
-        file.close()
-
-        file = open("/home/lukas/Python_Projects/AutoSklearnDevelopment/sample.txt", "a")
-        file.write("\n X_new shape: {}\n\n".format(self.preprocessor.transform(X).shape))
-        file.close()
-
         return self.preprocessor.transform(X)
 
     @staticmethod
