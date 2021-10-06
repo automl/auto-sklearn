@@ -6,18 +6,9 @@ import numpy as np
 
 from sklearn.base import BaseEstimator
 
-from autosklearn.pipeline.components.data_preprocessing.category_shift. \
-    category_shift import CategoryShift
-from autosklearn.pipeline.components.data_preprocessing.imputation. \
-    categorical_imputation import CategoricalImputation
-from autosklearn.pipeline.components.data_preprocessing.minority_coalescense \
-    import CoalescenseChoice
 from autosklearn.pipeline.components.data_preprocessing.text_encoding \
     import BOWChoice
 from autosklearn.pipeline.components.data_preprocessing.feature_reduction.truncated_svd import FeatureReduction
-from autosklearn.pipeline.components.data_preprocessing.categorical_encoding.encoding import (
-    OrdinalEncoding
-)
 from autosklearn.pipeline.base import (
     BasePipeline,
     DATASET_PROPERTIES_TYPE,
@@ -43,7 +34,6 @@ class TextPreprocessingPipeline(BasePipeline):
         If None, the random number generator is the RandomState instance
         used by `np.random`."""
 
-    # raise NotImplementedError
     def __init__(
             self,
             config: Optional[Configuration] = None,
