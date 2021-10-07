@@ -644,7 +644,7 @@ class AutoML(BaseEstimator):
 
         # We don't support size reduction on pandas dataframes yet
         if not isinstance(X, pd.DataFrame):
-            operations = ['subsampling']
+            operations = ['subsample']
             if X.dtype in supported_precision_reductions:
                 operations.append('precision')
 
