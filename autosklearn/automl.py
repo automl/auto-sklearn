@@ -506,7 +506,8 @@ class AutoML(BaseEstimator):
         #
         #   `task: Optional[int]` and `is_classification`
         #
-        #   `AutoML` tries to identify the task itself with `sklearn.type_of_target`, leaving little for the subclasses to do.
+        #   `AutoML` tries to identify the task itself with `sklearn.type_of_target`,
+        #   leaving little for the subclasses to do.
         #   Except this failes when type_of_target(y) == "multiclass".
         #
         #   "multiclass" be mean either REGRESSION or MULTICLASS_CLASSIFICATION,
@@ -585,7 +586,7 @@ class AutoML(BaseEstimator):
 
         """
         if (X_test is not None) ^ (y_test is not None):
-            raise ValueError(f"Must provide both X_test and y_test together")
+            raise ValueError("Must provide both X_test and y_test together")
 
         # AutoSklearn does not handle sparse y for now
         y = convert_if_sparse(y)

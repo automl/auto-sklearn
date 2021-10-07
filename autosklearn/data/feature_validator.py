@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from pandas.api.types import is_numeric_dtype, is_sparse
 
-from scipy.sparse import spmatrix, csr_matrix
+from scipy.sparse import csr_matrix, spmatrix
 
 from sklearn.base import BaseEstimator
 from sklearn.exceptions import NotFittedError
@@ -206,7 +206,7 @@ class FeatureValidator(BaseEstimator):
                 if X[column].isna().all():
                     X[column] = X[column].astype('category')
 
-        if not isinstance(X, (np.ndarray, pd.DataFrame)) and not scipy.sparse.issparse(X):
+        if not isinstance(X, (np.ndarray, pd.DataFrame)) and not isinstance(X, spmatrix):
             raise ValueError("Auto-sklearn only supports Numpy arrays, Pandas DataFrames,"
                              " scipy sparse and Python Lists, yet, the provided input is"
                              " of type {}".format(

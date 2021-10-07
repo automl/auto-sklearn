@@ -182,17 +182,14 @@ class TargetValidator(BaseEstimator):
                 self.encoder.fit(np.array(y_train).reshape(-1, 1))
 
         # we leave objects unchanged, so no need to store dtype in this case
-        if hasattr(y_train, 'dtype'):
-            # Series and numpy arrays are checked here
-            # Cast is as numpy for mypy checks
-            y_train = cast(np.ndarray, y_train)
+        if isinstance(y_train, np.ndarray) or isinstance(y_train, spmatrix):
             if is_numeric_dtype(y_train.dtype):
                 self.dtype = y_train.dtype
-        elif hasattr(y_train, 'dtypes') and is_numeric_dtype(cast(pd.DataFrame,
-                                                                         y_train).dtypes[0]):
-            # This case is for pandas array with a single column
-            y_train = cast(pd.DataFrame, y_train)
-            self.dtype = y_train.dtypes[0]
+
+        # TODO - This is incorrect
+        elif isinstance(y_train, pd.DataFrame):
+            if is_numeric_dtype(y_train.dtypes[0]):
+                self.dtype = y_train.dtypes[0]
 
         return self
 

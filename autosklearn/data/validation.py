@@ -1,8 +1,9 @@
 # -*- encoding: utf-8 -*-
 import logging
-from typing import Optional, List, Tuple, Union, cast, overload
+from typing import List, Optional, Tuple, Union, cast, overload
 
 import numpy as np
+
 import pandas as pd
 
 from scipy.sparse import spmatrix
