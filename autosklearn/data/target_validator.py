@@ -213,30 +213,26 @@ class TargetValidator(BaseEstimator):
         if not self._is_fitted:
             raise NotFittedError("Cannot call transform on a validator that is not fitted")
 
-        # Clear the type of List off of y
+        # Clear the types List and DataFrame off of y
         if isinstance(y, List):
             y_transformed = np.asarray(y)
+        elif isinstance(y, pd.DataFrame):
+            y_transformed = y.to_numpy()
         else:
             y_transformed = y
 
         # Check the data here so we catch problems on new test data
         self._check_data(y_transformed)
 
-        if self.encoder is not None:
-            if len(y_transformed.shape) > 1:
-                y_transformed = self.encoder.transform(y_transformed)  # TODO: type update
-            else:
-                # The Ordinal encoder expects a 2 dimensional input.
-                # The targets are 1 dimensional, so reshape to match the expected shape
-                if isinstance(y_transformed, pd.DataFrame):
-                    y_transformed = y_transformed.to_numpy().reshape(-1, 1)
-                else:
-                    y_transformed = y_transformed.reshape(-1, 1)
-                y_transformed = self.encoder.transform(y_transformed).reshape(-1)
+        # The Ordinal encoder expects a 2 dimensional input.
+        # The targets are 1 dimensional, so reshape to match the expected shape
+        if y_transformed.ndim == 1:
+            y_transformed = y_transformed.reshape(-1, 1)
+            y_transformed = self.encoder.transform(y_transformed).reshape(-1)
+        else:
+            y_transformed = self.encoder.transform(y_transformed)
 
-        # sklearn check array will make sure we have the
-        # correct numerical features for the array
-        # Converts DataFrames, Series to np.ndarray
+        # check_array ensures correct numerical features for array
         y_transformed = sklearn.utils.check_array(
             y_transformed,
             force_all_finite=True,
@@ -244,10 +240,9 @@ class TargetValidator(BaseEstimator):
             ensure_2d=False,
         )
 
-        # When translating a dataframe to numpy, make sure we
-        # honor the ravel requirement
+        # Ensure we flatten any arrays [[1], [2], [1], [1], ...] to [1,2,1,1,...]
         if y_transformed.ndim == 2 and y_transformed.shape[1] == 1:
-            y_transformed = np.ravel(y_transformed)
+            y_transformed = y_transformed.ravel()
 
         return y_transformed
 
