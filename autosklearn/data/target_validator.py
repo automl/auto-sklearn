@@ -213,6 +213,8 @@ class TargetValidator(BaseEstimator):
         if not self._is_fitted:
             raise NotFittedError("Cannot call transform on a validator that is not fitted")
 
+        assert self.encoder  # TODO typing this, wrap it in a property
+
         # Clear the types List and DataFrame off of y
         if isinstance(y, List):
             y_transformed = np.asarray(y)

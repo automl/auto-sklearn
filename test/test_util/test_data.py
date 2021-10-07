@@ -220,6 +220,7 @@ def test_reduce_dataset_invalid_dtype_for_precision_reduction():
             is_classification=False
         )
 
+
 def test_reduce_dataset_invalid_operations():
     X = np.asarray([1, 2, 3], dtype=int)
     with pytest.raises(ValueError):
