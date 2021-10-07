@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 import logging
-from typing import List, Optional, Tuple, Union, cast, overload
+from typing import List, Optional, Tuple, Union, overload
 
 import numpy as np
 
@@ -31,15 +31,15 @@ def convert_if_sparse(
     np.ndarray of shape (n_samples, ) or (n_samples, n_outputs)
     """
     if isinstance(y, spmatrix):
-        y = cast(spmatrix, y)
-        y = y.toarray()
-        y = cast(np.ndarray, y)
+        y_ = y.todense()
 
         # For one dimensional data, toarray will return (1, nrows)
-        if y.shape[0] == 1:
-            y = y.flatten()
+        if y_.shape[0] == 1:
+            y_ = y_.flatten()
+    else:
+        y_ = y
 
-    return y
+    return y_
 
 
 class InputValidator(BaseEstimator):
