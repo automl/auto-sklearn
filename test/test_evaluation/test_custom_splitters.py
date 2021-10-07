@@ -45,7 +45,6 @@ def test_custom_stratified_shuffle_split_returns_unique_labels_and_maintains_siz
     assert len(y_sampled) == n_samples
     assert len(X_sampled) == n_samples
 
-
     # Assert all the unique labels are present in the training set
     assert all(label in np.unique(y_sampled) for label in np.unique(y)), \
         f"{task} failed, {np.unique(y)} != {np.unique(y_sampled)}"
