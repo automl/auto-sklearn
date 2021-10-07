@@ -11,11 +11,10 @@ from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTY
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 
-class RelativeBagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
+class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
     def __init__(
             self,
             use_idf=None,
@@ -31,15 +30,17 @@ class RelativeBagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
         self.min_df_relative = min_df_relative
 
     def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
-            ) -> 'BagOfWordEncoder':
+            ) -> 'TfidfEncoder':
 
         if isinstance(X, pd.DataFrame):
             # define a CountVectorizer for every feature (implicitly defined by order of columns, maybe change the list
             # to a dictionary with features as keys)
             if self.min_df_choice == "min_df_absolute":
-                self.preprocessor = CountVectorizer(min_df=self.min_df_absolute)
+                self.preprocessor = TfidfVectorizer(min_df=self.min_df_absolute,
+                                                    use_idf=self.use_idf)
             elif self.min_df_choice == "min_df_relative":
-                self.preprocessor = CountVectorizer(min_df=self.min_df_relative)
+                self.preprocessor = TfidfVectorizer(min_df=self.min_df_relative,
+                                                    use_idf=self.use_idf)
             else:
                 raise KeyError()
             for feature in X.columns:
@@ -60,7 +61,6 @@ class RelativeBagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
                 X_new = self.preprocessor.transform(X[feature])
             else:
                 X_new += self.preprocessor.transform(X[feature])
-        X_new = TfidfTransformer(use_idf=self.use_idf).fit_transform(X_new)
         return X_new
 
     @staticmethod
@@ -86,15 +86,21 @@ class RelativeBagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
 
         hp_use_idf = CSH.CategoricalHyperparameter("use_idf", choices=[False, True])
         hp_min_df_choice = CSH.CategoricalHyperparameter("min_df_choice",
-                                                         choices=["min_df_absolute", "min_df_relative"])
-        hp_min_df_absolute = CSH.UniformIntegerHyperparameter(name="min_df_absolute", lower=0, upper=10,
+                                                         choices=["min_df_absolute",
+                                                                  "min_df_relative"])
+        hp_min_df_absolute = CSH.UniformIntegerHyperparameter(name="min_df_absolute", lower=0,
+                                                              upper=10,
                                                               default_value=0)
-        hp_min_df_relative = CSH.UniformFloatHyperparameter(name="min_df_relative", lower=0.01, upper=1.0,
+        hp_min_df_relative = CSH.UniformFloatHyperparameter(name="min_df_relative", lower=0.01,
+                                                            upper=1.0,
                                                             default_value=0.01, log=True)
-        cs.add_hyperparameters([hp_use_idf, hp_min_df_choice, hp_min_df_absolute, hp_min_df_relative])
+        cs.add_hyperparameters(
+            [hp_use_idf, hp_min_df_choice, hp_min_df_absolute, hp_min_df_relative])
 
-        cond_min_df_absolute = EqualsCondition(hp_min_df_absolute, hp_min_df_choice, "min_df_absolute")
-        cond_min_df_relative = EqualsCondition(hp_min_df_relative, hp_min_df_choice, "min_df_relative")
+        cond_min_df_absolute = EqualsCondition(hp_min_df_absolute, hp_min_df_choice,
+                                               "min_df_absolute")
+        cond_min_df_relative = EqualsCondition(hp_min_df_relative, hp_min_df_choice,
+                                               "min_df_relative")
         cs.add_conditions([cond_min_df_absolute, cond_min_df_relative])
 
         # maybe add bigrams ...
