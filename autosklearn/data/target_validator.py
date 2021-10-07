@@ -213,18 +213,19 @@ class TargetValidator(BaseEstimator):
         if not self._is_fitted:
             raise NotFittedError("Cannot call transform on a validator that is not fitted")
 
-        assert self.encoder  # TODO typing this, wrap it in a property
+        # Check the data here so we catch problems on new test data
+        self._check_data(y)
 
         # Clear the types List and DataFrame off of y
         if isinstance(y, List):
             y_transformed = np.asarray(y)
-        elif isinstance(y, pd.DataFrame):
+        elif isinstance(y, pd.DataFrame) or isinstance(y, pd.Series):
             y_transformed = y.to_numpy()
         else:
             y_transformed = y
 
-        # Check the data here so we catch problems on new test data
-        self._check_data(y_transformed)
+        if self.encoder is None:
+            return y_transformed
 
         # The Ordinal encoder expects a 2 dimensional input.
         # The targets are 1 dimensional, so reshape to match the expected shape
