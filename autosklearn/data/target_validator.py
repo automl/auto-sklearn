@@ -1,15 +1,17 @@
 import logging
-from typing import List, Optional, Union, cast
+from typing import List, Optional, Type, Union, cast
+import warnings
 
 import numpy as np
 
 import pandas as pd
 from pandas.api.types import is_numeric_dtype
+from pandas.core.dtypes.base import ExtensionDtype
 
 from scipy.sparse import spmatrix
 
 import sklearn.utils
-from sklearn import preprocessing
+from sklearn.preprocessing import OrdinalEncoder
 from sklearn.base import BaseEstimator
 from sklearn.exceptions import NotFittedError
 from sklearn.utils.multiclass import type_of_target
@@ -43,11 +45,12 @@ class TargetValidator(BaseEstimator):
 
         self.data_type = None  # type: Optional[type]
 
-        # TODO: type update
+        # NOTE: type update
         #   Encoders don't seems to have a unified base class for
         #   the methods 'transform'. Could make a `prototype` class that
         #   duck types for the 'transform', 'fit_transform' methods
-        self.encoder = None  # type: Optional[BaseEstimator]
+        #   This is however fine while we only use ordinal encoder
+        self.encoder = None  # type: Optional[OrdinalEncoder]
 
         self.out_dimensionality = None  # type: Optional[int]
         self.type_of_target = None  # type: Optional[str]
@@ -55,7 +58,7 @@ class TargetValidator(BaseEstimator):
         self.logger = logger if logger is not None else logging.getLogger(__name__)
 
         # Store the dtype for remapping to correct type
-        self.dtype = None  # type: Optional[type]
+        self.dtype = None  # type: Optional[Type]
 
         self._is_fitted = False
 
@@ -113,6 +116,7 @@ class TargetValidator(BaseEstimator):
                 raise ValueError('Number of outputs changed from %d to %d!' %
                                  (self.out_dimensionality, _n_outputs))
 
+
         # Fit on the training data
         self._fit(y_train, y_test)
 
@@ -122,9 +126,9 @@ class TargetValidator(BaseEstimator):
 
     def _fit(
         self,
-        y_train: SUPPORTED_TARGET_TYPES,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
-    ) -> BaseEstimator:
+        y_train: Union[list, np.ndarray, pd.Series, pd.DataFrame],
+        y_test: Optional[Union[list, np.ndarray, pd.Series, pd.DataFrame]] = None,
+    ) -> 'TargetValidator':
         """
         If dealing with classification, this utility encodes the targets.
 
@@ -143,52 +147,66 @@ class TargetValidator(BaseEstimator):
             # Only fit an encoder for classification tasks
             # Also, encoding multilabel indicator data makes the data multiclass
             # Let the user employ a MultiLabelBinarizer if needed
+            self.encoder = None
             return self
 
-        if y_test is not None:
-            if hasattr(y_train, "iloc"):
-                y_train = pd.concat([y_train, y_test], ignore_index=True, sort=False)
-            elif isinstance(y_train, list):
-                y_train = y_train + y_test
-            elif isinstance(y_train, np.ndarray):
-                y_train = np.concatenate((y_train, y_test))
-
-        ndim = len(np.shape(y_train))
-        if ndim == 1 or (ndim > 1 and np.shape(y_train)[1] == 1):
-            # The label encoder makes sure data is, and remains
-            # 1 dimensional
-            self.encoder = preprocessing.OrdinalEncoder(handle_unknown='use_encoded_value',
-                                                        unknown_value=-1)
-        else:
+        # Validate the shape of the input
+        shape = np.shape(y_train)
+        ndim = len(shape)
+        if ndim > 1 and shape[1] != 1:
             # We should not reach this if statement as we check for type of targets before
-            raise ValueError("Multi-dimensional classification is not yet supported. "
-                             "Encoding multidimensional data converts multiple columns "
-                             "to a 1 dimensional encoding. Data involved = {}/{}".format(
-                                np.shape(y_train),
-                                self.type_of_target
-                             ))
+            raise ValueError("Multi-dimensional classification is not yet"
+                             " supported. Encoding multidimensional data"
+                             " converts multiple columns to a 1 dimensional encoding."
+                             f" Data involved = {shape}/{self.type_of_target}")
 
-        # Mypy redefinition
-        assert self.encoder is not None
+        # Creat the encoder
+        self.encoder = OrdinalEncoder(
+            handle_unknown='use_encoded_value',
+            unknown_value=-1
+        )
 
-        # remove ravel warning from pandas Series
-        if ndim > 1:
-            self.encoder.fit(y_train)
+        # Clear typing to just numpy arrays and pandas
+        if isinstance(y_train, list):
+            y = np.asarray(y_train)
         else:
-            if hasattr(y_train, 'iloc'):
-                y_train = cast(pd.DataFrame, y_train)
-                self.encoder.fit(y_train.to_numpy().reshape(-1, 1))
+            y = y_train
+
+        # Attempt to store dtype if it's numeric, we use this in
+        # inverse_transform to try corretly restore it's dtype
+        if isinstance(y, pd.Series):
+            if isinstance(y.dtype, ExtensionDtype):
+                warnings.warn("Fitting transformer with a pandas series which"
+                              f" has the dtype {y.dtype}. Inverse transform"
+                              " may not be able preserve dtype when converting"
+                              " to np.ndarray")
+            elif is_numeric_dtype(y.dtype):
+                self.dtype = y.dtype
+        elif isinstance(y, pd.DataFrame):
+            if is_numeric_dtype(y.dtypes[0]):
+                self.dtype = y.dtypes[0]
+        else:
+            if is_numeric_dtype(y.dtype):
+                self.dtype = y.dtype
+
+        # Merge y_test and y_train for encoding
+        if y_test is not None:
+            arrs = (y, y_test)
+            if isinstance(y,  pd.Series) or isinstance(y, pd.DataFrame):
+                y = pd.concat(arrs, ignore_index=True, sort=False)  # type: ignore
             else:
-                self.encoder.fit(np.array(y_train).reshape(-1, 1))
+                y = np.concatenate(arrs)
 
-        # we leave objects unchanged, so no need to store dtype in this case
-        if isinstance(y_train, np.ndarray) or isinstance(y_train, spmatrix):
-            if is_numeric_dtype(y_train.dtype):
-                self.dtype = y_train.dtype
+        # If one dimensional, we need to reshape it
+        # [1, 2, 3] -> [[1], [2], [3]]
+        if y.ndim == 1:
+            if isinstance(y, pd.DataFrame) or isinstance(y, pd.Series):
+                y =  y.to_numpy()
 
-        elif isinstance(y_train, pd.DataFrame):
-            if is_numeric_dtype(y_train.dtypes[0]):
-                self.dtype = y_train.dtypes[0]
+            y = y.reshape(-1, 1)
+
+        # Fit encoder
+        self.encoder.fit(y)
 
         return self
 
@@ -211,13 +229,13 @@ class TargetValidator(BaseEstimator):
                 The transformed array
         """
         if not self._is_fitted:
-            raise NotFittedError("Cannot call transform on a validator that is not fitted")
+            raise NotFittedError("TargetValidator must have fit() called first")
 
         # Check the data here so we catch problems on new test data
         self._check_data(y)
 
         # Clear the types List and DataFrame off of y
-        if isinstance(y, List):
+        if isinstance(y, list):
             y_transformed = np.asarray(y)
         elif isinstance(y, pd.DataFrame) or isinstance(y, pd.Series):
             y_transformed = y.to_numpy()
@@ -251,42 +269,53 @@ class TargetValidator(BaseEstimator):
 
     def inverse_transform(
         self,
-        y: SUPPORTED_TARGET_TYPES,
+        y: Union[List, pd.Series, pd.DataFrame, np.ndarray],
     ) -> np.ndarray:
-        """
-        Revert any encoding transformation done on a target array
+        """ Revert any encoding transformation done on a target array.
 
         Parameters
         ----------
-            y: Union[np.ndarray, pd.DataFrame, pd.Series]
-                Target array to be transformed back to original form before encoding
+        y: Union[List, np.ndarray, pd.DataFrame, pd.Series]
+            Target array to be transformed back to original form before encoding
+
         Return
         ------
-            np.ndarray:
-                The transformed array
+        np.ndarray:
+            The transformed array
         """
         if not self._is_fitted:
-            raise NotFittedError("Cannot call inverse_transform on a validator that is not fitted")
+            raise NotFittedError("TargetValidator must have fit() called first")
 
+        # If there's no encoder, just return it as the expected ndarray
         if self.encoder is None:
-            return y
+            return np.asarray(y)
+
+        # If it's one dimensional, we need to convert it
+        # [1,2,3] -> [[1], [2], [3]]
         shape = np.shape(y)
-        if len(shape) > 1:
-            y = self.encoder.inverse_transform(y)
+        if len(shape) == 1:
+
+            if isinstance(y, pd.DataFrame) or isinstance(y, pd.Series):
+                y = y.to_numpy()
+            elif isinstance(y, list):
+                y = np.asarray(y)
+
+            # Perform the transformation and reshape it
+            y = y.reshape(-1, 1)
+            y_inv = self.encoder.inverse_transform(y)
+            y_inv = y_inv.reshape(-1)
+
         else:
-            # The targets should be a flattened array, hence reshape with -1
-            if hasattr(y, 'iloc'):
-                y = cast(pd.DataFrame, y)
-                y = self.encoder.inverse_transform(y.to_numpy().reshape(-1, 1)).reshape(-1)
-            else:
-                y = self.encoder.inverse_transform(np.array(y).reshape(-1, 1)).reshape(-1)
+            # Otherwise we can can just invert it as expected
+            y_inv = self.encoder.inverse_transform(y)
 
         # Inverse transform returns a numpy array of type object
         # This breaks certain metrics as accuracy, which makes type_of_target be unknown
         # If while fit a dtype was observed, we try to honor that dtype
         if self.dtype is not None:
-            y = y.astype(self.dtype)
-        return y
+            y_inv = y_inv.astype(self.dtype)
+
+        return y_inv
 
     def is_single_column_target(self) -> bool:
         """
