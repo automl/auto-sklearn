@@ -186,7 +186,6 @@ class TargetValidator(BaseEstimator):
             if is_numeric_dtype(y_train.dtype):
                 self.dtype = y_train.dtype
 
-        # TODO - This is incorrect
         elif isinstance(y_train, pd.DataFrame):
             if is_numeric_dtype(y_train.dtypes[0]):
                 self.dtype = y_train.dtypes[0]
