@@ -141,34 +141,32 @@ def subsample(
     sample_size: Union[float, int],
     random_state: Optional[Union[int, np.random.RandomState]] = None,
 ) -> Tuple[SUPPORTED_FEAT_TYPES, Union[List, np.ndarray, pd.DataFrame, pd.Series]]:
-    """ Subsamples data
+    """ Subsamples data returning the same type as it recieved.
 
-    Returns the same type as it recieved where
-    *   XT is one of [List, np.ndarray, spmatrix, pd.DataFrame]
-    *   YT is one of [List, np.ndarray, pd.Series, pd.DataFrame]
+    If `is_classification`, we split using a stratified shuffle split which
+    preserves unique labels in the training set.
 
     NOTE:
-    It's highly unadvisable to use lists here as we preserve types. This means
-    indexing into basic python lists may be slow. As a result, we actually just
-    use a numpy array and convert it back to a list.
+    It's highly unadvisable to use lists here. In order to preserver types,
+    we convert to a numpy array and then back to a list.
 
     NOTE2:
     Interestingly enough, StratifiedShuffleSplut and descendants don't support
-    sparse y in `split(): _check_array` call. Hence, neither do we.
+    sparse `y` in `split(): _check_array` call. Hence, neither do we.
 
     NOTE3:
-    The core autosklearn library doesn't rely on the full type XT.
+    The core autosklearn library doesn't rely on the full type of X.
     The typing could be reduced to:
-    *   XT is np.ndarray | spmatrix
-    *   YT is np.ndarray
+    *   X: np.ndarray | spmatrix
+    *   Y: np.ndarray
 
 
     Parameters
     ----------
-    X: XT
+    X: SUPPORTED_FEAT_TYPES
         The X's to subsample
 
-    Y: YT
+    Y: List | np.ndarray | pd.DataFrame | Series
         The Y's to subsample
 
     is_classification: bool
@@ -184,9 +182,15 @@ def subsample(
 
     Returns
     -------
-    (XT, YT)
-        The X and y subsampled
+    (SUPPORTED_FEAT_TYPES, List | np.ndarray | pd.DataFrame | Series)
+        The X and y subsampled according to sample_size
     """
+    if isinstance(X, list):
+        X = np.asarray(X)
+
+    if isinstance(y, list):
+        y = np.asarray(y)
+
     if is_classification:
         splitter = CustomStratifiedShuffleSplit(
             train_size=sample_size,
@@ -197,16 +201,12 @@ def subsample(
         if isinstance(X, pd.DataFrame):
             idxs = X.index[left_idxs]
             X = X.loc[idxs]
-        elif isinstance(X, list):
-            X = np.asarray(X)[left_idxs].tolist()
         else:
             X = X[left_idxs]
 
         if isinstance(y, pd.DataFrame) or isinstance(y, pd.Series):
             idxs = y.index[left_idxs]
             y = y.loc[idxs]
-        elif isinstance(y, list):
-            y = np.asarray(y)[left_idxs].tolist()
         else:
             y = y[left_idxs]
 
@@ -223,22 +223,16 @@ def subsample(
 def reduce_precision(
     X: Union[np.ndarray, spmatrix]
 ) -> Tuple[Union[np.ndarray, spmatrix], Type]:
-    """ Reduces the precision of an arraylike
-
-    Does not support ndarray a non-numeric type.
-    Will convert a List[float] to ndarray.
+    """ Reduces the precision of a np.ndarray or spmatrix containing floats
 
     Parameters
     ----------
-    X: List[float] | np.ndarray | spmatrix
-        The data to reduce precision of
-
-    safe: bool = True
-        Whether to force `X.astype(np.float32)` even if `X.dtype` is not listed.
+    X:  np.ndarray | spmatrix
+        The data to reduce precision of.
 
     Returns
     -------
-    (List[Float] | ndarray | spmatrix, str )
+    (ndarray | spmatrix, dtype)
         Returns the reduced data X along with the dtype it was reduced to.
     """
     if X.dtype not in supported_precision_reductions:
@@ -258,22 +252,25 @@ def reduce_dataset_size_if_too_large(
     operations: List[str] = ['precision', 'subsample'],
     multiplier: Union[float, int] = 10,
 ) -> Tuple[Union[np.ndarray, spmatrix], np.ndarray]:
-    """ Reduces the size of the dataset if it's too close to the memory limit.
+    f""" Reduces the size of the dataset if it's too close to the memory limit.
 
-    Attempts to do the following in the order:
-        * Reduce precision if necessary
-        * Subsample
+    Follows the order of the operations passed in and retains the type of its
+    input.
 
-    This retains the type of input if it's pd.DataFrame, spmatrix or ndarray.
+    Precision reduction will only work on the following float types:
+    -   {supported_precision_reductions}
+
+    Subsampling will ensure that the memory limit is satisfied while precision
+    reduction will only perform one level of precision reduction. Technically,
+    you could supply multiple rounds of precision reduction, i.e. to reduce
+    np.float128 to np.float32 you could use `operations = ['precision'] * 2`.
+    However, if that's the use case, it'd be advised to simply use the function
+    `autosklearn.util.data.reduce_precision`.
 
     NOTE: limitations
-
-        Does not precision reduce:
-        *   ndarray with type != float{32,64,96,128} - Could be done using feat_type
-        *   DataFrame - Could be done using feat_type
-
-        Does not support subsampling
-        *   When Dataframe as we can't easily estimate size - Could be done
+    * Does not support dataframes yet
+        -   Requires implementing column wise precision reduction
+        -   Requires calculating memory usage
 
     Parameters
     ----------
@@ -290,8 +287,8 @@ def reduce_dataset_size_if_too_large(
         Whether it's a classificaiton dataset or not. This is important when
         considering how to subsample.
 
-    seed: int | RandomState = None
-        The seed to use for subsampling.
+    random_state: int | RandomState = None
+        The random_state to use for subsampling.
 
     operations: List[str] = ['precision', 'subsampling']
         A list of operations that are permitted to be performed to reduce
@@ -304,7 +301,7 @@ def reduce_dataset_size_if_too_large(
 
     Returns
     -------
-    Tuple[spmatrix | np.ndarray, np.ndarray]:
+    (spmatrix | np.ndarray, np.ndarray)
         The reduced X, y if reductions were needed
     """
     # Validation
@@ -313,7 +310,7 @@ def reduce_dataset_size_if_too_large(
     if 'precision' in operations and X.dtype not in supported_precision_reductions:
         raise ValueError(f"Unsupported {X.dtype} for precision reduction")
 
-    def megabytes(arr: Union[np.ndarray, spmatrix]) -> int:
+    def megabytes(arr: Union[np.ndarray, spmatrix]) -> float:
         return 1e-6 * (arr.nbytes if isinstance(X, np.ndarray) else arr.data.nbytes)
 
     for operation in operations:
