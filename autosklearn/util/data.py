@@ -1,5 +1,6 @@
 import warnings
-from typing import Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
+from collections.abc import Mapping
+from typing import Dict, Iterator, List, Optional, Tuple, Type, Union
 
 import numpy as np
 
@@ -9,36 +10,68 @@ from scipy.sparse import spmatrix
 
 from sklearn.model_selection import train_test_split
 
-from autosklearn.data.validation import SUPPORTED_TARGET_TYPES
+from autosklearn.data.validation import SUPPORTED_FEAT_TYPES
 from autosklearn.evaluation.splitter import CustomStratifiedShuffleSplit
 
-# TypeVars
-XT_subsample = TypeVar("XT_subsample", List, np.ndarray, pd.DataFrame)
-YT_subsample = TypeVar("YT_subsample", List, np.ndarray, pd.DataFrame, pd.Series)
-XT = TypeVar('XT', np.ndarray, spmatrix)
 
-# Information about dtype support
-dtype_to_byte_mapping: Dict[type, int] = {
-    np.float32: 4,
-    np.float64: 8
-}
-reduction_mapping: Dict[type, type] = {
-    np.float32: np.float32,
-    np.float64: np.float32,
-}
-# In spite of the names, np.float96 and np.float128
-# provide only as much precision as np.longdouble,
-# that is, 80 bits on most x86 machines and 64 bits
-# in standard Windows builds.
-if hasattr(np, 'float96'):
-    dtype_to_byte_mapping[np.float96] = 16
-    reduction_mapping[np.float96] = np.float64
+class _DtypeReductionMapping(Mapping):
+    """
+    Unfortuantly, mappings compare by hash(item) and not the __eq__ operator
+    between the key and the item.
 
-if hasattr(np, 'float128'):
-    dtype_to_byte_mapping[np.float128] = 16
-    reduction_mapping[np.float128] = np.float64
+    Hence we wrap the dict in a Mapping class and implement our own __getitem__
+    such that we do use __eq__ between keys and query items.
 
-supported_dtypes = list(dtype_to_byte_mapping.keys())
+    >>> np.float32 == dtype('float32') # True, they are considered equal
+    >>>
+    >>> mydict = { np.float32: 'hello' }
+    >>>
+    >>> # Equal by __eq__ but dict operations fail
+    >>> np.dtype('float32') in mydict # False
+    >>> mydict[dtype('float32')]  # KeyError
+
+    This mapping class fixes that supporting the `in` operator as well as `__getitem__`
+
+    >>> reduction_mapping = _DtypeReductionMapping()
+    >>>
+    >>> reduction_mapping[np.dtype('float64')] # np.float32
+    >>> np.dtype('float32') in reduction_mapping # True
+    """
+
+    # Information about dtype support
+    _mapping: Dict[type, type] = {
+        np.float32: np.float32,
+        np.float64: np.float32,
+    }
+
+    # In spite of the names, np.float96 and np.float128
+    # provide only as much precision as np.longdouble,
+    # that is, 80 bits on most x86 machines and 64 bits
+    # in standard Windows builds.
+    if hasattr(np, 'float96'):
+        _mapping[np.float96] = np.float64
+
+    if hasattr(np, 'float128'):
+        _mapping[np.float128] = np.float64
+
+    @classmethod
+    def __getitem__(cls, item: type) -> type:
+        for k, v in cls._mapping.items():
+            if k == item:
+                return v
+        raise KeyError(item)
+
+    @classmethod
+    def __iter__(cls) -> Iterator[type]:
+        return iter(cls._mapping.keys())
+
+    @classmethod
+    def __len__(cls) -> int:
+        return len(cls._mapping)
+
+
+reduction_mapping = _DtypeReductionMapping()
+supported_precision_reductions = list(reduction_mapping)
 
 
 def binarization(array: Union[List, np.ndarray]) -> np.ndarray:
@@ -79,7 +112,7 @@ def convert_to_bin(Ycont: List, nval: int, verbose: bool = True) -> List:
     # Convert numeric vector to binary (typically classification target values)
     if verbose:
         pass
-    Ybin = [[0] * nval for x in range(len(Ycont))]
+    Ybin = [[0] * nval for _ in range(len(Ycont))]
     for i in range(len(Ybin)):
         line = Ybin[i]
         line[np.int(Ycont[i])] = 1
@@ -101,52 +134,13 @@ def predict_RAM_usage(X: np.ndarray, categorical: List[bool]) -> float:
     return estimated_ram
 
 
-def byte_size(dtype: type) -> int:
-    """ Returns the amount of bytes required for an element of dtype
-
-    Parameters
-    ----------
-    dtype: type
-        the dtype to estimate bits for
-
-    safe: bool = True
-        Whether to raise an error if the dtype is unknown
-
-    Returns
-    -------
-    int
-        The number of bytes
-    """
-    if dtype not in supported_dtypes:
-        raise ValueError(f"{dtype} not in supported {supported_dtypes}")
-
-    return dtype_to_byte_mapping[dtype]
-
-
-def megabytes(X: Union[np.ndarray, spmatrix]) -> float:
-    """ Estimate how large X is in megabytes
-
-    If ndarray is not a uniform type, this estimation does not work.
-    Also does not support pandas dataframes for now as a result
-
-    Parameters
-    ----------
-    X: ndarray | spmatrix
-        The data to estimate the size of in megabytes
-    """
-    if X.dtype not in supported_dtypes:
-        raise ValueError(f"{X.dtype} not in {supported_dtypes}")
-
-    return np.prod(X.shape) * byte_size(X.dtype) * 1e-6
-
-
 def subsample(
-    X: XT_subsample,
-    y: YT_subsample,
+    X: SUPPORTED_FEAT_TYPES,
+    y: Union[List, np.ndarray, pd.DataFrame, pd.Series],
     is_classification: bool,
     sample_size: Union[float, int],
     random_state: Optional[Union[int, np.random.RandomState]] = None,
-) -> Tuple[XT_subsample, YT_subsample]:
+) -> Tuple[SUPPORTED_FEAT_TYPES, Union[List, np.ndarray, pd.DataFrame, pd.Series]]:
     """ Subsamples data
 
     Returns the same type as it recieved where
@@ -160,7 +154,7 @@ def subsample(
 
     NOTE2:
     Interestingly enough, StratifiedShuffleSplut and descendants don't support
-    sparse y. Hence, neither do we.
+    sparse y in `split(): _check_array` call. Hence, neither do we.
 
     NOTE3:
     The core autosklearn library doesn't rely on the full type XT.
@@ -199,6 +193,7 @@ def subsample(
             random_state=random_state
         )
         left_idxs, _ = next(splitter.split(X=X, y=y))
+
         if isinstance(X, pd.DataFrame):
             idxs = X.index[left_idxs]
             X = X.loc[idxs]
@@ -225,7 +220,9 @@ def subsample(
     return X, y
 
 
-def reduce_precision(X: XT) -> Tuple[XT, Type]:
+def reduce_precision(
+    X: Union[np.ndarray, spmatrix]
+) -> Tuple[Union[np.ndarray, spmatrix], Type]:
     """ Reduces the precision of an arraylike
 
     Does not support ndarray a non-numeric type.
@@ -244,23 +241,23 @@ def reduce_precision(X: XT) -> Tuple[XT, Type]:
     (List[Float] | ndarray | spmatrix, str )
         Returns the reduced data X along with the dtype it was reduced to.
     """
-    precision = reduction_mapping[X.dtype]
+    if X.dtype not in supported_precision_reductions:
+        raise ValueError(f"X.dtype = {X.dtype} not equal to any supported"
+                         f" {supported_precision_reductions}")
 
-    # Technically this is not the same type as the type stores info on dtypes
-    # However, here, we don't care for that level of type safety
-    X = cast(XT, X.astype(precision))
-    return X, precision
+    precision = reduction_mapping[X.dtype]
+    return X.astype(precision), precision
 
 
 def reduce_dataset_size_if_too_large(
-    X: XT,
+    X: Union[np.ndarray, spmatrix],
     y: np.ndarray,
     memory_limit: int,
     is_classification: bool,
     random_state: Union[int, np.random.RandomState] = None,
-    include: List[str] = ['precision', 'subsampling'],
+    operations: List[str] = ['precision', 'subsample'],
     multiplier: Union[float, int] = 10,
-) -> Tuple[XT, SUPPORTED_TARGET_TYPES]:
+) -> Tuple[Union[np.ndarray, spmatrix], np.ndarray]:
     """ Reduces the size of the dataset if it's too close to the memory limit.
 
     Attempts to do the following in the order:
@@ -296,7 +293,7 @@ def reduce_dataset_size_if_too_large(
     seed: int | RandomState = None
         The seed to use for subsampling.
 
-    include: List[str] = ['precision', 'subsampling']
+    operations: List[str] = ['precision', 'subsampling']
         A list of operations that are permitted to be performed to reduce
         the size of the dataset.
 
@@ -313,10 +310,13 @@ def reduce_dataset_size_if_too_large(
     # Validation
     assert memory_limit > 0
 
-    if 'precision' in include and X.dtype not in supported_dtypes:
+    if 'precision' in operations and X.dtype not in supported_precision_reductions:
         raise ValueError(f"Unsupported {X.dtype} for precision reduction")
 
-    for operation in include:
+    def megabytes(arr: Union[np.ndarray, spmatrix]) -> int:
+        return 1e-6 * (arr.nbytes if isinstance(X, np.ndarray) else arr.data.nbytes)
+
+    for operation in operations:
 
         if operation == 'precision':
             # If `multiplier` times the dataset is too big for memory, we try
@@ -327,13 +327,19 @@ def reduce_dataset_size_if_too_large(
                     f'Dataset too large for memory limit {memory_limit}MB, '
                     f'reduced the precision from {X.dtype} to {precision}',
                 )
-        elif operation == 'subsampling':
+
+        elif operation == 'subsample':
             # If the dataset is still too big such that we couldn't fit
             # `multiplier` of them in memory, we subsample such that we can
             if memory_limit < megabytes(X) * multiplier:
 
                 reduction_percent = float(memory_limit) / (megabytes(X) * multiplier)
-                X, y = subsample(
+
+                # NOTE: type ignore
+                #
+                # Tried the generic `def subsample(X: T) -> T` approach but it was
+                # failing elsewhere, keeping it simple for now
+                X, y = subsample(  # type: ignore
                     X, y,
                     sample_size=reduction_percent,
                     is_classification=is_classification,
@@ -346,4 +352,6 @@ def reduce_dataset_size_if_too_large(
                     f" number of samples from {X.shape[0]} to {new_num_samples}."
                 )
 
+        else:
+            raise ValueError(f"Unknown operation {operation}")
     return X, y

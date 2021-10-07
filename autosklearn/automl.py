@@ -50,7 +50,7 @@ from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, _fit_with_budget
 from autosklearn.metrics import calculate_metric
 from autosklearn.util.backend import Backend, create
-from autosklearn.util.data import reduce_dataset_size_if_too_large, supported_dtypes
+from autosklearn.util.data import reduce_dataset_size_if_too_large, supported_precision_reductions
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import (
     setup_logger,
@@ -642,12 +642,18 @@ class AutoML(BaseEstimator):
         if X_test is not None and y_test is not None:
             X_test, y_test = self.InputValidator.transform(X_test, y_test)
 
-        if not isinstance(X, pd.DataFrame) and X.dtype not in supported_dtypes:
+        # We don't support size reduction on pandas dataframes yet
+        if not isinstance(X, pd.DataFrame):
+            operations = ['subsampling']
+            if X.dtype in supported_precision_reductions:
+                operations.append('precision')
+
             with warnings_to(self._logger):
                 X, y = reduce_dataset_size_if_too_large(
                     X=X,
                     y=y,
                     is_classification=is_classification,
+                    operations=operations,
                     random_state=self._seed,
                     memory_limit=self._memory_limit
                 )

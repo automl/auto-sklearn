@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 
 from sklearn.model_selection import StratifiedShuffleSplit, StratifiedKFold
@@ -15,7 +17,7 @@ class CustomStratifiedShuffleSplit(StratifiedShuffleSplit):
 
     def _iter_indices(self, X, y, groups=None):  # type: ignore
         n_samples = _num_samples(X)
-        y = check_array(y, ensure_2d=False, dtype=None)
+        y = check_array(y, accept_sparse=True, ensure_2d=False, dtype=None)
         n_train, n_test = _validate_shuffle_split(
             n_samples, self.test_size, self.train_size,
             default_test_size=self._default_test_size)
@@ -29,7 +31,7 @@ class CustomStratifiedShuffleSplit(StratifiedShuffleSplit):
         n_classes = classes.shape[0]
 
         class_counts = np.bincount(y_indices)
-        # print(class_counts)
+        print("class_counts", class_counts)
 
         if n_train < n_classes:
             raise ValueError('The train_size = %d should be greater or '
@@ -44,6 +46,7 @@ class CustomStratifiedShuffleSplit(StratifiedShuffleSplit):
         # (np.unique above performs a sort, so code is O(n logn) already)
         class_indices = np.split(np.argsort(y_indices, kind='mergesort'),
                                  np.cumsum(class_counts)[:-1])
+        print("class_indices", class_indices)
 
         rng = check_random_state(self.random_state)
 
@@ -52,20 +55,48 @@ class CustomStratifiedShuffleSplit(StratifiedShuffleSplit):
             # to make sure to break them anew in each iteration
             n_i = _approximate_mode(class_counts, n_train, rng)
             class_counts_remaining = class_counts - n_i
+            print("class_counts_remaining ", class_counts_remaining)
             t_i = _approximate_mode(class_counts_remaining, n_test, rng)
             train = []
             test = []
 
+            # NOTE: Adapting for unique instances
+            #
+            #   Each list n_i, t_i represent the list of class in the
+            #   training_set and test_set resepectively.
+            #
+            #   n_i = [100, 100, 0, 3]  # 100 instance of class '0', 0 instance of class '2'
+            #   t_i = [300, 300, 1, 3]  # 300 instances of class '0', 1 instance of class '2'
+            #
+            #  To support unique labels such as class '2', which only has one sample
+            #  between both n_i and t_i, we need to make sure that n_i has at least
+            #  one sample of all classes. There is also the extra check to ensure
+            #  that the sizes stay the same.
+            #
+            #   n_i = [ 99, 100, 1, 3]  # 100 instance of class '0', 0 instance of class '2'
+            #            |       ^
+            #            v       |
+            #   t_i = [301, 300, 0, 3]  # 300 instances of class '0', 1 instance of class '2'
+            #
+            for i, class_count in enumerate(n_i):
+                if class_count == 0:
+                    t_i[i] -= 1
+                    n_i[i] += 1
+
+                    j = np.argmax(n_i)
+                    if n_i[j] == 1:
+                        warnings.warn("Can't respect size requirements for split"
+                                      " as the train set must contain any unique"
+                                      " labels.")
+                    else:
+                        n_i[j] -= 1
+                        t_i[j] += 1
+
             for i in range(n_classes):
-                # print("Before", i, class_counts[i], n_i[i], t_i[i])
                 permutation = rng.permutation(class_counts[i])
                 perm_indices_class_i = class_indices[i].take(permutation,
                                                              mode='clip')
-                if n_i[i] == 0:
-                    n_i[i] = 1
-                    t_i[i] = t_i[i] - 1
 
-                # print("After", i, class_counts[i], n_i[i], t_i[i])
                 train.extend(perm_indices_class_i[:n_i[i]])
                 test.extend(perm_indices_class_i[n_i[i]:n_i[i] + t_i[i]])
 
