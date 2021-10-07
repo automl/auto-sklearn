@@ -18,7 +18,7 @@ from autosklearn.util.logging_ import get_named_client_logger
 
 def convert_if_sparse(
     y: SUPPORTED_TARGET_TYPES
-) -> Union[np.ndarray, np.ndarray, List, pd.DataFrame, pd.Series]:
+) -> Union[np.ndarray, List, pd.DataFrame, pd.Series]:
     """If the labels `y` are sparse, it will convert it to its dense representation
 
     Parameters
