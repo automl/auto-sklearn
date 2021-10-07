@@ -17,7 +17,7 @@ class CustomStratifiedShuffleSplit(StratifiedShuffleSplit):
 
     def _iter_indices(self, X, y, groups=None):  # type: ignore
         n_samples = _num_samples(X)
-        y = check_array(y, accept_sparse=True, ensure_2d=False, dtype=None)
+        y = check_array(y, ensure_2d=False, dtype=None)
         n_train, n_test = _validate_shuffle_split(
             n_samples, self.test_size, self.train_size,
             default_test_size=self._default_test_size)
@@ -31,7 +31,6 @@ class CustomStratifiedShuffleSplit(StratifiedShuffleSplit):
         n_classes = classes.shape[0]
 
         class_counts = np.bincount(y_indices)
-        print("class_counts", class_counts)
 
         if n_train < n_classes:
             raise ValueError('The train_size = %d should be greater or '
@@ -46,7 +45,6 @@ class CustomStratifiedShuffleSplit(StratifiedShuffleSplit):
         # (np.unique above performs a sort, so code is O(n logn) already)
         class_indices = np.split(np.argsort(y_indices, kind='mergesort'),
                                  np.cumsum(class_counts)[:-1])
-        print("class_indices", class_indices)
 
         rng = check_random_state(self.random_state)
 
@@ -55,7 +53,6 @@ class CustomStratifiedShuffleSplit(StratifiedShuffleSplit):
             # to make sure to break them anew in each iteration
             n_i = _approximate_mode(class_counts, n_train, rng)
             class_counts_remaining = class_counts - n_i
-            print("class_counts_remaining ", class_counts_remaining)
             t_i = _approximate_mode(class_counts_remaining, n_test, rng)
             train = []
             test = []
