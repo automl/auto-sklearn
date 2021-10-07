@@ -96,7 +96,10 @@ def test_subsample_validity(X, x_type, y, y_type, random_state, sample_size, tas
     # Check the types remain the same
     def dtype(obj):
         if isinstance(obj, list):
-            return type(obj[0])
+            if isinstance(obj[0], list):
+                return type(obj[0][0])
+            else:
+                return type(obj[0])
         elif isinstance(obj, pd.DataFrame):
             return obj.dtypes
         else:
@@ -105,6 +108,7 @@ def test_subsample_validity(X, x_type, y, y_type, random_state, sample_size, tas
     if isinstance(X, pd.DataFrame):
         assert list(dtype(X_sampled)) == list(dtype(X))
     else:
+        print(X)
         assert dtype(X_sampled) == dtype(X)
 
     if isinstance(y, pd.DataFrame):
@@ -215,7 +219,6 @@ def test_reduce_dataset_invalid_dtype_for_precision_reduction():
             memory_limit=1,
             is_classification=False
         )
-
 
 def test_reduce_dataset_invalid_operations():
     X = np.asarray([1, 2, 3], dtype=int)
