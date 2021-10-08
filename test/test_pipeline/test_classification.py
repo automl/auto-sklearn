@@ -140,6 +140,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             self.assertIn(AutoSklearnPreprocessingAlgorithm, preprocessors[key].__bases__)
 
     def test_default_configuration(self):
+        # ToDo test failed
         for i in range(2):
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris')
             auto = SimpleClassificationPipeline(random_state=1)
@@ -149,6 +150,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             auto.predict_proba(X_test)
 
     def test_default_configuration_multilabel(self):
+        # ToDo test failed
         for i in range(2):
             classifier = SimpleClassificationPipeline(
                 random_state=1,
@@ -167,6 +169,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             classifier.predict_proba(X_test)
 
     def test_default_configuration_iterative_fit(self):
+        # ToDo test failed
         classifier = SimpleClassificationPipeline(
             random_state=1,
             include={
@@ -188,6 +191,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertIsInstance(cls, SimpleClassificationPipeline)
 
     def test_multilabel(self):
+        # ToDo test failed
         cache = Memory(location=tempfile.gettempdir())
         cached_func = cache.cache(
             sklearn.datasets.make_multilabel_classification
@@ -218,11 +222,13 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self._test_configurations(configurations_space=cs, data=data)
 
     def test_configurations(self):
+        # ToDo test failed
         cls = SimpleClassificationPipeline()
         cs = cls.get_hyperparameter_search_space()
         self._test_configurations(configurations_space=cs)
 
     def test_configurations_signed_data(self):
+        # ToDo test failed
         dataset_properties = {'signed': True}
         cs = SimpleClassificationPipeline(dataset_properties=dataset_properties)\
             .get_hyperparameter_search_space()
@@ -231,6 +237,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                                   dataset_properties=dataset_properties)
 
     def test_configurations_sparse(self):
+        # ToDo test failed
         cs = SimpleClassificationPipeline(dataset_properties={'sparse': True}).\
             get_hyperparameter_search_space()
 
@@ -425,6 +432,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     raise e
 
     def test_get_hyperparameter_search_space(self):
+        # ToDo test failed
         cs = SimpleClassificationPipeline().get_hyperparameter_search_space()
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
@@ -541,6 +549,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual(cs_ml, cs_mc_ml)
 
     def test_predict_batched(self):
+        # ToDo test failed
         cls = SimpleClassificationPipeline(include={'classifier': ['sgd']})
 
         # Multiclass
@@ -557,6 +566,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         np.testing.assert_array_almost_equal(prediction_, prediction)
 
     def test_predict_batched_sparse(self):
+        # ToDo test failed
         cls = SimpleClassificationPipeline(dataset_properties={'sparse': True},
                                            include={'classifier': ['sgd']})
 
@@ -607,7 +617,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         np.testing.assert_array_almost_equal(prediction_, prediction)
 
     def test_predict_proba_batched_sparse(self):
-
+    # ToDo test failed
         cls = SimpleClassificationPipeline(
             dataset_properties={'sparse': True, 'multiclass': True},
             include={'classifier': ['sgd']})
@@ -646,6 +656,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         np.testing.assert_array_almost_equal(prediction_, prediction)
 
     def test_pipeline_clonability(self):
+        # ToDo test failed
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris')
         auto = SimpleClassificationPipeline()
         auto = auto.fit(X_train, Y_train)
@@ -782,6 +793,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         return keys_checked
 
     def test_set_hyperparameters_honors_configuration(self):
+        # ToDo test failed
         """Makes sure that a given configuration is honored in practice.
 
         This method tests that the set hyperparameters actually create objects
@@ -854,6 +866,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             self.assertSetEqual(set(config_dict.keys()), set(keys_checked))
 
     def test_fit_instantiates_component(self):
+        # ToDo test failed
         """Make sure that if a preprocessor is added, it's fit
         method is called"""
         preprocessing_components.add_preprocessor(CrashPreprocessor)

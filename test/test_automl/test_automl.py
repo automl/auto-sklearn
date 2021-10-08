@@ -606,7 +606,7 @@ def test_exceptions_inside_log_in_smbo(smbo_run_mock, dask_client):
 
 @pytest.mark.parametrize("metric", [log_loss, balanced_accuracy])
 def test_load_best_individual_model(metric, dask_client):
-
+    # ToDo error failed test
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
     automl = autosklearn.automl.AutoML(
         time_left_for_this_task=30,

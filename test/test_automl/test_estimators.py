@@ -125,7 +125,7 @@ def test_fit_n_jobs(tmp_dir):
 
 
 def test_feat_type_wrong_arguments():
-
+    # ToDo failed test
     # Every Auto-Sklearn estimator has a backend, that allows a single
     # call to fit
     X = np.zeros((100, 100))
@@ -628,7 +628,7 @@ def test_binary(tmp_dir, dask_client):
 
 
 def test_classification_pandas_support(tmp_dir, dask_client):
-
+    # ToDo test failed
     X, y = sklearn.datasets.fetch_openml(
         data_id=2,  # cat/num dataset
         return_X_y=True,
@@ -794,6 +794,7 @@ def test_autosklearn_regression_methods_returns_self(dask_client):
 
 
 def test_autosklearn2_classification_methods_returns_self(dask_client):
+    # ToDo test failed
     X_train, y_train, X_test, y_test = putil.get_dataset('iris')
     automl = AutoSklearn2Classifier(time_left_for_this_task=60, ensemble_size=0,
                                     delete_tmp_folder_after_terminate=False,
@@ -817,6 +818,7 @@ def test_autosklearn2_classification_methods_returns_self(dask_client):
 
 
 def test_autosklearn2_classification_methods_returns_self_sparse(dask_client):
+    # ToDo test failed
     X_train, y_train, X_test, y_test = putil.get_dataset('breast_cancer', make_sparse=True)
     automl = AutoSklearn2Classifier(time_left_for_this_task=60, ensemble_size=0,
                                     delete_tmp_folder_after_terminate=False,

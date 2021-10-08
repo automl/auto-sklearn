@@ -68,6 +68,7 @@ class BalancingComponentTest(unittest.TestCase):
                          list(init_params.items())[0])
 
     def test_weighting_effect(self):
+        # ToDo test failed
         data = sklearn.datasets.make_classification(
             n_samples=200, n_features=10, n_redundant=2, n_informative=2,
             n_repeated=2, n_clusters_per_class=2, weights=[0.8, 0.2],

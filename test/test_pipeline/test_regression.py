@@ -75,11 +75,13 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             self.assertIn(AutoSklearnPreprocessingAlgorithm, preprocessors[key].__bases__)
 
     def test_configurations(self):
+        # ToDo test failed
         cs = SimpleRegressionPipeline().get_hyperparameter_search_space()
 
         self._test_configurations(cs)
 
     def test_configurations_signed_data(self):
+        # ToDo test failed
         dataset_properties = {'signed': True}
         cs = SimpleRegressionPipeline(dataset_properties=dataset_properties).\
             get_hyperparameter_search_space()
@@ -88,6 +90,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                                   dataset_properties=dataset_properties)
 
     def test_configurations_sparse(self):
+        # ToDo test failed
         dataset_properties = {'sparse': True}
         cs = SimpleRegressionPipeline(
             dataset_properties=dataset_properties
@@ -97,6 +100,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                                   dataset_properties=dataset_properties)
 
     def test_multioutput(self):
+        # ToDo test failed
         cache = Memory(location=tempfile.gettempdir())
         cached_func = cache.cache(
             sklearn.datasets.make_regression
@@ -247,6 +251,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                     raise e
 
     def test_default_configuration(self):
+        # ToDo test failed
         for i in range(2):
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes')
             auto = SimpleRegressionPipeline(random_state=1)
@@ -259,6 +264,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             self.assertAlmostEqual(model_score, r2_score, places=5)
 
     def test_default_configuration_iterative_fit(self):
+        # ToDo test failed
         regressor = SimpleRegressionPipeline(
             random_state=1,
             include={
@@ -399,6 +405,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
     """
 
     def test_predict_batched(self):
+        # ToDo test failed
         include = {'regressor': ['decision_tree']}
         cs = SimpleRegressionPipeline(include=include).get_hyperparameter_search_space()
         default = cs.get_default_configuration()
@@ -420,6 +427,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         np.testing.assert_array_almost_equal(prediction_, prediction)
 
     def test_predict_batched_sparse(self):
+        # ToDo test failed
         dataset_properties = {'sparse': True}
         include = {'regressor': ['decision_tree']}
 
@@ -461,6 +469,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         raise NotImplementedError()
 
     def test_pipeline_clonability(self):
+        # ToDo test failed
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
         auto = SimpleRegressionPipeline(random_state=1)
         auto = auto.fit(X_train, Y_train)
@@ -581,6 +590,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         return keys_checked
 
     def test_set_hyperparameters_honors_configuration(self):
+        # ToDo test failed
         """Makes sure that a given configuration is honored in practice.
 
         This method tests that the set hyperparameters actually create objects

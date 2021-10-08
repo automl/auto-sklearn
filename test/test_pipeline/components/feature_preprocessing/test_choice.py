@@ -5,6 +5,7 @@ import autosklearn.pipeline.components.feature_preprocessing as fp
 
 class FeatureProcessingTest(unittest.TestCase):
     def test_get_available_components(self):
+        # ToDo test failed
         # Target type
         for target_type, num_values in [('classification', 15),
                                         ('regression', 14)]:

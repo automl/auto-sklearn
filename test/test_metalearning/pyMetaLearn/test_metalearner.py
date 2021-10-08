@@ -52,6 +52,7 @@ class MetaLearnerTest(unittest.TestCase):
         self.assertEqual('gradient_boosting', ret[1]['classifier:__choice__'])
 
     def test_metalearning_suggest(self):
+        # ToDo test failed
         ret = self.meta_optimizer.metalearning_suggest([])
         self.assertIsInstance(ret, Configuration)
         self.assertEqual('gradient_boosting', ret['classifier:__choice__'])
