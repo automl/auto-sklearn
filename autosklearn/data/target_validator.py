@@ -1,6 +1,6 @@
 import logging
-from typing import List, Optional, Type, Union, cast
 import warnings
+from typing import List, Optional, Type, Union, cast
 
 import numpy as np
 
@@ -11,9 +11,9 @@ from pandas.core.dtypes.base import ExtensionDtype
 from scipy.sparse import spmatrix
 
 import sklearn.utils
-from sklearn.preprocessing import OrdinalEncoder
 from sklearn.base import BaseEstimator
 from sklearn.exceptions import NotFittedError
+from sklearn.preprocessing import OrdinalEncoder
 from sklearn.utils.multiclass import type_of_target
 
 from autosklearn.util.logging_ import PickableLoggerAdapter
@@ -113,7 +113,6 @@ class TargetValidator(BaseEstimator):
                 raise ValueError('Number of outputs changed from %d to %d!' %
                                  (self.out_dimensionality, _n_outputs))
 
-
         # Fit on the training data
         self._fit(y_train, y_test)
 
@@ -146,7 +145,6 @@ class TargetValidator(BaseEstimator):
             # Let the user employ a MultiLabelBinarizer if needed
             self.encoder = None
             return self
-
 
         # Validate the shape of the input
         shape = np.shape(y_train)
@@ -203,7 +201,7 @@ class TargetValidator(BaseEstimator):
         # [1, 2, 3] -> [[1], [2], [3]]
         if y.ndim == 1:
             if isinstance(y, pd.DataFrame) or isinstance(y, pd.Series):
-                y =  y.to_numpy()
+                y = y.to_numpy()
 
             y = y.reshape(-1, 1)
 

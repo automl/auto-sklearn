@@ -132,7 +132,6 @@ def test_targetvalidator_supported_types_noclassification(input_data_targettest)
 
     y_encoded: np.ndarray = validator.transform(y)
 
-
     # Assert the validator was fitted
     assert validator._is_fitted
 
@@ -168,7 +167,7 @@ def test_targetvalidator_supported_types_classification(input_data_targettest):
     validator.fit(y)
 
     y_encoded: np.ndarray = validator.transform(y)
-    y_inverse: np.ndarray  = validator.inverse_transform(y_encoded)
+    y_inverse: np.ndarray = validator.inverse_transform(y_encoded)
 
     # Assert the validator was fitted
     assert validator._is_fitted
@@ -238,9 +237,6 @@ def test_targetvalidator_supported_types_classification(input_data_targettest):
                 max_label = len(np.unique(y_encoded[:, col])) - 1
                 assert np.min(column) == 0
                 assert np.max(column) == max_label
-
-
-
 
 
 @pytest.mark.parametrize(
