@@ -158,7 +158,7 @@ class FeatureValidator(BaseEstimator):
 
         Return
         ------
-        np.ndarray:
+        np.ndarray | spmatrix | pd.DataFrame:
             The transformed array
         """
         if not self._is_fitted:
