@@ -72,7 +72,7 @@ class FeatureValidator(BaseEstimator):
         self,
         X_train: SUPPORTED_FEAT_TYPES,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-    ) -> BaseEstimator:
+    ) -> 'FeatureValidator':
         """
         Validates input data to Auto-Sklearn.
         The supported data types are List, numpy arrays and pandas DataFrames.
