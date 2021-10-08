@@ -66,7 +66,7 @@ class TargetValidator(BaseEstimator):
         self,
         y_train: SUPPORTED_TARGET_TYPES,
         y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
-    ) -> BaseEstimator:
+    ) -> 'TargetValidator':
         """
         Validates and fit a categorical encoder (if needed) to the targets
         The supported data types are List, numpy arrays and pandas DataFrames.
