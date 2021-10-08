@@ -88,17 +88,10 @@ class TargetValidator(BaseEstimator):
 
             if len(shape) != len(np.shape(y_test)) or (
                     len(shape) > 1 and (shape[1] != np.shape(y_test)[1])):
-<<<<<<< HEAD
                 raise ValueError("The dimensionality of the train and test"
                                  " targets do not match"
                                  f" train {np.shape(y_train)}"
                                  f" != test {np.shape(y_test)}")
-=======
-                raise ValueError("The dimensionality of the train and test "
-                                 " targets do not match "
-                                 f"train {np.shape(y_train)}"
-                                 f"!= test {np.shape(y_test)}")
->>>>>>> 234ae5ed2735cb9407343e1e90dca388c1281c1b
 
             if isinstance(y_train, pd.DataFrame):
                 if not isinstance(y_test, pd.DataFrame):
