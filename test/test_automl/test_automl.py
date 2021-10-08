@@ -711,7 +711,7 @@ def data_input_and_target_types():
     ys_binary = [
         y_binary_ndarray,
         list(y_binary_ndarray),
-        csr_matrix(y_binary_ndarray),
+        # csr_matrix(y_binary_ndarray),
         pd.Series(y_binary_ndarray),
         pd.DataFrame(data=y_binary_ndarray),
     ]
@@ -719,7 +719,7 @@ def data_input_and_target_types():
     ys_multiclass = [
         y_multiclass_ndarray,
         list(y_multiclass_ndarray),
-        csr_matrix(y_multiclass_ndarray),
+        # csr_matrix(y_multiclass_ndarray),
         pd.Series(y_multiclass_ndarray),
         pd.DataFrame(data=y_multiclass_ndarray),
     ]
@@ -727,7 +727,7 @@ def data_input_and_target_types():
     ys_multilabel = [
         y_multilabel_ndarray,
         list(y_multilabel_ndarray),
-        csr_matrix(y_multilabel_ndarray),
+        # csr_matrix(y_multilabel_ndarray),
         # pd.Series(y_multilabel_ndarray)
         pd.DataFrame(data=y_multilabel_ndarray),
     ]
@@ -735,7 +735,7 @@ def data_input_and_target_types():
     ys_regression = [
         y_regression_ndarray,
         list(y_regression_ndarray),
-        csr_matrix(y_regression_ndarray),
+        # csr_matrix(y_regression_ndarray),
         pd.Series(y_regression_ndarray),
         pd.DataFrame(data=y_regression_ndarray),
     ]
@@ -743,7 +743,7 @@ def data_input_and_target_types():
     ys_multioutput_regression = [
         y_multioutput_regression_ndarray,
         list(y_multioutput_regression_ndarray),
-        csr_matrix(y_multioutput_regression_ndarray),
+        # csr_matrix(y_multioutput_regression_ndarray),
         # pd.Series(y_multioutput_regression_ndarray),
         pd.DataFrame(data=y_multioutput_regression_ndarray),
     ]
