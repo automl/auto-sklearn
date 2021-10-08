@@ -64,8 +64,8 @@ class TargetValidator(BaseEstimator):
 
     def fit(
         self,
-        y_train: SUPPORTED_TARGET_TYPES,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        y_train: Union[list, np.ndarray, pd.Series, pd.DataFrame],
+        y_test: Optional[Union[list, np.ndarray, pd.Series, pd.DataFrame]] = None,
     ) -> 'TargetValidator':
         """
         Validates and fit a categorical encoder (if needed) to the targets
@@ -88,21 +88,19 @@ class TargetValidator(BaseEstimator):
 
             if len(shape) != len(np.shape(y_test)) or (
                     len(shape) > 1 and (shape[1] != np.shape(y_test)[1])):
-                raise ValueError("The dimensionality of the train and test targets "
-                                 "does not match train({}) != test({})".format(
-                                     np.shape(y_train),
-                                     np.shape(y_test)
-                                 ))
+                raise ValueError("The dimensionality of the train and test "
+                                 " targets do not match "
+                                 f"train {np.shape(y_train)}"
+                                 f"!= test {np.shape(y_test)}")
 
             if isinstance(y_train, pd.DataFrame):
+                if not isinstance(y_test, pd.DataFrame):
+                    y_test = pd.DataFrame(y_test)
+
                 if y_train.columns.tolist() != y_test.columns.tolist():
-                    raise ValueError(
-                        "Train and test targets must both have the same columns, yet "
-                        "y={} and y_test={} ".format(
-                            y_train.columns,
-                            y_test.columns
-                        )
-                    )
+                    raise ValueError("Train and test targets must both have the"
+                                     f" same columns, yet y={y_train.columns}"
+                                     f" and y_test={y_test.columns}")
 
                 if list(y_train.dtypes) != list(y_test.dtypes):
                     raise ValueError("Train and test targets must both have the same dtypes")
