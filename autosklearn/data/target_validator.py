@@ -93,9 +93,8 @@ class TargetValidator(BaseEstimator):
                                      np.shape(y_train),
                                      np.shape(y_test)
                                  ))
+
             if isinstance(y_train, pd.DataFrame):
-                y_train = cast(pd.DataFrame, y_train)
-                y_test = cast(pd.DataFrame, y_test)
                 if y_train.columns.tolist() != y_test.columns.tolist():
                     raise ValueError(
                         "Train and test targets must both have the same columns, yet "
@@ -150,6 +149,7 @@ class TargetValidator(BaseEstimator):
             self.encoder = None
             return self
 
+
         # Validate the shape of the input
         shape = np.shape(y_train)
         ndim = len(shape)
@@ -180,7 +180,7 @@ class TargetValidator(BaseEstimator):
                               f" has the dtype {y.dtype}. Inverse transform"
                               " may not be able preserve dtype when converting"
                               " to np.ndarray")
-            elif is_numeric_dtype(y.dtype):
+            if is_numeric_dtype(y.dtype):
                 self.dtype = y.dtype
         elif isinstance(y, pd.DataFrame):
             if is_numeric_dtype(y.dtypes[0]):
@@ -191,11 +191,15 @@ class TargetValidator(BaseEstimator):
 
         # Merge y_test and y_train for encoding
         if y_test is not None:
-            arrs = (y, y_test)
-            if isinstance(y,  pd.Series) or isinstance(y, pd.DataFrame):
-                y = pd.concat(arrs, ignore_index=True, sort=False)  # type: ignore
+            if isinstance(y,  (pd.Series, pd.DataFrame)):
+                if isinstance(y, pd.Series):
+                    y_test = pd.Series(y_test)
+                else:
+                    y_test = pd.DataFrame(y_test)
+
+                y = pd.concat([y, y_test], ignore_index=True, sort=False)
             else:
-                y = np.concatenate(arrs)
+                y = np.concatenate([y, y_test])
 
         # If one dimensional, we need to reshape it
         # [1, 2, 3] -> [[1], [2], [3]]
