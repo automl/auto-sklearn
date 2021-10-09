@@ -4,11 +4,13 @@ import logging.handlers
 import queue
 import multiprocessing
 import os
+import pytest
 import tempfile
 import shutil
 import sys
 import unittest
 import unittest.mock
+import uuid
 
 from ConfigSpace import Configuration
 import numpy as np
@@ -104,7 +106,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
                                    port=self.port,
-                                   compute_train_loss=True,
                                    )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -171,7 +172,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
-                                   compute_train_loss=True,
                                    budget=0.0)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -270,7 +270,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
-                                   compute_train_loss=True,
                                    budget=0.0)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -340,7 +339,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy='holdout-iterative-fit',
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
-                                   compute_train_loss=True,
                                    metric=accuracy)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -383,7 +381,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 5},
                                    scoring_functions=None,
-                                   compute_train_loss=True,
                                    output_y_hat_optimization=True,
                                    metric=accuracy)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
@@ -439,7 +436,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy_args={'folds': 5},
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
-                                   compute_train_loss=True,
                                    metric=accuracy)
 
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
@@ -501,7 +497,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
-                                   compute_train_loss=True,
                                    budget=0.0)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -2273,7 +2268,6 @@ class FunctionsTest(unittest.TestCase):
             disable_file_output=False,
             instance=self.dataset_name,
             metric=accuracy,
-            compute_train_loss=True,
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
@@ -2511,7 +2505,6 @@ class FunctionsTest(unittest.TestCase):
             disable_file_output=False,
             instance=self.dataset_name,
             metric=accuracy,
-            compute_train_loss=True,
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
@@ -2585,3 +2578,45 @@ class FunctionsTest(unittest.TestCase):
             self.assertEqual(len(rval), 1)
             self.assertAlmostEqual(rval[0]['loss'], results[fold])
             self.assertEqual(rval[0]['status'], StatusType.SUCCESS)
+
+
+@pytest.mark.parametrize("disable_file_output", [[], ['training_predicitons']])
+@unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
+def test_evaluator_computes_train_loss(pipeline_mock, disable_file_output):
+    # Binary iris, contains 69 train samples, 25 validation samples,
+    # 6 test samples
+    D = get_binary_classification_datamanager()
+    D.name = 'test'
+
+    pipeline_mock.predict_proba.side_effect = \
+        lambda X, batch_size=None: np.tile([0.6, 0.4], (len(X), 1))
+    pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
+    pipeline_mock.get_additional_run_info.return_value = None
+    pipeline_mock.get_max_iter.return_value = 1
+    pipeline_mock.get_current_iter.return_value = 1
+
+    configuration = unittest.mock.Mock(spec=Configuration)
+    backend_api = backend.create(str(uuid.uuid1(clock_seq=os.getpid())))
+    backend_api.load_datamanager = lambda: D
+    queue_ = multiprocessing.Queue()
+
+    evaluator = TrainEvaluator(backend_api, queue_,
+                               configuration=configuration,
+                               resampling_strategy='holdout',
+                               resampling_strategy_args={'train_size': 0.66},
+                               scoring_functions=None,
+                               output_y_hat_optimization=True,
+                               disable_file_output=disable_file_output,
+                               metric=accuracy,
+                               port=logging.handlers.DEFAULT_TCP_LOGGING_PORT,
+                               )
+    evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
+    evaluator.file_output.return_value = (None, {})
+
+    evaluator.fit_predict_and_loss()
+
+    rval = read_queue(evaluator.queue)
+    if 'training_predictions' in disable_file_output:
+        assert 'train_loss' not in rval[0]['additional_run_info']
+    else:
+        assert 'train_loss' in rval[0]['additional_run_info']

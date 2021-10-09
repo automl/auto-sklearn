@@ -176,7 +176,6 @@ class TrainEvaluator(AbstractEvaluator):
         exclude: Optional[List[str]] = None,
         disable_file_output: bool = False,
         init_params: Optional[Dict[str, Any]] = None,
-        compute_train_loss: bool = False,
     ):
 
         super().__init__(
@@ -214,7 +213,11 @@ class TrainEvaluator(AbstractEvaluator):
         self.indices: List[Optional[Tuple[List[int], List[int]]]] = [None] * self.num_cv_folds
 
         # Compute train performances only if needed
-        self.compute_train_loss = compute_train_loss
+        self.compute_train_loss = True
+        if isinstance(
+            self.disable_file_output, list
+        ) and 'training_predictions' in self.disable_file_output:
+            self.compute_train_loss = False
 
         # Necessary for full CV. Makes full CV not write predictions if only
         # a subset of folds is evaluated but time is up. Complicated, because
@@ -1164,7 +1167,6 @@ def eval_holdout(
     budget: Optional[float] = 100.0,
     budget_type: Optional[str] = None,
     iterative: bool = False,
-    compute_train_loss: bool = False,
 ) -> None:
     evaluator = TrainEvaluator(
         backend=backend,
@@ -1184,7 +1186,6 @@ def eval_holdout(
         init_params=init_params,
         budget=budget,
         budget_type=budget_type,
-        compute_train_loss=compute_train_loss,
     )
     evaluator.fit_predict_and_loss(iterative=iterative)
 
@@ -1208,7 +1209,6 @@ def eval_iterative_holdout(
     init_params: Optional[Dict[str, Any]] = None,
     budget: Optional[float] = 100.0,
     budget_type: Optional[str] = None,
-    compute_train_loss: bool = False,
 ) -> None:
     return eval_holdout(
         queue=queue,
@@ -1230,7 +1230,6 @@ def eval_iterative_holdout(
         init_params=init_params,
         budget=budget,
         budget_type=budget_type,
-        compute_train_loss=compute_train_loss,
     )
 
 
@@ -1254,7 +1253,6 @@ def eval_partial_cv(
     budget: Optional[float] = None,
     budget_type: Optional[str] = None,
     iterative: bool = False,
-    compute_train_loss: bool = False,
 ) -> None:
     if budget_type is not None:
         raise NotImplementedError()
@@ -1279,7 +1277,6 @@ def eval_partial_cv(
         init_params=init_params,
         budget=budget,
         budget_type=budget_type,
-        compute_train_loss=compute_train_loss,
     )
 
     evaluator.partial_fit_predict_and_loss(fold=fold, iterative=iterative)
@@ -1304,7 +1301,6 @@ def eval_partial_cv_iterative(
     init_params: Optional[Dict[str, Any]] = None,
     budget: Optional[float] = None,
     budget_type: Optional[str] = None,
-    compute_train_loss: bool = False,
 ) -> None:
     if budget_type is not None:
         raise NotImplementedError()
@@ -1326,7 +1322,6 @@ def eval_partial_cv_iterative(
         disable_file_output=disable_file_output,
         iterative=True,
         init_params=init_params,
-        compute_train_loss=compute_train_loss,
     )
 
 
@@ -1351,7 +1346,6 @@ def eval_cv(
     budget: Optional[float] = None,
     budget_type: Optional[str] = None,
     iterative: bool = False,
-    compute_train_loss: bool = False,
 ) -> None:
     evaluator = TrainEvaluator(
         backend=backend,
@@ -1371,7 +1365,6 @@ def eval_cv(
         init_params=init_params,
         budget=budget,
         budget_type=budget_type,
-        compute_train_loss=compute_train_loss,
     )
 
     evaluator.fit_predict_and_loss(iterative=iterative)
@@ -1397,7 +1390,6 @@ def eval_iterative_cv(
     budget: Optional[float] = None,
     budget_type: Optional[str] = None,
     iterative: bool = True,
-    compute_train_loss: bool = False,
 ) -> None:
     eval_cv(
         backend=backend,
@@ -1419,5 +1411,4 @@ def eval_iterative_cv(
         budget_type=budget_type,
         iterative=iterative,
         instance=instance,
-        compute_train_loss=compute_train_loss,
     )

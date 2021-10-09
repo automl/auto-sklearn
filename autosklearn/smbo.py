@@ -240,7 +240,6 @@ class AutoMLSMBO(object):
                  pynisher_context='spawn',
                  ensemble_callback: typing.Optional[EnsembleBuilderManager] = None,
                  trials_callback: typing.Optional[IncorporateRunResultCallback] = None,
-                 compute_train_loss: bool = False,
                  ):
         super(AutoMLSMBO, self).__init__()
         # data related
@@ -250,7 +249,6 @@ class AutoMLSMBO(object):
         self.task = None
         self.backend = backend
         self.port = port
-        self.compute_train_loss = compute_train_loss
 
         # the configuration space
         self.config_space = config_space
@@ -428,7 +426,6 @@ class AutoMLSMBO(object):
             disable_file_output=self.disable_file_output,
             scoring_functions=self.scoring_functions,
             port=self.port,
-            compute_train_loss=self.compute_train_loss,
             pynisher_context=self.pynisher_context,
             **self.resampling_strategy_args
         )

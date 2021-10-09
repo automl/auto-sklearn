@@ -42,7 +42,7 @@ class AutoSklearnEstimator(BaseEstimator):
         delete_tmp_folder_after_terminate=True,
         n_jobs: Optional[int] = None,
         dask_client: Optional[dask.distributed.Client] = None,
-        disable_evaluator_output=False,
+        disable_evaluator_output=['training_predictions'],
         get_smac_object_callback=None,
         smac_scenario_args=None,
         logging_config=None,
@@ -51,7 +51,6 @@ class AutoSklearnEstimator(BaseEstimator):
         scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
         get_trials_callback=None,
-        compute_train_loss: bool = False,
     ):
         """
         Parameters
@@ -184,6 +183,10 @@ class AutoSklearnEstimator(BaseEstimator):
               optimization/validation set, which would later on be used to build
               an ensemble.
             * ``'model'`` : do not save any model files
+            * ``'training_predictions'`` : Do not calculate nor save train loss while evaluating
+              pipeline configurations. Train loss is useful to understand how each pipeline overfits
+              the train data. However, calculating this loss can incurr in resource overhead, which
+              might be demanding for big datasets (especially when using Cross-validation).
 
         smac_scenario_args : dict, optional (None)
             Additional arguments inserted into the scenario of SMAC. See the
@@ -225,10 +228,6 @@ class AutoSklearnEstimator(BaseEstimator):
             `smac.callbacks <https://automl.github.io/SMAC3/master/apidoc/smac.callbacks.html>`_.
             This is an advanced feature. Use only if you are familiar with
             `SMAC <https://automl.github.io/SMAC3/master/index.html>`_.
-
-        compute_train_loss: bool (False)
-            Computes the train loss for every pipeline explored and registers the result in
-            the RunHistory from SMAC.
 
         Attributes
         ----------
@@ -274,7 +273,6 @@ class AutoSklearnEstimator(BaseEstimator):
         self.scoring_functions = scoring_functions
         self.load_models = load_models
         self.get_trials_callback = get_trials_callback
-        self.compute_train_loss = compute_train_loss
 
         self.automl_ = None  # type: Optional[AutoML]
 
@@ -321,7 +319,6 @@ class AutoSklearnEstimator(BaseEstimator):
             metric=self.metric,
             scoring_functions=self.scoring_functions,
             get_trials_callback=self.get_trials_callback,
-            compute_train_loss=self.compute_train_loss,
         )
 
         return automl

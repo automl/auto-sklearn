@@ -35,6 +35,12 @@ X_train, X_test, y_train, y_test = \
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=30,
     per_run_time_limit=10,
+    # By default, auto-sklearn does not calculate the train performance
+    # of each pipeline. In other words, by default
+    # disable_evaluator_output=['training_predictions']
+    # We can set the following argument to False or as an empty list
+    # to instruct auto-sklearn to additionally compute the train loss for each pipeline
+    # and report it on the RunHistory of SMAC.
     disable_evaluator_output=False,
     # To simplify querying the models in the final ensemble, we
     # restrict auto-sklearn to use only pca as a preprocessor

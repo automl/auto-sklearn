@@ -192,13 +192,12 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         delete_tmp_folder_after_terminate: bool = True,
         n_jobs: Optional[int] = None,
         dask_client: Optional[dask.distributed.Client] = None,
-        disable_evaluator_output: bool = False,
+        disable_evaluator_output=['training_predictions'],
         smac_scenario_args: Optional[Dict[str, Any]] = None,
         logging_config: Optional[Dict[str, Any]] = None,
         metric: Optional[Scorer] = None,
         scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
-        compute_train_loss: bool = False,
     ):
 
         """
@@ -277,6 +276,10 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
               optimization/validation set, which would later on be used to build
               an ensemble.
             * ``'model'`` : do not save any model files
+            * ``'training_predictions'`` : Do not calculate nor save train loss while evaluating
+              pipeline configurations. Train loss is useful to understand how each pipeline overfits
+              the train data. However, calculating this loss can incurr in resource overhead, which
+              might be demanding for big datasets (especially when using Cross-validation).
 
         smac_scenario_args : dict, optional (None)
             Additional arguments inserted into the scenario of SMAC. See the
@@ -303,9 +306,6 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         load_models : bool, optional (True)
             Whether to load the models after fitting Auto-sklearn.
 
-        compute_train_loss: bool (False)
-            Computes the train loss for every pipeline explored and registers the result in
-            the RunHistory from SMAC.
 
         Attributes
         ----------
@@ -349,7 +349,6 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             metric=metric,
             scoring_functions=scoring_functions,
             load_models=load_models,
-            compute_train_loss=compute_train_loss,
         )
 
     def fit(self, X, y,
