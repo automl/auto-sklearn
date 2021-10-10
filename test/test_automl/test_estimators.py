@@ -77,7 +77,7 @@ def test_fit_n_jobs(tmp_dir):
                  'feature_preprocessor': ['no_preprocessing']},
         get_smac_object_callback=get_smac_object_wrapper_instance,
         max_models_on_disc=None,
-        disable_file_output=False,
+        disable_evaluator_output=False,
     )
     automl.fit(X_train, Y_train)
 
@@ -539,6 +539,7 @@ def test_can_pickle_classifier(tmp_dir, dask_client):
                                    per_run_time_limit=5,
                                    tmp_folder=tmp_dir,
                                    dask_client=dask_client,
+                                   disable_evaluator_output=False,
                                    )
     automl.fit(X_train, Y_train)
 
@@ -587,6 +588,7 @@ def test_multilabel(tmp_dir, dask_client):
                                    per_run_time_limit=5,
                                    tmp_folder=tmp_dir,
                                    dask_client=dask_client,
+                                   disable_evaluator_output=False,
                                    )
 
     automl.fit(X_train, Y_train)
@@ -649,6 +651,7 @@ def test_classification_pandas_support(tmp_dir, dask_client):
         dask_client=dask_client,
         seed=5,
         tmp_folder=tmp_dir,
+        disable_evaluator_output=False,
     )
 
     automl.fit(X, y)
@@ -676,6 +679,7 @@ def test_regression(tmp_dir, dask_client):
                                   per_run_time_limit=5,
                                   tmp_folder=tmp_dir,
                                   dask_client=dask_client,
+                                  disable_evaluator_output=False,
                                   )
 
     automl.fit(X_train, Y_train)
@@ -705,7 +709,7 @@ def test_cv_regression(tmp_dir, dask_client):
                                   resampling_strategy='cv',
                                   tmp_folder=tmp_dir,
                                   dask_client=dask_client,
-                                  disable_file_output=False,
+                                  disable_evaluator_output=False,
                                   )
 
     automl.fit(X_train, Y_train)
@@ -734,7 +738,7 @@ def test_regression_pandas_support(tmp_dir, dask_client):
         per_run_time_limit=5,
         dask_client=dask_client,
         tmp_folder=tmp_dir,
-        disable_file_output=False,
+        disable_evaluator_output=False,
     )
 
     # Make sure we error out because y is not encoded

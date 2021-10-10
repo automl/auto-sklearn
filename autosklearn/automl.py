@@ -1621,12 +1621,13 @@ class AutoML(BaseEstimator):
             endtime = pd.Timestamp(time.strftime('%Y-%m-%d %H:%M:%S',
                                                  time.localtime(run_value.endtime)))
             val_score = metric._optimum - (metric._sign * run_value.cost)
-            train_score = metric._optimum - (metric._sign * run_value.additional_info['train_loss'])
             scores = {
                 'Timestamp': endtime,
                 'single_best_optimization_score': val_score,
-                'single_best_train_score': train_score,
             }
+            if 'train_loss' in run_value.additional_info:
+                scores['single_best_train_score'] = metric._optimum - (
+                    metric._sign * run_value.additional_info['train_loss'])
             # Append test-scores, if data for test_loss are available.
             # This is the case, if X_test and y_test where provided.
             if 'test_loss' in run_value.additional_info:
