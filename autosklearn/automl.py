@@ -1344,7 +1344,7 @@ class AutoML(BaseEstimator):
         )
 
         pipeline = None
-        if kwargs['disable_file_output'] or kwargs['resampling_strategy'] == 'test':
+        if kwargs['disable_file_output'] is True or kwargs['resampling_strategy'] == 'test':
             self._logger.warning("File output is disabled. No pipeline can returned")
         elif run_value.status == StatusType.SUCCESS:
             if kwargs['resampling_strategy'] in ('cv', 'cv-iterative-fit'):
