@@ -271,6 +271,7 @@ def test_performance_over_time_no_ensemble(tmp_dir):
                                 tmp_folder=tmp_dir,
                                 seed=1,
                                 initial_configurations_via_metalearning=0,
+                                disable_evaluator_output=False,
                                 ensemble_size=0,)
     cls.fit(X_train, Y_train, X_test, Y_test)
 
@@ -612,6 +613,7 @@ def test_binary(tmp_dir, dask_client):
         'iris', make_binary=True)
     automl = AutoSklearnClassifier(time_left_for_this_task=40,
                                    delete_tmp_folder_after_terminate=False,
+                                   disable_evaluator_output=False,
                                    per_run_time_limit=10,
                                    tmp_folder=tmp_dir,
                                    dask_client=dask_client,
