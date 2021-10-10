@@ -219,7 +219,10 @@ class AutoML(BaseEstimator):
             raise ValueError('disable_evaluator_output must be of type bool '
                              'or list.')
         if isinstance(self._disable_evaluator_output, list):
-            allowed_elements = ['model', 'cv_model', 'y_optimization', 'y_test', 'y_valid']
+            allowed_elements = [
+                'model', 'cv_model', 'y_optimization',
+                'y_test', 'y_valid', 'training_predictions',
+            ]
             for element in self._disable_evaluator_output:
                 if element not in allowed_elements:
                     raise ValueError("List member '%s' for argument "
