@@ -133,42 +133,32 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
             text_features = [key for key, value in self.feat_type.items()
                              if value.lower() == "string"]
 
-        # If no categorical features, assume we have a numerical only pipeline
-        if len(numerical_features) != 0 and len(categorical_features) == 0 and len(text_features) == 0:
-            sklearn_transf_spec: List[Tuple[str, BaseEstimator, List[Union[str, bool, int]]]] = [
-                ("numerical_transformer", self.numer_ppl, [True] * n_feats)
-            ]
-        # If all features are categorical, then just the categorical transformer is used
-        elif len(numerical_features) == 0 and len(categorical_features) != 0 and len(text_features) == 0:
-            sklearn_transf_spec = [
-                ("categorical_transformer", self.categ_ppl, [True] * n_feats)
-            ]
-        # For the other cases, both transformers are used
-        elif len(numerical_features) != 0 and len(categorical_features) != 0 and len(text_features) == 0:
-            sklearn_transf_spec = [
-                ("categorical_transformer", self.categ_ppl, categorical_features),
-                ("numerical_transformer", self.numer_ppl, numerical_features)
-            ]
-        elif len(numerical_features) != 0 and len(categorical_features) == 0 and len(text_features) != 0:
-            sklearn_transf_spec = [
-                ("text_transformer", self.txt_ppl, text_features),
-                ("numerical_transformer", self.numer_ppl, numerical_features)
-            ]
-        # If all features are categorical, then just the categorical transformer is used
-        elif len(numerical_features) == 0 and len(categorical_features) != 0 and len(text_features) != 0:
-            sklearn_transf_spec = [
-                ("text_transformer", self.txt_ppl, text_features),
-                ("categorical_transformer", self.categ_ppl, categorical_features)
-            ]
-        # For the other cases, both transformers are used
-        elif len(numerical_features) != 0 and len(categorical_features) != 0 and len(text_features) != 0:
-            sklearn_transf_spec = [
-                ("text_transformer", self.txt_ppl, text_features),
-                ("categorical_transformer", self.categ_ppl, categorical_features),
-                ("numerical_transformer", self.numer_ppl, numerical_features)
-            ]
-        else:
-            raise NotImplementedError
+        # the character of the key are boolean indecators for text, categorical, numerical "tcn"
+        t, c, n = len(numerical_features) > 0, len(categorical_features) > 0, len(text_features) > 0
+        t, c, n = str(int(t)), str(int(c)), str(int(n))
+        features_dictionary = {"000": [],
+                               "001": [("numerical_transformer", self.numer_ppl,
+                                        numerical_features)],
+                               "010": [("categorical_transformer", self.categ_ppl,
+                                        categorical_features)],
+                               "100": [("text_transformer", self.txt_ppl, text_features)],
+                               "110": [("text_transformer", self.txt_ppl, text_features), (
+                                        "categorical_transformer", self.categ_ppl,
+                                        categorical_features)],
+                               "101": [("text_transformer", self.txt_ppl, text_features), (
+                                        "numerical_transformer", self.numer_ppl,
+                                        numerical_features)],
+                               "011": [("categorical_transformer", self.categ_ppl,
+                                        categorical_features), (
+                                        "numerical_transformer", self.numer_ppl,
+                                        numerical_features)],
+                               "111": [("text_transformer", self.txt_ppl, text_features), (
+                                        "categorical_transformer", self.categ_ppl,
+                                        categorical_features),
+                                       ("numerical_transformer", self.numer_ppl,
+                                        numerical_features)]
+                               }
+        sklearn_transf_spec = features_dictionary[t+c+n]
 
         # And one last check in case feat type is None
         # And to make sure the final specification has all the columns
