@@ -159,6 +159,8 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
                                         numerical_features)]
                                }
         sklearn_transf_spec = features_dictionary[t+c+n]
+        if len(sklearn_transf_spec) == 0:
+            raise ValueError("No valide features provided")
 
         # And one last check in case feat type is None
         # And to make sure the final specification has all the columns
