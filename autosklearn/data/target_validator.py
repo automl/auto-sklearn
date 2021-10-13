@@ -69,7 +69,6 @@ class TargetValidator(BaseEstimator):
         """
         Validates and fit a categorical encoder (if needed) to the targets
         The supported data types are List, numpy arrays and pandas DataFrames.
-
         Parameters
         ----------
             y_train: SUPPORTED_TARGET_TYPES
@@ -129,10 +128,8 @@ class TargetValidator(BaseEstimator):
     ) -> BaseEstimator:
         """
         If dealing with classification, this utility encodes the targets.
-
         It does so by also using the classes from the test data, to prevent encoding
         errors
-
         Parameters
         ----------
             y_train: SUPPORTED_TARGET_TYPES
@@ -205,7 +202,6 @@ class TargetValidator(BaseEstimator):
         """
         Validates and fit a categorical encoder (if needed) to the features.
         The supported data types are List, numpy arrays and pandas DataFrames.
-
         Parameters
         ----------
             y: SUPPORTED_TARGET_TYPES
@@ -259,7 +255,6 @@ class TargetValidator(BaseEstimator):
     ) -> np.ndarray:
         """
         Revert any encoding transformation done on a target array
-
         Parameters
         ----------
             y: typing.Union[np.ndarray, pd.DataFrame, pd.Series]
@@ -304,7 +299,6 @@ class TargetValidator(BaseEstimator):
     ) -> None:
         """
         Perform dimensionality and data type checks on the targets
-
         Parameters
         ----------
             y: typing.Union[np.ndarray, pd.DataFrame, pd.Series]

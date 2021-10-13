@@ -125,7 +125,6 @@ def test_fit_n_jobs(tmp_dir):
 
 
 def test_feat_type_wrong_arguments():
-    # ToDo failed test
     # Every Auto-Sklearn estimator has a backend, that allows a single
     # call to fit
     X = np.zeros((100, 100))
@@ -143,6 +142,7 @@ def test_feat_type_wrong_arguments():
         cls.fit(X=X, y=y, feat_type=[True]*100)
 
     cls = AutoSklearnClassifier(ensemble_size=0)
+    # ToDo failed test now autosklearn does support Stirngs
     expected_msg = r".*Only `Categorical` and `Numerical` are"
     "valid feature types, you passed `Car`.*"
     with pytest.raises(ValueError, match=expected_msg):

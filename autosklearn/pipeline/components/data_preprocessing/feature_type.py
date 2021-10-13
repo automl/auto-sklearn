@@ -62,6 +62,10 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         self.feat_type = feat_type
         self.force_sparse_output = force_sparse_output
 
+        file = open("sample.txt", "a")
+        file.write("feat_type_prev_prev: {}\n\n".format(self.feat_type))
+        file.close()
+
         # The pipeline that will be applied to the categorical features (i.e. columns)
         # of the dataset
         # Configuration of the data-preprocessor is different from the configuration of
@@ -114,6 +118,11 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         numerical_features = []
         text_features = []
 
+        file = open("sample.txt", "a")
+        file.write("feat_type_prev: {}\n\n".format(self.feat_type))
+        file.close()
+
+        # ToDo self.feat_type broken
         if self.feat_type is not None:
             # Make sure that we are not missing any column!
             expected = set(self.feat_type.keys())
@@ -134,33 +143,44 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
                              if value.lower() == "string"]
 
         # the character of the key are boolean indecators for text, categorical, numerical "tcn"
-        t, c, n = len(numerical_features) > 0, len(categorical_features) > 0, len(text_features) > 0
-        t, c, n = str(int(t)), str(int(c)), str(int(n))
-        features_dictionary = {"000": [],
+        file = open("sample.txt", "a")
+
+        file.write("X: {}\n".format(X))
+        file.write("y: {}\n\n".format(y))
+        file.write("feat_type: {}\n".format(self.feat_type))
+        file.write("text_feat: {}\n".format(text_features))
+        file.write("cat_feat: {}\n".format(categorical_features))
+        file.write("num_feat: {}\n\n\n".format(numerical_features))
+        file.close()
+        features_dictionary = {"000": [("numerical_transformer", self.numer_ppl,
+                                        [True]*n_feats)],  # if no features_types features eq. num.
                                "001": [("numerical_transformer", self.numer_ppl,
-                                        numerical_features)],
+                                        [True]*n_feats)],
                                "010": [("categorical_transformer", self.categ_ppl,
-                                        categorical_features)],
-                               "100": [("text_transformer", self.txt_ppl, text_features)],
+                                        [True]*n_feats)],
+                               "100": [("text_transformer", self.txt_ppl,
+                                        [True]*n_feats)],
                                "110": [("text_transformer", self.txt_ppl, text_features), (
-                                        "categorical_transformer", self.categ_ppl,
-                                        categorical_features)],
+                                   "categorical_transformer", self.categ_ppl,
+                                   categorical_features)],
                                "101": [("text_transformer", self.txt_ppl, text_features), (
-                                        "numerical_transformer", self.numer_ppl,
-                                        numerical_features)],
+                                   "numerical_transformer", self.numer_ppl,
+                                   numerical_features)],
                                "011": [("categorical_transformer", self.categ_ppl,
                                         categorical_features), (
-                                        "numerical_transformer", self.numer_ppl,
-                                        numerical_features)],
+                                           "numerical_transformer", self.numer_ppl,
+                                           numerical_features)],
                                "111": [("text_transformer", self.txt_ppl, text_features), (
-                                        "categorical_transformer", self.categ_ppl,
-                                        categorical_features),
+                                   "categorical_transformer", self.categ_ppl,
+                                   categorical_features),
                                        ("numerical_transformer", self.numer_ppl,
                                         numerical_features)]
                                }
-        sklearn_transf_spec = features_dictionary[t+c+n]
-        if len(sklearn_transf_spec) == 0:
-            raise ValueError("No valide features provided")
+
+        n, c, t = len(numerical_features) != 0, len(categorical_features) != 0, len(
+            text_features) != 0
+        n, c, t = str(int(n)), str(int(c)), str(int(t))
+        sklearn_transf_spec = features_dictionary[t + c + n]
 
         # And one last check in case feat type is None
         # And to make sure the final specification has all the columns

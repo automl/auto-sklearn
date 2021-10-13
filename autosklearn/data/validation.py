@@ -18,12 +18,10 @@ def convert_if_sparse(
     y: typing.Union[SUPPORTED_TARGET_TYPES, spmatrix]
 ) -> SUPPORTED_TARGET_TYPES:
     """If the labels `y` are sparse, it will convert it to its dense representation
-
     Parameters
     ----------
     y: {array-like, sparse matrix} of shape (n_samples,) or (n_samples, n_outputs)
         The labels to 'densify' if sparse
-
     Returns
     -------
     np.ndarray of shape (n_samples, ) or (n_samples, n_outputs)
@@ -45,7 +43,6 @@ class InputValidator(BaseEstimator):
     Makes sure the input data complies with Auto-sklearn requirements.
     Categorical inputs are encoded via a Label Encoder, if the input
     is a dataframe.
-
     This class also perform checks for data integrity and flags the user
     via informative errors.
     Attributes
@@ -101,7 +98,6 @@ class InputValidator(BaseEstimator):
         """
         Validates and fit a categorical encoder (if needed) to the features, and
         a encoder for targets in the case of classification. Specifically:
-
         For features:
             + Valid data types are enforced (List, np.ndarray, pd.DataFrame, pd.Series, scipy
               sparse) as well as dimensionality checks
@@ -110,7 +106,6 @@ class InputValidator(BaseEstimator):
         For targets:
             + Checks for dimensionality as well as missing values are performed.
             + If performing a classification task, the data is going to be encoded
-
         Parameters
         ----------
             X_train: SUPPORTED_FEAT_TYPES
@@ -156,14 +151,12 @@ class InputValidator(BaseEstimator):
     ) -> typing.Tuple[np.ndarray, typing.Optional[np.ndarray]]:
         """
         Transform the given target or features to a numpy array
-
         Parameters
         ----------
             X: SUPPORTED_FEAT_TYPES
                 A set of features to transform
             y: typing.Optional[SUPPORTED_TARGET_TYPES]
                 A set of targets to transform
-
         Return
         ------
             np.ndarray:

@@ -140,6 +140,7 @@ class DataPreprocessorChoice(AutoSklearnChoice):
             config[param] = value
 
         new_params = {}
+        # ToDo check feat_type
         feat_type = None
         if init_params is not None:
             for param, value in init_params.items():
