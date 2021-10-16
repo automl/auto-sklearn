@@ -76,7 +76,7 @@ the data the gets to the sklearn models is well formed and can be used for
 training models.
 
 While this is necessary in general, if you'd like to disable this step, please
-refer to this :ref:`sphx_glr_examples_80_extending_example_extending_data_preprocessor.py <example>`.
+refer to this :ref:`example <sphx_glr_examples_80_extending_example_extending_data_preprocessor.py>`.
 
 Feature preprocessing
 ~~~~~~~~~~~~~~~~~~~~~
