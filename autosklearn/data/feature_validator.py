@@ -349,6 +349,7 @@ class FeatureValidator(BaseEstimator):
         """
 
         # If a list was provided, it will be converted to pandas
+        # ToDo how to differentiate string and category
         X_train = pd.DataFrame(data=X_train).convert_dtypes()
 
         # Store the dtypes and use in case of re-fit
@@ -357,7 +358,9 @@ class FeatureValidator(BaseEstimator):
             # Warn the user about dtypes or request him to use a dataframe
             for col in X_train.columns:
                 if X_train[col].dtype.name == 'string':
-                    X_train[col] = X_train[col].astype('string')
+                    X_train[col] = X_train[col].astype('string')  # alterative for strings
+                    # (better because BOW becomes 1HE)
+                    # X_train[col] = X_train[col].astype('category')
 
             self.dtypes = {col: X_train[col].dtype.name.lower() for col in X_train.columns}
         else:

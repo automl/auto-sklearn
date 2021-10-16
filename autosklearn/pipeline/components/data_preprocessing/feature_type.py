@@ -62,10 +62,6 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         self.feat_type = feat_type
         self.force_sparse_output = force_sparse_output
 
-        file = open("sample.txt", "a")
-        file.write("feat_type_prev_prev: {}\n\n".format(self.feat_type))
-        file.close()
-
         # The pipeline that will be applied to the categorical features (i.e. columns)
         # of the dataset
         # Configuration of the data-preprocessor is different from the configuration of
@@ -118,10 +114,6 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         numerical_features = []
         text_features = []
 
-        file = open("sample.txt", "a")
-        file.write("feat_type_prev: {}\n\n".format(self.feat_type))
-        file.close()
-
         # ToDo self.feat_type broken
         if self.feat_type is not None:
             # Make sure that we are not missing any column!
@@ -143,15 +135,6 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
                              if value.lower() == "string"]
 
         # the character of the key are boolean indecators for text, categorical, numerical "tcn"
-        file = open("sample.txt", "a")
-
-        file.write("X: {}\n".format(X))
-        file.write("y: {}\n\n".format(y))
-        file.write("feat_type: {}\n".format(self.feat_type))
-        file.write("text_feat: {}\n".format(text_features))
-        file.write("cat_feat: {}\n".format(categorical_features))
-        file.write("num_feat: {}\n\n\n".format(numerical_features))
-        file.close()
         features_dictionary = {"000": [("numerical_transformer", self.numer_ppl,
                                         [True]*n_feats)],  # if no features_types features eq. num.
                                "001": [("numerical_transformer", self.numer_ppl,
