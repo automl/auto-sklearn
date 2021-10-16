@@ -11,10 +11,12 @@ auto-sklearn
 *auto-sklearn* is an automated machine learning toolkit and a drop-in
 replacement for a scikit-learn estimator:
 
-    >>> import autosklearn.classification
-    >>> cls = autosklearn.classification.AutoSklearnClassifier()
-    >>> cls.fit(X_train, y_train)
-    >>> predictions = cls.predict(X_test)
+.. code:: python
+
+    import autosklearn.classification
+    cls = autosklearn.classification.AutoSklearnClassifier()
+    cls.fit(X_train, y_train)
+    predictions = cls.predict(X_test)
 
 *auto-sklearn* frees a machine learning user from algorithm selection and
 hyperparameter tuning. It leverages recent advantages in *Bayesian
