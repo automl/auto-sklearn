@@ -47,6 +47,7 @@ all preprocessing methods and restrict the configuration space to only
 random forests.
 
 .. code:: python
+
     import autosklearn.classification
     automl = autosklearn.classification.AutoSklearnClassifier(
         include = {
@@ -89,10 +90,7 @@ This can be disabled by using the parameter ``include`` when creating an estimat
 .. code:: python
 
     clf = AutoSklearnClassifier(
-        ...,
-        include={
-            'feature_preprocessors'=["no_preprocessing"]
-        }
+        include={ 'feature_preprocessors'=["no_preprocessing"] }
     )
 
 Resampling strategies
@@ -231,6 +229,7 @@ In order to obtain *vanilla auto-sklearn* as used in `Efficient and Robust Autom
 set ``ensemble_size=1`` and ``initial_configurations_via_metalearning=0``:
 
 .. code:: python
+
     import autosklearn.classification
     automl = autosklearn.classification.AutoSklearnClassifier(
         ensemble_size=1,
