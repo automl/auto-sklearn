@@ -42,6 +42,11 @@ class MetaBase(object):
         self.algorithm_runs = aslib_reader.algorithm_runs
         self.configurations = aslib_reader.configurations
 
+        file = open(
+            "/home/lukas/Python_Projects/AutoSklearnDevelopment/config.txt", "a")
+        file.write("cs: {}".format(configuration_space))
+        file.close()
+
         configurations = dict()
         for algorithm_id in self.configurations:
             configuration = self.configurations[algorithm_id]

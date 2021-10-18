@@ -50,6 +50,7 @@ class AutoMLTrialsCallBack(IncorporateRunResultCallback):
 
 class VerifyTrialsCallBack(unittest.TestCase):
 
+    # ToDo test failed metalearning ?
     def test_trials_callback_execution(self):
         trials_summary_fname = os.path.join(tempfile.gettempdir(), "trials.csv")
         X_train, Y_train, X_test, Y_test = putil.get_dataset('breast_cancer')

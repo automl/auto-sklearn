@@ -640,7 +640,8 @@ def test_load_best_individual_model(metric, dask_client):
         assert automl.score(X_test, Y_test) > 0.9
     elif metric.name == 'log_loss':
         # Seen values in github actions of 0.6978304740364537
-        # ToDo error failed test
+        # ToDo error failed test, just bad prediction ... 1.9 is worse than 0.7
+        # but not loading the meta features might matter
         assert automl.score(X_test, Y_test) < 0.7
     else:
         raise ValueError(metric.name)
