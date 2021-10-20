@@ -20,7 +20,6 @@ from smac.tae.serial_runner import SerialRunner
 from smac.tae.dask_runner import DaskParallelRunner
 from smac.callbacks import IncorporateRunResultCallback
 
-
 import autosklearn.metalearning
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
     BINARY_CLASSIFICATION, TASK_TYPES_TO_STRING, CLASSIFICATION_TASKS, \
@@ -177,13 +176,13 @@ def _print_debug_info_of_init_configuration(initial_configurations, basename,
 
 
 def get_smac_object(
-    scenario_dict,
-    seed,
-    ta,
-    ta_kwargs,
-    metalearning_configurations,
-    n_jobs,
-    dask_client,
+        scenario_dict,
+        seed,
+        ta,
+        ta_kwargs,
+        metalearning_configurations,
+        n_jobs,
+        dask_client,
 ):
     if len(scenario_dict['instances']) > 1:
         intensifier = Intensifier
@@ -572,8 +571,8 @@ class AutoMLSMBO(object):
                 metafeature_calculation_end_time = time.time()
                 metafeature_calculation_time_limit = \
                     metafeature_calculation_time_limit - (
-                        metafeature_calculation_end_time -
-                        metafeature_calculation_start_time)
+                            metafeature_calculation_end_time -
+                            metafeature_calculation_start_time)
 
                 if metafeature_calculation_time_limit < 1:
                     self.logger.warning(
