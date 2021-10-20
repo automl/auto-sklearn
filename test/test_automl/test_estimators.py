@@ -142,8 +142,9 @@ def test_feat_type_wrong_arguments():
         cls.fit(X=X, y=y, feat_type=[True]*100)
 
     cls = AutoSklearnClassifier(ensemble_size=0)
-    # ToDo failed test now autosklearn does support Stirngs
-    expected_msg = r".*Only `Categorical` and `Numerical` are"
+    # expected_msg = r".*Only `Categorical` and `Numerical` are"
+    # "valid feature types, you passed `Car`.*"
+    expected_msg = r".*Only `Categorical`, `Numerical` and `String` are"
     "valid feature types, you passed `Car`.*"
     with pytest.raises(ValueError, match=expected_msg):
         cls.fit(X=X, y=y, feat_type=['Car']*100)
@@ -794,7 +795,6 @@ def test_autosklearn_regression_methods_returns_self(dask_client):
 
 
 def test_autosklearn2_classification_methods_returns_self(dask_client):
-    # ToDo test failed index error
     X_train, y_train, X_test, y_test = putil.get_dataset('iris')
     automl = AutoSklearn2Classifier(time_left_for_this_task=60, ensemble_size=0,
                                     delete_tmp_folder_after_terminate=False,
