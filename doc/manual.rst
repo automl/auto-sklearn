@@ -50,7 +50,7 @@ random forests.
 >>> automl = autosklearn.classification.AutoSklearnClassifier(
 >>>     include = {
 >>>       'classifier': ["random_forest"],
->>>       'feature_preprocessors': ["no_preprocessing"]
+>>>       'feature_preprocessor': ["no_preprocessing"]
 >>>     },
 >>>     exclude=None
 >>> )
@@ -80,7 +80,7 @@ autosklearn can actually pass the data to sklearn models without error.
 Feature preprocessing is a single transformer which implements for example feature
 selection or transformation of features into a different space (i.e. PCA).
 This can be turned off by setting
-``include={'feature_preprocessors'=["no_preprocessing"]}`` as shown in the example above.
+``include={'feature_preprocessor'=["no_preprocessing"]}`` as shown in the example above.
 
 Resampling strategies
 =====================
