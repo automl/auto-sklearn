@@ -622,8 +622,6 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             keys_checked = []
 
             for name, step in auto.named_steps.items():
-                print((name, step))
-                print()
                 if name == 'data_preprocessor':
                     keys_checked.extend(
                         self._test_set_hyperparameter_choice(
