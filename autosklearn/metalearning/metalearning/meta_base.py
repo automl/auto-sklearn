@@ -46,6 +46,7 @@ class MetaBase(object):
         for algorithm_id in self.configurations:
             configuration = self.configurations[algorithm_id]
             try:
+                # ToDo check if all stored configurations are actually readable
                 configurations[str(algorithm_id)] = \
                     (Configuration(configuration_space, values=configuration))
             except (ValueError, KeyError) as e:

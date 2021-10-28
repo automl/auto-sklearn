@@ -1060,7 +1060,8 @@ def test_autosklearn_anneal(as_frame):
                                    delete_tmp_folder_after_terminate=False,
                                    initial_configurations_via_metalearning=0,
                                    smac_scenario_args={'runcount_limit': 6},
-                                   resampling_strategy='holdout-iterative-fit')
+                                   resampling_strategy='holdout-iterative-fit',
+                                   memory_limit=4096)
 
     if as_frame:
         # Let autosklearn calculate the feat types
