@@ -88,9 +88,7 @@ class BOWChoice(AutoSklearnChoice):
                             ) -> 'BOWChoice':
         new_params = {}
 
-        params = configuration.get_dictionary()#
-        print(params)
-        #ToDo implement a conig space entry for choice bag of word
+        params = configuration.get_dictionary()
         choice = params['__choice__']
         del params['__choice__']
 

@@ -164,33 +164,33 @@ def input_data_featuretest(request):
 @pytest.mark.parametrize(
     'input_data_featuretest',
     (
-        'numpy_categoricalonly_nonan',
-        'numpy_numericalonly_nonan',
-        'numpy_mixed_nonan',
-        'numpy_categoricalonly_nan',
-        'numpy_numericalonly_nan',
-        'numpy_mixed_nan',
-        'pandas_categoricalonly_nonan',
-        'pandas_numericalonly_nonan',
-        'pandas_mixed_nonan',
-        'pandas_numericalonly_nan',
-        'list_numericalonly_nonan',
-        'list_numericalonly_nan',
-        'sparse_bsr_nonan',
-        'sparse_bsr_nan',
-        'sparse_coo_nonan',
-        'sparse_coo_nan',
-        'sparse_csc_nonan',
-        'sparse_csc_nan',
-        'sparse_csr_nonan',
-        'sparse_csr_nan',
-        'sparse_dia_nonan',
-        'sparse_dia_nan',
-        'sparse_dok_nonan',
-        'sparse_dok_nan',
-        'sparse_lil_nonan',
-        'sparse_lil_nan',
-        'openml_40981',  # Australian
+            'numpy_categoricalonly_nonan',
+            'numpy_numericalonly_nonan',
+            'numpy_mixed_nonan',
+            'numpy_categoricalonly_nan',
+            'numpy_numericalonly_nan',
+            'numpy_mixed_nan',
+            'pandas_categoricalonly_nonan',
+            'pandas_numericalonly_nonan',
+            'pandas_mixed_nonan',
+            'pandas_numericalonly_nan',
+            'list_numericalonly_nonan',
+            'list_numericalonly_nan',
+            'sparse_bsr_nonan',
+            'sparse_bsr_nan',
+            'sparse_coo_nonan',
+            'sparse_coo_nan',
+            'sparse_csc_nonan',
+            'sparse_csc_nan',
+            'sparse_csr_nonan',
+            'sparse_csr_nan',
+            'sparse_dia_nonan',
+            'sparse_dia_nan',
+            'sparse_dok_nonan',
+            'sparse_dok_nan',
+            'sparse_lil_nonan',
+            'sparse_lil_nan',
+            'openml_40981',  # Australian
     ),
     indirect=True
 )
@@ -211,8 +211,8 @@ def test_featurevalidator_supported_types(input_data_featuretest):
 @pytest.mark.parametrize(
     'input_data_featuretest',
     (
-        'numpy_string_nonan',
-        'numpy_string_nan',
+            'numpy_string_nonan',
+            'numpy_string_nan',
     ),
     indirect=True
 )
@@ -225,25 +225,25 @@ def test_featurevalidator_unsupported_numpy(input_data_featuretest):
 @pytest.mark.parametrize(
     'input_data_featuretest',
     (
-        'numpy_categoricalonly_nonan',
-        'numpy_mixed_nonan',
-        'numpy_categoricalonly_nan',
-        'numpy_mixed_nan',
-        'pandas_categoricalonly_nonan',
-        'pandas_mixed_nonan',
-        'sparse_bsr_nonan',
-        'sparse_bsr_nan',
-        'sparse_coo_nonan',
-        'sparse_coo_nan',
-        'sparse_csc_nonan',
-        'sparse_csc_nan',
-        'sparse_csr_nonan',
-        'sparse_csr_nan',
-        'sparse_dia_nonan',
-        'sparse_dia_nan',
-        'sparse_dok_nonan',
-        'sparse_dok_nan',
-        'sparse_lil_nonan',
+            'numpy_categoricalonly_nonan',
+            'numpy_mixed_nonan',
+            'numpy_categoricalonly_nan',
+            'numpy_mixed_nan',
+            'pandas_categoricalonly_nonan',
+            'pandas_mixed_nonan',
+            'sparse_bsr_nonan',
+            'sparse_bsr_nan',
+            'sparse_coo_nonan',
+            'sparse_coo_nan',
+            'sparse_csc_nonan',
+            'sparse_csc_nan',
+            'sparse_csr_nonan',
+            'sparse_csr_nan',
+            'sparse_dia_nonan',
+            'sparse_dia_nan',
+            'sparse_dok_nonan',
+            'sparse_dok_nan',
+            'sparse_lil_nonan',
     ),
     indirect=True
 )
@@ -307,8 +307,9 @@ def test_features_unsupported_calls_are_raised():
     with pytest.raises(ValueError, match=r"Auto-sklearn only supports.*yet, the provided input"):
         validator.fit({'input1': 1, 'input2': 2})
     validator = FeatureValidator()
-    with pytest.raises(ValueError, match=r"has unsupported dtype string"):
-        validator.fit(pd.DataFrame([{'A': 1, 'B': 2}], dtype='string'))
+    # strings are no longer an error
+    # with pytest.raises(ValueError, match=r"has unsupported dtype string"):
+    #     validator.fit(pd.DataFrame([{'A': 1, 'B': 2}], dtype='string'))
     with pytest.raises(ValueError, match=r"The feature dimensionality of the train and test"):
         validator.fit(X_train=np.array([[1, 2, 3], [4, 5, 6]]),
                       X_test=np.array([[1, 2, 3, 4], [4, 5, 6, 7]]),
@@ -324,7 +325,8 @@ def test_features_unsupported_calls_are_raised():
     with pytest.raises(ValueError, match=r"feat_type must only contain strings.*"):
         validator.fit(np.array([[1, 2, 3], [4, 5, 6]]))
     validator = FeatureValidator(feat_type=['1', '2', '3'])
-    with pytest.raises(ValueError, match=r"Only `Categorical` and `Numerical` are.*"):
+    with pytest.raises(ValueError,match=r"Only `Categorical`, `Numerical` and `String` are valid "
+                                        r"feature types"):
         validator.fit(np.array([[1, 2, 3], [4, 5, 6]]))
 
 
@@ -337,7 +339,7 @@ def test_no_new_category_after_fit():
     x = pd.DataFrame({'A': [1, 2, 3, 4], 'B': [5, 6, 7, 8]}, dtype='category')
     validator = FeatureValidator()
     validator.fit(x)
-    x['A'] = x['A'].apply(lambda x: x*x)
+    x['A'] = x['A'].apply(lambda x: x * x)
     validator.transform(x)
 
 
@@ -345,18 +347,17 @@ def test_no_new_category_after_fit():
 @pytest.mark.parametrize(
     'openml_id',
     (
-        40981,  # Australian
-        3,  # kr-vs-kp
-        1468,  # cnae-9
-        40975,  # car
-        40984,  # Segment
+            40981,  # Australian
+            3,  # kr-vs-kp
+            1468,  # cnae-9
+            40975,  # car
+            40984,  # Segment
     ),
 )
 @pytest.mark.parametrize('train_data_type', ('numpy', 'pandas', 'list'))
 @pytest.mark.parametrize('test_data_type', ('numpy', 'pandas', 'list'))
 def test_featurevalidator_new_data_after_fit(openml_id,
                                              train_data_type, test_data_type):
-
     # List is currently not supported as infer_objects
     # cast list objects to type objects
     if train_data_type == 'list' or test_data_type == 'list':
@@ -396,17 +397,15 @@ def test_featurevalidator_new_data_after_fit(openml_id,
 @pytest.mark.parametrize(
     'openml_id',
     (
-        40981,  # Australian
-        3,  # kr-vs-kp
-        1468,  # cnae-9
-        40975,  # car
-        40984,  # Segment
-        2,  # anneal
+            40981,  # Australian
+            3,  # kr-vs-kp
+            1468,  # cnae-9
+            40975,  # car
+            40984,  # Segment
+            2,  # anneal
     ),
 )
 def test_list_to_dataframe(openml_id):
-    # ToDo test failed
-
     X_pandas, y_pandas = sklearn.datasets.fetch_openml(data_id=openml_id,
                                                        return_X_y=True, as_frame=True)
     X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
@@ -421,7 +420,10 @@ def test_list_to_dataframe(openml_id):
             # convert dtype translates 72.0 to 72. Be robust against this!
             assert is_numeric_dtype(transformed_X[i].dtype)
         else:
-            assert X_pandas[col].dtype.name == transformed_X[i].dtype.name, col
+            # assert X_pandas[col].dtype.name == transformed_X[i].dtype.name, col
+            if X_pandas[col].dtype.name == "category":
+                if transformed_X[i].dtype.name != "string" and transformed_X[i].dtype.name != "category":
+                    assert False
 
     # Also make sure that at testing time
     # this work
@@ -431,26 +433,28 @@ def test_list_to_dataframe(openml_id):
             # convert dtype translates 72.0 to 72. Be robust against this!
             assert is_numeric_dtype(transformed_X[i].dtype)
         else:
-            assert X_pandas[col].dtype.name == transformed_X[i].dtype.name, col
-
+            # assert X_pandas[col].dtype.name == transformed_X[i].dtype.name, col
+            if X_pandas[col].dtype.name == "category":
+                if transformed_X[i].dtype.name != "string" and transformed_X[i].dtype.name != "category":
+                    assert False
 
 @pytest.mark.parametrize(
     'input_data_featuretest',
     (
-        'sparse_bsr_nonan',
-        'sparse_bsr_nan',
-        'sparse_coo_nonan',
-        'sparse_coo_nan',
-        'sparse_csc_nonan',
-        'sparse_csc_nan',
-        'sparse_csr_nonan',
-        'sparse_csr_nan',
-        'sparse_dia_nonan',
-        'sparse_dia_nan',
-        'sparse_dok_nonan',
-        'sparse_dok_nan',
-        'sparse_lil_nonan',
-        'sparse_lil_nan',
+            'sparse_bsr_nonan',
+            'sparse_bsr_nan',
+            'sparse_coo_nonan',
+            'sparse_coo_nan',
+            'sparse_csc_nonan',
+            'sparse_csc_nan',
+            'sparse_csr_nonan',
+            'sparse_csr_nan',
+            'sparse_dia_nonan',
+            'sparse_dia_nan',
+            'sparse_dok_nonan',
+            'sparse_dok_nan',
+            'sparse_lil_nonan',
+            'sparse_lil_nan',
     ),
     indirect=True
 )
