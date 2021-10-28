@@ -271,6 +271,7 @@ def test_performance_over_time_no_ensemble(tmp_dir):
                                 tmp_folder=tmp_dir,
                                 seed=1,
                                 initial_configurations_via_metalearning=0,
+                                memory_limit=4096,
                                 ensemble_size=0,)
     cls.fit(X_train, Y_train, X_test, Y_test)
 
@@ -290,6 +291,7 @@ def test_cv_results(tmp_dir):
                                 seed=1,
                                 initial_configurations_via_metalearning=0,
                                 ensemble_size=0,
+                                memory_limit=4096,
                                 scoring_functions=[autosklearn.metrics.precision,
                                                    autosklearn.metrics.roc_auc])
 
@@ -380,7 +382,8 @@ def test_leaderboard(
         time_left_for_this_task=30,
         per_run_time_limit=5,
         tmp_folder=tmp_dir,
-        seed=1
+        seed=1,
+        memory_limit=4096
     )
     model.fit(X_train, Y_train)
 

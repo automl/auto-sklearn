@@ -446,7 +446,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             'feature_preprocessor:__choice__').choices), 13)
 
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(168, len(hyperparameters))
+        # 12 new hps --> 168 becomes 180
+        self.assertEqual(180, len(hyperparameters))
 
         # for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp
