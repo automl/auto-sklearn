@@ -1,0 +1,2972 @@
+{
+  "hyperparameters": [
+    {
+      "name": "data_preprocessor:__choice__",
+      "type": "categorical",
+      "choices": [
+        "feature_type"
+      ],
+      "default": "feature_type",
+      "probabilities": null
+    },
+    {
+      "name": "feature_preprocessor:__choice__",
+      "type": "categorical",
+      "choices": [
+        "extra_trees_preproc_for_regression",
+        "fast_ica",
+        "feature_agglomeration",
+        "kernel_pca",
+        "kitchen_sinks",
+        "no_preprocessing",
+        "nystroem_sampler",
+        "pca",
+        "polynomial",
+        "random_trees_embedding",
+        "select_percentile_regression",
+        "select_rates_regression"
+      ],
+      "default": "no_preprocessing",
+      "probabilities": null
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "categorical",
+      "choices": [
+        "adaboost",
+        "ard_regression",
+        "decision_tree",
+        "extra_trees",
+        "gaussian_process",
+        "gradient_boosting",
+        "k_nearest_neighbors",
+        "liblinear_svr",
+        "libsvm_svr",
+        "mlp",
+        "random_forest",
+        "sgd"
+      ],
+      "default": "random_forest",
+      "probabilities": null
+    },
+    {
+      "name": "data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__",
+      "type": "categorical",
+      "choices": [
+        "encoding",
+        "no_encoding",
+        "one_hot_encoding"
+      ],
+      "default": "one_hot_encoding",
+      "probabilities": null
+    },
+    {
+      "name": "data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__",
+      "type": "categorical",
+      "choices": [
+        "minority_coalescer",
+        "no_coalescense"
+      ],
+      "default": "minority_coalescer",
+      "probabilities": null
+    },
+    {
+      "name": "data_preprocessor:feature_type:numerical_transformer:imputation:strategy",
+      "type": "categorical",
+      "choices": [
+        "mean",
+        "median",
+        "most_frequent"
+      ],
+      "default": "mean",
+      "probabilities": null
+    },
+    {
+      "name": "data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__",
+      "type": "categorical",
+      "choices": [
+        "minmax",
+        "none",
+        "normalize",
+        "power_transformer",
+        "quantile_transformer",
+        "robust_scaler",
+        "standardize"
+      ],
+      "default": "standardize",
+      "probabilities": null
+    },
+    {
+      "name": "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components",
+      "type": "uniform_int",
+      "log": true,
+      "lower": 50,
+      "upper": 1000,
+      "default": 100
+    },
+    {
+      "name": "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__",
+      "type": "categorical",
+      "choices": [
+        "bag_of_word_encoding",
+        "bag_of_word_encoding_distinct",
+        "tfidf_encoding"
+      ],
+      "default": "bag_of_word_encoding",
+      "probabilities": null
+    },
+    {
+      "name": "feature_preprocessor:extra_trees_preproc_for_regression:bootstrap",
+      "type": "categorical",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "default": "False",
+      "probabilities": null
+    },
+    {
+      "name": "feature_preprocessor:extra_trees_preproc_for_regression:criterion",
+      "type": "categorical",
+      "choices": [
+        "mse",
+        "friedman_mse",
+        "mae"
+      ],
+      "default": "mse",
+      "probabilities": null
+    },
+    {
+      "name": "feature_preprocessor:extra_trees_preproc_for_regression:max_depth",
+      "type": "constant",
+      "value": "None"
+    },
+    {
+      "name": "feature_preprocessor:extra_trees_preproc_for_regression:max_features",
+      "type": "uniform_float",
+      "log": false,
+      "lower": 0.1,
+      "upper": 1.0,
+      "default": 1.0
+    },
+    {
+      "name": "feature_preprocessor:extra_trees_preproc_for_regression:max_leaf_nodes",
+      "type": "constant",
+      "value": "None"
+    },
+    {
+      "name": "feature_preprocessor:extra_trees_preproc_for_regression:min_samples_leaf",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 1,
+      "upper": 20,
+      "default": 1
+    },
+    {
+      "name": "feature_preprocessor:extra_trees_preproc_for_regression:min_samples_split",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 2,
+      "upper": 20,
+      "default": 2
+    },
+    {
+      "name": "feature_preprocessor:extra_trees_preproc_for_regression:min_weight_fraction_leaf",
+      "type": "constant",
+      "value": 0.0
+    },
+    {
+      "name": "feature_preprocessor:extra_trees_preproc_for_regression:n_estimators",
+      "type": "constant",
+      "value": 100
+    },
+    {
+      "name": "feature_preprocessor:fast_ica:algorithm",
+      "type": "categorical",
+      "choices": [
+        "parallel",
+        "deflation"
+      ],
+      "default": "parallel",
+      "probabilities": null
+    },
+    {
+      "name": "feature_preprocessor:fast_ica:fun",
+      "type": "categorical",
+      "choices": [
+        "logcosh",
+        "exp",
+        "cube"
+      ],
+      "default": "logcosh",
+      "probabilities": null
+    },
+    {
+      "name": "feature_preprocessor:fast_ica:whiten",
+      "type": "categorical",
+      "choices": [
+        "False",
+        "True"
+      ],
+      "default": "False",
+      "probabilities": null
+    },
+    {
+      "name": "feature_preprocessor:feature_agglomeration:affinity",
+      "type": "categorical",
+      "choices": [
+        "euclidean",
+        "manhattan",
+        "cosine"
+      ],
+      "default": "euclidean",
+      "probabilities": null
+    },
+    {
+      "name": "feature_preprocessor:feature_agglomeration:linkage",
+      "type": "categorical",
+      "choices": [
+        "ward",
+        "complete",
+        "average"
+      ],
+      "default": "ward",
+      "probabilities": null
+    },
+    {
+      "name": "feature_preprocessor:feature_agglomeration:n_clusters",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 2,
+      "upper": 400,
+      "default": 25
+    },
+    {
+      "name": "feature_preprocessor:feature_agglomeration:pooling_func",
+      "type": "categorical",
+      "choices": [
+        "mean",
+        "median",
+        "max"
+      ],
+      "default": "mean",
+      "probabilities": null
+    },
+    {
+      "name": "feature_preprocessor:kernel_pca:kernel",
+      "type": "categorical",
+      "choices": [
+        "poly",
+        "rbf",
+        "sigmoid",
+        "cosine"
+      ],
+      "default": "rbf",
+      "probabilities": null
+    },
+    {
+      "name": "feature_preprocessor:kernel_pca:n_components",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 10,
+      "upper": 2000,
+      "default": 100
+    },
+    {
+      "name": "feature_preprocessor:kitchen_sinks:gamma",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 3.0517578125e-05,
+      "upper": 8.0,
+      "default": 1.0
+    },
+    {
+      "name": "feature_preprocessor:kitchen_sinks:n_components",
+      "type": "uniform_int",
+      "log": true,
+      "lower": 50,
+      "upper": 10000,
+      "default": 100
+    },
+    {
+      "name": "feature_preprocessor:nystroem_sampler:kernel",
+      "type": "categorical",
+      "choices": [
+        "poly",
+        "rbf",
+        "sigmoid",
+        "cosine"
+      ],
+      "default": "rbf",
+      "probabilities": null
+    },
+    {
+      "name": "feature_preprocessor:nystroem_sampler:n_components",
+      "type": "uniform_int",
+      "log": true,
+      "lower": 50,
+      "upper": 10000,
+      "default": 100
+    },
+    {
+      "name": "feature_preprocessor:pca:keep_variance",
+      "type": "uniform_float",
+      "log": false,
+      "lower": 0.5,
+      "upper": 0.9999,
+      "default": 0.9999
+    },
+    {
+      "name": "feature_preprocessor:pca:whiten",
+      "type": "categorical",
+      "choices": [
+        "False",
+        "True"
+      ],
+      "default": "False",
+      "probabilities": null
+    },
+    {
+      "name": "feature_preprocessor:polynomial:degree",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 2,
+      "upper": 3,
+      "default": 2
+    },
+    {
+      "name": "feature_preprocessor:polynomial:include_bias",
+      "type": "categorical",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "default": "True",
+      "probabilities": null
+    },
+    {
+      "name": "feature_preprocessor:polynomial:interaction_only",
+      "type": "categorical",
+      "choices": [
+        "False",
+        "True"
+      ],
+      "default": "False",
+      "probabilities": null
+    },
+    {
+      "name": "feature_preprocessor:random_trees_embedding:bootstrap",
+      "type": "categorical",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "default": "True",
+      "probabilities": null
+    },
+    {
+      "name": "feature_preprocessor:random_trees_embedding:max_depth",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 2,
+      "upper": 10,
+      "default": 5
+    },
+    {
+      "name": "feature_preprocessor:random_trees_embedding:max_leaf_nodes",
+      "type": "constant",
+      "value": "None"
+    },
+    {
+      "name": "feature_preprocessor:random_trees_embedding:min_samples_leaf",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 1,
+      "upper": 20,
+      "default": 1
+    },
+    {
+      "name": "feature_preprocessor:random_trees_embedding:min_samples_split",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 2,
+      "upper": 20,
+      "default": 2
+    },
+    {
+      "name": "feature_preprocessor:random_trees_embedding:min_weight_fraction_leaf",
+      "type": "constant",
+      "value": 1.0
+    },
+    {
+      "name": "feature_preprocessor:random_trees_embedding:n_estimators",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 10,
+      "upper": 100,
+      "default": 10
+    },
+    {
+      "name": "feature_preprocessor:select_percentile_regression:percentile",
+      "type": "uniform_float",
+      "log": false,
+      "lower": 1.0,
+      "upper": 99.0,
+      "default": 50.0
+    },
+    {
+      "name": "feature_preprocessor:select_percentile_regression:score_func",
+      "type": "categorical",
+      "choices": [
+        "f_regression",
+        "mutual_info"
+      ],
+      "default": "f_regression",
+      "probabilities": null
+    },
+    {
+      "name": "feature_preprocessor:select_rates_regression:alpha",
+      "type": "uniform_float",
+      "log": false,
+      "lower": 0.01,
+      "upper": 0.5,
+      "default": 0.1
+    },
+    {
+      "name": "feature_preprocessor:select_rates_regression:mode",
+      "type": "categorical",
+      "choices": [
+        "fpr",
+        "fdr",
+        "fwe"
+      ],
+      "default": "fpr",
+      "probabilities": null
+    },
+    {
+      "name": "feature_preprocessor:select_rates_regression:score_func",
+      "type": "categorical",
+      "choices": [
+        "f_regression"
+      ],
+      "default": "f_regression",
+      "probabilities": null
+    },
+    {
+      "name": "regressor:adaboost:learning_rate",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 0.01,
+      "upper": 2.0,
+      "default": 0.1
+    },
+    {
+      "name": "regressor:adaboost:loss",
+      "type": "categorical",
+      "choices": [
+        "linear",
+        "square",
+        "exponential"
+      ],
+      "default": "linear",
+      "probabilities": null
+    },
+    {
+      "name": "regressor:adaboost:max_depth",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 1,
+      "upper": 10,
+      "default": 1
+    },
+    {
+      "name": "regressor:adaboost:n_estimators",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 50,
+      "upper": 500,
+      "default": 50
+    },
+    {
+      "name": "regressor:ard_regression:alpha_1",
+      "type": "uniform_float",
+      "log": false,
+      "lower": 1e-10,
+      "upper": 0.001,
+      "default": 1e-06
+    },
+    {
+      "name": "regressor:ard_regression:alpha_2",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 1e-10,
+      "upper": 0.001,
+      "default": 1e-06
+    },
+    {
+      "name": "regressor:ard_regression:fit_intercept",
+      "type": "constant",
+      "value": "True"
+    },
+    {
+      "name": "regressor:ard_regression:lambda_1",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 1e-10,
+      "upper": 0.001,
+      "default": 1e-06
+    },
+    {
+      "name": "regressor:ard_regression:lambda_2",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 1e-10,
+      "upper": 0.001,
+      "default": 1e-06
+    },
+    {
+      "name": "regressor:ard_regression:n_iter",
+      "type": "constant",
+      "value": 300
+    },
+    {
+      "name": "regressor:ard_regression:threshold_lambda",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 1000.0,
+      "upper": 100000.0,
+      "default": 10000.0
+    },
+    {
+      "name": "regressor:ard_regression:tol",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 1e-05,
+      "upper": 0.1,
+      "default": 0.001
+    },
+    {
+      "name": "regressor:decision_tree:criterion",
+      "type": "categorical",
+      "choices": [
+        "mse",
+        "friedman_mse",
+        "mae"
+      ],
+      "default": "mse",
+      "probabilities": null
+    },
+    {
+      "name": "regressor:decision_tree:max_depth_factor",
+      "type": "uniform_float",
+      "log": false,
+      "lower": 0.0,
+      "upper": 2.0,
+      "default": 0.5
+    },
+    {
+      "name": "regressor:decision_tree:max_features",
+      "type": "constant",
+      "value": 1.0
+    },
+    {
+      "name": "regressor:decision_tree:max_leaf_nodes",
+      "type": "constant",
+      "value": "None"
+    },
+    {
+      "name": "regressor:decision_tree:min_impurity_decrease",
+      "type": "constant",
+      "value": 0.0
+    },
+    {
+      "name": "regressor:decision_tree:min_samples_leaf",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 1,
+      "upper": 20,
+      "default": 1
+    },
+    {
+      "name": "regressor:decision_tree:min_samples_split",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 2,
+      "upper": 20,
+      "default": 2
+    },
+    {
+      "name": "regressor:decision_tree:min_weight_fraction_leaf",
+      "type": "constant",
+      "value": 0.0
+    },
+    {
+      "name": "regressor:extra_trees:bootstrap",
+      "type": "categorical",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "default": "False",
+      "probabilities": null
+    },
+    {
+      "name": "regressor:extra_trees:criterion",
+      "type": "categorical",
+      "choices": [
+        "mse",
+        "friedman_mse",
+        "mae"
+      ],
+      "default": "mse",
+      "probabilities": null
+    },
+    {
+      "name": "regressor:extra_trees:max_depth",
+      "type": "constant",
+      "value": "None"
+    },
+    {
+      "name": "regressor:extra_trees:max_features",
+      "type": "uniform_float",
+      "log": false,
+      "lower": 0.1,
+      "upper": 1.0,
+      "default": 1.0
+    },
+    {
+      "name": "regressor:extra_trees:max_leaf_nodes",
+      "type": "constant",
+      "value": "None"
+    },
+    {
+      "name": "regressor:extra_trees:min_impurity_decrease",
+      "type": "constant",
+      "value": 0.0
+    },
+    {
+      "name": "regressor:extra_trees:min_samples_leaf",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 1,
+      "upper": 20,
+      "default": 1
+    },
+    {
+      "name": "regressor:extra_trees:min_samples_split",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 2,
+      "upper": 20,
+      "default": 2
+    },
+    {
+      "name": "regressor:extra_trees:min_weight_fraction_leaf",
+      "type": "constant",
+      "value": 0.0
+    },
+    {
+      "name": "regressor:gaussian_process:alpha",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 1e-14,
+      "upper": 1.0,
+      "default": 1e-08
+    },
+    {
+      "name": "regressor:gaussian_process:thetaL",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 1e-10,
+      "upper": 0.001,
+      "default": 1e-06
+    },
+    {
+      "name": "regressor:gaussian_process:thetaU",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 1.0,
+      "upper": 100000.0,
+      "default": 100000.0
+    },
+    {
+      "name": "regressor:gradient_boosting:early_stop",
+      "type": "categorical",
+      "choices": [
+        "off",
+        "valid",
+        "train"
+      ],
+      "default": "off",
+      "probabilities": null
+    },
+    {
+      "name": "regressor:gradient_boosting:l2_regularization",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 1e-10,
+      "upper": 1.0,
+      "default": 1e-10
+    },
+    {
+      "name": "regressor:gradient_boosting:learning_rate",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 0.01,
+      "upper": 1.0,
+      "default": 0.1
+    },
+    {
+      "name": "regressor:gradient_boosting:loss",
+      "type": "categorical",
+      "choices": [
+        "least_squares"
+      ],
+      "default": "least_squares",
+      "probabilities": null
+    },
+    {
+      "name": "regressor:gradient_boosting:max_bins",
+      "type": "constant",
+      "value": 255
+    },
+    {
+      "name": "regressor:gradient_boosting:max_depth",
+      "type": "constant",
+      "value": "None"
+    },
+    {
+      "name": "regressor:gradient_boosting:max_leaf_nodes",
+      "type": "uniform_int",
+      "log": true,
+      "lower": 3,
+      "upper": 2047,
+      "default": 31
+    },
+    {
+      "name": "regressor:gradient_boosting:min_samples_leaf",
+      "type": "uniform_int",
+      "log": true,
+      "lower": 1,
+      "upper": 200,
+      "default": 20
+    },
+    {
+      "name": "regressor:gradient_boosting:scoring",
+      "type": "constant",
+      "value": "loss"
+    },
+    {
+      "name": "regressor:gradient_boosting:tol",
+      "type": "constant",
+      "value": 1e-07
+    },
+    {
+      "name": "regressor:k_nearest_neighbors:n_neighbors",
+      "type": "uniform_int",
+      "log": true,
+      "lower": 1,
+      "upper": 100,
+      "default": 1
+    },
+    {
+      "name": "regressor:k_nearest_neighbors:p",
+      "type": "categorical",
+      "choices": [
+        1,
+        2
+      ],
+      "default": 2,
+      "probabilities": null
+    },
+    {
+      "name": "regressor:k_nearest_neighbors:weights",
+      "type": "categorical",
+      "choices": [
+        "uniform",
+        "distance"
+      ],
+      "default": "uniform",
+      "probabilities": null
+    },
+    {
+      "name": "regressor:liblinear_svr:C",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 0.03125,
+      "upper": 32768.0,
+      "default": 1.0
+    },
+    {
+      "name": "regressor:liblinear_svr:dual",
+      "type": "constant",
+      "value": "False"
+    },
+    {
+      "name": "regressor:liblinear_svr:epsilon",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 0.001,
+      "upper": 1.0,
+      "default": 0.1
+    },
+    {
+      "name": "regressor:liblinear_svr:fit_intercept",
+      "type": "constant",
+      "value": "True"
+    },
+    {
+      "name": "regressor:liblinear_svr:intercept_scaling",
+      "type": "constant",
+      "value": 1
+    },
+    {
+      "name": "regressor:liblinear_svr:loss",
+      "type": "categorical",
+      "choices": [
+        "epsilon_insensitive",
+        "squared_epsilon_insensitive"
+      ],
+      "default": "squared_epsilon_insensitive",
+      "probabilities": null
+    },
+    {
+      "name": "regressor:liblinear_svr:tol",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 1e-05,
+      "upper": 0.1,
+      "default": 0.0001
+    },
+    {
+      "name": "regressor:libsvm_svr:C",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 0.03125,
+      "upper": 32768.0,
+      "default": 1.0
+    },
+    {
+      "name": "regressor:libsvm_svr:epsilon",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 0.001,
+      "upper": 1.0,
+      "default": 0.1
+    },
+    {
+      "name": "regressor:libsvm_svr:kernel",
+      "type": "categorical",
+      "choices": [
+        "linear",
+        "poly",
+        "rbf",
+        "sigmoid"
+      ],
+      "default": "rbf",
+      "probabilities": null
+    },
+    {
+      "name": "regressor:libsvm_svr:max_iter",
+      "type": "constant",
+      "value": -1
+    },
+    {
+      "name": "regressor:libsvm_svr:shrinking",
+      "type": "categorical",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "default": "True",
+      "probabilities": null
+    },
+    {
+      "name": "regressor:libsvm_svr:tol",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 1e-05,
+      "upper": 0.1,
+      "default": 0.001
+    },
+    {
+      "name": "regressor:mlp:activation",
+      "type": "categorical",
+      "choices": [
+        "tanh",
+        "relu"
+      ],
+      "default": "tanh",
+      "probabilities": null
+    },
+    {
+      "name": "regressor:mlp:alpha",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 1e-07,
+      "upper": 0.1,
+      "default": 0.0001
+    },
+    {
+      "name": "regressor:mlp:batch_size",
+      "type": "constant",
+      "value": "auto"
+    },
+    {
+      "name": "regressor:mlp:beta_1",
+      "type": "constant",
+      "value": 0.9
+    },
+    {
+      "name": "regressor:mlp:beta_2",
+      "type": "constant",
+      "value": 0.999
+    },
+    {
+      "name": "regressor:mlp:early_stopping",
+      "type": "categorical",
+      "choices": [
+        "valid",
+        "train"
+      ],
+      "default": "valid",
+      "probabilities": null
+    },
+    {
+      "name": "regressor:mlp:epsilon",
+      "type": "constant",
+      "value": 1e-08
+    },
+    {
+      "name": "regressor:mlp:hidden_layer_depth",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 1,
+      "upper": 3,
+      "default": 1
+    },
+    {
+      "name": "regressor:mlp:learning_rate_init",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 0.0001,
+      "upper": 0.5,
+      "default": 0.001
+    },
+    {
+      "name": "regressor:mlp:n_iter_no_change",
+      "type": "constant",
+      "value": 32
+    },
+    {
+      "name": "regressor:mlp:num_nodes_per_layer",
+      "type": "uniform_int",
+      "log": true,
+      "lower": 16,
+      "upper": 264,
+      "default": 32
+    },
+    {
+      "name": "regressor:mlp:shuffle",
+      "type": "constant",
+      "value": "True"
+    },
+    {
+      "name": "regressor:mlp:solver",
+      "type": "constant",
+      "value": "adam"
+    },
+    {
+      "name": "regressor:mlp:tol",
+      "type": "constant",
+      "value": 0.0001
+    },
+    {
+      "name": "regressor:random_forest:bootstrap",
+      "type": "categorical",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "default": "True",
+      "probabilities": null
+    },
+    {
+      "name": "regressor:random_forest:criterion",
+      "type": "categorical",
+      "choices": [
+        "mse",
+        "friedman_mse",
+        "mae"
+      ],
+      "default": "mse",
+      "probabilities": null
+    },
+    {
+      "name": "regressor:random_forest:max_depth",
+      "type": "constant",
+      "value": "None"
+    },
+    {
+      "name": "regressor:random_forest:max_features",
+      "type": "uniform_float",
+      "log": false,
+      "lower": 0.1,
+      "upper": 1.0,
+      "default": 1.0
+    },
+    {
+      "name": "regressor:random_forest:max_leaf_nodes",
+      "type": "constant",
+      "value": "None"
+    },
+    {
+      "name": "regressor:random_forest:min_impurity_decrease",
+      "type": "constant",
+      "value": 0.0
+    },
+    {
+      "name": "regressor:random_forest:min_samples_leaf",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 1,
+      "upper": 20,
+      "default": 1
+    },
+    {
+      "name": "regressor:random_forest:min_samples_split",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 2,
+      "upper": 20,
+      "default": 2
+    },
+    {
+      "name": "regressor:random_forest:min_weight_fraction_leaf",
+      "type": "constant",
+      "value": 0.0
+    },
+    {
+      "name": "regressor:sgd:alpha",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 1e-07,
+      "upper": 0.1,
+      "default": 0.0001
+    },
+    {
+      "name": "regressor:sgd:average",
+      "type": "categorical",
+      "choices": [
+        "False",
+        "True"
+      ],
+      "default": "False",
+      "probabilities": null
+    },
+    {
+      "name": "regressor:sgd:fit_intercept",
+      "type": "constant",
+      "value": "True"
+    },
+    {
+      "name": "regressor:sgd:learning_rate",
+      "type": "categorical",
+      "choices": [
+        "optimal",
+        "invscaling",
+        "constant"
+      ],
+      "default": "invscaling",
+      "probabilities": null
+    },
+    {
+      "name": "regressor:sgd:loss",
+      "type": "categorical",
+      "choices": [
+        "squared_loss",
+        "huber",
+        "epsilon_insensitive",
+        "squared_epsilon_insensitive"
+      ],
+      "default": "squared_loss",
+      "probabilities": null
+    },
+    {
+      "name": "regressor:sgd:penalty",
+      "type": "categorical",
+      "choices": [
+        "l1",
+        "l2",
+        "elasticnet"
+      ],
+      "default": "l2",
+      "probabilities": null
+    },
+    {
+      "name": "regressor:sgd:tol",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 1e-05,
+      "upper": 0.1,
+      "default": 0.0001
+    },
+    {
+      "name": "data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 0.0001,
+      "upper": 0.5,
+      "default": 0.01
+    },
+    {
+      "name": "data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 10,
+      "upper": 2000,
+      "default": 1000
+    },
+    {
+      "name": "data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution",
+      "type": "categorical",
+      "choices": [
+        "uniform",
+        "normal"
+      ],
+      "default": "uniform",
+      "probabilities": null
+    },
+    {
+      "name": "data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max",
+      "type": "uniform_float",
+      "log": false,
+      "lower": 0.7,
+      "upper": 0.999,
+      "default": 0.75
+    },
+    {
+      "name": "data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min",
+      "type": "uniform_float",
+      "log": false,
+      "lower": 0.001,
+      "upper": 0.3,
+      "default": 0.25
+    },
+    {
+      "name": "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice",
+      "type": "categorical",
+      "choices": [
+        "min_df_absolute",
+        "min_df_relative"
+      ],
+      "default": "min_df_absolute",
+      "probabilities": null
+    },
+    {
+      "name": "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice",
+      "type": "categorical",
+      "choices": [
+        "min_df_absolute",
+        "min_df_relative"
+      ],
+      "default": "min_df_absolute",
+      "probabilities": null
+    },
+    {
+      "name": "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice",
+      "type": "categorical",
+      "choices": [
+        "min_df_absolute",
+        "min_df_relative"
+      ],
+      "default": "min_df_absolute",
+      "probabilities": null
+    },
+    {
+      "name": "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf",
+      "type": "categorical",
+      "choices": [
+        false,
+        true
+      ],
+      "default": false,
+      "probabilities": null
+    },
+    {
+      "name": "feature_preprocessor:fast_ica:n_components",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 10,
+      "upper": 2000,
+      "default": 100
+    },
+    {
+      "name": "feature_preprocessor:kernel_pca:coef0",
+      "type": "uniform_float",
+      "log": false,
+      "lower": -1.0,
+      "upper": 1.0,
+      "default": 0.0
+    },
+    {
+      "name": "feature_preprocessor:kernel_pca:degree",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 2,
+      "upper": 5,
+      "default": 3
+    },
+    {
+      "name": "feature_preprocessor:kernel_pca:gamma",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 3.0517578125e-05,
+      "upper": 8.0,
+      "default": 0.01
+    },
+    {
+      "name": "feature_preprocessor:nystroem_sampler:coef0",
+      "type": "uniform_float",
+      "log": false,
+      "lower": -1.0,
+      "upper": 1.0,
+      "default": 0.0
+    },
+    {
+      "name": "feature_preprocessor:nystroem_sampler:degree",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 2,
+      "upper": 5,
+      "default": 3
+    },
+    {
+      "name": "feature_preprocessor:nystroem_sampler:gamma",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 3.0517578125e-05,
+      "upper": 8.0,
+      "default": 0.1
+    },
+    {
+      "name": "regressor:gradient_boosting:n_iter_no_change",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 1,
+      "upper": 20,
+      "default": 10
+    },
+    {
+      "name": "regressor:gradient_boosting:validation_fraction",
+      "type": "uniform_float",
+      "log": false,
+      "lower": 0.01,
+      "upper": 0.4,
+      "default": 0.1
+    },
+    {
+      "name": "regressor:libsvm_svr:coef0",
+      "type": "uniform_float",
+      "log": false,
+      "lower": -1.0,
+      "upper": 1.0,
+      "default": 0.0
+    },
+    {
+      "name": "regressor:libsvm_svr:degree",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 2,
+      "upper": 5,
+      "default": 3
+    },
+    {
+      "name": "regressor:libsvm_svr:gamma",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 3.0517578125e-05,
+      "upper": 8.0,
+      "default": 0.1
+    },
+    {
+      "name": "regressor:mlp:validation_fraction",
+      "type": "constant",
+      "value": 0.1
+    },
+    {
+      "name": "regressor:sgd:epsilon",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 1e-05,
+      "upper": 0.1,
+      "default": 0.1
+    },
+    {
+      "name": "regressor:sgd:eta0",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 1e-07,
+      "upper": 0.1,
+      "default": 0.01
+    },
+    {
+      "name": "regressor:sgd:l1_ratio",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 1e-09,
+      "upper": 1.0,
+      "default": 0.15
+    },
+    {
+      "name": "regressor:sgd:power_t",
+      "type": "uniform_float",
+      "log": false,
+      "lower": 1e-05,
+      "upper": 1.0,
+      "default": 0.25
+    },
+    {
+      "name": "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 0,
+      "upper": 10,
+      "default": 0
+    },
+    {
+      "name": "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_relative",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 0.01,
+      "upper": 1.0,
+      "default": 0.01
+    },
+    {
+      "name": "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_absolute",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 0,
+      "upper": 10,
+      "default": 0
+    },
+    {
+      "name": "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_relative",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 0.01,
+      "upper": 1.0,
+      "default": 0.01
+    },
+    {
+      "name": "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_absolute",
+      "type": "uniform_int",
+      "log": false,
+      "lower": 0,
+      "upper": 10,
+      "default": 0
+    },
+    {
+      "name": "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_relative",
+      "type": "uniform_float",
+      "log": true,
+      "lower": 0.01,
+      "upper": 1.0,
+      "default": 0.01
+    }
+  ],
+  "conditions": [
+    {
+      "child": "data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__",
+      "parent": "data_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "feature_type"
+    },
+    {
+      "child": "data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__",
+      "parent": "data_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "feature_type"
+    },
+    {
+      "child": "data_preprocessor:feature_type:numerical_transformer:imputation:strategy",
+      "parent": "data_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "feature_type"
+    },
+    {
+      "child": "data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__",
+      "parent": "data_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "feature_type"
+    },
+    {
+      "child": "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components",
+      "parent": "data_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "feature_type"
+    },
+    {
+      "child": "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__",
+      "parent": "data_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "feature_type"
+    },
+    {
+      "child": "feature_preprocessor:extra_trees_preproc_for_regression:bootstrap",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "extra_trees_preproc_for_regression"
+    },
+    {
+      "child": "feature_preprocessor:extra_trees_preproc_for_regression:criterion",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "extra_trees_preproc_for_regression"
+    },
+    {
+      "child": "feature_preprocessor:extra_trees_preproc_for_regression:max_depth",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "extra_trees_preproc_for_regression"
+    },
+    {
+      "child": "feature_preprocessor:extra_trees_preproc_for_regression:max_features",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "extra_trees_preproc_for_regression"
+    },
+    {
+      "child": "feature_preprocessor:extra_trees_preproc_for_regression:max_leaf_nodes",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "extra_trees_preproc_for_regression"
+    },
+    {
+      "child": "feature_preprocessor:extra_trees_preproc_for_regression:min_samples_leaf",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "extra_trees_preproc_for_regression"
+    },
+    {
+      "child": "feature_preprocessor:extra_trees_preproc_for_regression:min_samples_split",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "extra_trees_preproc_for_regression"
+    },
+    {
+      "child": "feature_preprocessor:extra_trees_preproc_for_regression:min_weight_fraction_leaf",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "extra_trees_preproc_for_regression"
+    },
+    {
+      "child": "feature_preprocessor:extra_trees_preproc_for_regression:n_estimators",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "extra_trees_preproc_for_regression"
+    },
+    {
+      "child": "feature_preprocessor:fast_ica:algorithm",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "fast_ica"
+    },
+    {
+      "child": "feature_preprocessor:fast_ica:fun",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "fast_ica"
+    },
+    {
+      "child": "feature_preprocessor:fast_ica:whiten",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "fast_ica"
+    },
+    {
+      "child": "feature_preprocessor:feature_agglomeration:affinity",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "feature_agglomeration"
+    },
+    {
+      "child": "feature_preprocessor:feature_agglomeration:linkage",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "feature_agglomeration"
+    },
+    {
+      "child": "feature_preprocessor:feature_agglomeration:n_clusters",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "feature_agglomeration"
+    },
+    {
+      "child": "feature_preprocessor:feature_agglomeration:pooling_func",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "feature_agglomeration"
+    },
+    {
+      "child": "feature_preprocessor:kernel_pca:kernel",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "kernel_pca"
+    },
+    {
+      "child": "feature_preprocessor:kernel_pca:n_components",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "kernel_pca"
+    },
+    {
+      "child": "feature_preprocessor:kitchen_sinks:gamma",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "kitchen_sinks"
+    },
+    {
+      "child": "feature_preprocessor:kitchen_sinks:n_components",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "kitchen_sinks"
+    },
+    {
+      "child": "feature_preprocessor:nystroem_sampler:kernel",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "nystroem_sampler"
+    },
+    {
+      "child": "feature_preprocessor:nystroem_sampler:n_components",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "nystroem_sampler"
+    },
+    {
+      "child": "feature_preprocessor:pca:keep_variance",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "pca"
+    },
+    {
+      "child": "feature_preprocessor:pca:whiten",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "pca"
+    },
+    {
+      "child": "feature_preprocessor:polynomial:degree",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "polynomial"
+    },
+    {
+      "child": "feature_preprocessor:polynomial:include_bias",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "polynomial"
+    },
+    {
+      "child": "feature_preprocessor:polynomial:interaction_only",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "polynomial"
+    },
+    {
+      "child": "feature_preprocessor:random_trees_embedding:bootstrap",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "random_trees_embedding"
+    },
+    {
+      "child": "feature_preprocessor:random_trees_embedding:max_depth",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "random_trees_embedding"
+    },
+    {
+      "child": "feature_preprocessor:random_trees_embedding:max_leaf_nodes",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "random_trees_embedding"
+    },
+    {
+      "child": "feature_preprocessor:random_trees_embedding:min_samples_leaf",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "random_trees_embedding"
+    },
+    {
+      "child": "feature_preprocessor:random_trees_embedding:min_samples_split",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "random_trees_embedding"
+    },
+    {
+      "child": "feature_preprocessor:random_trees_embedding:min_weight_fraction_leaf",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "random_trees_embedding"
+    },
+    {
+      "child": "feature_preprocessor:random_trees_embedding:n_estimators",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "random_trees_embedding"
+    },
+    {
+      "child": "feature_preprocessor:select_percentile_regression:percentile",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "select_percentile_regression"
+    },
+    {
+      "child": "feature_preprocessor:select_percentile_regression:score_func",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "select_percentile_regression"
+    },
+    {
+      "child": "feature_preprocessor:select_rates_regression:alpha",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "select_rates_regression"
+    },
+    {
+      "child": "feature_preprocessor:select_rates_regression:mode",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "select_rates_regression"
+    },
+    {
+      "child": "feature_preprocessor:select_rates_regression:score_func",
+      "parent": "feature_preprocessor:__choice__",
+      "type": "EQ",
+      "value": "select_rates_regression"
+    },
+    {
+      "child": "regressor:adaboost:learning_rate",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "adaboost"
+    },
+    {
+      "child": "regressor:adaboost:loss",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "adaboost"
+    },
+    {
+      "child": "regressor:adaboost:max_depth",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "adaboost"
+    },
+    {
+      "child": "regressor:adaboost:n_estimators",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "adaboost"
+    },
+    {
+      "child": "regressor:ard_regression:alpha_1",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "ard_regression"
+    },
+    {
+      "child": "regressor:ard_regression:alpha_2",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "ard_regression"
+    },
+    {
+      "child": "regressor:ard_regression:fit_intercept",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "ard_regression"
+    },
+    {
+      "child": "regressor:ard_regression:lambda_1",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "ard_regression"
+    },
+    {
+      "child": "regressor:ard_regression:lambda_2",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "ard_regression"
+    },
+    {
+      "child": "regressor:ard_regression:n_iter",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "ard_regression"
+    },
+    {
+      "child": "regressor:ard_regression:threshold_lambda",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "ard_regression"
+    },
+    {
+      "child": "regressor:ard_regression:tol",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "ard_regression"
+    },
+    {
+      "child": "regressor:decision_tree:criterion",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "decision_tree"
+    },
+    {
+      "child": "regressor:decision_tree:max_depth_factor",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "decision_tree"
+    },
+    {
+      "child": "regressor:decision_tree:max_features",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "decision_tree"
+    },
+    {
+      "child": "regressor:decision_tree:max_leaf_nodes",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "decision_tree"
+    },
+    {
+      "child": "regressor:decision_tree:min_impurity_decrease",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "decision_tree"
+    },
+    {
+      "child": "regressor:decision_tree:min_samples_leaf",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "decision_tree"
+    },
+    {
+      "child": "regressor:decision_tree:min_samples_split",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "decision_tree"
+    },
+    {
+      "child": "regressor:decision_tree:min_weight_fraction_leaf",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "decision_tree"
+    },
+    {
+      "child": "regressor:extra_trees:bootstrap",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "extra_trees"
+    },
+    {
+      "child": "regressor:extra_trees:criterion",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "extra_trees"
+    },
+    {
+      "child": "regressor:extra_trees:max_depth",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "extra_trees"
+    },
+    {
+      "child": "regressor:extra_trees:max_features",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "extra_trees"
+    },
+    {
+      "child": "regressor:extra_trees:max_leaf_nodes",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "extra_trees"
+    },
+    {
+      "child": "regressor:extra_trees:min_impurity_decrease",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "extra_trees"
+    },
+    {
+      "child": "regressor:extra_trees:min_samples_leaf",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "extra_trees"
+    },
+    {
+      "child": "regressor:extra_trees:min_samples_split",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "extra_trees"
+    },
+    {
+      "child": "regressor:extra_trees:min_weight_fraction_leaf",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "extra_trees"
+    },
+    {
+      "child": "regressor:gaussian_process:alpha",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "gaussian_process"
+    },
+    {
+      "child": "regressor:gaussian_process:thetaL",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "gaussian_process"
+    },
+    {
+      "child": "regressor:gaussian_process:thetaU",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "gaussian_process"
+    },
+    {
+      "child": "regressor:gradient_boosting:early_stop",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "gradient_boosting"
+    },
+    {
+      "child": "regressor:gradient_boosting:l2_regularization",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "gradient_boosting"
+    },
+    {
+      "child": "regressor:gradient_boosting:learning_rate",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "gradient_boosting"
+    },
+    {
+      "child": "regressor:gradient_boosting:loss",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "gradient_boosting"
+    },
+    {
+      "child": "regressor:gradient_boosting:max_bins",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "gradient_boosting"
+    },
+    {
+      "child": "regressor:gradient_boosting:max_depth",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "gradient_boosting"
+    },
+    {
+      "child": "regressor:gradient_boosting:max_leaf_nodes",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "gradient_boosting"
+    },
+    {
+      "child": "regressor:gradient_boosting:min_samples_leaf",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "gradient_boosting"
+    },
+    {
+      "child": "regressor:gradient_boosting:scoring",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "gradient_boosting"
+    },
+    {
+      "child": "regressor:gradient_boosting:tol",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "gradient_boosting"
+    },
+    {
+      "child": "regressor:k_nearest_neighbors:n_neighbors",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "k_nearest_neighbors"
+    },
+    {
+      "child": "regressor:k_nearest_neighbors:p",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "k_nearest_neighbors"
+    },
+    {
+      "child": "regressor:k_nearest_neighbors:weights",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "k_nearest_neighbors"
+    },
+    {
+      "child": "regressor:liblinear_svr:C",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "liblinear_svr"
+    },
+    {
+      "child": "regressor:liblinear_svr:dual",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "liblinear_svr"
+    },
+    {
+      "child": "regressor:liblinear_svr:epsilon",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "liblinear_svr"
+    },
+    {
+      "child": "regressor:liblinear_svr:fit_intercept",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "liblinear_svr"
+    },
+    {
+      "child": "regressor:liblinear_svr:intercept_scaling",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "liblinear_svr"
+    },
+    {
+      "child": "regressor:liblinear_svr:loss",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "liblinear_svr"
+    },
+    {
+      "child": "regressor:liblinear_svr:tol",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "liblinear_svr"
+    },
+    {
+      "child": "regressor:libsvm_svr:C",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "libsvm_svr"
+    },
+    {
+      "child": "regressor:libsvm_svr:epsilon",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "libsvm_svr"
+    },
+    {
+      "child": "regressor:libsvm_svr:kernel",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "libsvm_svr"
+    },
+    {
+      "child": "regressor:libsvm_svr:max_iter",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "libsvm_svr"
+    },
+    {
+      "child": "regressor:libsvm_svr:shrinking",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "libsvm_svr"
+    },
+    {
+      "child": "regressor:libsvm_svr:tol",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "libsvm_svr"
+    },
+    {
+      "child": "regressor:mlp:activation",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "mlp"
+    },
+    {
+      "child": "regressor:mlp:alpha",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "mlp"
+    },
+    {
+      "child": "regressor:mlp:batch_size",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "mlp"
+    },
+    {
+      "child": "regressor:mlp:beta_1",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "mlp"
+    },
+    {
+      "child": "regressor:mlp:beta_2",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "mlp"
+    },
+    {
+      "child": "regressor:mlp:early_stopping",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "mlp"
+    },
+    {
+      "child": "regressor:mlp:epsilon",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "mlp"
+    },
+    {
+      "child": "regressor:mlp:hidden_layer_depth",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "mlp"
+    },
+    {
+      "child": "regressor:mlp:learning_rate_init",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "mlp"
+    },
+    {
+      "child": "regressor:mlp:n_iter_no_change",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "mlp"
+    },
+    {
+      "child": "regressor:mlp:num_nodes_per_layer",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "mlp"
+    },
+    {
+      "child": "regressor:mlp:shuffle",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "mlp"
+    },
+    {
+      "child": "regressor:mlp:solver",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "mlp"
+    },
+    {
+      "child": "regressor:mlp:tol",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "mlp"
+    },
+    {
+      "child": "regressor:random_forest:bootstrap",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "random_forest"
+    },
+    {
+      "child": "regressor:random_forest:criterion",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "random_forest"
+    },
+    {
+      "child": "regressor:random_forest:max_depth",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "random_forest"
+    },
+    {
+      "child": "regressor:random_forest:max_features",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "random_forest"
+    },
+    {
+      "child": "regressor:random_forest:max_leaf_nodes",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "random_forest"
+    },
+    {
+      "child": "regressor:random_forest:min_impurity_decrease",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "random_forest"
+    },
+    {
+      "child": "regressor:random_forest:min_samples_leaf",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "random_forest"
+    },
+    {
+      "child": "regressor:random_forest:min_samples_split",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "random_forest"
+    },
+    {
+      "child": "regressor:random_forest:min_weight_fraction_leaf",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "random_forest"
+    },
+    {
+      "child": "regressor:sgd:alpha",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "sgd"
+    },
+    {
+      "child": "regressor:sgd:average",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "sgd"
+    },
+    {
+      "child": "regressor:sgd:fit_intercept",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "sgd"
+    },
+    {
+      "child": "regressor:sgd:learning_rate",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "sgd"
+    },
+    {
+      "child": "regressor:sgd:loss",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "sgd"
+    },
+    {
+      "child": "regressor:sgd:penalty",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "sgd"
+    },
+    {
+      "child": "regressor:sgd:tol",
+      "parent": "regressor:__choice__",
+      "type": "EQ",
+      "value": "sgd"
+    },
+    {
+      "child": "data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction",
+      "parent": "data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__",
+      "type": "EQ",
+      "value": "minority_coalescer"
+    },
+    {
+      "child": "data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles",
+      "parent": "data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__",
+      "type": "EQ",
+      "value": "quantile_transformer"
+    },
+    {
+      "child": "data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution",
+      "parent": "data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__",
+      "type": "EQ",
+      "value": "quantile_transformer"
+    },
+    {
+      "child": "data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max",
+      "parent": "data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__",
+      "type": "EQ",
+      "value": "robust_scaler"
+    },
+    {
+      "child": "data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min",
+      "parent": "data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__",
+      "type": "EQ",
+      "value": "robust_scaler"
+    },
+    {
+      "child": "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice",
+      "parent": "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__",
+      "type": "EQ",
+      "value": "bag_of_word_encoding"
+    },
+    {
+      "child": "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice",
+      "parent": "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__",
+      "type": "EQ",
+      "value": "bag_of_word_encoding_distinct"
+    },
+    {
+      "child": "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice",
+      "parent": "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__",
+      "type": "EQ",
+      "value": "tfidf_encoding"
+    },
+    {
+      "child": "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf",
+      "parent": "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__",
+      "type": "EQ",
+      "value": "tfidf_encoding"
+    },
+    {
+      "child": "feature_preprocessor:fast_ica:n_components",
+      "parent": "feature_preprocessor:fast_ica:whiten",
+      "type": "EQ",
+      "value": "True"
+    },
+    {
+      "child": "feature_preprocessor:kernel_pca:coef0",
+      "parent": "feature_preprocessor:kernel_pca:kernel",
+      "type": "IN",
+      "values": [
+        "poly",
+        "sigmoid"
+      ]
+    },
+    {
+      "child": "feature_preprocessor:kernel_pca:degree",
+      "parent": "feature_preprocessor:kernel_pca:kernel",
+      "type": "EQ",
+      "value": "poly"
+    },
+    {
+      "child": "feature_preprocessor:kernel_pca:gamma",
+      "parent": "feature_preprocessor:kernel_pca:kernel",
+      "type": "IN",
+      "values": [
+        "poly",
+        "rbf"
+      ]
+    },
+    {
+      "child": "feature_preprocessor:nystroem_sampler:coef0",
+      "parent": "feature_preprocessor:nystroem_sampler:kernel",
+      "type": "IN",
+      "values": [
+        "poly",
+        "sigmoid"
+      ]
+    },
+    {
+      "child": "feature_preprocessor:nystroem_sampler:degree",
+      "parent": "feature_preprocessor:nystroem_sampler:kernel",
+      "type": "EQ",
+      "value": "poly"
+    },
+    {
+      "child": "feature_preprocessor:nystroem_sampler:gamma",
+      "parent": "feature_preprocessor:nystroem_sampler:kernel",
+      "type": "IN",
+      "values": [
+        "poly",
+        "rbf",
+        "sigmoid"
+      ]
+    },
+    {
+      "child": "regressor:gradient_boosting:n_iter_no_change",
+      "parent": "regressor:gradient_boosting:early_stop",
+      "type": "IN",
+      "values": [
+        "valid",
+        "train"
+      ]
+    },
+    {
+      "child": "regressor:gradient_boosting:validation_fraction",
+      "parent": "regressor:gradient_boosting:early_stop",
+      "type": "EQ",
+      "value": "valid"
+    },
+    {
+      "child": "regressor:libsvm_svr:coef0",
+      "parent": "regressor:libsvm_svr:kernel",
+      "type": "IN",
+      "values": [
+        "poly",
+        "sigmoid"
+      ]
+    },
+    {
+      "child": "regressor:libsvm_svr:degree",
+      "parent": "regressor:libsvm_svr:kernel",
+      "type": "IN",
+      "values": [
+        "poly",
+        "rbf",
+        "sigmoid"
+      ]
+    },
+    {
+      "child": "regressor:libsvm_svr:gamma",
+      "parent": "regressor:libsvm_svr:kernel",
+      "type": "IN",
+      "values": [
+        "poly",
+        "rbf"
+      ]
+    },
+    {
+      "child": "regressor:mlp:validation_fraction",
+      "parent": "regressor:mlp:early_stopping",
+      "type": "IN",
+      "values": [
+        "valid"
+      ]
+    },
+    {
+      "child": "regressor:sgd:eta0",
+      "parent": "regressor:sgd:learning_rate",
+      "type": "IN",
+      "values": [
+        "invscaling",
+        "constant"
+      ]
+    },
+    {
+      "child": "regressor:sgd:power_t",
+      "parent": "regressor:sgd:learning_rate",
+      "type": "EQ",
+      "value": "invscaling"
+    },
+    {
+      "child": "regressor:sgd:epsilon",
+      "parent": "regressor:sgd:loss",
+      "type": "IN",
+      "values": [
+        "huber",
+        "epsilon_insensitive",
+        "squared_epsilon_insensitive"
+      ]
+    },
+    {
+      "child": "regressor:sgd:l1_ratio",
+      "parent": "regressor:sgd:penalty",
+      "type": "EQ",
+      "value": "elasticnet"
+    },
+    {
+      "child": "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute",
+      "parent": "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice",
+      "type": "EQ",
+      "value": "min_df_absolute"
+    },
+    {
+      "child": "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_relative",
+      "parent": "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice",
+      "type": "EQ",
+      "value": "min_df_relative"
+    },
+    {
+      "child": "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_absolute",
+      "parent": "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice",
+      "type": "EQ",
+      "value": "min_df_absolute"
+    },
+    {
+      "child": "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_relative",
+      "parent": "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice",
+      "type": "EQ",
+      "value": "min_df_relative"
+    },
+    {
+      "child": "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_absolute",
+      "parent": "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice",
+      "type": "EQ",
+      "value": "min_df_absolute"
+    },
+    {
+      "child": "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_relative",
+      "parent": "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice",
+      "type": "EQ",
+      "value": "min_df_relative"
+    }
+  ],
+  "forbiddens": [
+    {
+      "name": "feature_preprocessor:feature_agglomeration:affinity",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "feature_preprocessor:feature_agglomeration:affinity",
+          "type": "IN",
+          "values": [
+            "manhattan",
+            "cosine"
+          ]
+        },
+        {
+          "name": "feature_preprocessor:feature_agglomeration:linkage",
+          "type": "EQUALS",
+          "value": "ward"
+        }
+      ]
+    },
+    {
+      "name": "regressor:liblinear_svr:dual",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:liblinear_svr:dual",
+          "type": "EQUALS",
+          "value": "False"
+        },
+        {
+          "name": "regressor:liblinear_svr:loss",
+          "type": "EQUALS",
+          "value": "epsilon_insensitive"
+        }
+      ]
+    },
+    {
+      "name": "feature_preprocessor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "random_trees_embedding"
+        },
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "ard_regression"
+        }
+      ]
+    },
+    {
+      "name": "feature_preprocessor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "random_trees_embedding"
+        },
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "gaussian_process"
+        }
+      ]
+    },
+    {
+      "name": "feature_preprocessor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "random_trees_embedding"
+        },
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "gradient_boosting"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "adaboost"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "kitchen_sinks"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "adaboost"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "kernel_pca"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "adaboost"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "nystroem_sampler"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "ard_regression"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "kitchen_sinks"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "ard_regression"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "kernel_pca"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "ard_regression"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "nystroem_sampler"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "decision_tree"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "kitchen_sinks"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "decision_tree"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "kernel_pca"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "decision_tree"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "nystroem_sampler"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "extra_trees"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "kitchen_sinks"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "extra_trees"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "kernel_pca"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "extra_trees"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "nystroem_sampler"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "gaussian_process"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "kitchen_sinks"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "gaussian_process"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "kernel_pca"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "gaussian_process"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "nystroem_sampler"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "gradient_boosting"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "kitchen_sinks"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "gradient_boosting"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "kernel_pca"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "gradient_boosting"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "nystroem_sampler"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "k_nearest_neighbors"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "kitchen_sinks"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "k_nearest_neighbors"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "kernel_pca"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "k_nearest_neighbors"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "nystroem_sampler"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "libsvm_svr"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "kitchen_sinks"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "libsvm_svr"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "kernel_pca"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "libsvm_svr"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "nystroem_sampler"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "mlp"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "kitchen_sinks"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "mlp"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "kernel_pca"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "mlp"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "nystroem_sampler"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "random_forest"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "kitchen_sinks"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "random_forest"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "kernel_pca"
+        }
+      ]
+    },
+    {
+      "name": "regressor:__choice__",
+      "type": "AND",
+      "clauses": [
+        {
+          "name": "regressor:__choice__",
+          "type": "EQUALS",
+          "value": "random_forest"
+        },
+        {
+          "name": "feature_preprocessor:__choice__",
+          "type": "EQUALS",
+          "value": "nystroem_sampler"
+        }
+      ]
+    }
+  ],
+  "python_module_version": "0.4.20",
+  "json_format_version": 0.2
+}

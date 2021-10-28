@@ -1,0 +1,16 @@
+execdir = .
+deterministic = True
+run_obj = quality
+overall_obj = par10
+par_factor = 10
+cost_for_crash = 1.0
+cutoff = 10.0
+memory_limit = 3072.0
+algo_runs_timelimit = inf
+wallclock_limit = 53.41698241233826
+always_race_default = False
+ta_run_limit = inf
+train_inst_fn = /home/lukas/Python_Projects/NewBOWDev/auto-sklearn/test/.tmp__test_automl.test_estimators__test_cv_regression/smac3-output/run_1/train_insts.txt
+initial_incumbent = DEFAULT
+pcs_fn = /home/lukas/Python_Projects/NewBOWDev/auto-sklearn/test/.tmp__test_automl.test_estimators__test_cv_regression/smac3-output/run_1/configspace.json
+save_instantly = False
