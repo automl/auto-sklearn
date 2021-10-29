@@ -41,11 +41,12 @@ from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 from autosklearn.smbo import get_smac_object
 
 sys.path.append(os.path.dirname(__file__))
-from automl_utils import print_debug_information, count_succeses, includes_train_scores, includes_all_scores, include_single_scores, performance_over_time_is_plausible  # noqa (E402: module level import not at top of file)
+from automl_utils import print_debug_information, count_succeses, includes_train_scores, \
+    includes_all_scores, include_single_scores, \
+    performance_over_time_is_plausible  # noqa (E402: module level import not at top of file)
 
 
 def test_fit_n_jobs(tmp_dir):
-
     X_train, Y_train, X_test, Y_test = putil.get_dataset('breast_cancer')
 
     # test parallel Classifier to predict classes, not only indices
@@ -128,7 +129,7 @@ def test_feat_type_wrong_arguments():
     # Every Auto-Sklearn estimator has a backend, that allows a single
     # call to fit
     X = np.zeros((100, 100))
-    y = np.zeros((100, ))
+    y = np.zeros((100,))
 
     cls = AutoSklearnClassifier(ensemble_size=0)
     expected_msg = r".*feat_type does not have same number of "
@@ -139,7 +140,7 @@ def test_feat_type_wrong_arguments():
     cls = AutoSklearnClassifier(ensemble_size=0)
     expected_msg = r".*feat_type must only contain strings.*"
     with pytest.raises(ValueError, match=expected_msg):
-        cls.fit(X=X, y=y, feat_type=[True]*100)
+        cls.fit(X=X, y=y, feat_type=[True] * 100)
 
     cls = AutoSklearnClassifier(ensemble_size=0)
     # expected_msg = r".*Only `Categorical` and `Numerical` are"
@@ -147,7 +148,7 @@ def test_feat_type_wrong_arguments():
     expected_msg = r".*Only `Categorical`, `Numerical` and `String` are"
     "valid feature types, you passed `Car`.*"
     with pytest.raises(ValueError, match=expected_msg):
-        cls.fit(X=X, y=y, feat_type=['Car']*100)
+        cls.fit(X=X, y=y, feat_type=['Car'] * 100)
 
 
 # Mock AutoSklearnEstimator.fit so the test doesn't actually run fit().
@@ -228,12 +229,12 @@ def test_type_of_target(mock_estimator):
     expected_msg = r".*Regression with data of type"
     " multilabel-indicator is not supported.*"
     with pytest.raises(ValueError, match=expected_msg):
-        reg.fit(X=X, y=y_multilabel,)
+        reg.fit(X=X, y=y_multilabel, )
 
     expected_msg = r".*Regression with data of type"
     " multiclass-multioutput is not supported.*"
     with pytest.raises(ValueError, match=expected_msg):
-        reg.fit(X=X, y=y_multiclass_multioutput,)
+        reg.fit(X=X, y=y_multiclass_multioutput, )
 
     # Legal target types: continuous, multiclass,
     # continuous-multioutput,
@@ -272,7 +273,7 @@ def test_performance_over_time_no_ensemble(tmp_dir):
                                 seed=1,
                                 initial_configurations_via_metalearning=0,
                                 memory_limit=4096,
-                                ensemble_size=0,)
+                                ensemble_size=0, )
     cls.fit(X_train, Y_train, X_test, Y_test)
 
     performance_over_time = cls.performance_over_time_
@@ -333,9 +334,9 @@ def test_cv_results(tmp_dir):
         # is possible RandomState instance but in this check we explicitly
         # fixed the random_state params recursively to be integer seeds.
         assert joblib.hash(new_value) == joblib.hash(original_value), (
-            "Estimator %s should not change or mutate "
-            " the parameter %s from %s to %s during fit."
-            % (cls, param_name, original_value, new_value))
+                "Estimator %s should not change or mutate "
+                " the parameter %s from %s to %s during fit."
+                % (cls, param_name, original_value, new_value))
 
     # Comply with https://scikit-learn.org/dev/glossary.html#term-classes
     is_classifier(cls)
@@ -347,9 +348,9 @@ def test_cv_results(tmp_dir):
     (AutoSklearnRegressor, 'boston')
 ])
 def test_leaderboard(
-    tmp_dir: str,
-    estimator_type: Type[AutoSklearnEstimator],
-    dataset_name: str
+        tmp_dir: str,
+        estimator_type: Type[AutoSklearnEstimator],
+        dataset_name: str
 ):
     # Comprehensive test tasks a substantial amount of time, manually set if
     # required.
@@ -409,24 +410,24 @@ def test_leaderboard(
 
         # include is single str but not valid
         elif (
-            isinstance(params['include'], str)
-            and params['include'] not in column_types['all']
+                isinstance(params['include'], str)
+                and params['include'] not in column_types['all']
         ):
             with pytest.raises(ValueError):
                 model.leaderboard(**params)
 
         # Crash if include is list but contains invalid column
         elif (
-            isinstance(params['include'], list)
-            and len(set(params['include']) - set(column_types['all'])) != 0
+                isinstance(params['include'], list)
+                and len(set(params['include']) - set(column_types['all'])) != 0
         ):
             with pytest.raises(ValueError):
                 model.leaderboard(**params)
 
         # Can't have just model_id, in both single str and list case
         elif (
-            params['include'] == 'model_id'
-            or params['include'] == ['model_id']
+                params['include'] == 'model_id'
+                or params['include'] == ['model_id']
         ):
             with pytest.raises(ValueError):
                 model.leaderboard(**params)
@@ -462,8 +463,8 @@ def test_leaderboard(
             # Ensure that if it's ensemble only
             # Can only check if 'ensemble_weight' is present
             if (
-                params['ensemble_only']
-                and 'ensemble_weight' in columns
+                    params['ensemble_only']
+                    and 'ensemble_weight' in columns
             ):
                 assert all(leaderboard['ensemble_weight'] > 0)
 
@@ -583,7 +584,6 @@ def test_can_pickle_classifier(tmp_dir, dask_client):
 
 
 def test_multilabel(tmp_dir, dask_client):
-
     X_train, Y_train, X_test, Y_test = putil.get_dataset(
         'iris', make_multilabel=True)
     automl = AutoSklearnClassifier(time_left_for_this_task=30,
@@ -596,7 +596,7 @@ def test_multilabel(tmp_dir, dask_client):
 
     predictions = automl.predict(X_test)
     assert predictions.shape == (50, 3), print_debug_information(automl)
-    assert count_succeses(automl.cv_results_) > 0,  print_debug_information(automl)
+    assert count_succeses(automl.cv_results_) > 0, print_debug_information(automl)
     assert includes_train_scores(automl.performance_over_time_.columns) is True
     assert performance_over_time_is_plausible(automl.performance_over_time_) is True
 
@@ -608,7 +608,6 @@ def test_multilabel(tmp_dir, dask_client):
 
 
 def test_binary(tmp_dir, dask_client):
-
     X_train, Y_train, X_test, Y_test = putil.get_dataset(
         'iris', make_binary=True)
     automl = AutoSklearnClassifier(time_left_for_this_task=40,
@@ -622,7 +621,7 @@ def test_binary(tmp_dir, dask_client):
                dataset_name='binary_test_dataset')
 
     predictions = automl.predict(X_test)
-    assert predictions.shape == (50, ), print_debug_information(automl)
+    assert predictions.shape == (50,), print_debug_information(automl)
 
     score = accuracy(Y_test, predictions)
     assert score > 0.9, print_debug_information(automl)
@@ -673,7 +672,6 @@ def test_classification_pandas_support(tmp_dir, dask_client):
 
 
 def test_regression(tmp_dir, dask_client):
-
     X_train, Y_train, X_test, Y_test = putil.get_dataset('boston')
     automl = AutoSklearnRegressor(time_left_for_this_task=30,
                                   per_run_time_limit=5,
@@ -722,7 +720,6 @@ def test_cv_regression(tmp_dir, dask_client):
 
 
 def test_regression_pandas_support(tmp_dir, dask_client):
-
     X, y = sklearn.datasets.fetch_openml(
         data_id=41514,  # diabetes
         return_X_y=True,
@@ -890,7 +887,7 @@ def test_check_askl2_same_arguments_as_askl():
     # ASKL2
     extra_arguments = list(set(
         inspect.getfullargspec(AutoSklearnEstimator.__init__).args) - set(
-            inspect.getfullargspec(AutoSklearn2Classifier.__init__).args))
+        inspect.getfullargspec(AutoSklearn2Classifier.__init__).args))
     expected_extra_args = ['exclude',
                            'include',
                            'resampling_strategy_arguments',
@@ -992,7 +989,6 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
 @pytest.mark.parametrize("include_categorical", [True, False])
 def test_pass_categorical_and_numeric_columns_to_pipeline(
         dask_client, data_type, include_categorical):
-
     # Prepare the training data
     X, y = sklearn.datasets.make_classification()
     feat_type = None
@@ -1007,7 +1003,7 @@ def test_pass_categorical_and_numeric_columns_to_pipeline(
         if include_categorical:
             feat_type = ['numerical' for x in range(np.shape(X)[1])]
             feat_type.append('categorical')
-            temporal = np.zeros((X.shape[0], X.shape[1]+1))
+            temporal = np.zeros((X.shape[0], X.shape[1] + 1))
             temporal[:, :-1] = X
             X = temporal
     else:
