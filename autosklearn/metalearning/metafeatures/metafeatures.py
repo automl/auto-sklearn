@@ -62,10 +62,12 @@ class HelperFunctions(object):
         """Decorator for adding helper functions to a "dictionary".
         This behaves like a function decorating a function,
         not a class decorating a function"""
+
         def wrapper(metafeature_class):
             instance = metafeature_class()
             self.__setitem__(name, instance)
             return instance
+
         return wrapper
 
 
@@ -115,11 +117,13 @@ class MetafeatureFunctions(object):
         """Decorator for adding metafeature functions to a "dictionary" of
         metafeatures. This behaves like a function decorating a function,
         not a class decorating a function"""
+
         def wrapper(metafeature_class):
             instance = metafeature_class()
             self.__setitem__(name, instance)
             self.dependencies[name] = dependency
             return instance
+
         return wrapper
 
 
@@ -151,6 +155,7 @@ class NumberOfClasses(MetaFeature):
     Calls np.unique on the targets. If the dataset is a multilabel dataset,
     does this for each label seperately and returns the mean.
     """
+
     def _calculate(self, X, y, logger, categorical):
         if type_of_target(y) == 'multilabel-indicator':
             # We have a label binary indicator array:
@@ -226,8 +231,8 @@ class NumberOfFeaturesWithMissingValues(MetaFeature):
         missing = helper_functions.get_value("MissingValues")
         new_missing = missing.tocsc()
         num_missing = [np.sum(
-            new_missing.data[new_missing.indptr[i]:new_missing.indptr[i+1]])
-                       for i in range(missing.shape[1])]
+            new_missing.data[new_missing.indptr[i]:new_missing.indptr[i + 1]])
+            for i in range(missing.shape[1])]
 
         return float(np.sum([1 if num > 0 else 0 for num in num_missing]))
 
@@ -255,7 +260,7 @@ class NumberOfMissingValues(MetaFeature):
 class PercentageOfMissingValues(MetaFeature):
     def _calculate(self, X, y, logger, categorical):
         return float(metafeatures.get_value("NumberOfMissingValues")) / \
-               float(X.shape[0]*X.shape[1])
+               float(X.shape[0] * X.shape[1])
 
 
 # TODO: generalize this!
@@ -275,9 +280,9 @@ class NumberOfCategoricalFeatures(MetaFeature):
 class RatioNumericalToNominal(MetaFeature):
     def _calculate(self, X, y, logger, categorical):
         num_categorical = float(metafeatures[
-            "NumberOfCategoricalFeatures"](X, y, logger, categorical).value)
+                                    "NumberOfCategoricalFeatures"](X, y, logger, categorical).value)
         num_numerical = float(metafeatures[
-            "NumberOfNumericFeatures"](X, y, logger, categorical).value)
+                                  "NumberOfNumericFeatures"](X, y, logger, categorical).value)
         if num_categorical == 0.0:
             return 0.
         return num_numerical / num_categorical
@@ -287,9 +292,9 @@ class RatioNumericalToNominal(MetaFeature):
 class RatioNominalToNumerical(MetaFeature):
     def _calculate(self, X, y, logger, categorical):
         num_categorical = float(metafeatures[
-            "NumberOfCategoricalFeatures"](X, y, logger, categorical).value)
+                                    "NumberOfCategoricalFeatures"](X, y, logger, categorical).value)
         num_numerical = float(metafeatures[
-            "NumberOfNumericFeatures"](X, y, logger, categorical).value)
+                                  "NumberOfNumericFeatures"](X, y, logger, categorical).value)
         if num_numerical == 0.0:
             return 0.
         else:
@@ -300,8 +305,8 @@ class RatioNominalToNumerical(MetaFeature):
 @metafeatures.define("DatasetRatio")
 class DatasetRatio(MetaFeature):
     def _calculate(self, X, y, logger, categorical):
-        return float(metafeatures["NumberOfFeatures"](X, y, logger).value) /\
-            float(metafeatures["NumberOfInstances"](X, y, logger).value)
+        return float(metafeatures["NumberOfFeatures"](X, y, logger).value) / \
+               float(metafeatures["NumberOfInstances"](X, y, logger).value)
 
 
 @metafeatures.define("LogDatasetRatio", dependency="DatasetRatio")
@@ -313,8 +318,8 @@ class LogDatasetRatio(MetaFeature):
 @metafeatures.define("InverseDatasetRatio")
 class InverseDatasetRatio(MetaFeature):
     def _calculate(self, X, y, logger, categorical):
-        return float(metafeatures["NumberOfInstances"](X, y, logger).value) /\
-            float(metafeatures["NumberOfFeatures"](X, y, logger).value)
+        return float(metafeatures["NumberOfInstances"](X, y, logger).value) / \
+               float(metafeatures["NumberOfFeatures"](X, y, logger).value)
 
 
 @metafeatures.define("LogInverseDatasetRatio",
@@ -404,7 +409,7 @@ class ClassProbabilitySTD(MetaFeature):
             for i in range(y.shape[1]):
                 std = np.array(
                     [occurrence for occurrence in occurence_dict[
-                                                      i].values()],
+                        i].values()],
                     dtype=np.float64)
                 std = (std / y.shape[0]).std()
                 stds.append(std)
@@ -489,6 +494,7 @@ class SymbolsSum(MetaFeature):
         sum = np.nansum(helper_functions.get_value("NumSymbols"))
         return sum if np.isfinite(sum) else 0
 
+
 ################################################################################
 # Statistical meta features
 # Only use third and fourth statistical moment because it is common to
@@ -514,7 +520,7 @@ class Kurtosisses(HelperFunction):
         for i in range(X_new.shape[1]):
             if not categorical[X.columns[i] if hasattr(X, 'columns') else i]:
                 start = X_new.indptr[i]
-                stop = X_new.indptr[i+1]
+                stop = X_new.indptr[i + 1]
                 kurts.append(scipy.stats.kurtosis(X_new.data[start:stop]))
         return kurts
 
@@ -629,7 +635,7 @@ class ClassEntropy(MetaFeature):
             for value in y if labels == 1 else y[:, i]:
                 occurence_dict[value] += 1
             entropies.append(scipy.stats.entropy([occurence_dict[key] for key in
-                                                 occurence_dict], base=2))
+                                                  occurence_dict], base=2))
 
         return np.mean(entropies)
 
@@ -813,7 +819,7 @@ class LandmarkDecisionNodeLearner(MetaFeature):
             random_state = sklearn.utils.check_random_state(42)
             node = sklearn.tree.DecisionTreeClassifier(
                 criterion="entropy", max_depth=1, random_state=random_state,
-                min_samples_split=2, min_samples_leaf=1,  max_features=None)
+                min_samples_split=2, min_samples_leaf=1, max_features=None)
             if len(y.shape) == 1 or y.shape[1] == 1:
                 node.fit(
                     X.iloc[train] if hasattr(X, 'iloc') else X[train],
@@ -970,7 +976,7 @@ class PCA(HelperFunction):
             try:
                 rs.shuffle(indices)
                 truncated_svd = sklearn.decomposition.TruncatedSVD(
-                    n_components=X.shape[1]-1, random_state=i,
+                    n_components=X.shape[1] - 1, random_state=i,
                     algorithm="randomized")
                 truncated_svd.fit(Xt[indices])
                 return truncated_svd
@@ -992,7 +998,7 @@ class PCAFractionOfComponentsFor95PercentVariance(MetaFeature):
         while sum_ < 0.95 and idx < len(pca_.explained_variance_ratio_):
             sum_ += pca_.explained_variance_ratio_[idx]
             idx += 1
-        return float(idx)/float(X.shape[1])
+        return float(idx) / float(X.shape[1])
 
 
 # Kurtosis of first PC
@@ -1055,8 +1061,8 @@ def calculate_all_metafeatures_with_labels(X, y, categorical, dataset_name, logg
 
 def calculate_all_metafeatures(X, y, categorical, dataset_name, logger,
                                calculate=None, dont_calculate=None, densify_threshold=1000):
-
     """Calculate all metafeatures."""
+    #ToDo categorical or numerical in cotegorical no longer binary option
     helper_functions.clear()
     metafeatures.clear()
     mf_ = dict()
@@ -1082,11 +1088,27 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name, logger,
                 # TODO make sure this is done as efficient as possible (no copy for
                 # sparse matrices because of wrong sparse format)
                 sparse = scipy.sparse.issparse(X)
+
+                key_to_type = {"int64": "numerical",
+                               "float64": "numerical",
+                               "bool": "categorical",
+                               "string": "string",
+                               "category": "categorical"}
+
+                if isinstance(X, pd.DataFrame):
+                    feat_type = {key: key_to_type[str(X[key].dtype)] for key in X.columns}
+                    for key in feat_type.keys():
+                        if feat_type[key] == "string":
+                            categorical[key] = True
+                else:
+                    feat_type = {key: 'categorical' if value else 'numerical' for key, value in
+                                 categorical.items()}
                 DPP = FeatTypeSplit(
                     # The difference between feat_type and categorical, is that
                     # categorical has True/False instead of categorical/numerical
-                    feat_type={key: 'categorical' if value else 'numerical'
-                               for key, value in categorical.items()},
+                    # feat_type={key: 'categorical' if value else 'numerical'
+                    #            for key, value in categorical.items()},
+                    feat_type=feat_type,
                     force_sparse_output=True)
                 X_transformed = DPP.fit_transform(X)
                 categorical_transformed = {i: False for i in range(X_transformed.shape[1])}

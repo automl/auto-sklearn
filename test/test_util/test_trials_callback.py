@@ -54,7 +54,7 @@ class VerifyTrialsCallBack(unittest.TestCase):
     def test_trials_callback_execution(self):
         trials_summary_fname = os.path.join(tempfile.gettempdir(), "trials.csv")
         X_train, Y_train, X_test, Y_test = putil.get_dataset('breast_cancer')
-        cls = AutoSklearnClassifier(time_left_for_this_task=30,
+        cls = AutoSklearnClassifier(time_left_for_this_task=60,
                                     initial_configurations_via_metalearning=0,
                                     per_run_time_limit=10,
                                     # memory_limit=1024,
