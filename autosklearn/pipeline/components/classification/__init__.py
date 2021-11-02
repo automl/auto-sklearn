@@ -1,7 +1,6 @@
 __author__ = 'feurerm'
 
 from collections import OrderedDict
-from typing import Type
 import os
 
 from ..base import AutoSklearnClassificationAlgorithm, find_components, \
@@ -16,7 +15,7 @@ _classifiers = find_components(__package__,
 _addons = ThirdPartyComponents(AutoSklearnClassificationAlgorithm)
 
 
-def add_classifier(classifier: Type[AutoSklearnClassificationAlgorithm]) -> None:
+def add_classifier(classifier):
     _addons.add_component(classifier)
 
 

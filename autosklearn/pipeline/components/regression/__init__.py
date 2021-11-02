@@ -1,5 +1,4 @@
 from collections import OrderedDict
-from typing import Type
 import os
 
 from ..base import AutoSklearnRegressionAlgorithm, find_components, \
@@ -14,7 +13,7 @@ _regressors = find_components(__package__,
 _addons = ThirdPartyComponents(AutoSklearnRegressionAlgorithm)
 
 
-def add_regressor(regressor: Type[AutoSklearnRegressionAlgorithm]) -> None:
+def add_regressor(regressor):
     _addons.add_component(regressor)
 
 

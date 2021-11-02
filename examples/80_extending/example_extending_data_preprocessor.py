@@ -23,20 +23,22 @@ class NoPreprocessing(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(self, **kwargs):
         """ This preprocessors does not change the data """
-        # Some internal checks makes sure parameters are set
-        for key, val in kwargs.items():
-            setattr(self, key, val)
+        self.preprocessor = None
 
     def fit(self, X, Y=None):
+        self.preprocessor = 0
+        self.fitted_ = True
         return self
 
     def transform(self, X):
+        if self.preprocessor is None:
+            raise NotImplementedError()
         return X
 
     @staticmethod
     def get_properties(dataset_properties=None):
         return {
-            'shortname': 'NoPreprocessing',
+            'shortname': 'no',
             'name': 'NoPreprocessing',
             'handles_regression': True,
             'handles_classification': True,
@@ -50,7 +52,8 @@ class NoPreprocessing(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        return ConfigurationSpace()  # Return an empty configuration as there is None
+        cs = ConfigurationSpace()
+        return cs
 
 
 # Add NoPreprocessing component to auto-sklearn.
@@ -78,9 +81,6 @@ clf = autosklearn.classification.AutoSklearnClassifier(
     smac_scenario_args={'runcount_limit': 5},
 )
 clf.fit(X_train, y_train)
-
-assert len(clf.get_models_with_weights()) > 0  # Just to make sure models were found
-print(clf.sprint_statistics())
 
 ############################################################################
 # Print prediction score and statistics

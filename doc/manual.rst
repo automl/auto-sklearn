@@ -70,33 +70,24 @@ For a full list please have a look at the source code (in `autosklearn/pipeline/
 We do also provide an example on how to restrict the classifiers to search over
 :ref:`sphx_glr_examples_40_advanced_example_interpretable_models.py`.
 
-Data preprocessing
-~~~~~~~~~~~~~~~~~~
-Data preprocessing includes One-Hot encoding of categorical features, imputation
-of missing values and the normalization of features or samples. These ensure that
-the data the gets to the sklearn models is well formed and can be used for 
-training models.
+Turning off preprocessing
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-While this is necessary in general, if you'd like to disable this step, please
-refer to this :ref:`example <sphx_glr_examples_80_extending_example_extending_data_preprocessor.py>`.
+Preprocessing in *auto-sklearn* is divided into data preprocessing and
+feature preprocessing. Data preprocessing includes One-Hot encoding of
+categorical features, imputation of missing values and the normalization of
+features or samples. Dataprerocessing steps cannot be turned off as this ensures
+autosklearn can actually pass the data to sklearn models without error.
 
-Feature preprocessing
-~~~~~~~~~~~~~~~~~~~~~
 Feature preprocessing is a single transformer which implements for example feature
 selection or transformation of features into a different space (i.e. PCA).
-
-This can be disabled by using the parameter ``include`` when creating an estimator.
-
-.. code:: python
-
-    clf = AutoSklearnClassifier(
-        include={ 'feature_preprocessors'=["no_preprocessing"] }
-    )
+This can be turned off by setting
+``include={'feature_preprocessors'=["no_preprocessing"]}`` as shown in the example above.
 
 Resampling strategies
 =====================
 
-Examples for using holdout and cross-validation can be found in :ref:`auto-sklearn/examples/ <examples>`.
+Examples for using holdout and cross-validation can be found in :ref:`auto-sklearn/examples/ <examples>`
 
 Supported Inputs
 ================
