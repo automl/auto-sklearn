@@ -344,8 +344,6 @@ class TargetValidator(BaseEstimator):
                                  type(y)
                              ))
 
-        # Sparse data muss be numerical
-        # Type ignore on attribute because sparse targets have a dtype
         if isinstance(y, spmatrix) and not np.issubdtype(y.dtype.type, np.number):
             raise ValueError("When providing a sparse matrix as targets, the only supported "
                              "values are numerical. Please consider using a dense"
