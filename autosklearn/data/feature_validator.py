@@ -182,7 +182,7 @@ class FeatureValidator(BaseEstimator):
                                     "will convert the provided data to the csr_matrix format.")
                 X_transformed = X_transformed.tocsr(copy=False)
 
-                X_transformed.sort_indices()
+            X_transformed.sort_indices()
 
         return X_transformed
 
