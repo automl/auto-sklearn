@@ -351,5 +351,5 @@ def reduce_dataset_size_if_too_large(
                 )
 
         else:
-            raise ValueError(f"Unknown operation {operation}")
+            raise ValueError(f"Unknown operation `{operation}`")
     return X, y
