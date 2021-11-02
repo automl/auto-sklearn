@@ -45,7 +45,7 @@ def test_subsample_classification_unique_labels_stay_in_training_set(y, random_s
             is_classification=True
         )
 
-    assert X_sampled.dtype == X.dtype and y.dtype == y.dtype
+    assert X_sampled.dtype == X.dtype and y_sampled.dtype == y.dtype
     assert len(y_sampled) == sample_size
     assert all(label in y_sampled for label in unique_labels), \
         f"sampled unique = {np.unique(y_sampled)}, original unique = {unique_labels}"
