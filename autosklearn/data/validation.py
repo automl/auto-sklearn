@@ -33,7 +33,8 @@ def convert_if_sparse(
     if isinstance(y, spmatrix):
         y_ = y.todense()
 
-        # For one dimensional data, toarray will return (1, nrows)
+        # For sparse one dimensional data, y.todense will return [[1], [2], [3], ...]
+        # We need to flatten this
         if y_.shape[0] == 1:
             y_ = y_.flatten()
     else:
