@@ -34,7 +34,7 @@ def convert_if_sparse(
         y_ = y.todense()
 
         # For sparse one dimensional data, y.todense will return [[1], [2], [3], ...]
-        # We need to flatten this
+        # We need to flatten this before returning it
         if y_.shape[0] == 1:
             y_ = y_.flatten()
     else:
