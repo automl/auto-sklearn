@@ -117,7 +117,7 @@ def _model_predict(
         The predictions produced by the model
     """
     # Copy the array and ensure is has the attr 'shape'
-    X_ = np.asarray(X) if isinstance(X, list) else X.copy()
+    X_ = np.asarray(X) if isinstance(X, List) else X.copy()
 
     assert X_.shape[0] >= 1, f"X must have more than 1 sample but has {X_.shape[0]}"
 
@@ -216,10 +216,10 @@ class AutoML(BaseEstimator):
         self.precision = precision
         self._disable_evaluator_output = disable_evaluator_output
         # Check arguments prior to doing anything!
-        if not isinstance(self._disable_evaluator_output, (bool, list)):
+        if not isinstance(self._disable_evaluator_output, (bool, List)):
             raise ValueError('disable_evaluator_output must be of type bool '
                              'or list.')
-        if isinstance(self._disable_evaluator_output, list):
+        if isinstance(self._disable_evaluator_output, List):
             allowed_elements = ['model', 'cv_model', 'y_optimization', 'y_test', 'y_valid']
             for element in self._disable_evaluator_output:
                 if element not in allowed_elements:
@@ -1144,7 +1144,7 @@ class AutoML(BaseEstimator):
         is_classification: bool
             Whether the task is for classification or regression. This affects
             how the targets are treated
-        feat_type : list, optional (default=None)
+        feat_type : List, optional (default=None)
             List of str of `len(X.shape[1])` describing the attribute type.
             Possible types are `Categorical` and `Numerical`. `Categorical`
             attributes will be automatically One-Hot encoded. The values
@@ -1433,7 +1433,7 @@ class AutoML(BaseEstimator):
                 raise ValueError('No models fitted!')
 
         elif self._disable_evaluator_output is False or \
-                (isinstance(self._disable_evaluator_output, list) and
+                (isinstance(self._disable_evaluator_output, List) and
                  'model' not in self._disable_evaluator_output):
             model_names = self._backend.list_all_models(self._seed)
 

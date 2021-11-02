@@ -50,7 +50,7 @@ class FeatureValidator(BaseEstimator):
         if feat_type is not None:
             if isinstance(feat_type, dict):
                 self.feat_type = feat_type
-            elif not isinstance(feat_type, list):
+            elif not isinstance(feat_type, List):
                 raise ValueError("Auto-Sklearn expects a list of categorical/"
                                  "numerical feature types, yet a"
                                  " {} was provided".format(type(feat_type)))
@@ -88,7 +88,7 @@ class FeatureValidator(BaseEstimator):
         """
 
         # If a list was provided, it will be converted to pandas
-        if isinstance(X_train, list):
+        if isinstance(X_train, List):
             X_train, X_test = self.list_to_dataframe(X_train, X_test)
 
         self._check_data(X_train)
@@ -165,7 +165,7 @@ class FeatureValidator(BaseEstimator):
             raise NotFittedError("Cannot call transform on a validator that is not fitted")
 
         # If a list was provided, it will be converted to pandas
-        if isinstance(X, list):
+        if isinstance(X, List):
             X_transformed, _ = self.list_to_dataframe(X)
         else:
             X_transformed = X
@@ -380,7 +380,7 @@ class FeatureValidator(BaseEstimator):
                                 [(col, t) for col, t in zip(X_train.columns, X_train.dtypes)]
                             ))
         if X_test is not None:
-            if not isinstance(X_test, list):
+            if not isinstance(X_test, List):
                 self.logger.warning("Train features are a list while the provided test data"
                                     "is {}. X_test will be casted as DataFrame.".format(
                                         type(X_test)

@@ -185,10 +185,10 @@ def subsample(
     (SUPPORTED_FEAT_TYPES, List | np.ndarray | pd.DataFrame | Series)
         The X and y subsampled according to sample_size
     """
-    if isinstance(X, list):
+    if isinstance(X, List):
         X = np.asarray(X)
 
-    if isinstance(y, list):
+    if isinstance(y, List):
         y = np.asarray(y)
 
     if is_classification:

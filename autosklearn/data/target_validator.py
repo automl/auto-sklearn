@@ -64,8 +64,8 @@ class TargetValidator(BaseEstimator):
 
     def fit(
         self,
-        y_train: Union[list, np.ndarray, pd.Series, pd.DataFrame],
-        y_test: Optional[Union[list, np.ndarray, pd.Series, pd.DataFrame]] = None,
+        y_train: Union[List, np.ndarray, pd.Series, pd.DataFrame],
+        y_test: Optional[Union[List, np.ndarray, pd.Series, pd.DataFrame]] = None,
     ) -> 'TargetValidator':
         """
         Validates and fit a categorical encoder (if needed) to the targets
@@ -122,8 +122,8 @@ class TargetValidator(BaseEstimator):
 
     def _fit(
         self,
-        y_train: Union[list, np.ndarray, pd.Series, pd.DataFrame],
-        y_test: Optional[Union[list, np.ndarray, pd.Series, pd.DataFrame]] = None,
+        y_train: Union[List, np.ndarray, pd.Series, pd.DataFrame],
+        y_test: Optional[Union[List, np.ndarray, pd.Series, pd.DataFrame]] = None,
     ) -> 'TargetValidator':
         """
         If dealing with classification, this utility encodes the targets.
@@ -163,7 +163,7 @@ class TargetValidator(BaseEstimator):
         )
 
         # Clear typing to just numpy arrays and pandas
-        if isinstance(y_train, list):
+        if isinstance(y_train, List):
             y = np.asarray(y_train)
         else:
             y = y_train
@@ -235,7 +235,7 @@ class TargetValidator(BaseEstimator):
         self._check_data(y)
 
         # Clear the types List and DataFrame off of y
-        if isinstance(y, list):
+        if isinstance(y, List):
             y_transformed = np.asarray(y)
         elif isinstance(y, pd.DataFrame) or isinstance(y, pd.Series):
             y_transformed = y.to_numpy()
@@ -297,7 +297,7 @@ class TargetValidator(BaseEstimator):
 
             if isinstance(y, pd.DataFrame) or isinstance(y, pd.Series):
                 y = y.to_numpy()
-            elif isinstance(y, list):
+            elif isinstance(y, List):
                 y = np.asarray(y)
 
             # Perform the transformation and reshape it
@@ -337,7 +337,7 @@ class TargetValidator(BaseEstimator):
         """
 
         if not isinstance(
-                y, (np.ndarray, pd.DataFrame, list, pd.Series)) and not isinstance(y, spmatrix):
+                y, (np.ndarray, pd.DataFrame, List, pd.Series)) and not isinstance(y, spmatrix):
             raise ValueError("Auto-sklearn only supports Numpy arrays, Pandas DataFrames,"
                              " pd.Series, sparse data and Python Lists as targets, yet, "
                              "the provided input is of type {}".format(
