@@ -330,6 +330,7 @@ def reduce_dataset_size_if_too_large(
             # `multiplier` of them in memory, we subsample such that we can
             if memory_limit < megabytes(X) * multiplier:
 
+                n_samples_before = X.shape[0]
                 reduction_percent = float(memory_limit) / (megabytes(X) * multiplier)
 
                 # NOTE: type ignore
@@ -343,10 +344,10 @@ def reduce_dataset_size_if_too_large(
                     random_state=random_state
                 )
 
-                new_num_samples = int(reduction_percent * X.shape[0])
+                n_samples_after = X.shape[0]
                 warnings.warn(
                     f"Dataset too large for memory limit {memory_limit}MB, reduced"
-                    f" number of samples from {X.shape[0]} to {new_num_samples}."
+                    f" number of samples from {n_samples_before} to {n_samples_after}."
                 )
 
         else:
