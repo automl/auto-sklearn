@@ -1,14 +1,17 @@
+from typing import List
+from itertools import chain
 import warnings
 
 import pytest
 
 import numpy as np
 import pandas as pd
+import sklearn.datasets
 from scipy.sparse import csr_matrix, spmatrix
 
 from autosklearn.constants import (
     BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION,
-    REGRESSION, MULTIOUTPUT_REGRESSION, CLASSIFICATION_TASKS
+    REGRESSION, MULTIOUTPUT_REGRESSION, CLASSIFICATION_TASKS, REGRESSION_TASKS
 )
 from autosklearn.util.data import (
     subsample,
@@ -64,7 +67,7 @@ def test_subsample_classification_unique_labels_stay_in_training_set(y, random_s
 @parametrize("random_state", [0])
 @parametrize("sample_size", [0.25, 0.5, 5, 10])
 def test_subsample_validity(X, x_type, y, y_type, random_state, sample_size, task):
-    """ Asserts the validity of the function with all valid types 
+    """ Asserts the validity of the function with all valid types
 
     We want to make sure that `subsample` works correctly with all the types listed
     as x_type and y_type.
@@ -160,7 +163,17 @@ def test_reduce_precision_correctly_reduces_precision(X, dtype, x_type):
     assert X_reduced.dtype == precision
 
     # Check that it was reduce to the correct precision
-    assert precision == reduction_mapping[dtype]
+    expected: Dict[type, type] = {
+        np.float32: np.float32,
+        np.float64: np.float32,
+    }
+    if hasattr(np, 'float96'):
+        expected[np.float96] = np.float64
+
+    if hasattr(np, 'float128'):
+        expected[np.float128] = np.float64
+
+    assert precision == expected[dtype]
 
     # Check that X's shape was not modified in any way
     assert X.shape == X_reduced.shape
@@ -178,8 +191,6 @@ def test_reduce_precision_with_unsupported_dtypes(X, dtype):
 
     expected = f"X.dtype = {dtype} not equal to any supported {supported_precision_reductions}"
     assert err.value == expected
-
-
 
 
 @parametrize("X", [
@@ -261,4 +272,78 @@ def test_reduce_dataset_invalid_operations():
         )
 
     expected_err = f"Unknown operation `{invalid_op}`"
-    assert err.value = expected_err
+    assert err.value == expected_err
+
+
+@pytest.mark.parametrize(
+    'memory_limit,precision,task',
+    [
+        (memory_limit, precision, task)
+        for task in chain(CLASSIFICATION_TASKS, REGRESSION_TASKS)
+        for precision in (float, np.float32, np.float64, np.float128)
+        for memory_limit in (1, 100)
+    ]
+)
+def test_reduce_dataset_subsampling_explicit_values(memory_limit, precision, task):
+    random_state = 0
+    fixture = {
+        BINARY_CLASSIFICATION: {
+            1: {float: 2500, np.float32: 2500, np.float64: 2500, np.float128: 1250},
+            100: {float: 12000, np.float32: 12000, np.float64: 12000, np.float128: 12000},
+        },
+        MULTICLASS_CLASSIFICATION: {
+            1: {float: 390, np.float32: 390, np.float64: 390, np.float128: 195},
+            100: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
+        },
+        MULTILABEL_CLASSIFICATION: {
+            1: {float: 390, np.float32: 390, np.float64: 390, np.float128: 195},
+            100: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
+        },
+        REGRESSION: {
+            1: {float: 1250, np.float32: 1250, np.float64: 1250, np.float128: 625},
+            100: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
+        },
+        MULTIOUTPUT_REGRESSION: {
+            1: {float: 1250, np.float32: 1250, np.float64: 1250, np.float128: 625},
+            100: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
+        }
+    }
+
+    # Create the task and data
+    if task == BINARY_CLASSIFICATION:
+        X, y = sklearn.datasets.make_hastie_10_2()
+    elif task == MULTICLASS_CLASSIFICATION:
+        X, y = sklearn.datasets.load_digits(return_X_y=True)
+    elif task == MULTILABEL_CLASSIFICATION:
+        X, y_ = sklearn.datasets.load_digits(return_X_y=True)
+        y = np.zeros((X.shape[0], 10))
+        for i, j in enumerate(y_):
+            y[i, j] = 1
+    elif task == REGRESSION:
+        X, y = sklearn.datasets.make_friedman1(n_samples=5000, n_features=20)
+    elif task == MULTIOUTPUT_REGRESSION:
+        X, y = sklearn.datasets.make_friedman1(n_samples=5000, n_features=20)
+        y = np.vstack((y, y)).transpose()
+    else:
+        raise ValueError(task)
+
+    # Validate the test data and make sure X and y have the same number of rows
+    assert X.shape[0] == y.shape[0]
+
+    # Convert X to the dtype we are testing
+    X = X.astype(precision)
+
+    # Preform the subsampling through `reduce_dataset_size_if_too_large`
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        X_new, y_new = reduce_dataset_size_if_too_large(
+            X=X, y=y,
+            random_state=random_state,
+            memory_limit=memory_limit,
+            is_classification=task in CLASSIFICATION_TASKS,
+            operations=['precision', 'subsample'],
+            multiplier=10
+        )
+
+    # Assert the new number of samples
+    assert X_new.shape[0] == fixture[task][memory_limit][precision]
