@@ -308,7 +308,7 @@ def reduce_dataset_size_if_too_large(
     assert memory_limit > 0
 
     if 'precision' in operations and X.dtype not in supported_precision_reductions:
-        raise ValueError(f"Unsupported {X.dtype} for precision reduction")
+        raise ValueError(f"Unsupported type `{X.dtype}` for precision reduction")
 
     def megabytes(arr: Union[np.ndarray, spmatrix]) -> float:
         return 1e-6 * (arr.nbytes if isinstance(X, np.ndarray) else arr.data.nbytes)

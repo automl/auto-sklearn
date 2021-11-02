@@ -157,8 +157,13 @@ def test_reduce_precision_correctly_reduces_precision(X, dtype, x_type):
 @parametrize('dtype', [np.int32, np.int64, np.complex128])
 def test_reduce_precision_with_unsupported_dtypes(X, dtype):
     X = X.astype(dtype)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as err:
         reduce_precision(X)
+
+    expected = f"X.dtype = {dtype} not equal to any supported {supported_precision_reductions}"
+    assert err.value == expected
+
+
 
 
 @parametrize("X", [
@@ -210,8 +215,10 @@ def test_reduce_dataset_reduces_size_and_precision(
 
 
 def test_reduce_dataset_invalid_dtype_for_precision_reduction():
-    X = np.asarray([1, 2, 3], dtype=int)
-    with pytest.raises(ValueError):
+    dtype = int
+    X = np.asarray([1, 2, 3], dtype=dtype)
+
+    with pytest.raises(ValueError) as err:
         reduce_dataset_size_if_too_large(
             X=X,
             y=X,
@@ -220,14 +227,22 @@ def test_reduce_dataset_invalid_dtype_for_precision_reduction():
             is_classification=False
         )
 
+    expected_err = f"Unsupported type `{dtype}` for precision reduction"
+    assert err.value == expected_err
+
 
 def test_reduce_dataset_invalid_operations():
-    X = np.asarray([1, 2, 3], dtype=int)
-    with pytest.raises(ValueError):
+    invalid_op = "invalid"
+
+    X = np.asarray([1, 2, 3], dtype=float)
+    with pytest.raises(ValueError) as err:
         reduce_dataset_size_if_too_large(
             X=X,
             y=X,
-            operations=['invalid'],
+            operations=[invalid_op],
             memory_limit=1,
             is_classification=False
         )
+
+    expected_err = f"Unknown operation `{invalid_op}`"
+    assert err.value = expected_err
