@@ -30,7 +30,7 @@ If you use auto-sklearn in scientific publications, we would appreciate citation
 *Matthias Feurer, Aaron Klein, Katharina Eggensperger, Jost Springenberg, Manuel Blum and Frank Hutter*  
 Advances in Neural Information Processing Systems 28 (2015)  
 
-[Link](https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf) to publication.
+[Link](https://papers.neurips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf) to publication.
 ```
 @inproceedings{feurer-neurips15a,
     title     = {Efficient and Robust Automated Machine Learning},
