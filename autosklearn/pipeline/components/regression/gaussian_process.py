@@ -7,19 +7,6 @@ from sklearn.exceptions import ConvergenceWarning
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS
 
-IGNORED_WARNINGS = [
-    # Guassian process issues a convergence warning if it's not fitted for very
-    # long which we can't control during tests. We assume the user does not need
-    # the multiple warnings either.
-    (
-        ConvergenceWarning,
-        (r'The optimal value found for dimension \d+ of parameter length_scale '
-         r'is close to the specified lower bound .+\. Decreasing the bound and '
-         r'calling fit again may find a better value\.')
-    )
-]
-
-
 class GaussianProcess(AutoSklearnRegressionAlgorithm):
     def __init__(self, alpha, thetaL, thetaU, random_state=None):
         self.alpha = alpha
@@ -52,11 +39,8 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
             random_state=self.random_state,
             normalize_y=True
         )
-        with warnings.catch_warnings():
-            for category, message in IGNORED_WARNINGS:
-                warnings.filterwarnings('ignore', category=category, message=message)
 
-            self.estimator.fit(X, y)
+        self.estimator.fit(X, y)
 
         return self
 

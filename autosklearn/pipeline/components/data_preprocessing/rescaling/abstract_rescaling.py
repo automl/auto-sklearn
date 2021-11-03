@@ -11,15 +11,6 @@ from sklearn.exceptions import NotFittedError
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 
-IGNORED_WARNINGS = [
-    # The QuantileTransformerComponent is created before knowing the number of samples
-    # and so the search space includes n_quantiles which can be too large
-    (
-        UserWarning,
-        r'n_quantiles \(\d+\) is greater than the total number of samples \(\d+\)'
-    )
-]
-
 
 class Rescaling(object):
     # Rescaling does not support fit_transform (as of 0.19.1)!
@@ -38,11 +29,7 @@ class Rescaling(object):
         if self.preprocessor is None:
             raise NotFittedError()
 
-        with warnings.catch_warnings():
-            for category, message in IGNORED_WARNINGS:
-                warnings.filterwarnings('ignore', category=category, message=message)
-
-            self.preprocessor.fit(X)
+        self.preprocessor.fit(X)
 
         return self
 
@@ -51,11 +38,7 @@ class Rescaling(object):
         if self.preprocessor is None:
             raise NotFittedError()
 
-        with warnings.catch_warnings():
-            for category, message in IGNORED_WARNINGS:
-                warnings.filterwarnings('ignore', category=category, message=message)
-
-            transformed_X = self.preprocessor.transform(X)
+        transformed_X = self.preprocessor.transform(X)
 
         return transformed_X
 

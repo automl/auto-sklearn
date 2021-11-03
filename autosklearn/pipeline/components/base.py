@@ -147,21 +147,7 @@ class AutoSklearnComponent(BaseEstimator):
 
 class IterativeComponent(AutoSklearnComponent):
     def fit(self, X, y, sample_weight=None):
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                'ignore', category=ConvergenceWarning,
-                message="Stochastic Optimizer: Maximum iterations (2) reached"
-                        " and the optimization hasn't converged yet."
-            )
-
-            self.iterative_fit(X, y, n_iter=2, refit=True)
-
-            iteration = 2
-            while not self.configuration_fully_fitted():
-                n_iter = int(2 ** iteration / 2)
-                self.iterative_fit(X, y, n_iter=n_iter, refit=False)
-                iteration += 1
-
+        self.iterative_fit(X, y, n_iter=self.get_max_iter(), refit=True)
         return self
 
     @staticmethod
@@ -175,25 +161,9 @@ class IterativeComponent(AutoSklearnComponent):
 class IterativeComponentWithSampleWeight(AutoSklearnComponent):
 
     def fit(self, X, y, sample_weight=None):
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                'ignore', category=ConvergenceWarning,
-                message="Stochastic Optimizer: Maximum iterations (2) reached"
-                        " and the optimization hasn't converged yet."
-            )
-
-            self.iterative_fit(
-                X, y, n_iter=2, refit=True, sample_weight=sample_weight
-            )
-
-            iteration = 2
-            while not self.configuration_fully_fitted():
-                n_iter = int(2 ** iteration / 2)
-                self.iterative_fit(
-                    X, y, n_iter=n_iter, refit=False, sample_weight=sample_weight
-                )
-                iteration += 1
-
+        self.iterative_fit(
+            X, y, n_iter=self.get_max_iter(), refit=True, sample_weight=sample_weight
+        )
         return self
 
     @staticmethod
