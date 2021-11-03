@@ -46,16 +46,18 @@ Instead of using all available estimators, it is possible to restrict
 all preprocessing methods and restrict the configuration space to only
 random forests.
 
->>> import autosklearn.classification
->>> automl = autosklearn.classification.AutoSklearnClassifier(
->>>     include = {
->>>       'classifier': ["random_forest"],
->>>       'feature_preprocessor': ["no_preprocessing"]
->>>     },
->>>     exclude=None
->>> )
->>> automl.fit(X_train, y_train)
->>> predictions = automl.predict(X_test)
+.. code:: python
+
+    import autosklearn.classification
+    automl = autosklearn.classification.AutoSklearnClassifier(
+        include = {
+            'classifier': ["random_forest"],
+            'feature_preprocessor': ["no_preprocessing"]
+        },
+        exclude=None
+    )
+    automl.fit(X_train, y_train)
+    predictions = automl.predict(X_test)
 
 **Note:** The strings used to identify estimators and preprocessors are the filenames without *.py*.
 
@@ -141,21 +143,23 @@ Inspecting the results
 *auto-sklearn* allows users to inspect the training results and statistics. The following example shows how different
 statistics can be printed for the inspection.
 
->>> import autosklearn.classification
->>> automl = autosklearn.classification.AutoSklearnClassifier()
->>> automl.fit(X_train, y_train)
->>> automl.cv_results_
->>> automl.performance_over_time_.plot(
->>>    x='Timestamp',
->>>    kind='line',
->>>    legend=True,
->>>    title='Auto-sklearn accuracy over time',
->>>    grid=True,
->>> )
->>> plt.show()
->>> 
->>> automl.sprint_statistics()
->>> automl.show_models()
+.. code:: python
+
+    import autosklearn.classification
+    automl = autosklearn.classification.AutoSklearnClassifier()
+    automl.fit(X_train, y_train)
+    automl.cv_results_
+    automl.performance_over_time_.plot(
+        x='Timestamp',
+        kind='line',
+        legend=True,
+        title='Auto-sklearn accuracy over time',
+        grid=True,
+    )
+    plt.show()
+
+    automl.sprint_statistics()
+    automl.show_models()
 
 ``cv_results_`` returns a dict with keys as column headers and values as columns, that can be imported into a pandas DataFrame.
 ``performance_over_time_``  returns a DataFrame containing the models performance over time data, which can be used for plotting directly (Here is an example: :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py`).
@@ -215,11 +219,13 @@ In order to obtain *vanilla auto-sklearn* as used in `Efficient and Robust Autom
 <https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine -learning>`_
 set ``ensemble_size=1`` and ``initial_configurations_via_metalearning=0``:
 
->>> import autosklearn.classification
->>> automl = autosklearn.classification.AutoSklearnClassifier(
->>>     ensemble_size=1,
->>>     initial_configurations_via_metalearning=0
->>> )
+.. code:: python
+
+    import autosklearn.classification
+    automl = autosklearn.classification.AutoSklearnClassifier(
+        ensemble_size=1,
+        initial_configurations_via_metalearning=0
+    )
 
 An ensemble of size one will result in always choosing the current best model
 according to its performance on the validation set. Setting the initial
