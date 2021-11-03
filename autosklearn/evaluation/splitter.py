@@ -82,9 +82,9 @@ class CustomStratifiedShuffleSplit(StratifiedShuffleSplit):
 
                     j = np.argmax(n_i)
                     if n_i[j] == 1:
-                        warnings.warn("Can't respect size requirements for split"
-                                      " as the train set must contain any unique"
-                                      " labels.")
+                        warnings.warn("Can't respect size requirements for split.",
+                                      " The training set must contain all of the unique"
+                                      " labels that exist in the dataset.")
                     else:
                         n_i[j] -= 1
                         t_i[j] += 1
