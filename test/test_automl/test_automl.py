@@ -743,7 +743,7 @@ def data_input_and_target_types():
     ys_multioutput_regression = [
         y_multioutput_regression_ndarray,
         list(y_multioutput_regression_ndarray),
-        # csr_matrix(y_multioutput_regression_ndarray),
+        csr_matrix(y_multioutput_regression_ndarray),
         # pd.Series(y_multioutput_regression_ndarray),
         pd.DataFrame(data=y_multioutput_regression_ndarray),
     ]
