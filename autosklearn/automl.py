@@ -690,7 +690,7 @@ class AutoML(BaseEstimator):
         self._logger.debug('Starting to print environment information')
         self._logger.debug('  Python version: %s', sys.version.split('\n'))
         try:
-            self._logger.debug('  Distribution: %s', distro.linux_distribution())
+            self._logger.debug(f'\tDistribution: {distro.id()}-{distro.version()}-{distro.name()}')
         except AttributeError:
             pass
 

@@ -6,6 +6,7 @@ import tempfile
 import traceback
 import unittest
 import unittest.mock
+import warnings
 
 from joblib import Memory
 import numpy as np
@@ -15,6 +16,7 @@ from sklearn.base import clone
 import sklearn.ensemble
 import sklearn.svm
 from sklearn.utils.validation import check_is_fitted
+from sklearn.exceptions import ConvergenceWarning
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
@@ -28,6 +30,15 @@ import autosklearn.pipeline.components.feature_preprocessing as preprocessing_co
 from autosklearn.pipeline.util import get_dataset
 from autosklearn.pipeline.constants import SPARSE, DENSE, SIGNED_DATA, UNSIGNED_DATA, PREDICTIONS
 
+ignored_warnings = [
+    (
+        ConvergenceWarning, (  # Gaussian processes iterative fit issues this warning
+            r"The optimal value found for dimension \d+ of parameter \w+ is"
+            r" close to the specified upper bound \d+\.\d+\. Increasing the"
+            r" bound and calling fit again may find a better value\."
+        )
+    ),
+]
 
 class SimpleRegressionPipelineTest(unittest.TestCase):
     _multiprocess_can_split_ = True
@@ -123,16 +134,17 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 'X_test': X_test, 'Y_test': Y_test}
 
         dataset_properties = {'multioutput': True}
-        cs = SimpleRegressionPipeline(dataset_properties=dataset_properties).\
-            get_hyperparameter_search_space()
-        self._test_configurations(cs, data=data,
-                                  dataset_properties=dataset_properties)
+        pipeline = SimpleRegressionPipeline(dataset_properties=dataset_properties)
+        cs = pipeline.get_hyperparameter_search_space()
+
+        self._test_configurations(cs, data=data, dataset_properties=dataset_properties)
 
     def _test_configurations(self, configurations_space, make_sparse=False,
                              data=None, dataset_properties=None):
         # Use a limit of ~4GiB
         limit = 3072 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+
 
         configurations_space.seed(1)
 
@@ -179,18 +191,23 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                                             "instance is not fitted yet"):
                     check_is_fitted(step)
 
+
             try:
-                cls.fit(X_train, Y_train)
-                # After fit, all components should be tagged as fitted
-                # by sklearn. Check is fitted raises an exception if that
-                # is not the case
-                try:
-                    for name, step in cls.named_steps.items():
-                        check_is_fitted(step)
-                except sklearn.exceptions.NotFittedError:
-                    self.fail("config={} raised NotFittedError unexpectedly!".format(
-                        config
-                    ))
+                with warnings.catch_warnings():
+                    for category, message in ignored_warnings:
+                        warnings.filterwarnings('ignore', category=category, message=message)
+
+                    cls.fit(X_train, Y_train)
+                    # After fit, all components should be tagged as fitted
+                    # by sklearn. Check is fitted raises an exception if that
+                    # is not the case
+                    try:
+                        for name, step in cls.named_steps.items():
+                            check_is_fitted(step)
+                    except sklearn.exceptions.NotFittedError:
+                        self.fail("config={} raised NotFittedError unexpectedly!".format(
+                            config
+                        ))
 
                 cls.predict(X_test)
             except MemoryError:
