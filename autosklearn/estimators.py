@@ -186,7 +186,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
         smac_scenario_args : dict, optional (None)
             Additional arguments inserted into the scenario of SMAC. See the
-            `SMAC documentation <https://automl.github.io/SMAC3/master/options.html?highlight=scenario#scenario>`_
+            `SMAC documentation <https://automl.github.io/SMAC3/master/pages/details/scenario.html>`_
             for a list of available arguments.
 
         get_smac_object_callback : callable
