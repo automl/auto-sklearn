@@ -79,7 +79,8 @@ clf = autosklearn.classification.AutoSklearnClassifier(
 )
 clf.fit(X_train, y_train)
 
-assert len(clf.get_models_with_weights()) > 0  # Just to make sure models were found
+# To check that models were found without issue when running examples
+assert len(clf.get_models_with_weights()) > 0
 print(clf.sprint_statistics())
 
 ############################################################################
