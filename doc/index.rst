@@ -22,7 +22,7 @@ replacement for a scikit-learn estimator:
 hyperparameter tuning. It leverages recent advantages in *Bayesian
 optimization*, *meta-learning* and *ensemble construction*. Learn more about
 the technology behind *auto-sklearn* by reading our paper published at
-`NIPS 2015 <https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf>`_
+`NIPS 2015 <https://papers.neurips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf>`_
 .
 
 .. topic:: NEW: Auto-sklearn 2.0
@@ -83,38 +83,32 @@ reference to the following paper:
 
 
  `Efficient and Robust Automated Machine Learning
- <https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning>`_,
+ <https://papers.neurips.cc/paper/5872-efficient-and-robust-automated-machine-learning>`_,
  Feurer *et al.*, Advances in Neural Information Processing Systems 28 (NIPS 2015).
 
  Bibtex entry::
 
-     @incollection{NIPS2015_5872,
-        title = {Efficient and Robust Automated Machine Learning},
-        author = {Feurer, Matthias and Klein, Aaron and Eggensperger, Katharina and
-                  Springenberg, Jost and Blum, Manuel and Hutter, Frank},
-        booktitle = {Advances in Neural Information Processing Systems 28},
-        editor = {C. Cortes and N. D. Lawrence and D. D. Lee and M. Sugiyama and R. Garnett},
-        pages = {2962--2970},
-        year = {2015},
-        publisher = {Curran Associates, Inc.},
-        url = {https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf}
-     }
+    @inproceedings{feurer-neurips15a,
+        title     = {Efficient and Robust Automated Machine Learning},
+        author    = {Feurer, Matthias and Klein, Aaron and Eggensperger, Katharina  Springenberg, Jost and Blum, Manuel and Hutter, Frank},
+        booktitle = {Advances in Neural Information Processing Systems 28 (2015)},
+        pages     = {2962--2970},
+        year      = {2015}
+    }
 
 If you are using Auto-sklearn 2.0, please also cite
 
 
- `Auto-Sklearn 2.0: The Next Generation <https://arxiv.org/abs/2007.04074>`_, Feurer *et al.*, (arXiv, 2020).
+ `Auto-Sklearn 2.0: Hands-free AutoML via Meta-Learning <https://arxiv.org/abs/2007.04074>`_, Feurer *et al.*, (arXiv, 2020).
 
  Bibtex entry::
 
-     @article{ASKL2,
-        title = {Auto-Sklearn 2.0},
-        author = {Feurer, Matthias and Eggensperger, Katharina and
-                  Falkner, Stefan and Lindauer, Marius and Hutter, Frank},
-        booktitle = {Advances in Neural Information Processing Systems 28},
-        year = {2020},
-        journal = {arXiv:2007.04074 [cs.LG]},
-     }
+    @article{feurer-arxiv20a,
+        title     = {Auto-Sklearn 2.0: Hands-free AutoML via Meta-Learning},
+        author    = {Feurer, Matthias and Eggensperger, Katharina and Falkner, Stefan and Lindauer, Marius and Hutter, Frank},
+        journal   = {arXiv:2007.04074 [cs.LG]},
+        year      = {2020},
+    }
 
 Contributing
 ************
