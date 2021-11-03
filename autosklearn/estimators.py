@@ -2,7 +2,7 @@
 from typing import Optional, Dict, List, Tuple, Union, Iterable
 from typing_extensions import Literal
 
-from ConfigSpace.configuration_space import Configuration
+from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
 import dask.distributed
 import joblib
 import numpy as np
@@ -830,7 +830,7 @@ class AutoSklearnEstimator(BaseEstimator):
         y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         dataset_name: Optional[str] = None,
         feat_type: Optional[List[str]] = None,
-    ):
+    ) -> ConfigurationSpace:
         """
         Returns the Configuration Space object, from which Auto-Sklearn
         will sample configurations and build pipelines.
@@ -851,6 +851,7 @@ class AutoSklearnEstimator(BaseEstimator):
         """
         if self.automl_ is None:
             self.automl_ = self.build_automl()
+
         return self.automl_.fit(
             X, y,
             X_test=X_test, y_test=y_test,
