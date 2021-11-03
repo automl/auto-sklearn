@@ -11,10 +11,12 @@ auto-sklearn
 *auto-sklearn* is an automated machine learning toolkit and a drop-in
 replacement for a scikit-learn estimator:
 
-    >>> import autosklearn.classification
-    >>> cls = autosklearn.classification.AutoSklearnClassifier()
-    >>> cls.fit(X_train, y_train)
-    >>> predictions = cls.predict(X_test)
+.. code:: python
+
+    import autosklearn.classification
+    cls = autosklearn.classification.AutoSklearnClassifier()
+    cls.fit(X_train, y_train)
+    predictions = cls.predict(X_test)
 
 *auto-sklearn* frees a machine learning user from algorithm selection and
 hyperparameter tuning. It leverages recent advantages in *Bayesian
@@ -30,26 +32,30 @@ the technology behind *auto-sklearn* by reading our paper published at
 
 *auto-sklearn 2.0* works the same way as regular *auto-sklearn* and you can use it via
 
-    >>> from autosklearn.experimental.askl2 import AutoSklearn2Classifier
+.. code:: python
+
+    from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 
 A paper describing our advances is available on `arXiv <https://arxiv.org/abs/2007.04074>`_.
 
 Example
 *******
 
-    >>> import autosklearn.classification
-    >>> import sklearn.model_selection
-    >>> import sklearn.datasets
-    >>> import sklearn.metrics
-    >>> if __name__ == "__main__":
-    >>>     X, y = sklearn.datasets.load_digits(return_X_y=True)
-    >>>     X_train, X_test, y_train, y_test = \
-                sklearn.model_selection.train_test_split(X, y, random_state=1)
-    >>>     automl = autosklearn.classification.AutoSklearnClassifier()
-    >>>     automl.fit(X_train, y_train)
-    >>>     y_hat = automl.predict(X_test)
-    >>>     print("Accuracy score", sklearn.metrics.accuracy_score(y_test, y_hat))
+.. code:: python
 
+    import autosklearn.classification
+    import sklearn.model_selection
+    import sklearn.datasets
+    import sklearn.metrics
+
+    if __name__ == "__main__":
+        X, y = sklearn.datasets.load_digits(return_X_y=True)
+        X_train, X_test, y_train, y_test = \
+            sklearn.model_selection.train_test_split(X, y, random_state=1)
+        automl = autosklearn.classification.AutoSklearnClassifier()
+        automl.fit(X_train, y_train)
+        y_hat = automl.predict(X_test)
+        print("Accuracy score", sklearn.metrics.accuracy_score(y_test, y_hat))
 
 This will run for one hour and should result in an accuracy above 0.98.
 
@@ -115,8 +121,10 @@ Contributing
 
 We appreciate all contribution to auto-sklearn, from bug reports and
 documentation to new features. If you want to contribute to the code, you can
-pick an issue from the `issue tracker <https://github.com/automl/auto-sklearn/issues>`_
-which is marked with `Needs contributer`.
+pick an issue from the `issue tracker <https://github.com/automl/auto-sklearn/issues>`_.
+
+Check out our `contribution guide on github<https://github.com/automl/auto-sklearn/blob/master/CONTRIBUTING.md>`_ if you want to know more!
+We've catered it for both new and experienced contributers.
 
 .. note::
 
@@ -124,7 +132,3 @@ which is marked with `Needs contributer`.
     get merged, it is highly advised that you contact the developers
     by opening a `github issue <https://github
     .com/automl/auto-sklearn/issues>`_ before starting to work.
-
-When developing new features, please create a new branch from the development
-branch. When to submitting a pull request, make sure that all tests are
-still passing.
