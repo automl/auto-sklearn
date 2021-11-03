@@ -36,7 +36,7 @@ def test_custom_stratified_shuffle_split_returns_unique_labels_and_maintains_siz
     y_sampled = y[left_idxs]
     X_sampled = X[left_idxs]
 
-    # Assert the train_size param is kept
+    # Assert the train_size param is respected
     if isinstance(train_size, float):
         n_samples = int(train_size * len(y))
     else:
