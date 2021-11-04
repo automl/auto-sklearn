@@ -1,11 +1,9 @@
-import warnings
-
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter
-from sklearn.exceptions import ConvergenceWarning
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS
+
 
 class GaussianProcess(AutoSklearnRegressionAlgorithm):
     def __init__(self, alpha, thetaL, thetaU, random_state=None):

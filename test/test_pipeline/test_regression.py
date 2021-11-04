@@ -40,6 +40,7 @@ ignored_warnings = [
     ),
 ]
 
+
 class SimpleRegressionPipelineTest(unittest.TestCase):
     _multiprocess_can_split_ = True
 
@@ -145,7 +146,6 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         limit = 3072 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
-
         configurations_space.seed(1)
 
         for i in range(10):
@@ -190,7 +190,6 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 with self.assertRaisesRegex(sklearn.exceptions.NotFittedError,
                                             "instance is not fitted yet"):
                     check_is_fitted(step)
-
 
             try:
                 with warnings.catch_warnings():

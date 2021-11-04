@@ -1,5 +1,4 @@
 from typing import Optional, Union
-import warnings
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 
