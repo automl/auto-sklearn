@@ -57,6 +57,7 @@ ignored_warnings = [
     ),
 ]
 
+
 class SimpleRegressionPipelineTest(unittest.TestCase):
     _multiprocess_can_split_ = True
 

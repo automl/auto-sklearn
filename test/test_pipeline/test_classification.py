@@ -70,6 +70,7 @@ ignored_warnings = [
     ),
 ]
 
+
 class DummyClassifier(AutoSklearnClassificationAlgorithm):
     @staticmethod
     def get_properties(dataset_properties=None):
