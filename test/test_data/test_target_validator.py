@@ -215,10 +215,12 @@ def test_targetvalidator_supported_types_classification(input_data_targettest):
     # These next part of the tests rely on some encoding to have taken place
     # This happens when `is_classification` and not task_type = multilabel-indicator
     #
-    # TargetValidator._fit()
+    # As state in TargetValidator._fit()
     # > Also, encoding multilabel indicator data makes the data multiclass
     #   Let the user employ a MultiLabelBinarizer if needed
     #
+    # As a result of this, we don't encode 'multilabel-indicator' labels and
+    # there is nothing else to check here
     if validator.type_of_target == 'multilabel-indicator':
         assert validator.encoder is None
 
