@@ -152,22 +152,6 @@ class InputValidator(BaseEstimator):
 
         return self
 
-    @overload
-    def transform(
-        self,
-        X: SUPPORTED_FEAT_TYPES,
-        y: None
-    ) -> Tuple[Union[np.ndarray, pd.DataFrame, spmatrix], None]:
-        ...
-
-    @overload
-    def transform(
-        self,
-        X: SUPPORTED_FEAT_TYPES,
-        y: Union[List, pd.Series, pd.DataFrame, np.ndarray]
-    ) -> Tuple[Union[spmatrix, pd.DataFrame, np.ndarray], np.ndarray]:
-        ...
-
     def transform(
         self,
         X: SUPPORTED_FEAT_TYPES,
