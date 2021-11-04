@@ -166,6 +166,8 @@ def test_reduce_precision_correctly_reduces_precision(X, dtype, x_type):
     expected: Dict[type, type] = {
         np.float32: np.float32,
         np.float64: np.float32,
+        np.dtype('float32'): np.float32,
+        np.dtype('float64'): np.float32
     }
     if hasattr(np, 'float96'):
         expected[np.float96] = np.float64
@@ -189,8 +191,8 @@ def test_reduce_precision_with_unsupported_dtypes(X, dtype):
     with pytest.raises(ValueError) as err:
         reduce_precision(X)
 
-    expected = f"X.dtype = {dtype} not equal to any supported {supported_precision_reductions}"
-    assert err.value == expected
+    expected = f"X.dtype = {X.dtype} not equal to any supported {supported_precision_reductions}"
+    assert err.value.args[0] == expected
 
 
 @parametrize("X", [
@@ -215,15 +217,18 @@ def test_reduce_dataset_reduces_size_and_precision(
     random_state = 0
     memory_limit = 1  # Force reductions
 
-    X_out, y_out = reduce_dataset_size_if_too_large(
-        X=X,
-        y=y,
-        random_state=random_state,
-        memory_limit=memory_limit,
-        operations=operations,
-        multiplier=multiplier,
-        is_classification=is_classification,
-    )
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore")
+
+        X_out, y_out = reduce_dataset_size_if_too_large(
+            X=X,
+            y=y,
+            random_state=random_state,
+            memory_limit=memory_limit,
+            operations=operations,
+            multiplier=multiplier,
+            is_classification=is_classification,
+        )
 
     def bytes(arr):
         return arr.nbytes if isinstance(arr, np.ndarray) else arr.data.nbytes
@@ -254,8 +259,8 @@ def test_reduce_dataset_invalid_dtype_for_precision_reduction():
             is_classification=False
         )
 
-    expected_err = f"Unsupported type `{dtype}` for precision reduction"
-    assert err.value == expected_err
+    expected_err = f"Unsupported type `{X.dtype}` for precision reduction"
+    assert err.value.args[0] == expected_err
 
 
 def test_reduce_dataset_invalid_operations():
@@ -272,7 +277,7 @@ def test_reduce_dataset_invalid_operations():
         )
 
     expected_err = f"Unknown operation `{invalid_op}`"
-    assert err.value == expected_err
+    assert err.value.args[0] == expected_err
 
 
 @pytest.mark.parametrize(
