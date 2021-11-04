@@ -628,6 +628,21 @@ def test_binary(tmp_dir, dask_client):
     assert performance_over_time_is_plausible(automl.performance_over_time_) is True
 
 
+def test_can_fit_twice(tmp_dir, dask_client):
+    X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+    automl = AutoSklearnClassifier(
+        tmp_folder=tmp_dir,
+        dask_client=dask_client,
+        per_run_time_limit=5,
+        initial_configurations_via_metalearning=0,
+        smac_scenario_args={'runcount_limit': 1},
+    )
+
+    # Should raise no error
+    automl.fit(X_train, Y_train, X_test=X_test, y_test=Y_test)
+    automl.fit(X_train, Y_train, X_test=X_test, y_test=Y_test)
+
+
 def test_classification_pandas_support(tmp_dir, dask_client):
 
     X, y = sklearn.datasets.fetch_openml(
