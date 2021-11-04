@@ -32,14 +32,30 @@ from autosklearn.pipeline.constants import SPARSE, DENSE, SIGNED_DATA, UNSIGNED_
 
 ignored_warnings = [
     (
-        ConvergenceWarning, (  # Gaussian processes iterative fit issues this warning
-            r"The optimal value found for dimension \d+ of parameter \w+ is"
-            r" close to the specified upper bound \d+\.\d+\. Increasing the"
-            r" bound and calling fit again may find a better value\."
+        UserWarning, (  # From QuantileTransformer
+            r"n_quantiles \(\d+\) is greater than the total number of samples \(\d+\)\."
+            r" n_quantiles is set to n_samples\."
+        )
+    ),
+    (
+        ConvergenceWarning, (  # From GaussianProcesses
+            r"The optimal value found for dimension \d+ of parameter \w+ is close"
+            r" to the specified (upper|lower) bound .*(Increasing|Decreasing) the bound"
+            r" and calling fit again may find a better value."
+        )
+    ),
+    (
+        UserWarning, (  # From FastICA
+            r"n_components is too large: it will be set to \d+"
+        )
+    ),
+    (
+        ConvergenceWarning, (  # From SGD
+            r"Maximum number of iteration reached before convergence\. Consider increasing"
+            r" max_iter to improve the fit\."
         )
     ),
 ]
-
 
 class SimpleRegressionPipelineTest(unittest.TestCase):
     _multiprocess_can_split_ = True
