@@ -135,8 +135,8 @@ def predict_RAM_usage(X: np.ndarray, categorical: List[bool]) -> float:
 
 
 def subsample(
-    X: SUPPORTED_FEAT_TYPES,
-    y: Union[List, np.ndarray, pd.DataFrame, pd.Series],
+    X: Union[np.ndarray, spmatrix],
+    y: np.ndarray,
     is_classification: bool,
     sample_size: Union[float, int],
     random_state: Optional[Union[int, np.random.RandomState]] = None,
@@ -154,19 +154,12 @@ def subsample(
     Interestingly enough, StratifiedShuffleSplut and descendants don't support
     sparse `y` in `split(): _check_array` call. Hence, neither do we.
 
-    NOTE3:
-    The core autosklearn library doesn't rely on the full type of X.
-    The typing could be reduced to:
-    *   X: np.ndarray | spmatrix
-    *   Y: np.ndarray
-
-
     Parameters
     ----------
-    X: SUPPORTED_FEAT_TYPES
+    X: Union[np.ndarray, spmatrix]
         The X's to subsample
 
-    Y: List | np.ndarray | pd.DataFrame | Series
+    y: np.ndarray
         The Y's to subsample
 
     is_classification: bool
@@ -182,7 +175,7 @@ def subsample(
 
     Returns
     -------
-    (SUPPORTED_FEAT_TYPES, List | np.ndarray | pd.DataFrame | Series)
+    (np.ndarray | spmatrix, np.ndarray)
         The X and y subsampled according to sample_size
     """
     if isinstance(X, List):
@@ -198,6 +191,8 @@ def subsample(
         )
         left_idxs, _ = next(splitter.split(X=X, y=y))
 
+        # This function supports pandas objects but they won't get here
+        # yet as we do not reduce the size of pandas dataframes.
         if isinstance(X, pd.DataFrame):
             idxs = X.index[left_idxs]
             X = X.loc[idxs]
