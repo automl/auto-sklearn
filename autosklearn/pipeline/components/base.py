@@ -152,6 +152,7 @@ class IterativeComponent(AutoSklearnComponent):
         while not self.configuration_fully_fitted():
             n_iter = int(2 ** iteration / 2)
             self.iterative_fit(X, y, n_iter=n_iter, refit=False)
+            iteration += 1
 
         return self
 
@@ -172,6 +173,7 @@ class IterativeComponentWithSampleWeight(AutoSklearnComponent):
         while not self.configuration_fully_fitted():
             n_iter = int(2 ** iteration / 2)
             self.iterative_fit(X, y, n_iter=n_iter, refit=False, sample_weight=sample_weight)
+            iteration += 1
 
         return self
 
