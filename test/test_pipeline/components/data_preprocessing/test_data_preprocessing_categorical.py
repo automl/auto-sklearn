@@ -107,4 +107,3 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
     def test_transform_with_sparse_column_with_negative_labels(self):
         X = sparse.csr_matrix([[0], [-1]])
         CategoricalPreprocessingPipeline().fit_transform(X)
-

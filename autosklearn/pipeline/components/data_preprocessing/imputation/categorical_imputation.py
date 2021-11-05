@@ -36,9 +36,10 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
             # Only DataFrame does not
             kind = X.dtype.kind
 
+        fill_value: Optional[int] = None
+
         number_kinds = ("i", "u", "f")
         if kind in number_kinds:
-
             if isinstance(X, spmatrix):
                 # TODO negative labels
                 #
@@ -50,8 +51,6 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
                 fill_value = 0
             else:
                 fill_value = min(np.unique(X)) - 1
-        else:
-            fill_value = None  # use the default of SimpleImputer
 
         self.preprocessor = sklearn.impute.SimpleImputer(
             strategy='constant', copy=False, fill_value=fill_value
