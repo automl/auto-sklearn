@@ -38,8 +38,18 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
 
         number_kinds = ("i", "u", "f")
         if kind in number_kinds:
-            unique = np.unique(X.data) if isinstance(X, spmatrix) else np.unique(X)
-            fill_value = min(min(unique), 0)
+
+            if isinstance(X, spmatrix):
+                # TODO negative labels
+                #
+                #   Previously this was the behaviour and went
+                #   unnoticed. Imputing negative labels results in
+                #   the cateogircal shift step failing as the ordinal
+                #   encoder can't fix negative labels.
+                #   This is here to document the behaviour explicitly
+                fill_value = 0
+            else:
+                fill_value = min(np.unique(X)) - 1
         else:
             fill_value = None  # use the default of SimpleImputer
 
