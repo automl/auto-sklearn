@@ -3,7 +3,7 @@ from typing import Dict, Optional, Tuple, Union
 from ConfigSpace.configuration_space import ConfigurationSpace
 
 import numpy as np
-from scipy.sparse import issparse
+from scipy.sparse import spmatrix
 
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
@@ -38,19 +38,14 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
 
         number_kinds = ("i", "u", "f")
         if kind in number_kinds:
-            # We do not want to impute a category with the default
-            # value (0 is the default).
-            # Hence we take one greater than the max
-            unique = np.unique([*X.data, 0]) if issparse(X) else np.unique(X)
-            print(unique)
-            fill_value = min(unique) - 1
+            unique = np.unique(X.data) if isinstance(X, spmatrix) else np.unique(X)
+            fill_value = min(min(unique), 0)
         else:
-            fill_value = None
-
-        print(fill_value)
+            fill_value = None  # use the default of SimpleImputer
 
         self.preprocessor = sklearn.impute.SimpleImputer(
-            strategy='constant', copy=False, fill_value=fill_value)
+            strategy='constant', copy=False, fill_value=fill_value
+        )
         self.preprocessor.fit(X)
         return self
 
