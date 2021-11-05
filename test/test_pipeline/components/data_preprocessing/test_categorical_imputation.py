@@ -74,5 +74,5 @@ def test_default_sparse(input_data_imputation):
     Y = CategoricalImputation().fit_transform(X)
     Y = Y.todense()
 
-    assert np.array_equal(Y == -1, mask)
-    assert np.array_equal(Y != -1, ~mask)
+    np.testing.assert_equal(Y == 0, mask)
+    np.testing.assert_equal(Y != 0, ~mask)
