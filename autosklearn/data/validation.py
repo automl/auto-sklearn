@@ -31,9 +31,9 @@ def convert_if_sparse(
     np.ndarray of shape (n_samples, ) or (n_samples, n_outputs)
     """
     if isinstance(y, spmatrix):
-        y_ = y.todense()
+        y_ = y.toarray()
 
-        # For sparse one dimensional data, y.todense will return [[1], [2], [3], ...]
+        # For sparse one dimensional data, y.toarray will return [[1], [2], [3], ...]
         # We need to flatten this before returning it
         if y_.shape[0] == 1:
             y_ = y_.flatten()
