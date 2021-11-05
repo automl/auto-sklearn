@@ -2,7 +2,7 @@
 from typing import Optional, Dict, List, Tuple, Union, Iterable
 from typing_extensions import Literal
 
-from ConfigSpace.configuration_space import Configuration
+from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
 import dask.distributed
 import joblib
 import numpy as np
@@ -186,7 +186,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
         smac_scenario_args : dict, optional (None)
             Additional arguments inserted into the scenario of SMAC. See the
-            `SMAC documentation <https://automl.github.io/SMAC3/master/options.html?highlight=scenario#scenario>`_
+            `SMAC documentation <https://automl.github.io/SMAC3/master/pages/details/scenario.html>`_
             for a list of available arguments.
 
         get_smac_object_callback : callable
@@ -830,7 +830,7 @@ class AutoSklearnEstimator(BaseEstimator):
         y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
         dataset_name: Optional[str] = None,
         feat_type: Optional[List[str]] = None,
-    ):
+    ) -> ConfigurationSpace:
         """
         Returns the Configuration Space object, from which Auto-Sklearn
         will sample configurations and build pipelines.
@@ -851,6 +851,7 @@ class AutoSklearnEstimator(BaseEstimator):
         """
         if self.automl_ is None:
             self.automl_ = self.build_automl()
+
         return self.automl_.fit(
             X, y,
             X_test=X_test, y_test=y_test,

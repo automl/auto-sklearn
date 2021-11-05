@@ -1,6 +1,6 @@
 import os
 from collections import OrderedDict
-from typing import Dict, Optional
+from typing import Dict, Optional, Type
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
@@ -16,7 +16,7 @@ _preprocessors = find_components(__package__,
 _addons = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
 
 
-def add_preprocessor(preprocessor: AutoSklearnPreprocessingAlgorithm) -> None:
+def add_preprocessor(preprocessor: Type[AutoSklearnPreprocessingAlgorithm]) -> None:
     _addons.add_component(preprocessor)
 
 

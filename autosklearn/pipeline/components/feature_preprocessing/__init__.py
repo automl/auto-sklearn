@@ -1,5 +1,6 @@
-from collections import OrderedDict
 import os
+from collections import OrderedDict
+from typing import Type
 
 from ..base import AutoSklearnPreprocessingAlgorithm, find_components, \
     ThirdPartyComponents, AutoSklearnChoice
@@ -13,7 +14,7 @@ _preprocessors = find_components(__package__,
 _addons = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
 
 
-def add_preprocessor(preprocessor):
+def add_preprocessor(preprocessor: Type[AutoSklearnPreprocessingAlgorithm]) -> None:
     _addons.add_component(preprocessor)
 
 

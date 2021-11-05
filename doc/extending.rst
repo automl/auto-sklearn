@@ -48,8 +48,7 @@ the type of component:
 get_hyperparameter_search_space()
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Return an instance of ``HPOlibConfigSpace.configuration_space
-.ConfigurationSpace``.
+Return an instance of ``ConfigSpace.configuration_space.ConfigurationSpace``.
 
 See also the abstract definitions:
 :meth:`AutoSklearnClassificationAlgorithm.get_hyperparameter_search_space() <autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.get_hyperparameter_search_space>`
