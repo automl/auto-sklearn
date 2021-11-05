@@ -29,6 +29,7 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
             y: Optional[PIPELINE_DATA_DTYPE] = None) -> 'CategoricalImputation':
         import sklearn.impute
 
+        fill_value = None
         if hasattr(X, 'columns'):
             kind = X[X.columns[-1]].dtype.kind
         else:
@@ -36,18 +37,15 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
             # Only DataFrame does not
             kind = X.dtype.kind
 
-        number_kinds = ("i", "u", "f")
-        if kind in number_kinds:
+        if kind in ("i", "u", "f"):
             # We do not want to impute a category with the default
-            # value (0 is the default).
-            # Hence we take one greater than the max
-            unique = np.unique([*X.data, 0]) if issparse(X) else np.unique(X)
-            print(unique)
-            fill_value = min(unique) - 1
-        else:
-            fill_value = None
-
-        print(fill_value)
+            # value (0 is the default) in case such default is in the
+            # train data already!
+            if issparse(X):
+                # X.data doesn't return 0's
+                fill_value = min([*X.data, 0]) - 1
+            else:
+                fill_value = min(np.unique(X)) - 1
 
         self.preprocessor = sklearn.impute.SimpleImputer(
             strategy='constant', copy=False, fill_value=fill_value)
