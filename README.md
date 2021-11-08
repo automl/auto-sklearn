@@ -30,14 +30,14 @@ If you use auto-sklearn in scientific publications, we would appreciate citation
 *Matthias Feurer, Aaron Klein, Katharina Eggensperger, Jost Springenberg, Manuel Blum and Frank Hutter*  
 Advances in Neural Information Processing Systems 28 (2015)  
 
-[Link](https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf) to publication.
+[Link](https://papers.neurips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf) to publication.
 ```
 @inproceedings{feurer-neurips15a,
-  title     = {Efficient and Robust Automated Machine Learning},
-  author    = {Matthias Feurer, Aaron Klein, Katharina Eggensperger, Jost Springenberg, Manuel Blum and Frank Hutter},
-  booktitle = {Advances in Neural Information Processing Systems 28 (2015)},
-  pages     = {2962--2970},
-  year      = {2015}
+    title     = {Efficient and Robust Automated Machine Learning},
+    author    = {Feurer, Matthias and Klein, Aaron and Eggensperger, Katharina  Springenberg, Jost and Blum, Manuel and Hutter, Frank},
+    booktitle = {Advances in Neural Information Processing Systems 28 (2015)},
+    pages     = {2962--2970},
+    year      = {2015}
 }
 ```
 
@@ -49,11 +49,11 @@ arXiv:2007.04074 [cs.LG], 2020
 
 [Link](https://arxiv.org/abs/2007.04074) to publication.
 ```
-@inproceedings{feurer-arxiv20a,
-  title     = {Auto-Sklearn 2.0: The Next Generation},
-  author    = {Matthias Feurer, Katharina Eggensperger, Stefan Falkner, Marius Lindauer and Frank Hutter},
-  booktitle = {arXiv:2007.04074 [cs.LG]},
-  year      = {2020}
+@article{feurer-arxiv20a,
+    title     = {Auto-Sklearn 2.0: Hands-free AutoML via Meta-Learning},
+    author    = {Feurer, Matthias and Eggensperger, Katharina and Falkner, Stefan and Lindauer, Marius and Hutter, Frank},
+    booktitle = {arXiv:2007.04074 [cs.LG]},
+    year      = {2020}
 }
 ```
 

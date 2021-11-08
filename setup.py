@@ -44,11 +44,11 @@ extras_reqs={
     "docs": ["sphinx", "sphinx-gallery", "sphinx_bootstrap_theme", "numpydoc"],
 }
 
-with open("autosklearn/__version__.py") as fh:
+with open(os.path.join(HERE, 'autosklearn', '__version__.py')) as fh:
     version = fh.readlines()[-1].split()[-1].strip("\"'")
 
 
-with open('README.md') as fh:
+with open(os.path.join(HERE, 'README.md')) as fh:
     long_description = fh.read()
 
 

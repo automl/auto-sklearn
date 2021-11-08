@@ -818,9 +818,9 @@ def data_input_and_target_types():
         pd.DataFrame(data=y_multioutput_regression_ndarray),
     ]
 
-    # [ (X, y, task), ... ]
+    # [ (X, y, X_test, y_test, task), ... ]
     return (
-        (X, y, task)
+        (X, y, X, y, task)
         for X in xs
         for y, task in itertools.chain(
             itertools.product(ys_binary, [BINARY_CLASSIFICATION]),
@@ -832,8 +832,8 @@ def data_input_and_target_types():
     )
 
 
-@pytest.mark.parametrize("X, y, task", data_input_and_target_types())
-def test_input_and_target_types(dask_client, X, y, task):
+@pytest.mark.parametrize("X, y, X_test, y_test, task", data_input_and_target_types())
+def test_input_and_target_types(dask_client, X, y, X_test, y_test, task):
 
     if task in CLASSIFICATION_TASKS:
         automl = AutoMLClassifier(
@@ -849,18 +849,34 @@ def test_input_and_target_types(dask_client, X, y, task):
         )
     # To save time fitting and only validate the inputs we only return
     # the configuration space
-    automl.fit(X, y, only_return_configuration_space=True)
+    automl.fit(
+        X=X,
+        y=y,
+        X_test=X_test,
+        y_test=y_test,
+        only_return_configuration_space=True
+    )
     assert automl._task == task
     assert automl._metric.name == default_metric_for_task[task].name
 
 
 def data_test_model_predict_outsputs_correct_shapes():
     datasets = sklearn.datasets
-    binary = datasets.make_classification(n_samples=5, n_classes=2)
-    multiclass = datasets.make_classification(n_samples=5, n_informative=3, n_classes=3)
-    multilabel = datasets.make_multilabel_classification(n_samples=5, n_classes=3)
-    regression = datasets.make_regression(n_samples=5)
-    multioutput = datasets.make_regression(n_samples=5, n_targets=3)
+    binary = datasets.make_classification(
+        n_samples=5, n_classes=2, random_state=0
+    )
+    multiclass = datasets.make_classification(
+        n_samples=5, n_informative=3, n_classes=3, random_state=0
+    )
+    multilabel = datasets.make_multilabel_classification(
+        n_samples=5, n_classes=3, random_state=0
+    )
+    regression = datasets.make_regression(
+        n_samples=5, random_state=0
+    )
+    multioutput = datasets.make_regression(
+        n_samples=5, n_targets=3, random_state=0
+    )
 
     # TODO issue 1169
     #   While testing output shapes, realised all models are wrapped to provide

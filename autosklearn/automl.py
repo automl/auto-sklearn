@@ -587,6 +587,7 @@ class AutoML(BaseEstimator):
 
         # AutoSklearn does not handle sparse y for now
         y = convert_if_sparse(y)
+        y_test = convert_if_sparse(y_test) if y_test is not None else None
 
         # Get the task if it doesn't exist
         if task is None:
