@@ -144,7 +144,7 @@ def test_feat_type_wrong_arguments():
         cls.fit(X=X, y=y, feat_type=[True]*100)
 
     cls = AutoSklearnClassifier(ensemble_size=0)
-    expected_msg = r".*Only `Categorical` and `Numerical` are"
+    expected_msg = r".*Only `Categorical`, `Numerical` and `String` are"
     "valid feature types, you passed `Car`.*"
     with pytest.raises(ValueError, match=expected_msg):
         cls.fit(X=X, y=y, feat_type=['Car']*100)

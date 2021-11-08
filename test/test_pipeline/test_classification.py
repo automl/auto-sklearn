@@ -711,6 +711,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             to_check = {
                 'numerical_transformer': implementation.choice.numer_ppl.named_steps,
                 'categorical_transformer': implementation.choice.categ_ppl.named_steps,
+                'text_transformer': implementation.choice.txt_ppl.named_steps,
             }
 
             for data_type, pipeline in to_check.items():

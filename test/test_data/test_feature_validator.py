@@ -306,8 +306,6 @@ def test_features_unsupported_calls_are_raised():
     with pytest.raises(ValueError, match=r"Auto-sklearn only supports.*yet, the provided input"):
         validator.fit({'input1': 1, 'input2': 2})
     validator = FeatureValidator()
-    with pytest.raises(ValueError, match=r"has unsupported dtype string"):
-        validator.fit(pd.DataFrame([{'A': 1, 'B': 2}], dtype='string'))
     with pytest.raises(ValueError, match=r"The feature dimensionality of the train and test"):
         validator.fit(X_train=np.array([[1, 2, 3], [4, 5, 6]]),
                       X_test=np.array([[1, 2, 3, 4], [4, 5, 6, 7]]),
@@ -323,7 +321,8 @@ def test_features_unsupported_calls_are_raised():
     with pytest.raises(ValueError, match=r"feat_type must only contain strings.*"):
         validator.fit(np.array([[1, 2, 3], [4, 5, 6]]))
     validator = FeatureValidator(feat_type=['1', '2', '3'])
-    with pytest.raises(ValueError, match=r"Only `Categorical` and `Numerical` are.*"):
+    with pytest.raises(ValueError,match=r"Only `Categorical`, `Numerical` and `String` are valid "
+                                        r"feature types"):
         validator.fit(np.array([[1, 2, 3], [4, 5, 6]]))
 
 
@@ -419,7 +418,9 @@ def test_list_to_dataframe(openml_id):
             # convert dtype translates 72.0 to 72. Be robust against this!
             assert is_numeric_dtype(transformed_X[i].dtype)
         else:
-            assert X_pandas[col].dtype.name == transformed_X[i].dtype.name, col
+            if X_pandas[col].dtype.name == "category":
+                if transformed_X[i].dtype.name != "string" and transformed_X[i].dtype.name != "category":
+                    assert False
 
     # Also make sure that at testing time
     # this work
@@ -429,8 +430,9 @@ def test_list_to_dataframe(openml_id):
             # convert dtype translates 72.0 to 72. Be robust against this!
             assert is_numeric_dtype(transformed_X[i].dtype)
         else:
-            assert X_pandas[col].dtype.name == transformed_X[i].dtype.name, col
-
+            if X_pandas[col].dtype.name == "category":
+                if transformed_X[i].dtype.name != "string" and transformed_X[i].dtype.name != "category":
+                    assert False
 
 @pytest.mark.parametrize(
     'input_data_featuretest',
