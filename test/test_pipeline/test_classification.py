@@ -438,7 +438,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             'feature_preprocessor:__choice__').choices), 13)
 
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(168, len(hyperparameters))
+        self.assertEqual(180, len(hyperparameters))
 
         # for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp
@@ -711,6 +711,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             to_check = {
                 'numerical_transformer': implementation.choice.numer_ppl.named_steps,
                 'categorical_transformer': implementation.choice.categ_ppl.named_steps,
+                'text_transformer': implementation.choice.txt_ppl.named_steps,
             }
 
             for data_type, pipeline in to_check.items():
