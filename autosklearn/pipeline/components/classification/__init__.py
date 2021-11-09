@@ -5,7 +5,7 @@ from typing import Type
 import os
 
 from ..base import AutoSklearnClassificationAlgorithm, find_components, \
-    ThirdPartyComponents, AutoSklearnChoice
+    ThirdPartyComponents, AutoSklearnChoice, _addons
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
@@ -13,11 +13,12 @@ classifier_directory = os.path.split(__file__)[0]
 _classifiers = find_components(__package__,
                                classifier_directory,
                                AutoSklearnClassificationAlgorithm)
-_addons = ThirdPartyComponents(AutoSklearnClassificationAlgorithm)
+additional_components = ThirdPartyComponents(AutoSklearnClassificationAlgorithm)
+_addons['classification'] = additional_components
 
 
 def add_classifier(classifier: Type[AutoSklearnClassificationAlgorithm]) -> None:
-    _addons.add_component(classifier)
+    additional_components.add_component(classifier)
 
 
 class ClassifierChoice(AutoSklearnChoice):
@@ -26,7 +27,7 @@ class ClassifierChoice(AutoSklearnChoice):
     def get_components(cls):
         components = OrderedDict()
         components.update(_classifiers)
-        components.update(_addons.components)
+        components.update(additional_components.components)
         return components
 
     def get_available_components(cls, dataset_properties=None,

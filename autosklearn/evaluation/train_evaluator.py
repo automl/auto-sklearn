@@ -35,7 +35,7 @@ from autosklearn.data.validation import (
      SUPPORTED_TARGET_TYPES,
  )
 from autosklearn.pipeline.base import PIPELINE_DATA_DTYPE
-from autosklearn.pipeline.components.base import IterativeComponent
+from autosklearn.pipeline.components.base import IterativeComponent, ThirdPartyComponents
 from autosklearn.metrics import Scorer
 from autosklearn.util.backend import Backend
 from autosklearn.util.logging_ import PicklableClientLogger
@@ -160,6 +160,7 @@ class TrainEvaluator(AbstractEvaluator):
         backend: Backend,
         queue: multiprocessing.Queue,
         metric: Scorer,
+        additional_components: Dict[str, ThirdPartyComponents],
         port: Optional[int],
         configuration: Optional[Union[int, Configuration]] = None,
         scoring_functions: Optional[List[Scorer]] = None,
@@ -184,6 +185,7 @@ class TrainEvaluator(AbstractEvaluator):
             port=port,
             configuration=configuration,
             metric=metric,
+            additional_components=additional_components,
             scoring_functions=scoring_functions,
             seed=seed,
             output_y_hat_optimization=output_y_hat_optimization,
@@ -1163,6 +1165,7 @@ def eval_holdout(
     exclude: Optional[List[str]],
     disable_file_output: bool,
     port: Optional[int],
+    additional_components: Dict[str, ThirdPartyComponents],
     init_params: Optional[Dict[str, Any]] = None,
     budget: Optional[float] = 100.0,
     budget_type: Optional[str] = None,
@@ -1183,6 +1186,7 @@ def eval_holdout(
         include=include,
         exclude=exclude,
         disable_file_output=disable_file_output,
+        additional_components=additional_components,
         init_params=init_params,
         budget=budget,
         budget_type=budget_type,
@@ -1206,6 +1210,7 @@ def eval_iterative_holdout(
     exclude: Optional[List[str]],
     disable_file_output: bool,
     port: Optional[int],
+    additional_components: Dict[str, ThirdPartyComponents],
     init_params: Optional[Dict[str, Any]] = None,
     budget: Optional[float] = 100.0,
     budget_type: Optional[str] = None,
@@ -1227,6 +1232,7 @@ def eval_iterative_holdout(
         instance=instance,
         disable_file_output=disable_file_output,
         iterative=True,
+        additional_components=additional_components,
         init_params=init_params,
         budget=budget,
         budget_type=budget_type
@@ -1249,6 +1255,7 @@ def eval_partial_cv(
     exclude: Optional[List[str]],
     disable_file_output: bool,
     port: Optional[int],
+    additional_components: Dict[str, ThirdPartyComponents],
     init_params: Optional[Dict[str, Any]] = None,
     budget: Optional[float] = None,
     budget_type: Optional[str] = None,
@@ -1274,6 +1281,7 @@ def eval_partial_cv(
         include=include,
         exclude=exclude,
         disable_file_output=disable_file_output,
+        additional_components=additional_components,
         init_params=init_params,
         budget=budget,
         budget_type=budget_type,
@@ -1298,6 +1306,7 @@ def eval_partial_cv_iterative(
     exclude: Optional[List[str]],
     disable_file_output: bool,
     port: Optional[int],
+    additional_components: Dict[str, ThirdPartyComponents],
     init_params: Optional[Dict[str, Any]] = None,
     budget: Optional[float] = None,
     budget_type: Optional[str] = None,
@@ -1321,6 +1330,7 @@ def eval_partial_cv_iterative(
         exclude=exclude,
         disable_file_output=disable_file_output,
         iterative=True,
+        additional_components=additional_components,
         init_params=init_params,
     )
 
@@ -1342,6 +1352,7 @@ def eval_cv(
     exclude: Optional[List[str]],
     disable_file_output: bool,
     port: Optional[int],
+    additional_components: Dict[str, ThirdPartyComponents],
     init_params: Optional[Dict[str, Any]] = None,
     budget: Optional[float] = None,
     budget_type: Optional[str] = None,
@@ -1362,6 +1373,7 @@ def eval_cv(
         include=include,
         exclude=exclude,
         disable_file_output=disable_file_output,
+        additional_components=additional_components,
         init_params=init_params,
         budget=budget,
         budget_type=budget_type,
@@ -1386,6 +1398,7 @@ def eval_iterative_cv(
     exclude: Optional[List[str]],
     disable_file_output: bool,
     port: Optional[int],
+    additional_components: Dict[str, ThirdPartyComponents],
     init_params: Optional[Dict[str, Any]] = None,
     budget: Optional[float] = None,
     budget_type: Optional[str] = None,
@@ -1406,6 +1419,7 @@ def eval_iterative_cv(
         exclude=exclude,
         disable_file_output=disable_file_output,
         port=port,
+        additional_components=additional_components,
         init_params=init_params,
         budget=budget,
         budget_type=budget_type,

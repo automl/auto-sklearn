@@ -3,7 +3,7 @@ from typing import Type
 import os
 
 from ..base import AutoSklearnRegressionAlgorithm, find_components, \
-    ThirdPartyComponents, AutoSklearnChoice
+    ThirdPartyComponents, AutoSklearnChoice, _addons
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
@@ -11,11 +11,12 @@ regressor_directory = os.path.split(__file__)[0]
 _regressors = find_components(__package__,
                               regressor_directory,
                               AutoSklearnRegressionAlgorithm)
-_addons = ThirdPartyComponents(AutoSklearnRegressionAlgorithm)
+additional_components = ThirdPartyComponents(AutoSklearnRegressionAlgorithm)
+_addons['regression'] = additional_components
 
 
 def add_regressor(regressor: Type[AutoSklearnRegressionAlgorithm]) -> None:
-    _addons.add_component(regressor)
+    additional_components.add_component(regressor)
 
 
 class RegressorChoice(AutoSklearnChoice):
@@ -24,7 +25,7 @@ class RegressorChoice(AutoSklearnChoice):
     def get_components(cls):
         components = OrderedDict()
         components.update(_regressors)
-        components.update(_addons.components)
+        components.update(additional_components.components)
         return components
 
     @classmethod
