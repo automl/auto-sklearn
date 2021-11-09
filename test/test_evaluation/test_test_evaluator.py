@@ -67,6 +67,7 @@ class TestEvaluator_Test(BaseEvaluatorTest, unittest.TestCase):
                     queue_,
                     metric=metric_lookup[D.info['task']],
                     port=logging.handlers.DEFAULT_TCP_LOGGING_PORT,
+                    additional_components=dict(),
                 )
 
                 evaluator.fit_predict_and_loss()
@@ -112,6 +113,7 @@ class FunctionsTest(unittest.TestCase):
             disable_file_output=False,
             instance=self.dataset_name,
             port=self.port,
+            additional_components=dict(),
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
@@ -133,6 +135,7 @@ class FunctionsTest(unittest.TestCase):
             disable_file_output=False,
             instance=self.dataset_name,
             port=self.port,
+            additional_components=dict(),
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
