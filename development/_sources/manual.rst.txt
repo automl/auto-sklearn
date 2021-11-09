@@ -46,16 +46,18 @@ Instead of using all available estimators, it is possible to restrict
 all preprocessing methods and restrict the configuration space to only
 random forests.
 
->>> import autosklearn.classification
->>> automl = autosklearn.classification.AutoSklearnClassifier(
->>>     include = {
->>>       'classifier': ["random_forest"],
->>>       'feature_preprocessors': ["no_preprocessing"]
->>>     },
->>>     exclude=None
->>> )
->>> automl.fit(X_train, y_train)
->>> predictions = automl.predict(X_test)
+.. code:: python
+
+    import autosklearn.classification
+    automl = autosklearn.classification.AutoSklearnClassifier(
+        include = {
+            'classifier': ["random_forest"],
+            'feature_preprocessor': ["no_preprocessing"]
+        },
+        exclude=None
+    )
+    automl.fit(X_train, y_train)
+    predictions = automl.predict(X_test)
 
 **Note:** The strings used to identify estimators and preprocessors are the filenames without *.py*.
 
@@ -68,24 +70,28 @@ For a full list please have a look at the source code (in `autosklearn/pipeline/
 We do also provide an example on how to restrict the classifiers to search over
 :ref:`sphx_glr_examples_40_advanced_example_interpretable_models.py`.
 
-Turning off preprocessing
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Data preprocessing
+~~~~~~~~~~~~~~~~~~
+Data preprocessing includes One-Hot encoding of categorical features, imputation
+of missing values and the normalization of features or samples. These ensure that
+the data the gets to the sklearn models is well formed and can be used for 
+training models.
 
-Preprocessing in *auto-sklearn* is divided into data preprocessing and
-feature preprocessing. Data preprocessing includes One-Hot encoding of
-categorical features, imputation of missing values and the normalization of
-features or samples. Dataprerocessing steps cannot be turned off as this ensures
-autosklearn can actually pass the data to sklearn models without error.
+While this is necessary in general, if you'd like to disable this step, please
+refer to this :ref:`example <sphx_glr_examples_80_extending_example_extending_data_preprocessor.py>`.
 
+Feature preprocessing
+~~~~~~~~~~~~~~~~~~~~~
 Feature preprocessing is a single transformer which implements for example feature
 selection or transformation of features into a different space (i.e. PCA).
+
 This can be turned off by setting
-``include={'feature_preprocessors'=["no_preprocessing"]}`` as shown in the example above.
+``include={'feature_preprocessor'=["no_preprocessing"]}`` as shown in the example above.
 
 Resampling strategies
 =====================
 
-Examples for using holdout and cross-validation can be found in :ref:`auto-sklearn/examples/ <examples>`
+Examples for using holdout and cross-validation can be found in :ref:`auto-sklearn/examples/ <examples>`.
 
 Supported Inputs
 ================
@@ -141,21 +147,23 @@ Inspecting the results
 *auto-sklearn* allows users to inspect the training results and statistics. The following example shows how different
 statistics can be printed for the inspection.
 
->>> import autosklearn.classification
->>> automl = autosklearn.classification.AutoSklearnClassifier()
->>> automl.fit(X_train, y_train)
->>> automl.cv_results_
->>> automl.performance_over_time_.plot(
->>>    x='Timestamp',
->>>    kind='line',
->>>    legend=True,
->>>    title='Auto-sklearn accuracy over time',
->>>    grid=True,
->>> )
->>> plt.show()
->>> 
->>> automl.sprint_statistics()
->>> automl.show_models()
+.. code:: python
+
+    import autosklearn.classification
+    automl = autosklearn.classification.AutoSklearnClassifier()
+    automl.fit(X_train, y_train)
+    automl.cv_results_
+    automl.performance_over_time_.plot(
+        x='Timestamp',
+        kind='line',
+        legend=True,
+        title='Auto-sklearn accuracy over time',
+        grid=True,
+    )
+    plt.show()
+
+    automl.sprint_statistics()
+    automl.show_models()
 
 ``cv_results_`` returns a dict with keys as column headers and values as columns, that can be imported into a pandas DataFrame.
 ``performance_over_time_``  returns a DataFrame containing the models performance over time data, which can be used for plotting directly (Here is an example: :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py`).
@@ -215,11 +223,13 @@ In order to obtain *vanilla auto-sklearn* as used in `Efficient and Robust Autom
 <https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine -learning>`_
 set ``ensemble_size=1`` and ``initial_configurations_via_metalearning=0``:
 
->>> import autosklearn.classification
->>> automl = autosklearn.classification.AutoSklearnClassifier(
->>>     ensemble_size=1,
->>>     initial_configurations_via_metalearning=0
->>> )
+.. code:: python
+
+    import autosklearn.classification
+    automl = autosklearn.classification.AutoSklearnClassifier(
+        ensemble_size=1,
+        initial_configurations_via_metalearning=0
+    )
 
 An ensemble of size one will result in always choosing the current best model
 according to its performance on the validation set. Setting the initial

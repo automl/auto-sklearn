@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Manual &#8212; AutoSklearn 0.14.0 documentation</title>
+    <title>Manual &#8212; AutoSklearn 0.14.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css" />
@@ -55,7 +55,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.14.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -111,7 +111,8 @@
 <li><a class="reference internal" href="#examples">Examples</a></li>
 <li><a class="reference internal" href="#time-and-memory-limits">Time and memory limits</a></li>
 <li><a class="reference internal" href="#restricting-the-searchspace">Restricting the searchspace</a><ul>
-<li><a class="reference internal" href="#turning-off-preprocessing">Turning off preprocessing</a></li>
+<li><a class="reference internal" href="#data-preprocessing">Data preprocessing</a></li>
+<li><a class="reference internal" href="#feature-preprocessing">Feature preprocessing</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#resampling-strategies">Resampling strategies</a></li>
@@ -162,16 +163,16 @@ time limit of one day, and a time limit of 30 minutes for a single run.</p>
 <em>auto-sklearn</em>’s searchspace. The following shows an example of how to exclude
 all preprocessing methods and restrict the configuration space to only
 random forests.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">include</span> <span class="o">=</span> <span class="p">{</span>
-<span class="gp">&gt;&gt;&gt; </span>      <span class="s1">&#39;classifier&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;random_forest&quot;</span><span class="p">],</span>
-<span class="gp">&gt;&gt;&gt; </span>      <span class="s1">&#39;feature_preprocessors&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;no_preprocessing&quot;</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="p">},</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
+<span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">include</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;classifier&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;random_forest&quot;</span><span class="p">],</span>
+        <span class="s1">&#39;feature_preprocessor&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;no_preprocessing&quot;</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><strong>Note:</strong> The strings used to identify estimators and preprocessors are the filenames without <em>.py</em>.</p>
@@ -185,22 +186,26 @@ random forests.</p>
 </div></blockquote>
 <p>We do also provide an example on how to restrict the classifiers to search over
 <a class="reference internal" href="examples/40_advanced/example_interpretable_models.html#sphx-glr-examples-40-advanced-example-interpretable-models-py"><span class="std std-ref">Interpretable models</span></a>.</p>
-<section id="turning-off-preprocessing">
-<h3>Turning off preprocessing<a class="headerlink" href="#turning-off-preprocessing" title="Permalink to this headline">¶</a></h3>
-<p>Preprocessing in <em>auto-sklearn</em> is divided into data preprocessing and
-feature preprocessing. Data preprocessing includes One-Hot encoding of
-categorical features, imputation of missing values and the normalization of
-features or samples. Dataprerocessing steps cannot be turned off as this ensures
-autosklearn can actually pass the data to sklearn models without error.</p>
+<section id="data-preprocessing">
+<h3>Data preprocessing<a class="headerlink" href="#data-preprocessing" title="Permalink to this headline">¶</a></h3>
+<p>Data preprocessing includes One-Hot encoding of categorical features, imputation
+of missing values and the normalization of features or samples. These ensure that
+the data the gets to the sklearn models is well formed and can be used for
+training models.</p>
+<p>While this is necessary in general, if you’d like to disable this step, please
+refer to this <a class="reference internal" href="examples/80_extending/example_extending_data_preprocessor.html#sphx-glr-examples-80-extending-example-extending-data-preprocessor-py"><span class="std std-ref">example</span></a>.</p>
+</section>
+<section id="feature-preprocessing">
+<h3>Feature preprocessing<a class="headerlink" href="#feature-preprocessing" title="Permalink to this headline">¶</a></h3>
 <p>Feature preprocessing is a single transformer which implements for example feature
-selection or transformation of features into a different space (i.e. PCA).
-This can be turned off by setting
-<code class="docutils literal notranslate"><span class="pre">include={'feature_preprocessors'=[&quot;no_preprocessing&quot;]}</span></code> as shown in the example above.</p>
+selection or transformation of features into a different space (i.e. PCA).</p>
+<p>This can be turned off by setting
+<code class="docutils literal notranslate"><span class="pre">include={'feature_preprocessor'=[&quot;no_preprocessing&quot;]}</span></code> as shown in the example above.</p>
 </section>
 </section>
 <section id="resampling-strategies">
 <h2>Resampling strategies<a class="headerlink" href="#resampling-strategies" title="Permalink to this headline">¶</a></h2>
-<p>Examples for using holdout and cross-validation can be found in <a class="reference internal" href="examples/index.html#examples"><span class="std std-ref">auto-sklearn/examples/</span></a></p>
+<p>Examples for using holdout and cross-validation can be found in <a class="reference internal" href="examples/index.html#examples"><span class="std std-ref">auto-sklearn/examples/</span></a>.</p>
 </section>
 <section id="supported-inputs">
 <h2>Supported Inputs<a class="headerlink" href="#supported-inputs" title="Permalink to this headline">¶</a></h2>
@@ -250,21 +255,21 @@ to build an ensemble based on the models’ prediction for the validation set. T
 <span id="id3"></span><h2>Inspecting the results<a class="headerlink" href="#inspecting-the-results" title="Permalink to this headline">¶</a></h2>
 <p><em>auto-sklearn</em> allows users to inspect the training results and statistics. The following example shows how different
 statistics can be printed for the inspection.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span><span class="o">.</span><span class="n">cv_results_</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span><span class="o">.</span><span class="n">performance_over_time_</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-<span class="gp">&gt;&gt;&gt; </span>   <span class="n">x</span><span class="o">=</span><span class="s1">&#39;Timestamp&#39;</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>   <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;line&#39;</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>   <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>   <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Auto-sklearn accuracy over time&#39;</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>   <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span><span class="o">.</span><span class="n">sprint_statistics</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
+<span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">()</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">cv_results_</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">performance_over_time_</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="s1">&#39;Timestamp&#39;</span><span class="p">,</span>
+    <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;line&#39;</span><span class="p">,</span>
+    <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Auto-sklearn accuracy over time&#39;</span><span class="p">,</span>
+    <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">automl</span><span class="o">.</span><span class="n">sprint_statistics</span><span class="p">()</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">()</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">cv_results_</span></code> returns a dict with keys as column headers and values as columns, that can be imported into a pandas DataFrame.
@@ -313,11 +318,11 @@ from scikit-learn.</p>
 <h2>Vanilla auto-sklearn<a class="headerlink" href="#vanilla-auto-sklearn" title="Permalink to this headline">¶</a></h2>
 <p>In order to obtain <em>vanilla auto-sklearn</em> as used in <a class="reference external" href="https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning">Efficient and Robust Automated Machine Learning</a>
 set <code class="docutils literal notranslate"><span class="pre">ensemble_size=1</span></code> and <code class="docutils literal notranslate"><span class="pre">initial_configurations_via_metalearning=0</span></code>:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">ensemble_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
+<span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">ensemble_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 <p>An ensemble of size one will result in always choosing the current best model
