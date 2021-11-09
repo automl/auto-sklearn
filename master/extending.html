@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Extending auto-sklearn &#8212; AutoSklearn 0.14.0 documentation</title>
+    <title>Extending auto-sklearn &#8212; AutoSklearn 0.14.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css" />
@@ -55,7 +55,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.14.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -152,23 +152,22 @@ existence. You have to add it with the following function calls, depending on
 the type of component:</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="autosklearn.pipeline.components.classification.add_classifier">
-<span class="sig-prename descclassname"><span class="pre">autosklearn.pipeline.components.classification.</span></span><span class="sig-name descname"><span class="pre">add_classifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">classifier</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/classification.html#add_classifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.pipeline.components.classification.add_classifier" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">autosklearn.pipeline.components.classification.</span></span><span class="sig-name descname"><span class="pre">add_classifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">classifier</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="api.html#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm" title="autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm"><span class="pre">autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/autosklearn/pipeline/components/classification.html#add_classifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.pipeline.components.classification.add_classifier" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="autosklearn.pipeline.components.regression.add_regressor">
-<span class="sig-prename descclassname"><span class="pre">autosklearn.pipeline.components.regression.</span></span><span class="sig-name descname"><span class="pre">add_regressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">regressor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/regression.html#add_regressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.pipeline.components.regression.add_regressor" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">autosklearn.pipeline.components.regression.</span></span><span class="sig-name descname"><span class="pre">add_regressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">regressor</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="api.html#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm" title="autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm"><span class="pre">autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/autosklearn/pipeline/components/regression.html#add_regressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.pipeline.components.regression.add_regressor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="autosklearn.pipeline.components.feature_preprocessing.add_preprocessor">
-<span class="sig-prename descclassname"><span class="pre">autosklearn.pipeline.components.feature_preprocessing.</span></span><span class="sig-name descname"><span class="pre">add_preprocessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">preprocessor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/feature_preprocessing.html#add_preprocessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.pipeline.components.feature_preprocessing.add_preprocessor" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">autosklearn.pipeline.components.feature_preprocessing.</span></span><span class="sig-name descname"><span class="pre">add_preprocessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">preprocessor</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="api.html#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm" title="autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm"><span class="pre">autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/autosklearn/pipeline/components/feature_preprocessing.html#add_preprocessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.pipeline.components.feature_preprocessing.add_preprocessor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <section id="get-hyperparameter-search-space">
 <span id="id1"></span><h3>get_hyperparameter_search_space()<a class="headerlink" href="#get-hyperparameter-search-space" title="Permalink to this headline">¶</a></h3>
-<p>Return an instance of <code class="docutils literal notranslate"><span class="pre">HPOlibConfigSpace.configuration_space</span>
-<span class="pre">.ConfigurationSpace</span></code>.</p>
+<p>Return an instance of <code class="docutils literal notranslate"><span class="pre">ConfigSpace.configuration_space.ConfigurationSpace</span></code>.</p>
 <p>See also the abstract definitions:
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">AutoSklearnClassificationAlgorithm.get_hyperparameter_search_space()</span></code>
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">AutoSklearnRegressionAlgorithm.get_hyperparameter_search_space()</span></code>

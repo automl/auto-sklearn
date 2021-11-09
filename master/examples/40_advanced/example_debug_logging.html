@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Logging and debugging &#8212; AutoSklearn 0.14.0 documentation</title>
+    <title>Logging and debugging &#8212; AutoSklearn 0.14.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
@@ -55,7 +55,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.14.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -224,16 +224,16 @@ We will instead create a custom one as follows:</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2021-10-01 00:46:52,197 - Client-EnsembleBuilder - INFO - DummyFuture: ([{&#39;Timestamp&#39;: Timestamp(&#39;2021-10-01 00:46:52.181869&#39;), &#39;ensemble_optimization_score&#39;: 0.9886363636363636, &#39;ensemble_test_score&#39;: 0.9899874843554443}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2021.10.01-00.46.52 for iteration 0.
-2021-10-01 00:46:57,034 - Client-EnsembleBuilder - INFO - DummyFuture: ([{&#39;Timestamp&#39;: Timestamp(&#39;2021-10-01 00:46:57.008983&#39;), &#39;ensemble_optimization_score&#39;: 0.9911616161616161, &#39;ensemble_test_score&#39;: 0.9899874843554443}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2021.10.01-00.46.57 for iteration 1.
-tmp_folder/smac3-output
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2021-11-09 09:56:45,057 - Client-EnsembleBuilder - INFO - DummyFuture: ([{&#39;Timestamp&#39;: Timestamp(&#39;2021-11-09 09:56:45.036805&#39;), &#39;ensemble_optimization_score&#39;: 0.47853535353535354, &#39;ensemble_test_score&#39;: 0.47434292866082606}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2021.11.09-09.56.45 for iteration 0.
+2021-11-09 09:56:51,702 - Client-EnsembleBuilder - INFO - DummyFuture: ([], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2021.11.09-09.56.51 for iteration 1.
+tmp_folder/AutoML(1):556960a4-4143-11ec-8ab4-138222a41353.log
 tmp_folder/.auto-sklearn
-tmp_folder/distributed.log
 tmp_folder/space.json
-tmp_folder/AutoML(1):01e16634-2251-11ec-86ae-f31ff0047657.log
+tmp_folder/smac3-output
+tmp_folder/distributed.log
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  38.966 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  19.926 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-debug-logging-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_debug_logging.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>

@@ -9,6 +9,26 @@
 Releases
 ========
 
+Version 0.14.1
+==============
+
+* FIX #1248: Allow for sparse ``y_test``.
+* FIX #1259: Fix an issue that could result in ``setup.py`` not working due to relative paths
+  being chosen.
+* MAINT #1261: Include a CITATION.cff file
+* MAINT #1263: Make unit test deterministic.
+* DOC #1269: Fix example on extending data preprocessing.
+* DOC #1270: Remove ``>>>`` from code examples in the documentation.
+* DOC #1271: Fix a typo in an example in the documentation.
+* DOC #1282: Add a contribution guide.
+
+Contributors v0.14.1
+********************
+
+* Edward Bergman
+* Michael Becker
+* Katharina Eggensperger
+
 Version 0.14.0
 ==============
 
@@ -47,7 +67,7 @@ Contributors v0.14.0
 * Rohit Agarwal
 * hnishi
 * Francisco Rivera Valverde
-* Eddie Bergman <eddiebergmanhs@gmail.com>
+* Eddie Bergman
 * Satyam Jha
 * Joel Jose
 * Oli
