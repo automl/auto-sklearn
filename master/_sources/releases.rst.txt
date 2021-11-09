@@ -9,6 +9,16 @@
 Releases
 ========
 
+Version 0.14.2
+==============
+
+* FIX #1290: Fixes a bug where it was not possible to extend Auto-sklearn and run it in parallel.
+
+Contributors v0.14.2
+********************
+
+* Matthias Feurer
+
 Version 0.14.1
 ==============
 
