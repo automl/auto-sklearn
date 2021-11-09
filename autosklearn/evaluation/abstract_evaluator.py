@@ -16,6 +16,7 @@ from threadpoolctl import threadpool_limits
 
 import autosklearn.pipeline.classification
 import autosklearn.pipeline.regression
+from autosklearn.pipeline.components.base import ThirdPartyComponents, _addons
 from autosklearn.constants import (
     CLASSIFICATION_TASKS,
     REGRESSION_TASKS,
@@ -181,6 +182,7 @@ class AbstractEvaluator(object):
         backend: Backend,
         queue: multiprocessing.Queue,
         metric: Scorer,
+        additional_components: Dict[str, ThirdPartyComponents],
         port: Optional[int],
         configuration: Optional[Union[int, Configuration]] = None,
         scoring_functions: Optional[List[Scorer]] = None,
@@ -267,6 +269,15 @@ class AbstractEvaluator(object):
 
         self.budget = budget
         self.budget_type = budget_type
+
+        # Add 3rd-party components to the list of 3rd-party components in case this wasn't done
+        # before (this happens if we run in parallel and the components are only passed to the
+        # AbstractEvaluator via the TAE and are not there yet because the worker is in its own
+        # process).
+        for key in additional_components:
+            for component_name, component in additional_components[key].components.items():
+                if component_name not in _addons[key].components:
+                    _addons[key].add_component(component)
 
         # Please mypy to prevent not defined attr
         self.model = self._get_model()

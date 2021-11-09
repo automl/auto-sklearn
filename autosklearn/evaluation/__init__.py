@@ -24,6 +24,7 @@ from autosklearn.metrics import Scorer
 import autosklearn.evaluation.train_evaluator
 import autosklearn.evaluation.test_evaluator
 import autosklearn.evaluation.util
+import autosklearn.pipeline.components
 from autosklearn.evaluation.train_evaluator import TYPE_ADDITIONAL_INFO
 from autosklearn.util.backend import Backend
 from autosklearn.util.logging_ import PickableLoggerAdapter, get_named_client_logger
@@ -336,6 +337,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             init_params=init_params,
             budget=budget,
             budget_type=self.budget_type,
+            additional_components=autosklearn.pipeline.components.base._addons,
         )
 
         if self.resampling_strategy != 'test':

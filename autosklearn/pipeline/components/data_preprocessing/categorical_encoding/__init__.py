@@ -10,7 +10,7 @@ from ConfigSpace.hyperparameters import CategoricalHyperparameter
 from sklearn.base import BaseEstimator
 
 from ...base import AutoSklearnPreprocessingAlgorithm, find_components, \
-    ThirdPartyComponents, AutoSklearnChoice
+    ThirdPartyComponents, AutoSklearnChoice, _addons
 
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 
@@ -18,11 +18,12 @@ ohe_directory = os.path.split(__file__)[0]
 _ohes = find_components(__package__,
                         ohe_directory,
                         AutoSklearnPreprocessingAlgorithm)
-_addons = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
+additional_components = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
+_addons['data_preprocessing.categorical_encoding'] = additional_components
 
 
 def add_ohe(ohe: 'OHEChoice') -> None:
-    _addons.add_component(ohe)
+    additional_components.add_component(ohe)
 
 
 class OHEChoice(AutoSklearnChoice):
@@ -31,7 +32,7 @@ class OHEChoice(AutoSklearnChoice):
     def get_components(cls: BaseEstimator) -> Dict[str, BaseEstimator]:
         components: Dict[str, BaseEstimator] = OrderedDict()
         components.update(_ohes)
-        components.update(_addons.components)
+        components.update(additional_components.components)
         return components
 
     def get_hyperparameter_search_space(
