@@ -172,10 +172,8 @@ to download the full example code or to run this example in your browser via Bin
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight                 type      cost  duration
 model_id
-2            1             0.70        random_forest  0.161845  2.496048
-8            2             0.16          extra_trees  0.241829  1.576111
-5            3             0.02  k_nearest_neighbors  0.267036  0.510130
-14           4             0.12  k_nearest_neighbors  0.499303  1.031620
+2            1              0.8        random_forest  0.145622  1.983667
+5            2              0.2  k_nearest_neighbors  0.220183  0.392921
 </pre></div>
 </div>
 </section>
@@ -185,28 +183,14 @@ model_id
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(0.700000, SimpleRegressionPipeline({&#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;regressor:__choice__&#39;: &#39;random_forest&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;regressor:random_forest:bootstrap&#39;: &#39;True&#39;, &#39;regressor:random_forest:criterion&#39;: &#39;mse&#39;, &#39;regressor:random_forest:max_depth&#39;: &#39;None&#39;, &#39;regressor:random_forest:max_features&#39;: 1.0, &#39;regressor:random_forest:max_leaf_nodes&#39;: &#39;None&#39;, &#39;regressor:random_forest:min_impurity_decrease&#39;: 0.0, &#39;regressor:random_forest:min_samples_leaf&#39;: 1, &#39;regressor:random_forest:min_samples_split&#39;: 2, &#39;regressor:random_forest:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01},
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(0.800000, SimpleRegressionPipeline({&#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;regressor:__choice__&#39;: &#39;random_forest&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;regressor:random_forest:bootstrap&#39;: &#39;True&#39;, &#39;regressor:random_forest:criterion&#39;: &#39;mse&#39;, &#39;regressor:random_forest:max_depth&#39;: &#39;None&#39;, &#39;regressor:random_forest:max_features&#39;: 1.0, &#39;regressor:random_forest:max_leaf_nodes&#39;: &#39;None&#39;, &#39;regressor:random_forest:min_impurity_decrease&#39;: 0.0, &#39;regressor:random_forest:min_samples_leaf&#39;: 1, &#39;regressor:random_forest:min_samples_split&#39;: 2, &#39;regressor:random_forest:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01},
 dataset_properties={
   &#39;task&#39;: 5,
   &#39;sparse&#39;: False,
   &#39;multioutput&#39;: True,
   &#39;target_type&#39;: &#39;regression&#39;,
   &#39;signed&#39;: False})),
-(0.160000, SimpleRegressionPipeline({&#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;fast_ica&#39;, &#39;regressor:__choice__&#39;: &#39;extra_trees&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:fast_ica:algorithm&#39;: &#39;parallel&#39;, &#39;feature_preprocessor:fast_ica:fun&#39;: &#39;cube&#39;, &#39;feature_preprocessor:fast_ica:whiten&#39;: &#39;True&#39;, &#39;regressor:extra_trees:bootstrap&#39;: &#39;True&#39;, &#39;regressor:extra_trees:criterion&#39;: &#39;friedman_mse&#39;, &#39;regressor:extra_trees:max_depth&#39;: &#39;None&#39;, &#39;regressor:extra_trees:max_features&#39;: 0.5507241840323179, &#39;regressor:extra_trees:max_leaf_nodes&#39;: &#39;None&#39;, &#39;regressor:extra_trees:min_impurity_decrease&#39;: 0.0, &#39;regressor:extra_trees:min_samples_leaf&#39;: 1, &#39;regressor:extra_trees:min_samples_split&#39;: 13, &#39;regressor:extra_trees:min_weight_fraction_leaf&#39;: 0.0, &#39;feature_preprocessor:fast_ica:n_components&#39;: 1530},
-dataset_properties={
-  &#39;task&#39;: 5,
-  &#39;sparse&#39;: False,
-  &#39;multioutput&#39;: True,
-  &#39;target_type&#39;: &#39;regression&#39;,
-  &#39;signed&#39;: False})),
-(0.120000, SimpleRegressionPipeline({&#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;fast_ica&#39;, &#39;regressor:__choice__&#39;: &#39;k_nearest_neighbors&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;normalize&#39;, &#39;feature_preprocessor:fast_ica:algorithm&#39;: &#39;deflation&#39;, &#39;feature_preprocessor:fast_ica:fun&#39;: &#39;logcosh&#39;, &#39;feature_preprocessor:fast_ica:whiten&#39;: &#39;True&#39;, &#39;regressor:k_nearest_neighbors:n_neighbors&#39;: 1, &#39;regressor:k_nearest_neighbors:p&#39;: 1, &#39;regressor:k_nearest_neighbors:weights&#39;: &#39;distance&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.00024939850901091595, &#39;feature_preprocessor:fast_ica:n_components&#39;: 563},
-dataset_properties={
-  &#39;task&#39;: 5,
-  &#39;sparse&#39;: False,
-  &#39;multioutput&#39;: True,
-  &#39;target_type&#39;: &#39;regression&#39;,
-  &#39;signed&#39;: False})),
-(0.020000, SimpleRegressionPipeline({&#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;regressor:__choice__&#39;: &#39;k_nearest_neighbors&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;normalize&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.8772654126094648, &#39;feature_preprocessor:pca:whiten&#39;: &#39;True&#39;, &#39;regressor:k_nearest_neighbors:n_neighbors&#39;: 14, &#39;regressor:k_nearest_neighbors:p&#39;: 1, &#39;regressor:k_nearest_neighbors:weights&#39;: &#39;uniform&#39;},
+(0.200000, SimpleRegressionPipeline({&#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;regressor:__choice__&#39;: &#39;k_nearest_neighbors&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;normalize&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.8772654126094648, &#39;feature_preprocessor:pca:whiten&#39;: &#39;True&#39;, &#39;regressor:k_nearest_neighbors:n_neighbors&#39;: 14, &#39;regressor:k_nearest_neighbors:p&#39;: 1, &#39;regressor:k_nearest_neighbors:weights&#39;: &#39;uniform&#39;},
 dataset_properties={
   &#39;task&#39;: 5,
   &#39;sparse&#39;: False,
@@ -224,7 +208,7 @@ dataset_properties={
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.8527210615711605
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.8640244899786339
 </pre></div>
 </div>
 </section>
@@ -425,7 +409,7 @@ dataset_properties={
     (Forbidden: regressor:__choice__ == &#39;random_forest&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  59.886 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  55.248 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-20-basic-example-multioutput-regression-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/20_basic/example_multioutput_regression.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo.svg" width="150px" /></a>

@@ -116,7 +116,7 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span>
 
 <span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">AutoSklearnPreprocessingAlgorithm</span><span class="p">,</span> <span class="n">find_components</span><span class="p">,</span> \
-    <span class="n">ThirdPartyComponents</span><span class="p">,</span> <span class="n">AutoSklearnChoice</span>
+    <span class="n">ThirdPartyComponents</span><span class="p">,</span> <span class="n">AutoSklearnChoice</span><span class="p">,</span> <span class="n">_addons</span>
 <span class="kn">from</span> <span class="nn">ConfigSpace.configuration_space</span> <span class="kn">import</span> <span class="n">ConfigurationSpace</span>
 <span class="kn">from</span> <span class="nn">ConfigSpace.hyperparameters</span> <span class="kn">import</span> <span class="n">CategoricalHyperparameter</span>
 
@@ -124,11 +124,12 @@
 <span class="n">_preprocessors</span> <span class="o">=</span> <span class="n">find_components</span><span class="p">(</span><span class="n">__package__</span><span class="p">,</span>
                                  <span class="n">classifier_directory</span><span class="p">,</span>
                                  <span class="n">AutoSklearnPreprocessingAlgorithm</span><span class="p">)</span>
-<span class="n">_addons</span> <span class="o">=</span> <span class="n">ThirdPartyComponents</span><span class="p">(</span><span class="n">AutoSklearnPreprocessingAlgorithm</span><span class="p">)</span>
+<span class="n">additional_components</span> <span class="o">=</span> <span class="n">ThirdPartyComponents</span><span class="p">(</span><span class="n">AutoSklearnPreprocessingAlgorithm</span><span class="p">)</span>
+<span class="n">_addons</span><span class="p">[</span><span class="s1">&#39;feature_preprocessing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">additional_components</span>
 
 
 <div class="viewcode-block" id="add_preprocessor"><a class="viewcode-back" href="../../../../extending.html#autosklearn.pipeline.components.feature_preprocessing.add_preprocessor">[docs]</a><span class="k">def</span> <span class="nf">add_preprocessor</span><span class="p">(</span><span class="n">preprocessor</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">AutoSklearnPreprocessingAlgorithm</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">_addons</span><span class="o">.</span><span class="n">add_component</span><span class="p">(</span><span class="n">preprocessor</span><span class="p">)</span></div>
+    <span class="n">additional_components</span><span class="o">.</span><span class="n">add_component</span><span class="p">(</span><span class="n">preprocessor</span><span class="p">)</span></div>
 
 
 <span class="k">class</span> <span class="nc">FeaturePreprocessorChoice</span><span class="p">(</span><span class="n">AutoSklearnChoice</span><span class="p">):</span>
@@ -137,7 +138,7 @@
     <span class="k">def</span> <span class="nf">get_components</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="n">components</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
         <span class="n">components</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_preprocessors</span><span class="p">)</span>
-        <span class="n">components</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_addons</span><span class="o">.</span><span class="n">components</span><span class="p">)</span>
+        <span class="n">components</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">additional_components</span><span class="o">.</span><span class="n">components</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">components</span>
 
     <span class="k">def</span> <span class="nf">get_available_components</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>

@@ -116,10 +116,13 @@
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">pkgutil</span>
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
 
 <span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span>
 
 <span class="kn">from</span> <span class="nn">autosklearn.pipeline.constants</span> <span class="kn">import</span> <span class="n">SPARSE</span>
+
+<span class="n">_addons</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>  <span class="c1"># type: Dict[str, &#39;ThirdPartyComponents&#39;]</span>
 
 
 <span class="k">def</span> <span class="nf">find_components</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">base_class</span><span class="p">):</span>
