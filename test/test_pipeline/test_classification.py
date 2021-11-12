@@ -24,7 +24,7 @@ from ConfigSpace.hyperparameters import CategoricalHyperparameter
 from autosklearn.pipeline.classification import SimpleClassificationPipeline
 from autosklearn.pipeline.components.base import \
     AutoSklearnClassificationAlgorithm, AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.components.base import AutoSklearnComponent, AutoSklearnChoice
+from autosklearn.pipeline.components.base import AutoSklearnComponent, AutoSklearnChoice, _addons
 import autosklearn.pipeline.components.classification as classification_components
 import autosklearn.pipeline.components.feature_preprocessing as preprocessing_components
 from autosklearn.pipeline.util import get_dataset
@@ -676,20 +676,24 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         pass
 
     def test_add_classifier(self):
-        self.assertEqual(len(classification_components._addons.components), 0)
+        self.assertEqual(len(classification_components.additional_components.components), 0)
+        self.assertEqual(len(_addons['classification'].components), 0)
         classification_components.add_classifier(DummyClassifier)
-        self.assertEqual(len(classification_components._addons.components), 1)
+        self.assertEqual(len(classification_components.additional_components.components), 1)
+        self.assertEqual(len(_addons['classification'].components), 1)
         cs = SimpleClassificationPipeline().get_hyperparameter_search_space()
         self.assertIn('DummyClassifier', str(cs))
-        del classification_components._addons.components['DummyClassifier']
+        del classification_components.additional_components.components['DummyClassifier']
 
     def test_add_preprocessor(self):
-        self.assertEqual(len(preprocessing_components._addons.components), 0)
+        self.assertEqual(len(preprocessing_components.additional_components.components), 0)
+        self.assertEqual(len(_addons['feature_preprocessing'].components), 0)
         preprocessing_components.add_preprocessor(DummyPreprocessor)
-        self.assertEqual(len(preprocessing_components._addons.components), 1)
+        self.assertEqual(len(preprocessing_components.additional_components.components), 1)
+        self.assertEqual(len(_addons['feature_preprocessing'].components), 1)
         cs = SimpleClassificationPipeline().get_hyperparameter_search_space()
         self.assertIn('DummyPreprocessor', str(cs))
-        del preprocessing_components._addons.components['DummyPreprocessor']
+        del preprocessing_components.additional_components.components['DummyPreprocessor']
 
     def _test_set_hyperparameter_choice(self, expected_key, implementation, config_dict):
         """
@@ -870,7 +874,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         except Exception as e:
             # In case of failure clean up the components and print enough information
             # to clean up with check in the future
-            del preprocessing_components._addons.components['CrashPreprocessor']
+            del preprocessing_components.additional_components.components['CrashPreprocessor']
             self.fail("cs={} config={} Exception={}".format(cs, config, e))
         cls.set_hyperparameters(config)
         with self.assertRaisesRegex(
@@ -881,4 +885,4 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 X=np.array([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]),
                 y=np.array([1, 0, 1, 1])
             )
-        del preprocessing_components._addons.components['CrashPreprocessor']
+        del preprocessing_components.additional_components.components['CrashPreprocessor']

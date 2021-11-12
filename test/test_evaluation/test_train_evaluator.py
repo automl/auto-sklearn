@@ -104,6 +104,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
                                    port=self.port,
+                                   additional_components=dict(),
                                    )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -170,7 +171,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
-                                   budget=0.0)
+                                   budget=0.0,
+                                   additional_components=dict(),)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
 
@@ -268,7 +270,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
-                                   budget=0.0)
+                                   budget=0.0,
+                                   additional_components=dict(),
+                                   )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
 
@@ -337,7 +341,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy='holdout-iterative-fit',
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
-                                   metric=accuracy)
+                                   metric=accuracy,
+                                   additional_components=dict(),
+                                   )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
 
@@ -380,7 +386,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy_args={'folds': 5},
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
-                                   metric=accuracy)
+                                   metric=accuracy,
+                                   additional_components=dict(),
+                                   )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
 
@@ -434,7 +442,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy_args={'folds': 5},
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
-                                   metric=accuracy)
+                                   metric=accuracy,
+                                   additional_components=dict(),
+                                   )
 
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -495,7 +505,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
-                                   budget=0.0)
+                                   budget=0.0,
+                                   additional_components=dict(),
+                                   )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
 
@@ -563,7 +575,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy_args={'folds': 5},
                                    scoring_functions=SCORER_LIST,
                                    output_y_hat_optimization=True,
-                                   metric=accuracy)
+                                   metric=accuracy,
+                                   additional_components=dict(),)
 
         self.backend_mock.get_model_dir.return_value = True
         evaluator.model = 'model'
@@ -647,7 +660,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 10},
-                                   metric=accuracy)
+                                   metric=accuracy,
+                                   additional_components=dict(),
+                                   )
         train_indices = np.arange(69, dtype=int)
         train_indices1 = subsample_indices(
             train_indices, 0.1449, evaluator.task_type, evaluator.Y_train)
@@ -695,7 +710,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 10},
-                                   metric=accuracy)
+                                   metric=accuracy,
+                                   additional_components=dict(),
+                                   )
         train_indices = np.arange(69, dtype=int)
         train_indices3 = subsample_indices(train_indices, subsample=0.4347,
                                            task_type=evaluator.task_type,
@@ -741,7 +758,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 10},
                                    output_y_hat_optimization=False,
-                                   metric=accuracy)
+                                   metric=accuracy,
+                                   additional_components=dict(),
+                                   )
 
         evaluator.fit_predict_and_loss()
         Y_optimization_pred = self.backend_mock.save_numrun_to_dir.call_args_list[0][1][
@@ -781,6 +800,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             resampling_strategy='holdout',
             output_y_hat_optimization=False,
             metric=accuracy,
+            additional_components=dict(),
         )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -826,6 +846,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             resampling_strategy_args={'folds': 2},
             output_y_hat_optimization=False,
             metric=accuracy,
+            additional_components=dict(),
         )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -878,7 +899,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             resampling_strategy='holdout',
             output_y_hat_optimization=False,
             metric=accuracy,
-            budget=0.0
+            budget=0.0,
+            additional_components=dict(),
         )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -916,6 +938,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             resampling_strategy='holdout',
             output_y_hat_optimization=False,
             metric=accuracy,
+            additional_components=dict(),
         )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -966,6 +989,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             metric=accuracy,
             budget_type='iterations',
             budget=50,
+            additional_components=dict(),
         )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -1006,6 +1030,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             metric=accuracy,
             budget_type='subsample',
             budget=50,
+            additional_components=dict(),
         )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -1049,7 +1074,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                            resampling_strategy='cv',
                                            resampling_strategy_args={'folds': 2},
                                            output_y_hat_optimization=False,
-                                           metric=metric_lookup[D.info['task']])
+                                           metric=metric_lookup[D.info['task']],
+                                           additional_components=dict(),)
 
                 evaluator.fit_predict_and_loss()
                 rval = evaluator.queue.get(timeout=1)
@@ -2248,6 +2274,7 @@ class FunctionsTest(unittest.TestCase):
             disable_file_output=False,
             instance=self.dataset_name,
             metric=accuracy,
+            additional_components=dict(),
         )
         info = read_queue(self.queue)
         self.assertEqual(len(info), 1)
@@ -2272,6 +2299,7 @@ class FunctionsTest(unittest.TestCase):
             disable_file_output=False,
             instance=self.dataset_name,
             metric=accuracy,
+            additional_components=dict(),
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
@@ -2323,6 +2351,7 @@ class FunctionsTest(unittest.TestCase):
             disable_file_output=False,
             instance=self.dataset_name,
             metric=accuracy,
+            additional_components=dict(),
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 9)
@@ -2348,7 +2377,8 @@ class FunctionsTest(unittest.TestCase):
             instance=self.dataset_name,
             metric=accuracy,
             budget=1,
-            budget_type='iterations'
+            budget_type='iterations',
+            additional_components=dict(),
         )
         info = read_queue(self.queue)
         self.assertEqual(len(info), 1)
@@ -2378,7 +2408,8 @@ class FunctionsTest(unittest.TestCase):
             instance=self.dataset_name,
             metric=accuracy,
             budget=80,
-            budget_type='iterations'
+            budget_type='iterations',
+            additional_components=dict(),
         )
         info = read_queue(self.queue)
         self.assertEqual(len(info), 1)
@@ -2404,7 +2435,8 @@ class FunctionsTest(unittest.TestCase):
             instance=self.dataset_name,
             metric=accuracy,
             budget=30,
-            budget_type='subsample'
+            budget_type='subsample',
+            additional_components=dict(),
         )
         info = read_queue(self.queue)
         self.assertEqual(len(info), 1)
@@ -2431,7 +2463,8 @@ class FunctionsTest(unittest.TestCase):
             instance=self.dataset_name,
             metric=accuracy,
             budget=1,
-            budget_type='mixed'
+            budget_type='mixed',
+            additional_components=dict()
         )
         info = read_queue(self.queue)
         self.assertEqual(len(info), 1)
@@ -2460,7 +2493,8 @@ class FunctionsTest(unittest.TestCase):
             instance=self.dataset_name,
             metric=accuracy,
             budget=40,
-            budget_type='mixed'
+            budget_type='mixed',
+            additional_components=dict(),
         )
         info = read_queue(self.queue)
         self.assertEqual(len(info), 1)
@@ -2485,6 +2519,7 @@ class FunctionsTest(unittest.TestCase):
             disable_file_output=False,
             instance=self.dataset_name,
             metric=accuracy,
+            additional_components=dict(),
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
@@ -2509,6 +2544,7 @@ class FunctionsTest(unittest.TestCase):
             disable_file_output=False,
             instance=self.dataset_name,
             metric=accuracy,
+            additional_components=dict(),
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
@@ -2577,6 +2613,7 @@ class FunctionsTest(unittest.TestCase):
                 exclude=None,
                 disable_file_output=False,
                 metric=accuracy,
+                additional_components=dict(),
             )
             rval = read_queue(self.queue)
             self.assertEqual(len(rval), 1)

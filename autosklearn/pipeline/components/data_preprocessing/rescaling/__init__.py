@@ -9,7 +9,7 @@ from ConfigSpace.hyperparameters import CategoricalHyperparameter
 from sklearn.base import BaseEstimator
 
 from ...base import AutoSklearnPreprocessingAlgorithm, find_components, \
-    ThirdPartyComponents, AutoSklearnChoice
+    ThirdPartyComponents, AutoSklearnChoice, _addons
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_rescaling import (
     Rescaling
@@ -19,11 +19,12 @@ rescaling_directory = os.path.split(__file__)[0]
 _rescalers = find_components(__package__,
                              rescaling_directory,
                              AutoSklearnPreprocessingAlgorithm)
-_addons = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
+additional_components = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
+_addons['data_preprocessing.rescaling'] = additional_components
 
 
 def add_rescaler(rescaler: Rescaling) -> None:
-    _addons.add_component(rescaler)
+    additional_components.add_component(rescaler)
 
 
 class RescalingChoice(AutoSklearnChoice):
@@ -32,7 +33,7 @@ class RescalingChoice(AutoSklearnChoice):
     def get_components(cls: BaseEstimator) -> Dict[str, BaseEstimator]:
         components: Dict[str, BaseEstimator] = OrderedDict()
         components.update(_rescalers)
-        components.update(_addons.components)
+        components.update(additional_components.components)
         return components
 
     def get_hyperparameter_search_space(

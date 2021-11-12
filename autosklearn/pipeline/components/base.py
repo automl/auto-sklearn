@@ -3,10 +3,13 @@ import importlib
 import inspect
 import pkgutil
 import sys
+from typing import Dict
 
 from sklearn.base import BaseEstimator, TransformerMixin
 
 from autosklearn.pipeline.constants import SPARSE
+
+_addons = dict()  # type: Dict[str, 'ThirdPartyComponents']
 
 
 def find_components(package, directory, base_class):
