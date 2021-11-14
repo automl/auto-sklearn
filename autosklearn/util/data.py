@@ -245,7 +245,7 @@ def reduce_dataset_size_if_too_large(
     is_classification: bool,
     random_state: Union[int, np.random.RandomState] = None,
     operations: List[str] = ['precision', 'subsample'],
-    multiplier: Union[float, int] = 10,
+    multiplier: Union[float, int] = 8,
 ) -> Tuple[Union[np.ndarray, spmatrix], np.ndarray]:
     f""" Reduces the size of the dataset if it's too close to the memory limit.
 
@@ -289,7 +289,7 @@ def reduce_dataset_size_if_too_large(
         A list of operations that are permitted to be performed to reduce
         the size of the dataset.
 
-    multiplier: float | int = 10
+    multiplier: float | int = 8
         When performing reductions, satisfies the conditions that:
         * Reduce precision if `size(X) * multiplier >= memory_limit`
         * Subsample so that `size(X) * mulitplier = memory_limit` is satisfied``

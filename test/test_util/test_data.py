@@ -204,7 +204,7 @@ def test_reduce_precision_with_unsupported_dtypes(X, dtype):
     (np.asarray([1] * 100000), True),
     (np.asarray([1.0] * 100000), False),
 ])
-@parametrize('multiplier', [1, 5.2, 10])
+@parametrize('multiplier', [1, 5.2, 8])
 @parametrize('operations', [['precision'], ['subsample'], ['precision', 'subsample']])
 def test_reduce_dataset_reduces_size_and_precision(
     X, x_type, dtype, y, is_classification, multiplier, operations
@@ -293,23 +293,23 @@ def test_reduce_dataset_subsampling_explicit_values(memory_limit, precision, tas
     random_state = 0
     fixture = {
         BINARY_CLASSIFICATION: {
-            1: {float: 2500, np.float32: 2500, np.float64: 2500, np.float128: 1250},
+            1: {float: 3125, np.float32: 3125, np.float64: 3125, np.float128: 1562},
             100: {float: 12000, np.float32: 12000, np.float64: 12000, np.float128: 12000},
         },
         MULTICLASS_CLASSIFICATION: {
-            1: {float: 390, np.float32: 390, np.float64: 390, np.float128: 195},
+            1: {float: 488, np.float32: 488, np.float64: 488, np.float128: 244},
             100: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
         },
         MULTILABEL_CLASSIFICATION: {
-            1: {float: 390, np.float32: 390, np.float64: 390, np.float128: 195},
+            1: {float: 488, np.float32: 488, np.float64: 488, np.float128: 244},
             100: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
         },
         REGRESSION: {
-            1: {float: 1250, np.float32: 1250, np.float64: 1250, np.float128: 625},
+            1: {float: 1562, np.float32: 1562, np.float64: 1562, np.float128: 781},
             100: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
         },
         MULTIOUTPUT_REGRESSION: {
-            1: {float: 1250, np.float32: 1250, np.float64: 1250, np.float128: 625},
+            1: {float: 1562, np.float32: 1562, np.float64: 1562, np.float128: 781},
             100: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
         }
     }
@@ -347,7 +347,7 @@ def test_reduce_dataset_subsampling_explicit_values(memory_limit, precision, tas
             memory_limit=memory_limit,
             is_classification=task in CLASSIFICATION_TASKS,
             operations=['precision', 'subsample'],
-            multiplier=10
+            multiplier=8
         )
 
     # Assert the new number of samples
