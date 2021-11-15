@@ -293,23 +293,23 @@ def test_reduce_dataset_subsampling_explicit_values(memory_limit, precision, tas
     random_state = 0
     fixture = {
         BINARY_CLASSIFICATION: {
-            1: {float: 3125, np.float32: 3125, np.float64: 3125, np.float128: 1562},
+            1: {float: 3276, np.float32: 3276, np.float64: 3276, np.float128: 1638},
             100: {float: 12000, np.float32: 12000, np.float64: 12000, np.float128: 12000},
         },
         MULTICLASS_CLASSIFICATION: {
-            1: {float: 488, np.float32: 488, np.float64: 488, np.float128: 244},
+            1: {float: 512, np.float32: 512, np.float64: 512, np.float128: 256},
             100: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
         },
         MULTILABEL_CLASSIFICATION: {
-            1: {float: 488, np.float32: 488, np.float64: 488, np.float128: 244},
+            1: {float: 512, np.float32: 512, np.float64: 512, np.float128: 256},
             100: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
         },
         REGRESSION: {
-            1: {float: 1562, np.float32: 1562, np.float64: 1562, np.float128: 781},
+            1: {float: 1638, np.float32: 1638, np.float64: 1638, np.float128: 819},
             100: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
         },
         MULTIOUTPUT_REGRESSION: {
-            1: {float: 1562, np.float32: 1562, np.float64: 1562, np.float128: 781},
+            1: {float: 1638, np.float32: 1638, np.float64: 1638, np.float128: 819},
             100: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
         }
     }
