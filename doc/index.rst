@@ -22,7 +22,7 @@ replacement for a scikit-learn estimator:
 hyperparameter tuning. It leverages recent advantages in *Bayesian
 optimization*, *meta-learning* and *ensemble construction*. Learn more about
 the technology behind *auto-sklearn* by reading our paper published at
-`NIPS 2015 <https://papers.neurips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf>`_
+`NeurIPS 2015 <https://papers.neurips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf>`_
 .
 
 .. topic:: NEW: Auto-sklearn 2.0
@@ -37,6 +37,11 @@ the technology behind *auto-sklearn* by reading our paper published at
     from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 
 A paper describing our advances is available on `arXiv <https://arxiv.org/abs/2007.04074>`_.
+
+.. topic:: NEW: Material from tutorials and presentations
+
+    We provide slides and notebooks from talks and tutorials here: `auto-sklearn-talks <https://github.com/automl/auto-sklearn-talks>`_
+
 
 Example
 *******

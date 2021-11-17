@@ -9,11 +9,15 @@ Manual
 This manual give an overview of different aspects of *auto-sklearn*. For each section, we either references examples or
 give short explanations (click the title to expand text), e.g.
 
-.. collapse:: <b>Examples</b>
+.. collapse:: <b>Code Examples</b>
 
     We provide examples on using *auto-sklearn* for multiple use cases ranging from
     simple classification to advanced uses such as feature importance, parallel runs
     and customization. They can be found in the :ref:`sphx_glr_examples`.
+
+.. collapse:: <b>Material from talks and presentations</b>
+
+    We provide resources for talks, tutorials and presentations on *auto-sklearn* under `auto-sklearn-talks <https://github.com/automl/auto-sklearn-talks>`_
 
 Resource limits
 ===============
