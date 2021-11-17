@@ -9,7 +9,7 @@ Manual
 This manual give an overview of different aspects of *auto-sklearn*. For each section, we either references examples or
 give short explanations (click the title to expand text), e.g.
 
-.. collapse:: <b>Code Examples</b>
+.. collapse:: <b>Code examples</b>
 
     We provide examples on using *auto-sklearn* for multiple use cases ranging from
     simple classification to advanced uses such as feature importance, parallel runs
@@ -124,7 +124,7 @@ Ensembling
 To get the best performance out of the evaluated models, *auto-sklearn* uses ensemble selection by `Caruana et al. (2004) <https://dl.acm.org/doi/pdf/10.1145/1015330.1015432>`_
 to build an ensemble based on the models’ prediction for the validation set.
 
-.. collapse:: <b>Configuring the Ensemble Building Process</b>
+.. collapse:: <b>Configuring the ensemble building process</b>
 
     The following hyperparameters control how the ensemble is constructed:
 
@@ -153,7 +153,7 @@ Inspecting the results
 
 *auto-sklearn* offers the following ways to inspect the results
 
-.. collapse:: <b>Basic Statistics</b>
+.. collapse:: <b>Basic statistics</b>
 
     ``sprint_statistics()`` is a method that prints the name of the  dataset, the metric used, and the best validation score
     obtained by running *auto-sklearn*. It additionally prints the number of both successful and unsuccessful
@@ -175,7 +175,7 @@ Inspecting the results
             )
             plt.show()
 
-.. collapse:: <b>Evaluated Models</b>
+.. collapse:: <b>Evaluated models</b>
 
     The results obtained from the final ensemble can be printed by calling ``show_models()``.
 
@@ -233,7 +233,7 @@ building an ensemble every time a new machine learning model has finished traini
 Other
 =====
 
-.. collapse:: <b>Supported Inputs</b>
+.. collapse:: <b>Supported input types</b>
 
     *auto-sklearn* can accept targets for the following tasks (more details on `Sklearn algorithms <https://scikit-learn.org/stable/modules/multiclass.html>`_):
 
