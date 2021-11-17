@@ -124,7 +124,7 @@ Ensembling
 To get the best performance out of the evaluated models, *auto-sklearn* uses ensemble selection by `Caruana et al. (2004) <https://dl.acm.org/doi/pdf/10.1145/1015330.1015432>`_
 to build an ensemble based on the models’ prediction for the validation set.
 
-.. collapse:: <b>Configuring the ensemble building process</b>
+.. collapse:: <b>Configure the ensemble building process</b>
 
     The following hyperparameters control how the ensemble is constructed:
 
@@ -137,6 +137,13 @@ to build an ensemble based on the models’ prediction for the validation set.
     The results obtained from the final ensemble can be printed by calling ``show_models()``.
     The *auto-sklearn* ensemble is composed of scikit-learn models that can be inspected as exemplified
     in the Example :ref:`sphx_glr_examples_40_advanced_example_get_pipeline_components.py`.
+
+.. collapse:: <b>Fit ensemble post-hoc</b>
+
+    To use a single core only, it is possible to build ensembles post-hoc. An example on how to do this (first searching
+    for individual models, and then building an ensemble from them) can be seen in
+    :ref:`sphx_glr_examples_60_search_example_sequential.py`.
+
 
 .. _inspect:
 
@@ -192,14 +199,8 @@ Inspecting the results
 Parallel computation
 ====================
 
-In it's default mode, *auto-sklearn* already uses **two cores**. The first one is used for model building, the second for
-building an ensemble every time a new machine learning model has finished training.
-
-.. collapse:: <b>Use a single core only</b>
-
-    To use a single core only, it is possible to build ensembles post-hoc. An example on how to do this (first searching
-    for individual models, and then building an ensemble from them) can be seen in
-    :ref:`sphx_glr_examples_60_search_example_sequential.py`.
+In it's default mode, *auto-sklearn* uses **one core** and interleaves ensemble building with evaluating new
+configurations.
 
 .. collapse:: <b>Parallelization with Dask</b>
 
