@@ -58,7 +58,7 @@ class QuantileTransformerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm)
             'n_quantiles', lower=10, upper=2000, default_value=1000
         )
         output_distribution = CategoricalHyperparameter(
-            'output_distribution', ['uniform', 'normal']
+            'output_distribution', ['normal', 'uniform']
         )
         cs.add_hyperparameters((n_quantiles, output_distribution))
         return cs
