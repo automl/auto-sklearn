@@ -288,7 +288,6 @@ class FeatureValidator(BaseEstimator):
             elif X[column].dtype.name in ['category', 'bool']:
 
                 feat_type[column] = 'categorical'
-            # new string option
             elif X[column].dtype.name == "string":
                 feat_type[column] = 'string'
             # Move away from np.issubdtype as it causes
