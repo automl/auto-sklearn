@@ -9,7 +9,7 @@ FAQ
 Issues
 ======
 
-.. collapse:: Auto-sklearn is extremely memory hungry in a sequential setting
+.. collapse:: <b>Auto-sklearn is extremely memory hungry in a sequential setting</b>
 
     Auto-sklearn can appear very memory hungry (i.e. requiring a lot of memory for small datasets) due
     to the use of ``fork`` for creating new processes when running in sequential manner (if this
@@ -53,7 +53,7 @@ Issues
 
     We therefore suggest using one of the above settings by default.
 
-.. collapse:: Auto-sklearn is extremely memory hungry in a parallel setting
+.. collapse:: <b>Auto-sklearn is extremely memory hungry in a parallel setting</b>
 
     When running Auto-sklearn in a parallel setting it starts new processes for evaluating machine
     learning models using the ``forkserver`` mechanism. Code that is in the main script and that is
@@ -63,7 +63,7 @@ Issues
 
     We therefore suggest moving all code inside functions or the main block.
 
-.. collapse:: Auto-sklearn crashes with a segmentation fault
+.. collapse:: <b>Auto-sklearn crashes with a segmentation fault</b>
 
     Please make sure that you have read and followed the :ref:`installation` section! In case
     everything is set up correctly, this is most likely due to the dependency
@@ -91,7 +91,7 @@ Issues
 Log files and output
 ====================
 
-.. collapse:: Where does Auto-sklearn output files by default?
+.. collapse:: <b>Where does Auto-sklearn output files by default?</b>
 
     *Auto-sklearn* heavily uses the hard drive to store temporary data, models and log files which can
     be used to inspect the behavior of Auto-sklearn. Each run of Auto-sklearn requires
@@ -107,7 +107,7 @@ Log files and output
     There's an additional argument ``output_directory`` which can be passed to *Auto-sklearn* and it
     controls where test predictions of the ensemble are stored if the test set is passed to ``fit()``.
 
-.. collapse:: Auto-sklearn eats up all my disk space
+.. collapse:: <b>Auto-sklearn eats up all my disk space</b>
 
     *Auto-sklearn* heavily uses the hard drive to store temporary data, models and log files which can
     be used to inspect the behavior of Auto-sklearn. By default, *Auto-sklearn* stores 50
@@ -139,7 +139,7 @@ Log files and output
 Available machine learning models
 =================================
 
-.. collapse:: Will non-scikit-learn models be added to Auto-sklearn?
+.. collapse:: <b>Will non-scikit-learn models be added to Auto-sklearn?</b>
 
     The short answer: no.
 
@@ -156,7 +156,7 @@ Available machine learning models
     If there is interest in creating a Auto-sklearn-contrib repository with 3rd-party models please
     open an issue for that.
 
-.. collapse:: Can the preprocessing be disabled
+.. collapse:: <b>Can the preprocessing be disabled</b>
 
     Feature preprocessing can be disabled as discussed in the example
     :ref:`space`. Other preprocessing steps such as one hot encoding, missing
@@ -165,7 +165,7 @@ Available machine learning models
 Usage
 =====
 
-.. collapse:: Only use interpretable models
+.. collapse:: <b>Only use interpretable models</b>
 
     Auto-sklearn can be restricted to only use interpretable models and preprocessing algorithms.
     Please see the Section :ref:`space` to learn how to restrict the models
@@ -176,7 +176,7 @@ Usage
     specific use case, but would like to note that decision trees and linear models usually most
     interpretable.
 
-.. collapse:: Limiting the number of model evaluations
+.. collapse:: <b>Limiting the number of model evaluations</b>
 
     In certain cases, for example for debugging, it can be helpful to limit the number of
     model evaluations. We do not provide this as an argument in the API as we believe that it
@@ -186,7 +186,7 @@ Usage
     Please note that Auto-sklearn will stop when either the time limit or the number of
     models termination condition is reached.
 
-.. collapse:: Ensemble contains only a dummy model
+.. collapse:: <b>Ensemble contains only a dummy model</b>
 
     This is a symptom of the problem that all runs started by Auto-sklearn failed. Usually, the issue
     is that the runtime or memory limit were too tight. Please check the output of
@@ -194,7 +194,7 @@ Usage
     runs, please check the log file for further details. If there are mostly runs that exceed the
     memory or time limit, please increase the respective limit and rerun the optimization.
 
-.. collapse:: Parallel processing and oversubscription
+.. collapse:: <b>Parallel processing and oversubscription</b>
 
     Auto-sklearn wraps scikit-learn and therefore inherits its parallelism implementation. In short,
     scikit-learn uses two modes of parallelizing computations:
@@ -217,14 +217,14 @@ Usage
 Meta-Learning
 =============
 
-.. collapse:: Which datasets are used for meta-learning?
+.. collapse:: <b>Which datasets are used for meta-learning?</b>
 
     We updated the list of datasets used for meta-learning several times and this list now differs
     significantly from the original 140 datasets we used in 2015 when the paper and the package were
     released. An up-to-date list of `OpenML task IDs <https://docs.openml.org/#tasks>`_ can be found
     on `github <https://github.com/automl/auto-sklearn/blob/master/scripts/update_metadata_util.py>`_.
 
-.. collapse:: How can datasets from the meta-data be excluded?
+.. collapse:: <b>How can datasets from the meta-data be excluded?</b>
 
     For *Auto-sklearn 1.0* one can pass the dataset name via the ``fit()`` function. If a dataset
     with the same name is within the meta-data, that datasets will not be used.
@@ -232,12 +232,12 @@ Meta-Learning
     For *Auto-sklearn 2.0* it is not possible to do so because of the method used to construct the
     meta-data.
 
-.. collapse:: Which meta-features are used for meta-learning?
+.. collapse:: <b>Which meta-features are used for meta-learning?</b>
 
     We do not have a user guide on meta-features but they are all pretty simple and can be found
     `in the source code <https://github.com/automl/auto-sklearn/blob/master/autosklearn/metalearning/metafeatures/metafeatures.py>`_.
 
-.. collapse:: How is the meta-data generated for Auto-sklearn 1.0?
+.. collapse:: <b>How is the meta-data generated for Auto-sklearn 1.0?</b>
 
     We currently generate meta-data the following way. First, for each of the datasets mentioned
     above, we run Auto-sklearn without meta-learning for a total of two days on multiple metrics (for
@@ -248,6 +248,6 @@ Meta-Learning
     ones such F1 and precision. Finally, for each combination of dataset and metric we store the best
     model we know of.
 
-.. collapse:: How is the meta-data generated for Auto-sklearn 2.0?
+.. collapse:: <b>How is the meta-data generated for Auto-sklearn 2.0?</b>
 
     Please check `our paper <https://arxiv.org/abs/2007.04074>`_ for details.
