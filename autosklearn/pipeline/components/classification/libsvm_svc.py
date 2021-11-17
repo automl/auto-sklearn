@@ -2,10 +2,9 @@ import resource
 import sys
 
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.conditions import EqualsCondition, InCondition
+from ConfigSpace.conditions import EqualsCondition
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    UniformIntegerHyperparameter, CategoricalHyperparameter, \
-    UnParametrizedHyperparameter
+    CategoricalHyperparameter, UnParametrizedHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
@@ -15,10 +14,9 @@ from autosklearn.util.common import check_for_bool, check_none
 
 class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
     def __init__(self, C, kernel, gamma, shrinking, tol, max_iter,
-                 class_weight=None, degree=3, coef0=0, random_state=None):
+                 class_weight=None, coef0=0, random_state=None):
         self.C = C
         self.kernel = kernel
-        self.degree = degree
         self.gamma = gamma
         self.coef0 = coef0
         self.shrinking = shrinking
@@ -60,10 +58,6 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
             cache_size = 200
 
         self.C = float(self.C)
-        if self.degree is None:
-            self.degree = 3
-        else:
-            self.degree = int(self.degree)
         if self.gamma is None:
             self.gamma = 0.0
         else:
@@ -82,7 +76,6 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
 
         self.estimator = sklearn.svm.SVC(C=self.C,
                                          kernel=self.kernel,
-                                         degree=self.degree,
                                          gamma=self.gamma,
                                          coef0=self.coef0,
                                          shrinking=self.shrinking,
@@ -126,9 +119,8 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
                                        default_value=1.0)
         # No linear kernel here, because we have liblinear
         kernel = CategoricalHyperparameter(name="kernel",
-                                           choices=["rbf", "poly", "sigmoid"],
+                                           choices=["rbf", "sigmoid"],
                                            default_value="rbf")
-        degree = UniformIntegerHyperparameter("degree", 2, 5, default_value=3)
         gamma = UniformFloatHyperparameter("gamma", 3.0517578125e-05, 8,
                                            log=True, default_value=0.1)
         # TODO this is totally ad-hoc
@@ -142,12 +134,9 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
         max_iter = UnParametrizedHyperparameter("max_iter", -1)
 
         cs = ConfigurationSpace()
-        cs.add_hyperparameters([C, kernel, degree, gamma, coef0, shrinking,
-                                tol, max_iter])
+        cs.add_hyperparameters([C, kernel, gamma, coef0, shrinking, tol, max_iter])
 
-        degree_depends_on_poly = EqualsCondition(degree, kernel, "poly")
-        coef0_condition = InCondition(coef0, kernel, ["poly", "sigmoid"])
-        cs.add_condition(degree_depends_on_poly)
+        coef0_condition = EqualsCondition(coef0, kernel, "sigmoid")
         cs.add_condition(coef0_condition)
 
         return cs

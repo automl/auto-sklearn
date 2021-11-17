@@ -145,8 +145,6 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                             'regressor:adaboost:max_depth': 1,
                             'feature_preprocessor:kernel_pca:n_components': 10,
                             'feature_preprocessor:kitchen_sinks:n_components': 50,
-                            'regressor:libsvm_svc:degree': 2,
-                            'regressor:libsvm_svr:degree': 2,
                             'regressor:libsvm_svr:C': 1.,
                             'feature_preprocessor:truncatedSVD:target_dim': 10,
                             'feature_preprocessor:polynomial:degree': 2,
@@ -284,7 +282,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
         forbiddens = cs.get_forbiddens()
-        self.assertEqual(156, len(hyperparameters))
+        self.assertEqual(155, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 3, len(conditions))
         self.assertEqual(len(forbiddens), 35)
 

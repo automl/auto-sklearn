@@ -2,10 +2,9 @@ import resource
 import sys
 
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.conditions import InCondition
+from ConfigSpace.conditions import EqualsCondition
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    UniformIntegerHyperparameter, CategoricalHyperparameter, \
-    UnParametrizedHyperparameter
+    CategoricalHyperparameter, UnParametrizedHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
@@ -14,14 +13,12 @@ from autosklearn.util.common import check_for_bool, check_none
 
 class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
     def __init__(self, kernel, C, epsilon, tol, shrinking, gamma=0.1,
-                 degree=3, coef0=0.0, verbose=False,
-                 max_iter=-1, random_state=None):
+                 coef0=0.0, verbose=False, max_iter=-1, random_state=None):
         self.kernel = kernel
         self.C = C
         self.epsilon = epsilon
         self.tol = tol
         self.shrinking = shrinking
-        self.degree = degree
         self.gamma = gamma
         self.coef0 = coef0
         self.verbose = verbose
@@ -64,7 +61,6 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
         self.epsilon = float(self.epsilon)
         self.tol = float(self.tol)
         self.shrinking = check_for_bool(self.shrinking)
-        self.degree = int(self.degree)
         self.gamma = float(self.gamma)
         if check_none(self.coef0):
             self.coef0 = 0.0
@@ -79,7 +75,6 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
             epsilon=self.epsilon,
             tol=self.tol,
             shrinking=self.shrinking,
-            degree=self.degree,
             gamma=self.gamma,
             coef0=self.coef0,
             cache_size=cache_size,
@@ -125,13 +120,11 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
                                              log=True)
 
         kernel = CategoricalHyperparameter(
-            name="kernel", choices=['linear', 'poly', 'rbf', 'sigmoid'],
-            default_value="rbf")
-        degree = UniformIntegerHyperparameter(
-            name="degree", lower=2, upper=5, default_value=3)
-
+            name="kernel", choices=['rbf', 'sigmoid'], default_value="rbf"
+        )
         gamma = UniformFloatHyperparameter(
-            name="gamma", lower=3.0517578125e-05, upper=8, log=True, default_value=0.1)
+            name="gamma", lower=3.0517578125e-05, upper=8, log=True, default_value=0.1
+        )
 
         # TODO this is totally ad-hoc
         coef0 = UniformFloatHyperparameter(
@@ -144,16 +137,10 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
         max_iter = UnParametrizedHyperparameter("max_iter", -1)
 
         cs = ConfigurationSpace()
-        cs.add_hyperparameters([C, kernel, degree, gamma, coef0, shrinking,
-                               tol, max_iter, epsilon])
+        cs.add_hyperparameters([C, kernel, gamma, coef0, shrinking, tol, max_iter, epsilon])
 
-        degree_depends_on_kernel = InCondition(child=degree, parent=kernel,
-                                               values=('poly', 'rbf', 'sigmoid'))
-        gamma_depends_on_kernel = InCondition(child=gamma, parent=kernel,
-                                              values=('poly', 'rbf'))
-        coef0_depends_on_kernel = InCondition(child=coef0, parent=kernel,
-                                              values=('poly', 'sigmoid'))
-        cs.add_conditions([degree_depends_on_kernel, gamma_depends_on_kernel,
-                           coef0_depends_on_kernel])
+        gamma_depends_on_kernel = EqualsCondition(child=gamma, parent=kernel, value='rbf')
+        coef0_depends_on_kernel = EqualsCondition(child=coef0, parent=kernel, value='sigmoid')
+        cs.add_conditions([gamma_depends_on_kernel, coef0_depends_on_kernel])
 
         return cs

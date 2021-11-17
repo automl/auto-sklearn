@@ -319,8 +319,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                             'feature_preprocessor:kernel_pca:n_components': 10,
                             'feature_preprocessor:kitchen_sinks:n_components': 50,
                             'classifier:proj_logit:max_epochs': 1,
-                            'classifier:libsvm_svc:degree': 2,
-                            'regressor:libsvm_svr:degree': 2,
                             'feature_preprocessor:truncatedSVD:target_dim': 10,
                             'feature_preprocessor:polynomial:degree': 2,
                             'classifier:lda:n_components': 10,
