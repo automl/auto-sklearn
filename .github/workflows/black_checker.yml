@@ -28,3 +28,4 @@ jobs:
       run: |
         black --check --diff --line-length 100 ./autosklearn || ! $STRICT
         black --check --diff --line-length 100 ./test || ! $STRICT
+        black --check --diff --line-length 100 ./examples|| ! $STRICT
