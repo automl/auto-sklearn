@@ -6,8 +6,140 @@
 FAQ
 ===
 
-Issues
-======
+General
+=======
+
+.. collapse:: <b>Where can I find examples on how to use auto-sklearn?</b>
+
+    We provide examples on using *auto-sklearn* for multiple use cases ranging from
+    simple classification to advanced uses such as feature importance, parallel runs
+    and customization. They can be found in the :ref:`sphx_glr_examples`.
+
+.. collapse:: <b>What type of tasks can auto-sklearn tackle?</b>
+
+    *auto-sklearn* can accept targets for the following tasks (more details on `Sklearn algorithms <https://scikit-learn.org/stable/modules/multiclass.html>`_):
+
+    * Binary Classification
+    * Multiclass Classification
+    * Multilabel Classification
+    * Regression
+    * Multioutput Regression
+
+    You can provide feature and target training pairs (X_train/y_train) to *auto-sklearn* to fit an
+    ensemble of pipelines as described in the next section. This X_train/y_train dataset must belong
+    to one of the supported formats: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.
+    Optionally, you can measure the ability of this fitted model to generalize to unseen data by
+    providing an optional testing pair (X_test/Y_test). For further details, please refer to the
+    Example :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py`.
+    Supported formats for these training and testing pairs are: np.ndarray,
+    pd.DataFrame, scipy.sparse.csr_matrix and python lists.
+
+    If your data contains categorical values (in the features or targets), autosklearn will automatically encode your
+    data using a `sklearn.preprocessing.LabelEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_
+    for unidimensional data and a `sklearn.preprocessing.OrdinalEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html>`_
+    for multidimensional data.
+
+    Regarding the features, there are two methods to guide *auto-sklearn* to properly encode categorical columns:
+
+    * Providing a X_train/X_test numpy array with the optional flag feat_type. For further details, you
+      can check the Example :ref:`sphx_glr_examples_40_advanced_example_feature_types.py`.
+    * You can provide a pandas DataFrame, with properly formatted columns. If a column has numerical
+      dtype, *auto-sklearn* will not encode it and it will be passed directly to scikit-learn. If the
+      column has a categorical/boolean class, it will be encoded. If the column is of any other type
+      (Object or Timeseries), an error will be raised. For further details on how to properly encode
+      your data, you can check the Pandas Example
+      `Working with categorical data <https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html>`_).
+      If you are working with time series, it is recommended that you follow this approach
+      `Working with time data <https://stats.stackexchange.com/questions/311494/>`_.
+
+    Regarding the targets (y_train/y_test), if the task involves a classification problem, such features will be
+    automatically encoded. It is recommended to provide both y_train and y_test during fit, so that a common encoding
+    is created between these splits (if only y_train is provided during fit, the categorical encoder will not be able
+    to handle new classes that are exclusive to y_test). If the task is regression, no encoding happens on the
+    targets.
+
+.. collapse:: <b>Where can I find slides and notebooks from talks and tutorials?</b>
+
+    We provide resources for talks, tutorials and presentations on *auto-sklearn* under `auto-sklearn-talks <https://github.com/automl/auto-sklearn-talks>`_
+
+.. collapse:: <b>How should I cite auto-sklearn in a scientific publication?</b>
+
+    If you've used auto-sklearn in scientific publications, we would appreciate citations.
+
+    .. code-block::
+
+        @inproceedings{feurer-neurips15a,
+            title     = {Efficient and Robust Automated Machine Learning},
+            author    = {Feurer, Matthias and Klein, Aaron and Eggensperger, Katharina  Springenberg, Jost and Blum, Manuel and Hutter, Frank},
+            booktitle = {Advances in Neural Information Processing Systems 28 (2015)},
+            pages     = {2962--2970},
+            year      = {2015}
+        }
+
+    Or this, if you've used auto-sklearn 2.0 in your work:
+
+    .. code-block::
+
+        @article{feurer-arxiv20a,
+            title     = {Auto-Sklearn 2.0: Hands-free AutoML via Meta-Learning},
+            author    = {Feurer, Matthias and Eggensperger, Katharina and Falkner, Stefan and Lindauer, Marius and Hutter, Frank},
+            booktitle = {arXiv:2007.04074 [cs.LG]},
+            year      = {2020}
+        }
+
+.. collapse:: <b>I want to contribute. What can I do?</b>
+
+    This sounds great. Please have a look at our `contribution guide <https://github.com/automl/auto-sklearn/blob/master/CONTRIBUTING.md>`_
+
+.. collapse:: <b>I have a question which is not answered here. What should I do?</b>
+
+    Thanks a lot. We regularly update this section with questions from our issue tracker. So please use the
+    `issue tracker <https://github.com/automl/auto-sklearn/issues>`_
+
+Resource Management
+===================
+
+.. collapse:: <b>How should I set the time and memory limits?</b>
+
+    While *auto-sklearn* alleviates manual hyperparameter tuning, the user still
+    has to set memory and time limits. For most datasets a memory limit of 3GB or
+    6GB as found on most modern computers is sufficient. For the time limits it
+    is harder to give clear guidelines. If possible, a good default is a total
+    time limit of one day, and a time limit of 30 minutes for a single run.
+
+    Further guidelines can be found in
+    `auto-sklearn/issues/142 <https://github.com/automl/auto-sklearn/issues/142>`_.
+
+.. collapse:: <b>How many CPU cores does auto-sklearn use by default?</b>
+
+    By default, *auto-sklearn* uses **one core**. See also :ref:`parallel` on how to configure this.
+
+.. collapse:: <b>How can I run auto-sklearn in parallel?</b>
+
+    Nevertheless, *auto-sklearn* also supports parallel Bayesian optimization via the use of
+    `Dask.distributed  <https://distributed.dask.org/>`_. By providing the arguments ``n_jobs``
+    to the estimator construction, one can control the number of cores available to *auto-sklearn*
+    (As shown in the Example :ref:`sphx_glr_examples_60_search_example_parallel_n_jobs.py`).
+    Distributed processes are also supported by providing a custom client object to *auto-sklearn* like
+    in the Example: :ref:`sphx_glr_examples_60_search_example_parallel_manual_spawning_cli.py`. When
+    multiple cores are
+    available, *auto-sklearn* will create a worker per core, and use the available workers to both search
+    for better machine learning models as well as building an ensemble with them until the time resource
+    is exhausted.
+
+    **Note:** *auto-sklearn* requires all workers to have access to a shared file system for storing training data and models.
+
+    *auto-sklearn* employs `threadpoolctl <https://github.com/joblib/threadpoolctl/>`_ to control the number of threads employed by scientific libraries like numpy or scikit-learn. This is done exclusively during the building procedure of models, not during inference. In particular, *auto-sklearn* allows each pipeline to use at most 1 thread during training. At predicting and scoring time this limitation is not enforced by *auto-sklearn*. You can control the number of resources
+    employed by the pipelines by setting the following variables in your environment, prior to running *auto-sklearn*:
+
+    .. code-block:: shell-session
+
+        $ export OPENBLAS_NUM_THREADS=1
+        $ export MKL_NUM_THREADS=1
+        $ export OMP_NUM_THREADS=1
+
+    For further information about how scikit-learn handles multiprocessing, please check the `Parallelism, resource management, and configuration <https://scikit-learn.org/stable/computing/parallelism.html>`_ documentation from the library.
+
 
 .. collapse:: <b>Auto-sklearn is extremely memory hungry in a sequential setting</b>
 
@@ -88,8 +220,43 @@ Issues
        github issues for suggestions: `1025 <https://github.com/automl/auto-sklearn/issues/1025>`_,
        `856 <https://github.com/automl/auto-sklearn/issues/856>`_
 
-Log files and output
-====================
+Results, Log Files and Output
+=============================
+
+.. collapse:: <b>How can I get an overview of the run statistics?</b>
+
+    ``sprint_statistics()`` is a method that prints the name of the  dataset, the metric used, and the best validation score
+    obtained by running *auto-sklearn*. It additionally prints the number of both successful and unsuccessful
+    algorithm runs.
+
+.. collapse:: <b>What was the performance over time?</b>
+
+    ``performance_over_time_``  returns a DataFrame containing the models performance over time data, which can
+    be used for plotting directly (Here is an example: :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py`).
+
+    .. code:: python
+
+        automl.performance_over_time_.plot(
+                x='Timestamp',
+                kind='line',
+                legend=True,
+                title='Auto-sklearn accuracy over time',
+                grid=True,
+            )
+            plt.show()
+
+.. collapse:: <b>Which models were evaluated?</b>
+
+    The results obtained from the final ensemble can be printed by calling ``show_models()``.
+
+.. collapse:: <b>Which models are in the final ensemble?</b>
+
+    ``automl.leaderboard()`` shows the ensemble members.
+
+.. collapse:: <b>Is there more data I can look at?</b>
+
+    ``cv_results_`` returns a dict with keys as column headers and values as columns, that can be imported into
+    a pandas DataFrame.
 
 .. collapse:: <b>Where does Auto-sklearn output files by default?</b>
 
@@ -107,7 +274,7 @@ Log files and output
     There's an additional argument ``output_directory`` which can be passed to *Auto-sklearn* and it
     controls where test predictions of the ensemble are stored if the test set is passed to ``fit()``.
 
-.. collapse:: <b>Auto-sklearn eats up all my disk space</b>
+.. collapse:: <b>Auto-sklearn's logfiles eat up all my disk space. What can I do?</b>
 
     *Auto-sklearn* heavily uses the hard drive to store temporary data, models and log files which can
     be used to inspect the behavior of Auto-sklearn. By default, *Auto-sklearn* stores 50
@@ -136,8 +303,55 @@ Log files and output
        These limits do only apply to models and their predictions, but not to other files stored in
        the temporary directory such as the log files.
 
-Available machine learning models
-=================================
+The Search Space
+================
+
+.. collapse:: <b>How can I restrict the searchspace?</b>
+
+ The following shows an example of how to exclude all preprocessing methods and restrict the configuration space to
+ only random forests.
+
+    .. code:: python
+
+        import autosklearn.classification
+        automl = autosklearn.classification.AutoSklearnClassifier(
+            include = {
+                'classifier': ["random_forest"],
+                'feature_preprocessor': ["no_preprocessing"]
+            },
+            exclude=None
+        )
+        automl.fit(X_train, y_train)
+        predictions = automl.predict(X_test)
+
+    **Note:** The strings used to identify estimators and preprocessors are the filenames without *.py*.
+
+    For a full list please have a look at the source code (in `autosklearn/pipeline/components/`):
+
+      * `Classifiers <https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/classification>`_
+      * `Regressors <https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/regression>`_
+      * `Preprocessors <https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/feature_preprocessing>`_
+
+    We do also provide an example on how to restrict the classifiers to search over
+    :ref:`sphx_glr_examples_40_advanced_example_interpretable_models.py`.
+
+.. collapse:: <b>How can I turn off data preprocessing?</b>
+
+    Data preprocessing includes One-Hot encoding of categorical features, imputation
+    of missing values and the normalization of features or samples. These ensure that
+    the data the gets to the sklearn models is well formed and can be used for
+    training models.
+
+    While this is necessary in general, if you'd like to disable this step, please
+    refer to this :ref:`example <sphx_glr_examples_80_extending_example_extending_data_preprocessor.py>`.
+
+.. collapse:: <b>How can I turn off feature preprocessing?</b>
+
+    Feature preprocessing is a single transformer which implements for example feature
+    selection or transformation of features into a different space (i.e. PCA).
+
+    This can be turned off by setting
+    ``include={'feature_preprocessor'=["no_preprocessing"]}`` as shown in the example above.
 
 .. collapse:: <b>Will non-scikit-learn models be added to Auto-sklearn?</b>
 
@@ -156,16 +370,7 @@ Available machine learning models
     If there is interest in creating a Auto-sklearn-contrib repository with 3rd-party models please
     open an issue for that.
 
-.. collapse:: <b>Can the preprocessing be disabled</b>
-
-    Feature preprocessing can be disabled as discussed in the example
-    :ref:`space`. Other preprocessing steps such as one hot encoding, missing
-    feature imputation and normalization cannot yet be disabled, but we're working on that.
-
-Usage
-=====
-
-.. collapse:: <b>Only use interpretable models</b>
+.. collapse:: <b>How can I only search for interpretable models</b>
 
     Auto-sklearn can be restricted to only use interpretable models and preprocessing algorithms.
     Please see the Section :ref:`space` to learn how to restrict the models
@@ -176,43 +381,39 @@ Usage
     specific use case, but would like to note that decision trees and linear models usually most
     interpretable.
 
-.. collapse:: <b>Limiting the number of model evaluations</b>
+Ensembling
+==========
 
-    In certain cases, for example for debugging, it can be helpful to limit the number of
-    model evaluations. We do not provide this as an argument in the API as we believe that it
-    should NOT be used in practice, but that the user should rather provide time limits.
-    An example on how to add the number of models to try as an additional stopping condition
-    can be found `in this github issue <https://github.com/automl/auto-sklearn/issues/451#issuecomment-376445607>`_.
-    Please note that Auto-sklearn will stop when either the time limit or the number of
-    models termination condition is reached.
+.. collapse:: <b>What can I configure wrt the ensemble building process?</b>
 
-.. collapse:: <b>Ensemble contains only a dummy model</b>
+    The following hyperparameters control how the ensemble is constructed:
 
-    This is a symptom of the problem that all runs started by Auto-sklearn failed. Usually, the issue
-    is that the runtime or memory limit were too tight. Please check the output of
-    ``sprint_statistics`` to see the distribution of why runs failed. If there are mostly crashed
-    runs, please check the log file for further details. If there are mostly runs that exceed the
-    memory or time limit, please increase the respective limit and rerun the optimization.
+    * ``ensemble_size`` determines the maximal size of the ensemble. If it is set to zero, no ensemble will be constructed.
+    * ``ensemble_nbest`` allows the user to directly specify the number of models considered for the ensemble.  This hyperparameter can be an integer *n*, such that only the best *n* models are used in the final ensemble. If a float between 0.0 and 1.0 is provided, ``ensemble_nbest`` would be interpreted as a fraction suggesting the percentage of models to use in the ensemble building process (namely, if ensemble_nbest is a float, library pruning is implemented as described in `Caruana et al. (2006) <https://dl.acm.org/doi/10.1109/ICDM.2006.76>`_).
+    * ``max_models_on_disc`` defines the maximum number of models that are kept on the disc, as a mechanism to control the amount of disc space consumed by *auto-sklearn*. Throughout the automl process, different individual models are optimized, and their predictions (and other metadata) is stored on disc. The user can set the upper bound on how many models are acceptable to keep on disc, yet this variable takes priority in the definition of the number of models used by the ensemble builder (that is, the minimum of ``ensemble_size``, ``ensemble_nbest`` and ``max_models_on_disc`` determines the maximal amount of models used in the ensemble). If set to None, this feature is disabled.
 
-.. collapse:: <b>Parallel processing and oversubscription</b>
+.. collapse:: <b>Which models are in the final ensemble?</b>
 
-    Auto-sklearn wraps scikit-learn and therefore inherits its parallelism implementation. In short,
-    scikit-learn uses two modes of parallelizing computations:
+    The results obtained from the final ensemble can be printed by calling ``show_models()`` or  ``leaderboard()``.
+    The *auto-sklearn* ensemble is composed of scikit-learn models that can be inspected as exemplified
+    in the Example :ref:`sphx_glr_examples_40_advanced_example_get_pipeline_components.py`.
 
-    1. By using joblib to distribute independent function calls on multiple cores.
-    2. By using lower level libraries such as OpenMP and numpy to distribute more fine-grained
-       computation.
+.. collapse:: <b>Can I fit an ensemble also only post-hoc?</b>
 
-    This means that Auto-sklearn can use more resources than expected by the user. For technical
-    reasons we can only control the 1st way of parallel execution, but not the 2nd. Thus, the user
-    needs to make sure that the lower level parallelization libraries only use as many cores as
-    allocated (on a laptop or workstation running a single copy of Auto-sklearn it can be fine to not
-    adjust this, but when using a compute cluster it is necessary to align the parallelism setting
-    with the number of requested CPUs). This can be done by setting the following environment
-    variables: ``MKL_NUM_THREADS``, ``OPENBLAS_NUM_THREADS``, ``BLIS_NUM_THREADS`` and
-    ``OMP_NUM_THREADS``.
+    To use a single core only, it is possible to build ensembles post-hoc. An example on how to do this (first searching
+    for individual models, and then building an ensemble from them) can be seen in
+    :ref:`sphx_glr_examples_60_search_example_sequential.py`.
 
-    More details can be found in the `scikit-learn docs <https://scikit-learn.org/stable/computing/parallelism.html?highlight=joblib#parallelism>`_.
+Configuring the Search Procedure
+================================
+
+.. collapse:: <b>Can I change the resampling strategy?</b>
+
+    Examples for using holdout and cross-validation can be found in :ref:`example <sphx_glr_examples_40_advanced_example_resampling.py>`
+
+.. collapse:: <b>Can I use a custom metric</b>
+
+    Examples for using a custom metric can be found in :ref:`example <sphx_glr_examples_40_advanced_example_metrics.py>`
 
 Meta-Learning
 =============
@@ -251,3 +452,74 @@ Meta-Learning
 .. collapse:: <b>How is the meta-data generated for Auto-sklearn 2.0?</b>
 
     Please check `our paper <https://arxiv.org/abs/2007.04074>`_ for details.
+
+
+Issues and Debugging
+====================
+
+.. collapse:: <b>How can I limit the number of model evaluations for debugging?</b>
+
+    In certain cases, for example for debugging, it can be helpful to limit the number of
+    model evaluations. We do not provide this as an argument in the API as we believe that it
+    should NOT be used in practice, but that the user should rather provide time limits.
+    An example on how to add the number of models to try as an additional stopping condition
+    can be found `in this github issue <https://github.com/automl/auto-sklearn/issues/451#issuecomment-376445607>`_.
+    Please note that Auto-sklearn will stop when either the time limit or the number of
+    models termination condition is reached.
+
+.. collapse:: <b>Why does the final ensemble contains only a dummy model?</b>
+
+    This is a symptom of the problem that all runs started by Auto-sklearn failed. Usually, the issue
+    is that the runtime or memory limit were too tight. Please check the output of
+    ``sprint_statistics`` to see the distribution of why runs failed. If there are mostly crashed
+    runs, please check the log file for further details. If there are mostly runs that exceed the
+    memory or time limit, please increase the respective limit and rerun the optimization.
+
+.. collapse:: <b>Auto-sklearn does not use the specified amount of resources?</b>
+
+    Auto-sklearn wraps scikit-learn and therefore inherits its parallelism implementation. In short,
+    scikit-learn uses two modes of parallelizing computations:
+
+    1. By using joblib to distribute independent function calls on multiple cores.
+    2. By using lower level libraries such as OpenMP and numpy to distribute more fine-grained
+       computation.
+
+    This means that Auto-sklearn can use more resources than expected by the user. For technical
+    reasons we can only control the 1st way of parallel execution, but not the 2nd. Thus, the user
+    needs to make sure that the lower level parallelization libraries only use as many cores as
+    allocated (on a laptop or workstation running a single copy of Auto-sklearn it can be fine to not
+    adjust this, but when using a compute cluster it is necessary to align the parallelism setting
+    with the number of requested CPUs). This can be done by setting the following environment
+    variables: ``MKL_NUM_THREADS``, ``OPENBLAS_NUM_THREADS``, ``BLIS_NUM_THREADS`` and
+    ``OMP_NUM_THREADS``.
+
+    More details can be found in the `scikit-learn docs <https://scikit-learn.org/stable/computing/parallelism.html?highlight=joblib#parallelism>`_.
+
+Other
+=====
+
+.. collapse:: <b>Model persistence</b>
+
+    *auto-sklearn* is mostly a wrapper around scikit-learn. Therefore, it is
+    possible to follow the
+    `persistence Example <https://scikit-learn.org/stable/modules/model_persistence.html>`_
+    from scikit-learn.
+
+.. collapse:: <b>Vanilla auto-sklearn</b>
+
+    In order to obtain *vanilla auto-sklearn* as used in `Efficient and Robust Automated Machine Learning
+    <https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine -learning>`_
+    set ``ensemble_size=1`` and ``initial_configurations_via_metalearning=0``:
+
+    .. code:: python
+
+        import autosklearn.classification
+        automl = autosklearn.classification.AutoSklearnClassifier(
+            ensemble_size=1,
+            initial_configurations_via_metalearning=0
+        )
+
+    An ensemble of size one will result in always choosing the current best model
+    according to its performance on the validation set. Setting the initial
+    configurations found by meta-learning to zero makes *auto-sklearn* use the
+    regular SMAC algorithm for suggesting new hyperparameter configurations.

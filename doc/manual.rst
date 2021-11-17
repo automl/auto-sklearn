@@ -19,10 +19,10 @@ give short explanations (click the title to expand text), e.g.
 
     We provide resources for talks, tutorials and presentations on *auto-sklearn* under `auto-sklearn-talks <https://github.com/automl/auto-sklearn-talks>`_
 
+.. _limits:
+
 Resource limits
 ===============
-
-.. _limits:
 
 A crucial feature of *auto-sklearn* is limiting the resources (memory and time) which the scikit-learn algorithms are
 allowed to use. Especially for large datasets, on which algorithms can take several hours and make the machine swap,

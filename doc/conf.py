@@ -181,7 +181,7 @@ html_theme_options = {
         ('Start', 'index'),
         ('Releases', 'releases'),
         ('Installation', 'installation'),
-        ('Manual', 'manual'),
+        #('Manual', 'manual'),
         ('Examples', 'examples/index'),
         ('API', 'api'),
         ('Extending', 'extending'),
