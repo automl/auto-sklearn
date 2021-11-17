@@ -1,0 +1,39 @@
+name: black-format-check
+
+on: [push, pull_request]
+
+env:
+  #If STRICT is set to true, it will fail on black check fail
+  STRICT: false
+
+jobs:
+
+  black-format-check:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.7"
+
+    - name: Install black
+      run: |
+        pip install black
+
+    - name: Run Black Check
+      run: |
+        if ${{ env.STRICT }}; then
+          black --check --diff --line-length 100 ./autosklearn
+          black --check --diff --line-length 100 ./test
+        else
+          # We capture output and always return true
+          output_src=$(black --check --diff --line-length 100 ./autosklearn) || true
+          echo $output_src
+
+          output_test=$(black --check --diff --line-length 100 ./test) || true
+          echo $output_test
+        fi
