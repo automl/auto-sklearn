@@ -166,7 +166,7 @@ Can the preprocessing be disabled
 ---------------------------------
 
 Feature preprocessing can be disabled as discussed in the example
-:ref:`restricting_the_searchspace`. Other preprocessing steps such as one hot encoding, missing
+:ref:`space`. Other preprocessing steps such as one hot encoding, missing
 feature imputation and normalization cannot yet be disabled, but we're working on that.
 
 Usage
@@ -176,7 +176,7 @@ Only use interpretable models
 -----------------------------
 
 Auto-sklearn can be restricted to only use interpretable models and preprocessing algorithms.
-Please see the Section :ref:`restricting_the_searchspace` to learn how to restrict the models
+Please see the Section :ref:`space` to learn how to restrict the models
 which are searched over or see the Example
 :ref:`sphx_glr_examples_40_advanced_example_interpretable_models.py`.
 
