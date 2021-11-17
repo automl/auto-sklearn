@@ -43,7 +43,7 @@ extras_reqs={
     ],
     "docs": [
         "sphinx",
-        "sphinx-gallery",
+        "sphinx-gallery<=0.10.0",
         "sphinx_bootstrap_theme",
         "numpydoc",
         "sphinx_toolbox",
