@@ -2,7 +2,7 @@ import resource
 import sys
 
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.conditions import InCondition
+from ConfigSpace.conditions import InCondition, EqualsCondition
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter
@@ -147,13 +147,12 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
         cs.add_hyperparameters([C, kernel, degree, gamma, coef0, shrinking,
                                tol, max_iter, epsilon])
 
-        degree_depends_on_kernel = InCondition(child=degree, parent=kernel,
-                                               values=('poly', 'rbf', 'sigmoid'))
+        degree_depends_on_poly = EqualsCondition(degree, kernel, "poly")
         gamma_depends_on_kernel = InCondition(child=gamma, parent=kernel,
                                               values=('poly', 'rbf'))
         coef0_depends_on_kernel = InCondition(child=coef0, parent=kernel,
                                               values=('poly', 'sigmoid'))
-        cs.add_conditions([degree_depends_on_kernel, gamma_depends_on_kernel,
+        cs.add_conditions([degree_depends_on_poly, gamma_depends_on_kernel,
                            coef0_depends_on_kernel])
 
         return cs
