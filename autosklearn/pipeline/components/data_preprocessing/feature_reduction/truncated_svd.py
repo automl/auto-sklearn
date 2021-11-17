@@ -4,7 +4,6 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 import ConfigSpace.hyperparameters as CSH
 
 import numpy as np
-from scipy.sparse import csr_matrix
 
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
@@ -13,7 +12,7 @@ from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 from sklearn.decomposition import TruncatedSVD
 
 
-class TextFeatureReduction(AutoSklearnPreprocessingAlgorithm):
+class FeatureReduction(AutoSklearnPreprocessingAlgorithm):
     """
     Reduces the features created by a bag of words encoding
     """
@@ -27,7 +26,7 @@ class TextFeatureReduction(AutoSklearnPreprocessingAlgorithm):
         self.random_state = random_state
 
     def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
-            ) -> 'TextFeatureReduction':
+            ) -> 'FeatureReduction':
         if X.shape[1] > self.n_components:
             self.preprocessor = TruncatedSVD(n_components=self.n_components,
                                              random_state=self.random_state)

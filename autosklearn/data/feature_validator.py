@@ -364,11 +364,6 @@ class FeatureValidator(BaseEstimator):
         if len(self.dtypes) == 0:
             # Categorical data is inferred as string. Convert to categorical.
             # Warn the user about dtypes or request him to use a dataframe
-            # Todo check if this loop is still needed
-            for col in X_train.columns:
-                if X_train[col].dtype.name == 'string':
-                    X_train[col] = X_train[col].astype('string')
-
             self.dtypes = {col: X_train[col].dtype.name.lower() for col in X_train.columns}
         else:
             for col in X_train.columns:

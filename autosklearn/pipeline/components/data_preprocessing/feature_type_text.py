@@ -8,8 +8,8 @@ from sklearn.base import BaseEstimator
 
 from autosklearn.pipeline.components.data_preprocessing.text_encoding \
     import BagOfWordChoice
-from autosklearn.pipeline.components.data_preprocessing.text_feature_reduction.truncated_svd import \
-    TextFeatureReduction
+from autosklearn.pipeline.components.data_preprocessing.feature_reduction.truncated_svd import \
+    FeatureReduction
 from autosklearn.pipeline.base import (
     BasePipeline,
     DATASET_PROPERTIES_TYPE,
@@ -110,7 +110,7 @@ class TextPreprocessingPipeline(BasePipeline):
         # ToDo implemenent the feature reduction
         steps.extend([
             ("text_encoding", BagOfWordChoice(default_dataset_properties)),
-            ("text_feature_reduction", TextFeatureReduction())
+            ("feature_reduction", FeatureReduction())
         ])
         return steps
 
