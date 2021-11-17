@@ -26,14 +26,5 @@ jobs:
 
     - name: Run Black Check
       run: |
-        if ${{ env.STRICT }}; then
-          black --check --diff --line-length 100 ./autosklearn
-          black --check --diff --line-length 100 ./test
-        else
-          # We capture output and always return true
-          output_src=$(black --check --diff --line-length 100 ./autosklearn) || true
-          echo $output_src
-
-          output_test=$(black --check --diff --line-length 100 ./test) || true
-          echo $output_test
-        fi
+        black --check --diff --line-length 100 ./autosklearn || ! $STRICT
+        black --check --diff --line-length 100 ./test || ! $STRICT
