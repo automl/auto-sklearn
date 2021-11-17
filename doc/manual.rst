@@ -43,7 +43,7 @@ tested.
 
 .. collapse:: <b>CPU cores</b>
 
-    By default, *auto-sklearn* uses **two cores**. See also :ref:`parallel` on how to configure this.
+    By default, *auto-sklearn* uses **one core**. See also :ref:`parallel` on how to configure this.
 
 .. _space:
 

@@ -185,7 +185,7 @@ class AutoSklearnEstimator(BaseEstimator):
             fine-grained information on what to save. Allowed elements in the
             list are:
 
-            * ``y_optimization`` : do not save the predictions for the
+            * ``'y_optimization'`` : do not save the predictions for the
               optimization/validation set, which would later on be used to build
               an ensemble.
             * ``model`` : do not save any model files
