@@ -435,6 +435,7 @@ class AutoMLSMBO(object):
         total_walltime_limit = self.total_walltime_limit - startup_time - 5
         scenario_dict = {
             'abort_on_first_run_crash': False,
+            'save-results-instantly': True,
             'cs': self.config_space,
             'cutoff_time': self.func_eval_time_limit,
             'deterministic': 'true',
