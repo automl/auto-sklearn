@@ -22,6 +22,24 @@ cls.fit(X_train, y_train)
 predictions = cls.predict(X_test)
 ```
 
+## auto-sklearn acceleration with sklearnex
+
+You can accelerate auto-sklearn with [sklearnex](https://github.com/intel/scikit-learn-intelex). It is extension that speedups sklearn algorithms through patching with highly optimized machine learning kernels.
+
+Install sklearnex with pip or conda:
+```bash
+pip install scikit-learn-intelex
+conda install scikit-learn-intelex
+conda install -c conda-forge scikit-learn-intelex
+```
+
+Insert these two lines of code before auto-sklearn and sklearn imports to get acceleration:
+
+```python
+from sklearnex import patch_sklearn
+patch_sklearn()
+```
+
 ## Relevant publications
 
 If you use auto-sklearn in scientific publications, we would appreciate citations.

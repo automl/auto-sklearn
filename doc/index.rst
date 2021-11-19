@@ -60,6 +60,26 @@ Example
 This will run for one hour and should result in an accuracy above 0.98.
 
 
+auto-sklearn acceleration with sklearnex
+******
+You can accelerate auto-sklearn with `sklearnex <https://github.com/intel/scikit-learn-intelex>`_. It is extension that speedups sklearn algorithms through patching with highly optimized machine learning kernels.
+
+Install sklearnex with pip or conda:
+
+.. code:: bash
+
+    pip install scikit-learn-intelex
+    conda install scikit-learn-intelex
+    conda install -c conda-forge scikit-learn-intelex
+
+Insert these two lines of code before auto-sklearn and sklearn imports to get acceleration:
+
+.. code:: python
+
+    from sklearnex import patch_sklearn
+    patch_sklearn()
+
+
 Manual
 ******
 
