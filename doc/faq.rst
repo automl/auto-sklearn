@@ -256,7 +256,7 @@ Results, Log Files and Output
 .. collapse:: <b>Is there more data I can look at?</b>
 
     ``cv_results_`` returns a dict with keys as column headers and values as columns, that can be imported into
-    a pandas DataFrame.
+    a pandas DataFrame, e.g. ``df = pd.DataFrame(automl.cv_results_)``
 
 .. collapse:: <b>Where does Auto-sklearn output files by default?</b>
 
