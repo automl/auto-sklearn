@@ -247,11 +247,11 @@ Results, Log Files and Output
 
 .. collapse:: <b>Which models were evaluated?</b>
 
-    The results obtained from the final ensemble can be printed by calling ``show_models()``.
+    You can see all models evaluated using :meth:`automl.leaderboard(ensemble_only=False) <autosklearn.classification.AutoSklearnClassifier.leaderboard>`.
 
 .. collapse:: <b>Which models are in the final ensemble?</b>
 
-    ``automl.leaderboard()`` shows the ensemble members.
+    Use either :meth:`automl.leaderboard(ensemble_only=True) <autosklearn.classification.AutoSklearnClassifier.leaderboard>` or ``automl.show_models()``
 
 .. collapse:: <b>Is there more data I can look at?</b>
 
@@ -400,9 +400,7 @@ Ensembling
 
 .. collapse:: <b>Can I fit an ensemble also only post-hoc?</b>
 
-    To use a single core only, it is possible to build ensembles post-hoc. An example on how to do this (first searching
-    for individual models, and then building an ensemble from them) can be seen in
-    :ref:`sphx_glr_examples_60_search_example_sequential.py`.
+    It is possible to build ensembles post-hoc. An example on how to do this (first searching for individual models, and then building an ensemble from them) can be seen in :ref:`sphx_glr_examples_60_search_example_sequential.py`.
 
 Configuring the Search Procedure
 ================================
