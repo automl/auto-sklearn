@@ -269,7 +269,7 @@ Results, Log Files and Output
     ``delete_tmp_folder_after_terminate=True`` to the *Auto-sklearn* object.
 
     The :class:`autosklearn.classification.AutoSklearnClassifier` and all other *auto-sklearn*
-    estimators accept the argument ``tmp_directory`` which change where such output is written to.
+    estimators accept the argument ``tmp_folder`` which change where such output is written to.
 
     There's an additional argument ``output_directory`` which can be passed to *Auto-sklearn* and it
     controls where test predictions of the ensemble are stored if the test set is passed to ``fit()``.
