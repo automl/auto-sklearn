@@ -33,11 +33,22 @@ conda install scikit-learn-intelex
 conda install -c conda-forge scikit-learn-intelex
 ```
 
-Insert these two lines of code before auto-sklearn and sklearn imports to get acceleration:
+Insert these two lines of patching code before auto-sklearn and sklearn imports to get acceleration:
 
 ```python
 from sklearnex import patch_sklearn
 patch_sklearn()
+
+import autosklearn.classification
+```
+
+Call unpatching and reimport auto-sklearn and sklearn to return original implementation:
+
+```python
+from sklearnex import unpatch_sklearn
+unpatch_sklearn()
+
+import autosklearn.classification
 ```
 
 ## Relevant publications
