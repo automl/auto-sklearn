@@ -565,7 +565,7 @@ class AutoSklearnEstimator(BaseEstimator):
         Gives an overview of all models trained during the search process along
         with various statistics about their training.
 
-        The availble statistics are:
+        The available statistics are:
 
         **Simple**:
 
