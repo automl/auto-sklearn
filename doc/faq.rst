@@ -469,7 +469,7 @@ Issues and Debugging
 
     This is a symptom of the problem that all runs started by Auto-sklearn failed. Usually, the issue
     is that the runtime or memory limit were too tight. Please check the output of
-    ``sprint_statistics`` to see the distribution of why runs failed. If there are mostly crashed
+    ``sprint_statistics()`` to see the distribution of why runs failed. If there are mostly crashed
     runs, please check the log file for further details. If there are mostly runs that exceed the
     memory or time limit, please increase the respective limit and rerun the optimization.
 
