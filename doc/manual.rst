@@ -6,7 +6,7 @@
 Manual
 ======
 
-This manual give an overview of different aspects of *auto-sklearn*. For each section, we either references examples or
+This manual gives an overview of different aspects of *auto-sklearn*. For each section, we either references examples or
 give short explanations (click the title to expand text), e.g.
 
 .. collapse:: <b>Code examples</b>
