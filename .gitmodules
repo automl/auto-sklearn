@@ -1,0 +1,3 @@
+[submodule "automl_common"]
+	path = automl_common
+	url = https://github.com/automl/automl_common
