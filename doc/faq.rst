@@ -265,7 +265,7 @@ Results, Log Files and Output
     its own directory. If not provided by the user, *Auto-sklearn* requests a temporary directory from
     Python, which by default is located under ``/tmp`` and starts with ``autosklearn_tmp_`` followed
     by a random string. By default, this directory is deleted when the *Auto-sklearn* object is
-    destroyed. If you want to keep these files you can pass the argument
+    finished fitting. If you want to keep these files you can pass the argument
     ``delete_tmp_folder_after_terminate=True`` to the *Auto-sklearn* object.
 
     The :class:`autosklearn.classification.AutoSklearnClassifier` and all other *auto-sklearn*
