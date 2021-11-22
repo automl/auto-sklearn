@@ -188,7 +188,7 @@ Inspecting the results
 
 .. collapse:: <b>Leaderboard</b>
 
-    ``automl.leaderboard()`` shows the ensemble members.
+    ``automl.leaderboard()`` shows the ensemble members, check the :meth:`docs <autosklearn.classification.AutoSklearnClassifier.leaderboard>` for using leaderboard for getting information on *all* runs.
 
 .. collapse:: <b>Other</b>
 
