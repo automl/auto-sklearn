@@ -14,7 +14,7 @@ from smac.tae import StatusType
 
 from threadpoolctl import threadpool_limits
 
-from automl_common.commons.utils.backend import Backend
+from automl_common.common.utils.backend import Backend
 
 import autosklearn.pipeline.classification
 import autosklearn.pipeline.regression

@@ -20,7 +20,7 @@ from smac.tae.execute_func import AbstractTAFunc
 from sklearn.model_selection._split import _RepeatedSplits, BaseShuffleSplit,\
     BaseCrossValidator
 
-from automl_common.commons.utils.backend import Backend
+from automl_common.common.utils.backend import Backend
 
 from autosklearn.metrics import Scorer
 import autosklearn.evaluation.train_evaluator

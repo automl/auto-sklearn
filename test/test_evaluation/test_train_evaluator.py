@@ -646,7 +646,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             )
         )
 
-    @unittest.mock.patch('automl_common.commons.utils.backend.Backend')
+    @unittest.mock.patch('automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_subsample_indices_classification(self, mock, backend_mock):
 
@@ -698,7 +698,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             'classes = 2', subsample_indices, train_indices, 0.9999, evaluator.task_type,
             evaluator.Y_train)
 
-    @unittest.mock.patch('automl_common.commons.utils.backend.Backend')
+    @unittest.mock.patch('automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_subsample_indices_regression(self, mock, backend_mock):
 
@@ -771,7 +771,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
     @unittest.mock.patch.object(TrainEvaluator, 'file_output')
     @unittest.mock.patch.object(TrainEvaluator, '_partial_fit_and_predict_standard')
-    @unittest.mock.patch('automl_common.commons.utils.backend.Backend')
+    @unittest.mock.patch('automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_fit_predict_and_loss_standard_additional_run_info(
         self, mock, backend_mock, _partial_fit_and_predict_mock,
@@ -864,7 +864,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
     @unittest.mock.patch.object(TrainEvaluator, '_loss')
     @unittest.mock.patch.object(TrainEvaluator, 'finish_up')
-    @unittest.mock.patch('automl_common.commons.utils.backend.Backend')
+    @unittest.mock.patch('automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_fit_predict_and_loss_iterative_additional_run_info(
             self, mock, backend_mock, finish_up_mock, loss_mock,
@@ -913,7 +913,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
     @unittest.mock.patch.object(TrainEvaluator, '_loss')
     @unittest.mock.patch.object(TrainEvaluator, 'finish_up')
-    @unittest.mock.patch('automl_common.commons.utils.backend.Backend')
+    @unittest.mock.patch('automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_fit_predict_and_loss_iterative_noniterativemodel_additional_run_info(
             self, mock, backend_mock, finish_up_mock, loss_mock,
@@ -952,7 +952,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
     @unittest.mock.patch.object(TrainEvaluator, '_loss')
     @unittest.mock.patch.object(TrainEvaluator, 'finish_up')
-    @unittest.mock.patch('automl_common.commons.utils.backend.Backend')
+    @unittest.mock.patch('automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_fit_predict_and_loss_budget_additional_run_info(
             self, mock, backend_mock, finish_up_mock, loss_mock,
@@ -1003,7 +1003,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
     @unittest.mock.patch.object(TrainEvaluator, '_loss')
     @unittest.mock.patch.object(TrainEvaluator, 'finish_up')
-    @unittest.mock.patch('automl_common.commons.utils.backend.Backend')
+    @unittest.mock.patch('automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_fit_predict_and_loss_budget_2_additional_run_info(
             self, mock, backend_mock, finish_up_mock, loss_mock,

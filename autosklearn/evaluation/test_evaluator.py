@@ -8,7 +8,7 @@ import numpy as np
 
 from smac.tae import StatusType
 
-from automl_common.commons.utils.backend import Backend
+from automl_common.common.utils.backend import Backend
 
 from autosklearn.evaluation.abstract_evaluator import (
     AbstractEvaluator,
