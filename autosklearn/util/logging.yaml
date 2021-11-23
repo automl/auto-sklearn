@@ -33,7 +33,7 @@ loggers:
     level: DEBUG
     handlers: [file_handler]
 
-  autosklearn.util.backend:
+  automl_commons.utils.backend:
     level: DEBUG
     handlers: [file_handler]
     propagate: no

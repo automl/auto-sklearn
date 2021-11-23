@@ -7,7 +7,7 @@ from dask.distributed import Client, get_client
 import psutil
 import pytest
 
-from autosklearn.util.backend import create, Backend
+from automl_common.commons.utils.backend import create, Backend
 from autosklearn.automl import AutoML
 
 

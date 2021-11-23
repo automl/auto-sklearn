@@ -10,10 +10,11 @@ import tempfile
 import numpy as np
 import sklearn.dummy
 
+from automl_common.commons.utils.backend import Backend, BackendContext
+
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 from autosklearn.pipeline.components.base import _addons
 from autosklearn.metrics import accuracy
-from autosklearn.util.backend import Backend, BackendContext
 from smac.tae import StatusType
 
 this_directory = os.path.dirname(__file__)
