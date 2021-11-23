@@ -19,7 +19,7 @@ from sklearn.model_selection import GroupKFold, GroupShuffleSplit, \
 import sklearn.model_selection
 from smac.tae import StatusType, TAEAbortException
 
-from automl_common.commons.utils import backend
+from automl_common.common.utils import backend
 
 import autosklearn.evaluation.splitter
 from autosklearn.data.abstract_data_manager import AbstractDataManager
