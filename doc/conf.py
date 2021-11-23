@@ -43,6 +43,7 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary',
               'sphinx.ext.doctest', 'sphinx.ext.coverage',
               'sphinx.ext.mathjax', 'sphinx.ext.viewcode',
               'sphinx_gallery.gen_gallery', 'sphinx.ext.autosectionlabel',
+              'sphinx_toolbox.collapse',
               # sphinx.ext.autosexctionlabel raises duplicate label warnings
               # because same section headers are used multiple times throughout
               # the documentation.
@@ -180,7 +181,7 @@ html_theme_options = {
         ('Start', 'index'),
         ('Releases', 'releases'),
         ('Installation', 'installation'),
-        ('Manual', 'manual'),
+        #('Manual', 'manual'),
         ('Examples', 'examples/index'),
         ('API', 'api'),
         ('Extending', 'extending'),
