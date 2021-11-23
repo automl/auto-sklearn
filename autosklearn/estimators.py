@@ -97,6 +97,13 @@ class AutoSklearnEstimator(BaseEstimator):
             Memory limit in MB for the machine learning algorithm.
             `auto-sklearn` will stop fitting the machine learning algorithm if
             it tries to allocate more than ``memory_limit`` MB.
+            
+            **Important notes:** 
+            
+            * If ``None`` is provided, no memory limit is set.
+            * In case of multi-processing, ``memory_limit`` will be *per job*, so the total usage is 
+              ``n_jobs x memory_limit``.
+            * The memory limit also applies to the ensemble creation process.
 
             **Important notes:**
 
