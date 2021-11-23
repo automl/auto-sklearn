@@ -3,8 +3,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Logging and debugging &#8212; AutoSklearn 0.14.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
@@ -64,7 +63,6 @@
                 <li><a href="../../index.html">Start</a></li>
                 <li><a href="../../releases.html">Releases</a></li>
                 <li><a href="../../installation.html">Installation</a></li>
-                <li><a href="../../manual.html">Manual</a></li>
                 <li><a href="../index.html">Examples</a></li>
                 <li><a href="../../api.html">API</a></li>
                 <li><a href="../../extending.html">Extending</a></li>
@@ -124,7 +122,7 @@
 <p>Click <a class="reference internal" href="#sphx-glr-download-examples-40-advanced-example-debug-logging-py"><span class="std std-ref">here</span></a>
 to download the full example code or to run this example in your browser via Binder</p>
 </div>
-<section class="sphx-glr-example-title" id="logging-and-debugging">
+<div class="sphx-glr-example-title section" id="logging-and-debugging">
 <span id="sphx-glr-examples-40-advanced-example-debug-logging-py"></span><h1>Logging and debugging<a class="headerlink" href="#logging-and-debugging" title="Permalink to this headline">¶</a></h1>
 <p>This example shows how to provide a custom logging configuration to <em>auto-sklearn</em>.
 We will be fitting 2 pipelines and showing any INFO-level msg on console.
@@ -142,7 +140,7 @@ directory structure.</p>
 <span class="kn">import</span> <span class="nn">autosklearn.classification</span>
 </pre></div>
 </div>
-<section id="data-loading">
+<div class="section" id="data-loading">
 <h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
 <p>Load kr-vs-kp dataset from <a class="reference external" href="https://www.openml.org/d/3">https://www.openml.org/d/3</a></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">data</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">fetch_openml</span><span class="p">(</span><span class="n">data_id</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -151,8 +149,8 @@ directory structure.</p>
      <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="create-a-logging-config">
+</div>
+<div class="section" id="create-a-logging-config">
 <h2>Create a logging config<a class="headerlink" href="#create-a-logging-config" title="Permalink to this headline">¶</a></h2>
 <p><em>auto-sklearn</em> uses a default
 <a class="reference external" href="https://github.com/automl/auto-sklearn/blob/master/autosklearn/util/logging.yaml">logging config</a>
@@ -190,8 +188,8 @@ We will instead create a custom one as follows:</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-</section>
-<section id="build-and-fit-a-classifier">
+</div>
+<div class="section" id="build-and-fit-a-classifier">
 <h2>Build and fit a classifier<a class="headerlink" href="#build-and-fit-a-classifier" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">cls</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
     <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
@@ -224,16 +222,16 @@ We will instead create a custom one as follows:</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2021-11-09 17:13:28,180 - Client-EnsembleBuilder - INFO - DummyFuture: ([{&#39;Timestamp&#39;: Timestamp(&#39;2021-11-09 17:13:28.161858&#39;), &#39;ensemble_optimization_score&#39;: 0.47853535353535354, &#39;ensemble_test_score&#39;: 0.47434292866082606}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2021.11.09-17.13.28 for iteration 0.
-2021-11-09 17:13:33,565 - Client-EnsembleBuilder - INFO - DummyFuture: ([{&#39;Timestamp&#39;: Timestamp(&#39;2021-11-09 17:13:33.546943&#39;), &#39;ensemble_optimization_score&#39;: 0.9734848484848485, &#39;ensemble_test_score&#39;: 0.9774718397997497}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2021.11.09-17.13.33 for iteration 1.
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2021-11-23 13:33:08,596 - Client-EnsembleBuilder - INFO - DummyFuture: ([{&#39;Timestamp&#39;: Timestamp(&#39;2021-11-23 13:33:08.582993&#39;), &#39;ensemble_optimization_score&#39;: 0.9886363636363636, &#39;ensemble_test_score&#39;: 0.9899874843554443}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2021.11.23-13.33.08 for iteration 0.
+2021-11-23 13:33:12,373 - Client-EnsembleBuilder - INFO - DummyFuture: ([{&#39;Timestamp&#39;: Timestamp(&#39;2021-11-23 13:33:12.360115&#39;), &#39;ensemble_optimization_score&#39;: 0.9911616161616161, &#39;ensemble_test_score&#39;: 0.9899874843554443}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2021.11.23-13.33.12 for iteration 1.
+tmp_folder/smac3-output
 tmp_folder/.auto-sklearn
 tmp_folder/space.json
-tmp_folder/smac3-output
+tmp_folder/AutoML(1):dd14d496-4c61-11ec-86cc-bfd1f1506941.log
 tmp_folder/distributed.log
-tmp_folder/AutoML(1):5642fb7b-4180-11ec-87eb-55ebabda4b78.log
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  21.793 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  25.499 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-debug-logging-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_debug_logging.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
@@ -246,8 +244,8 @@ tmp_folder/AutoML(1):5642fb7b-4180-11ec-87eb-55ebabda4b78.log
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
-</section>
-</section>
+</div>
+</div>
 
 
     </div>

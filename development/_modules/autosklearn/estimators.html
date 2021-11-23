@@ -63,7 +63,6 @@
                 <li><a href="../../index.html">Start</a></li>
                 <li><a href="../../releases.html">Releases</a></li>
                 <li><a href="../../installation.html">Installation</a></li>
-                <li><a href="../../manual.html">Manual</a></li>
                 <li><a href="../../examples/index.html">Examples</a></li>
                 <li><a href="../../api.html">API</a></li>
                 <li><a href="../../extending.html">Extending</a></li>
@@ -189,7 +188,7 @@
 <span class="sd">        ensemble_size : int, optional (default=50)</span>
 <span class="sd">            Number of models added to the ensemble built by *Ensemble</span>
 <span class="sd">            selection from libraries of models*. Models are drawn with</span>
-<span class="sd">            replacement.</span>
+<span class="sd">            replacement. If set to ``0`` no ensemble is fit.</span>
 
 <span class="sd">        ensemble_nbest : int, optional (default=50)</span>
 <span class="sd">            Only consider the ``ensemble_nbest`` models when building an</span>
@@ -209,10 +208,14 @@
 <span class="sd">        memory_limit : int, optional (3072)</span>
 <span class="sd">            Memory limit in MB for the machine learning algorithm.</span>
 <span class="sd">            `auto-sklearn` will stop fitting the machine learning algorithm if</span>
-<span class="sd">            it tries to allocate more than `memory_limit` MB.</span>
-<span class="sd">            If None is provided, no memory limit is set.</span>
-<span class="sd">            In case of multi-processing, `memory_limit` will be per job.</span>
-<span class="sd">            This memory limit also applies to the ensemble creation process.</span>
+<span class="sd">            it tries to allocate more than ``memory_limit`` MB.</span>
+<span class="sd">            </span>
+<span class="sd">            **Important notes:** </span>
+<span class="sd">            </span>
+<span class="sd">            * If ``None`` is provided, no memory limit is set.</span>
+<span class="sd">            * In case of multi-processing, ``memory_limit`` will be *per job*, so the total usage is </span>
+<span class="sd">              ``n_jobs x memory_limit``.</span>
+<span class="sd">            * The memory limit also applies to the ensemble creation process.</span>
 
 <span class="sd">        include : dict, optional (None)</span>
 <span class="sd">            If None, all possible algorithms are used. Otherwise specifies</span>
@@ -258,10 +261,10 @@
 <span class="sd">            * &#39;cv-iterative-fit&#39;: {&#39;folds&#39;: int}</span>
 <span class="sd">            * &#39;partial-cv&#39;: {&#39;folds&#39;: int, &#39;shuffle&#39;: bool}</span>
 <span class="sd">            * BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments</span>
-<span class="sd">                required by chosen class as specified in scikit-learn documentation.</span>
-<span class="sd">                If arguments are not provided, scikit-learn defaults are used.</span>
-<span class="sd">                If no defaults are available, an exception is raised.</span>
-<span class="sd">                Refer to the &#39;n_splits&#39; argument as &#39;folds&#39;.</span>
+<span class="sd">              required by chosen class as specified in scikit-learn documentation.</span>
+<span class="sd">              If arguments are not provided, scikit-learn defaults are used.</span>
+<span class="sd">              If no defaults are available, an exception is raised.</span>
+<span class="sd">              Refer to the &#39;n_splits&#39; argument as &#39;folds&#39;.</span>
 
 <span class="sd">        tmp_folder : string, optional (None)</span>
 <span class="sd">            folder to store configuration output and log files, if ``None``</span>
@@ -273,13 +276,15 @@
 
 <span class="sd">        n_jobs : int, optional, experimental</span>
 <span class="sd">            The number of jobs to run in parallel for ``fit()``. ``-1`` means</span>
-<span class="sd">            using all processors. By default, Auto-sklearn uses a single core</span>
-<span class="sd">            for fitting the machine learning model and a single core for fitting</span>
-<span class="sd">            an ensemble. Ensemble building is not affected by ``n_jobs`` but</span>
-<span class="sd">            can be controlled by the number of models in the ensemble. In</span>
-<span class="sd">            contrast to most scikit-learn models, ``n_jobs`` given in the</span>
-<span class="sd">            constructor is not applied to the ``predict()`` method. If</span>
-<span class="sd">            ``dask_client`` is None, a new dask client is created.</span>
+<span class="sd">            using all processors. </span>
+<span class="sd">            </span>
+<span class="sd">            **Important notes**: </span>
+<span class="sd">            </span>
+<span class="sd">            * By default, Auto-sklearn uses one core. </span>
+<span class="sd">            * Ensemble building is not affected by ``n_jobs`` but can be controlled by the number </span>
+<span class="sd">              of models in the ensemble.</span>
+<span class="sd">            * ``predict()`` is not affected by ``n_jobs`` (in contrast to most scikit-learn models)</span>
+<span class="sd">            * If ``dask_client`` is ``None``, a new dask client is created.</span>
 
 <span class="sd">        dask_client : dask.distributed.Client, optional</span>
 <span class="sd">            User-created dask client, can be used to start a dask cluster and then</span>
@@ -295,7 +300,7 @@
 <span class="sd">            * ``&#39;y_optimization&#39;`` : do not save the predictions for the</span>
 <span class="sd">              optimization/validation set, which would later on be used to build</span>
 <span class="sd">              an ensemble.</span>
-<span class="sd">            * ``&#39;model&#39;`` : do not save any model files</span>
+<span class="sd">            * ``model`` : do not save any model files</span>
 
 <span class="sd">        smac_scenario_args : dict, optional (None)</span>
 <span class="sd">            Additional arguments inserted into the scenario of SMAC. See the</span>
@@ -672,7 +677,7 @@
 <span class="sd">        Gives an overview of all models trained during the search process along</span>
 <span class="sd">        with various statistics about their training.</span>
 
-<span class="sd">        The availble statistics are:</span>
+<span class="sd">        The available statistics are:</span>
 
 <span class="sd">        **Simple**:</span>
 

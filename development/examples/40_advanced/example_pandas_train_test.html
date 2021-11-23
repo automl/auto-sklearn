@@ -3,8 +3,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Performance-over-time plot &#8212; AutoSklearn 0.14.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
@@ -64,7 +63,6 @@
                 <li><a href="../../index.html">Start</a></li>
                 <li><a href="../../releases.html">Releases</a></li>
                 <li><a href="../../installation.html">Installation</a></li>
-                <li><a href="../../manual.html">Manual</a></li>
                 <li><a href="../index.html">Examples</a></li>
                 <li><a href="../../api.html">API</a></li>
                 <li><a href="../../extending.html">Extending</a></li>
@@ -125,7 +123,7 @@
 <p>Click <a class="reference internal" href="#sphx-glr-download-examples-40-advanced-example-pandas-train-test-py"><span class="std std-ref">here</span></a>
 to download the full example code or to run this example in your browser via Binder</p>
 </div>
-<section class="sphx-glr-example-title" id="performance-over-time-plot">
+<div class="sphx-glr-example-title section" id="performance-over-time-plot">
 <span id="sphx-glr-examples-40-advanced-example-pandas-train-test-py"></span><h1>Performance-over-time plot<a class="headerlink" href="#performance-over-time-plot" title="Permalink to this headline">¶</a></h1>
 <p>This example shows, how to use the <em>performance_over_time_</em> attribute to plot the performance
 over train time.  <em>performance_over_time_</em> can contain multiple metrics within a pandas dataframe, namely:</p>
@@ -166,7 +164,7 @@ list or numpy arrays as there is no per-column dtype (further details in the exa
 <span class="kn">import</span> <span class="nn">autosklearn.classification</span>
 </pre></div>
 </div>
-<section id="data-loading">
+<div class="section" id="data-loading">
 <h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Using Australian dataset https://www.openml.org/d/40981.</span>
 <span class="c1"># This example will use the command fetch_openml, which will</span>
@@ -220,8 +218,8 @@ A14     float64
 dtype: object
 </pre></div>
 </div>
-</section>
-<section id="build-and-fit-a-classifier">
+</div>
+<div class="section" id="build-and-fit-a-classifier">
 <h2>Build and fit a classifier<a class="headerlink" href="#build-and-fit-a-classifier" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">cls</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
     <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
@@ -234,19 +232,19 @@ dtype: object
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(per_run_time_limit=30, time_left_for_this_task=120)
 </pre></div>
 </div>
-</section>
-<section id="get-the-score-of-the-final-ensemble">
+</div>
+<div class="section" id="get-the-score-of-the-final-ensemble">
 <h2>Get the Score of the final ensemble<a class="headerlink" href="#get-the-score-of-the-final-ensemble" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">predictions</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score 0.855072463768116
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score 0.8463768115942029
 </pre></div>
 </div>
-</section>
-<section id="plot-the-ensemble-performance">
+</div>
+<div class="section" id="plot-the-ensemble-performance">
 <h2>Plot the ensemble performance<a class="headerlink" href="#plot-the-ensemble-performance" title="Permalink to this headline">¶</a></h2>
 <p>The <em>performance_over_time_</em> attribute returns a pandas dataframe, which can
 be directly used for plotting</p>
@@ -261,7 +259,7 @@ be directly used for plotting</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_example_pandas_train_test_001.png" srcset="../../_images/sphx_glr_example_pandas_train_test_001.png" alt="Auto-sklearn accuracy over time" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  57.737 seconds)</p>
+<img src="../../_images/sphx_glr_example_pandas_train_test_001.png" srcset="../../_images/sphx_glr_example_pandas_train_test_001.png" alt="Auto-sklearn accuracy over time" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  57.508 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-pandas-train-test-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_pandas_train_test.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
@@ -274,8 +272,8 @@ be directly used for plotting</p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
-</section>
-</section>
+</div>
+</div>
 
 
     </div>

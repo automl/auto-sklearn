@@ -3,8 +3,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Extending auto-sklearn &#8212; AutoSklearn 0.14.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
@@ -64,7 +63,6 @@
                 <li><a href="index.html">Start</a></li>
                 <li><a href="releases.html">Releases</a></li>
                 <li><a href="installation.html">Installation</a></li>
-                <li><a href="manual.html">Manual</a></li>
                 <li><a href="examples/index.html">Examples</a></li>
                 <li><a href="api.html">API</a></li>
                 <li><a href="#">Extending</a></li>
@@ -124,13 +122,13 @@
       </div>
     <div class="body col-md-9 content" role="main">
       
-  <section id="extending-auto-sklearn">
+  <div class="section" id="extending-auto-sklearn">
 <span id="extending"></span><h1>Extending auto-sklearn<a class="headerlink" href="#extending-auto-sklearn" title="Permalink to this headline">¶</a></h1>
 <p>auto-sklearn can be easily extended with new classification, regression and
 feature preprocessing methods. In order to do so, a user has to implement a
 wrapper class and register it to auto-sklearn. This manual will walk you
 through the process.</p>
-<section id="writing-a-component">
+<div class="section" id="writing-a-component">
 <h2>Writing a component<a class="headerlink" href="#writing-a-component" title="Permalink to this headline">¶</a></h2>
 <p>Depending on the purpose, the component has to be a subclass of one of the
 following base classes:</p>
@@ -165,7 +163,7 @@ the type of component:</p>
 <span class="sig-prename descclassname"><span class="pre">autosklearn.pipeline.components.feature_preprocessing.</span></span><span class="sig-name descname"><span class="pre">add_preprocessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">preprocessor</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="api.html#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm" title="autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm"><span class="pre">autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/autosklearn/pipeline/components/feature_preprocessing.html#add_preprocessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.pipeline.components.feature_preprocessing.add_preprocessor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<section id="get-hyperparameter-search-space">
+<div class="section" id="get-hyperparameter-search-space">
 <span id="id1"></span><h3>get_hyperparameter_search_space()<a class="headerlink" href="#get-hyperparameter-search-space" title="Permalink to this headline">¶</a></h3>
 <p>Return an instance of <code class="docutils literal notranslate"><span class="pre">ConfigSpace.configuration_space.ConfigurationSpace</span></code>.</p>
 <p>See also the abstract definitions:
@@ -174,8 +172,8 @@ the type of component:</p>
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">AutoSklearnPreprocessingAlgorithm.get_hyperparameter_search_space()</span></code></p>
 <p>To find out about how to create a <code class="docutils literal notranslate"><span class="pre">ConfigurationSpace</span></code>-object, please look
 at the source code on <a class="reference external" href="https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/classification">github.com</a>.</p>
-</section>
-<section id="get-properties">
+</div>
+<div class="section" id="get-properties">
 <span id="id2"></span><h3>get_properties()<a class="headerlink" href="#get-properties" title="Permalink to this headline">¶</a></h3>
 <p>Return a dictionary which defines how the component can be used when
 constructing a machine learning pipeline. The following fields must be
@@ -291,9 +289,9 @@ mutually exclusive with autosklearn.constants.UNSIGNED_DATA</p>
 </dl>
 </li>
 </ul>
-</section>
-</section>
-<section id="classification">
+</div>
+</div>
+<div class="section" id="classification">
 <h2>Classification<a class="headerlink" href="#classification" title="Permalink to this headline">¶</a></h2>
 <p>In addition two <cite>get_properties()</cite> and <cite>get_hyperparameter_search_space()</cite>
 you have to implement
@@ -301,8 +299,8 @@ you have to implement
 and
 <a class="reference internal" href="api.html#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict" title="autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">AutoSklearnClassificationAlgorithm.predict()</span></code></a>
 . These are an implementation of the <a class="reference external" href="https://scikit-learn.org/stable/developers/develop.html#apis-of-scikit-learn-objects">scikit-learn predictor API</a>.</p>
-</section>
-<section id="regression">
+</div>
+<div class="section" id="regression">
 <h2>Regression<a class="headerlink" href="#regression" title="Permalink to this headline">¶</a></h2>
 <p>In addition two <cite>get_properties()</cite> and <cite>get_hyperparameter_search_space()</cite>
 you have to implement
@@ -310,8 +308,8 @@ you have to implement
 and
 <a class="reference internal" href="api.html#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.predict" title="autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.predict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">AutoSklearnRegressionAlgorithm.predict()</span></code></a>
 . These are an implementation of the <a class="reference external" href="https://scikit-learn.org/stable/developers/develop.html#apis-of-scikit-learn-objects">scikit-learn predictor API</a>.</p>
-</section>
-<section id="feature-preprocessing">
+</div>
+<div class="section" id="feature-preprocessing">
 <h2>Feature Preprocessing<a class="headerlink" href="#feature-preprocessing" title="Permalink to this headline">¶</a></h2>
 <p>In addition two <cite>get_properties()</cite> and <cite>get_hyperparameter_search_space()</cite>
 you have to implement
@@ -319,8 +317,8 @@ you have to implement
 and
 <a class="reference internal" href="api.html#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.transform" title="autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.transform"><code class="xref py py-meth docutils literal notranslate"><span class="pre">AutoSklearnPreprocessingAlgorithm.transform()</span></code></a>
 . These are an implementation of the <a class="reference external" href="https://scikit-learn.org/stable/developers/develop.html#apis-of-scikit-learn-objects">scikit-learn predictor API</a>.</p>
-</section>
-</section>
+</div>
+</div>
 
 
     </div>

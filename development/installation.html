@@ -3,8 +3,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Installation &#8212; AutoSklearn 0.14.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
@@ -64,7 +63,6 @@
                 <li><a href="index.html">Start</a></li>
                 <li><a href="releases.html">Releases</a></li>
                 <li><a href="#">Installation</a></li>
-                <li><a href="manual.html">Manual</a></li>
                 <li><a href="examples/index.html">Examples</a></li>
                 <li><a href="api.html">API</a></li>
                 <li><a href="extending.html">Extending</a></li>
@@ -129,9 +127,9 @@
       </div>
     <div class="body col-md-9 content" role="main">
       
-  <section id="installation">
+  <div class="section" id="installation">
 <span id="id1"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<section id="system-requirements">
+<div class="section" id="system-requirements">
 <h2>System requirements<a class="headerlink" href="#system-requirements" title="Permalink to this headline">¶</a></h2>
 <p>auto-sklearn has the following system requirements:</p>
 <ul class="simple">
@@ -147,8 +145,8 @@ need:</p>
 </ul>
 <p>For an explanation of missing Microsoft Windows and MAC OSX support please
 check the Section <a class="reference internal" href="#windows-osx-compatibility">Windows/OSX compatibility</a>.</p>
-</section>
-<section id="installing-auto-sklearn">
+</div>
+<div class="section" id="installing-auto-sklearn">
 <h2>Installing auto-sklearn<a class="headerlink" href="#installing-auto-sklearn" title="Permalink to this headline">¶</a></h2>
 <p>You can install <em>auto-sklearn</em> with <cite>pip</cite> in the usual manner:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3 install auto-sklearn
@@ -159,16 +157,16 @@ check the Section <a class="reference internal" href="#windows-osx-compatibility
 or an
 <a class="reference external" href="https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">Anaconda environment</a>.</p>
 <p>If the <code class="docutils literal notranslate"><span class="pre">pip3</span></code> installation command fails, make sure you have the <a class="reference internal" href="#system-requirements">System requirements</a> installed correctly.</p>
-</section>
-<section id="ubuntu-installation">
+</div>
+<div class="section" id="ubuntu-installation">
 <h2>Ubuntu installation<a class="headerlink" href="#ubuntu-installation" title="Permalink to this headline">¶</a></h2>
 <p>To provide Python 3, a C++11 building environment and the latest SWIG version on Ubuntu,
 run:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt-get install build-essential swig python3-dev
 </pre></div>
 </div>
-</section>
-<section id="anaconda-installation">
+</div>
+<div class="section" id="anaconda-installation">
 <h2>Anaconda installation<a class="headerlink" href="#anaconda-installation" title="Permalink to this headline">¶</a></h2>
 <p>You need to enable conda-forge to install <em>auto-sklearn</em> via anaconda. This section explains how to enable conda-forge so
 installation can be done with the command <cite>conda install auto-sklearn</cite>.
@@ -181,7 +179,7 @@ be solved by installing the <em>gcc</em> compiler shipped with AnaConda (as well
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install gxx_linux-64 gcc_linux-64 swig
 </pre></div>
 </div>
-<section id="conda-forge">
+<div class="section" id="conda-forge">
 <h3>Conda-forge<a class="headerlink" href="#conda-forge" title="Permalink to this headline">¶</a></h3>
 <p>Installing <cite>auto-sklearn</cite> from the <cite>conda-forge</cite> channel can be achieved by adding <cite>conda-forge</cite> to your channels with:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda config --add channels conda-forge
@@ -201,11 +199,11 @@ conda config --set channel_priority strict
 <a class="reference external" href="https://github.com/conda-forge/auto-sklearn-feedstock">auto sklearn feedstock</a>.</p>
 <p>for more information about Conda forge check
 <a class="reference external" href="https://conda-forge.org/docs/">conda-forge documentations</a>.</p>
-</section>
-</section>
-<section id="windows-osx-compatibility">
+</div>
+</div>
+<div class="section" id="windows-osx-compatibility">
 <h2>Windows/OSX compatibility<a class="headerlink" href="#windows-osx-compatibility" title="Permalink to this headline">¶</a></h2>
-<section id="windows">
+<div class="section" id="windows">
 <h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
 <p><em>auto-sklearn</em> relies heavily on the Python module <code class="docutils literal notranslate"><span class="pre">resource</span></code>. <code class="docutils literal notranslate"><span class="pre">resource</span></code>
 is part of Python’s <a class="reference external" href="https://docs.python.org/3/library/unix.html">Unix Specific Services</a>
@@ -218,8 +216,8 @@ and not available on a Windows machine. Therefore, it is not possible to run
 <li><p>virtual machine</p></li>
 <li><p>docker image</p></li>
 </ul>
-</section>
-<section id="mac-osx">
+</div>
+<div class="section" id="mac-osx">
 <h3>Mac OSX<a class="headerlink" href="#mac-osx" title="Permalink to this headline">¶</a></h3>
 <p>We currently do not know if <em>auto-sklearn</em> works on OSX. There are at least two
 issues holding us back from actively supporting OSX:</p>
@@ -235,9 +233,9 @@ issues holding us back from actively supporting OSX:</p>
 <li><p>virtual machine</p></li>
 <li><p>docker image</p></li>
 </ul>
-</section>
-</section>
-<section id="docker-image">
+</div>
+</div>
+<div class="section" id="docker-image">
 <h2>Docker Image<a class="headerlink" href="#docker-image" title="Permalink to this headline">¶</a></h2>
 <p>A Docker image is also provided on dockerhub. To download from dockerhub,
 use:</p>
@@ -258,8 +256,8 @@ use:</p>
 </div>
 <p>Alternatively, it is possible to use the development version of auto-sklearn by replacing all
 occurences of <code class="docutils literal notranslate"><span class="pre">master</span></code> by <code class="docutils literal notranslate"><span class="pre">development</span></code>.</p>
-</section>
-</section>
+</div>
+</div>
 
 
     </div>

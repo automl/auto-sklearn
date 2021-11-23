@@ -3,8 +3,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>APIs &#8212; AutoSklearn 0.14.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
@@ -65,7 +64,6 @@
                 <li><a href="index.html">Start</a></li>
                 <li><a href="releases.html">Releases</a></li>
                 <li><a href="installation.html">Installation</a></li>
-                <li><a href="manual.html">Manual</a></li>
                 <li><a href="examples/index.html">Examples</a></li>
                 <li><a href="#">API</a></li>
                 <li><a href="extending.html">Extending</a></li>
@@ -131,11 +129,11 @@
       </div>
     <div class="body col-md-9 content" role="main">
       
-  <section id="apis">
+  <div class="section" id="apis">
 <span id="api"></span><h1>APIs<a class="headerlink" href="#apis" title="Permalink to this headline">¶</a></h1>
-<section id="main-modules">
+<div class="section" id="main-modules">
 <h2>Main modules<a class="headerlink" href="#main-modules" title="Permalink to this headline">¶</a></h2>
-<section id="classification">
+<div class="section" id="classification">
 <h3>Classification<a class="headerlink" href="#classification" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="autosklearn.classification.AutoSklearnClassifier">
@@ -161,7 +159,7 @@ should start from scratch.</p>
 </dd>
 <dt><strong>ensemble_size</strong><span class="classifier">int, optional (default=50)</span></dt><dd><p>Number of models added to the ensemble built by <em>Ensemble
 selection from libraries of models</em>. Models are drawn with
-replacement.</p>
+replacement. If set to <code class="docutils literal notranslate"><span class="pre">0</span></code> no ensemble is fit.</p>
 </dd>
 <dt><strong>ensemble_nbest</strong><span class="classifier">int, optional (default=50)</span></dt><dd><p>Only consider the <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> models when building an
 ensemble.</p>
@@ -177,10 +175,14 @@ If set to None, all models are kept on the disc.</p>
 </dd>
 <dt><strong>memory_limit</strong><span class="classifier">int, optional (3072)</span></dt><dd><p>Memory limit in MB for the machine learning algorithm.
 <cite>auto-sklearn</cite> will stop fitting the machine learning algorithm if
-it tries to allocate more than <cite>memory_limit</cite> MB.
-If None is provided, no memory limit is set.
-In case of multi-processing, <cite>memory_limit</cite> will be per job.
-This memory limit also applies to the ensemble creation process.</p>
+it tries to allocate more than <code class="docutils literal notranslate"><span class="pre">memory_limit</span></code> MB.</p>
+<p><strong>Important notes:</strong></p>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">None</span></code> is provided, no memory limit is set.</p></li>
+<li><p>In case of multi-processing, <code class="docutils literal notranslate"><span class="pre">memory_limit</span></code> will be <em>per job</em>, so the total usage is 
+<code class="docutils literal notranslate"><span class="pre">n_jobs</span> <span class="pre">x</span> <span class="pre">memory_limit</span></code>.</p></li>
+<li><p>The memory limit also applies to the ensemble creation process.</p></li>
+</ul>
 </dd>
 <dt><strong>include</strong><span class="classifier">dict, optional (None)</span></dt><dd><p>If None, all possible algorithms are used. Otherwise specifies
 set of algorithms for each added component is used. Include and 
@@ -231,14 +233,11 @@ splitting it into train and validation.</p></li>
 <li><p>‘cv’: {‘folds’: int}</p></li>
 <li><p>‘cv-iterative-fit’: {‘folds’: int}</p></li>
 <li><p>‘partial-cv’: {‘folds’: int, ‘shuffle’: bool}</p></li>
-<li><dl class="simple">
-<dt>BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments</dt><dd><p>required by chosen class as specified in scikit-learn documentation.
+<li><p>BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments
+required by chosen class as specified in scikit-learn documentation.
 If arguments are not provided, scikit-learn defaults are used.
 If no defaults are available, an exception is raised.
-Refer to the ‘n_splits’ argument as ‘folds’.</p>
-</dd>
-</dl>
-</li>
+Refer to the ‘n_splits’ argument as ‘folds’.</p></li>
 </ul>
 </dd>
 <dt><strong>tmp_folder</strong><span class="classifier">string, optional (None)</span></dt><dd><p>folder to store configuration output and log files, if <code class="docutils literal notranslate"><span class="pre">None</span></code>
@@ -248,13 +247,15 @@ automatically use <code class="docutils literal notranslate"><span class="pre">/
 tmp_dir will always be deleted</p>
 </dd>
 <dt><strong>n_jobs</strong><span class="classifier">int, optional, experimental</span></dt><dd><p>The number of jobs to run in parallel for <code class="docutils literal notranslate"><span class="pre">fit()</span></code>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> means
-using all processors. By default, Auto-sklearn uses a single core
-for fitting the machine learning model and a single core for fitting
-an ensemble. Ensemble building is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> but
-can be controlled by the number of models in the ensemble. In
-contrast to most scikit-learn models, <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> given in the
-constructor is not applied to the <code class="docutils literal notranslate"><span class="pre">predict()</span></code> method. If
-<code class="docutils literal notranslate"><span class="pre">dask_client</span></code> is None, a new dask client is created.</p>
+using all processors.</p>
+<p><strong>Important notes</strong>:</p>
+<ul class="simple">
+<li><p>By default, Auto-sklearn uses one core.</p></li>
+<li><p>Ensemble building is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> but can be controlled by the number 
+of models in the ensemble.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">predict()</span></code> is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> (in contrast to most scikit-learn models)</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">dask_client</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, a new dask client is created.</p></li>
+</ul>
 </dd>
 <dt><strong>dask_client</strong><span class="classifier">dask.distributed.Client, optional</span></dt><dd><p>User-created dask client, can be used to start a dask cluster and then
 attach auto-sklearn to it.</p>
@@ -268,7 +269,7 @@ list are:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">'y_optimization'</span></code> : do not save the predictions for the
 optimization/validation set, which would later on be used to build
 an ensemble.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">'model'</span></code> : do not save any model files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code> : do not save any model files</p></li>
 </ul>
 </dd>
 <dt><strong>smac_scenario_args</strong><span class="classifier">dict, optional (None)</span></dt><dd><p>Additional arguments inserted into the scenario of SMAC. See the
@@ -511,7 +512,7 @@ contained subobjects that are estimators.</p>
 <dd><p>Returns a pandas table of results for all evaluated models.</p>
 <p>Gives an overview of all models trained during the search process along
 with various statistics about their training.</p>
-<p>The availble statistics are:</p>
+<p>The available statistics are:</p>
 <p><strong>Simple</strong>:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;model_id&quot;</span></code> - The id given to a model by <code class="docutils literal notranslate"><span class="pre">autosklearn</span></code>.</p></li>
@@ -732,7 +733,7 @@ possible to update each component of a nested object.</p>
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">autosklearn.experimental.askl2.</span></span><span class="sig-name descname"><span class="pre">AutoSklearn2Classifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_left_for_this_task</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">3600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_run_time_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble_size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble_nbest</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_models_on_disc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory_limit</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">3072</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmp_folder</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delete_tmp_folder_after_terminate</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dask_client</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">distributed.client.Client</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disable_evaluator_output</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smac_scenario_args</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logging_config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">autosklearn.metrics.Scorer</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring_functions</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">autosklearn.metrics.Scorer</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/experimental/askl2.html#AutoSklearn2Classifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.experimental.askl2.AutoSklearn2Classifier" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
+<dd class="field-odd"><dl>
 <dt><strong>time_left_for_this_task</strong><span class="classifier">int, optional (default=3600)</span></dt><dd><p>Time limit in seconds for the search of appropriate
 models. By increasing this value, <em>auto-sklearn</em> has a higher
 chance of finding better models.</p>
@@ -745,7 +746,7 @@ training data.</p>
 </dd>
 <dt><strong>ensemble_size</strong><span class="classifier">int, optional (default=50)</span></dt><dd><p>Number of models added to the ensemble built by <em>Ensemble
 selection from libraries of models</em>. Models are drawn with
-replacement.</p>
+replacement. If set to <code class="docutils literal notranslate"><span class="pre">0</span></code> no ensemble is fit.</p>
 </dd>
 <dt><strong>ensemble_nbest</strong><span class="classifier">int, optional (default=50)</span></dt><dd><p>Only consider the <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> models when building an
 ensemble.</p>
@@ -761,10 +762,14 @@ If set to None, all models are kept on the disc.</p>
 </dd>
 <dt><strong>memory_limit</strong><span class="classifier">int, optional (3072)</span></dt><dd><p>Memory limit in MB for the machine learning algorithm.
 <cite>auto-sklearn</cite> will stop fitting the machine learning algorithm if
-it tries to allocate more than <cite>memory_limit</cite> MB.
-If None is provided, no memory limit is set.
-In case of multi-processing, <cite>memory_limit</cite> will be per job.
-This memory limit also applies to the ensemble creation process.</p>
+it tries to allocate more than <code class="docutils literal notranslate"><span class="pre">memory_limit</span></code> MB.</p>
+<p><strong>Important notes:</strong></p>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">None</span></code> is provided, no memory limit is set.</p></li>
+<li><p>In case of multi-processing, <code class="docutils literal notranslate"><span class="pre">memory_limit</span></code> will be <em>per job</em>, so the total usage is 
+<code class="docutils literal notranslate"><span class="pre">n_jobs</span> <span class="pre">x</span> <span class="pre">memory_limit</span></code>.</p></li>
+<li><p>The memory limit also applies to the ensemble creation process.</p></li>
+</ul>
 </dd>
 <dt><strong>tmp_folder</strong><span class="classifier">string, optional (None)</span></dt><dd><p>folder to store configuration output and log files, if <code class="docutils literal notranslate"><span class="pre">None</span></code>
 automatically use <code class="docutils literal notranslate"><span class="pre">/tmp/autosklearn_tmp_$pid_$random_number</span></code></p>
@@ -773,13 +778,15 @@ automatically use <code class="docutils literal notranslate"><span class="pre">/
 tmp_dir will always be deleted</p>
 </dd>
 <dt><strong>n_jobs</strong><span class="classifier">int, optional, experimental</span></dt><dd><p>The number of jobs to run in parallel for <code class="docutils literal notranslate"><span class="pre">fit()</span></code>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> means
-using all processors. By default, Auto-sklearn uses a single core
-for fitting the machine learning model and a single core for fitting
-an ensemble. Ensemble building is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> but
-can be controlled by the number of models in the ensemble. In
-contrast to most scikit-learn models, <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> given in the
-constructor is not applied to the <code class="docutils literal notranslate"><span class="pre">predict()</span></code> method. If
-<code class="docutils literal notranslate"><span class="pre">dask_client</span></code> is None, a new dask client is created.</p>
+using all processors.</p>
+<p><strong>Important notes</strong>:</p>
+<ul class="simple">
+<li><p>By default, Auto-sklearn uses one core.</p></li>
+<li><p>Ensemble building is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> but can be controlled by the number 
+of models in the ensemble.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">predict()</span></code> is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> (in contrast to most scikit-learn models)</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">dask_client</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, a new dask client is created.</p></li>
+</ul>
 </dd>
 <dt><strong>dask_client</strong><span class="classifier">dask.distributed.Client, optional</span></dt><dd><p>User-created dask client, can be used to start a dask cluster and then
 attach auto-sklearn to it.</p>
@@ -793,7 +800,7 @@ list are:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">'y_optimization'</span></code> : do not save the predictions for the
 optimization/validation set, which would later on be used to build
 an ensemble.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">'model'</span></code> : do not save any model files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code> : do not save any model files</p></li>
 </ul>
 </dd>
 <dt><strong>smac_scenario_args</strong><span class="classifier">dict, optional (None)</span></dt><dd><p>Additional arguments inserted into the scenario of SMAC. See the
@@ -1017,7 +1024,7 @@ contained subobjects that are estimators.</p>
 <dd><p>Returns a pandas table of results for all evaluated models.</p>
 <p>Gives an overview of all models trained during the search process along
 with various statistics about their training.</p>
-<p>The availble statistics are:</p>
+<p>The available statistics are:</p>
 <p><strong>Simple</strong>:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;model_id&quot;</span></code> - The id given to a model by <code class="docutils literal notranslate"><span class="pre">autosklearn</span></code>.</p></li>
@@ -1233,8 +1240,8 @@ possible to update each component of a nested object.</p>
 
 </dd></dl>
 
-</section>
-<section id="regression">
+</div>
+<div class="section" id="regression">
 <h3>Regression<a class="headerlink" href="#regression" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="autosklearn.regression.AutoSklearnRegressor">
@@ -1260,7 +1267,7 @@ should start from scratch.</p>
 </dd>
 <dt><strong>ensemble_size</strong><span class="classifier">int, optional (default=50)</span></dt><dd><p>Number of models added to the ensemble built by <em>Ensemble
 selection from libraries of models</em>. Models are drawn with
-replacement.</p>
+replacement. If set to <code class="docutils literal notranslate"><span class="pre">0</span></code> no ensemble is fit.</p>
 </dd>
 <dt><strong>ensemble_nbest</strong><span class="classifier">int, optional (default=50)</span></dt><dd><p>Only consider the <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> models when building an
 ensemble.</p>
@@ -1276,10 +1283,14 @@ If set to None, all models are kept on the disc.</p>
 </dd>
 <dt><strong>memory_limit</strong><span class="classifier">int, optional (3072)</span></dt><dd><p>Memory limit in MB for the machine learning algorithm.
 <cite>auto-sklearn</cite> will stop fitting the machine learning algorithm if
-it tries to allocate more than <cite>memory_limit</cite> MB.
-If None is provided, no memory limit is set.
-In case of multi-processing, <cite>memory_limit</cite> will be per job.
-This memory limit also applies to the ensemble creation process.</p>
+it tries to allocate more than <code class="docutils literal notranslate"><span class="pre">memory_limit</span></code> MB.</p>
+<p><strong>Important notes:</strong></p>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">None</span></code> is provided, no memory limit is set.</p></li>
+<li><p>In case of multi-processing, <code class="docutils literal notranslate"><span class="pre">memory_limit</span></code> will be <em>per job</em>, so the total usage is 
+<code class="docutils literal notranslate"><span class="pre">n_jobs</span> <span class="pre">x</span> <span class="pre">memory_limit</span></code>.</p></li>
+<li><p>The memory limit also applies to the ensemble creation process.</p></li>
+</ul>
 </dd>
 <dt><strong>include</strong><span class="classifier">dict, optional (None)</span></dt><dd><p>If None, all possible algorithms are used. Otherwise specifies
 set of algorithms for each added component is used. Include and 
@@ -1330,14 +1341,11 @@ splitting it into train and validation.</p></li>
 <li><p>‘cv’: {‘folds’: int}</p></li>
 <li><p>‘cv-iterative-fit’: {‘folds’: int}</p></li>
 <li><p>‘partial-cv’: {‘folds’: int, ‘shuffle’: bool}</p></li>
-<li><dl class="simple">
-<dt>BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments</dt><dd><p>required by chosen class as specified in scikit-learn documentation.
+<li><p>BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments
+required by chosen class as specified in scikit-learn documentation.
 If arguments are not provided, scikit-learn defaults are used.
 If no defaults are available, an exception is raised.
-Refer to the ‘n_splits’ argument as ‘folds’.</p>
-</dd>
-</dl>
-</li>
+Refer to the ‘n_splits’ argument as ‘folds’.</p></li>
 </ul>
 </dd>
 <dt><strong>tmp_folder</strong><span class="classifier">string, optional (None)</span></dt><dd><p>folder to store configuration output and log files, if <code class="docutils literal notranslate"><span class="pre">None</span></code>
@@ -1347,13 +1355,15 @@ automatically use <code class="docutils literal notranslate"><span class="pre">/
 tmp_dir will always be deleted</p>
 </dd>
 <dt><strong>n_jobs</strong><span class="classifier">int, optional, experimental</span></dt><dd><p>The number of jobs to run in parallel for <code class="docutils literal notranslate"><span class="pre">fit()</span></code>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> means
-using all processors. By default, Auto-sklearn uses a single core
-for fitting the machine learning model and a single core for fitting
-an ensemble. Ensemble building is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> but
-can be controlled by the number of models in the ensemble. In
-contrast to most scikit-learn models, <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> given in the
-constructor is not applied to the <code class="docutils literal notranslate"><span class="pre">predict()</span></code> method. If
-<code class="docutils literal notranslate"><span class="pre">dask_client</span></code> is None, a new dask client is created.</p>
+using all processors.</p>
+<p><strong>Important notes</strong>:</p>
+<ul class="simple">
+<li><p>By default, Auto-sklearn uses one core.</p></li>
+<li><p>Ensemble building is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> but can be controlled by the number 
+of models in the ensemble.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">predict()</span></code> is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> (in contrast to most scikit-learn models)</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">dask_client</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, a new dask client is created.</p></li>
+</ul>
 </dd>
 <dt><strong>dask_client</strong><span class="classifier">dask.distributed.Client, optional</span></dt><dd><p>User-created dask client, can be used to start a dask cluster and then
 attach auto-sklearn to it.</p>
@@ -1367,7 +1377,7 @@ list are:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">'y_optimization'</span></code> : do not save the predictions for the
 optimization/validation set, which would later on be used to build
 an ensemble.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">'model'</span></code> : do not save any model files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code> : do not save any model files</p></li>
 </ul>
 </dd>
 <dt><strong>smac_scenario_args</strong><span class="classifier">dict, optional (None)</span></dt><dd><p>Additional arguments inserted into the scenario of SMAC. See the
@@ -1608,7 +1618,7 @@ contained subobjects that are estimators.</p>
 <dd><p>Returns a pandas table of results for all evaluated models.</p>
 <p>Gives an overview of all models trained during the search process along
 with various statistics about their training.</p>
-<p>The availble statistics are:</p>
+<p>The available statistics are:</p>
 <p><strong>Simple</strong>:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;model_id&quot;</span></code> - The id given to a model by <code class="docutils literal notranslate"><span class="pre">autosklearn</span></code>.</p></li>
@@ -1817,9 +1827,9 @@ possible to update each component of a nested object.</p>
 
 </dd></dl>
 
-</section>
-</section>
-<section id="metrics">
+</div>
+</div>
+<div class="section" id="metrics">
 <h2>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="autosklearn.metrics.make_scorer">
@@ -1859,9 +1869,9 @@ This only works for binary classification.</p>
 </dl>
 </dd></dl>
 
-<section id="built-in-metrics">
+<div class="section" id="built-in-metrics">
 <h3>Built-in Metrics<a class="headerlink" href="#built-in-metrics" title="Permalink to this headline">¶</a></h3>
-<section id="classification-metrics">
+<div class="section" id="classification-metrics">
 <h4>Classification metrics<a class="headerlink" href="#classification-metrics" title="Permalink to this headline">¶</a></h4>
 <p>Note: The default <code class="docutils literal notranslate"><span class="pre">autosklearn.metrics.f1</span></code>, <code class="docutils literal notranslate"><span class="pre">autosklearn.metrics.precision</span></code> and <code class="docutils literal notranslate"><span class="pre">autosklearn.metrics.recall</span></code>
 built-in metrics are applicable only for binary classification. In order to apply them on multilabel and multiclass
@@ -1988,8 +1998,8 @@ For more information about how these metrics are used, please read
 <dd><p>alias of log_loss</p>
 </dd></dl>
 
-</section>
-<section id="regression-metrics">
+</div>
+<div class="section" id="regression-metrics">
 <h4>Regression metrics<a class="headerlink" href="#regression-metrics" title="Permalink to this headline">¶</a></h4>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="autosklearn.metrics.r2">
@@ -2015,10 +2025,10 @@ For more information about how these metrics are used, please read
 <dd><p>alias of median_absolute_error</p>
 </dd></dl>
 
-</section>
-</section>
-</section>
-<section id="extension-interfaces">
+</div>
+</div>
+</div>
+<div class="section" id="extension-interfaces">
 <h2>Extension Interfaces<a class="headerlink" href="#extension-interfaces" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm">
@@ -2171,8 +2181,8 @@ for further information.</p>
 
 </dd></dl>
 
-</section>
-</section>
+</div>
+</div>
 
 
     </div>

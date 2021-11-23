@@ -3,8 +3,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Multi-label Classification &#8212; AutoSklearn 0.14.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
@@ -64,7 +63,6 @@
                 <li><a href="../../index.html">Start</a></li>
                 <li><a href="../../releases.html">Releases</a></li>
                 <li><a href="../../installation.html">Installation</a></li>
-                <li><a href="../../manual.html">Manual</a></li>
                 <li><a href="../index.html">Examples</a></li>
                 <li><a href="../../api.html">API</a></li>
                 <li><a href="../../extending.html">Extending</a></li>
@@ -127,7 +125,7 @@
 <p>Click <a class="reference internal" href="#sphx-glr-download-examples-20-basic-example-multilabel-classification-py"><span class="std std-ref">here</span></a>
 to download the full example code or to run this example in your browser via Binder</p>
 </div>
-<section class="sphx-glr-example-title" id="multi-label-classification">
+<div class="sphx-glr-example-title section" id="multi-label-classification">
 <span id="sphx-glr-examples-20-basic-example-multilabel-classification-py"></span><h1>Multi-label Classification<a class="headerlink" href="#multi-label-classification" title="Permalink to this headline">¶</a></h1>
 <p>This examples shows how to format the targets for a multilabel classification
 problem. Details on multilabel classification can be found
@@ -141,7 +139,7 @@ problem. Details on multilabel classification can be found
 <span class="kn">import</span> <span class="nn">autosklearn.classification</span>
 </pre></div>
 </div>
-<section id="data-loading">
+<div class="section" id="data-loading">
 <h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Using reuters multilabel dataset -- https://www.openml.org/d/40594</span>
 <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">fetch_openml</span><span class="p">(</span><span class="n">data_id</span><span class="o">=</span><span class="mi">40594</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -171,8 +169,8 @@ Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdo
 type_of_target=multilabel-indicator
 </pre></div>
 </div>
-</section>
-<section id="building-the-classifier">
+</div>
+<div class="section" id="building-the-classifier">
 <h2>Building the classifier<a class="headerlink" href="#building-the-classifier" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
     <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
@@ -192,8 +190,8 @@ type_of_target=multilabel-indicator
                       time_left_for_this_task=60)
 </pre></div>
 </div>
-</section>
-<section id="view-the-models-found-by-auto-sklearn">
+</div>
+<div class="section" id="view-the-models-found-by-auto-sklearn">
 <h2>View the models found by auto-sklearn<a class="headerlink" href="#view-the-models-found-by-auto-sklearn" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">leaderboard</span><span class="p">())</span>
 </pre></div>
@@ -201,11 +199,11 @@ type_of_target=multilabel-indicator
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight           type      cost  duration
 model_id
-2            1              1.0  random_forest  0.447294  3.901081
+2            1              1.0  random_forest  0.447294  3.100555
 </pre></div>
 </div>
-</section>
-<section id="print-the-final-ensemble-constructed-by-auto-sklearn">
+</div>
+<div class="section" id="print-the-final-ensemble-constructed-by-auto-sklearn">
 <h2>Print the final ensemble constructed by auto-sklearn<a class="headerlink" href="#print-the-final-ensemble-constructed-by-auto-sklearn" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">())</span>
 </pre></div>
@@ -222,8 +220,8 @@ dataset_properties={
 ]
 </pre></div>
 </div>
-</section>
-<section id="print-statistics-about-the-auto-sklearn-run">
+</div>
+<div class="section" id="print-statistics-about-the-auto-sklearn-run">
 <h2>Print statistics about the auto-sklearn run<a class="headerlink" href="#print-statistics-about-the-auto-sklearn-run" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Print statistics about the auto-sklearn run such as number of</span>
 <span class="c1"># iterations, number of models failed with a time out.</span>
@@ -242,8 +240,8 @@ dataset_properties={
   Number of target algorithms that exceeded the memory limit: 0
 </pre></div>
 </div>
-</section>
-<section id="get-the-score-of-the-final-ensemble">
+</div>
+<div class="section" id="get-the-score-of-the-final-ensemble">
 <h2>Get the Score of the final ensemble<a class="headerlink" href="#get-the-score-of-the-final-ensemble" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
@@ -253,7 +251,7 @@ dataset_properties={
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score 0.604
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  15.866 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  12.020 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-20-basic-example-multilabel-classification-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/20_basic/example_multilabel_classification.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo.svg" width="150px" /></a>
@@ -266,8 +264,8 @@ dataset_properties={
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
-</section>
-</section>
+</div>
+</div>
 
 
     </div>

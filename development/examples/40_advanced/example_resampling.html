@@ -3,8 +3,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Resampling Strategies &#8212; AutoSklearn 0.14.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
@@ -64,7 +63,6 @@
                 <li><a href="../../index.html">Start</a></li>
                 <li><a href="../../releases.html">Releases</a></li>
                 <li><a href="../../installation.html">Installation</a></li>
-                <li><a href="../../manual.html">Manual</a></li>
                 <li><a href="../index.html">Examples</a></li>
                 <li><a href="../../api.html">API</a></li>
                 <li><a href="../../extending.html">Extending</a></li>
@@ -128,7 +126,7 @@
 <p>Click <a class="reference internal" href="#sphx-glr-download-examples-40-advanced-example-resampling-py"><span class="std std-ref">here</span></a>
 to download the full example code or to run this example in your browser via Binder</p>
 </div>
-<section class="sphx-glr-example-title" id="resampling-strategies">
+<div class="sphx-glr-example-title section" id="resampling-strategies">
 <span id="sphx-glr-examples-40-advanced-example-resampling-py"></span><h1>Resampling Strategies<a class="headerlink" href="#resampling-strategies" title="Permalink to this headline">¶</a></h1>
 <p>In <em>auto-sklearn</em> it is possible to use different resampling strategies
 by specifying the arguments <code class="docutils literal notranslate"><span class="pre">resampling_strategy</span></code> and
@@ -142,15 +140,15 @@ settings for the <code class="docutils literal notranslate"><span class="pre">Au
 <span class="kn">import</span> <span class="nn">autosklearn.classification</span>
 </pre></div>
 </div>
-<section id="data-loading">
+<div class="section" id="data-loading">
 <h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> \
     <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="holdout">
+</div>
+<div class="section" id="holdout">
 <h2>Holdout<a class="headerlink" href="#holdout" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
     <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
@@ -173,19 +171,19 @@ settings for the <code class="docutils literal notranslate"><span class="pre">Au
                       tmp_folder=&#39;/tmp/autosklearn_resampling_example_tmp&#39;)
 </pre></div>
 </div>
-</section>
-<section id="get-the-score-of-the-final-ensemble">
+</div>
+<div class="section" id="get-the-score-of-the-final-ensemble">
 <h2>Get the Score of the final ensemble<a class="headerlink" href="#get-the-score-of-the-final-ensemble" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score holdout: &quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score holdout:  0.9440559440559441
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score holdout:  0.958041958041958
 </pre></div>
 </div>
-</section>
-<section id="cross-validation">
+</div>
+<div class="section" id="cross-validation">
 <h2>Cross-validation<a class="headerlink" href="#cross-validation" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
     <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
@@ -211,8 +209,8 @@ settings for the <code class="docutils literal notranslate"><span class="pre">Au
 Accuracy score CV 0.965034965034965
 </pre></div>
 </div>
-</section>
-<section id="perform-a-refit">
+</div>
+<div class="section" id="perform-a-refit">
 <h2>Perform a refit<a class="headerlink" href="#perform-a-refit" title="Permalink to this headline">¶</a></h2>
 <p>During fit(), models are fit on individual cross-validation folds. To use
 all available data, we call refit() which trains all models in the
@@ -225,11 +223,11 @@ final ensemble on the whole dataset.</p>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>After re-fit
-Accuracy score CV 0.958041958041958
+Accuracy score CV 0.965034965034965
 </pre></div>
 </div>
-</section>
-<section id="scikit-learn-splitter-objects">
+</div>
+<div class="section" id="scikit-learn-splitter-objects">
 <h2>scikit-learn splitter objects<a class="headerlink" href="#scikit-learn-splitter-objects" title="Permalink to this headline">¶</a></h2>
 <p>It is also possible to use
 <a class="reference external" href="https://scikit-learn.org/stable/modules/classes.html#splitter-classes">scikit-learn’s splitter classes</a> to further customize the outputs. In case one needs to have 100% control over the
@@ -271,8 +269,8 @@ defined as strings by Auto-sklearn) it is necessary to perform a refit:</p>
                       tmp_folder=&#39;/tmp/autosklearn_resampling_example_tmp&#39;)
 </pre></div>
 </div>
-</section>
-<section id="get-the-score-of-the-final-ensemble-again">
+</div>
+<div class="section" id="get-the-score-of-the-final-ensemble-again">
 <h2>Get the Score of the final ensemble (again)<a class="headerlink" href="#get-the-score-of-the-final-ensemble-again" title="Permalink to this headline">¶</a></h2>
 <p>Obviously, this score is pretty bad as we “destroyed” the dataset by
 splitting it on the first feature.</p>
@@ -284,7 +282,7 @@ splitting it on the first feature.</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score custom split 0.38461538461538464
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 6 minutes  27.376 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 6 minutes  9.017 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-resampling-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_resampling.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
@@ -297,8 +295,8 @@ splitting it on the first feature.</p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
-</section>
-</section>
+</div>
+</div>
 
 
     </div>

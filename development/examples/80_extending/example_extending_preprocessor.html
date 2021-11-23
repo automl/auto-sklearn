@@ -3,8 +3,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Extending Auto-Sklearn with Preprocessor Component &#8212; AutoSklearn 0.14.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
@@ -64,7 +63,6 @@
                 <li><a href="../../index.html">Start</a></li>
                 <li><a href="../../releases.html">Releases</a></li>
                 <li><a href="../../installation.html">Installation</a></li>
-                <li><a href="../../manual.html">Manual</a></li>
                 <li><a href="../index.html">Examples</a></li>
                 <li><a href="../../api.html">API</a></li>
                 <li><a href="../../extending.html">Extending</a></li>
@@ -126,7 +124,7 @@
 <p>Click <a class="reference internal" href="#sphx-glr-download-examples-80-extending-example-extending-preprocessor-py"><span class="std std-ref">here</span></a>
 to download the full example code or to run this example in your browser via Binder</p>
 </div>
-<section class="sphx-glr-example-title" id="extending-auto-sklearn-with-preprocessor-component">
+<div class="sphx-glr-example-title section" id="extending-auto-sklearn-with-preprocessor-component">
 <span id="sphx-glr-examples-80-extending-example-extending-preprocessor-py"></span><h1>Extending Auto-Sklearn with Preprocessor Component<a class="headerlink" href="#extending-auto-sklearn-with-preprocessor-component" title="Permalink to this headline">¶</a></h1>
 <p>The following example demonstrates how to create a wrapper around the linear
 discriminant analysis (LDA) algorithm from sklearn and use it as a preprocessor
@@ -148,7 +146,7 @@ in auto-sklearn.</p>
 <span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
 </pre></div>
 </div>
-<section id="create-lda-component-for-auto-sklearn">
+<div class="section" id="create-lda-component-for-auto-sklearn">
 <h2>Create LDA component for auto-sklearn<a class="headerlink" href="#create-lda-component-for-auto-sklearn" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">LDA</span><span class="p">(</span><span class="n">AutoSklearnPreprocessingAlgorithm</span><span class="p">):</span>
 
@@ -217,15 +215,15 @@ in auto-sklearn.</p>
 <span class="n">autosklearn</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">feature_preprocessing</span><span class="o">.</span><span class="n">add_preprocessor</span><span class="p">(</span><span class="n">LDA</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="create-dataset">
+</div>
+<div class="section" id="create-dataset">
 <h2>Create dataset<a class="headerlink" href="#create-dataset" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="configuration-space">
+</div>
+<div class="section" id="configuration-space">
 <h2>Configuration space<a class="headerlink" href="#configuration-space" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cs</span> <span class="o">=</span> <span class="n">LDA</span><span class="o">.</span><span class="n">get_hyperparameter_search_space</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span>
@@ -241,8 +239,8 @@ in auto-sklearn.</p>
     shrinkage | solver in {&#39;lsqr&#39;, &#39;eigen&#39;}
 </pre></div>
 </div>
-</section>
-<section id="fit-the-model-using-lda-as-preprocessor">
+</div>
+<div class="section" id="fit-the-model-using-lda-as-preprocessor">
 <h2>Fit the model using LDA as preprocessor<a class="headerlink" href="#fit-the-model-using-lda-as-preprocessor" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">clf</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
     <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
@@ -265,8 +263,8 @@ in auto-sklearn.</p>
                       time_left_for_this_task=30)
 </pre></div>
 </div>
-</section>
-<section id="print-prediction-score-and-statistics">
+</div>
+<div class="section" id="print-prediction-score-and-statistics">
 <h2>Print prediction score and statistics<a class="headerlink" href="#print-prediction-score-and-statistics" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">y_pred</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;accuracy: &quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y_test</span><span class="p">))</span>
@@ -274,7 +272,7 @@ in auto-sklearn.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.9440559440559441
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.965034965034965
 [(1.000000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;random_forest&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;LDA&#39;, &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;, &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;, &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;, &#39;classifier:random_forest:max_features&#39;: 0.5, &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0, &#39;classifier:random_forest:min_samples_leaf&#39;: 1, &#39;classifier:random_forest:min_samples_split&#39;: 2, &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:LDA:solver&#39;: &#39;svd&#39;, &#39;feature_preprocessor:LDA:tol&#39;: 0.0001, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01},
 dataset_properties={
   &#39;task&#39;: 1,
@@ -286,7 +284,7 @@ dataset_properties={
 ]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  20.830 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  14.773 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-extending-preprocessor-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_preprocessor.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>
@@ -299,8 +297,8 @@ dataset_properties={
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
-</section>
-</section>
+</div>
+</div>
 
 
     </div>

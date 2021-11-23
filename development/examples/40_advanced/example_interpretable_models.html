@@ -3,8 +3,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Interpretable models &#8212; AutoSklearn 0.14.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
@@ -64,7 +63,6 @@
                 <li><a href="../../index.html">Start</a></li>
                 <li><a href="../../releases.html">Releases</a></li>
                 <li><a href="../../installation.html">Installation</a></li>
-                <li><a href="../../manual.html">Manual</a></li>
                 <li><a href="../index.html">Examples</a></li>
                 <li><a href="../../api.html">API</a></li>
                 <li><a href="../../extending.html">Extending</a></li>
@@ -127,7 +125,7 @@
 <p>Click <a class="reference internal" href="#sphx-glr-download-examples-40-advanced-example-interpretable-models-py"><span class="std std-ref">here</span></a>
 to download the full example code or to run this example in your browser via Binder</p>
 </div>
-<section class="sphx-glr-example-title" id="interpretable-models">
+<div class="sphx-glr-example-title section" id="interpretable-models">
 <span id="sphx-glr-examples-40-advanced-example-interpretable-models-py"></span><h1>Interpretable models<a class="headerlink" href="#interpretable-models" title="Permalink to this headline">¶</a></h1>
 <p>The following example shows how to inspect the models which <em>auto-sklearn</em>
 optimizes over and how to restrict them to an interpretable subset.</p>
@@ -136,7 +134,7 @@ optimizes over and how to restrict them to an interpretable subset.</p>
 <span class="kn">import</span> <span class="nn">sklearn.metrics</span>
 </pre></div>
 </div>
-<section id="show-available-classification-models">
+<div class="section" id="show-available-classification-models">
 <h2>Show available classification models<a class="headerlink" href="#show-available-classification-models" title="Permalink to this headline">¶</a></h2>
 <p>We will first list all classifiers Auto-sklearn chooses from. A similar
 call is available for preprocessors (see below) and regression (not shown)
@@ -166,8 +164,8 @@ random_forest
 sgd
 </pre></div>
 </div>
-</section>
-<section id="show-available-preprocessors">
+</div>
+<div class="section" id="show-available-preprocessors">
 <h2>Show available preprocessors<a class="headerlink" href="#show-available-preprocessors" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">autosklearn.pipeline.components.feature_preprocessing</span> <span class="kn">import</span> <span class="n">FeaturePreprocessorChoice</span>
 
@@ -196,16 +194,16 @@ select_rates_regression
 truncatedSVD
 </pre></div>
 </div>
-</section>
-<section id="data-loading">
+</div>
+<div class="section" id="data-loading">
 <h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> \
     <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="build-and-fit-a-classifier">
+</div>
+<div class="section" id="build-and-fit-a-classifier">
 <h2>Build and fit a classifier<a class="headerlink" href="#build-and-fit-a-classifier" title="Permalink to this headline">¶</a></h2>
 <p>We will now only use a subset of the given classifiers and preprocessors.
 Furthermore, we will restrict the ensemble size to <code class="docutils literal notranslate"><span class="pre">1</span></code> to only use the
@@ -239,14 +237,14 @@ and can change from use case to use case.</p>
                       tmp_folder=&#39;/tmp/autosklearn_interpretable_models_example_tmp&#39;)
 </pre></div>
 </div>
-</section>
-<section id="print-the-final-ensemble-constructed-by-auto-sklearn">
+</div>
+<div class="section" id="print-the-final-ensemble-constructed-by-auto-sklearn">
 <h2>Print the final ensemble constructed by auto-sklearn<a class="headerlink" href="#print-the-final-ensemble-constructed-by-auto-sklearn" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">())</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(1.000000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;sgd&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;polynomial&#39;, &#39;classifier:sgd:alpha&#39;: 0.0003336259810364362, &#39;classifier:sgd:average&#39;: &#39;False&#39;, &#39;classifier:sgd:fit_intercept&#39;: &#39;True&#39;, &#39;classifier:sgd:learning_rate&#39;: &#39;invscaling&#39;, &#39;classifier:sgd:loss&#39;: &#39;log&#39;, &#39;classifier:sgd:penalty&#39;: &#39;l2&#39;, &#39;classifier:sgd:tol&#39;: 0.006915066463246923, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:polynomial:degree&#39;: 3, &#39;feature_preprocessor:polynomial:include_bias&#39;: &#39;True&#39;, &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;False&#39;, &#39;classifier:sgd:eta0&#39;: 0.010000000000000014, &#39;classifier:sgd:power_t&#39;: 0.5, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.012199160249499144},
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(1.000000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;sgd&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;classifier:sgd:alpha&#39;: 9.999999999999991e-05, &#39;classifier:sgd:average&#39;: &#39;False&#39;, &#39;classifier:sgd:fit_intercept&#39;: &#39;True&#39;, &#39;classifier:sgd:learning_rate&#39;: &#39;invscaling&#39;, &#39;classifier:sgd:loss&#39;: &#39;modified_huber&#39;, &#39;classifier:sgd:penalty&#39;: &#39;l2&#39;, &#39;classifier:sgd:tol&#39;: 0.0004668987145850572, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;classifier:sgd:epsilon&#39;: 1.3700860264543197e-05, &#39;classifier:sgd:eta0&#39;: 0.010000000000000014, &#39;classifier:sgd:power_t&#39;: 0.5, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01253391694297453},
 dataset_properties={
   &#39;task&#39;: 1,
   &#39;sparse&#39;: False,
@@ -257,18 +255,18 @@ dataset_properties={
 ]
 </pre></div>
 </div>
-</section>
-<section id="get-the-score-of-the-final-ensemble">
+</div>
+<div class="section" id="get-the-score-of-the-final-ensemble">
 <h2>Get the Score of the final ensemble<a class="headerlink" href="#get-the-score-of-the-final-ensemble" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score:&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score: 0.958041958041958
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score: 0.965034965034965
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  0.230 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  4.220 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-interpretable-models-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_interpretable_models.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
@@ -281,8 +279,8 @@ dataset_properties={
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
-</section>
-</section>
+</div>
+</div>
 
 
     </div>

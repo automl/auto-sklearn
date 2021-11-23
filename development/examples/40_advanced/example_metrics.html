@@ -3,8 +3,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Metrics &#8212; AutoSklearn 0.14.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
@@ -64,7 +63,6 @@
                 <li><a href="../../index.html">Start</a></li>
                 <li><a href="../../releases.html">Releases</a></li>
                 <li><a href="../../installation.html">Installation</a></li>
-                <li><a href="../../manual.html">Manual</a></li>
                 <li><a href="../index.html">Examples</a></li>
                 <li><a href="../../api.html">API</a></li>
                 <li><a href="../../extending.html">Extending</a></li>
@@ -129,7 +127,7 @@
 <p>Click <a class="reference internal" href="#sphx-glr-download-examples-40-advanced-example-metrics-py"><span class="std std-ref">here</span></a>
 to download the full example code or to run this example in your browser via Binder</p>
 </div>
-<section class="sphx-glr-example-title" id="metrics">
+<div class="sphx-glr-example-title section" id="metrics">
 <span id="sphx-glr-examples-40-advanced-example-metrics-py"></span><h1>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h1>
 <p><em>Auto-sklearn</em> supports various built-in metrics, which can be found in the
 <a class="reference internal" href="../../api.html#built-in-metrics"><span class="std std-ref">metrics section in the API</span></a>. However, it is also
@@ -146,7 +144,7 @@ classification problem.</p>
 <span class="kn">import</span> <span class="nn">autosklearn.metrics</span>
 </pre></div>
 </div>
-<section id="custom-metrics">
+<div class="section" id="custom-metrics">
 <h2>Custom Metrics<a class="headerlink" href="#custom-metrics" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">accuracy</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">prediction</span><span class="p">):</span>
     <span class="c1"># custom function defining accuracy</span>
@@ -170,16 +168,16 @@ classification problem.</p>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">solution</span> <span class="o">!=</span> <span class="n">prediction</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="data-loading">
+</div>
+<div class="section" id="data-loading">
 <h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> \
     <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="print-a-list-of-available-metrics">
+</div>
+<div class="section" id="print-a-list-of-available-metrics">
 <h2>Print a list of available metrics<a class="headerlink" href="#print-a-list-of-available-metrics" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Available CLASSIFICATION metrics autosklearn.metrics.*:&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">*&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">*&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">autosklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">CLASSIFICATION_METRICS</span><span class="p">))</span>
@@ -219,8 +217,8 @@ Available REGRESSION autosklearn.metrics.*:
         *r2
 </pre></div>
 </div>
-</section>
-<section id="first-example-use-predefined-accuracy-metric">
+</div>
+<div class="section" id="first-example-use-predefined-accuracy-metric">
 <h2>First example: Use predefined accuracy metric<a class="headerlink" href="#first-example-use-predefined-accuracy-metric" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Use predefined accuracy metric&quot;</span><span class="p">)</span>
@@ -241,11 +239,11 @@ Available REGRESSION autosklearn.metrics.*:
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>################################################################################
 Use predefined accuracy metric
-Accuracy score 0.944 using accuracy
+Accuracy score 0.958 using accuracy
 </pre></div>
 </div>
-</section>
-<section id="second-example-use-own-accuracy-metric">
+</div>
+<div class="section" id="second-example-use-own-accuracy-metric">
 <h2>Second example: Use own accuracy metric<a class="headerlink" href="#second-example-use-own-accuracy-metric" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Use self defined accuracy metric&quot;</span><span class="p">)</span>
@@ -274,11 +272,11 @@ Accuracy score 0.944 using accuracy
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>################################################################################
 Use self defined accuracy metric
-Accuracy score 0.951 using accu
+Accuracy score 0.937 using accu
 </pre></div>
 </div>
-</section>
-<section id="third-example-use-own-error-metric">
+</div>
+<div class="section" id="third-example-use-own-error-metric">
 <h2>Third example: Use own error metric<a class="headerlink" href="#third-example-use-own-error-metric" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Use self defined error metric&quot;</span><span class="p">)</span>
@@ -307,21 +305,24 @@ Accuracy score 0.951 using accu
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>################################################################################
 Use self defined error metric
-[WARNING] [2021-11-09 17:25:04,374:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-11-09 17:25:05,571:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-11-09 17:25:09,566:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-11-09 17:25:10,643:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-11-09 17:25:11,896:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-11-09 17:25:16,757:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-11-09 17:25:18,897:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-11-09 17:25:23,784:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-11-09 17:25:29,282:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-11-09 17:25:35,290:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-Error score -0.049 using error
+[WARNING] [2021-11-23 13:44:32,813:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:44:33,934:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:44:37,294:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:44:38,205:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:44:39,236:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:44:43,225:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:44:45,341:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:44:49,148:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:44:53,201:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:44:57,999:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:45:02,572:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:45:07,295:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:45:08,226:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+Error score -0.063 using error
 </pre></div>
 </div>
-</section>
-<section id="fourth-example-use-own-accuracy-metric-with-additional-argument">
+</div>
+<div class="section" id="fourth-example-use-own-accuracy-metric-with-additional-argument">
 <h2>Fourth example: Use own accuracy metric with additional argument<a class="headerlink" href="#fourth-example-use-own-accuracy-metric-with-additional-argument" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Use self defined accuracy with additional argument&quot;</span><span class="p">)</span>
@@ -351,11 +352,11 @@ Error score -0.049 using error
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>################################################################################
 Use self defined accuracy with additional argument
-Accuracy score 0.951 using accu_add
+Accuracy score 0.937 using accu_add
 </pre></div>
 </div>
-</section>
-<section id="fifth-example-use-own-accuracy-metric-with-additional-argument">
+</div>
+<div class="section" id="fifth-example-use-own-accuracy-metric-with-additional-argument">
 <h2>Fifth example: Use own accuracy metric with additional argument<a class="headerlink" href="#fifth-example-use-own-accuracy-metric-with-additional-argument" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Use self defined error with additional argument&quot;</span><span class="p">)</span>
@@ -385,22 +386,26 @@ Accuracy score 0.951 using accu_add
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>################################################################################
 Use self defined error with additional argument
-[WARNING] [2021-11-09 17:26:53,722:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-11-09 17:26:58,057:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-11-09 17:27:05,473:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-11-09 17:27:06,632:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-11-09 17:27:10,586:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-11-09 17:27:11,590:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-11-09 17:27:12,764:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-11-09 17:27:19,186:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-11-09 17:27:24,356:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-11-09 17:27:30,031:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-11-09 17:27:32,540:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2021-11-09 17:27:38,510:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:46:45,825:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:46:49,040:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:46:54,642:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:46:55,515:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:46:58,404:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:46:59,170:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:47:00,031:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:47:04,915:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:47:08,643:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:47:12,624:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:47:14,524:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:47:19,120:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:47:23,361:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:47:24,301:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:47:28,939:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2021-11-23 13:47:30,283:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
 Error score 0.615 using error_add
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 5 minutes  0.841 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 5 minutes  24.375 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-metrics-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_metrics.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
@@ -413,8 +418,8 @@ Error score 0.615 using error_add
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
-</section>
-</section>
+</div>
+</div>
 
 
     </div>
