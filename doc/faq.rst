@@ -506,7 +506,7 @@ Other
 .. collapse:: <b>Vanilla auto-sklearn</b>
 
     In order to obtain *vanilla auto-sklearn* as used in `Efficient and Robust Automated Machine Learning
-    `<https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning>`_
+    <https://papers.neurips.cc/paper/5872-efficient-and-robust-automated-machine-learning>`_
     set ``ensemble_size=1`` and ``initial_configurations_via_metalearning=0``:
 
     .. code:: python
