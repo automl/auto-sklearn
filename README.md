@@ -26,7 +26,7 @@ predictions = cls.predict(X_test)
 
 You can accelerate auto-sklearn with [Intel(R) Extension for Scikit-Learn (sklearnex)](https://github.com/intel/scikit-learn-intelex). The acceleration is achieved through **patching**: replacing scikit-learn algorithms with their optimized versions provided by the extension.
 
-Install sklearnex with pip or conda:
+Read [system requirements](https://intel.github.io/scikit-learn-intelex/system-requirements.html) and install sklearnex with pip or conda:
 ```bash
 pip install scikit-learn-intelex
 conda install scikit-learn-intelex

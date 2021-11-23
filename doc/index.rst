@@ -64,7 +64,7 @@ auto-sklearn acceleration with sklearnex
 *******
 You can accelerate auto-sklearn with `Intel(R) Extension for Scikit-Learn (sklearnex) <https://github.com/intel/scikit-learn-intelex>`_. The acceleration is achieved through **patching**: replacing scikit-learn algorithms with their optimized versions provided by the extension.
 
-Install sklearnex with pip or conda:
+Read `system requirements <https://intel.github.io/scikit-learn-intelex/system-requirements.html>`_ and install sklearnex with pip or conda:
 
 .. code:: bash
 
