@@ -69,7 +69,13 @@ Read `system requirements <https://intel.github.io/scikit-learn-intelex/system-r
 .. code:: bash
 
     pip install scikit-learn-intelex
+
+.. code:: bash
+
     conda install scikit-learn-intelex
+
+.. code:: bash
+
     conda install -c conda-forge scikit-learn-intelex
 
 To accelerate auto-sklearn, insert the following two lines of patching code before auto-sklearn and sklearn imports:
