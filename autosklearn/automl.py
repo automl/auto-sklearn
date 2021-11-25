@@ -1834,15 +1834,52 @@ class AutoML(BaseEstimator):
         return self.ensemble_.get_models_with_weights(self.models_)
 
     def show_models(self):
-        models_with_weights = self.get_models_with_weights()
+        """ Returns a dictionary containing models and their information
+            where model_id/run_id is the key """
 
-        with io.StringIO() as sio:
-            sio.write("[")
-            for weight, model in models_with_weights:
-                sio.write("(%f, %s),\n" % (weight, model))
-            sio.write("]")
+        ensemble_dict={} 
+        
+        def has_key(rv, key):
+            return rv.additional_info and key in rv.additional_info
+        
+        table_dict={}
+        for rkey, rval in self.runhistory_.data.items():
+            if has_key(rval, 'num_run'):
+                table_dict[rval.additional_info['num_run']]={
+                        'model_id': rval.additional_info['num_run'],
+                        'cost': rval.cost}
+                
+        for i, weight in enumerate(self.ensemble_.weights_):
+            (_, model_id, _) = self.ensemble_.identifiers_[i]
+            table_dict[model_id]['ensemble_weight']=weight
+        
+        table=pd.DataFrame.from_dict(table_dict, orient='index')
+        table.sort_values(by='cost', inplace=True)
+        table['rank']=range(1,len(table)+1)
 
-            return sio.getvalue()
+        for (_, model_id, _), model in self.models_.items():
+            model_dict={} #Empty model dictionary
+                
+            #Inserting rank and ensemble weight
+            model_dict['model_id']=table.loc[model_id]['model_id']
+            model_dict['rank']=table.loc[model_id]['rank']
+            model_dict['ensemble_weight']=table.loc[model_id]['ensemble_weight']
+            
+            # The steps in the models pipeline will be saved in the dictionary as follows: 
+            # 'data_preprocessing': DataPreprocessor,
+            # 'balancing': Balancing,
+            # 'feature_preprocessor': FeaturePreprocessorChoice,
+            # 'classifier': ClassifierChoice -> autosklearn wrapped model
+            for step in model.steps:
+                model_dict[step[0]]=step[1]
+            
+            #Adding sklearn model to the model dictionary
+            model_dict['sklearn_model']=model.steps[-1][1].choice.estimator
+            
+            #Adding model to ensemble dictionary
+            ensemble_dict[model_id] = model_dict
+        return ensemble_dict
+        
 
     def _create_search_space(self, tmp_dir, backend, datamanager,
                              include=None,
