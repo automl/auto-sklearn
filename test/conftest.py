@@ -48,8 +48,8 @@ def backend(request):
                     time.sleep(1)
 
     # Make sure the folders we wanna create do not already exist.
-    backend_api = create(
-        temporary_directory=self.tmp_dir,
+    backend = create(
+        temporary_directory=tmp_dir,
         output_directory=None,
         prefix="autosklearn"
     )
