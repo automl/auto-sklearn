@@ -48,9 +48,10 @@ def backend(request):
                     time.sleep(1)
 
     # Make sure the folders we wanna create do not already exist.
-    backend = create(
-        tmp,
-        delete_tmp_folder_after_terminate=True,
+    backend_api = create(
+        temporary_directory=self.tmp_dir,
+        output_directory=None,
+        prefix="autosklearn"
     )
 
     def get_finalizer(tmp_dir):

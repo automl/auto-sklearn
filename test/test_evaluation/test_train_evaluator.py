@@ -93,7 +93,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.get_current_iter.return_value = 1
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="autosklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -161,7 +165,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.get_current_iter.side_effect = (2, 4, 8, 16, 32, 64, 128, 256, 512)
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="autosklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -260,7 +268,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.get_current_iter.side_effect = (2, 4, 8, 16, 32, 64, 128, 256, 512)
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="autosklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -332,7 +344,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.get_additional_run_info.return_value = None
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="autosklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -376,7 +392,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.get_additional_run_info.return_value = None
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="autosklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -432,7 +452,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.name = 'test'
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="autosklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -494,7 +518,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.get_current_iter.side_effect = (2, 4, 8, 16, 32, 64, 128, 256, 512)
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="autosklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
