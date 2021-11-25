@@ -253,12 +253,15 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         context = BackendContext(
             temporary_directory=os.path.join(self.working_directory, 'tmp'),
+            output_directory=os.path.join(self.working_directory, 'tmp_output'),
             delete_tmp_folder_after_terminate=True,
+            delete_output_folder_after_terminate=True,
+            prefix="autosklearn"
         )
         with unittest.mock.patch.object(Backend, 'load_datamanager') as load_datamanager_mock:
             load_datamanager_mock.return_value = get_multiclass_classification_datamanager()
 
-            backend = Backend(context)
+            backend = Backend(context, prefix="autosklearn")
 
             ae = AbstractEvaluator(
                 backend=backend,
@@ -295,11 +298,14 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         context = BackendContext(
             temporary_directory=os.path.join(self.working_directory, 'tmp'),
+            output_directory=os.path.join(self.working_directory, 'tmp_output'),
             delete_tmp_folder_after_terminate=True,
+            delete_output_folder_after_terminate=True,
+            prefix="autosklearn"
         )
         with unittest.mock.patch.object(Backend, 'load_datamanager') as load_datamanager_mock:
             load_datamanager_mock.return_value = get_multiclass_classification_datamanager()
-            backend = Backend(context)
+            backend = Backend(context, prefix="autosklearn")
 
             with unittest.mock.patch.object(_addons['classification'], 'add_component') as _:
 
