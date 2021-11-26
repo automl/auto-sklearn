@@ -210,7 +210,7 @@ final ensemble on the whole dataset.
  .. code-block:: none
 
     After re-fit
-    Accuracy score CV 0.965034965034965
+    Accuracy score CV 0.958041958041958
 
 
 
@@ -329,7 +329,7 @@ splitting it on the first feature.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 6 minutes  9.017 seconds)
+   **Total running time of the script:** ( 6 minutes  17.614 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_resampling.py:
