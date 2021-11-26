@@ -81,7 +81,7 @@ Following that we'll tell you about how you can test your changes locally and th
     # If you're using shells other than bash you'll need to use
     pip install -e ".[test,examples,doc]"
     ```
-    *   If you're only exposure to using pip is `pip install package_name` then this might be a bit confusing.
+    *   If your only exposure to using pip is `pip install package_name` then this might be a bit confusing.
     *   If we type `pip install -e .` (notice the 'dot'), this tells `pip` to install a package located here, in this directory, `.`.
         The `-e` flag indicates that it should be editable, meaning you will not have to run `pip install .` every time you make a change and want to try it.
     *   Finally the `[test,examples,doc]` tells `pip` that there's some extra optional dependencies that we want to install.
