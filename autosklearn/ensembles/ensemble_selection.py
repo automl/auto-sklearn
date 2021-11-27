@@ -2,7 +2,7 @@ import random
 from collections import Counter
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
-from automl_common.common.ensemble_building.abstract_ensemble import AbstractEnsemble
+from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 
 import numpy as np
 
