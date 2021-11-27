@@ -88,4 +88,3 @@ class AbstractEnsemble(object):
         ------
         float
         """
-

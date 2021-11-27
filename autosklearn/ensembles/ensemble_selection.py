@@ -2,14 +2,12 @@ import random
 from collections import Counter
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
-from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
-
 import numpy as np
 
 from sklearn.utils import check_random_state
 
-
 from autosklearn.constants import TASK_TYPES
+from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.metrics import Scorer, calculate_loss
 from autosklearn.pipeline.base import BasePipeline
 
