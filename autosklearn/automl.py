@@ -1833,53 +1833,120 @@ class AutoML(BaseEstimator):
 
         return self.ensemble_.get_models_with_weights(self.models_)
 
-    def show_models(self):
-        """ Returns a dictionary containing models and their information
-            where model_id/run_id is the key """
+    def show_models(self) -> Dict[int, Any]:
+        """ Returns a dictionary containing dictionaries of ensemble models only.
 
-        ensemble_dict={} 
-        
+        Any model can be accessed by giving its ``model_id`` as key.
+
+        A model dictionary contains the following:
+
+        * ``"model_id"`` - The id given to a model by ``autosklearn``.
+        * ``"rank"`` - The rank of the model based on it's ``"cost"``.
+        * ``"cost"`` - The loss of the model on the validation set.
+        * ``"ensemble_weight"`` - The weight given to the model in the ensemble.
+        * ``"data_preprocessor"`` - The preprocessor used on the data.
+        * ``"balancing"`` - The balancing used on the data (for classification).
+        * ``"feature_preprocessor"`` - The preprocessor for features types.
+        * ``"classifier"`` or ``"regressor"`` - The autosklearn wrapped classifier or regressor.
+        * ``"sklearn_classifier"`` or ``"sklearn_regressor"`` - The sklearn classifier or regressor.
+
+        **Example**
+
+        .. code-block:: python
+
+            import sklearn.datasets
+            import sklearn.metrics
+            import autosklearn.regression
+
+            X, y = sklearn.datasets.load_diabetes(return_X_y=True)
+
+            automl = autosklearn.regression.AutoSklearnRegressor(
+                time_left_for_this_task=120
+                )
+            automl.fit(X_train, y_train, dataset_name='diabetes')
+
+            ensemble_dict = automl.show_models()
+            print(ensemble_dict)
+
+        Output:
+
+        .. code-block:: text
+
+            {
+                25: {'model_id': 25.0,
+                     'rank': 1,
+                     'cost': 0.43667876507897496,
+                     'ensemble_weight': 0.38,
+                     'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing....>,
+                     'feature_preprocessor': <autosklearn.pipeline.components....>,
+                     'regressor': <autosklearn.pipeline.components.regression....>,
+                     'sklearn_regressor': SGDRegressor(alpha=0.0006517033225329654,...)
+                    },
+                6: {'model_id': 6.0,
+                    'rank': 2,
+                    'cost': 0.4550418898836528,
+                    'ensemble_weight': 0.3,
+                    'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing....>,
+                    'feature_preprocessor': <autosklearn.pipeline.components....>,
+                    'regressor': <autosklearn.pipeline.components.regression....>,
+                    'sklearn_regressor': ARDRegression(alpha_1=0.0003701926442639788,...)
+                    }...
+            }
+
+        Returns
+        -------
+        Dict(int, Any) : dictionary of length = number of models in the ensemble
+            A dictionary of models in the ensemble, where ``model_id`` is the key.
+
+        """
+
+        ensemble_dict = {}
+
         def has_key(rv, key):
             return rv.additional_info and key in rv.additional_info
-        
-        table_dict={}
+
+        table_dict = {}
         for rkey, rval in self.runhistory_.data.items():
             if has_key(rval, 'num_run'):
-                table_dict[rval.additional_info['num_run']]={
-                        'model_id': rval.additional_info['num_run'],
-                        'cost': rval.cost}
-                
+                model_id = rval.additional_info['num_run']
+                table_dict[model_id] = {
+                        'model_id': model_id,
+                        'cost': rval.cost
+                        }
+
         for i, weight in enumerate(self.ensemble_.weights_):
             (_, model_id, _) = self.ensemble_.identifiers_[i]
-            table_dict[model_id]['ensemble_weight']=weight
-        
-        table=pd.DataFrame.from_dict(table_dict, orient='index')
-        table.sort_values(by='cost', inplace=True)
-        table['rank']=range(1,len(table)+1)
+            table_dict[model_id]['ensemble_weight'] = weight
 
+        table = pd.DataFrame.from_dict(table_dict, orient='index')
+        table.sort_values(by='cost', inplace=True)
+
+        rank = 1  # Initializing rank for the first model
         for (_, model_id, _), model in self.models_.items():
-            model_dict={} #Empty model dictionary
-                
-            #Inserting rank and ensemble weight
-            model_dict['model_id']=table.loc[model_id]['model_id']
-            model_dict['rank']=table.loc[model_id]['rank']
-            model_dict['ensemble_weight']=table.loc[model_id]['ensemble_weight']
-            
-            # The steps in the models pipeline will be saved in the dictionary as follows: 
-            # 'data_preprocessing': DataPreprocessor,
+            model_dict = {}  # Declaring model dictionary
+
+            # Inserting model_id, rank, cost and ensemble weight
+            model_dict['model_id'] = table.loc[model_id]['model_id']
+            model_dict['rank'] = rank
+            model_dict['cost'] = table.loc[model_id]['cost']
+            model_dict['ensemble_weight'] = table.loc[model_id]['ensemble_weight']
+            rank += 1  # Incrementing rank by 1 for the next model
+
+            # The steps in the models pipeline will be saved in the dictionary as follows:
+            # 'data_preprocessor': DataPreprocessor,
             # 'balancing': Balancing,
             # 'feature_preprocessor': FeaturePreprocessorChoice,
-            # 'classifier': ClassifierChoice -> autosklearn wrapped model
-            for step in model.steps:
-                model_dict[step[0]]=step[1]
-            
-            #Adding sklearn model to the model dictionary
-            model_dict['sklearn_model']=model.steps[-1][1].choice.estimator
-            
-            #Adding model to ensemble dictionary
+            # 'classifier'/'regressor': ClassifierChoice/RegressorChoice (autosklearn wrapped model)
+            steps = dict(model.steps)
+            model_dict.update(steps)
+
+            # Adding sklearn model to the model dictionary
+            model_type, autosklearn_wrapped_model = model.steps[-1]
+            model_dict[f'sklearn_{model_type}'] = autosklearn_wrapped_model.choice.estimator
+
+            # Insterting model_dict in the ensemble dictionary
             ensemble_dict[model_id] = model_dict
         return ensemble_dict
-        
 
     def _create_search_space(self, tmp_dir, backend, datamanager,
                              include=None,
