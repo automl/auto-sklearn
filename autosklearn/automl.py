@@ -282,7 +282,7 @@ class AutoML(BaseEstimator):
         return create(
             temporary_directory=self._temporary_directory,
             output_directory=None,
-            prefix="autosklearn",
+            prefix="auto-sklearn",
             delete_tmp_folder_after_terminate=self._delete_tmp_folder_after_terminate,
         )
 

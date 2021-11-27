@@ -96,7 +96,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         backend_api = backend.create(
             temporary_directory=self.tmp_dir,
             output_directory=None,
-            prefix="autosklearn"
+            prefix="auto-sklearn"
         )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
@@ -168,7 +168,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         backend_api = backend.create(
             temporary_directory=self.tmp_dir,
             output_directory=None,
-            prefix="autosklearn"
+            prefix="auto-sklearn"
         )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
@@ -271,7 +271,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         backend_api = backend.create(
             temporary_directory=self.tmp_dir,
             output_directory=None,
-            prefix="autosklearn"
+            prefix="auto-sklearn"
         )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
@@ -347,7 +347,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         backend_api = backend.create(
             temporary_directory=self.tmp_dir,
             output_directory=None,
-            prefix="autosklearn"
+            prefix="auto-sklearn"
         )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
@@ -395,7 +395,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         backend_api = backend.create(
             temporary_directory=self.tmp_dir,
             output_directory=None,
-            prefix="autosklearn"
+            prefix="auto-sklearn"
         )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
@@ -455,7 +455,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         backend_api = backend.create(
             temporary_directory=self.tmp_dir,
             output_directory=None,
-            prefix="autosklearn"
+            prefix="auto-sklearn"
         )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
@@ -521,7 +521,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         backend_api = backend.create(
             temporary_directory=self.tmp_dir,
             output_directory=None,
-            prefix="autosklearn"
+            prefix="auto-sklearn"
         )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
