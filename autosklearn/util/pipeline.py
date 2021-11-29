@@ -22,21 +22,25 @@ __all__ = [
 ]
 
 
-def get_configuration_space(info: Dict[str, Any],
-                            include: Optional[Dict[str, List[str]]] = None,
-                            exclude: Optional[Dict[str, List[str]]] = None,
-                            ) -> ConfigurationSpace:
+def get_configuration_space(
+    info: Dict[str, Any],
+    include: Optional[Dict[str, List[str]]] = None,
+    exclude: Optional[Dict[str, List[str]]] = None,
+    random_state: Optional[Union[int, np.random.RandomState]] = None
+) -> ConfigurationSpace:
 
     if info['task'] in REGRESSION_TASKS:
-        return _get_regression_configuration_space(info, include, exclude)
+        return _get_regression_configuration_space(info, include, exclude, random_state)
     else:
-        return _get_classification_configuration_space(info, include, exclude)
+        return _get_classification_configuration_space(info, include, exclude, random_state)
 
 
-def _get_regression_configuration_space(info: Dict[str, Any],
-                                        include: Optional[Dict[str, List[str]]],
-                                        exclude: Optional[Dict[str, List[str]]]
-                                        ) -> ConfigurationSpace:
+def _get_regression_configuration_space(
+    info: Dict[str, Any],
+    include: Optional[Dict[str, List[str]]],
+    exclude: Optional[Dict[str, List[str]]],
+    random_state: Optional[Union[int, np.random.RandomState]] = None
+) -> ConfigurationSpace:
     task_type = info['task']
     sparse = False
     multioutput = False
@@ -54,15 +58,18 @@ def _get_regression_configuration_space(info: Dict[str, Any],
     configuration_space = SimpleRegressionPipeline(
         dataset_properties=dataset_properties,
         include=include,
-        exclude=exclude
+        exclude=exclude,
+        random_state=random_state
     ).get_hyperparameter_search_space()
     return configuration_space
 
 
-def _get_classification_configuration_space(info: Dict[str, Any],
-                                            include: Optional[Dict[str, List[str]]],
-                                            exclude: Optional[Dict[str, List[str]]]
-                                            ) -> ConfigurationSpace:
+def _get_classification_configuration_space(
+    info: Dict[str, Any],
+    include: Optional[Dict[str, List[str]]],
+    exclude: Optional[Dict[str, List[str]]],
+    random_state: Optional[Union[int, np.random.RandomState]] = None
+) -> ConfigurationSpace:
     task_type = info['task']
 
     multilabel = False
@@ -87,8 +94,10 @@ def _get_classification_configuration_space(info: Dict[str, Any],
 
     return SimpleClassificationPipeline(
         dataset_properties=dataset_properties,
-        include=include, exclude=exclude).\
-        get_hyperparameter_search_space()
+        include=include,
+        exclude=exclude,
+        random_state=random_state
+    ).get_hyperparameter_search_space()
 
 
 def get_class(info: Dict[str, Any]) -> Pipeline:

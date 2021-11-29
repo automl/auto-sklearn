@@ -213,26 +213,38 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 'X_test': X_test, 'Y_test': Y_test}
 
         dataset_properties = {'multilabel': True}
-        cs = SimpleClassificationPipeline(dataset_properties=dataset_properties).\
-            get_hyperparameter_search_space()
+        pipeline = SimpleClassificationPipeline(
+            random_state=1,
+            dataset_properties=dataset_properties
+        )
+        cs = pipeline.get_hyperparameter_search_space()
         self._test_configurations(configurations_space=cs, data=data)
 
     def test_configurations(self):
-        cls = SimpleClassificationPipeline()
+        cls = SimpleClassificationPipeline(random_state=1)
         cs = cls.get_hyperparameter_search_space()
         self._test_configurations(configurations_space=cs)
 
     def test_configurations_signed_data(self):
         dataset_properties = {'signed': True}
-        cs = SimpleClassificationPipeline(dataset_properties=dataset_properties)\
-            .get_hyperparameter_search_space()
+        pipeline = SimpleClassificationPipeline(
+            random_state=1,
+            dataset_properties=dataset_properties
+        )
 
-        self._test_configurations(configurations_space=cs,
-                                  dataset_properties=dataset_properties)
+        config_space = pipeline.get_hyperparameter_search_space()
+
+        self._test_configurations(
+            configurations_space=config_space,
+            dataset_properties=dataset_properties
+        )
 
     def test_configurations_sparse(self):
-        cs = SimpleClassificationPipeline(dataset_properties={'sparse': True}).\
-            get_hyperparameter_search_space()
+        pipeline = SimpleClassificationPipeline(
+            dataset_properties={'sparse': True},
+            random_state=1
+        )
+        cs = pipeline.get_hyperparameter_search_space()
 
         self._test_configurations(configurations_space=cs, make_sparse=True)
 
@@ -279,8 +291,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         with unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline'
                                  '._check_init_params_honored'):
             cls = SimpleClassificationPipeline(
-                init_params={'data_preprocessor:feat_type': {0: 'categorical',
-                                                             1: 'numerical'}}
+                random_state=1,
+                init_params={
+                    'data_preprocessor:feat_type': {0: 'categorical', 1: 'numerical'}
+                }
             )
 
             self.assertEqual(
@@ -425,7 +439,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     raise e
 
     def test_get_hyperparameter_search_space(self):
-        cs = SimpleClassificationPipeline().get_hyperparameter_search_space()
+        cs = SimpleClassificationPipeline(random_state=1).get_hyperparameter_search_space()
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         forbiddens = cs.get_forbiddens()
@@ -450,43 +464,59 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual(len(forbiddens), 53)
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
-        cs = SimpleClassificationPipeline(include={'classifier': ['libsvm_svc']})\
-            .get_hyperparameter_search_space()
+        pipeline = SimpleClassificationPipeline(
+            random_state=1,
+            include={'classifier': ['libsvm_svc']}
+        )
+        cs = pipeline.get_hyperparameter_search_space()
         self.assertEqual(
             cs.get_hyperparameter('classifier:__choice__'),
             CategoricalHyperparameter('classifier:__choice__', ['libsvm_svc']),
-            )
+        )
 
-        cs = SimpleClassificationPipeline(exclude={'classifier': ['libsvm_svc']}).\
-            get_hyperparameter_search_space()
+        pipeline = SimpleClassificationPipeline(
+            random_state=1
+            exclude={'classifier': ['libsvm_svc']},
+        )
+        cs = pipeline.get_hyperparameter_search_space()
         self.assertNotIn('libsvm_svc', str(cs))
 
-        cs = SimpleClassificationPipeline(
-            include={'feature_preprocessor': ['select_percentile_classification']}).\
-            get_hyperparameter_search_space()
+        pipeline = SimpleClassificationPipeline(
+            random_state=1
+            include={'feature_preprocessor': ['select_percentile_classification']}
+        )
+        cs = pipeline.get_hyperparameter_search_space()
         fpp1 = cs.get_hyperparameter('feature_preprocessor:__choice__')
         fpp2 = CategoricalHyperparameter(
             'feature_preprocessor:__choice__', ['select_percentile_classification'])
         self.assertEqual(fpp1, fpp2)
 
-        cs = SimpleClassificationPipeline(
+        pipeline = SimpleClassificationPipeline(
+            random_state=1,
             exclude={'feature_preprocessor': ['select_percentile_classification']}
-        ).get_hyperparameter_search_space()
+        )
+        cs = pipeline.get_hyperparameter_search_space()
         self.assertNotIn('select_percentile_classification', str(cs))
 
     def test_get_hyperparameter_search_space_preprocessor_contradicts_default_classifier(self):
-        cs = SimpleClassificationPipeline(
+        pipeline = SimpleClassificationPipeline(
+            random_state=1,
             include={'feature_preprocessor': ['densifier']},
-            dataset_properties={'sparse': True}).\
-            get_hyperparameter_search_space()
+            dataset_properties={'sparse': True}
+        )
+        cs = pipeline.get_hyperparameter_search_space()
+
         self.assertEqual(cs.get_hyperparameter(
             'classifier:__choice__').default_value,
             'qda'
         )
 
-        cs = SimpleClassificationPipeline(
-            include={'feature_preprocessor': ['nystroem_sampler']}).\
-            get_hyperparameter_search_space()
+        pipeline = SimpleClassificationPipeline(
+            random_state=1,
+            include={'feature_preprocessor': ['nystroem_sampler']}
+        )
+        cs = pipeline.get_hyperparameter_search_space()
+
         self.assertEqual(cs.get_hyperparameter(
             'classifier:__choice__').default_value,
             'sgd'
@@ -520,7 +550,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
     @unittest.skip("Wait until ConfigSpace is fixed.")
     def test_get_hyperparameter_search_space_dataset_properties(self):
         cs_mc = SimpleClassificationPipeline.get_hyperparameter_search_space(
-            dataset_properties={'multiclass': True})
+            dataset_properties={'multiclass': True}
+        )
         self.assertNotIn('bernoulli_nb', str(cs_mc))
 
         cs_ml = SimpleClassificationPipeline.get_hyperparameter_search_space(
@@ -541,7 +572,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual(cs_ml, cs_mc_ml)
 
     def test_predict_batched(self):
-        cls = SimpleClassificationPipeline(include={'classifier': ['sgd']})
+        cls = SimpleClassificationPipeline(random_state=1, include={'classifier': ['sgd']})
 
         # Multiclass
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
@@ -557,8 +588,11 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         np.testing.assert_array_almost_equal(prediction_, prediction)
 
     def test_predict_batched_sparse(self):
-        cls = SimpleClassificationPipeline(dataset_properties={'sparse': True},
-                                           include={'classifier': ['sgd']})
+        cls = SimpleClassificationPipeline(
+            random_state=1,
+            dataset_properties={'sparse': True},
+            include={'classifier': ['sgd']}
+        )
 
         # Multiclass
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
@@ -576,7 +610,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
     def test_predict_proba_batched(self):
         # Multiclass
-        cls = SimpleClassificationPipeline(include={'classifier': ['sgd']})
+        cls = SimpleClassificationPipeline(random_state=1, include={'classifier': ['sgd']})
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
 
         cls.fit(X_train, Y_train)
@@ -591,7 +625,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         np.testing.assert_array_almost_equal(prediction_, prediction)
 
         # Multilabel
-        cls = SimpleClassificationPipeline(include={'classifier': ['lda']})
+        cls = SimpleClassificationPipeline(random_state=1, include={'classifier': ['lda']})
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
         Y_train = np.array(list([(list([1 if i != y else 0 for i in range(10)]))
                                  for y in Y_train]))
@@ -609,8 +643,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
     def test_predict_proba_batched_sparse(self):
 
         cls = SimpleClassificationPipeline(
+            random_state=1,
             dataset_properties={'sparse': True, 'multiclass': True},
-            include={'classifier': ['sgd']})
+            include={'classifier': ['sgd']}
+        )
 
         # Multiclass
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
@@ -628,8 +664,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
         # Multilabel
         cls = SimpleClassificationPipeline(
+            random_state=1,
             dataset_properties={'sparse': True, 'multilabel': True},
-            include={'classifier': ['lda']})
+            include={'classifier': ['lda']}
+        )
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
                                                        make_sparse=True)
         Y_train = np.array(list([(list([1 if i != y else 0 for i in range(10)]))
@@ -647,7 +685,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
     def test_pipeline_clonability(self):
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris')
-        auto = SimpleClassificationPipeline()
+        auto = SimpleClassificationPipeline(random_state=1)
         auto = auto.fit(X_train, Y_train)
         auto_clone = clone(auto)
         auto_clone_params = auto_clone.get_params()
@@ -681,7 +719,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         classification_components.add_classifier(DummyClassifier)
         self.assertEqual(len(classification_components.additional_components.components), 1)
         self.assertEqual(len(_addons['classification'].components), 1)
-        cs = SimpleClassificationPipeline().get_hyperparameter_search_space()
+        cs = SimpleClassificationPipeline(random_state=1).get_hyperparameter_search_space()
         self.assertIn('DummyClassifier', str(cs))
         del classification_components.additional_components.components['DummyClassifier']
 
@@ -691,7 +729,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         preprocessing_components.add_preprocessor(DummyPreprocessor)
         self.assertEqual(len(preprocessing_components.additional_components.components), 1)
         self.assertEqual(len(_addons['feature_preprocessing'].components), 1)
-        cs = SimpleClassificationPipeline().get_hyperparameter_search_space()
+        cs = SimpleClassificationPipeline(random_state=1).get_hyperparameter_search_space()
         self.assertIn('DummyPreprocessor', str(cs))
         del preprocessing_components.additional_components.components['DummyPreprocessor']
 
@@ -864,7 +902,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
         # We reduce the search space as forbidden clauses prevent to instantiate
         # the user defined preprocessor manually
-        cls = SimpleClassificationPipeline(include={'classifier': ['random_forest']})
+        cls = SimpleClassificationPipeline(
+            random_state=1,
+            include={'classifier': ['random_forest']}
+        )
         cs = cls.get_hyperparameter_search_space()
         self.assertIn('CrashPreprocessor', str(cs))
         config = cs.sample_configuration()

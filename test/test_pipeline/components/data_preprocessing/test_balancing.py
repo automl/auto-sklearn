@@ -157,8 +157,7 @@ class BalancingComponentTest(unittest.TestCase):
 
                 include = {'classifier': ['sgd'], 'feature_preprocessor': [name]}
 
-                classifier = SimpleClassificationPipeline(
-                    random_state=1, include=include)
+                classifier = SimpleClassificationPipeline(random_state=1, include=include)
                 cs = classifier.get_hyperparameter_search_space()
                 default = cs.get_default_configuration()
                 default._values['balancing:strategy'] = strategy
@@ -177,8 +176,7 @@ class BalancingComponentTest(unittest.TestCase):
                 Y_test = data_[1][100:]
 
                 default._values['balancing:strategy'] = strategy
-                classifier = SimpleClassificationPipeline(
-                    default, random_state=1, include=include)
+                classifier = SimpleClassificationPipeline(default, random_state=1, include=include)
                 Xt, fit_params = classifier.fit_transformer(X_train, Y_train)
                 classifier.fit_estimator(Xt, Y_train, **fit_params)
                 predictions = classifier.predict(X_test)
