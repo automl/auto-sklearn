@@ -1914,6 +1914,10 @@ class AutoML(BaseEstimator):
                         'cost': rval.cost
                         }
 
+        # Check if dictionary is empty
+        if not table_dict:
+            raise RuntimeError('No model found. Try increasing \'time_left_for_this_task\'.')
+
         for i, weight in enumerate(self.ensemble_.weights_):
             (_, model_id, _) = self.ensemble_.identifiers_[i]
             table_dict[model_id]['ensemble_weight'] = weight
