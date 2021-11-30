@@ -3,15 +3,10 @@ name: Tests
 on:
   push:
   pull_request:
+  workflow_dispatch:
   schedule:
     # Every Monday at 7AM UTC
     - cron: '0 07 * * 1'
-  workflow_dispatch:
-    inputs:
-      dummy:
-        description: 'Place holder'
-        required: false
-        default: 'Dummy argument'
 
 jobs:
   ubuntu:
