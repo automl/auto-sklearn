@@ -29,7 +29,7 @@ class OrdinalEncoding(AutoSklearnPreprocessingAlgorithm):
             self.preprocessor.fit(X, y)
             return self
         else:
-            # TODO spare_encoding of negative labels
+            # TODO sparse_encoding of negative labels
             #
             #   The next step in the pipeline relies on positive labels
             #   Given a categorical column [[0], [-1]], the next step will fail
