@@ -28,7 +28,27 @@ def get_configuration_space(
     exclude: Optional[Dict[str, List[str]]] = None,
     random_state: Optional[Union[int, np.random.RandomState]] = None
 ) -> ConfigurationSpace:
+    """Get the configuration of a pipeline given some dataset info
 
+    Parameters
+    ----------
+    info: Dict[str, Any]
+        Information about the dataset
+
+    include: Optional[Dict[str, List[str]]] = None
+        A dictionary of what components to include for each pipeline step
+
+    exclude: Optional[Dict[str, List[str]]] = None
+        A dictionary of what components to exclude for each pipeline step
+
+    random_state: Optional[Union[int, np.random.Randomstate]] = None
+        The random state to use for seeding the ConfigSpace
+
+    Returns
+    -------
+    ConfigurationSpace
+        The configuration space for the pipeline
+    """
     if info['task'] in REGRESSION_TASKS:
         return _get_regression_configuration_space(info, include, exclude, random_state)
     else:
@@ -41,6 +61,27 @@ def _get_regression_configuration_space(
     exclude: Optional[Dict[str, List[str]]],
     random_state: Optional[Union[int, np.random.RandomState]] = None
 ) -> ConfigurationSpace:
+    """Get the configuration of a regression pipeline given some dataset info
+
+    Parameters
+    ----------
+    info: Dict[str, Any]
+        Information about the dataset
+
+    include: Optional[Dict[str, List[str]]] = None
+        A dictionary of what components to include for each pipeline step
+
+    exclude: Optional[Dict[str, List[str]]] = None
+        A dictionary of what components to exclude for each pipeline step
+
+    random_state: Optional[Union[int, np.random.Randomstate]] = None
+        The random state to use for seeding the ConfigSpace
+
+    Returns
+    -------
+    ConfigurationSpace
+        The configuration space for the regression pipeline
+    """
     task_type = info['task']
     sparse = False
     multioutput = False
@@ -70,6 +111,27 @@ def _get_classification_configuration_space(
     exclude: Optional[Dict[str, List[str]]],
     random_state: Optional[Union[int, np.random.RandomState]] = None
 ) -> ConfigurationSpace:
+    """Get the configuration of a classification pipeline given some dataset info
+
+    Parameters
+    ----------
+    info: Dict[str, Any]
+        Information about the dataset
+
+    include: Optional[Dict[str, List[str]]] = None
+        A dictionary of what components to include for each pipeline step
+
+    exclude: Optional[Dict[str, List[str]]] = None
+        A dictionary of what components to exclude for each pipeline step
+
+    random_state: Optional[Union[int, np.random.Randomstate]] = None
+        The random state to use for seeding the ConfigSpace
+
+    Returns
+    -------
+    ConfigurationSpace
+        The configuration space for the classification pipeline
+    """
     task_type = info['task']
 
     multilabel = False
@@ -98,10 +160,3 @@ def _get_classification_configuration_space(
         exclude=exclude,
         random_state=random_state
     ).get_hyperparameter_search_space()
-
-
-def get_class(info: Dict[str, Any]) -> Pipeline:
-    if info['task'] in REGRESSION_TASKS:
-        return SimpleRegressionPipeline
-    else:
-        return SimpleClassificationPipeline
