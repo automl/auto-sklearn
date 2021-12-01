@@ -1,0 +1,3 @@
+[submodule "autosklearn/automl_common"]
+	path = autosklearn/automl_common
+	url = https://github.com/automl/automl_common
