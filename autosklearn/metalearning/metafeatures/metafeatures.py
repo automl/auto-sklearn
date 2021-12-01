@@ -184,7 +184,7 @@ class MissingValues(HelperFunction):
     def _calculate_sparse(self, X, y, logger, categorical):
         data = [True if not np.isfinite(x) else False for x in X.data]
         missing = X.__class__((data, X.indices, X.indptr), shape=X.shape,
-                              dtype=np.bool)
+                              dtype=bool)
         return missing
 
 

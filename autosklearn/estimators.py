@@ -234,13 +234,13 @@ class AutoSklearnEstimator(BaseEstimator):
         Attributes
         ----------
 
-        cv_results\_ : dict of numpy (masked) ndarrays
+        cv_results_ : dict of numpy (masked) ndarrays
             A dict with keys as column headers and values as columns, that can be
             imported into a pandas ``DataFrame``.
 
             Not all keys returned by scikit-learn are supported yet.
 
-        performance_over_time\_ : pandas.core.frame.DataFrame
+        performance_over_time_ : pandas.core.frame.DataFrame
             A ``DataFrame`` containing the models performance over time data. Can be
             used for plotting directly. Please refer to the example
             :ref:`Train and Test Inputs <sphx_glr_examples_40_advanced_example_pandas_train_test.py>`.

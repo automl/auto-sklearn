@@ -3,6 +3,7 @@ from typing import Dict, Optional, Tuple, Union
 from ConfigSpace.configuration_space import ConfigurationSpace
 
 import numpy as np
+from scipy.sparse import spmatrix
 
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
@@ -28,24 +29,32 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
             y: Optional[PIPELINE_DATA_DTYPE] = None) -> 'CategoricalImputation':
         import sklearn.impute
 
-        fill_value = None
         if hasattr(X, 'columns'):
             kind = X[X.columns[-1]].dtype.kind
         else:
             # Series, sparse and numpy have dtype
             # Only DataFrame does not
             kind = X.dtype.kind
-        if kind in ("i", "u", "f"):
-            # We do not want to impute a category with the default
-            # value (0 is the default) in case such default is in the
-            # train data already!
-            fill_value = 0
-            unique = np.unique(X)
-            while fill_value in unique:
-                fill_value -= 1
+
+        fill_value: Optional[int] = None
+
+        number_kinds = ("i", "u", "f")
+        if kind in number_kinds:
+            if isinstance(X, spmatrix):
+                # TODO negative labels
+                #
+                #   Previously this was the behaviour and went
+                #   unnoticed. Imputing negative labels results in
+                #   the cateogircal shift step failing as the ordinal
+                #   encoder can't fix negative labels.
+                #   This is here to document the behaviour explicitly
+                fill_value = 0
+            else:
+                fill_value = min(np.unique(X)) - 1
 
         self.preprocessor = sklearn.impute.SimpleImputer(
-            strategy='constant', copy=False, fill_value=fill_value)
+            strategy='constant', copy=False, fill_value=fill_value
+        )
         self.preprocessor.fit(X)
         return self
 

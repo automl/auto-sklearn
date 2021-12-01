@@ -27,7 +27,14 @@ class OrdinalEncoding(AutoSklearnPreprocessingAlgorithm):
                 categories='auto', handle_unknown='use_encoded_value', unknown_value=-1,
             )
             self.preprocessor.fit(X, y)
-        return self
+            return self
+        else:
+            # TODO sparse_encoding of negative labels
+            #
+            #   The next step in the pipeline relies on positive labels
+            #   Given a categorical column [[0], [-1]], the next step will fail
+            #   unless we can fix this encoding
+            return self
 
     def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         if scipy.sparse.issparse(X):

@@ -30,7 +30,7 @@ X, y = sklearn.datasets.fetch_openml(data_id=40594, return_X_y=True, as_frame=Fa
 # More information on: https://scikit-learn.org/stable/modules/multiclass.html
 y[y == 'TRUE'] = 1
 y[y == 'FALSE'] = 0
-y = y.astype(np.int)
+y = y.astype(int)
 
 # Using type of target is a good way to make sure your data
 # is properly formatted
