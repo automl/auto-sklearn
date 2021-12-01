@@ -233,7 +233,7 @@ these features. Again, we'll look at acceleration_y and acceleration_z.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 3 minutes  57.255 seconds)
+   **Total running time of the script:** ( 3 minutes  53.448 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_inspect_predictions.py:

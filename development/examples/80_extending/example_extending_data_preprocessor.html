@@ -205,9 +205,9 @@ to download the full example code or to run this example in your browser via Bin
 </div>
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>auto-sklearn results:
-  Dataset name: 4c8da221-4eb6-11ec-86be-1de9961ebe90
+  Dataset name: d31cfe3e-5285-11ec-867a-b7e09c96a597
   Metric: accuracy
-  Best validation score: 0.957447
+  Best validation score: 0.936170
   Number of target algorithm runs: 5
   Number of successful target algorithm runs: 5
   Number of crashed target algorithm runs: 0
@@ -241,15 +241,7 @@ dataset_properties={
   &#39;multiclass&#39;: False,
   &#39;target_type&#39;: &#39;classification&#39;,
   &#39;signed&#39;: False})),
-(0.020000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;lda&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;NoPreprocessing&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;select_rates_classification&#39;, &#39;classifier:lda:shrinkage&#39;: &#39;auto&#39;, &#39;classifier:lda:tol&#39;: 0.00010495766342828794, &#39;feature_preprocessor:select_rates_classification:alpha&#39;: 0.4886183647550176, &#39;feature_preprocessor:select_rates_classification:score_func&#39;: &#39;mutual_info_classif&#39;},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.020000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;libsvm_svc&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;NoPreprocessing&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;polynomial&#39;, &#39;classifier:libsvm_svc:C&#39;: 5.6217653025966605, &#39;classifier:libsvm_svc:gamma&#39;: 0.00016239358614064282, &#39;classifier:libsvm_svc:kernel&#39;: &#39;poly&#39;, &#39;classifier:libsvm_svc:max_iter&#39;: -1, &#39;classifier:libsvm_svc:shrinking&#39;: &#39;True&#39;, &#39;classifier:libsvm_svc:tol&#39;: 0.0001346237047084913, &#39;feature_preprocessor:polynomial:degree&#39;: 2, &#39;feature_preprocessor:polynomial:include_bias&#39;: &#39;True&#39;, &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;False&#39;, &#39;classifier:libsvm_svc:coef0&#39;: -0.011192631375838147, &#39;classifier:libsvm_svc:degree&#39;: 5},
+(0.040000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;adaboost&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;NoPreprocessing&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;liblinear_svc_preprocessor&#39;, &#39;classifier:adaboost:algorithm&#39;: &#39;SAMME.R&#39;, &#39;classifier:adaboost:learning_rate&#39;: 1.077525751047041, &#39;classifier:adaboost:max_depth&#39;: 9, &#39;classifier:adaboost:n_estimators&#39;: 208, &#39;feature_preprocessor:liblinear_svc_preprocessor:C&#39;: 1202.4376014010597, &#39;feature_preprocessor:liblinear_svc_preprocessor:dual&#39;: &#39;False&#39;, &#39;feature_preprocessor:liblinear_svc_preprocessor:fit_intercept&#39;: &#39;True&#39;, &#39;feature_preprocessor:liblinear_svc_preprocessor:intercept_scaling&#39;: 1, &#39;feature_preprocessor:liblinear_svc_preprocessor:loss&#39;: &#39;squared_hinge&#39;, &#39;feature_preprocessor:liblinear_svc_preprocessor:multi_class&#39;: &#39;ovr&#39;, &#39;feature_preprocessor:liblinear_svc_preprocessor:penalty&#39;: &#39;l1&#39;, &#39;feature_preprocessor:liblinear_svc_preprocessor:tol&#39;: 8.931650858806469e-05},
 dataset_properties={
   &#39;task&#39;: 1,
   &#39;sparse&#39;: False,
@@ -260,7 +252,7 @@ dataset_properties={
 ]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  21.197 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  21.556 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-extending-data-preprocessor-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_data_preprocessor.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>

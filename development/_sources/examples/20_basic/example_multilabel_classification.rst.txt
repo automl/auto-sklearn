@@ -66,7 +66,7 @@ Data Loading
     # More information on: https://scikit-learn.org/stable/modules/multiclass.html
     y[y == 'TRUE'] = 1
     y[y == 'FALSE'] = 0
-    y = y.astype(np.int)
+    y = y.astype(int)
 
     # Using type of target is a good way to make sure your data
     # is properly formatted
@@ -86,9 +86,6 @@ Data Loading
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/examples/20_basic/example_multilabel_classification.py:33: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
-    Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
-      y = y.astype(np.int)
     type_of_target=multilabel-indicator
 
 
@@ -157,7 +154,7 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight           type      cost  duration
     model_id                                                          
-    2            1              1.0  random_forest  0.447294  4.436343
+    2            1              1.0  random_forest  0.447294  4.533196
 
 
 
@@ -265,7 +262,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  16.045 seconds)
+   **Total running time of the script:** ( 0 minutes  16.172 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multilabel_classification.py:
