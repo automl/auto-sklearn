@@ -12,10 +12,7 @@ on:
 
   # When a push occurs on a PR that targets these branches
   pull_request:
-    branches:
-      - master
-      - development
-
+  workflow_dispatch:
   schedule:
     # Every day at 7AM UTC
     - cron: '0 07 * * *'
