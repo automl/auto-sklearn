@@ -3,6 +3,7 @@ name: Tests
 on:
   push:
   pull_request:
+  workflow_dispatch:
   schedule:
     # Every Monday at 7AM UTC
     - cron: '0 07 * * 1'
