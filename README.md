@@ -22,27 +22,6 @@ cls.fit(X_train, y_train)
 predictions = cls.predict(X_test)
 ```
 
-## Install from source
-
-Directly from a clone
-```bash
-git clone --recurse-submodules git@github.com:automl/auto-sklearn.git
-cd auto-sklearn
-
-pip install -e ".[test,doc,examples]"
-```
-
-Once in a branch
-```bash
-git clone git@github.com:automl/auto-sklearn.git
-cd auto-sklearn
-
-git checkout <branch>
-git submodule update --init --recursive
-
-pip install -e ".[test,doc,examples]"
-```
-
 ## Relevant publications
 
 If you use auto-sklearn in scientific publications, we would appreciate citations.
