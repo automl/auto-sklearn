@@ -7,7 +7,7 @@ include autosklearn/requirements.txt
 recursive-include autosklearn/metalearning/files *.arff *.csv *.txt
 recursive-include autosklearn/experimental *.json
 
-# Remove tests and workflow files from automl_common
+# Remove tests from automl_common
 prune autosklearn/automl_common/test
 
 # Include automl_common LICENSE and README
