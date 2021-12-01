@@ -19,17 +19,27 @@ class Rescaling(object):
     ) -> None:
         self.preprocessor: Optional[BaseEstimator] = None
 
-    def fit(self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
-            ) -> 'AutoSklearnPreprocessingAlgorithm':
+    def fit(
+        self,
+        X: PIPELINE_DATA_DTYPE,
+        y: Optional[PIPELINE_DATA_DTYPE] = None
+    ) -> 'AutoSklearnPreprocessingAlgorithm':
+
         if self.preprocessor is None:
             raise NotFittedError()
+
         self.preprocessor.fit(X)
+
         return self
 
     def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
+
         if self.preprocessor is None:
-            raise NotImplementedError()
-        return self.preprocessor.transform(X)
+            raise NotFittedError()
+
+        transformed_X = self.preprocessor.transform(X)
+
+        return transformed_X
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None

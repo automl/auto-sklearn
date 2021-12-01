@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 import copy
+import distro
 import io
 import json
 import platform
@@ -690,11 +691,10 @@ class AutoML(BaseEstimator):
         self._logger.debug('Starting to print environment information')
         self._logger.debug('  Python version: %s', sys.version.split('\n'))
         try:
-            self._logger.debug('  Distribution: %s', platform.linux_distribution())
+            self._logger.debug(f'\tDistribution: {distro.id()}-{distro.version()}-{distro.name()}')
         except AttributeError:
-            # platform.linux_distribution() was removed in Python3.8
-            # We should move to the distro package as soon as it supports Windows and OSX
             pass
+
         self._logger.debug('  System: %s', platform.system())
         self._logger.debug('  Machine: %s', platform.machine())
         self._logger.debug('  Platform: %s', platform.platform())

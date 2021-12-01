@@ -1,5 +1,6 @@
 setuptools
 typing_extensions
+distro
 
 numpy>=1.9.0
 scipy>=1.7.0

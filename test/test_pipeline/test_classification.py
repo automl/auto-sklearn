@@ -6,6 +6,7 @@ import tempfile
 import traceback
 import unittest
 import unittest.mock
+import warnings
 
 from joblib import Memory
 import numpy as np
@@ -17,6 +18,7 @@ import sklearn.model_selection
 import sklearn.ensemble
 import sklearn.svm
 from sklearn.utils.validation import check_is_fitted
+from sklearn.exceptions import ConvergenceWarning
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
@@ -30,6 +32,43 @@ import autosklearn.pipeline.components.feature_preprocessing as preprocessing_co
 from autosklearn.pipeline.util import get_dataset
 from autosklearn.pipeline.constants import \
     DENSE, SPARSE, UNSIGNED_DATA, PREDICTIONS, SIGNED_DATA, INPUT
+
+ignored_warnings = [
+    (
+        UserWarning, (  # From QuantileTransformer
+            r"n_quantiles \(\d+\) is greater than the total number of samples \(\d+\)\."
+            r" n_quantiles is set to n_samples\."
+        )
+    ),
+    (
+        UserWarning, (  # From FastICA
+            r"n_components is too large: it will be set to \d+"
+        )
+
+    ),
+    (
+        ConvergenceWarning, (  # From Liblinear
+            r"Liblinear failed to converge, increase the number of iterations\."
+        )
+    ),
+    (
+        ConvergenceWarning, (  # From SGD
+            r"Maximum number of iteration reached before convergence\. Consider increasing"
+            r" max_iter to improve the fit\."
+        )
+    ),
+    (
+        ConvergenceWarning, (  # From MLP
+            r"Stochastic Optimizer: Maximum iterations \(\d+\) reached and the"
+            r" optimization hasn't converged yet\."
+        )
+    ),
+    (
+        UserWarning, (  # From LDA (Linear Discriminant Analysis)
+            r"Variables are collinear"
+        )
+    ),
+]
 
 
 class DummyClassifier(AutoSklearnClassificationAlgorithm):
@@ -359,7 +398,11 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     check_is_fitted(step)
 
             try:
-                cls.fit(X_train, Y_train)
+                with warnings.catch_warnings():
+                    for category, message in ignored_warnings:
+                        warnings.filterwarnings('ignore', category=category, message=message)
+
+                    cls.fit(X_train, Y_train)
 
                 # After fit, all components should be tagged as fitted
                 # by sklearn. Check is fitted raises an exception if that

@@ -2,6 +2,8 @@ import unittest
 import numpy as np
 from scipy import sparse
 
+import pytest
+
 from autosklearn.pipeline.components.data_preprocessing.feature_type_categorical \
     import CategoricalPreprocessingPipeline
 
@@ -97,3 +99,11 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
         # Consistency check:
         Y2t = CPPL.transform(X)
         np.testing.assert_array_equal(Y1t, Y2t)
+
+    @pytest.mark.xfail(reason=(
+        "Encoding step does not support sparse matrices to convert negative labels to"
+        " positive ones as it does with non-sparse matrices"
+    ))
+    def test_transform_with_sparse_column_with_negative_labels(self):
+        X = sparse.csr_matrix([[0], [-1]])
+        CategoricalPreprocessingPipeline().fit_transform(X)
