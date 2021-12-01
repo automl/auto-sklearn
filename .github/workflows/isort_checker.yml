@@ -1,6 +1,6 @@
 name: black-format-check
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 env:
   #If STRICT is set to true, it will fail on black check fail
@@ -24,10 +24,8 @@ jobs:
 
     - name: Install black
       run: |
-        pip install black
+        pip install isort
 
-    - name: Run Black Check
+    - name: Run isort Check
       run: |
-        black --check --diff --line-length 100 ./autosklearn || ! $STRICT
-        black --check --diff --line-length 100 ./test || ! $STRICT
-        black --check --diff --line-length 100 ./examples|| ! $STRICT
+        isort --check-only autosklearn || ! $STRICT
