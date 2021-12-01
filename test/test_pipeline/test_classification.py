@@ -1,3 +1,5 @@
+from typing import Any, Dict, Union
+
 import copy
 import itertools
 import os
@@ -332,7 +334,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             True, True, True, True, True, True, False, False, False, True, True, True
         ]
         categorical = {
-            i: 'categorical' if is_cateorgical else 'numerical'
+            i: 'categorical' if is_categorical else 'numerical'
             for i, is_categorical in enumerate(categorical_columns)
         }
 
@@ -346,7 +348,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
         data = {'X_train': X_train, 'Y_train': Y_train, 'X_test': X_test, 'Y_test': Y_test}
 
-        init_params = { 'data_preprocessor:feat_type': categorical }
+        init_params = {'data_preprocessor:feat_type': categorical}
 
         self._test_configurations(configurations_space=cs, data=data, init_params=init_params)
 
@@ -389,7 +391,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             )
 
             init_args = ohe_mock.call_args[1]['init_params']
-            self.assertEqual(init_args, { 'feat_type': feat_types })
+            self.assertEqual(init_args, {'feat_type': feat_types})
 
     def _test_configurations(
         self,
@@ -464,10 +466,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     add_NaNs=True
                 )
             else:
-                X_train = data['X_train'].copy()
-                Y_train = data['Y_train'].copy()
-                X_test = data['X_test'].copy()
-                data['Y_test'].copy()
+                X_train = dataset['X_train'].copy()
+                Y_train = dataset['Y_train'].copy()
+                X_test = dataset['X_test'].copy()
+                dataset['Y_test'].copy()
 
             init_params_ = copy.deepcopy(init_params)
 
@@ -1060,7 +1062,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         Also considers random_state and ensures pipeline steps correctly recieve
         the right random_state
         """
-
+        random_state = 1
         all_combinations = list(itertools.product([True, False], repeat=4))
         for sparse, multilabel, signed, multiclass, in all_combinations:
             dataset_properties = {

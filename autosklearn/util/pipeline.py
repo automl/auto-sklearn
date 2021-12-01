@@ -1,9 +1,9 @@
 # -*- encoding: utf-8 -*-
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 
-from sklearn.pipeline import Pipeline
+import numpy as np
 
 from autosklearn.constants import (
     BINARY_CLASSIFICATION,
@@ -16,10 +16,7 @@ from autosklearn.pipeline.classification import SimpleClassificationPipeline
 from autosklearn.pipeline.regression import SimpleRegressionPipeline
 
 
-__all__ = [
-    'get_configuration_space',
-    'get_class',
-]
+__all__ = ['get_configuration_space']
 
 
 def get_configuration_space(
