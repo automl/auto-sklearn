@@ -37,7 +37,7 @@ from sklearn.utils.validation import check_is_fitted
 from sklearn.metrics._classification import type_of_target
 from sklearn.dummy import DummyClassifier, DummyRegressor
 
-from automl_common.common.utils.backend import Backend, create
+from autosklearn.automl_common.common.utils.backend import Backend, create
 
 from autosklearn.metrics import Scorer, default_metric_for_task
 from autosklearn.data.xy_data_manager import XYDataManager

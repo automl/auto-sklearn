@@ -1,7 +1,7 @@
 import os
 from typing import List, Tuple, Union
 
-from automl_common.common.utils.backend import Backend
+from autosklearn.automl_common.common.utils.backend import Backend
 
 import numpy as np
 

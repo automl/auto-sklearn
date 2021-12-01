@@ -24,8 +24,8 @@ from smac.optimizer.smbo import SMBO
 from smac.runhistory.runhistory import RunInfo, RunValue
 from smac.tae.base import StatusType
 
-from automl_common.common.utils.backend import Backend
-from automl_common.common.ensemble_building.abstract_ensemble import AbstractEnsemble
+from autosklearn.automl_common.common.utils.backend import Backend
+from autosklearn.automl_common.common.ensemble_building.abstract_ensemble import AbstractEnsemble
 
 from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.metrics import calculate_score, calculate_loss, Scorer

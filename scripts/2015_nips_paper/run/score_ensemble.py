@@ -10,7 +10,7 @@ import numpy as np
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.metrics import balanced_accuracy
 
-from automl_common.common.utils.backend import create
+from autosklearn.automl_common.common.utils.backend import create
 
 
 def _load_file(f):

@@ -17,7 +17,7 @@ from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit, KFold,
     StratifiedKFold, train_test_split, BaseCrossValidator, PredefinedSplit
 from sklearn.model_selection._split import _RepeatedSplits, BaseShuffleSplit
 
-from automl_common.common.utils.backend import Backend
+from autosklearn.automl_common.common.utils.backend import Backend
 
 from autosklearn.evaluation.abstract_evaluator import (
     AbstractEvaluator,
