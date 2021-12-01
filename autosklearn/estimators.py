@@ -108,7 +108,7 @@ class AutoSklearnEstimator(BaseEstimator):
         include : Optional[Dict[str, List[str]]] = None
             If None, all possible algorithms are used.
 
-            Otherwise, specifies a step and the components that are available to be used.
+            Otherwise, specifies a step and the components that are included in search.
             See ``/pipeline/components/<step>/*`` for available components.
 
             Incompatible with parameter ``exclude``.
@@ -133,7 +133,7 @@ class AutoSklearnEstimator(BaseEstimator):
         exclude : Optional[Dict[str, List[str]]] = None
             If None, all possible algorithms are used.
 
-            Otherwise, specifies a step and the components that are available to be used.
+            Otherwise, specifies a step and the components that are excluded from search.
             See ``/pipeline/components/<step>/*`` for available components.
 
             Incompatible with parameter ``include``.
