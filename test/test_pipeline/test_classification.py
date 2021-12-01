@@ -270,7 +270,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
         pipeline = SimpleClassificationPipeline(dataset_properties={"multilabel": True})
         cs = pipeline.get_hyperparameter_search_space()
-        self._test_configurations(configurations_space=cs, data=data)
+        self._test_configurations(configurations_space=cs, dataset=data)
 
     def test_configurations(self):
         """Tests a non-seeded random set of configurations with default dataset properties
@@ -350,7 +350,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
         init_params = {'data_preprocessor:feat_type': categorical}
 
-        self._test_configurations(configurations_space=cs, data=data, init_params=init_params)
+        self._test_configurations(configurations_space=cs, dataset=data, init_params=init_params)
 
     @unittest.mock.patch('autosklearn.pipeline.components.data_preprocessing'
                          '.DataPreprocessorChoice.set_hyperparameters')
@@ -455,7 +455,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
             config._values.update({
                 param: value
-                for param, value in restrictions
+                for param, value in restrictions.items()
                 if param in config and config[param] is not None
             })
 
