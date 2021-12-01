@@ -168,9 +168,10 @@ to download the full example code or to run this example in your browser via Bin
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight              type          cost  duration
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight              type      cost  duration
 model_id
-16           1              1.0  gaussian_process  2.167045e-07  4.291291
+21           1             0.92  gaussian_process  0.000021  8.889246
+14           2             0.08  gaussian_process  0.000043  3.829112
 </pre></div>
 </div>
 </div>
@@ -180,7 +181,14 @@ model_id
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(1.000000, SimpleRegressionPipeline({&#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;feature_agglomeration&#39;, &#39;regressor:__choice__&#39;: &#39;gaussian_process&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:feature_agglomeration:affinity&#39;: &#39;manhattan&#39;, &#39;feature_preprocessor:feature_agglomeration:linkage&#39;: &#39;complete&#39;, &#39;feature_preprocessor:feature_agglomeration:n_clusters&#39;: 175, &#39;feature_preprocessor:feature_agglomeration:pooling_func&#39;: &#39;mean&#39;, &#39;regressor:gaussian_process:alpha&#39;: 5.8017613084341367e-11, &#39;regressor:gaussian_process:thetaL&#39;: 0.00022144801244085836, &#39;regressor:gaussian_process:thetaU&#39;: 25.49370111331582, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01929659491674654},
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(0.920000, SimpleRegressionPipeline({&#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;feature_agglomeration&#39;, &#39;regressor:__choice__&#39;: &#39;gaussian_process&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;power_transformer&#39;, &#39;feature_preprocessor:feature_agglomeration:affinity&#39;: &#39;manhattan&#39;, &#39;feature_preprocessor:feature_agglomeration:linkage&#39;: &#39;average&#39;, &#39;feature_preprocessor:feature_agglomeration:n_clusters&#39;: 270, &#39;feature_preprocessor:feature_agglomeration:pooling_func&#39;: &#39;mean&#39;, &#39;regressor:gaussian_process:alpha&#39;: 6.433108064273108e-10, &#39;regressor:gaussian_process:thetaL&#39;: 6.101635772515074e-09, &#39;regressor:gaussian_process:thetaU&#39;: 4781.053002384995, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.005333380048794037},
+dataset_properties={
+  &#39;task&#39;: 5,
+  &#39;sparse&#39;: False,
+  &#39;multioutput&#39;: True,
+  &#39;target_type&#39;: &#39;regression&#39;,
+  &#39;signed&#39;: False})),
+(0.080000, SimpleRegressionPipeline({&#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;feature_agglomeration&#39;, &#39;regressor:__choice__&#39;: &#39;gaussian_process&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;power_transformer&#39;, &#39;feature_preprocessor:feature_agglomeration:affinity&#39;: &#39;manhattan&#39;, &#39;feature_preprocessor:feature_agglomeration:linkage&#39;: &#39;average&#39;, &#39;feature_preprocessor:feature_agglomeration:n_clusters&#39;: 365, &#39;feature_preprocessor:feature_agglomeration:pooling_func&#39;: &#39;mean&#39;, &#39;regressor:gaussian_process:alpha&#39;: 0.0001892420474677165, &#39;regressor:gaussian_process:thetaL&#39;: 1.7549152191973897e-09, &#39;regressor:gaussian_process:thetaU&#39;: 2227.384462976473},
 dataset_properties={
   &#39;task&#39;: 5,
   &#39;sparse&#39;: False,
@@ -198,7 +206,7 @@ dataset_properties={
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.9999998605259209
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.999975860673032
 </pre></div>
 </div>
 </div>
@@ -399,7 +407,7 @@ dataset_properties={
     (Forbidden: regressor:__choice__ == &#39;random_forest&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  57.398 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  5.696 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-20-basic-example-multioutput-regression-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/20_basic/example_multioutput_regression.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo.svg" width="150px" /></a>

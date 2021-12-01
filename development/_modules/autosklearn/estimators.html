@@ -146,8 +146,8 @@
         <span class="n">max_models_on_disc</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
         <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">memory_limit</span><span class="o">=</span><span class="mi">3072</span><span class="p">,</span>
-        <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">include</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">exclude</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">resampling_strategy</span><span class="o">=</span><span class="s1">&#39;holdout&#39;</span><span class="p">,</span>
         <span class="n">resampling_strategy_arguments</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">tmp_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -209,24 +209,63 @@
 <span class="sd">            Memory limit in MB for the machine learning algorithm.</span>
 <span class="sd">            `auto-sklearn` will stop fitting the machine learning algorithm if</span>
 <span class="sd">            it tries to allocate more than ``memory_limit`` MB.</span>
-<span class="sd">            </span>
-<span class="sd">            **Important notes:** </span>
-<span class="sd">            </span>
+
+<span class="sd">            **Important notes:**</span>
+
 <span class="sd">            * If ``None`` is provided, no memory limit is set.</span>
-<span class="sd">            * In case of multi-processing, ``memory_limit`` will be *per job*, so the total usage is </span>
+<span class="sd">            * In case of multi-processing, ``memory_limit`` will be *per job*, so the total usage is</span>
 <span class="sd">              ``n_jobs x memory_limit``.</span>
 <span class="sd">            * The memory limit also applies to the ensemble creation process.</span>
 
-<span class="sd">        include : dict, optional (None)</span>
-<span class="sd">            If None, all possible algorithms are used. Otherwise specifies</span>
-<span class="sd">            set of algorithms for each added component is used. Include and </span>
-<span class="sd">            exclude are incompatible if used together on the same component</span>
+<span class="sd">        include : Optional[Dict[str, List[str]]] = None</span>
+<span class="sd">            If None, all possible algorithms are used.</span>
 
-<span class="sd">        exclude : dict, optional (None)</span>
-<span class="sd">            If None, all possible algorithms are used. Otherwise specifies</span>
-<span class="sd">            set of algorithms for each added component is not used.</span>
-<span class="sd">            Incompatible with include. Include and exclude are incompatible</span>
-<span class="sd">            if used together on the same component</span>
+<span class="sd">            Otherwise, specifies a step and the components that are included in search.</span>
+<span class="sd">            See ``/pipeline/components/&lt;step&gt;/*`` for available components.</span>
+
+<span class="sd">            Incompatible with parameter ``exclude``.</span>
+
+<span class="sd">            **Possible Steps**:</span>
+
+<span class="sd">            * ``&quot;data_preprocessor&quot;``</span>
+<span class="sd">            * ``&quot;balancing&quot;``</span>
+<span class="sd">            * ``&quot;feature_preprocessor&quot;``</span>
+<span class="sd">            * ``&quot;classifier&quot;`` - Only for when when using ``AutoSklearnClasssifier``</span>
+<span class="sd">            * ``&quot;regressor&quot;`` - Only for when when using ``AutoSklearnRegressor``</span>
+
+<span class="sd">            **Example**:</span>
+
+<span class="sd">            .. code-block:: python</span>
+
+<span class="sd">                include = {</span>
+<span class="sd">                    &#39;classifier&#39;: [&quot;random_forest&quot;],</span>
+<span class="sd">                    &#39;feature_preprocessor&#39;: [&quot;no_preprocessing&quot;]</span>
+<span class="sd">                }</span>
+
+<span class="sd">        exclude : Optional[Dict[str, List[str]]] = None</span>
+<span class="sd">            If None, all possible algorithms are used.</span>
+
+<span class="sd">            Otherwise, specifies a step and the components that are excluded from search.</span>
+<span class="sd">            See ``/pipeline/components/&lt;step&gt;/*`` for available components.</span>
+
+<span class="sd">            Incompatible with parameter ``include``.</span>
+
+<span class="sd">            **Possible Steps**:</span>
+
+<span class="sd">            * ``&quot;data_preprocessor&quot;``</span>
+<span class="sd">            * ``&quot;balancing&quot;``</span>
+<span class="sd">            * ``&quot;feature_preprocessor&quot;``</span>
+<span class="sd">            * ``&quot;classifier&quot;`` - Only for when when using ``AutoSklearnClasssifier``</span>
+<span class="sd">            * ``&quot;regressor&quot;`` - Only for when when using ``AutoSklearnRegressor``</span>
+
+<span class="sd">            **Example**:</span>
+
+<span class="sd">            .. code-block:: python</span>
+
+<span class="sd">                exclude = {</span>
+<span class="sd">                    &#39;classifier&#39;: [&quot;random_forest&quot;],</span>
+<span class="sd">                    &#39;feature_preprocessor&#39;: [&quot;no_preprocessing&quot;]</span>
+<span class="sd">                }</span>
 
 <span class="sd">        resampling_strategy : string or object, optional (&#39;holdout&#39;)</span>
 <span class="sd">            how to to handle overfitting, might need &#39;resampling_strategy_arguments&#39;</span>

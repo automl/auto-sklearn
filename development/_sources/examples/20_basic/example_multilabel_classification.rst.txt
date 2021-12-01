@@ -154,7 +154,7 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight           type      cost  duration
     model_id                                                          
-    2            1              1.0  random_forest  0.447294  3.559042
+    2            1              1.0  random_forest  0.447294  4.090744
 
 
 
@@ -262,7 +262,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  17.360 seconds)
+   **Total running time of the script:** ( 0 minutes  16.527 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multilabel_classification.py:
