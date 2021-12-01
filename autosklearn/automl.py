@@ -1849,8 +1849,8 @@ class AutoML(BaseEstimator):
         tmp_dir,
         backend,
         datamanager,
-        include: Optional[Dict[str, List[str]] = None,
-        exclude: Optional[Dict[str, List[str]] = None,
+        include: Optional[Dict[str, List[str]]] = None,
+        exclude: Optional[Dict[str, List[str]]] = None,
     ):
         task_name = 'CreateConfigSpace'
 

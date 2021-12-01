@@ -1,3 +1,4 @@
+from typing import Dict, List, Optional
 import copy
 import json
 import logging
@@ -231,8 +232,8 @@ class AutoMLSMBO(object):
                  metadata_directory=None,
                  resampling_strategy='holdout',
                  resampling_strategy_args=None,
-                 include: Optional[Dict[str, List[str]] = None,
-                 exclude: Optional[Dict[str, List[str]] = None,
+                 include: Optional[Dict[str, List[str]]] = None,
+                 exclude: Optional[Dict[str, List[str]]] = None,
                  disable_file_output=False,
                  smac_scenario_args=None,
                  get_smac_object_callback=None,
