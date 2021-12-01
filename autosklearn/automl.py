@@ -172,8 +172,8 @@ class AutoML(BaseEstimator):
                  memory_limit=3072,
                  metadata_directory=None,
                  debug_mode=False,
-                 include=None,
-                 exclude=None,
+                 include: Optional[Dict[str, List[str]]] = None,
+                 exclude: Optional[Dict[str, List[str]]] = None,
                  resampling_strategy='holdout-iterative-fit',
                  resampling_strategy_arguments=None,
                  n_jobs=None,
@@ -1844,10 +1844,14 @@ class AutoML(BaseEstimator):
 
             return sio.getvalue()
 
-    def _create_search_space(self, tmp_dir, backend, datamanager,
-                             include=None,
-                             exclude=None,
-                             ):
+    def _create_search_space(
+        self,
+        tmp_dir,
+        backend,
+        datamanager,
+        include: Optional[Dict[str, List[str]] = None,
+        exclude: Optional[Dict[str, List[str]] = None,
+    ):
         task_name = 'CreateConfigSpace'
 
         self._stopwatch.start_task(task_name)
