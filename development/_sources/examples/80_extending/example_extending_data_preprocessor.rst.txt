@@ -156,7 +156,7 @@ Fit the model without performing data preprocessing
  .. code-block:: none
 
     auto-sklearn results:
-      Dataset name: d6427c22-5285-11ec-86ca-a3e198c0a758
+      Dataset name: 5b0d6475-528c-11ec-86d4-2b2480b2c6be
       Metric: accuracy
       Best validation score: 0.950355
       Number of target algorithm runs: 5
@@ -192,8 +192,8 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    accuracy:  0.958041958041958
-    [(0.380000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'passive_aggressive', 'data_preprocessor:__choice__': 'NoPreprocessing', 'feature_preprocessor:__choice__': 'kernel_pca', 'classifier:passive_aggressive:C': 7.328568999403367e-05, 'classifier:passive_aggressive:average': 'False', 'classifier:passive_aggressive:fit_intercept': 'True', 'classifier:passive_aggressive:loss': 'hinge', 'classifier:passive_aggressive:tol': 0.02258105767523384, 'feature_preprocessor:kernel_pca:kernel': 'cosine', 'feature_preprocessor:kernel_pca:n_components': 503},
+    accuracy:  0.965034965034965
+    [(0.840000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'passive_aggressive', 'data_preprocessor:__choice__': 'NoPreprocessing', 'feature_preprocessor:__choice__': 'kernel_pca', 'classifier:passive_aggressive:C': 7.328568999403367e-05, 'classifier:passive_aggressive:average': 'False', 'classifier:passive_aggressive:fit_intercept': 'True', 'classifier:passive_aggressive:loss': 'hinge', 'classifier:passive_aggressive:tol': 0.02258105767523384, 'feature_preprocessor:kernel_pca:kernel': 'cosine', 'feature_preprocessor:kernel_pca:n_components': 503},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -201,7 +201,7 @@ Print prediction score and statistics
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.360000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessor:__choice__': 'NoPreprocessing', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0},
+    (0.120000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessor:__choice__': 'NoPreprocessing', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -209,15 +209,7 @@ Print prediction score and statistics
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.200000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'lda', 'data_preprocessor:__choice__': 'NoPreprocessing', 'feature_preprocessor:__choice__': 'select_rates_classification', 'classifier:lda:shrinkage': 'auto', 'classifier:lda:tol': 0.00010495766342828794, 'feature_preprocessor:select_rates_classification:alpha': 0.4886183647550176, 'feature_preprocessor:select_rates_classification:score_func': 'mutual_info_classif'},
-    dataset_properties={
-      'task': 1,
-      'sparse': False,
-      'multilabel': False,
-      'multiclass': False,
-      'target_type': 'classification',
-      'signed': False})),
-    (0.060000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'adaboost', 'data_preprocessor:__choice__': 'NoPreprocessing', 'feature_preprocessor:__choice__': 'liblinear_svc_preprocessor', 'classifier:adaboost:algorithm': 'SAMME.R', 'classifier:adaboost:learning_rate': 1.077525751047041, 'classifier:adaboost:max_depth': 9, 'classifier:adaboost:n_estimators': 208, 'feature_preprocessor:liblinear_svc_preprocessor:C': 1202.4376014010597, 'feature_preprocessor:liblinear_svc_preprocessor:dual': 'False', 'feature_preprocessor:liblinear_svc_preprocessor:fit_intercept': 'True', 'feature_preprocessor:liblinear_svc_preprocessor:intercept_scaling': 1, 'feature_preprocessor:liblinear_svc_preprocessor:loss': 'squared_hinge', 'feature_preprocessor:liblinear_svc_preprocessor:multi_class': 'ovr', 'feature_preprocessor:liblinear_svc_preprocessor:penalty': 'l1', 'feature_preprocessor:liblinear_svc_preprocessor:tol': 8.931650858806469e-05},
+    (0.040000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'adaboost', 'data_preprocessor:__choice__': 'NoPreprocessing', 'feature_preprocessor:__choice__': 'liblinear_svc_preprocessor', 'classifier:adaboost:algorithm': 'SAMME.R', 'classifier:adaboost:learning_rate': 1.077525751047041, 'classifier:adaboost:max_depth': 9, 'classifier:adaboost:n_estimators': 208, 'feature_preprocessor:liblinear_svc_preprocessor:C': 1202.4376014010597, 'feature_preprocessor:liblinear_svc_preprocessor:dual': 'False', 'feature_preprocessor:liblinear_svc_preprocessor:fit_intercept': 'True', 'feature_preprocessor:liblinear_svc_preprocessor:intercept_scaling': 1, 'feature_preprocessor:liblinear_svc_preprocessor:loss': 'squared_hinge', 'feature_preprocessor:liblinear_svc_preprocessor:multi_class': 'ovr', 'feature_preprocessor:liblinear_svc_preprocessor:penalty': 'l1', 'feature_preprocessor:liblinear_svc_preprocessor:tol': 8.931650858806469e-05},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -233,7 +225,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  28.366 seconds)
+   **Total running time of the script:** ( 0 minutes  18.512 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_data_preprocessor.py:

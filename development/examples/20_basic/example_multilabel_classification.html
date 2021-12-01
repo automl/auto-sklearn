@@ -151,7 +151,7 @@ problem. Details on multilabel classification can be found
 <span class="c1"># More information on: https://scikit-learn.org/stable/modules/multiclass.html</span>
 <span class="n">y</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="s1">&#39;TRUE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">y</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="s1">&#39;FALSE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
 <span class="c1"># Using type of target is a good way to make sure your data</span>
 <span class="c1"># is properly formatted</span>
@@ -163,10 +163,7 @@ problem. Details on multilabel classification can be found
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/examples/20_basic/example_multilabel_classification.py:33: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
-Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
-  y = y.astype(np.int)
-type_of_target=multilabel-indicator
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>type_of_target=multilabel-indicator
 </pre></div>
 </div>
 </div>
@@ -199,7 +196,7 @@ type_of_target=multilabel-indicator
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight           type      cost  duration
 model_id
-2            1              1.0  random_forest  0.447294  4.309669
+2            1              1.0  random_forest  0.447294  3.559042
 </pre></div>
 </div>
 </div>
@@ -251,7 +248,7 @@ dataset_properties={
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score 0.604
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  19.348 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  17.360 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-20-basic-example-multilabel-classification-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/20_basic/example_multilabel_classification.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo.svg" width="150px" /></a>
