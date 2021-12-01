@@ -34,8 +34,8 @@ class AutoSklearnEstimator(BaseEstimator):
         max_models_on_disc=50,
         seed=1,
         memory_limit=3072,
-        include=None,
-        exclude=None,
+        include: Optional[Dict[str, List[str]]] = None,
+        exclude: Optional[Dict[str, List[str]]] = None,
         resampling_strategy='holdout',
         resampling_strategy_arguments=None,
         tmp_folder=None,
@@ -97,24 +97,63 @@ class AutoSklearnEstimator(BaseEstimator):
             Memory limit in MB for the machine learning algorithm.
             `auto-sklearn` will stop fitting the machine learning algorithm if
             it tries to allocate more than ``memory_limit`` MB.
-            
-            **Important notes:** 
-            
+
+            **Important notes:**
+
             * If ``None`` is provided, no memory limit is set.
-            * In case of multi-processing, ``memory_limit`` will be *per job*, so the total usage is 
+            * In case of multi-processing, ``memory_limit`` will be *per job*, so the total usage is
               ``n_jobs x memory_limit``.
             * The memory limit also applies to the ensemble creation process.
 
-        include : dict, optional (None)
-            If None, all possible algorithms are used. Otherwise specifies
-            set of algorithms for each added component is used. Include and 
-            exclude are incompatible if used together on the same component
+        include : Optional[Dict[str, List[str]]] = None
+            If None, all possible algorithms are used.
 
-        exclude : dict, optional (None)
-            If None, all possible algorithms are used. Otherwise specifies
-            set of algorithms for each added component is not used.
-            Incompatible with include. Include and exclude are incompatible
-            if used together on the same component
+            Otherwise, specifies a step and the components that are included in search.
+            See ``/pipeline/components/<step>/*`` for available components.
+
+            Incompatible with parameter ``exclude``.
+
+            **Possible Steps**:
+
+            * ``"data_preprocessor"``
+            * ``"balancing"``
+            * ``"feature_preprocessor"``
+            * ``"classifier"`` - Only for when when using ``AutoSklearnClasssifier``
+            * ``"regressor"`` - Only for when when using ``AutoSklearnRegressor``
+
+            **Example**:
+
+            .. code-block:: python
+
+                include = {
+                    'classifier': ["random_forest"],
+                    'feature_preprocessor': ["no_preprocessing"]
+                }
+
+        exclude : Optional[Dict[str, List[str]]] = None
+            If None, all possible algorithms are used.
+
+            Otherwise, specifies a step and the components that are excluded from search.
+            See ``/pipeline/components/<step>/*`` for available components.
+
+            Incompatible with parameter ``include``.
+
+            **Possible Steps**:
+
+            * ``"data_preprocessor"``
+            * ``"balancing"``
+            * ``"feature_preprocessor"``
+            * ``"classifier"`` - Only for when when using ``AutoSklearnClasssifier``
+            * ``"regressor"`` - Only for when when using ``AutoSklearnRegressor``
+
+            **Example**:
+
+            .. code-block:: python
+
+                exclude = {
+                    'classifier': ["random_forest"],
+                    'feature_preprocessor': ["no_preprocessing"]
+                }
 
         resampling_strategy : string or object, optional ('holdout')
             how to to handle overfitting, might need 'resampling_strategy_arguments'
