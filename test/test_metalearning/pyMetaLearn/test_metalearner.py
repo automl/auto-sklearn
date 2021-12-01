@@ -23,9 +23,7 @@ class MetaLearnerTest(unittest.TestCase):
         data_dir = os.path.join(data_dir, 'test_meta_base_data')
         os.chdir(data_dir)
 
-        pipeline = autosklearn.pipeline.classification.SimpleClassificationPipeline(
-            random_state=1
-        )
+        pipeline = autosklearn.pipeline.classification.SimpleClassificationPipeline()
         self.cs = pipeline.get_hyperparameter_search_space()
 
         self.logger = logging.getLogger()
