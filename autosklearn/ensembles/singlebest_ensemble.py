@@ -1,12 +1,11 @@
 import os
 from typing import List, Tuple, Union
 
-from autosklearn.automl_common.common.utils.backend import Backend
-
 import numpy as np
 
 from smac.runhistory.runhistory import RunHistory
 
+from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.metrics import Scorer
 from autosklearn.pipeline.base import BasePipeline
