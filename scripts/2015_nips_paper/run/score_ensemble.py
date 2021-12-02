@@ -106,6 +106,7 @@ def main(input_directories, output_file, task_id, seed, ensemble_size, n_jobs=1)
         temporary_directory=input_directory,
         output_directory=input_directory + "_output",
         delete_tmp_folder_after_terminate=False,
+        prefix="auto-sklearn"
     )
     valid_labels = backend.load_targets_ensemble()
     score = balanced_accuracy
