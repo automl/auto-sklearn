@@ -45,6 +45,7 @@ Following that we'll tell you about how you can test your changes locally and th
 
     # If you missed the --recurse-submodules arg during clone or need to install the
     # submodule manually, then execute the following line:
+    #
     # git submodule udate --init --recursive
 
     # ... Alternatively, if you would prefer a more manual method
@@ -57,7 +58,10 @@ Following that we'll tell you about how you can test your changes locally and th
     # Create a new branch based on the currently active branch
     git checkout -b my_new_branch
 
-    git submodule udate --init --recursive  # If you missed the --recurse-submodules arg
+    # If you missed the --recurse-submodules arg during clone or need to install the
+    # submodule manually, then execute the following line:
+    #
+    # git submodule udate --init --recursive
     ```
 
     The reason to create a new branch is two fold:
@@ -343,7 +347,7 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     cd auto-sklearn
     git checkout -b my_new_branch development
 
-    # Initaize autosklearn/automl_common submodule
+    # Initialize autosklearn/automl_common submodule
     git submodule update --init --recursive
 
     # Create a virtual environment and activate it so there are no package
