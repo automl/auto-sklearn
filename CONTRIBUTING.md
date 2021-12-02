@@ -42,8 +42,10 @@ Following that we'll tell you about how you can test your changes locally and th
 
     # Create a new branch based off the development one
     git checkout -b my_new_branch development
-    
-    git submodule udate --init --recursive  # If you missed the --recurse-submodules arg
+
+    # If you missed the --recurse-submodules arg during clone or need to install the
+    # submodule manually, then execute the following line:
+    # git submodule udate --init --recursive
 
     # ... Alternatively, if you would prefer a more manual method
     # Show all the available branches with a * beside your current one
