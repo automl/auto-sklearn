@@ -9,6 +9,7 @@ recursive-include autosklearn/experimental *.json
 
 # Remove tests from automl_common
 prune autosklearn/automl_common/test
+exclude autosklearn/automl_common/setup.py
 
 # Include automl_common LICENSE and README
 include autosklearn/automl_common/LICENSE
