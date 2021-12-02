@@ -2,7 +2,6 @@ include LICENSE.txt
 include requirements.txt
 include autosklearn/util/logging.yaml
 include autosklearn/requirements.txt
-include autosklearn/py.typed
 
 # Meta-data
 recursive-include autosklearn/metalearning/files *.arff *.csv *.txt
