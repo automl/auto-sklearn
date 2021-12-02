@@ -113,6 +113,7 @@
 <li><a class="reference internal" href="#conda-forge">Conda-forge</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#source-installation">Source Installation</a></li>
 <li><a class="reference internal" href="#windows-osx-compatibility">Windows/OSX compatibility</a><ul>
 <li><a class="reference internal" href="#windows">Windows</a></li>
 <li><a class="reference internal" href="#mac-osx">Mac OSX</a></li>
@@ -199,6 +200,26 @@ conda config --set channel_priority strict
 <a class="reference external" href="https://github.com/conda-forge/auto-sklearn-feedstock">auto sklearn feedstock</a>.</p>
 <p>for more information about Conda forge check
 <a class="reference external" href="https://conda-forge.org/docs/">conda-forge documentations</a>.</p>
+</div>
+</div>
+<div class="section" id="source-installation">
+<h2>Source Installation<a class="headerlink" href="#source-installation" title="Permalink to this headline">¶</a></h2>
+<p>You can install auto-sklearn directly form source by following the below:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone --recurse-submodules git@github.com:automl/auto-sklearn.git
+<span class="nb">cd</span> auto-sklearn
+
+<span class="c1"># Install it in editable mode with all optional dependencies</span>
+pip install -e <span class="s2">&quot;.[test,doc,examples]&quot;</span>
+</pre></div>
+</div>
+<p>We use submodules so you will have to make sure the submodule is initialized if you
+missed the <cite>–recurse-submodules</cite> option.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone git@github.com:automl/auto-sklearn.git
+<span class="nb">cd</span> auto-sklearn
+git submodule update --init --recursive
+
+pip install -e <span class="s2">&quot;.[test,doc,examples]&quot;</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="windows-osx-compatibility">
