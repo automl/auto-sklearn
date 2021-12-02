@@ -162,15 +162,15 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             self.assertIn(AutoSklearnPreprocessingAlgorithm, preprocessors[key].__bases__)
 
     def test_default_configuration(self):
-        """Test that non-seeded SimpleClassificaitonPipeline returns good results on iris
+        """Test that seeded SimpleClassificaitonPipeline returns good results on iris
 
         Expects
         -------
-        * The performance of a random configuration gets above 96% accuracy on iris
+        * The performance of configuration with fixed seed gets above 96% accuracy on iris
         """
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris')
 
-        auto = SimpleClassificationPipeline()
+        auto = SimpleClassificationPipeline(random_state=1)
 
         auto = auto.fit(X_train, Y_train)
         predictions = auto.predict(X_test)
