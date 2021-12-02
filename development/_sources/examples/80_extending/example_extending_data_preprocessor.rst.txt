@@ -156,9 +156,9 @@ Fit the model without performing data preprocessing
  .. code-block:: none
 
     auto-sklearn results:
-      Dataset name: 691c2910-52d1-11ec-8666-df5fc576be95
+      Dataset name: 60acf899-536d-11ec-864c-bf61093ad6e7
       Metric: accuracy
-      Best validation score: 0.950355
+      Best validation score: 0.957447
       Number of target algorithm runs: 5
       Number of successful target algorithm runs: 5
       Number of crashed target algorithm runs: 0
@@ -192,8 +192,8 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    accuracy:  0.958041958041958
-    [(0.800000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'passive_aggressive', 'data_preprocessor:__choice__': 'NoPreprocessing', 'feature_preprocessor:__choice__': 'kernel_pca', 'classifier:passive_aggressive:C': 7.328568999403367e-05, 'classifier:passive_aggressive:average': 'False', 'classifier:passive_aggressive:fit_intercept': 'True', 'classifier:passive_aggressive:loss': 'hinge', 'classifier:passive_aggressive:tol': 0.02258105767523384, 'feature_preprocessor:kernel_pca:kernel': 'cosine', 'feature_preprocessor:kernel_pca:n_components': 503},
+    accuracy:  0.965034965034965
+    [(0.860000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'passive_aggressive', 'data_preprocessor:__choice__': 'NoPreprocessing', 'feature_preprocessor:__choice__': 'kernel_pca', 'classifier:passive_aggressive:C': 7.328568999403367e-05, 'classifier:passive_aggressive:average': 'False', 'classifier:passive_aggressive:fit_intercept': 'True', 'classifier:passive_aggressive:loss': 'hinge', 'classifier:passive_aggressive:tol': 0.02258105767523384, 'feature_preprocessor:kernel_pca:kernel': 'cosine', 'feature_preprocessor:kernel_pca:n_components': 503},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -201,7 +201,7 @@ Print prediction score and statistics
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.100000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessor:__choice__': 'NoPreprocessing', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0},
+    (0.060000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessor:__choice__': 'NoPreprocessing', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -209,7 +209,7 @@ Print prediction score and statistics
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.060000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'adaboost', 'data_preprocessor:__choice__': 'NoPreprocessing', 'feature_preprocessor:__choice__': 'liblinear_svc_preprocessor', 'classifier:adaboost:algorithm': 'SAMME.R', 'classifier:adaboost:learning_rate': 1.077525751047041, 'classifier:adaboost:max_depth': 9, 'classifier:adaboost:n_estimators': 208, 'feature_preprocessor:liblinear_svc_preprocessor:C': 1202.4376014010597, 'feature_preprocessor:liblinear_svc_preprocessor:dual': 'False', 'feature_preprocessor:liblinear_svc_preprocessor:fit_intercept': 'True', 'feature_preprocessor:liblinear_svc_preprocessor:intercept_scaling': 1, 'feature_preprocessor:liblinear_svc_preprocessor:loss': 'squared_hinge', 'feature_preprocessor:liblinear_svc_preprocessor:multi_class': 'ovr', 'feature_preprocessor:liblinear_svc_preprocessor:penalty': 'l1', 'feature_preprocessor:liblinear_svc_preprocessor:tol': 8.931650858806469e-05},
+    (0.060000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'lda', 'data_preprocessor:__choice__': 'NoPreprocessing', 'feature_preprocessor:__choice__': 'select_rates_classification', 'classifier:lda:shrinkage': 'auto', 'classifier:lda:tol': 0.00010495766342828794, 'feature_preprocessor:select_rates_classification:alpha': 0.4886183647550176, 'feature_preprocessor:select_rates_classification:score_func': 'mutual_info_classif'},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -217,7 +217,7 @@ Print prediction score and statistics
       'multiclass': False,
       'target_type': 'classification',
       'signed': False})),
-    (0.040000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'lda', 'data_preprocessor:__choice__': 'NoPreprocessing', 'feature_preprocessor:__choice__': 'select_rates_classification', 'classifier:lda:shrinkage': 'auto', 'classifier:lda:tol': 0.00010495766342828794, 'feature_preprocessor:select_rates_classification:alpha': 0.4886183647550176, 'feature_preprocessor:select_rates_classification:score_func': 'mutual_info_classif'},
+    (0.020000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'libsvm_svc', 'data_preprocessor:__choice__': 'NoPreprocessing', 'feature_preprocessor:__choice__': 'polynomial', 'classifier:libsvm_svc:C': 5.6217653025966605, 'classifier:libsvm_svc:gamma': 0.00016239358614064282, 'classifier:libsvm_svc:kernel': 'poly', 'classifier:libsvm_svc:max_iter': -1, 'classifier:libsvm_svc:shrinking': 'True', 'classifier:libsvm_svc:tol': 0.0001346237047084913, 'feature_preprocessor:polynomial:degree': 2, 'feature_preprocessor:polynomial:include_bias': 'True', 'feature_preprocessor:polynomial:interaction_only': 'False', 'classifier:libsvm_svc:coef0': -0.011192631375838147, 'classifier:libsvm_svc:degree': 5},
     dataset_properties={
       'task': 1,
       'sparse': False,
@@ -233,7 +233,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  19.171 seconds)
+   **Total running time of the script:** ( 0 minutes  20.335 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_data_preprocessor.py:

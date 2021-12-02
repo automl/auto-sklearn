@@ -201,7 +201,7 @@ First example: Use predefined accuracy metric
 
     ################################################################################
     Use predefined accuracy metric
-    Accuracy score 0.944 using accuracy
+    Accuracy score 0.951 using accuracy
 
 
 
@@ -301,15 +301,15 @@ Third example: Use own error metric
 
     ################################################################################
     Use self defined error metric
-    [WARNING] [2021-12-01 17:53:15,724:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2021-12-01 17:53:16,864:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2021-12-01 17:53:20,824:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2021-12-01 17:53:21,830:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2021-12-01 17:53:23,007:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2021-12-01 17:53:27,966:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2021-12-01 17:53:30,254:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2021-12-01 17:53:35,194:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2021-12-01 17:53:40,492:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2021-12-02 12:29:56,220:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2021-12-02 12:29:57,455:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2021-12-02 12:30:01,759:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2021-12-02 12:30:02,868:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2021-12-02 12:30:04,186:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2021-12-02 12:30:09,546:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2021-12-02 12:30:11,854:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2021-12-02 12:30:17,142:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2021-12-02 12:30:22,779:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
     Error score -0.056 using error
 
 
@@ -411,17 +411,17 @@ Fifth example: Use own accuracy metric with additional argument
 
     ################################################################################
     Use self defined error with additional argument
-    [WARNING] [2021-12-01 17:54:57,285:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2021-12-01 17:55:01,787:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2021-12-01 17:55:14,602:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2021-12-01 17:55:15,730:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2021-12-01 17:55:19,692:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2021-12-01 17:55:20,672:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2021-12-01 17:55:21,815:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2021-12-01 17:55:28,230:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2021-12-01 17:55:33,080:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2021-12-01 17:55:38,273:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2021-12-01 17:55:40,824:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2021-12-02 12:31:40,179:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2021-12-02 12:31:45,043:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2021-12-02 12:31:57,172:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2021-12-02 12:31:58,374:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2021-12-02 12:32:02,632:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2021-12-02 12:32:03,695:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2021-12-02 12:32:04,896:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2021-12-02 12:32:11,930:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2021-12-02 12:32:17,232:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2021-12-02 12:32:23,108:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2021-12-02 12:32:26,222:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
     Error score 0.615 using error_add
 
 
@@ -430,7 +430,7 @@ Fifth example: Use own accuracy metric with additional argument
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 4 minutes  48.824 seconds)
+   **Total running time of the script:** ( 5 minutes  3.377 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_metrics.py:
