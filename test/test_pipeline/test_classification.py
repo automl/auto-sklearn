@@ -642,8 +642,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
         Expects
         -------
-        * With 'densifier' as the only legal feature_preprocessor, 'qda' is default classifier
-        * With 'nystroem_sampler' as the only legal feature_preprocessor, 'sgd' is default classifier
+        * With 'densifier' as only legal feature_preprocessor, 'qda' is default classifier
+        * With 'nystroem_sampler' as only legal feature_preprocessor, 'sgd' is default classifier
         """
         pipeline = SimpleClassificationPipeline(
             include={'feature_preprocessor': ['densifier']},
