@@ -40,6 +40,16 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     strategy:
+      matrix:
+        python-version: ['3.7', '3.8', '3.9', '3.10']
+        use-conda: [true, false]
+        use-dist: [false]
+        include:
+          - python-version: '3.8'
+            code-cov: true
+          - python-version: '3.7'
+            use-conda: false
+            use-dist: true
       fail-fast: false
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
