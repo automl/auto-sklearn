@@ -637,7 +637,14 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertNotIn('select_percentile_classification', str(cs))
 
     def test_get_hyperparameter_search_space_preprocessor_contradicts_default_classifier(self):
-        """TODO: Not sure what this test does"""
+        """Test that the default classifier gets updated based on the legal feature
+        preprocessors that come before.
+
+        Expects
+        -------
+        * With 'densifier' as the only legal feature_preprocessor, 'qda' is default classifier
+        * With 'nystroem_sampler' as the only legal feature_preprocessor, 'sgd' is default classifier
+        """
         pipeline = SimpleClassificationPipeline(
             include={'feature_preprocessor': ['densifier']},
             dataset_properties={'sparse': True}
