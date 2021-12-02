@@ -434,11 +434,16 @@ def test_do_dummy_prediction(dask_client, datasets):
 
     # Ensure that the dummy predictions are not in the current working
     # directory, but in the temporary directory.
-    assert not os.path.exists(os.path.join(os.getcwd(), '.auto-sklearn'))
-    assert os.path.exists(os.path.join(
-        auto._backend.temporary_directory, '.auto-sklearn', 'runs', '1_1_0.0',
-        'predictions_ensemble_1_1_0.0.npy')
+    unexpected_directory = os.path.join(os.getcwd(), '.auto-sklearn')
+    expected_directory = os.path.join(
+        auto._backend.temporary_directory,
+        '.auto-sklearn',
+        'runs',
+        '1_1_0.0',
+        'predictions_ensemble_1_1_0.0.npy'
     )
+    assert not os.path.exists(unexpected_directory)
+    assert os.path.exists(expected_directory)
 
     auto._clean_logger()
 

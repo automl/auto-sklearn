@@ -38,6 +38,8 @@ from sklearn.utils.validation import check_is_fitted
 from sklearn.metrics._classification import type_of_target
 from sklearn.dummy import DummyClassifier, DummyRegressor
 
+from autosklearn.automl_common.common.utils.backend import Backend, create
+
 from autosklearn.metrics import Scorer, default_metric_for_task
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.data.validation import (
@@ -50,7 +52,6 @@ from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, _fit_with_budget
 from autosklearn.metrics import calculate_metric
-from autosklearn.util.backend import Backend, create
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import (
     setup_logger,
@@ -281,6 +282,8 @@ class AutoML(BaseEstimator):
     def _create_backend(self) -> Backend:
         return create(
             temporary_directory=self._temporary_directory,
+            output_directory=None,
+            prefix="auto-sklearn",
             delete_tmp_folder_after_terminate=self._delete_tmp_folder_after_terminate,
         )
 

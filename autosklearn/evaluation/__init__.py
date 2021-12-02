@@ -19,14 +19,15 @@ from smac.tae.execute_func import AbstractTAFunc
 
 from sklearn.model_selection._split import _RepeatedSplits, BaseShuffleSplit,\
     BaseCrossValidator
-from autosklearn.metrics import Scorer
 
+from autosklearn.automl_common.common.utils.backend import Backend
+
+from autosklearn.metrics import Scorer
 import autosklearn.evaluation.train_evaluator
 import autosklearn.evaluation.test_evaluator
 import autosklearn.evaluation.util
 import autosklearn.pipeline.components
 from autosklearn.evaluation.train_evaluator import TYPE_ADDITIONAL_INFO
-from autosklearn.util.backend import Backend
 from autosklearn.util.logging_ import PickableLoggerAdapter, get_named_client_logger
 from autosklearn.util.parallel import preload_modules
 

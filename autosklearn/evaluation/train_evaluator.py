@@ -17,6 +17,8 @@ from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit, KFold,
     StratifiedKFold, train_test_split, BaseCrossValidator, PredefinedSplit
 from sklearn.model_selection._split import _RepeatedSplits, BaseShuffleSplit
 
+from autosklearn.automl_common.common.utils.backend import Backend
+
 from autosklearn.evaluation.abstract_evaluator import (
     AbstractEvaluator,
     TYPE_ADDITIONAL_INFO,
@@ -37,7 +39,6 @@ from autosklearn.data.validation import (
 from autosklearn.pipeline.base import PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import IterativeComponent, ThirdPartyComponents
 from autosklearn.metrics import Scorer
-from autosklearn.util.backend import Backend
 from autosklearn.util.logging_ import PicklableClientLogger
 
 

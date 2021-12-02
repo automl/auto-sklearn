@@ -14,6 +14,8 @@ from smac.tae import StatusType
 
 from threadpoolctl import threadpool_limits
 
+from autosklearn.automl_common.common.utils.backend import Backend
+
 import autosklearn.pipeline.classification
 import autosklearn.pipeline.regression
 from autosklearn.pipeline.components.base import ThirdPartyComponents, _addons
@@ -28,7 +30,6 @@ from autosklearn.pipeline.implementations.util import (
     convert_multioutput_multiclass_to_multilabel
 )
 from autosklearn.metrics import calculate_loss, Scorer
-from autosklearn.util.backend import Backend
 from autosklearn.util.logging_ import PicklableClientLogger, get_named_client_logger
 
 from ConfigSpace import Configuration

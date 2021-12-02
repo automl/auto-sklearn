@@ -100,6 +100,30 @@ to read in more details check
 for more information about Conda forge check
 `conda-forge documentations <https://conda-forge.org/docs/>`_.
 
+Source Installation
+===================
+
+You can install auto-sklearn directly form source by following the below:
+
+.. code:: bash
+
+    git clone --recurse-submodules git@github.com:automl/auto-sklearn.git
+    cd auto-sklearn
+
+    # Install it in editable mode with all optional dependencies
+    pip install -e ".[test,doc,examples]"
+
+We use submodules so you will have to make sure the submodule is initialized if you
+missed the `--recurse-submodules` option.
+
+.. code:: bash
+
+    git clone git@github.com:automl/auto-sklearn.git
+    cd auto-sklearn
+    git submodule update --init --recursive
+
+    pip install -e ".[test,doc,examples]"
+
 
 Windows/OSX compatibility
 =========================
