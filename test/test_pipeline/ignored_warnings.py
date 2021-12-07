@@ -77,6 +77,7 @@ classifier_warnings = [
 
 ignored_warnings = regressor_warnings + classifier_warnings
 
+
 @contextmanager
 def ignore_warnings(to_ignore: List[Tuple[Exception, str]] = ignored_warnings) -> Iterator[None]:
     """A context manager to ignore warnings
@@ -93,4 +94,3 @@ def ignore_warnings(to_ignore: List[Tuple[Exception, str]] = ignored_warnings) -
         for category, message in to_ignore:
             warnings.filterwarnings('ignore', category=category, message=message)
         yield
-
