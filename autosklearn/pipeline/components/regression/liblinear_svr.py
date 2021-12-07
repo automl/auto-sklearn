@@ -23,7 +23,7 @@ class LibLinear_SVR(AutoSklearnRegressionAlgorithm):
         self.random_state = random_state
         self.estimator = None
 
-    def fit(self, X, Y):
+    def fit(self, X, y):
         import sklearn.svm
 
         self.C = float(self.C)
@@ -42,7 +42,11 @@ class LibLinear_SVR(AutoSklearnRegressionAlgorithm):
                                                fit_intercept=self.fit_intercept,
                                                intercept_scaling=self.intercept_scaling,
                                                random_state=self.random_state)
-        self.estimator.fit(X, Y)
+
+        if y.ndim == 2 and y.shape[1] == 1:
+            y = y.flatten()
+
+        self.estimator.fit(X, y)
         return self
 
     def predict(self, X):

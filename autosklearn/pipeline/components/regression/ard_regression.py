@@ -22,8 +22,8 @@ class ARDRegression(AutoSklearnRegressionAlgorithm):
         self.threshold_lambda = threshold_lambda
         self.fit_intercept = fit_intercept
 
-    def fit(self, X, Y):
-        import sklearn.linear_model
+    def fit(self, X, y):
+        from sklearn.linear_model import ARDRegression
 
         self.n_iter = int(self.n_iter)
         self.tol = float(self.tol)
@@ -34,20 +34,25 @@ class ARDRegression(AutoSklearnRegressionAlgorithm):
         self.threshold_lambda = float(self.threshold_lambda)
         self.fit_intercept = check_for_bool(self.fit_intercept)
 
-        self.estimator = sklearn.linear_model.\
-            ARDRegression(n_iter=self.n_iter,
-                          tol=self.tol,
-                          alpha_1=self.alpha_1,
-                          alpha_2=self.alpha_2,
-                          lambda_1=self.lambda_1,
-                          lambda_2=self.lambda_2,
-                          compute_score=False,
-                          threshold_lambda=self.threshold_lambda,
-                          fit_intercept=True,
-                          normalize=False,
-                          copy_X=False,
-                          verbose=False)
-        self.estimator.fit(X, Y)
+        self.estimator = ARDRegression(
+            n_iter=self.n_iter,
+            tol=self.tol,
+            alpha_1=self.alpha_1,
+            alpha_2=self.alpha_2,
+            lambda_1=self.lambda_1,
+            lambda_2=self.lambda_2,
+            compute_score=False,
+            threshold_lambda=self.threshold_lambda,
+            fit_intercept=True,
+            normalize=False,
+            copy_X=False,
+            verbose=False
+        )
+
+        if y.ndim == 2 and y.shape[1] == 1:
+            y = y.flatten()
+
+        self.estimator.fit(X, y)
         return self
 
     def predict(self, X):
