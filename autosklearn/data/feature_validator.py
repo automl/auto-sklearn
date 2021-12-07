@@ -293,19 +293,22 @@ class FeatureValidator(BaseEstimator):
             # Move away from np.issubdtype as it causes
             # TypeError: data type not understood in certain pandas types
             elif not is_numeric_dtype(X[column]):
+                # Todo check if assumption holds
                 if X[column].dtype.name == 'object':
-                    raise ValueError(
-                        "Input Column {} has invalid type object. "
-                        "Cast it to a valid dtype before using it in Auto-Sklearn. "
-                        "Valid types are numerical, categorical or boolean. "
-                        "You can cast it to a valid dtype using "
-                        "pandas.Series.astype ."
-                        "If working with string objects, the following "
-                        "tutorial illustrates how to work with text data: "
-                        "https://scikit-learn.org/stable/tutorial/text_analytics/working_with_text_data.html".format(  # noqa: E501
-                            column,
-                        )
-                    )
+                    feat_type[column] = 'string'
+                    feat_type[column] = feat_type[column].astype("string")
+                    # raise ValueError(
+                    #     "Input Column {} has invalid type object. "
+                    #     "Cast it to a valid dtype before using it in Auto-Sklearn. "
+                    #     "Valid types are numerical, categorical or boolean. "
+                    #     "You can cast it to a valid dtype using "
+                    #     "pandas.Series.astype ."
+                    #     "If working with string objects, the following "
+                    #     "tutorial illustrates how to work with text data: "
+                    #     "https://scikit-learn.org/stable/tutorial/text_analytics/working_with_text_data.html".format(  # noqa: E501
+                    #         column,
+                    #     )
+                    # )
                 elif pd.core.dtypes.common.is_datetime_or_timedelta_dtype(
                     X[column].dtype
                 ):

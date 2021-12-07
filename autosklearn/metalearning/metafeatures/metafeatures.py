@@ -1094,8 +1094,7 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name, logger,
                 DPP = FeatTypeSplit(
                     # The difference between feat_type and categorical, is that
                     # categorical has True/False instead of categorical/numerical
-                    feat_type={key: 'categorical' if value else 'numerical'
-                               for key, value in categorical.items()},
+                    feat_type=feat_type,
                     force_sparse_output=True)
                 X_transformed = DPP.fit_transform(X)
                 categorical_transformed = {i: False for i in range(X_transformed.shape[1])}
