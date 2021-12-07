@@ -28,7 +28,7 @@ import autosklearn.pipeline.components.feature_preprocessing as preprocessing_co
 from autosklearn.pipeline.util import get_dataset
 from autosklearn.pipeline.constants import SPARSE, DENSE, SIGNED_DATA, UNSIGNED_DATA, PREDICTIONS
 
-from ..ignored_warnings import regressor_warnings, ignore_warnings
+from .ignored_warnings import regressor_warnings, ignore_warnings
 
 
 class SimpleRegressionPipelineTest(unittest.TestCase):

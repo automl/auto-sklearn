@@ -31,7 +31,7 @@ from autosklearn.pipeline.util import get_dataset
 from autosklearn.pipeline.constants import \
     DENSE, SPARSE, UNSIGNED_DATA, PREDICTIONS, SIGNED_DATA, INPUT
 
-from ..ignored_warnings import classifier_warnings, ignore_warnings
+from .ignored_warnings import classifier_warnings, ignore_warnings
 
 
 class DummyClassifier(AutoSklearnClassificationAlgorithm):
