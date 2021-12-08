@@ -34,9 +34,12 @@ class BaseRegressionComponentTest(unittest.TestCase):
             return
 
         for _ in range(2):
-            predictions, targets, n_calls = _test_regressor(
-                dataset="boston", Regressor=self.module
-            )
+
+            with ignore_warnings(regressor_warnings):
+                predictions, targets, n_calls = _test_regressor(
+                    dataset="boston",
+                    Regressor=self.module
+                )
 
             if "default_boston_le_ge" in self.res:
                 # Special treatment for Gaussian Process Regression
@@ -73,9 +76,12 @@ class BaseRegressionComponentTest(unittest.TestCase):
             return
 
         for i in range(2):
-            predictions, targets, regressor = \
-                _test_regressor_iterative_fit(dataset="boston",
-                                              Regressor=self.module)
+            with ignore_warnings(regressor_warnings):
+                predictions, targets, regressor =  _test_regressor_iterative_fit(
+                    dataset="boston",
+                    Regressor=self.module
+                )
+
             score = sklearn.metrics.r2_score(targets, predictions)
             fixture = self.res["default_boston_iterative"]
 
@@ -108,10 +114,12 @@ class BaseRegressionComponentTest(unittest.TestCase):
             return
 
         for i in range(2):
-            predictions, targets, _ = \
-                _test_regressor_iterative_fit(dataset="boston",
-                                              Regressor=self.module,
-                                              sparse=True)
+            with ignore_warnings(regressor_warnings):
+                predictions, targets, _ = _test_regressor_iterative_fit(
+                    dataset="boston",
+                    Regressor=self.module,
+                    sparse=True
+                )
             self.assertAlmostEqual(self.res["default_boston_iterative_sparse"],
                                    sklearn.metrics.r2_score(targets,
                                                             predictions),
@@ -127,10 +135,13 @@ class BaseRegressionComponentTest(unittest.TestCase):
             return
 
         for i in range(2):
-            predictions, targets, _ = \
-                _test_regressor(dataset="boston",
-                                Regressor=self.module,
-                                sparse=True)
+            with ignore_warnings(regressor_warnings):
+                predictions, targets, _ = _test_regressor(
+                    dataset="boston",
+                    Regressor=self.module,
+                    sparse=True
+                )
+
             self.assertAlmostEqual(self.res["default_boston_sparse"],
                                    sklearn.metrics.r2_score(targets,
                                                             predictions),
@@ -143,9 +154,11 @@ class BaseRegressionComponentTest(unittest.TestCase):
             return
 
         for i in range(2):
-            predictions, targets, n_calls = \
-                _test_regressor(dataset="diabetes",
-                                Regressor=self.module)
+            with ignore_warnings(regressor_warnings):
+                predictions, targets, n_calls = _test_regressor(
+                    dataset="diabetes",
+                    Regressor=self.module
+                )
 
             self.assertAlmostEqual(self.res["default_diabetes"],
                                    sklearn.metrics.r2_score(targets,
@@ -165,9 +178,12 @@ class BaseRegressionComponentTest(unittest.TestCase):
             return
 
         for i in range(2):
-            predictions, targets, _ = \
-                _test_regressor_iterative_fit(dataset="diabetes",
-                                              Regressor=self.module)
+            with ignore_warnings(regressor_warnings):
+                predictions, targets, _ = _test_regressor_iterative_fit(
+                    dataset="diabetes",
+                    Regressor=self.module
+                )
+
             self.assertAlmostEqual(self.res["default_diabetes_iterative"],
                                    sklearn.metrics.r2_score(targets,
                                                             predictions),
@@ -186,10 +202,13 @@ class BaseRegressionComponentTest(unittest.TestCase):
             return
 
         for i in range(2):
-            predictions, targets, regressor = \
-                _test_regressor_iterative_fit(dataset="diabetes",
-                                              Regressor=self.module,
-                                              sparse=True)
+            with ignore_warnings(regressor_warnings):
+                predictions, targets, regressor = _test_regressor_iterative_fit(
+                    dataset="diabetes",
+                    Regressor=self.module,
+                    sparse=True
+                )
+
             self.assertAlmostEqual(self.res["default_diabetes_iterative_sparse"],
                                    sklearn.metrics.r2_score(targets,
                                                             predictions),
@@ -211,10 +230,11 @@ class BaseRegressionComponentTest(unittest.TestCase):
             return
 
         for i in range(2):
-            predictions, targets, _ = \
-                _test_regressor(dataset="diabetes",
-                                Regressor=self.module,
-                                sparse=True)
+            with ignore_warnings(regressor_warnings):
+                predictions, targets, _ = _test_regressor(dataset="diabetes",
+                    Regressor=self.module,
+                    sparse=True
+                )
             self.assertAlmostEqual(self.res["default_diabetes_sparse"],
                                    sklearn.metrics.r2_score(targets,
                                                             predictions),
@@ -264,12 +284,16 @@ class BaseRegressionComponentTest(unittest.TestCase):
 
             # Get the parameters on the first and second fit with config params
             # Also compare their random state
-            params_first = regressor.fit(X.copy(), y.copy()).estimator.get_params()
+            with ignore_warnings(regressor_warnings):
+                params_first = regressor.fit(X.copy(), y.copy()).estimator.get_params()
+
             if hasattr(regressor.estimator, 'random_state'):
                 rs_1 = regressor.random_state
                 rs_estimator_1 = regressor.estimator.random_state
 
-            params_second = regressor.fit(X.copy(), y.copy()).estimator.get_params()
+            with ignore_warnings(regressor_warnings):
+                params_second = regressor.fit(X.copy(), y.copy()).estimator.get_params()
+
             if hasattr(regressor.estimator, 'random_state'):
                 rs_2 = regressor.random_state
                 rs_estimator_2 = regressor.estimator.random_state
@@ -302,7 +326,7 @@ def test_fit_and_predict_with_1d_targets_as_1d(
     regressor: Type[RegressorChoice],
     X: np.ndarray,
     y: np.ndarray
-):
+) -> None:
     """Test that all pipelines work with 1d target types
 
     Parameters
@@ -345,7 +369,7 @@ def test_fit_and_predict_with_1d_targets_as_2d(
     regressor: Type[RegressorChoice],
     X: np.ndarray,
     y: np.ndarray
-):
+) -> None:
     """Test that all pipelines work with 1d target types when they are wrapped as 2d
 
     Parameters
@@ -394,7 +418,7 @@ def test_fit_and_predict_with_2d_targets(
     regressor: Type[RegressorChoice],
     X: np.ndarray,
     y: np.ndarray
-):
+) -> None:
     """Test that all pipelines work with 2d target types
 
     Parameters
