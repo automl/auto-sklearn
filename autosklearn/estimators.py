@@ -236,9 +236,9 @@ class AutoSklearnEstimator(BaseEstimator):
             Default:
             ```
             {
-                enabled: True,
-                memory_allocation: 0.1,
-                methods: ["precision", "subsample"]
+                "enabled": True,
+                "memory_allocation": 0.1,
+                "methods": ["precision", "subsample"]
             }
             ```
 
