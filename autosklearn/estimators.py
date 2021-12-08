@@ -50,7 +50,8 @@ class AutoSklearnEstimator(BaseEstimator):
         metric=None,
         scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
-        get_trials_callback=None
+        get_trials_callback=None,
+        dataset_compression: Optional[Dict[str, Union[bool, str, List[str]]]] = None
     ):
         """
         Parameters
@@ -218,12 +219,61 @@ class AutoSklearnEstimator(BaseEstimator):
 
         load_models : bool, optional (True)
             Whether to load the models after fitting Auto-sklearn.
-           
+
         get_trials_callback: callable
             Callback function to create an object of subclass defined in module
             `smac.callbacks <https://automl.github.io/SMAC3/master/apidoc/smac.callbacks.html>`_.
             This is an advanced feature. Use only if you are familiar with
             `SMAC <https://automl.github.io/SMAC3/master/index.html>`_.
+
+        dataset_compression: Optional[Dict[str, Union[bool, str, List[str]]]] = None
+            We compress datasets so that they fit into some predefined amount of memory.
+            Currently this does not apply to dataframes or sparse arrays, only to raw numpy arrays.
+
+            To do this, we can either reduce the precision of the datatypes or subsample
+            the data.
+
+            Default:
+            ```
+            {
+                enabled: True,
+                memory_allocation: 0.1,
+                methods: ["precision", "subsample"]
+            }
+            ```
+
+            The available options are described here:
+
+            **enabled**
+
+            We enable this by default and can be disabled by including ``enabled: False``.
+
+            **memory_allocation**
+
+            By default, we attempt to fit the dataset into ``0.1 * memory_limit``. This
+            value ``0.1`` can be set with ``memory_allocation: 0.1``. These values are
+            checked after each method is performed and if performing only some methods
+            is enough to fit the dataset into its allocation, the following methods will
+            not be performed.
+
+            For example, if ``methods: ["precision", "subsample"]`` is passed, if reducing
+            precision was enough to make the dataset fit into memory, then subsampling will
+            not be performed.
+
+            **methods**
+
+            We currently provide the following methods for reducing the dataset size.
+            These can be provided in a list and are performed in the order as given.
+
+            *   ``"precision"`` - We reduce floating point precision as follows:
+                *   ``np.float128 -> np.float64``
+                *   ``np.float96 -> np.float64``
+                *   ``np.float64 -> np.float32``
+
+            *   ``subsampling`` - We subsample data such that it fits directly into the
+                memory allocation ``memory_allocation * memory_limit``. This takes into
+                account classification labels and stratifies accordingly. We garauntee that
+                at least one occurence of each label is included in the sampled set.
 
         Attributes
         ----------
@@ -269,6 +319,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.scoring_functions = scoring_functions
         self.load_models = load_models
         self.get_trials_callback = get_trials_callback
+        self.dataset_compression = dataset_compression
 
         self.automl_ = None  # type: Optional[AutoML]
 
@@ -314,7 +365,8 @@ class AutoSklearnEstimator(BaseEstimator):
             metadata_directory=self.metadata_directory,
             metric=self.metric,
             scoring_functions=self.scoring_functions,
-            get_trials_callback=self.get_trials_callback
+            get_trials_callback=self.get_trials_callback,
+            dataset_compression=self.dataset_compression
         )
 
         return automl

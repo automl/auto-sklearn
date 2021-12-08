@@ -8,7 +8,7 @@ import multiprocessing
 import os
 import sys
 import time
-from typing import Any, Dict, Optional, List, Tuple, Union
+from typing import Any, Dict, Optional, List, Tuple, Union, Iterable
 import uuid
 import unittest.mock
 import tempfile
@@ -159,34 +159,36 @@ def _model_predict(
 
 class AutoML(BaseEstimator):
 
-    def __init__(self,
-                 time_left_for_this_task,
-                 per_run_time_limit,
-                 temporary_directory: Optional[str] = None,
-                 delete_tmp_folder_after_terminate: bool = True,
-                 initial_configurations_via_metalearning=25,
-                 ensemble_size=1,
-                 ensemble_nbest=1,
-                 max_models_on_disc=1,
-                 seed=1,
-                 memory_limit=3072,
-                 metadata_directory=None,
-                 debug_mode=False,
-                 include=None,
-                 exclude=None,
-                 resampling_strategy='holdout-iterative-fit',
-                 resampling_strategy_arguments=None,
-                 n_jobs=None,
-                 dask_client: Optional[dask.distributed.Client] = None,
-                 precision=32,
-                 disable_evaluator_output=False,
-                 get_smac_object_callback=None,
-                 smac_scenario_args=None,
-                 logging_config=None,
-                 metric=None,
-                 scoring_functions=None,
-                 get_trials_callback=None
-                 ):
+    def __init__(
+        self,
+        time_left_for_this_task,
+        per_run_time_limit,
+        temporary_directory: Optional[str] = None,
+        delete_tmp_folder_after_terminate: bool = True,
+        initial_configurations_via_metalearning=25,
+        ensemble_size=1,
+        ensemble_nbest=1,
+        max_models_on_disc=1,
+        seed=1,
+        memory_limit=3072,
+        metadata_directory=None,
+        debug_mode=False,
+        include=None,
+        exclude=None,
+        resampling_strategy='holdout-iterative-fit',
+        resampling_strategy_arguments=None,
+        n_jobs=None,
+        dask_client: Optional[dask.distributed.Client] = None,
+        precision=32,
+        disable_evaluator_output=False,
+        get_smac_object_callback=None,
+        smac_scenario_args=None,
+        logging_config=None,
+        metric=None,
+        scoring_functions=None,
+        get_trials_callback=None,
+        dataset_compression: Optional[Dict[str, Union[bool, str, List[str]]]] = None
+    ):
         super(AutoML, self).__init__()
         self.configuration_space = None
         self._backend: Optional[Backend] = None
@@ -230,6 +232,59 @@ class AutoML(BaseEstimator):
         self._get_trials_callback = get_trials_callback
         self._smac_scenario_args = smac_scenario_args
         self.logging_config = logging_config
+
+        # Validate dataset_compression arg
+        default_dataset_compression = {
+            "enabled": True,
+            "memory_allocation": 0.1,
+            "methods": ["precision", "subsample"]
+        }
+
+        if dataset_compression is None:
+            dataset_compression = default_dataset_compression
+        else:
+            # Fill with defaults if they don't exist
+            dataset_compression = {**default_dataset_compression, **dataset_compression}
+
+            # Must contain known keys
+            if set(dataset_compression.keys()) != set(default_dataset_compression.keys()):
+                raise ValueError(
+                    f"Unknown key in dataset_compression, {list(dataset_compression.keys())}."
+                    f"\nPossible keys are {list(default_dataset_compression.keys())}"
+                )
+
+            # "enabled" must be bool
+            if type(dataset_compression["enabled"]) != bool:
+                raise ValueError(
+                    "key 'enabled' in `dataset_compression` must be of type bool."
+                    f"\n{dataset_compression}"
+                )
+
+            # "memory_allocation" must be float between (0, 1)
+            if (
+                type(dataset_compression["memory_allocation"]) != float
+                and 0.0 < dataset_compression["memory_allocation"] < 1.0
+            ):
+                raise ValueError(
+                    "key 'memory_allocation' must be a float in (0, 1)"
+                    f"\n{dataset_compression}"
+                )
+
+            # "methods" must be iterable and contain known methods
+            if (
+                not isinstance(dataset_compression["methods"], Iterable)
+                or any(
+                    method not in default_dataset_compression["methods"]
+                    for method in dataset_compression["methods"]
+                )
+            ):
+                raise ValueError(
+                    f"key 'methods' must be list and can only contain"
+                    f" {default_dataset_compression['methods']}"
+                    f"\n{dataset_compression}"
+                )
+
+        self._dataset_compression = dataset_compression
 
         self._datamanager = None
         self._dataset_name = None
