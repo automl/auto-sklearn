@@ -41,6 +41,8 @@ from autosklearn.automl import AutoMLClassifier
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 from autosklearn.smbo import get_smac_object
 
+from ..test_pipeline.ignored_warnings import ignore_warnings
+
 sys.path.append(os.path.dirname(__file__))
 from automl_utils import print_debug_information, count_succeses, includes_train_scores, includes_all_scores, include_single_scores, performance_over_time_is_plausible  # noqa (E402: module level import not at top of file)
 
@@ -79,7 +81,9 @@ def test_fit_n_jobs(tmp_dir):
         get_smac_object_callback=get_smac_object_wrapper_instance,
         max_models_on_disc=None,
     )
-    automl.fit(X_train, Y_train)
+
+    with ignore_warnings():
+        automl.fit(X_train, Y_train)
 
     # Test that the argument is correctly passed to SMAC
     assert getattr(get_smac_object_wrapper_instance, 'n_jobs') == 2
@@ -272,7 +276,9 @@ def test_performance_over_time_no_ensemble(tmp_dir):
                                 seed=1,
                                 initial_configurations_via_metalearning=0,
                                 ensemble_size=0,)
-    cls.fit(X_train, Y_train, X_test, Y_test)
+
+    with ignore_warnings():
+        cls.fit(X_train, Y_train, X_test, Y_test)
 
     performance_over_time = cls.performance_over_time_
     assert include_single_scores(performance_over_time.columns) is True
@@ -296,7 +302,9 @@ def test_cv_results(tmp_dir):
     params = cls.get_params()
     original_params = copy.deepcopy(params)
 
-    cls.fit(X_train, Y_train)
+    with ignore_warnings():
+        cls.fit(X_train, Y_train)
+
     cv_results = cls.cv_results_
     assert isinstance(cv_results, dict), type(cv_results)
     assert isinstance(cv_results['mean_test_score'], np.ndarray), type(
@@ -382,7 +390,9 @@ def test_leaderboard(
         tmp_folder=tmp_dir,
         seed=1
     )
-    model.fit(X_train, Y_train)
+
+    with ignore_warnings():
+        model.fit(X_train, Y_train)
 
     for params in params_generator:
         # Convert from iterator to solid list
@@ -540,7 +550,9 @@ def test_can_pickle_classifier(tmp_dir, dask_client):
                                    tmp_folder=tmp_dir,
                                    dask_client=dask_client,
                                    )
-    automl.fit(X_train, Y_train)
+
+    with ignore_warnings():
+        automl.fit(X_train, Y_train)
 
     initial_predictions = automl.predict(X_test)
     initial_accuracy = sklearn.metrics.accuracy_score(Y_test,
@@ -589,7 +601,8 @@ def test_multilabel(tmp_dir, dask_client):
                                    dask_client=dask_client,
                                    )
 
-    automl.fit(X_train, Y_train)
+    with ignore_warnings():
+        automl.fit(X_train, Y_train)
 
     predictions = automl.predict(X_test)
     assert predictions.shape == (50, 3), print_debug_information(automl)
@@ -615,8 +628,9 @@ def test_binary(tmp_dir, dask_client):
                                    dask_client=dask_client,
                                    )
 
-    automl.fit(X_train, Y_train, X_test=X_test, y_test=Y_test,
-               dataset_name='binary_test_dataset')
+    with ignore_warnings():
+        automl.fit(X_train, Y_train, X_test=X_test, y_test=Y_test,
+                   dataset_name='binary_test_dataset')
 
     predictions = automl.predict(X_test)
     assert predictions.shape == (50, ), print_debug_information(automl)
@@ -651,13 +665,15 @@ def test_classification_pandas_support(tmp_dir, dask_client):
         tmp_folder=tmp_dir,
     )
 
-    automl.fit(X, y)
+    with ignore_warnings():
+        automl.fit(X, y)
 
     # Make sure that at least better than random.
     # We use same X_train==X_test to test code quality
     assert automl.score(X, y) > 0.555, print_debug_information(automl)
 
-    automl.refit(X, y)
+    with ignore_warnings():
+        automl.refit(X, y)
 
     # Make sure that at least better than random.
     # accuracy in sklearn needs valid data
@@ -678,7 +694,8 @@ def test_regression(tmp_dir, dask_client):
                                   dask_client=dask_client,
                                   )
 
-    automl.fit(X_train, Y_train)
+    with ignore_warnings():
+        automl.fit(X_train, Y_train)
 
     predictions = automl.predict(X_test)
     assert predictions.shape == (356,)
@@ -707,7 +724,8 @@ def test_cv_regression(tmp_dir, dask_client):
                                   dask_client=dask_client,
                                   )
 
-    automl.fit(X_train, Y_train)
+    with ignore_warnings():
+        automl.fit(X_train, Y_train)
 
     predictions = automl.predict(X_test)
     assert predictions.shape == (206,)
@@ -736,13 +754,15 @@ def test_regression_pandas_support(tmp_dir, dask_client):
     )
 
     # Make sure we error out because y is not encoded
-    automl.fit(X, y)
+    with ignore_warnings():
+        automl.fit(X, y)
 
     # Make sure that at least better than random.
     # We use same X_train==X_test to test code quality
     assert automl.score(X, y) >= 0.5, print_debug_information(automl)
 
-    automl.refit(X, y)
+    with ignore_warnings():
+        automl.refit(X, y)
 
     # Make sure that at least better than random.
     assert r2(y, automl.predict(X)) > 0.5, print_debug_information(automl)
@@ -764,13 +784,17 @@ def test_autosklearn_classification_methods_returns_self(dask_client):
                                    dask_client=dask_client,
                                    exclude={'feature_preprocessor': ['fast_ica']})
 
-    automl_fitted = automl.fit(X_train, y_train)
+    with ignore_warnings():
+        automl_fitted = automl.fit(X_train, y_train)
+
     assert automl is automl_fitted
 
     automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
     assert automl is automl_ensemble_fitted
 
-    automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+    with ignore_warnings():
+        automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+
     assert automl is automl_refitted
 
 
@@ -784,13 +808,15 @@ def test_autosklearn_regression_methods_returns_self(dask_client):
                                   dask_client=dask_client,
                                   ensemble_size=0)
 
-    automl_fitted = automl.fit(X_train, y_train)
+    with ignore_warnings():
+        automl_fitted = automl.fit(X_train, y_train)
     assert automl is automl_fitted
 
     automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
     assert automl is automl_ensemble_fitted
 
-    automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+    with ignore_warnings():
+        automl_refitted = automl.refit(X_train.copy(), y_train.copy())
     assert automl is automl_refitted
 
 
@@ -800,13 +826,18 @@ def test_autosklearn2_classification_methods_returns_self(dask_client):
                                     delete_tmp_folder_after_terminate=False,
                                     dask_client=dask_client)
 
-    automl_fitted = automl.fit(X_train, y_train)
+
+    with ignore_warnings():
+        automl_fitted = automl.fit(X_train, y_train)
+
     assert automl is automl_fitted
 
     automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
     assert automl is automl_ensemble_fitted
 
-    automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+    with ignore_warnings():
+        automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+
     assert automl is automl_refitted
 
     predictions = automl_fitted.predict(X_test)
@@ -823,13 +854,17 @@ def test_autosklearn2_classification_methods_returns_self_sparse(dask_client):
                                     delete_tmp_folder_after_terminate=False,
                                     dask_client=dask_client)
 
-    automl_fitted = automl.fit(X_train, y_train)
+    with ignore_warnings():
+        automl_fitted = automl.fit(X_train, y_train)
+
     assert automl is automl_fitted
 
     automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
     assert automl is automl_ensemble_fitted
 
-    automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+    with ignore_warnings():
+        automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+
     assert automl is automl_refitted
 
     predictions = automl_fitted.predict(X_test)
@@ -933,10 +968,16 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
                                             X_test=X_test, y_test=y_test,
                                             ).get_default_configuration()
 
-    pipeline, run_info, run_value = automl.fit_pipeline(X=X_train, y=y_train, config=config,
-                                                        X_test=X_test, y_test=y_test,
-                                                        disable_file_output=disable_file_output,
-                                                        resampling_strategy=resampling_strategy)
+    with ignore_warnings():
+        pipeline, run_info, run_value = automl.fit_pipeline(
+            X=X_train,
+            y=y_train,
+            config=config,
+            X_test=X_test,
+            y_test=y_test,
+            disable_file_output=disable_file_output,
+            resampling_strategy=resampling_strategy
+        )
 
     assert isinstance(run_info.config, Configuration)
     assert run_info.cutoff == 30
@@ -1036,10 +1077,11 @@ def test_pass_categorical_and_numeric_columns_to_pipeline(
     )
     config = config_space.get_default_configuration()
 
-    pipeline, _, run_value = automl.fit_pipeline(
-        X=X_train, y=y_train, X_test=X_test, y_test=y_test,
-        config=config, feat_type=feat_type,
-    )
+    with ignore_warnings():
+        pipeline, _, run_value = automl.fit_pipeline(
+            X=X_train, y=y_train, X_test=X_test, y_test=y_test,
+            config=config, feat_type=feat_type,
+        )
 
     assert pipeline is not None, "Expected a pipeline from automl.fit_pipeline"
 
@@ -1088,13 +1130,18 @@ def test_autosklearn_anneal(as_frame):
                                    resampling_strategy='holdout-iterative-fit')
 
     if as_frame:
+        with ignore_warnings():
         # Let autosklearn calculate the feat types
-        automl_fitted = automl.fit(X, y)
+            automl_fitted = automl.fit(X, y)
+
     else:
         X_, y_ = sklearn.datasets.fetch_openml(data_id=2, return_X_y=True, as_frame=True)
         feat_type = ['categorical' if X_[col].dtype.name == 'category' else 'numerical'
                      for col in X_.columns]
-        automl_fitted = automl.fit(X, y, feat_type=feat_type)
+
+        with ignore_warnings():
+            automl_fitted = automl.fit(X, y, feat_type=feat_type)
+
     assert automl is automl_fitted
 
     automl_ensemble_fitted = automl.fit_ensemble(y, ensemble_size=5)

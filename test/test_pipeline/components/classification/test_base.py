@@ -9,6 +9,8 @@ from autosklearn.pipeline.constants import SPARSE
 import sklearn.metrics
 import numpy as np
 
+from ...ignored_warnings import ignore_warnings, classifier_warnings
+
 
 class BaseClassificationComponentTest(unittest.TestCase):
     # Magic command to not run tests on base class
@@ -274,7 +276,8 @@ class BaseClassificationComponentTest(unittest.TestCase):
                         + " assignment" in err.args[0])
 
             try:
-                model.fit(X.copy(), y.copy())
+                with ignore_warnings(classifier_warnings):
+                    model.fit(X.copy(), y.copy())
             except ValueError as e:
                 if is_AdaBoostClassifier_error(e) or is_QDA_error(e):
                     return None

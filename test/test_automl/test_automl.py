@@ -42,6 +42,7 @@ from smac.tae import StatusType
 sys.path.append(os.path.dirname(__file__))
 from automl_utils import print_debug_information, count_succeses, AutoMLLogParser, includes_all_scores, includes_train_scores, performance_over_time_is_plausible  # noqa (E402: module level import not at top of file)
 
+from ..test_pipeline.ignored_warnings import ignore_warnings
 
 class AutoMLStub(AutoML):
     def __init__(self):
@@ -64,9 +65,10 @@ def test_fit(dask_client):
         metric=accuracy,
         dask_client=dask_client,
     )
-    automl.fit(
-        X_train, Y_train, task=MULTICLASS_CLASSIFICATION
-    )
+
+    with ignore_warnings():
+        automl.fit(X_train, Y_train, task=MULTICLASS_CLASSIFICATION)
+
     score = automl.score(X_test, Y_test)
     assert score > 0.8
     assert count_succeses(automl.cv_results_) > 0
@@ -109,9 +111,9 @@ def test_fit_roar(dask_client_single_worker):
         metric=accuracy,
         dask_client=dask_client_single_worker,
     )
-    automl.fit(
-        X_train, Y_train, task=MULTICLASS_CLASSIFICATION,
-    )
+    with ignore_warnings():
+        automl.fit(X_train, Y_train, task=MULTICLASS_CLASSIFICATION)
+
     score = automl.score(X_test, Y_test)
     assert score > 0.8
     assert count_succeses(automl.cv_results_) > 0
@@ -224,8 +226,8 @@ def test_delete_non_candidate_models(dask_client):
         max_models_on_disc=3,
     )
 
-    automl.fit(X, Y, task=MULTICLASS_CLASSIFICATION,
-               X_test=X, y_test=Y)
+    with ignore_warnings():
+        automl.fit(X, Y, task=MULTICLASS_CLASSIFICATION, X_test=X, y_test=Y)
 
     # Assert at least one model file has been deleted and that there were no
     # deletion errors
@@ -271,7 +273,10 @@ def test_binary_score_and_include(dask_client):
         metric=accuracy,
         dask_client=dask_client,
     )
-    automl.fit(X_train, Y_train, task=BINARY_CLASSIFICATION)
+
+    with ignore_warnings():
+        automl.fit(X_train, Y_train, task=BINARY_CLASSIFICATION)
+
     assert automl._task == BINARY_CLASSIFICATION
 
     # TODO, the assumption from above is not really tested here
@@ -294,14 +299,17 @@ def test_automl_outputs(dask_client):
         dask_client=dask_client,
         delete_tmp_folder_after_terminate=False,
     )
-    auto.fit(
-        X=X_train,
-        y=Y_train,
-        X_test=X_test,
-        y_test=Y_test,
-        dataset_name=name,
-        task=MULTICLASS_CLASSIFICATION,
-    )
+
+    with ignore_warnings():
+        auto.fit(
+            X=X_train,
+            y=Y_train,
+            X_test=X_test,
+            y_test=Y_test,
+            dataset_name=name,
+            task=MULTICLASS_CLASSIFICATION,
+        )
+
     data_manager_file = os.path.join(
         auto._backend.temporary_directory,
         '.auto-sklearn',
@@ -624,9 +632,9 @@ def test_load_best_individual_model(metric, dask_client):
     # We cannot easily mock a function sent to dask
     # so for this test we create the whole set of models/ensembles
     # but prevent it to be loaded
-    automl.fit(
-        X_train, Y_train, task=MULTICLASS_CLASSIFICATION,
-    )
+    with ignore_warnings():
+        automl.fit(X_train, Y_train, task=MULTICLASS_CLASSIFICATION)
+
     automl._backend.load_ensemble = unittest.mock.MagicMock(return_value=None)
 
     # A memory error occurs in the ensemble construction
