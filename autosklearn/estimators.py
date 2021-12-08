@@ -113,22 +113,36 @@ class AutoSklearnEstimator(BaseEstimator):
             Incompatible with include. Include and exclude are incompatible
             if used together on the same component
 
-        resampling_strategy : string or object, optional ('holdout')
-            how to to handle overfitting, might need 'resampling_strategy_arguments'
+        resampling_strategy : Union[str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit] = "holdout"
+            How to to handle overfitting, might need to use ``resampling_strategy_arguments``
+            if using ``"cv"`` based method or a Splitter object.
 
-            * 'holdout': 67:33 (train:test) split
-            * 'holdout-iterative-fit':  67:33 (train:test) split, calls iterative
-              fit where possible
-            * 'cv': crossvalidation, requires 'folds'
-            * 'cv-iterative-fit': crossvalidation, calls iterative fit where possible
-            * 'partial-cv': crossvalidation with intensification, requires
-              'folds'
-            * BaseCrossValidator object: any BaseCrossValidator class found
-                                        in scikit-learn model_selection module
-            * _RepeatedSplits object: any _RepeatedSplits class found
-                                      in scikit-learn model_selection module
-            * BaseShuffleSplit object: any BaseShuffleSplit class found
-                                      in scikit-learn model_selection module
+            If using a Splitter object that relies on the dataset retaining it's current
+            size and order, you will need to look at the ``dataset_compression`` argument
+            and ensure that ``"subsample"`` is not included in the applied compression
+            ``"methods"``.
+
+            **Options**
+            *   ``"holdout"``:
+                    67:33 (train:test) split
+            *   ``"holdout-iterative-fit"``:
+                    67:33 (train:test) split, iterative fit where possible
+            *   ``"cv"``:
+                    crossvalidation,
+                    requires ``"folds"`` in ``resampling_strategy_arguments``
+            *   ``"cv-iterative-fit"``:
+                    crossvalidation,
+                    calls iterative fit where possible,
+                    requires ``"folds"`` in ``resampling_strategy_arguments``
+            *   'partial-cv':
+                    crossvalidation with intensification,
+                    requires ``"folds"`` in ``resampling_strategy_arguments``
+            *   ``BaseCrossValidator`` object:
+                    any BaseCrossValidator class found in scikit-learn model_selection module
+            *   ``_RepeatedSplits`` object:
+                    any _RepeatedSplits class found in scikit-learn model_selection module
+            *   ``BaseShuffleSplit`` object:
+                    any BaseShuffleSplit class found in scikit-learn model_selection module
 
         resampling_strategy_arguments : dict, optional if 'holdout' (train_size default=0.67)
             Additional arguments for resampling_strategy:
@@ -229,6 +243,9 @@ class AutoSklearnEstimator(BaseEstimator):
         dataset_compression: Optional[Dict[str, Union[bool, str, List[str]]]] = None
             We compress datasets so that they fit into some predefined amount of memory.
             Currently this does not apply to dataframes or sparse arrays, only to raw numpy arrays.
+
+            **NOTE**: If using a custom ``resampling_strategy`` that relies on specific
+                size or ordering of data, this must be disabled to preserve these properties.
 
             To do this, we can either reduce the precision of the datatypes or subsample
             the data.
