@@ -1,3 +1,5 @@
+from ..test_pipeline.ignored_warnings import ignore_warnings
+
 # -*- encoding: utf-8 -*-
 import itertools
 import os
@@ -42,7 +44,6 @@ from smac.tae import StatusType
 sys.path.append(os.path.dirname(__file__))
 from automl_utils import print_debug_information, count_succeses, AutoMLLogParser, includes_all_scores, includes_train_scores, performance_over_time_is_plausible  # noqa (E402: module level import not at top of file)
 
-from ..test_pipeline.ignored_warnings import ignore_warnings
 
 class AutoMLStub(AutoML):
     def __init__(self):

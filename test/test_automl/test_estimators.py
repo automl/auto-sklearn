@@ -826,7 +826,6 @@ def test_autosklearn2_classification_methods_returns_self(dask_client):
                                     delete_tmp_folder_after_terminate=False,
                                     dask_client=dask_client)
 
-
     with ignore_warnings():
         automl_fitted = automl.fit(X_train, y_train)
 
@@ -1131,7 +1130,7 @@ def test_autosklearn_anneal(as_frame):
 
     if as_frame:
         with ignore_warnings():
-        # Let autosklearn calculate the feat types
+            # Let autosklearn calculate the feat types
             automl_fitted = automl.fit(X, y)
 
     else:

@@ -77,7 +77,7 @@ class BaseRegressionComponentTest(unittest.TestCase):
 
         for i in range(2):
             with ignore_warnings(regressor_warnings):
-                predictions, targets, regressor =  _test_regressor_iterative_fit(
+                predictions, targets, regressor = _test_regressor_iterative_fit(
                     dataset="boston",
                     Regressor=self.module
                 )
@@ -231,10 +231,12 @@ class BaseRegressionComponentTest(unittest.TestCase):
 
         for i in range(2):
             with ignore_warnings(regressor_warnings):
-                predictions, targets, _ = _test_regressor(dataset="diabetes",
+                predictions, targets, _ = _test_regressor(
+                    dataset="diabetes",
                     Regressor=self.module,
                     sparse=True
                 )
+
             self.assertAlmostEqual(self.res["default_diabetes_sparse"],
                                    sklearn.metrics.r2_score(targets,
                                                             predictions),
