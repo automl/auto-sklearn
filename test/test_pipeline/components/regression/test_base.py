@@ -1,3 +1,5 @@
+from typing import Type
+
 import unittest
 
 import pytest
@@ -340,7 +342,7 @@ def test_fit_and_predict_with_1d_targets_as_1d(
 @pytest.mark.parametrize("X", [np.array([[1, 2, 3]] * 20)])
 @pytest.mark.parametrize("y", [np.array([[1]] * 20)])
 def test_fit_and_predict_with_1d_targets_as_2d(
-    regressor: Type[ RegressorChoice ],
+    regressor: Type[RegressorChoice],
     X: np.ndarray,
     y: np.ndarray
 ):
