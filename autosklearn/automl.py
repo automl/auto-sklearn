@@ -1,4 +1,5 @@
-# -*- encoding: utf-8 -*- import copy
+# -*- encoding: utf-8 -*-
+import copy
 import io
 import json
 import platform

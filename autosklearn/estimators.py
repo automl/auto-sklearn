@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-from typing import Optional, Dict, List, Mapping, Tuple, Union, Iterable
+from typing import Any, Optional, Dict, List, Mapping, Tuple, Union, Iterable
 from typing_extensions import Literal
 
 from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
