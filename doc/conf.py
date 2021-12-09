@@ -68,6 +68,22 @@ import autosklearn
 if "dev" in autosklearn.__version__:
     binder_branch = "development"
 
+# Getting issues with the `-D plot_gallery=0` for sphinx gallery, this is a workaround
+# We do this by setting an evironment variable we check and modifying the python config
+# object.
+# We have this extra processing as it enters as a raw string and we need a boolean value
+gallery_env_var ="SPHINX_GALLERY_PLOT"
+
+sphinx_plot_gallery_flag = True
+if gallery_env_var in os.environ:
+    value = os.environ[gallery_env_var]
+    if value in ["False", "false", "0"]:
+        sphinx_plot_gallery_flag = False
+    elif value in ["True", "true", "1"]:
+        sphinx_plot_gallery_flag = True
+    else:
+        raise ValueError(f'Env variable {gallery_env_var} must be set to "false" or "true"')
+
 sphinx_gallery_conf = {
     # path to the examples
     'examples_dirs': '../examples',
@@ -78,6 +94,7 @@ sphinx_gallery_conf = {
     #'reference_url': {
     #    'autosklearn': None
     #},
+    'plot_gallery': sphinx_plot_gallery_flag,
     'backreferences_dir': None,
     'filename_pattern': 'example.*.py$',
     'ignore_pattern': r'custom_metrics\.py|__init__\.py',
