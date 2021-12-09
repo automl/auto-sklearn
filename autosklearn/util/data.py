@@ -1,6 +1,5 @@
 import warnings
-from collections.abc import Mapping
-from typing import Dict, Iterator, List, Optional, Tuple, Type, Union
+from typing import Dict, Iterator, List, Mapping, Optional, Sequence, Tuple, Type, Union
 
 import numpy as np
 
@@ -13,6 +12,76 @@ from sklearn.model_selection import train_test_split
 from autosklearn.data.validation import SUPPORTED_FEAT_TYPES
 from autosklearn.evaluation.splitter import CustomStratifiedShuffleSplit
 
+
+# Default argument and specification for arg `dataset_compression`
+default_dataset_compression_arg = {
+    "memory_allocation": 0.1,
+    "methods": ["precision", "subsample"]
+}
+
+def validate_dataset_compression_arg(
+    dataset_compression: Mapping[str, Any]
+) -> Dict[str, Any]:
+    """Validates and return a correct dataset_compression argument
+
+    The returned value can be safely used with `reduce_dataset_size_if_too_large`.
+
+    Parameters
+    ----------
+    dataset_compression: Mapping[str, Any]
+        The arg to validate
+
+    Returns
+    -------
+    Dict[str, Any]
+        The validated and correct argument
+    """
+    if isinstance(dataset_compression, Mapping):
+        # Fill with defaults if they don't exist
+        dataset_compression = {
+            **default_dataset_compression_arg,
+            **dataset_compression
+        }
+
+        # Must contain known keys
+        if set(dataset_compression.keys()) != set(default_dataset_compression_arg.keys()):
+            raise ValueError(
+                f"Unknown key in dataset_compression, {list(dataset_compression.keys())}."
+                f"\nPossible keys are {list(default_dataset_compression_arg.keys())}"
+            )
+
+        # "memory_allocation" must be float between (0, 1)
+        if (
+            type(dataset_compression["memory_allocation"]) != float
+            and 0.0 < dataset_compression["memory_allocation"] < 1.0
+        ):
+            raise ValueError( "key 'memory_allocation' must be a float in (0, 1)"
+                f"\n{dataset_compression}"
+            )
+
+        # "methods" must be non-empty sequence
+        if (
+            not isinstance(dataset_compression["methods"], Sequence)
+            or len(dataset_compression["methods"]) <= 0
+            ):
+                raise ValueError(
+                    "key 'methods' must be a non-empty list."
+                    f"\n{dataset_compression}"
+                )
+
+        # "methods" must contain known methods
+        if any(
+            method not in default_dataset_compression_arg["methods"]
+            for method in dataset_compression["methods"]
+        ):
+            raise ValueError(
+                f"key 'methods' can only contain {default_dataset_compression_arg['methods']}"
+                f"\n{dataset_compression}"
+            )
+
+        return dataset_compression
+    else:
+        raise ValueError(f"Unknown value for `dataset_compression` {dataset_compression}")
 
 class _DtypeReductionMapping(Mapping):
     """
@@ -245,7 +314,7 @@ def reduce_dataset_size_if_too_large(
     is_classification: bool,
     random_state: Union[int, np.random.RandomState] = None,
     operations: List[str] = ['precision', 'subsample'],
-    multiplier: Union[float, int] = 10,
+    memory_allocation: Union[int, float] = 0.1,
 ) -> Tuple[Union[np.ndarray, spmatrix], np.ndarray]:
     f""" Reduces the size of the dataset if it's too close to the memory limit.
 
@@ -255,9 +324,7 @@ def reduce_dataset_size_if_too_large(
     Precision reduction will only work on the following float types:
     -   {supported_precision_reductions}
 
-    Subsampling will ensure that the memory limit is satisfied while precision
-    reduction will only perform one level of precision reduction. Technically,
-    you could supply multiple rounds of precision reduction, i.e. to reduce
+    Subsampling will ensure that the memory limit is satisfied while precision reduction will only perform one level of precision reduction. Technically, you could supply multiple rounds of precision reduction, i.e. to reduce
     np.float128 to np.float32 you could use `operations = ['precision'] * 2`.
     However, if that's the use case, it'd be advised to simply use the function
     `autosklearn.util.data.reduce_precision`.
@@ -289,10 +356,18 @@ def reduce_dataset_size_if_too_large(
         A list of operations that are permitted to be performed to reduce
         the size of the dataset.
 
-    multiplier: float | int = 10
-        When performing reductions, satisfies the conditions that:
-        * Reduce precision if `size(X) * multiplier >= memory_limit`
-        * Subsample so that `size(X) * mulitplier = memory_limit` is satisfied``
+        **precision**
+
+        Reduce the precision of float types
+
+        **subsample**
+
+        Reduce the amount of samples of the dataset such that it fits into memory.
+        Ensures stratification and that unique labels are present
+
+    memory_allocation: Union[int, float] = 0.1
+        Performs reductions in the order they are passed in, performing them if the
+        dataset fits in to memory.
 
     Returns
     -------
@@ -301,6 +376,17 @@ def reduce_dataset_size_if_too_large(
     """
     # Validation
     assert memory_limit > 0
+
+    if isinstance(memory_allocation, float):
+        assert 0.0 < memory_allocation < 1.0
+        allocated_memory = memory_limit * memory_allocation
+
+    elif isinstance(memory_allocation, int):
+        assert 0 < memory_allocation < memory_limit
+        allocated_memory = memory_allocation
+
+    else:
+        raise ValueError(f"Unknown type for `memory_allocation` {type(memory_allocation)}")
 
     if 'precision' in operations and X.dtype not in supported_precision_reductions:
         raise ValueError(f"Unsupported type `{X.dtype}` for precision reduction")
@@ -311,22 +397,22 @@ def reduce_dataset_size_if_too_large(
     for operation in operations:
 
         if operation == 'precision':
-            # If `multiplier` times the dataset is too big for memory, we try
-            # to reduce the precision if it's a high precision dataset
-            if megabytes(X) * multiplier > memory_limit:
+            # If the dataset is too big for the allocated memory,
+            # we then try to reduce the precision if it's a high precision dataset
+            if megabytes(X) > allocated_memory:
                 X, precision = reduce_precision(X)
                 warnings.warn(
-                    f'Dataset too large for memory limit {memory_limit}MB, '
+                    f'Dataset too large for allocated memory {allocated_memory}MB, '
                     f'reduced the precision from {X.dtype} to {precision}',
                 )
 
         elif operation == 'subsample':
             # If the dataset is still too big such that we couldn't fit
-            # `multiplier` of them in memory, we subsample such that we can
-            if memory_limit < megabytes(X) * multiplier:
+            # into the allocated memory, we subsample it so that it does
+            if megabytes(X) > allocated_memory:
 
                 n_samples_before = X.shape[0]
-                reduction_percent = float(memory_limit) / (megabytes(X) * multiplier)
+                sample_percentage = allocated_memory / megabytes(X)
 
                 # NOTE: type ignore
                 #
@@ -334,17 +420,18 @@ def reduce_dataset_size_if_too_large(
                 # failing elsewhere, keeping it simple for now
                 X, y = subsample(  # type: ignore
                     X, y,
-                    sample_size=reduction_percent,
+                    sample_size=sample_percentage,
                     is_classification=is_classification,
                     random_state=random_state
                 )
 
                 n_samples_after = X.shape[0]
                 warnings.warn(
-                    f"Dataset too large for memory limit {memory_limit}MB, reduced"
+                    f"Dataset too large for allocated memory {allocated_memory}MB, reduced"
                     f" number of samples from {n_samples_before} to {n_samples_after}."
                 )
 
         else:
             raise ValueError(f"Unknown operation `{operation}`")
+
     return X, y

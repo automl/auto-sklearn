@@ -1,5 +1,4 @@
-# -*- encoding: utf-8 -*-
-import copy
+# -*- encoding: utf-8 -*- import copy
 import io
 import json
 import platform
@@ -8,7 +7,7 @@ import multiprocessing
 import os
 import sys
 import time
-from typing import Any, Dict, Optional, List, Tuple, Union, Iterable
+from typing import Any, Dict, Mapping, Optional, List, Tuple, Union, Sequence
 import uuid
 import unittest.mock
 import tempfile
@@ -50,7 +49,12 @@ from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, _fit_with_budget
 from autosklearn.metrics import calculate_metric
 from autosklearn.util.backend import Backend, create
-from autosklearn.util.data import reduce_dataset_size_if_too_large, supported_precision_reductions
+from autosklearn.util.data import (
+    reduce_dataset_size_if_too_large,
+    supported_precision_reductions,
+    validate_data_compression_arg,
+    default_dataset_compression_arg
+)
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import (
     setup_logger,
@@ -187,9 +191,8 @@ class AutoML(BaseEstimator):
         metric=None,
         scoring_functions=None,
         get_trials_callback=None,
-        dataset_compression: Optional[Dict[str, Union[bool, str, List[str]]]] = None
-    ):
-        super(AutoML, self).__init__()
+        dataset_compression: Union[bool, Mapping[str, Any]] = True
+    ): super(AutoML, self).__init__()
         self.configuration_space = None
         self._backend: Optional[Backend] = None
         self._temporary_directory = temporary_directory
@@ -233,58 +236,14 @@ class AutoML(BaseEstimator):
         self._smac_scenario_args = smac_scenario_args
         self.logging_config = logging_config
 
-        # Validate dataset_compression arg
-        default_dataset_compression = {
-            "enabled": True,
-            "memory_allocation": 0.1,
-            "methods": ["precision", "subsample"]
-        }
-
-        if dataset_compression is None:
-            dataset_compression = default_dataset_compression
+        # Validate dataset_compression and set its values
+        if isinstance(dataset_compression, bool):
+            if dataset_compression is False:
+                self._dataset_compression = None
+            else:
+                self._dataset_compression = default_dataset_compression_arg
         else:
-            # Fill with defaults if they don't exist
-            dataset_compression = {**default_dataset_compression, **dataset_compression}
-
-            # Must contain known keys
-            if set(dataset_compression.keys()) != set(default_dataset_compression.keys()):
-                raise ValueError(
-                    f"Unknown key in dataset_compression, {list(dataset_compression.keys())}."
-                    f"\nPossible keys are {list(default_dataset_compression.keys())}"
-                )
-
-            # "enabled" must be bool
-            if type(dataset_compression["enabled"]) != bool:
-                raise ValueError(
-                    "key 'enabled' in `dataset_compression` must be of type bool."
-                    f"\n{dataset_compression}"
-                )
-
-            # "memory_allocation" must be float between (0, 1)
-            if (
-                type(dataset_compression["memory_allocation"]) != float
-                and 0.0 < dataset_compression["memory_allocation"] < 1.0
-            ):
-                raise ValueError(
-                    "key 'memory_allocation' must be a float in (0, 1)"
-                    f"\n{dataset_compression}"
-                )
-
-            # "methods" must be iterable and contain known methods
-            if (
-                not isinstance(dataset_compression["methods"], Iterable)
-                or any(
-                    method not in default_dataset_compression["methods"]
-                    for method in dataset_compression["methods"]
-                )
-            ):
-                raise ValueError(
-                    f"key 'methods' must be list and can only contain"
-                    f" {default_dataset_compression['methods']}"
-                    f"\n{dataset_compression}"
-                )
-
-        self._dataset_compression = dataset_compression
+            self._dataset_compression = validate_data_compression_arg(dataset_compression)
 
         self._datamanager = None
         self._dataset_name = None
@@ -697,19 +656,26 @@ class AutoML(BaseEstimator):
             X_test, y_test = self.InputValidator.transform(X_test, y_test)
 
         # We don't support size reduction on pandas dataframes yet
-        if not isinstance(X, pd.DataFrame):
-            operations = ['subsample']
-            if X.dtype in supported_precision_reductions:
-                operations.append('precision')
+        if not isinstance(X, pd.DataFrame) and self._dataset_compression is not None:
+            methods = self._dataset_compression["methods"]
+            memory_allocation = self._dataset_compression["memory_allocation"]
+
+            # Remove precision reduction if we can't perform it
+            if (
+                X.dtype not in supported_precision_reductions
+                and "precision" in methods
+            ):
+                methods = [method for method in methods if method != "precision"]
 
             with warnings_to(self._logger):
                 X, y = reduce_dataset_size_if_too_large(
                     X=X,
                     y=y,
-                    is_classification=is_classification,
-                    operations=operations,
-                    random_state=self._seed,
                     memory_limit=self._memory_limit
+                    is_classification=is_classification,
+                    random_state=self._seed,
+                    operations=methods,
+                    memory_allocation=memory_allocation
                 )
 
         # Check the re-sampling strategy
