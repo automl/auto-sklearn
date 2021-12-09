@@ -41,11 +41,12 @@ extras_reqs={
         "seaborn",
     ],
     "docs": [
-        "sphinx",
-        "sphinx-gallery<=0.10.0",
+        "sphinx<4.3",
+        "sphinx-gallery",
         "sphinx_bootstrap_theme",
         "numpydoc",
         "sphinx_toolbox",
+        "docutils==0.16"
     ],
 }
 
