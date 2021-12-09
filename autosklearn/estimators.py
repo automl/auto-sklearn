@@ -8,7 +8,9 @@ import joblib
 import numpy as np
 import pandas as pd
 from scipy.sparse import spmatrix
-from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin from sklearn.utils.multiclass import type_of_target from smac.runhistory.runhistory import RunInfo, RunValue
+from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
+from sklearn.utils.multiclass import type_of_target
+from smac.runhistory.runhistory import RunInfo, RunValue
 
 from autosklearn.data.validation import (
     convert_if_sparse,

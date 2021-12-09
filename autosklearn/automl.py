@@ -8,7 +8,7 @@ import multiprocessing
 import os
 import sys
 import time
-from typing import Any, Dict, Mapping, Optional, List, Tuple, Union, Sequence
+from typing import Any, Dict, Mapping, Optional, List, Tuple, Union
 import uuid
 import unittest.mock
 import tempfile
@@ -53,7 +53,7 @@ from autosklearn.util.backend import Backend, create
 from autosklearn.util.data import (
     reduce_dataset_size_if_too_large,
     supported_precision_reductions,
-    validate_data_compression_arg,
+    validate_dataset_compression_arg,
     default_dataset_compression_arg
 )
 from autosklearn.util.stopwatch import StopWatch
@@ -245,7 +245,10 @@ class AutoML(BaseEstimator):
             else:
                 self._dataset_compression = default_dataset_compression_arg
         else:
-            self._dataset_compression = validate_data_compression_arg(dataset_compression)
+            self._dataset_compression = validate_dataset_compression_arg(
+                dataset_compression,
+                memory_limit=self._memory_limit
+            )
 
         self._datamanager = None
         self._dataset_name = None
@@ -657,8 +660,18 @@ class AutoML(BaseEstimator):
         if X_test is not None and y_test is not None:
             X_test, y_test = self.InputValidator.transform(X_test, y_test)
 
-        # We don't support size reduction on pandas dataframes yet
-        if not isinstance(X, pd.DataFrame) and self._dataset_compression is not None:
+        # We don't support size reduction on pandas type object yet
+        print(X)
+        print(type(X))
+        print(self._dataset_compression)
+        print(isinstance(X, pd.DataFrame))
+        print(isinstance(y, pd.DataFrame))
+        print(isinstance(y, pd.Series))
+        if (
+            self._dataset_compression is not None
+            and not isinstance(X, pd.DataFrame)
+            and not (isinstance(y, pd.Series) or isinstance(y, pd.DataFrame))
+        ):
             methods = self._dataset_compression["methods"]
             memory_allocation = self._dataset_compression["memory_allocation"]
 
@@ -670,10 +683,11 @@ class AutoML(BaseEstimator):
                 methods = [method for method in methods if method != "precision"]
 
             with warnings_to(self._logger):
+                print("called")
                 X, y = reduce_dataset_size_if_too_large(
                     X=X,
                     y=y,
-                    memory_limit=self._memory_limit
+                    memory_limit=self._memory_limit,
                     is_classification=is_classification,
                     random_state=self._seed,
                     operations=methods,

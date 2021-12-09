@@ -1,5 +1,5 @@
 import warnings
-from typing import Dict, Iterator, List, Mapping, Optional, Sequence, Tuple, Type, Union
+from typing import Any, Dict, Iterator, List, Mapping, Optional, Sequence, Tuple, Type, Union, cast
 
 import numpy as np
 
@@ -19,8 +19,10 @@ default_dataset_compression_arg = {
     "methods": ["precision", "subsample"]
 }
 
+
 def validate_dataset_compression_arg(
-    dataset_compression: Mapping[str, Any]
+    dataset_compression: Mapping[str, Any],
+    memory_limit: int
 ) -> Dict[str, Any]:
     """Validates and return a correct dataset_compression argument
 
@@ -50,12 +52,23 @@ def validate_dataset_compression_arg(
                 f"\nPossible keys are {list(default_dataset_compression_arg.keys())}"
             )
 
-        # "memory_allocation" must be float between (0, 1)
-        if (
-            type(dataset_compression["memory_allocation"]) != float
-            and 0.0 < dataset_compression["memory_allocation"] < 1.0
-        ):
-            raise ValueError( "key 'memory_allocation' must be a float in (0, 1)"
+        memory_allocation = dataset_compression["memory_allocation"]
+
+        # "memory_allocation" must be float or int
+        if not (isinstance(memory_allocation, float) or isinstance(memory_allocation, int)):
+            raise ValueError("key 'memory_allocation' must be an `int` or `float`")
+
+        # "memory_allocation" must be in (0,1) if float
+        if isinstance(memory_allocation, float) and not (0.0 < memory_allocation < 1.0):
+            raise ValueError(
+                "key 'memory_allocation' if float must be in (0, 1)"
+                f"\n{dataset_compression}"
+            )
+
+        # "memory_allocation" if absolute, should be > 0 and < memory_limit
+        if isinstance(memory_allocation, int) and not (0 < memory_allocation < memory_limit):
+            raise ValueError(
+                f"key 'memory_allocation' if int must be in (0, memory_limit={memory_limit})"
                 f"\n{dataset_compression}"
             )
 
@@ -63,15 +76,15 @@ def validate_dataset_compression_arg(
         if (
             not isinstance(dataset_compression["methods"], Sequence)
             or len(dataset_compression["methods"]) <= 0
-            ):
-                raise ValueError(
-                    "key 'methods' must be a non-empty list."
-                    f"\n{dataset_compression}"
-                )
+        ):
+            raise ValueError(
+                "key 'methods' must be a non-empty list"
+                f"\n{dataset_compression}"
+            )
 
         # "methods" must contain known methods
         if any(
-            method not in default_dataset_compression_arg["methods"]
+            method not in cast(Sequence, default_dataset_compression_arg["methods"])  # mypy
             for method in dataset_compression["methods"]
         ):
             raise ValueError(
@@ -81,7 +94,8 @@ def validate_dataset_compression_arg(
 
         return dataset_compression
     else:
-        raise ValueError(f"Unknown value for `dataset_compression` {dataset_compression}")
+        raise ValueError(f"Unknown type for `dataset_compression` {dataset_compression}")
+
 
 class _DtypeReductionMapping(Mapping):
     """
@@ -324,8 +338,11 @@ def reduce_dataset_size_if_too_large(
     Precision reduction will only work on the following float types:
     -   {supported_precision_reductions}
 
-    Subsampling will ensure that the memory limit is satisfied while precision reduction will only perform one level of precision reduction. Technically, you could supply multiple rounds of precision reduction, i.e. to reduce
-    np.float128 to np.float32 you could use `operations = ['precision'] * 2`.
+    Subsampling will ensure that the memory limit is satisfied while precision reduction
+    will only perform one level of precision reduction. Technically, you could supply
+    multiple rounds of precision reduction, i.e. to reduce np.float128 to np.float32
+    you could use `operations = ['precision'] * 2`.
+
     However, if that's the use case, it'd be advised to simply use the function
     `autosklearn.util.data.reduce_precision`.
 
@@ -362,12 +379,13 @@ def reduce_dataset_size_if_too_large(
 
         **subsample**
 
-        Reduce the amount of samples of the dataset such that it fits into memory.
+        Reduce the amount of samples of the dataset such that it fits into the allocated memory.
         Ensures stratification and that unique labels are present
 
     memory_allocation: Union[int, float] = 0.1
-        Performs reductions in the order they are passed in, performing them if the
-        dataset fits in to memory.
+        The amount of memory to allocate to the dataset. A float specifys that the
+        dataset will try to be fit into that percentage of memory. An int specifies an
+        absolute amount.
 
     Returns
     -------
@@ -378,11 +396,15 @@ def reduce_dataset_size_if_too_large(
     assert memory_limit > 0
 
     if isinstance(memory_allocation, float):
-        assert 0.0 < memory_allocation < 1.0
+        if not (0.0 < memory_allocation < 1.0):
+            raise ValueError("memory_allocation if float must be in (0, 1)")
+
         allocated_memory = memory_limit * memory_allocation
 
     elif isinstance(memory_allocation, int):
-        assert 0 < memory_allocation < memory_limit
+        if not (0 < memory_allocation < memory_limit):
+            raise ValueError("memory_allocation if int must be in (0, memory_limit)")
+
         allocated_memory = memory_allocation
 
     else:
