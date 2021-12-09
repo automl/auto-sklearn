@@ -1,4 +1,4 @@
-from typing import Type, cast
+from typing import Any, Dict, Type, Union, cast
 
 import copy
 import glob
@@ -1105,3 +1105,24 @@ def test_autosklearn_anneal(as_frame):
     # can be used in a meaningful way -- not meant for generalization,
     # hence we use the train dataset
     assert automl_fitted.score(X, y) > 0.75
+
+
+@pytest.mark.parametrize("dataset_compression", [
+    False, True, {"memory_allocation": 0.2}
+])
+def test_param_dataset_compression(dataset_compression: Union[bool, Dict[str, Any]]):
+    """We expect this does not get parsed and modified until it gets to the AutoML class,
+    In the meantime, it's value remains whatever was passed in.
+
+    Parameters
+    ----------
+    dataset_compression: Union[bool, Dict[str, Any]
+        The arg to pass to the estimator
+
+    Expects
+    -------
+    * The private attribute should be set to what was passed
+    """
+    model = AutoSklearnClassifier(dataset_compression=dataset_compression)
+
+    assert model.dataset_compression == dataset_compression

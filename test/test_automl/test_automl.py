@@ -1,4 +1,6 @@
 # -*- encoding: utf-8 -*-
+from typing import Dict, List, Union
+
 import itertools
 import os
 import pickle
@@ -12,7 +14,7 @@ import warnings
 import numpy as np
 import pandas as pd
 import pytest
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_matrix, spmatrix
 import sklearn.datasets
 from sklearn.ensemble import VotingRegressor, VotingClassifier
 from smac.scenario.scenario import Scenario
@@ -26,6 +28,7 @@ from autosklearn.metrics import (
     accuracy, log_loss, balanced_accuracy, default_metric_for_task
 )
 from autosklearn.evaluation.abstract_evaluator import MyDummyClassifier, MyDummyRegressor
+from autosklearn.util.data import default_dataset_compression_arg
 from autosklearn.util.logging_ import PickableLoggerAdapter
 import autosklearn.pipeline.util as putil
 from autosklearn.constants import (
@@ -43,18 +46,17 @@ from automl_utils import print_debug_information, count_succeses, AutoMLLogParse
 
 
 class AutoMLStub(AutoML):
-    def __init__(self):
-        self.__class__ = AutoML
+    def __init__(self, classifier: bool = False):
         self._task = None
         self._dask_client = None
         self._is_dask_client_internally_created = False
+        self._classifier = classifier
 
     def __del__(self):
         pass
 
 
 def test_fit(dask_client):
-
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
     automl = autosklearn.automl.AutoML(
         seed=0,
@@ -933,3 +935,186 @@ def test_model_predict_outputs_to_stdout_if_no_logger():
         _model_predict(model, X, task, logger=None)
 
         assert len(w) == 1, "One warning sould have been emmited"
+
+
+@pytest.mark.parametrize("dataset_compression", [False])
+def test_param_dataset_compression_false(dataset_compression: bool):
+    """
+    Parameters
+    ----------
+    dataset_compression: bool
+        The dataset_compression arg set as False
+
+    Expects
+    -------
+    * Should set the private attribute to None
+    """
+    auto = AutoMLRegressor(
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        dataset_compression=dataset_compression
+    )
+
+    assert auto._dataset_compression is None
+
+
+@pytest.mark.parametrize("dataset_compression", [True])
+def test_construction_param_dataset_compression_true(dataset_compression: bool):
+    """
+    Parameters
+    ----------
+    dataset_compression: bool
+        The dataset_compression arg set as True
+
+    Expects
+    -------
+    * Should set the private attribute to the defaults
+    """
+    auto = AutoMLRegressor(
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        dataset_compression=dataset_compression
+    )
+
+    assert auto._dataset_compression == default_dataset_compression_arg
+
+
+@pytest.mark.parametrize("dataset_compression", [{"memory_allocation": 0.2}])
+def test_construction_param_dataset_compression_valid_dict(dataset_compression: Dict):
+    """
+    Parameters
+    ----------
+    dataset_compression: Dict
+        The dataset_compression arg set partially specified
+
+    Expects
+    -------
+    * Should set the private attribute to the passed dataset_compression arg + defaults
+    """
+    auto = AutoMLRegressor(
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        dataset_compression=dataset_compression
+    )
+
+    expected_memory_allocation = dataset_compression["memory_allocation"]
+    expected_methods = default_dataset_compression_arg["methods"]
+
+    assert auto._dataset_compression["memory_allocation"] == expected_memory_allocation
+    assert auto._dataset_compression["methods"] == expected_methods
+
+
+@pytest.mark.parametrize("dataset_compression", [{"methods": ["precision", "subsample"]}])
+@pytest.mark.parametrize("X", [np.ones((100, 10), dtype=int)])
+@pytest.mark.parametrize("y", [np.random.random((100,))])
+@unittest.mock.patch("autosklearn.automl.reduce_dataset_size_if_too_large")
+def test_fit_performs_dataset_compression_without_precision_with_int(
+    mock_reduce_dataset: unittest.mock.MagicMock,
+    dataset_compression: Dict,
+    X: np.ndarray,
+    y: np.ndarray
+):
+    """
+    Parameters
+    ----------
+    mock_reduce_dataset: MagicMock
+        A mock function to check the parameters that were passed in
+
+    dataset_compression: Dict
+        The dataset_compression arg with "precision" set in it
+
+    X: np.ndarray
+        An array of ints which we can't reduce precision of
+
+    y: np.ndarray
+        An array of floats as the regression target
+
+    Expects
+    -------
+    * Should call reduce_dataset_size_if_too_large
+    * "precision" should have been remove from the "methods" passed to the keyword
+        argument "operations" of `reduce_dataset_size_if_too_large`
+    """
+    # We just return the data
+    mock_reduce_dataset.return_value = X, y
+
+    auto = AutoMLRegressor(
+        time_left_for_this_task=30,  # not used but required
+        per_run_time_limit=5,  # not used but required
+        dataset_compression=dataset_compression
+    )
+
+    # To prevent fitting anything we use `only_return_configuration_space`
+    auto.fit(X, y, only_return_configuration_space=True)
+
+    assert mock_reduce_dataset.called
+
+    args = mock_reduce_dataset.call_args.kwargs
+
+    assert args["operations"] == ["subsample"]
+
+
+@pytest.mark.parametrize("dataset_compression", [True])
+@pytest.mark.parametrize("X", [
+    np.empty((10, 10)),
+    csr_matrix(np.identity(10)),
+    pytest.param(
+        np.empty((10, 10)).tolist(),
+        marks=pytest.mark.xfail(reason="Converted to dataframe by InputValidator")
+    ),
+    pytest.param(
+        pd.DataFrame(np.empty((10, 10))),
+        marks=pytest.mark.xfail(reason="No pandas support yet for dataset compression")
+    )
+])
+@pytest.mark.parametrize("y", [
+    np.random.random((10, 1)),
+    np.random.random((10, 1)).tolist(),
+    pytest.param(
+        pd.Series(np.random.random((10,))),
+        marks=pytest.mark.xfail(reason="No pandas support yet for dataset compression")
+    ),
+    pytest.param(
+        pd.DataFrame(np.random.random((10, 10))),
+        marks=pytest.mark.xfail(reason="No pandas support yet for dataset compression")
+    )
+])
+@unittest.mock.patch("autosklearn.automl.reduce_dataset_size_if_too_large")
+def test_fit_performs_dataset_compression(
+    mock_reduce_dataset: unittest.mock.MagicMock,
+    dataset_compression: bool,
+    X: Union[np.ndarray, spmatrix, List, pd.DataFrame],
+    y: Union[np.ndarray, List, pd.Series, pd.DataFrame]
+):
+    """
+    Parameters
+    ----------
+    mock_reduce_dataset: MagicMock
+        A mock function to view call count
+
+    dataset_compression: bool
+        Dataset compression set to True
+
+    X: Union[np.ndarray, spmatrix, List, pd.Dataframe]
+        Feature to reduce
+
+    y: Union[np.ndarray, List, pd.Series, pd.Dataframe]
+        Target to reduce (regression values)
+
+    Expects
+    -------
+    * Should call reduce_dataset_size_if_too_large
+    """
+    # We just return the data
+    mock_reduce_dataset.return_value = X, y
+
+    auto = AutoMLRegressor(
+        time_left_for_this_task=30,  # not used but required
+        per_run_time_limit=5,  # not used but required
+        dataset_compression=dataset_compression
+    )
+
+    # To prevent fitting anything we use `only_return_configuration_space`
+    auto.fit(X, y, only_return_configuration_space=True)
+
+    assert mock_reduce_dataset.called
