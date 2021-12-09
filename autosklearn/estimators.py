@@ -58,7 +58,8 @@ class AutoSklearnEstimator(BaseEstimator):
             Time limit in seconds for the search of appropriate
             models. By increasing this value, *auto-sklearn* has a higher
             chance of finding better models.
-per_run_time_limit : int, optional (default=1/10 of time_left_for_this_task)
+
+        per_run_time_limit : int, optional (default=1/10 of time_left_for_this_task)
             Time limit for a single call to the machine learning model.
             Model fitting will be terminated if the machine learning
             algorithm runs over the time limit. Set this value high enough so
