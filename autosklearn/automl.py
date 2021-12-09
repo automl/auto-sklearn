@@ -192,7 +192,8 @@ class AutoML(BaseEstimator):
         scoring_functions=None,
         get_trials_callback=None,
         dataset_compression: Union[bool, Mapping[str, Any]] = True
-    ): super(AutoML, self).__init__()
+    ):
+        super(AutoML, self).__init__()
         self.configuration_space = None
         self._backend: Optional[Backend] = None
         self._temporary_directory = temporary_directory
