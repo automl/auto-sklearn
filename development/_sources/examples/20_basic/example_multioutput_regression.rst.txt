@@ -124,7 +124,7 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight              type          cost  duration
     model_id                                                                 
-    20           1              1.0  gaussian_process  2.198749e-08  4.786565
+    11           1              1.0  gaussian_process  4.436846e-10  9.897039
 
 
 
@@ -151,7 +151,7 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    [(1.000000, SimpleRegressionPipeline({'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'extra_trees_preproc_for_regression', 'regressor:__choice__': 'gaussian_process', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:extra_trees_preproc_for_regression:bootstrap': 'True', 'feature_preprocessor:extra_trees_preproc_for_regression:criterion': 'mae', 'feature_preprocessor:extra_trees_preproc_for_regression:max_depth': 'None', 'feature_preprocessor:extra_trees_preproc_for_regression:max_features': 0.5166678376035129, 'feature_preprocessor:extra_trees_preproc_for_regression:max_leaf_nodes': 'None', 'feature_preprocessor:extra_trees_preproc_for_regression:min_samples_leaf': 1, 'feature_preprocessor:extra_trees_preproc_for_regression:min_samples_split': 9, 'feature_preprocessor:extra_trees_preproc_for_regression:min_weight_fraction_leaf': 0.0, 'feature_preprocessor:extra_trees_preproc_for_regression:n_estimators': 100, 'regressor:gaussian_process:alpha': 4.2478708206859043e-10, 'regressor:gaussian_process:thetaL': 1.158691069519535e-05, 'regressor:gaussian_process:thetaU': 1167.1248238015862, 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01017601832778754},
+    [(1.000000, SimpleRegressionPipeline({'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'gaussian_process', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'regressor:gaussian_process:alpha': 1.6650724498551164e-11, 'regressor:gaussian_process:thetaL': 5.222627524598125e-10, 'regressor:gaussian_process:thetaU': 5801.524168449955, 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0809214996879808, 'data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max': 0.9020530113478731, 'data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min': 0.10288728233229412},
     dataset_properties={
       'task': 5,
       'sparse': False,
@@ -186,7 +186,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.9999999937620259
+    R2 score: 0.9999999995269687
 
 
 
@@ -409,7 +409,7 @@ Get the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  1.233 seconds)
+   **Total running time of the script:** ( 1 minutes  54.019 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multioutput_regression.py:
