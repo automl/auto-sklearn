@@ -1,5 +1,3 @@
-from ..test_pipeline.ignored_warnings import ignore_warnings
-
 # -*- encoding: utf-8 -*-
 import itertools
 import os
@@ -67,17 +65,16 @@ def test_fit(dask_client):
         dask_client=dask_client,
     )
 
-    with ignore_warnings():
-        automl.fit(X_train, Y_train, task=MULTICLASS_CLASSIFICATION)
+    automl.fit(X_train, Y_train, task=MULTICLASS_CLASSIFICATION)
 
-    score = automl.score(X_test, Y_test)
-    assert score > 0.8
-    assert count_succeses(automl.cv_results_) > 0
-    assert includes_train_scores(automl.performance_over_time_.columns) is True
-    assert performance_over_time_is_plausible(automl.performance_over_time_) is True
-    assert automl._task == MULTICLASS_CLASSIFICATION
+score = automl.score(X_test, Y_test)
+assert score > 0.8
+assert count_succeses(automl.cv_results_) > 0
+assert includes_train_scores(automl.performance_over_time_.columns) is True
+assert performance_over_time_is_plausible(automl.performance_over_time_) is True
+assert automl._task == MULTICLASS_CLASSIFICATION
 
-    del automl
+del automl
 
 
 def test_fit_roar(dask_client_single_worker):
@@ -112,8 +109,8 @@ def test_fit_roar(dask_client_single_worker):
         metric=accuracy,
         dask_client=dask_client_single_worker,
     )
-    with ignore_warnings():
-        automl.fit(X_train, Y_train, task=MULTICLASS_CLASSIFICATION)
+
+    automl.fit(X_train, Y_train, task=MULTICLASS_CLASSIFICATION)
 
     score = automl.score(X_test, Y_test)
     assert score > 0.8
@@ -227,8 +224,7 @@ def test_delete_non_candidate_models(dask_client):
         max_models_on_disc=3,
     )
 
-    with ignore_warnings():
-        automl.fit(X, Y, task=MULTICLASS_CLASSIFICATION, X_test=X, y_test=Y)
+    automl.fit(X, Y, task=MULTICLASS_CLASSIFICATION, X_test=X, y_test=Y)
 
     # Assert at least one model file has been deleted and that there were no
     # deletion errors
@@ -275,8 +271,7 @@ def test_binary_score_and_include(dask_client):
         dask_client=dask_client,
     )
 
-    with ignore_warnings():
-        automl.fit(X_train, Y_train, task=BINARY_CLASSIFICATION)
+    automl.fit(X_train, Y_train, task=BINARY_CLASSIFICATION)
 
     assert automl._task == BINARY_CLASSIFICATION
 
@@ -301,15 +296,14 @@ def test_automl_outputs(dask_client):
         delete_tmp_folder_after_terminate=False,
     )
 
-    with ignore_warnings():
-        auto.fit(
-            X=X_train,
-            y=Y_train,
-            X_test=X_test,
-            y_test=Y_test,
-            dataset_name=name,
-            task=MULTICLASS_CLASSIFICATION,
-        )
+    auto.fit(
+        X=X_train,
+        y=Y_train,
+        X_test=X_test,
+        y_test=Y_test,
+        dataset_name=name,
+        task=MULTICLASS_CLASSIFICATION,
+    )
 
     data_manager_file = os.path.join(
         auto._backend.temporary_directory,
@@ -633,8 +627,7 @@ def test_load_best_individual_model(metric, dask_client):
     # We cannot easily mock a function sent to dask
     # so for this test we create the whole set of models/ensembles
     # but prevent it to be loaded
-    with ignore_warnings():
-        automl.fit(X_train, Y_train, task=MULTICLASS_CLASSIFICATION)
+    automl.fit(X_train, Y_train, task=MULTICLASS_CLASSIFICATION)
 
     automl._backend.load_ensemble = unittest.mock.MagicMock(return_value=None)
 
