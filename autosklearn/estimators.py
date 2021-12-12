@@ -245,18 +245,21 @@ class AutoSklearnEstimator(BaseEstimator):
             We compress datasets so that they fit into some predefined amount of memory.
             Currently this does not apply to dataframes or sparse arrays, only to raw numpy arrays.
 
-            **NOTE**: If using a custom ``resampling_strategy`` that relies on specific
-                size or ordering of data, this must be disabled to preserve these properties.
+            **NOTE**
+
+            If using a custom ``resampling_strategy`` that relies on specific
+            size or ordering of data, this must be disabled to preserve these properties.
 
             You can disable this entirely by passing ``False``.
 
             Default configuration when left as ``True``:
-            ```
-            {
-                "memory_allocation": 0.1,
-                "methods": ["precision", "subsample"]
-            }
-            ```
+
+            .. code-block:: python
+
+                {
+                    "memory_allocation": 0.1,
+                    "methods": ["precision", "subsample"]
+                }
 
             You can also pass your own configuration with the same keys and choosing
             from the available ``"methods"``.
@@ -294,7 +297,6 @@ class AutoSklearnEstimator(BaseEstimator):
 
         Attributes
         ----------
-
         cv_results\_ : dict of numpy (masked) ndarrays
             A dict with keys as column headers and values as columns, that can be
             imported into a pandas ``DataFrame``.
@@ -931,10 +933,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
 
 class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
-    """
-    This class implements the classification task.
-
-    """
+    """This class implements the classification task. """
 
     def fit(self, X, y,
             X_test=None,
@@ -948,7 +947,6 @@ class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
 
         Parameters
         ----------
-
         X : array-like or sparse matrix of shape = [n_samples, n_features]
             The training input samples.
 
@@ -980,7 +978,6 @@ class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
         Returns
         -------
         self
-
         """
         # AutoSklearn does not handle sparse y for now
         y = convert_if_sparse(y)
@@ -1032,12 +1029,10 @@ class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
         -------
         y : array of shape = [n_samples] or [n_samples, n_labels]
             The predicted classes.
-
         """
         return super().predict(X, batch_size=batch_size, n_jobs=n_jobs)
 
     def predict_proba(self, X, batch_size=None, n_jobs=1):
-
         """Predict probabilities of classes for all samples X.
 
         Parameters
@@ -1053,7 +1048,6 @@ class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
         -------
         y : array of shape = [n_samples, n_classes] or [n_samples, n_labels]
             The predicted class probabilities.
-
         """
         pred_proba = super().predict_proba(
             X, batch_size=batch_size, n_jobs=n_jobs)
