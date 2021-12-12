@@ -881,21 +881,32 @@ def test_selector_file_askl2_can_be_created(selector_path):
     importlib.reload(autosklearn.experimental.askl2)
 
 
-def test_check_askl2_same_arguments_as_askl():
-    # In case a new attribute is created, make sure it is there also in
-    # ASKL2
-    extra_arguments = list(set(
-        inspect.getfullargspec(AutoSklearnEstimator.__init__).args) - set(
-            inspect.getfullargspec(AutoSklearn2Classifier.__init__).args))
-    expected_extra_args = ['exclude',
-                           'include',
-                           'resampling_strategy_arguments',
-                           'get_smac_object_callback',
-                           'initial_configurations_via_metalearning',
-                           'resampling_strategy',
-                           'metadata_directory',
-                           'get_trials_callback']
-    unexpected_args = set(extra_arguments) - set(expected_extra_args)
+def test_check_askl2_same_arguments_as_askl() -> None:
+    """Check the asklearn2 has the same args as asklearn1
+
+    This test is useful for when adding args to asklearn1 to make sure we update asklearn2
+
+    Expects
+    -------
+    * The set of arguments for AutoSklearnClassifier is the same as AutoSklearn2Classifier
+        except for a few expected arugments
+    """
+    autosklearn1_classifier_args = set(inspect.getfullargspec(AutoSklearnEstimator.__init__).args)
+    autosklearn2_classifier_args = set(inspect.getfullargspec(AutoSklearn2Classifier.__init__).args)
+    extra_arguments = autosklearn1_classifier_args - autosklearn2_classifier_args
+
+    expected_extra_args = set([
+        'exclude',
+        'include',
+        'resampling_strategy_arguments',
+        'get_smac_object_callback',
+        'initial_configurations_via_metalearning',
+        'resampling_strategy',
+        'metadata_directory',
+        'get_trials_callback',
+    ])
+    unexpected_args = extra_arguments - expected_extra_args
+
     assert len(unexpected_args) == 0, unexpected_args
 
 
