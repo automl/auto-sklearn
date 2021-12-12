@@ -123,6 +123,7 @@ class AutoSklearnEstimator(BaseEstimator):
             ``"methods"`` or disable it entirely with ``False``.
 
             **Options**
+
             *   ``"holdout"``:
                     67:33 (train:test) split
             *   ``"holdout-iterative-fit"``:

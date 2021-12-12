@@ -3,7 +3,7 @@ import json
 import os
 import pathlib
 import pickle
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Mapping
 
 import dask.distributed
 import scipy.sparse

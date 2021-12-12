@@ -30,6 +30,7 @@ class DatasetCompressionSpec(TypedDict):
     memory_allocation: float
     methods: List[str]
 
+
 # Default specification for arg `dataset_compression`
 default_dataset_compression_arg: DatasetCompressionSpec = {
     "memory_allocation": 0.1,
@@ -109,7 +110,7 @@ def validate_dataset_compression_arg(
                 f"\n{dataset_compression}"
             )
 
-        return dataset_compression
+        return cast(DatasetCompressionSpec, dataset_compression)
     else:
         raise ValueError(f"Unknown type for `dataset_compression` {dataset_compression}")
 
