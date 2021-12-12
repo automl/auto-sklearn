@@ -1,5 +1,18 @@
 import warnings
-from typing import Any, Dict, Iterator, List, Mapping, Optional, Sequence, Tuple, Type, Union, cast
+from typing import (
+    Any,
+    Dict,
+    Iterator,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypedDict,
+    Union,
+    cast
+)
 
 import numpy as np
 
@@ -13,8 +26,12 @@ from autosklearn.data.validation import SUPPORTED_FEAT_TYPES
 from autosklearn.evaluation.splitter import CustomStratifiedShuffleSplit
 
 
-# Default argument and specification for arg `dataset_compression`
-default_dataset_compression_arg = {
+class DatasetCompressionSpec(TypedDict):
+    memory_allocation: float
+    methods: List[str]
+
+# Default specification for arg `dataset_compression`
+default_dataset_compression_arg: DatasetCompressionSpec = {
     "memory_allocation": 0.1,
     "methods": ["precision", "subsample"]
 }
@@ -23,7 +40,7 @@ default_dataset_compression_arg = {
 def validate_dataset_compression_arg(
     dataset_compression: Mapping[str, Any],
     memory_limit: int
-) -> Dict[str, Any]:
+) -> DatasetCompressionSpec:
     """Validates and return a correct dataset_compression argument
 
     The returned value can be safely used with `reduce_dataset_size_if_too_large`.
@@ -35,8 +52,8 @@ def validate_dataset_compression_arg(
 
     Returns
     -------
-    Dict[str, Any]
-        The validated and correct argument
+    DatasetCompressionSpec
+        The validated and correct dataset compression spec
     """
     if isinstance(dataset_compression, Mapping):
         # Fill with defaults if they don't exist

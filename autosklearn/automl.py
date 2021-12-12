@@ -54,7 +54,8 @@ from autosklearn.util.data import (
     reduce_dataset_size_if_too_large,
     supported_precision_reductions,
     validate_dataset_compression_arg,
-    default_dataset_compression_arg
+    default_dataset_compression_arg,
+    DatasetCompressionSpec,
 )
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import (
@@ -239,15 +240,15 @@ class AutoML(BaseEstimator):
         self.logging_config = logging_config
 
         # Validate dataset_compression and set its values
+        self._dataset_compression: Optional[DatasetCompressionSpec]
         if isinstance(dataset_compression, bool):
-            if dataset_compression is False:
-                self._dataset_compression = None
-            else:
+            if dataset_compression is True:
                 self._dataset_compression = default_dataset_compression_arg
+            else:
+                self._dataset_compression = None
         else:
             self._dataset_compression = validate_dataset_compression_arg(
-                dataset_compression,
-                memory_limit=self._memory_limit
+                dataset_compression, memory_limit=self._memory_limit
             )
 
         self._datamanager = None
@@ -661,12 +662,6 @@ class AutoML(BaseEstimator):
             X_test, y_test = self.InputValidator.transform(X_test, y_test)
 
         # We don't support size reduction on pandas type object yet
-        print(X)
-        print(type(X))
-        print(self._dataset_compression)
-        print(isinstance(X, pd.DataFrame))
-        print(isinstance(y, pd.DataFrame))
-        print(isinstance(y, pd.Series))
         if (
             self._dataset_compression is not None
             and not isinstance(X, pd.DataFrame)
@@ -683,7 +678,6 @@ class AutoML(BaseEstimator):
                 methods = [method for method in methods if method != "precision"]
 
             with warnings_to(self._logger):
-                print("called")
                 X, y = reduce_dataset_size_if_too_large(
                     X=X,
                     y=y,
