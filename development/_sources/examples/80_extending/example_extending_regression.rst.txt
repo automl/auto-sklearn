@@ -253,7 +253,7 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    r2 score:  -0.004615171174183752
+    r2 score:  0.014806898006898828
     [(1.000000, SimpleRegressionPipeline({'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'KernelRidgeRegression', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'regressor:KernelRidgeRegression:alpha': 1.0, 'regressor:KernelRidgeRegression:gamma': 0.1, 'regressor:KernelRidgeRegression:kernel': 'polynomial', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'regressor:KernelRidgeRegression:coef0': 1.0, 'regressor:KernelRidgeRegression:degree': 3},
     dataset_properties={
       'task': 4,
@@ -269,7 +269,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  13.045 seconds)
+   **Total running time of the script:** ( 0 minutes  16.262 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_regression.py:

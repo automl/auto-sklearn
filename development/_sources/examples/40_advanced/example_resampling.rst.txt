@@ -133,7 +133,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score holdout:  0.958041958041958
+    Accuracy score holdout:  0.951048951048951
 
 
 
@@ -177,7 +177,7 @@ Cross-validation
  .. code-block:: none
 
     Before re-fit
-    Accuracy score CV 0.965034965034965
+    Accuracy score CV 0.958041958041958
 
 
 
@@ -210,7 +210,7 @@ final ensemble on the whole dataset.
  .. code-block:: none
 
     After re-fit
-    Accuracy score CV 0.958041958041958
+    Accuracy score CV 0.951048951048951
 
 
 
@@ -232,13 +232,14 @@ Below is an example of using a predefined split. We split the training
 data by the first feature. In practice, one would use a splitting according
 to the use case at hand.
 
-.. GENERATED FROM PYTHON SOURCE LINES 100-114
+.. GENERATED FROM PYTHON SOURCE LINES 100-117
 
 .. code-block:: default
 
 
+    selected_indices = (X_train[:, 0] < np.mean(X_train[:, 0])).astype(int)
     resampling_strategy = sklearn.model_selection.PredefinedSplit(
-        test_fold=np.where(X_train[:, 0] < np.mean(X_train[:, 0]))[0]
+        test_fold=selected_indices
     )
 
     automl = autosklearn.classification.AutoSklearnClassifier(
@@ -250,6 +251,8 @@ to the use case at hand.
     )
     automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
+    print(automl.sprint_statistics())
+
 
 
 
@@ -260,20 +263,26 @@ to the use case at hand.
 
  .. code-block:: none
 
+    auto-sklearn results:
+      Dataset name: breast_cancer
+      Metric: accuracy
+      Best validation score: 0.964789
+      Number of target algorithm runs: 27
+      Number of successful target algorithm runs: 26
+      Number of crashed target algorithm runs: 0
+      Number of target algorithms that exceeded the time limit: 1
+      Number of target algorithms that exceeded the memory limit: 0
 
-    AutoSklearnClassifier(per_run_time_limit=30,
-                          resampling_strategy=PredefinedSplit(test_fold=array([  3,   4, ..., 424, 425])),
-                          time_left_for_this_task=120,
-                          tmp_folder='/tmp/autosklearn_resampling_example_tmp')
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 115-117
+
+.. GENERATED FROM PYTHON SOURCE LINES 118-120
 
 For custom resampling strategies (i.e. resampling strategies that are not
 defined as strings by Auto-sklearn) it is necessary to perform a refit:
 
-.. GENERATED FROM PYTHON SOURCE LINES 117-119
+.. GENERATED FROM PYTHON SOURCE LINES 120-122
 
 .. code-block:: default
 
@@ -291,13 +300,13 @@ defined as strings by Auto-sklearn) it is necessary to perform a refit:
 
 
     AutoSklearnClassifier(per_run_time_limit=30,
-                          resampling_strategy=PredefinedSplit(test_fold=array([  3,   4, ..., 424, 425])),
+                          resampling_strategy=PredefinedSplit(test_fold=array([0, 0, ..., 1, 1])),
                           time_left_for_this_task=120,
                           tmp_folder='/tmp/autosklearn_resampling_example_tmp')
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 120-125
+.. GENERATED FROM PYTHON SOURCE LINES 123-128
 
 Get the Score of the final ensemble (again)
 ===========================================
@@ -305,7 +314,7 @@ Get the Score of the final ensemble (again)
 Obviously, this score is pretty bad as we "destroyed" the dataset by
 splitting it on the first feature.
 
-.. GENERATED FROM PYTHON SOURCE LINES 125-127
+.. GENERATED FROM PYTHON SOURCE LINES 128-130
 
 .. code-block:: default
 
@@ -321,7 +330,7 @@ splitting it on the first feature.
 
  .. code-block:: none
 
-    Accuracy score custom split 0.38461538461538464
+    Accuracy score custom split 0.958041958041958
 
 
 
@@ -329,7 +338,7 @@ splitting it on the first feature.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 6 minutes  10.294 seconds)
+   **Total running time of the script:** ( 6 minutes  22.537 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_resampling.py:
