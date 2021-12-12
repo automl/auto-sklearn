@@ -15,7 +15,7 @@ class AdaboostRegressor(AutoSklearnRegressionAlgorithm):
         self.max_depth = max_depth
         self.estimator = None
 
-    def fit(self, X, Y):
+    def fit(self, X, y):
         import sklearn.ensemble
         import sklearn.tree
 
@@ -32,7 +32,11 @@ class AdaboostRegressor(AutoSklearnRegressionAlgorithm):
             loss=self.loss,
             random_state=self.random_state
         )
-        self.estimator.fit(X, Y)
+
+        if y.ndim == 2 and y.shape[1] == 1:
+            y = y.flatten()
+
+        self.estimator.fit(X, y)
         return self
 
     def predict(self, X):

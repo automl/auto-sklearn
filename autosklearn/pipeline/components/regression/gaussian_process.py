@@ -12,7 +12,6 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
         self.thetaU = thetaU
         self.random_state = random_state
         self.estimator = None
-        self.scaler = None
 
     def fit(self, X, y):
         import sklearn.gaussian_process
@@ -37,6 +36,9 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
             random_state=self.random_state,
             normalize_y=True
         )
+
+        if y.ndim == 2 and y.shape[1] == 1:
+            y = y.flatten()
 
         self.estimator.fit(X, y)
 

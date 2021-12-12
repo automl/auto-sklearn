@@ -48,10 +48,7 @@ class GradientBoosting(
         return self.estimator.n_iter_
 
     def iterative_fit(self, X, y, n_iter=2, refit=False):
-
-        """
-        Set n_iter=2 for the same reason as for SGD
-        """
+        """ Set n_iter=2 for the same reason as for SGD """
         import sklearn.ensemble
         from sklearn.experimental import enable_hist_gradient_boosting  # noqa
 
@@ -111,6 +108,9 @@ class GradientBoosting(
             self.estimator.max_iter += n_iter
             self.estimator.max_iter = min(self.estimator.max_iter,
                                           self.max_iter)
+
+        if y.ndim == 2 and y.shape[1] == 1:
+            y = y.flatten()
 
         self.estimator.fit(X, y)
 
