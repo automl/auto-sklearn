@@ -1,4 +1,4 @@
-from typing import Type, Container
+from typing import Type
 
 import unittest
 
@@ -13,7 +13,7 @@ from autosklearn.pipeline.components.regression.libsvm_svr import LibSVM_SVR
 
 from autosklearn.pipeline.components.regression import _regressors, RegressorChoice
 
-from test.test_pipeline.ignored_warnings import regressor_warnings, ignore_warnings
+from ...ignored_warnings import regressor_warnings, ignore_warnings
 
 
 class BaseRegressionComponentTest(unittest.TestCase):
@@ -331,7 +331,7 @@ def test_fit_and_predict_with_1d_targets_as_1d(
     regressor: Type[RegressorChoice],
     X: np.ndarray,
     y: np.ndarray
-) -> None:
+):
     """Test that all pipelines work with 1d target types
 
     Parameters
@@ -374,7 +374,7 @@ def test_fit_and_predict_with_1d_targets_as_2d(
     regressor: Type[RegressorChoice],
     X: np.ndarray,
     y: np.ndarray
-) -> None:
+):
     """Test that all pipelines work with 1d target types when they are wrapped as 2d
 
     Parameters
@@ -423,7 +423,7 @@ def test_fit_and_predict_with_2d_targets(
     regressor: Type[RegressorChoice],
     X: np.ndarray,
     y: np.ndarray
-) -> None:
+):
     """Test that all pipelines work with 2d target types
 
     Parameters
