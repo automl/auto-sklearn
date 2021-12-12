@@ -198,6 +198,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         metric: Optional[Scorer] = None,
         scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
+        dataset_compression: Union[bool, Mapping[str, Any]] = True
     ):
 
         """
