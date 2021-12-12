@@ -938,7 +938,7 @@ def test_model_predict_outputs_to_stdout_if_no_logger():
 
 
 @pytest.mark.parametrize("dataset_compression", [False])
-def test_param_dataset_compression_false(dataset_compression: bool):
+def test_param_dataset_compression_false(dataset_compression: bool) -> None:
     """
     Parameters
     ----------
@@ -959,7 +959,7 @@ def test_param_dataset_compression_false(dataset_compression: bool):
 
 
 @pytest.mark.parametrize("dataset_compression", [True])
-def test_construction_param_dataset_compression_true(dataset_compression: bool):
+def test_construction_param_dataset_compression_true(dataset_compression: bool) -> None:
     """
     Parameters
     ----------
@@ -980,7 +980,7 @@ def test_construction_param_dataset_compression_true(dataset_compression: bool):
 
 
 @pytest.mark.parametrize("dataset_compression", [{"memory_allocation": 0.2}])
-def test_construction_param_dataset_compression_valid_dict(dataset_compression: Dict):
+def test_construction_param_dataset_compression_valid_dict(dataset_compression: Dict) -> None:
     """
     Parameters
     ----------
@@ -1000,6 +1000,7 @@ def test_construction_param_dataset_compression_valid_dict(dataset_compression: 
     expected_memory_allocation = dataset_compression["memory_allocation"]
     expected_methods = default_dataset_compression_arg["methods"]
 
+    assert auto._dataset_compression is not None
     assert auto._dataset_compression["memory_allocation"] == expected_memory_allocation
     assert auto._dataset_compression["methods"] == expected_methods
 
@@ -1013,7 +1014,7 @@ def test_fit_performs_dataset_compression_without_precision_with_int(
     dataset_compression: Dict,
     X: np.ndarray,
     y: np.ndarray
-):
+) -> None:
     """
     Parameters
     ----------
@@ -1082,7 +1083,7 @@ def test_fit_performs_dataset_compression(
     dataset_compression: bool,
     X: Union[np.ndarray, spmatrix, List, pd.DataFrame],
     y: Union[np.ndarray, List, pd.Series, pd.DataFrame]
-):
+) -> None:
     """
     Parameters
     ----------
