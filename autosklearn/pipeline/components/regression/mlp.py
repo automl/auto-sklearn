@@ -137,16 +137,36 @@ class MLPRegressor(
                 # max_fun=self.max_fun
             )
             self.scaler = sklearn.preprocessing.StandardScaler(copy=True)
-            self.scaler.fit(y.reshape((-1, 1)))
+
+            # Convert y to be at least 2d for the StandardScaler
+            # [1,1,1] -> [[1], [1], [1]]
+            if y.ndim == 1:
+                y = y.reshape((-1, 1))
+
+            self.scaler.fit(y)
         else:
             new_max_iter = min(self.max_iter - self.estimator.n_iter_, n_iter)
             self.estimator.max_iter = new_max_iter
 
-        Y_scaled = self.scaler.transform(y.reshape((-1, 1))).ravel()
-        self.estimator.fit(X, Y_scaled)
-        if self.estimator.n_iter_ >= self.max_iter or \
-                self.estimator._no_improvement_count > self.n_iter_no_change:
+        # Convert y to be at least 2d for the scaler
+        # [1,1,1] -> [[1], [1], [1]]
+        if y.ndim == 1:
+            y = y.reshape((-1, 1))
+
+        y_scaled = self.scaler.transform(y)
+
+        # Flatten: [[0], [0], [0]] -> [0, 0, 0]
+        if y_scaled.ndim == 2 and y_scaled.shape[1] == 1:
+            y_scaled = y_scaled.flatten()
+
+        self.estimator.fit(X, y_scaled)
+
+        if (
+            self.estimator.n_iter_ >= self.max_iter
+            or self.estimator._no_improvement_count > self.n_iter_no_change
+        ):
             self._fully_fit = True
+
         return self
 
     def configuration_fully_fitted(self):
@@ -160,8 +180,16 @@ class MLPRegressor(
     def predict(self, X):
         if self.estimator is None:
             raise NotImplementedError
-        Y_pred = self.estimator.predict(X)
-        return self.scaler.inverse_transform(Y_pred)
+
+        y_pred = self.estimator.predict(X)
+
+        inverse = self.scaler.inverse_transform(y_pred)
+
+        # Flatten: [[0], [0], [0]] -> [0, 0, 0]
+        if inverse.ndim == 2 and inverse.shape[1] == 1:
+            inverse = inverse.flatten()
+
+        return inverse
 
     @staticmethod
     def get_properties(dataset_properties=None):
