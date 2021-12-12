@@ -1,9 +1,9 @@
-name: black-format-check
+name: isort-check
 
 on: [push, pull_request, workflow_dispatch]
 
 env:
-  #If STRICT is set to true, it will fail on black check fail
+  #If STRICT is set to true, it will fail on isort check fail
   STRICT: false
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
       with:
         python-version: "3.7"
 
-    - name: Install black
+    - name: Install isort
       run: |
         pip install isort
 
