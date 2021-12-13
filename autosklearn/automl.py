@@ -673,7 +673,7 @@ class AutoML(BaseEstimator):
             # Remove precision reduction if we can't perform it
             if (
                 X.dtype not in supported_precision_reductions
-                and "precision" in methods
+                and "precision" in cast(List[str], methods)  # Removable with TypedDict
             ):
                 methods = [method for method in methods if method != "precision"]
 

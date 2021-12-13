@@ -9,7 +9,6 @@ from typing import (
     Sequence,
     Tuple,
     Type,
-    TypedDict,
     Union,
     cast
 )
@@ -26,13 +25,14 @@ from autosklearn.data.validation import SUPPORTED_FEAT_TYPES
 from autosklearn.evaluation.splitter import CustomStratifiedShuffleSplit
 
 
-class DatasetCompressionSpec(TypedDict):
-    memory_allocation: float
-    methods: List[str]
-
+# TODO: TypedDict with python 3.8
+#
+#   When upgrading to python 3.8 as minimum version, this should be a TypedDict
+#   so that mypy can identify the fields types
+DatasetCompressionSpec = Dict[str, Union[float, List[str]]]
 
 # Default specification for arg `dataset_compression`
-default_dataset_compression_arg: DatasetCompressionSpec = {
+default_dataset_compression_arg:  DatasetCompressionSpec = {
     "memory_allocation": 0.1,
     "methods": ["precision", "subsample"]
 }
