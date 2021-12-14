@@ -122,14 +122,9 @@ View the models found by auto-sklearn
 
  .. code-block:: none
 
-              rank  ensemble_weight                 type      cost  duration
-    model_id                                                                
-    2            1             0.74        random_forest  0.105222  2.568839
-    20           2             0.02          extra_trees  0.126052  1.365298
-    5            3             0.06  k_nearest_neighbors  0.277803  0.518441
-    8            4             0.04          extra_trees  0.308847  1.598460
-    22           5             0.10  k_nearest_neighbors  0.377291  0.517786
-    14           6             0.04  k_nearest_neighbors  0.548478  0.893792
+              rank  ensemble_weight              type          cost   duration
+    model_id                                                                  
+    18           1              1.0  gaussian_process  5.149491e-09  10.221251
 
 
 
@@ -156,42 +151,7 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    [(0.740000, SimpleRegressionPipeline({'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'random_forest', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'regressor:random_forest:bootstrap': 'True', 'regressor:random_forest:criterion': 'mse', 'regressor:random_forest:max_depth': 'None', 'regressor:random_forest:max_features': 1.0, 'regressor:random_forest:max_leaf_nodes': 'None', 'regressor:random_forest:min_impurity_decrease': 0.0, 'regressor:random_forest:min_samples_leaf': 1, 'regressor:random_forest:min_samples_split': 2, 'regressor:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01},
-    dataset_properties={
-      'task': 5,
-      'sparse': False,
-      'multioutput': True,
-      'target_type': 'regression',
-      'signed': False})),
-    (0.100000, SimpleRegressionPipeline({'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'k_nearest_neighbors', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:polynomial:degree': 3, 'feature_preprocessor:polynomial:include_bias': 'False', 'feature_preprocessor:polynomial:interaction_only': 'True', 'regressor:k_nearest_neighbors:n_neighbors': 1, 'regressor:k_nearest_neighbors:p': 1, 'regressor:k_nearest_neighbors:weights': 'uniform', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0003383450128800807},
-    dataset_properties={
-      'task': 5,
-      'sparse': False,
-      'multioutput': True,
-      'target_type': 'regression',
-      'signed': False})),
-    (0.060000, SimpleRegressionPipeline({'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'regressor:__choice__': 'k_nearest_neighbors', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:pca:keep_variance': 0.8772654126094648, 'feature_preprocessor:pca:whiten': 'True', 'regressor:k_nearest_neighbors:n_neighbors': 14, 'regressor:k_nearest_neighbors:p': 1, 'regressor:k_nearest_neighbors:weights': 'uniform'},
-    dataset_properties={
-      'task': 5,
-      'sparse': False,
-      'multioutput': True,
-      'target_type': 'regression',
-      'signed': False})),
-    (0.040000, SimpleRegressionPipeline({'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'fast_ica', 'regressor:__choice__': 'extra_trees', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'median', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:fast_ica:algorithm': 'parallel', 'feature_preprocessor:fast_ica:fun': 'cube', 'feature_preprocessor:fast_ica:whiten': 'True', 'regressor:extra_trees:bootstrap': 'True', 'regressor:extra_trees:criterion': 'friedman_mse', 'regressor:extra_trees:max_depth': 'None', 'regressor:extra_trees:max_features': 0.5507241840323179, 'regressor:extra_trees:max_leaf_nodes': 'None', 'regressor:extra_trees:min_impurity_decrease': 0.0, 'regressor:extra_trees:min_samples_leaf': 1, 'regressor:extra_trees:min_samples_split': 13, 'regressor:extra_trees:min_weight_fraction_leaf': 0.0, 'feature_preprocessor:fast_ica:n_components': 1530},
-    dataset_properties={
-      'task': 5,
-      'sparse': False,
-      'multioutput': True,
-      'target_type': 'regression',
-      'signed': False})),
-    (0.040000, SimpleRegressionPipeline({'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'fast_ica', 'regressor:__choice__': 'k_nearest_neighbors', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:fast_ica:algorithm': 'deflation', 'feature_preprocessor:fast_ica:fun': 'logcosh', 'feature_preprocessor:fast_ica:whiten': 'True', 'regressor:k_nearest_neighbors:n_neighbors': 1, 'regressor:k_nearest_neighbors:p': 1, 'regressor:k_nearest_neighbors:weights': 'distance', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.00024939850901091595, 'feature_preprocessor:fast_ica:n_components': 563},
-    dataset_properties={
-      'task': 5,
-      'sparse': False,
-      'multioutput': True,
-      'target_type': 'regression',
-      'signed': False})),
-    (0.020000, SimpleRegressionPipeline({'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'extra_trees', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'regressor:extra_trees:bootstrap': 'True', 'regressor:extra_trees:criterion': 'friedman_mse', 'regressor:extra_trees:max_depth': 'None', 'regressor:extra_trees:max_features': 0.9636134380703354, 'regressor:extra_trees:max_leaf_nodes': 'None', 'regressor:extra_trees:min_impurity_decrease': 0.0, 'regressor:extra_trees:min_samples_leaf': 1, 'regressor:extra_trees:min_samples_split': 17, 'regressor:extra_trees:min_weight_fraction_leaf': 0.0, 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.014024988684708958},
+    [(1.000000, SimpleRegressionPipeline({'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'extra_trees_preproc_for_regression', 'regressor:__choice__': 'gaussian_process', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'none', 'feature_preprocessor:extra_trees_preproc_for_regression:bootstrap': 'True', 'feature_preprocessor:extra_trees_preproc_for_regression:criterion': 'mae', 'feature_preprocessor:extra_trees_preproc_for_regression:max_depth': 'None', 'feature_preprocessor:extra_trees_preproc_for_regression:max_features': 0.10236588960344592, 'feature_preprocessor:extra_trees_preproc_for_regression:max_leaf_nodes': 'None', 'feature_preprocessor:extra_trees_preproc_for_regression:min_samples_leaf': 2, 'feature_preprocessor:extra_trees_preproc_for_regression:min_samples_split': 9, 'feature_preprocessor:extra_trees_preproc_for_regression:min_weight_fraction_leaf': 0.0, 'feature_preprocessor:extra_trees_preproc_for_regression:n_estimators': 100, 'regressor:gaussian_process:alpha': 1.893109218935316e-09, 'regressor:gaussian_process:thetaL': 2.303696108477476e-05, 'regressor:gaussian_process:thetaU': 51148.328195924485},
     dataset_properties={
       'task': 5,
       'sparse': False,
@@ -226,7 +186,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.8979526772328041
+    R2 score: 0.9999999915708525
 
 
 
@@ -449,7 +409,7 @@ Get the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  19.828 seconds)
+   **Total running time of the script:** ( 1 minutes  55.266 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multioutput_regression.py:
