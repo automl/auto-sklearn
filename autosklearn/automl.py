@@ -8,7 +8,7 @@ import multiprocessing
 import os
 import sys
 import time
-from typing import Any, Dict, Mapping, Optional, List, Tuple, Union
+from typing import Any, Dict, Mapping, Optional, List, Tuple, Union, cast
 import uuid
 import unittest.mock
 import tempfile
