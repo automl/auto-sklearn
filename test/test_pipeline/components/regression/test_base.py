@@ -41,6 +41,12 @@ class BaseRegressionComponentTest(unittest.TestCase):
                     Regressor=self.module
                 )
 
+            with ignore_warnings(regressor_warnings):
+                predictions, targets, n_calls = _test_regressor(
+                    dataset="boston",
+                    Regressor=self.module
+                )
+
             score = sklearn.metrics.r2_score(y_true=targets, y_pred=predictions)
 
             # Special treatment for Gaussian Process Regression
@@ -331,7 +337,7 @@ def test_fit_and_predict_with_1d_targets_as_1d(
     regressor: Type[RegressorChoice],
     X: np.ndarray,
     y: np.ndarray
-):
+) -> None:
     """Test that all pipelines work with 1d target types
 
     Parameters
@@ -374,7 +380,7 @@ def test_fit_and_predict_with_1d_targets_as_2d(
     regressor: Type[RegressorChoice],
     X: np.ndarray,
     y: np.ndarray
-):
+) -> None:
     """Test that all pipelines work with 1d target types when they are wrapped as 2d
 
     Parameters
@@ -423,7 +429,7 @@ def test_fit_and_predict_with_2d_targets(
     regressor: Type[RegressorChoice],
     X: np.ndarray,
     y: np.ndarray
-):
+) -> None:
     """Test that all pipelines work with 2d target types
 
     Parameters
