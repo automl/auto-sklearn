@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from typing import List, Iterator, Tuple
 
 import warnings
+
 from sklearn.exceptions import ConvergenceWarning
 
 
@@ -69,13 +70,33 @@ classifier_warnings = [
         )
     ),
     (
+        ConvergenceWarning, (  # From FastICA
+            r"FastICA did not converge\."
+            r" Consider increasing tolerance or the maximum number of iterations\."
+        )
+    ),
+    (
         UserWarning, (  # From LDA (Linear Discriminant Analysis)
             r"Variables are collinear"
         )
     ),
+    (
+        UserWarning, (
+            r"Clustering metrics expects discrete values but received continuous values"
+            r" for label, and multiclass values for target"
+        )
+    )
 ]
 
-ignored_warnings = regressor_warnings + classifier_warnings
+feature_preprocessing_warnings = [
+    (
+        ConvergenceWarning, (  # From liblinear
+            r"Liblinear failed to converge, increase the number of iterations."
+        )
+    )
+]
+
+ignored_warnings = regressor_warnings + classifier_warnings + feature_preprocessing_warnings
 
 
 @contextmanager

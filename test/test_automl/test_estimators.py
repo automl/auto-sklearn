@@ -79,6 +79,7 @@ def test_fit_n_jobs(tmp_dir):
         get_smac_object_callback=get_smac_object_wrapper_instance,
         max_models_on_disc=None,
     )
+
     automl.fit(X_train, Y_train)
 
     # Test that the argument is correctly passed to SMAC
@@ -272,6 +273,7 @@ def test_performance_over_time_no_ensemble(tmp_dir):
                                 seed=1,
                                 initial_configurations_via_metalearning=0,
                                 ensemble_size=0,)
+
     cls.fit(X_train, Y_train, X_test, Y_test)
 
     performance_over_time = cls.performance_over_time_
@@ -297,6 +299,7 @@ def test_cv_results(tmp_dir):
     original_params = copy.deepcopy(params)
 
     cls.fit(X_train, Y_train)
+
     cv_results = cls.cv_results_
     assert isinstance(cv_results, dict), type(cv_results)
     assert isinstance(cv_results['mean_test_score'], np.ndarray), type(
@@ -382,6 +385,7 @@ def test_leaderboard(
         tmp_folder=tmp_dir,
         seed=1
     )
+
     model.fit(X_train, Y_train)
 
     for params in params_generator:
@@ -540,6 +544,7 @@ def test_can_pickle_classifier(tmp_dir, dask_client):
                                    tmp_folder=tmp_dir,
                                    dask_client=dask_client,
                                    )
+
     automl.fit(X_train, Y_train)
 
     initial_predictions = automl.predict(X_test)
@@ -765,12 +770,14 @@ def test_autosklearn_classification_methods_returns_self(dask_client):
                                    exclude={'feature_preprocessor': ['fast_ica']})
 
     automl_fitted = automl.fit(X_train, y_train)
+
     assert automl is automl_fitted
 
     automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
     assert automl is automl_ensemble_fitted
 
     automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+
     assert automl is automl_refitted
 
 
@@ -801,12 +808,14 @@ def test_autosklearn2_classification_methods_returns_self(dask_client):
                                     dask_client=dask_client)
 
     automl_fitted = automl.fit(X_train, y_train)
+
     assert automl is automl_fitted
 
     automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
     assert automl is automl_ensemble_fitted
 
     automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+
     assert automl is automl_refitted
 
     predictions = automl_fitted.predict(X_test)
@@ -824,12 +833,14 @@ def test_autosklearn2_classification_methods_returns_self_sparse(dask_client):
                                     dask_client=dask_client)
 
     automl_fitted = automl.fit(X_train, y_train)
+
     assert automl is automl_fitted
 
     automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
     assert automl is automl_ensemble_fitted
 
     automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+
     assert automl is automl_refitted
 
     predictions = automl_fitted.predict(X_test)
@@ -933,10 +944,15 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
                                             X_test=X_test, y_test=y_test,
                                             ).get_default_configuration()
 
-    pipeline, run_info, run_value = automl.fit_pipeline(X=X_train, y=y_train, config=config,
-                                                        X_test=X_test, y_test=y_test,
-                                                        disable_file_output=disable_file_output,
-                                                        resampling_strategy=resampling_strategy)
+    pipeline, run_info, run_value = automl.fit_pipeline(
+        X=X_train,
+        y=y_train,
+        config=config,
+        X_test=X_test,
+        y_test=y_test,
+        disable_file_output=disable_file_output,
+        resampling_strategy=resampling_strategy
+    )
 
     assert isinstance(run_info.config, Configuration)
     assert run_info.cutoff == 30
@@ -1090,11 +1106,14 @@ def test_autosklearn_anneal(as_frame):
     if as_frame:
         # Let autosklearn calculate the feat types
         automl_fitted = automl.fit(X, y)
+
     else:
         X_, y_ = sklearn.datasets.fetch_openml(data_id=2, return_X_y=True, as_frame=True)
         feat_type = ['categorical' if X_[col].dtype.name == 'category' else 'numerical'
                      for col in X_.columns]
+
         automl_fitted = automl.fit(X, y, feat_type=feat_type)
+
     assert automl is automl_fitted
 
     automl_ensemble_fitted = automl.fit_ensemble(y, ensemble_size=5)

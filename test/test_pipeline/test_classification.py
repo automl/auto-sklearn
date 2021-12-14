@@ -174,7 +174,9 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
         auto = SimpleClassificationPipeline(random_state=1)
 
-        auto = auto.fit(X_train, Y_train)
+        with ignore_warnings(classifier_warnings):
+            auto = auto.fit(X_train, Y_train)
+
         predictions = auto.predict(X_test)
 
         acc = sklearn.metrics.accuracy_score(predictions, Y_test)
@@ -197,7 +199,9 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         default = cs.get_default_configuration()
         classifier.set_hyperparameters(default)
 
-        classifier = classifier.fit(X_train, Y_train)
+        with ignore_warnings(classifier_warnings):
+            classifier = classifier.fit(X_train, Y_train)
+
         predictions = classifier.predict(X_test)
 
         acc = sklearn.metrics.accuracy_score(predictions, Y_test)
@@ -221,10 +225,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             }
         )
         classifier.fit_transformer(X_train, Y_train)
-        for i in range(1, 11):
-            classifier.iterative_fit(X_train, Y_train)
-            n_estimators = classifier.steps[-1][-1].choice.estimator.n_estimators
-            self.assertEqual(n_estimators, i)
+
+        with ignore_warnings(classifier_warnings):
+            for i in range(1, 11):
+                classifier.iterative_fit(X_train, Y_train)
+                n_estimators = classifier.steps[-1][-1].choice.estimator.n_estimators
+                self.assertEqual(n_estimators, i)
 
     def test_repr(self):
         """Test that the default pipeline can be converted to its representation and
@@ -730,7 +736,9 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
         # Multiclass
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
-        cls.fit(X_train, Y_train)
+
+        with ignore_warnings(classifier_warnings):
+            cls.fit(X_train, Y_train)
 
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
@@ -762,7 +770,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
         # Multiclass
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits', make_sparse=True)
-        cls.fit(X_train, Y_train)
+        with ignore_warnings(classifier_warnings):
+            cls.fit(X_train, Y_train)
 
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
@@ -791,7 +800,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cls = SimpleClassificationPipeline(include={'classifier': ['sgd']})
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
 
-        cls.fit(X_train, Y_train)
+        with ignore_warnings(classifier_warnings):
+            cls.fit(X_train, Y_train)
 
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
@@ -811,7 +821,9 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
         Y_train = np.array(list([(list([1 if i != y else 0 for i in range(10)]))
                                  for y in Y_train]))
-        cls.fit(X_train, Y_train)
+
+        with ignore_warnings(classifier_warnings):
+            cls.fit(X_train, Y_train)
 
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
@@ -845,7 +857,9 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits', make_sparse=True)
         X_test_ = X_test.copy()
 
-        cls.fit(X_train, Y_train)
+        with ignore_warnings(classifier_warnings):
+            cls.fit(X_train, Y_train)
+
         prediction_ = cls.predict_proba(X_test_)
 
         # The object behind the last step in the pipeline
@@ -864,10 +878,13 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             include={'classifier': ['lda']}
         )
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits', make_sparse=True)
+
         X_test_ = X_test.copy()
         Y_train = np.array([[1 if i != y else 0 for i in range(10)] for y in Y_train])
 
-        cls.fit(X_train, Y_train)
+        with ignore_warnings(classifier_warnings):
+            cls.fit(X_train, Y_train)
+
         prediction_ = cls.predict_proba(X_test_)
 
         # The object behind the last step in the pipeline
@@ -892,7 +909,9 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris')
 
         auto = SimpleClassificationPipeline()
-        auto = auto.fit(X_train, Y_train)
+
+        with ignore_warnings(classifier_warnings):
+            auto = auto.fit(X_train, Y_train)
 
         auto_clone = clone(auto)
         auto_clone_params = auto_clone.get_params()
@@ -1153,12 +1172,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             del preprocessing_components.additional_components.components['CrashPreprocessor']
             self.fail("cs={} config={} Exception={}".format(cs, config, e))
         cls.set_hyperparameters(config)
-        with self.assertRaisesRegex(
-            ValueError,
-            "Make sure fit is called"
-        ):
-            cls.fit(
-                X=np.array([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]),
-                y=np.array([1, 0, 1, 1])
-            )
+
+        with self.assertRaisesRegex(ValueError, "Make sure fit is called"):
+            with ignore_warnings(classifier_warnings):
+                cls.fit(
+                    X=np.array([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]),
+                    y=np.array([1, 0, 1, 1])
+                )
+
         del preprocessing_components.additional_components.components['CrashPreprocessor']
