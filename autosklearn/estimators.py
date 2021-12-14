@@ -492,9 +492,9 @@ class AutoSklearnEstimator(BaseEstimator):
         return self.automl_.score(X, y)
 
     def show_models(self):
-        """ Returns a dictionary containing dictionaries of ensemble models only.
+        """ Returns a dictionary containing dictionaries of ensemble models.
 
-        Any model can be accessed by giving its ``model_id`` as key.
+        Each model in the ensemble can be accessed by giving its ``model_id`` as key.
 
         A model dictionary contains the following:
 
@@ -502,6 +502,8 @@ class AutoSklearnEstimator(BaseEstimator):
         * ``"rank"`` - The rank of the model based on it's ``"cost"``.
         * ``"cost"`` - The loss of the model on the validation set.
         * ``"ensemble_weight"`` - The weight given to the model in the ensemble.
+        * ``"voting_model"`` - The ``VotingX`` model (only for 'cv' resampling).
+        * ``"estimators"`` - List of dicts of models in the ``VotingX`` (only for 'cv' resampling).
         * ``"data_preprocessor"`` - The preprocessor used on the data.
         * ``"balancing"`` - The balancing used on the data (for classification).
         * ``"feature_preprocessor"`` - The preprocessor for features types.

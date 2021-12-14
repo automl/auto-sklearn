@@ -1834,9 +1834,9 @@ class AutoML(BaseEstimator):
         return self.ensemble_.get_models_with_weights(self.models_)
 
     def show_models(self) -> Dict[int, Any]:
-        """ Returns a dictionary containing dictionaries of ensemble models only.
+        """ Returns a dictionary containing dictionaries of ensemble models.
 
-        Any model can be accessed by giving its ``model_id`` as key.
+        Each model in the ensemble can be accessed by giving its ``model_id`` as key.
 
         A model dictionary contains the following:
 
@@ -1844,6 +1844,8 @@ class AutoML(BaseEstimator):
         * ``"rank"`` - The rank of the model based on it's ``"cost"``.
         * ``"cost"`` - The loss of the model on the validation set.
         * ``"ensemble_weight"`` - The weight given to the model in the ensemble.
+        * ``"voting_model"`` - The ``VotingX`` model (only for 'cv' resampling).
+        * ``"estimators"`` - List of dicts of models in the ``VotingX`` (only for 'cv' resampling).
         * ``"data_preprocessor"`` - The preprocessor used on the data.
         * ``"balancing"`` - The balancing used on the data (for classification).
         * ``"feature_preprocessor"`` - The preprocessor for features types.
@@ -1914,7 +1916,7 @@ class AutoML(BaseEstimator):
                         'cost': rval.cost
                         }
 
-        # Check if dictionary is empty
+        # Checking if the dictionary is empty
         if not table_dict:
             raise RuntimeError('No model found. Try increasing \'time_left_for_this_task\'.')
 
@@ -1925,31 +1927,58 @@ class AutoML(BaseEstimator):
         table = pd.DataFrame.from_dict(table_dict, orient='index')
         table.sort_values(by='cost', inplace=True)
 
+        # Checking which resampling strategy is chosen and selecting the appropriate models
+        is_cv = (self._resampling_strategy == "cv")
+        models = self.cv_models_ if is_cv else self.models_
+
         rank = 1  # Initializing rank for the first model
-        for (_, model_id, _), model in self.models_.items():
+        for (_, model_id, _), model in models.items():
             model_dict = {}  # Declaring model dictionary
 
             # Inserting model_id, rank, cost and ensemble weight
-            model_dict['model_id'] = table.loc[model_id]['model_id']
+            model_dict['model_id'] = table.loc[model_id]['model_id'].astype(int)
             model_dict['rank'] = rank
             model_dict['cost'] = table.loc[model_id]['cost']
             model_dict['ensemble_weight'] = table.loc[model_id]['ensemble_weight']
             rank += 1  # Incrementing rank by 1 for the next model
 
-            # The steps in the models pipeline will be saved in the dictionary as follows:
+            # The steps in the models pipeline are as follows:
             # 'data_preprocessor': DataPreprocessor,
             # 'balancing': Balancing,
             # 'feature_preprocessor': FeaturePreprocessorChoice,
             # 'classifier'/'regressor': ClassifierChoice/RegressorChoice (autosklearn wrapped model)
-            steps = dict(model.steps)
-            model_dict.update(steps)
 
-            # Adding sklearn model to the model dictionary
-            model_type, autosklearn_wrapped_model = model.steps[-1]
-            model_dict[f'sklearn_{model_type}'] = autosklearn_wrapped_model.choice.estimator
+            # For 'cv' (cross validation) strategy
+            if is_cv:
+                # Voting model created by cross validation
+                VotingX = model
+                model_dict['voting_model'] = VotingX
+
+                # List of models, each trained on one cv fold
+                cv_models = []
+                for cv_model in VotingX.estimators_:
+                    estimator = {}
+                    steps = dict(cv_model.steps)
+                    estimator.update(steps)
+
+                    # Adding sklearn model to the model dictionary
+                    model_type, autosklearn_wrapped_model = cv_model.steps[-1]
+                    estimator[f'sklearn_{model_type}'] = autosklearn_wrapped_model.choice.estimator
+                    cv_models.append(estimator)
+                model_dict['estimators'] = cv_models
+
+            # For any other strategy
+            else:
+                steps = dict(model.steps)
+                model_dict.update(steps)
+
+                # Adding sklearn model to the model dictionary
+                model_type, autosklearn_wrapped_model = model.steps[-1]
+                model_dict[f'sklearn_{model_type}'] = autosklearn_wrapped_model.choice.estimator
 
             # Insterting model_dict in the ensemble dictionary
             ensemble_dict[model_id] = model_dict
+
         return ensemble_dict
 
     def _create_search_space(self, tmp_dir, backend, datamanager,
