@@ -138,12 +138,12 @@ class AutoSklearnEstimator(BaseEstimator):
             *   'partial-cv':
                     crossvalidation with intensification,
                     requires ``"folds"`` in ``resampling_strategy_arguments``
-            *   ``BaseCrossValidator`` object:
-                    any BaseCrossValidator class found in scikit-learn model_selection module
-            *   ``_RepeatedSplits`` object:
-                    any _RepeatedSplits class found in scikit-learn model_selection module
-            *   ``BaseShuffleSplit`` object:
-                    any BaseShuffleSplit class found in scikit-learn model_selection module
+            *   ``BaseCrossValidator`` subclass:
+                    any BaseCrossValidator subclass (found in scikit-learn model_selection module)
+            *   ``_RepeatedSplits`` subclass:
+                    any _RepeatedSplits subclass (found in scikit-learn model_selection module)
+            *   ``BaseShuffleSplit`` subclass:
+                    any BaseShuffleSplit subclass (found in scikit-learn model_selection module)
 
         resampling_strategy_arguments : dict, optional if 'holdout' (train_size default=0.67)
             Additional arguments for resampling_strategy:
@@ -269,16 +269,16 @@ class AutoSklearnEstimator(BaseEstimator):
             **memory_allocation**
 
             By default, we attempt to fit the dataset into ``0.1 * memory_limit``. This
-            value can be set with ``"memory_allocation": 0.1``. We also allow for specifying
-            absolute memory in MB, e.g. 10MB is ``"memory_allocation": 10``. These values
-            are checked after each method is performed and if performing only some methods
-            is enough to fit the dataset into its allocation, the following methods will
-            not be performed.
+            float value can be set with ``"memory_allocation": 0.1``. We also allow for
+            specifying absolute memory in MB, e.g. 10MB is ``"memory_allocation": 10``.
 
-            For example, if ``methods: ["precision", "subsample"]`` is passed, if reducing
-            precision was enough to make the dataset fit into memory, then subsampling will
-            not be performed. We note that ``"subample"`` forces that the dataset fits
-            into the memory allocation.
+            The memory used by the dataset is checked after each reduction method is
+            performed. If the dataset fits into the allocated memory, any further methods
+            listed in ``"methods"`` will not be performed.
+
+            For example, if ``methods: ["precision", "subsample"]`` and the
+            ``"precision"`` reduction step was enough to make the dataset fit into memory,
+            then the ``"subsample"`` reduction step will not be performed.
 
             **methods**
 
@@ -290,10 +290,12 @@ class AutoSklearnEstimator(BaseEstimator):
                 *   ``np.float96 -> np.float64``
                 *   ``np.float64 -> np.float32``
 
-            *   ``subsampling`` - We subsample data such that it fits directly into the
-                memory allocation ``memory_allocation * memory_limit``. This takes into
-                account classification labels and stratifies accordingly. We garauntee that
-                at least one occurence of each label is included in the sampled set.
+            *   ``subsample`` - We subsample data such that it **fits directly into the
+                memory allocation** ``memory_allocation * memory_limit``. Therefore, this
+                should likely be the last method listed in ``"methods"``.
+                Subsampling takes into account classification labels and stratifies
+                accordingly. We guarantee that at least one occurrence of each label is
+                included in the sampled set.
 
         Attributes
         ----------

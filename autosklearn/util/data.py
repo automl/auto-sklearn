@@ -74,20 +74,26 @@ def validate_dataset_compression_arg(
 
         # "memory_allocation" must be float or int
         if not (isinstance(memory_allocation, float) or isinstance(memory_allocation, int)):
-            raise ValueError("key 'memory_allocation' must be an `int` or `float`")
+            raise ValueError(
+                "key 'memory_allocation' must be an `int` or `float`"
+                f"\ntype = {memory_allocation}"
+                f"\ndataset_compression = {dataset_compression}"
+            )
 
         # "memory_allocation" must be in (0,1) if float
         if isinstance(memory_allocation, float) and not (0.0 < memory_allocation < 1.0):
             raise ValueError(
                 "key 'memory_allocation' if float must be in (0, 1)"
-                f"\n{dataset_compression}"
+                f"\nmemory_allocation = {memory_allocation}"
+                f"\ndataset_compression = {dataset_compression}"
             )
 
         # "memory_allocation" if absolute, should be > 0 and < memory_limit
         if isinstance(memory_allocation, int) and not (0 < memory_allocation < memory_limit):
             raise ValueError(
                 f"key 'memory_allocation' if int must be in (0, memory_limit={memory_limit})"
-                f"\n{dataset_compression}"
+                f"\nmemory_allocation = {memory_allocation}"
+                f"\ndataset_compression = {dataset_compression}"
             )
 
         # "methods" must be non-empty sequence
@@ -97,7 +103,8 @@ def validate_dataset_compression_arg(
         ):
             raise ValueError(
                 "key 'methods' must be a non-empty list"
-                f"\n{dataset_compression}"
+                f"\nmethods = {dataset_compression['methods']}"
+                f"\ndataset_compression = {dataset_compression}"
             )
 
         # "methods" must contain known methods
@@ -107,12 +114,16 @@ def validate_dataset_compression_arg(
         ):
             raise ValueError(
                 f"key 'methods' can only contain {default_dataset_compression_arg['methods']}"
-                f"\n{dataset_compression}"
+                f"\nmethods = {dataset_compression['methods']}"
+                f"\ndataset_compression = {dataset_compression}"
             )
 
         return cast(DatasetCompressionSpec, dataset_compression)
     else:
-        raise ValueError(f"Unknown type for `dataset_compression` {dataset_compression}")
+        raise ValueError(
+            f"Unknown type for `dataset_compression` {type(dataset_compression)}"
+            f"\ndataset_compression = {dataset_compression}"
+        )
 
 
 class _DtypeReductionMapping(Mapping):

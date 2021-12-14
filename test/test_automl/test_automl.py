@@ -1015,7 +1015,11 @@ def test_fit_performs_dataset_compression_without_precision_with_int(
     X: np.ndarray,
     y: np.ndarray
 ) -> None:
-    """
+    """We can't reduce the precision of ints as we do with floats. Suppose someone
+    was to pass a column with `max_int64` and `min_int64`, any reduction of bits will
+    cause this information to be lost and not simply reduce precision as it does with
+    floats.
+
     Parameters
     ----------
     mock_reduce_dataset: MagicMock
@@ -1033,7 +1037,7 @@ def test_fit_performs_dataset_compression_without_precision_with_int(
     Expects
     -------
     * Should call reduce_dataset_size_if_too_large
-    * "precision" should have been remove from the "methods" passed to the keyword
+    * "precision" should have been removed from the "methods" passed to the keyword
         argument "operations" of `reduce_dataset_size_if_too_large`
     """
     # We just return the data
@@ -1049,7 +1053,7 @@ def test_fit_performs_dataset_compression_without_precision_with_int(
     auto.fit(X, y, only_return_configuration_space=True)
 
     assert mock_reduce_dataset.call_count == 1
-    assert mock_reduce_dataset.call_args.kwargs["operations"] == ["subsample"]
+    assert mock_reduce_dataset.call_args.call_args["operations"] == ["subsample"]
 
 
 @pytest.mark.parametrize("dataset_compression", [True])
