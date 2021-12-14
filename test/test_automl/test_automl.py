@@ -1053,7 +1053,9 @@ def test_fit_performs_dataset_compression_without_precision_with_int(
     auto.fit(X, y, only_return_configuration_space=True)
 
     assert mock_reduce_dataset.call_count == 1
-    assert mock_reduce_dataset.call_args.call_args["operations"] == ["subsample"]
+
+    args, kwargs = mock_reduce_dataset.call_args
+    assert kwargs["operations"] == ["subsample"]
 
 
 @pytest.mark.parametrize("dataset_compression", [True])
