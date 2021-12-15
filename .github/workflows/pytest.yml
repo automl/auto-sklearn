@@ -127,7 +127,7 @@ jobs:
 
         if [[ ${{ matrix.kind }} == 'conda' ]]; then
           PYTHON=$CONDA/envs/testenv/bin/python3
-        else:
+        else
           PYTHON=$(which python3)
         fi
 
