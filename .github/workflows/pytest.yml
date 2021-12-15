@@ -132,9 +132,9 @@ jobs:
         fi
 
         if [ ${{ matrix.code-cov }} ]; then
-          pytest ${{ env.pytest-args }} ${{ env.code-cov-args }} test
+          $PYTHON -m pytest ${{ env.pytest-args }} ${{ env.code-cov-args }} test
         else
-          pytest ${{ env.pytest-args }} test
+          $PYTHON -m pytest ${{ env.pytest-args }} test
         fi
 
     - name: Check for files left behind by test
