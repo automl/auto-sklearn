@@ -9,7 +9,7 @@ on:
       - master
       - development
 
-  pull_request
+  pull_request:
       - master
       - development
 
