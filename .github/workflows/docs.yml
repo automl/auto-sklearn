@@ -1,31 +1,50 @@
 name: Docs
-on: [pull_request, push]
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - master
+      - development
+
+  pull_request
+      - master
+      - development
 
 jobs:
+
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
+
     - name: Setup Python
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
+
     - name: Install dependencies
       run: |
         pip install -e .[docs,examples,examples_unix]
+
     - name: Make docs
       run: |
         cd doc
         make html
+
     - name: Check links
       run: |
         cd doc
         make linkcheck
+
     - name: Pull latest gh-pages
       if: (contains(github.ref, 'develop') || contains(github.ref, 'master')) && github.event_name == 'push'
       run: |
         cd ..
         git clone https://github.com/automl/auto-sklearn.git --branch gh-pages --single-branch gh-pages
+
     - name: Copy new doc into gh-pages
       if: (contains(github.ref, 'develop') || contains(github.ref, 'master')) && github.event_name == 'push'
       run: |
@@ -33,6 +52,7 @@ jobs:
         cd ../gh-pages
         rm -rf $branch_name
         cp -r ../auto-sklearn/doc/build/html $branch_name
+
     - name: Push to gh-pages
       if: (contains(github.ref, 'develop') || contains(github.ref, 'master')) && github.event_name == 'push'
       run: |
