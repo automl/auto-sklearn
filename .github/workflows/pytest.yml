@@ -119,6 +119,11 @@ jobs:
 
         if [[ ${{ matrix.kind }} == 'conda' ]]; then
           PYTHON=$CONDA/envs/testenv/bin/python3
+
+          # As one of the tests runs a subprocess command and calls `python3`, we must
+          # explicitly add it to the path
+          export PATH="$CONDA/envs/testenv/bin:$PATH"
+
         else
           PYTHON=$(which python3)
         fi
