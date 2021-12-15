@@ -1,14 +1,16 @@
 #https://help.github.com/en/actions/language-and-framework-guides/publishing-docker-images#publishing-images-to-github-packages
 name: Publish Docker image
+
 on:
+
   push:
-    # Push  to `master` or `development`
     branches:
       - master
       - development
       - docker_workflow
 
 jobs:
+
   push_to_registry:
     name: Push Docker image to GitHub Packages
     runs-on: ubuntu-latest
