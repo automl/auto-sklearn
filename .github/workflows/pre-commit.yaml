@@ -9,6 +9,7 @@ on:
       - development
 
   pull_request:
+    branches:
       - master
       - development
 
