@@ -17,7 +17,7 @@ on:
       - development
 
 env:
-  #If STRICT is set to true, it will fail on black check fail
+  #If STRICT is set to true, it will fail on isort check fail
   STRICT: false
 
 jobs:
