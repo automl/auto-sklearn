@@ -95,15 +95,7 @@ jobs:
       if: matrix.kind == 'source'
       run: |
         python -m pip install --upgrade pip
-        if [[ `python -c 'import platform; print(platform.python_version())' | cut -d '.' -f 2` -eq 6 ]]; then
-          # Numpy 1.20 dropped suppert for Python3.6
-          pip install "numpy<=1.19"
-        fi
         pip install -e .[test]
-        sudo apt-get update
-        sudo apt-get remove swig
-        sudo apt-get install swig3.0
-        sudo ln -s /usr/bin/swig3.0 /usr/bin/swig
 
     - name: Dist install
       if: matrix.kind == 'dist'
