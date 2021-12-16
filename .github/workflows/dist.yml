@@ -50,5 +50,9 @@ jobs:
     - name: PEP 561 Compliance
       run: |
         pip install mypy
+
         cd ..  # required to use the installed version of autosklearn
+
+        # Note this doesnt perform mypy checks, only
+        # that the types are exported
         if ! mypy -c "import autosklearn"; then exit 1; fi
