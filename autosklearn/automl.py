@@ -8,7 +8,7 @@ import multiprocessing
 import os
 import sys
 import time
-from typing import Any, Dict, Optional, List, Tuple, Union
+from typing import Any, Dict, Mapping, Optional, List, Tuple, Union, cast
 import uuid
 import unittest.mock
 import tempfile
@@ -50,7 +50,13 @@ from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, _fit_with_budget
 from autosklearn.metrics import calculate_metric
 from autosklearn.util.backend import Backend, create
-from autosklearn.util.data import reduce_dataset_size_if_too_large, supported_precision_reductions
+from autosklearn.util.data import (
+    reduce_dataset_size_if_too_large,
+    supported_precision_reductions,
+    validate_dataset_compression_arg,
+    default_dataset_compression_arg,
+    DatasetCompressionSpec,
+)
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import (
     setup_logger,
@@ -159,34 +165,36 @@ def _model_predict(
 
 class AutoML(BaseEstimator):
 
-    def __init__(self,
-                 time_left_for_this_task,
-                 per_run_time_limit,
-                 temporary_directory: Optional[str] = None,
-                 delete_tmp_folder_after_terminate: bool = True,
-                 initial_configurations_via_metalearning=25,
-                 ensemble_size=1,
-                 ensemble_nbest=1,
-                 max_models_on_disc=1,
-                 seed=1,
-                 memory_limit=3072,
-                 metadata_directory=None,
-                 debug_mode=False,
-                 include=None,
-                 exclude=None,
-                 resampling_strategy='holdout-iterative-fit',
-                 resampling_strategy_arguments=None,
-                 n_jobs=None,
-                 dask_client: Optional[dask.distributed.Client] = None,
-                 precision=32,
-                 disable_evaluator_output=False,
-                 get_smac_object_callback=None,
-                 smac_scenario_args=None,
-                 logging_config=None,
-                 metric=None,
-                 scoring_functions=None,
-                 get_trials_callback=None
-                 ):
+    def __init__(
+        self,
+        time_left_for_this_task,
+        per_run_time_limit,
+        temporary_directory: Optional[str] = None,
+        delete_tmp_folder_after_terminate: bool = True,
+        initial_configurations_via_metalearning=25,
+        ensemble_size=1,
+        ensemble_nbest=1,
+        max_models_on_disc=1,
+        seed=1,
+        memory_limit=3072,
+        metadata_directory=None,
+        debug_mode=False,
+        include=None,
+        exclude=None,
+        resampling_strategy='holdout-iterative-fit',
+        resampling_strategy_arguments=None,
+        n_jobs=None,
+        dask_client: Optional[dask.distributed.Client] = None,
+        precision=32,
+        disable_evaluator_output=False,
+        get_smac_object_callback=None,
+        smac_scenario_args=None,
+        logging_config=None,
+        metric=None,
+        scoring_functions=None,
+        get_trials_callback=None,
+        dataset_compression: Union[bool, Mapping[str, Any]] = True
+    ):
         super(AutoML, self).__init__()
         self.configuration_space = None
         self._backend: Optional[Backend] = None
@@ -230,6 +238,18 @@ class AutoML(BaseEstimator):
         self._get_trials_callback = get_trials_callback
         self._smac_scenario_args = smac_scenario_args
         self.logging_config = logging_config
+
+        # Validate dataset_compression and set its values
+        self._dataset_compression: Optional[DatasetCompressionSpec]
+        if isinstance(dataset_compression, bool):
+            if dataset_compression is True:
+                self._dataset_compression = default_dataset_compression_arg
+            else:
+                self._dataset_compression = None
+        else:
+            self._dataset_compression = validate_dataset_compression_arg(
+                dataset_compression, memory_limit=self._memory_limit
+            )
 
         self._datamanager = None
         self._dataset_name = None
@@ -641,20 +661,31 @@ class AutoML(BaseEstimator):
         if X_test is not None and y_test is not None:
             X_test, y_test = self.InputValidator.transform(X_test, y_test)
 
-        # We don't support size reduction on pandas dataframes yet
-        if not isinstance(X, pd.DataFrame):
-            operations = ['subsample']
-            if X.dtype in supported_precision_reductions:
-                operations.append('precision')
+        # We don't support size reduction on pandas type object yet
+        if (
+            self._dataset_compression is not None
+            and not isinstance(X, pd.DataFrame)
+            and not (isinstance(y, pd.Series) or isinstance(y, pd.DataFrame))
+        ):
+            methods = self._dataset_compression["methods"]
+            memory_allocation = self._dataset_compression["memory_allocation"]
+
+            # Remove precision reduction if we can't perform it
+            if (
+                X.dtype not in supported_precision_reductions
+                and "precision" in cast(List[str], methods)  # Removable with TypedDict
+            ):
+                methods = [method for method in methods if method != "precision"]
 
             with warnings_to(self._logger):
                 X, y = reduce_dataset_size_if_too_large(
                     X=X,
                     y=y,
+                    memory_limit=self._memory_limit,
                     is_classification=is_classification,
-                    operations=operations,
                     random_state=self._seed,
-                    memory_limit=self._memory_limit
+                    operations=methods,
+                    memory_allocation=memory_allocation
                 )
 
         # Check the re-sampling strategy

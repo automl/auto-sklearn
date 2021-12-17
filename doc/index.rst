@@ -117,7 +117,7 @@ We appreciate all contribution to auto-sklearn, from bug reports and
 documentation to new features. If you want to contribute to the code, you can
 pick an issue from the `issue tracker <https://github.com/automl/auto-sklearn/issues>`_.
 
-Check out our `contribution guide on github<https://github.com/automl/auto-sklearn/blob/master/CONTRIBUTING.md>`_ if you want to know more!
+Check out our `contribution guide on github <https://github.com/automl/auto-sklearn/blob/master/CONTRIBUTING.md>`_ if you want to know more!
 We've catered it for both new and experienced contributers.
 
 .. note::
