@@ -9,6 +9,36 @@
 Releases
 ========
 
+Version 0.14.2
+==============
+
+* FIX #1290: Fixes a bug where it was not possible to extend Auto-sklearn and run it in parallel.
+
+Contributors v0.14.2
+********************
+
+* Matthias Feurer
+
+Version 0.14.1
+==============
+
+* FIX #1248: Allow for sparse ``y_test``.
+* FIX #1259: Fix an issue that could result in ``setup.py`` not working due to relative paths
+  being chosen.
+* MAINT #1261: Include a CITATION.cff file
+* MAINT #1263: Make unit test deterministic.
+* DOC #1269: Fix example on extending data preprocessing.
+* DOC #1270: Remove ``>>>`` from code examples in the documentation.
+* DOC #1271: Fix a typo in an example in the documentation.
+* DOC #1282: Add a contribution guide.
+
+Contributors v0.14.1
+********************
+
+* Edward Bergman
+* Michael Becker
+* Katharina Eggensperger
+
 Version 0.14.0
 ==============
 
@@ -591,7 +621,7 @@ Version 0.4.0
   minimization problem.
 * Implements `#271 <https://github.com/automl/auto-sklearn/issues/271>`_:
   XGBoost is available again, even configuring the new dropout functionality.
-* New documentation section :ref:`inspecting_the_results`.
+* New documentation section :ref:`inspect`.
 * Fixes `#444 <https://github.com/automl/auto-sklearn/issues/444>`_:
   Auto-sklearn now only loads models for refit which are actually relevant
   for the ensemble.

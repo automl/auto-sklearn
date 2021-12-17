@@ -5,10 +5,10 @@ import unittest.mock
 
 import numpy as np
 
+from autosklearn.automl_common.common.ensemble_building.abstract_ensemble import AbstractEnsemble
+
 from autosklearn.metrics import make_scorer
-from autosklearn.ensemble_builder import (
-    EnsembleBuilder, AbstractEnsemble
-)
+from autosklearn.ensemble_builder import EnsembleBuilder
 
 
 def scorer_function(a, b):

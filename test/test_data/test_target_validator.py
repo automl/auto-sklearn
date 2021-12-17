@@ -67,7 +67,7 @@ def input_data_targettest(request):
             y = y.dropna()
             y.replace('FALSE', 0, inplace=True)
             y.replace('TRUE', 1, inplace=True)
-            y = y.astype(np.int)
+            y = y.astype(int)
         return y
     elif 'sparse' in request.param:
         # We expect the names to be of the type sparse_csc_nonan

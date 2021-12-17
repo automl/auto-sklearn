@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 import copy
+import distro
 import io
 import json
 import platform
@@ -36,6 +37,8 @@ from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
 from sklearn.metrics._classification import type_of_target
 from sklearn.dummy import DummyClassifier, DummyRegressor
+
+from autosklearn.automl_common.common.utils.backend import Backend, create
 
 from autosklearn.metrics import Scorer, default_metric_for_task
 from autosklearn.data.xy_data_manager import XYDataManager
@@ -301,6 +304,8 @@ class AutoML(BaseEstimator):
     def _create_backend(self) -> Backend:
         return create(
             temporary_directory=self._temporary_directory,
+            output_directory=None,
+            prefix="auto-sklearn",
             delete_tmp_folder_after_terminate=self._delete_tmp_folder_after_terminate,
         )
 
@@ -731,11 +736,10 @@ class AutoML(BaseEstimator):
         self._logger.debug('Starting to print environment information')
         self._logger.debug('  Python version: %s', sys.version.split('\n'))
         try:
-            self._logger.debug('  Distribution: %s', platform.linux_distribution())
+            self._logger.debug(f'\tDistribution: {distro.id()}-{distro.version()}-{distro.name()}')
         except AttributeError:
-            # platform.linux_distribution() was removed in Python3.8
-            # We should move to the distro package as soon as it supports Windows and OSX
             pass
+
         self._logger.debug('  System: %s', platform.system())
         self._logger.debug('  Machine: %s', platform.machine())
         self._logger.debug('  Platform: %s', platform.platform())
@@ -1774,10 +1778,14 @@ class AutoML(BaseEstimator):
 
             return sio.getvalue()
 
-    def _create_search_space(self, tmp_dir, backend, datamanager,
-                             include=None,
-                             exclude=None,
-                             ):
+    def _create_search_space(
+        self,
+        tmp_dir,
+        backend,
+        datamanager,
+        include: Optional[Dict[str, List[str]]] = None,
+        exclude: Optional[Dict[str, List[str]]] = None,
+    ):
         task_name = 'CreateConfigSpace'
 
         self._stopwatch.start_task(task_name)

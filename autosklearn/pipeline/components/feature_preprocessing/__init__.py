@@ -3,7 +3,7 @@ from collections import OrderedDict
 from typing import Type
 
 from ..base import AutoSklearnPreprocessingAlgorithm, find_components, \
-    ThirdPartyComponents, AutoSklearnChoice
+    ThirdPartyComponents, AutoSklearnChoice, _addons
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
@@ -11,11 +11,12 @@ classifier_directory = os.path.split(__file__)[0]
 _preprocessors = find_components(__package__,
                                  classifier_directory,
                                  AutoSklearnPreprocessingAlgorithm)
-_addons = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
+additional_components = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
+_addons['feature_preprocessing'] = additional_components
 
 
 def add_preprocessor(preprocessor: Type[AutoSklearnPreprocessingAlgorithm]) -> None:
-    _addons.add_component(preprocessor)
+    additional_components.add_component(preprocessor)
 
 
 class FeaturePreprocessorChoice(AutoSklearnChoice):
@@ -24,7 +25,7 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
     def get_components(cls):
         components = OrderedDict()
         components.update(_preprocessors)
-        components.update(_addons.components)
+        components.update(additional_components.components)
         return components
 
     def get_available_components(self, dataset_properties=None,

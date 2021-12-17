@@ -34,8 +34,8 @@ class AutoSklearnEstimator(BaseEstimator):
         max_models_on_disc=50,
         seed=1,
         memory_limit=3072,
-        include=None,
-        exclude=None,
+        include: Optional[Dict[str, List[str]]] = None,
+        exclude: Optional[Dict[str, List[str]]] = None,
         resampling_strategy='holdout',
         resampling_strategy_arguments=None,
         tmp_folder=None,
@@ -77,7 +77,7 @@ class AutoSklearnEstimator(BaseEstimator):
         ensemble_size : int, optional (default=50)
             Number of models added to the ensemble built by *Ensemble
             selection from libraries of models*. Models are drawn with
-            replacement.
+            replacement. If set to ``0`` no ensemble is fit.
 
         ensemble_nbest : int, optional (default=50)
             Only consider the ``ensemble_nbest`` models when building an
@@ -97,21 +97,64 @@ class AutoSklearnEstimator(BaseEstimator):
         memory_limit : int, optional (3072)
             Memory limit in MB for the machine learning algorithm.
             `auto-sklearn` will stop fitting the machine learning algorithm if
-            it tries to allocate more than `memory_limit` MB.
-            If None is provided, no memory limit is set.
-            In case of multi-processing, `memory_limit` will be per job.
-            This memory limit also applies to the ensemble creation process.
+            it tries to allocate more than ``memory_limit`` MB.
 
-        include : dict, optional (None)
-            If None, all possible algorithms are used. Otherwise specifies
-            set of algorithms for each added component is used. Include and
-            exclude are incompatible if used together on the same component
+            **Important notes:**
 
-        exclude : dict, optional (None)
-            If None, all possible algorithms are used. Otherwise specifies
-            set of algorithms for each added component is not used.
-            Incompatible with include. Include and exclude are incompatible
-            if used together on the same component
+            * If ``None`` is provided, no memory limit is set.
+            * In case of multi-processing, ``memory_limit`` will be *per job*, so the total usage is
+              ``n_jobs x memory_limit``.
+            * The memory limit also applies to the ensemble creation process.
+
+        include : Optional[Dict[str, List[str]]] = None
+            If None, all possible algorithms are used.
+
+            Otherwise, specifies a step and the components that are included in search.
+            See ``/pipeline/components/<step>/*`` for available components.
+
+            Incompatible with parameter ``exclude``.
+
+            **Possible Steps**:
+
+            * ``"data_preprocessor"``
+            * ``"balancing"``
+            * ``"feature_preprocessor"``
+            * ``"classifier"`` - Only for when when using ``AutoSklearnClasssifier``
+            * ``"regressor"`` - Only for when when using ``AutoSklearnRegressor``
+
+            **Example**:
+
+            .. code-block:: python
+
+                include = {
+                    'classifier': ["random_forest"],
+                    'feature_preprocessor': ["no_preprocessing"]
+                }
+
+        exclude : Optional[Dict[str, List[str]]] = None
+            If None, all possible algorithms are used.
+
+            Otherwise, specifies a step and the components that are excluded from search.
+            See ``/pipeline/components/<step>/*`` for available components.
+
+            Incompatible with parameter ``include``.
+
+            **Possible Steps**:
+
+            * ``"data_preprocessor"``
+            * ``"balancing"``
+            * ``"feature_preprocessor"``
+            * ``"classifier"`` - Only for when when using ``AutoSklearnClasssifier``
+            * ``"regressor"`` - Only for when when using ``AutoSklearnRegressor``
+
+            **Example**:
+
+            .. code-block:: python
+
+                exclude = {
+                    'classifier': ["random_forest"],
+                    'feature_preprocessor': ["no_preprocessing"]
+                }
 
         resampling_strategy : Union[str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit] = "holdout"
             How to to handle overfitting, might need to use ``resampling_strategy_arguments``
@@ -161,10 +204,10 @@ class AutoSklearnEstimator(BaseEstimator):
             * 'cv-iterative-fit': {'folds': int}
             * 'partial-cv': {'folds': int, 'shuffle': bool}
             * BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments
-                required by chosen class as specified in scikit-learn documentation.
-                If arguments are not provided, scikit-learn defaults are used.
-                If no defaults are available, an exception is raised.
-                Refer to the 'n_splits' argument as 'folds'.
+              required by chosen class as specified in scikit-learn documentation.
+              If arguments are not provided, scikit-learn defaults are used.
+              If no defaults are available, an exception is raised.
+              Refer to the 'n_splits' argument as 'folds'.
 
         tmp_folder : string, optional (None)
             folder to store configuration output and log files, if ``None``
@@ -176,13 +219,15 @@ class AutoSklearnEstimator(BaseEstimator):
 
         n_jobs : int, optional, experimental
             The number of jobs to run in parallel for ``fit()``. ``-1`` means
-            using all processors. By default, Auto-sklearn uses a single core
-            for fitting the machine learning model and a single core for fitting
-            an ensemble. Ensemble building is not affected by ``n_jobs`` but
-            can be controlled by the number of models in the ensemble. In
-            contrast to most scikit-learn models, ``n_jobs`` given in the
-            constructor is not applied to the ``predict()`` method. If
-            ``dask_client`` is None, a new dask client is created.
+            using all processors. 
+            
+            **Important notes**: 
+            
+            * By default, Auto-sklearn uses one core. 
+            * Ensemble building is not affected by ``n_jobs`` but can be controlled by the number 
+              of models in the ensemble.
+            * ``predict()`` is not affected by ``n_jobs`` (in contrast to most scikit-learn models)
+            * If ``dask_client`` is ``None``, a new dask client is created.
 
         dask_client : dask.distributed.Client, optional
             User-created dask client, can be used to start a dask cluster and then
@@ -198,7 +243,7 @@ class AutoSklearnEstimator(BaseEstimator):
             * ``'y_optimization'`` : do not save the predictions for the
               optimization/validation set, which would later on be used to build
               an ensemble.
-            * ``'model'`` : do not save any model files
+            * ``model`` : do not save any model files
 
         smac_scenario_args : dict, optional (None)
             Additional arguments inserted into the scenario of SMAC. See the
@@ -299,13 +344,13 @@ class AutoSklearnEstimator(BaseEstimator):
 
         Attributes
         ----------
-        cv_results\_ : dict of numpy (masked) ndarrays
+        cv_results_ : dict of numpy (masked) ndarrays
             A dict with keys as column headers and values as columns, that can be
             imported into a pandas ``DataFrame``.
 
             Not all keys returned by scikit-learn are supported yet.
 
-        performance_over_time\_ : pandas.core.frame.DataFrame
+        performance_over_time_ : pandas.core.frame.DataFrame
             A ``DataFrame`` containing the models performance over time data. Can be
             used for plotting directly. Please refer to the example
             :ref:`Train and Test Inputs <sphx_glr_examples_40_advanced_example_pandas_train_test.py>`.
@@ -632,7 +677,7 @@ class AutoSklearnEstimator(BaseEstimator):
         Gives an overview of all models trained during the search process along
         with various statistics about their training.
 
-        The availble statistics are:
+        The available statistics are:
 
         **Simple**:
 

@@ -13,12 +13,13 @@ import unittest.mock
 import numpy as np
 from smac.tae import StatusType
 
+from autosklearn.automl_common.common.utils.backend import Backend
+
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, BINARY_CLASSIFICATION, \
     MULTICLASS_CLASSIFICATION, REGRESSION
 from autosklearn.evaluation.test_evaluator import TestEvaluator, eval_t
 from autosklearn.evaluation.util import read_queue
 from autosklearn.util.pipeline import get_configuration_space
-from autosklearn.util.backend import Backend
 from autosklearn.metrics import accuracy, r2, f1_macro
 
 this_directory = os.path.dirname(__file__)
@@ -67,6 +68,7 @@ class TestEvaluator_Test(BaseEvaluatorTest, unittest.TestCase):
                     queue_,
                     metric=metric_lookup[D.info['task']],
                     port=logging.handlers.DEFAULT_TCP_LOGGING_PORT,
+                    additional_components=dict(),
                 )
 
                 evaluator.fit_predict_and_loss()
@@ -112,6 +114,7 @@ class FunctionsTest(unittest.TestCase):
             disable_file_output=False,
             instance=self.dataset_name,
             port=self.port,
+            additional_components=dict(),
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
@@ -133,6 +136,7 @@ class FunctionsTest(unittest.TestCase):
             disable_file_output=False,
             instance=self.dataset_name,
             port=self.port,
+            additional_components=dict(),
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)

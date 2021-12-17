@@ -10,9 +10,11 @@ import tempfile
 import numpy as np
 import sklearn.dummy
 
+from autosklearn.automl_common.common.utils.backend import Backend, BackendContext
+
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
+from autosklearn.pipeline.components.base import _addons
 from autosklearn.metrics import accuracy
-from autosklearn.util.backend import Backend, BackendContext
 from smac.tae import StatusType
 
 this_directory = os.path.dirname(__file__)
@@ -61,7 +63,9 @@ class AbstractEvaluatorTest(unittest.TestCase):
         ae = AbstractEvaluator(backend=self.backend_mock,
                                port=self.port,
                                output_y_hat_optimization=False,
-                               queue=queue_mock, metric=accuracy)
+                               queue=queue_mock, metric=accuracy,
+                               additional_components=dict(),
+                               )
         ae.Y_optimization = rs.rand(33, 3)
         predictions_ensemble = rs.rand(33, 3)
         predictions_test = rs.rand(25, 3)
@@ -136,6 +140,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
             disable_file_output=True,
             metric=accuracy,
             port=self.port,
+            additional_components=dict(),
         )
 
         predictions_ensemble = rs.rand(33, 3)
@@ -163,6 +168,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
                 disable_file_output=[disable],
                 metric=accuracy,
                 port=self.port,
+                additional_components=dict(),
             )
             ae.Y_optimization = predictions_ensemble
             ae.model = unittest.mock.Mock()
@@ -209,6 +215,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
             metric=accuracy,
             disable_file_output=['y_optimization'],
             port=self.port,
+            additional_components=dict(),
         )
         ae.Y_optimization = predictions_ensemble
         ae.model = 'model'
@@ -246,12 +253,15 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         context = BackendContext(
             temporary_directory=os.path.join(self.working_directory, 'tmp'),
+            output_directory=os.path.join(self.working_directory, 'tmp_output'),
             delete_tmp_folder_after_terminate=True,
+            delete_output_folder_after_terminate=True,
+            prefix="auto-sklearn"
         )
         with unittest.mock.patch.object(Backend, 'load_datamanager') as load_datamanager_mock:
             load_datamanager_mock.return_value = get_multiclass_classification_datamanager()
 
-            backend = Backend(context)
+            backend = Backend(context, prefix="auto-sklearn")
 
             ae = AbstractEvaluator(
                 backend=backend,
@@ -259,6 +269,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
                 queue=queue_mock,
                 metric=accuracy,
                 port=self.port,
+                additional_components=dict(),
             )
             ae.model = sklearn.dummy.DummyClassifier()
 
@@ -278,3 +289,40 @@ class AbstractEvaluatorTest(unittest.TestCase):
                                                         '.auto-sklearn', 'runs', '1_0_None')))
 
             shutil.rmtree(self.working_directory, ignore_errors=True)
+
+    def test_add_additional_components(self):
+        shutil.rmtree(self.working_directory, ignore_errors=True)
+        os.mkdir(self.working_directory)
+
+        queue_mock = unittest.mock.Mock()
+
+        context = BackendContext(
+            temporary_directory=os.path.join(self.working_directory, 'tmp'),
+            output_directory=os.path.join(self.working_directory, 'tmp_output'),
+            delete_tmp_folder_after_terminate=True,
+            delete_output_folder_after_terminate=True,
+            prefix="auto-sklearn"
+        )
+        with unittest.mock.patch.object(Backend, 'load_datamanager') as load_datamanager_mock:
+            load_datamanager_mock.return_value = get_multiclass_classification_datamanager()
+            backend = Backend(context, prefix="auto-sklearn")
+
+            with unittest.mock.patch.object(_addons['classification'], 'add_component') as _:
+
+                # If the components in the argument `additional_components` are an empty dict
+                # there is no call to `add_component`, if there's something in it, `add_component
+                # is called (2nd case)
+                for fixture, case in ((0, dict()), (1, dict(abc='def'))):
+
+                    thirdparty_components_patch = unittest.mock.Mock()
+                    thirdparty_components_patch.components = case
+                    additional_components = dict(classification=thirdparty_components_patch)
+                    AbstractEvaluator(
+                        backend=backend,
+                        output_y_hat_optimization=False,
+                        queue=queue_mock,
+                        metric=accuracy,
+                        port=self.port,
+                        additional_components=additional_components,
+                    )
+                    self.assertEqual(_addons['classification'].add_component.call_count, fixture)

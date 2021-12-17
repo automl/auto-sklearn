@@ -41,7 +41,14 @@ extras_reqs={
         "notebook",
         "seaborn",
     ],
-    "docs": ["sphinx", "sphinx-gallery", "sphinx_bootstrap_theme", "numpydoc"],
+    "docs": [
+        "sphinx<4.3",
+        "sphinx-gallery",
+        "sphinx_bootstrap_theme",
+        "numpydoc",
+        "sphinx_toolbox",
+        "docutils==0.16"
+    ],
 }
 
 with open(os.path.join(HERE, 'autosklearn', '__version__.py')) as fh:

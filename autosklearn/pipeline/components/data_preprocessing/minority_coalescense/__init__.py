@@ -8,7 +8,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
 from ...base import AutoSklearnPreprocessingAlgorithm, find_components, \
-    ThirdPartyComponents, AutoSklearnChoice
+    ThirdPartyComponents, AutoSklearnChoice, _addons
 
 from sklearn.base import BaseEstimator
 
@@ -17,11 +17,12 @@ from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTY
 mc_directory = os.path.split(__file__)[0]
 _mcs = find_components(
     __package__, mc_directory, AutoSklearnPreprocessingAlgorithm)
-_addons = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
+additional_components = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
+_addons['data_preprocessing.minority_coalescense'] = additional_components
 
 
 def add_mc(mc: BaseEstimator) -> None:
-    _addons.add_component(mc)
+    additional_components.add_component(mc)
 
 
 class CoalescenseChoice(AutoSklearnChoice):
@@ -30,7 +31,7 @@ class CoalescenseChoice(AutoSklearnChoice):
     def get_components(cls: BaseEstimator) -> Dict[str, BaseEstimator]:
         components: Dict[str, BaseEstimator] = OrderedDict()
         components.update(_mcs)
-        components.update(_addons.components)
+        components.update(additional_components.components)
         return components
 
     def get_hyperparameter_search_space(

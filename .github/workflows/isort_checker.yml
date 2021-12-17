@@ -1,0 +1,31 @@
+name: isort-check
+
+on: [push, pull_request, workflow_dispatch]
+
+env:
+  #If STRICT is set to true, it will fail on isort check fail
+  STRICT: false
+
+jobs:
+
+  black-format-check:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Setup Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.7"
+
+    - name: Install isort
+      run: |
+        pip install isort
+
+    - name: Run isort Check
+      run: |
+        isort --check-only autosklearn || ! $STRICT

@@ -19,12 +19,13 @@ from sklearn.model_selection import GroupKFold, GroupShuffleSplit, \
 import sklearn.model_selection
 from smac.tae import StatusType, TAEAbortException
 
+from autosklearn.automl_common.common.utils import backend
+
 import autosklearn.evaluation.splitter
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.evaluation.util import read_queue
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, \
     eval_holdout, eval_iterative_holdout, eval_cv, eval_partial_cv, subsample_indices
-from autosklearn.util import backend
 from autosklearn.util.pipeline import get_configuration_space
 from autosklearn.constants import BINARY_CLASSIFICATION, \
     MULTILABEL_CLASSIFICATION,\
@@ -92,7 +93,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.get_current_iter.return_value = 1
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="auto-sklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -104,6 +109,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
                                    port=self.port,
+                                   additional_components=dict(),
                                    )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -159,7 +165,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.get_current_iter.side_effect = (2, 4, 8, 16, 32, 64, 128, 256, 512)
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="auto-sklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -170,7 +180,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
-                                   budget=0.0)
+                                   budget=0.0,
+                                   additional_components=dict(),)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
 
@@ -257,7 +268,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.get_current_iter.side_effect = (2, 4, 8, 16, 32, 64, 128, 256, 512)
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="auto-sklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -268,7 +283,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
-                                   budget=0.0)
+                                   budget=0.0,
+                                   additional_components=dict(),
+                                   )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
 
@@ -327,7 +344,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.get_additional_run_info.return_value = None
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="auto-sklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -337,7 +358,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy='holdout-iterative-fit',
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
-                                   metric=accuracy)
+                                   metric=accuracy,
+                                   additional_components=dict(),
+                                   )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
 
@@ -369,7 +392,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.get_additional_run_info.return_value = None
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="auto-sklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -380,7 +407,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy_args={'folds': 5},
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
-                                   metric=accuracy)
+                                   metric=accuracy,
+                                   additional_components=dict(),
+                                   )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
 
@@ -423,7 +452,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.name = 'test'
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="auto-sklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -434,7 +467,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy_args={'folds': 5},
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
-                                   metric=accuracy)
+                                   metric=accuracy,
+                                   additional_components=dict(),
+                                   )
 
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -483,7 +518,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.get_current_iter.side_effect = (2, 4, 8, 16, 32, 64, 128, 256, 512)
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="auto-sklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -495,7 +534,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    scoring_functions=None,
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
-                                   budget=0.0)
+                                   budget=0.0,
+                                   additional_components=dict(),
+                                   )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
 
@@ -563,7 +604,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy_args={'folds': 5},
                                    scoring_functions=SCORER_LIST,
                                    output_y_hat_optimization=True,
-                                   metric=accuracy)
+                                   metric=accuracy,
+                                   additional_components=dict(),)
 
         self.backend_mock.get_model_dir.return_value = True
         evaluator.model = 'model'
@@ -633,7 +675,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             )
         )
 
-    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_subsample_indices_classification(self, mock, backend_mock):
 
@@ -647,7 +689,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 10},
-                                   metric=accuracy)
+                                   metric=accuracy,
+                                   additional_components=dict(),
+                                   )
         train_indices = np.arange(69, dtype=int)
         train_indices1 = subsample_indices(
             train_indices, 0.1449, evaluator.task_type, evaluator.Y_train)
@@ -683,7 +727,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             'classes = 2', subsample_indices, train_indices, 0.9999, evaluator.task_type,
             evaluator.Y_train)
 
-    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_subsample_indices_regression(self, mock, backend_mock):
 
@@ -695,7 +739,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 10},
-                                   metric=accuracy)
+                                   metric=accuracy,
+                                   additional_components=dict(),
+                                   )
         train_indices = np.arange(69, dtype=int)
         train_indices3 = subsample_indices(train_indices, subsample=0.4347,
                                            task_type=evaluator.task_type,
@@ -741,7 +787,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 10},
                                    output_y_hat_optimization=False,
-                                   metric=accuracy)
+                                   metric=accuracy,
+                                   additional_components=dict(),
+                                   )
 
         evaluator.fit_predict_and_loss()
         Y_optimization_pred = self.backend_mock.save_numrun_to_dir.call_args_list[0][1][
@@ -752,7 +800,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
     @unittest.mock.patch.object(TrainEvaluator, 'file_output')
     @unittest.mock.patch.object(TrainEvaluator, '_partial_fit_and_predict_standard')
-    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_fit_predict_and_loss_standard_additional_run_info(
         self, mock, backend_mock, _partial_fit_and_predict_mock,
@@ -781,6 +829,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             resampling_strategy='holdout',
             output_y_hat_optimization=False,
             metric=accuracy,
+            additional_components=dict(),
         )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -826,6 +875,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             resampling_strategy_args={'folds': 2},
             output_y_hat_optimization=False,
             metric=accuracy,
+            additional_components=dict(),
         )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -843,7 +893,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
     @unittest.mock.patch.object(TrainEvaluator, '_loss')
     @unittest.mock.patch.object(TrainEvaluator, 'finish_up')
-    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_fit_predict_and_loss_iterative_additional_run_info(
             self, mock, backend_mock, finish_up_mock, loss_mock,
@@ -878,7 +928,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             resampling_strategy='holdout',
             output_y_hat_optimization=False,
             metric=accuracy,
-            budget=0.0
+            budget=0.0,
+            additional_components=dict(),
         )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -891,7 +942,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
     @unittest.mock.patch.object(TrainEvaluator, '_loss')
     @unittest.mock.patch.object(TrainEvaluator, 'finish_up')
-    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_fit_predict_and_loss_iterative_noniterativemodel_additional_run_info(
             self, mock, backend_mock, finish_up_mock, loss_mock,
@@ -916,6 +967,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             resampling_strategy='holdout',
             output_y_hat_optimization=False,
             metric=accuracy,
+            additional_components=dict(),
         )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -929,7 +981,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
     @unittest.mock.patch.object(TrainEvaluator, '_loss')
     @unittest.mock.patch.object(TrainEvaluator, 'finish_up')
-    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_fit_predict_and_loss_budget_additional_run_info(
             self, mock, backend_mock, finish_up_mock, loss_mock,
@@ -966,6 +1018,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             metric=accuracy,
             budget_type='iterations',
             budget=50,
+            additional_components=dict(),
         )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -979,7 +1032,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
     @unittest.mock.patch.object(TrainEvaluator, '_loss')
     @unittest.mock.patch.object(TrainEvaluator, 'finish_up')
-    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_fit_predict_and_loss_budget_2_additional_run_info(
             self, mock, backend_mock, finish_up_mock, loss_mock,
@@ -1006,6 +1059,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             metric=accuracy,
             budget_type='subsample',
             budget=50,
+            additional_components=dict(),
         )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
@@ -1049,7 +1103,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                            resampling_strategy='cv',
                                            resampling_strategy_args={'folds': 2},
                                            output_y_hat_optimization=False,
-                                           metric=metric_lookup[D.info['task']])
+                                           metric=metric_lookup[D.info['task']],
+                                           additional_components=dict(),)
 
                 evaluator.fit_predict_and_loss()
                 rval = evaluator.queue.get(timeout=1)
@@ -2248,6 +2303,7 @@ class FunctionsTest(unittest.TestCase):
             disable_file_output=False,
             instance=self.dataset_name,
             metric=accuracy,
+            additional_components=dict(),
         )
         info = read_queue(self.queue)
         self.assertEqual(len(info), 1)
@@ -2272,6 +2328,7 @@ class FunctionsTest(unittest.TestCase):
             disable_file_output=False,
             instance=self.dataset_name,
             metric=accuracy,
+            additional_components=dict(),
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
@@ -2323,6 +2380,7 @@ class FunctionsTest(unittest.TestCase):
             disable_file_output=False,
             instance=self.dataset_name,
             metric=accuracy,
+            additional_components=dict(),
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 9)
@@ -2348,7 +2406,8 @@ class FunctionsTest(unittest.TestCase):
             instance=self.dataset_name,
             metric=accuracy,
             budget=1,
-            budget_type='iterations'
+            budget_type='iterations',
+            additional_components=dict(),
         )
         info = read_queue(self.queue)
         self.assertEqual(len(info), 1)
@@ -2378,7 +2437,8 @@ class FunctionsTest(unittest.TestCase):
             instance=self.dataset_name,
             metric=accuracy,
             budget=80,
-            budget_type='iterations'
+            budget_type='iterations',
+            additional_components=dict(),
         )
         info = read_queue(self.queue)
         self.assertEqual(len(info), 1)
@@ -2404,7 +2464,8 @@ class FunctionsTest(unittest.TestCase):
             instance=self.dataset_name,
             metric=accuracy,
             budget=30,
-            budget_type='subsample'
+            budget_type='subsample',
+            additional_components=dict(),
         )
         info = read_queue(self.queue)
         self.assertEqual(len(info), 1)
@@ -2431,7 +2492,8 @@ class FunctionsTest(unittest.TestCase):
             instance=self.dataset_name,
             metric=accuracy,
             budget=1,
-            budget_type='mixed'
+            budget_type='mixed',
+            additional_components=dict()
         )
         info = read_queue(self.queue)
         self.assertEqual(len(info), 1)
@@ -2460,7 +2522,8 @@ class FunctionsTest(unittest.TestCase):
             instance=self.dataset_name,
             metric=accuracy,
             budget=40,
-            budget_type='mixed'
+            budget_type='mixed',
+            additional_components=dict(),
         )
         info = read_queue(self.queue)
         self.assertEqual(len(info), 1)
@@ -2485,6 +2548,7 @@ class FunctionsTest(unittest.TestCase):
             disable_file_output=False,
             instance=self.dataset_name,
             metric=accuracy,
+            additional_components=dict(),
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
@@ -2509,6 +2573,7 @@ class FunctionsTest(unittest.TestCase):
             disable_file_output=False,
             instance=self.dataset_name,
             metric=accuracy,
+            additional_components=dict(),
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
@@ -2577,6 +2642,7 @@ class FunctionsTest(unittest.TestCase):
                 exclude=None,
                 disable_file_output=False,
                 metric=accuracy,
+                additional_components=dict(),
             )
             rval = read_queue(self.queue)
             self.assertEqual(len(rval), 1)

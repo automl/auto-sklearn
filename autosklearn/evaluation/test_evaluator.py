@@ -8,12 +8,14 @@ import numpy as np
 
 from smac.tae import StatusType
 
+from autosklearn.automl_common.common.utils.backend import Backend
+
 from autosklearn.evaluation.abstract_evaluator import (
     AbstractEvaluator,
     _fit_and_suppress_warnings,
 )
+from autosklearn.pipeline.components.base import ThirdPartyComponents
 from autosklearn.metrics import calculate_loss, Scorer
-from autosklearn.util.backend import Backend
 
 
 __all__ = [
@@ -29,6 +31,7 @@ class TestEvaluator(AbstractEvaluator):
         backend: Backend,
         queue: multiprocessing.Queue,
         metric: Scorer,
+        additional_components: Dict[str, ThirdPartyComponents],
         port: Optional[int],
         configuration: Optional[Union[int, Configuration]] = None,
         scoring_functions: Optional[List[Scorer]] = None,
@@ -44,6 +47,7 @@ class TestEvaluator(AbstractEvaluator):
             port=port,
             configuration=configuration,
             metric=metric,
+            additional_components=additional_components,
             scoring_functions=scoring_functions,
             seed=seed,
             output_y_hat_optimization=False,
@@ -120,6 +124,7 @@ def eval_t(
     exclude: Optional[List[str]],
     disable_file_output: bool,
     port: Optional[int],
+    additional_components: Dict[str, ThirdPartyComponents],
     init_params: Optional[Dict[str, Any]] = None,
     budget: Optional[float] = None,
     budget_type: Optional[str] = None,
@@ -131,6 +136,7 @@ def eval_t(
                               scoring_functions=scoring_functions,
                               include=include, exclude=exclude,
                               disable_file_output=disable_file_output,
-                              init_params=init_params)
+                              additional_components=additional_components,
+                              init_params=init_params,)
 
     evaluator.fit_predict_and_loss()
