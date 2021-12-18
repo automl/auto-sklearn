@@ -52,7 +52,6 @@ from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, _fit_with_budget
 from autosklearn.metrics import calculate_metric
-from autosklearn.util.backend import Backend, create
 from autosklearn.util.data import (
     reduce_dataset_size_if_too_large,
     supported_precision_reductions,
