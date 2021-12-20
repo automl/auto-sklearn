@@ -469,7 +469,8 @@ def test_leaderboard(
 @pytest.mark.parametrize('estimator', [AutoSklearnRegressor])
 @pytest.mark.parametrize('resampling_strategy', ['holdout'])
 @pytest.mark.parametrize('X', [
-    np.asarray([[1.0, 1.0, 1.0]] * 50 + [[2.0, 2.0, 2.0]] * 50)
+    np.asarray([[1.0, 1.0, 1.0]] * 25 + [[2.0, 2.0, 2.0]] * 25 +
+               [[3.0, 3.0, 3.0]] * 25 + [[4.0, 4.0, 4.0]] * 25)
 ])
 @pytest.mark.parametrize('y', [
     np.asarray([1.0] * 25 + [2.0] * 25 + [3.0] * 25 + [4.0] * 25)
@@ -522,16 +523,16 @@ def test_show_models_with_holdout(
 
     models = automl.show_models().values()
 
-    model_keys = [
+    model_keys = set([
         'model_id', 'rank', 'cost', 'ensemble_weight',
         'data_preprocessor', 'feature_preprocessor',
         'regressor', 'sklearn_regressor'
-    ]
+    ])
 
-    assert all([model_keys == list(model.keys()) for model in models]) is True
-    assert all([model['regressor'] for model in models]) is True
-    assert all([model['sklearn_regressor'] for model in models]) is True
-    assert any([None in model.values() for model in models]) is False
+    assert all([model_keys == set(model.keys()) for model in models])
+    assert all([model['regressor'] for model in models])
+    assert all([model['sklearn_regressor'] for model in models])
+    assert not any([None in model.values() for model in models])
 
 
 @pytest.mark.parametrize('estimator', [AutoSklearnClassifier])
@@ -592,28 +593,28 @@ def test_show_models_with_cv(
 
     models = automl.show_models().values()
 
-    model_keys = [
+    model_keys = set([
         'model_id', 'rank',
         'cost', 'ensemble_weight',
         'voting_model', 'estimators'
-    ]
+    ])
 
-    estimator_keys = [
+    estimator_keys = set([
         'data_preprocessor', 'balancing',
         'feature_preprocessor', 'classifier',
         'sklearn_classifier'
-    ]
+    ])
 
-    assert all([model_keys == list(model.keys()) for model in models]) is True
-    assert any([None in model.values() for model in models]) is False
-    assert all([estimator_keys == list(estimator.keys())
-                for model in models for estimator in model['estimators']]) is True
+    assert all([model_keys == set(model.keys()) for model in models])
+    assert not any([None in model.values() for model in models])
+    assert all([estimator_keys == set(estimator.keys())
+                for model in models for estimator in model['estimators']])
     assert all([estimator['classifier']
-                for model in models for estimator in model['estimators']]) is True
+                for model in models for estimator in model['estimators']])
     assert all([estimator['sklearn_classifier']
-                for model in models for estimator in model['estimators']]) is True
-    assert any([None in estimator.values()
-                for model in models for estimator in model['estimators']]) is False
+                for model in models for estimator in model['estimators']])
+    assert not any([None in estimator.values()
+                    for model in models for estimator in model['estimators']])
 
 
 @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.build_automl')
