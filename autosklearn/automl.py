@@ -1844,8 +1844,8 @@ class AutoML(BaseEstimator):
         * ``"rank"`` - The rank of the model based on it's ``"cost"``.
         * ``"cost"`` - The loss of the model on the validation set.
         * ``"ensemble_weight"`` - The weight given to the model in the ensemble.
-        * ``"voting_model"`` - The ``VotingX`` model (only for 'cv' resampling).
-        * ``"estimators"`` - List of dicts of models in the ``VotingX`` (only for 'cv' resampling).
+        * ``"voting_model"`` - The ``cv_voting_ensemble`` model (for 'cv' resampling).
+        * ``"estimators"`` - List of models (dicts) in ``cv_voting_ensemble`` (for 'cv' resampling).
         * ``"data_preprocessor"`` - The preprocessor used on the data.
         * ``"balancing"`` - The balancing used on the data (for classification).
         * ``"feature_preprocessor"`` - The preprocessor for features types.
@@ -1951,15 +1951,13 @@ class AutoML(BaseEstimator):
             # For 'cv' (cross validation) strategy
             if is_cv:
                 # Voting model created by cross validation
-                VotingX = model
-                model_dict['voting_model'] = VotingX
+                cv_voting_ensemble = model
+                model_dict['voting_model'] = cv_voting_ensemble
 
                 # List of models, each trained on one cv fold
                 cv_models = []
-                for cv_model in VotingX.estimators_:
-                    estimator = {}
-                    steps = dict(cv_model.steps)
-                    estimator.update(steps)
+                for cv_model in cv_voting_ensemble.estimators_:
+                    estimator = dict(cv_model.steps)
 
                     # Adding sklearn model to the model dictionary
                     model_type, autosklearn_wrapped_model = cv_model.steps[-1]
