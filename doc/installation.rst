@@ -102,7 +102,7 @@ for more information about Conda forge check
 
 
 Windows/macOS compatibility
-=========================
+===========================
 
 Windows
 ~~~~~~~
