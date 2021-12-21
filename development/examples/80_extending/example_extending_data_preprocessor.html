@@ -205,9 +205,9 @@ to download the full example code or to run this example in your browser via Bin
 </div>
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>auto-sklearn results:
-  Dataset name: 92ec70cb-5ceb-11ec-8759-ab7bea429cef
+  Dataset name: cd807f86-6269-11ec-8753-d1016d62c3e8
   Metric: accuracy
-  Best validation score: 0.957447
+  Best validation score: 0.964539
   Number of target algorithm runs: 5
   Number of successful target algorithm runs: 4
   Number of crashed target algorithm runs: 1
@@ -225,7 +225,7 @@ to download the full example code or to run this example in your browser via Bin
 </div>
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.972027972027972
-[(0.520000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;passive_aggressive&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;NoPreprocessing&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;kernel_pca&#39;, &#39;classifier:passive_aggressive:C&#39;: 7.328568999403367e-05, &#39;classifier:passive_aggressive:average&#39;: &#39;False&#39;, &#39;classifier:passive_aggressive:fit_intercept&#39;: &#39;True&#39;, &#39;classifier:passive_aggressive:loss&#39;: &#39;hinge&#39;, &#39;classifier:passive_aggressive:tol&#39;: 0.02258105767523384, &#39;feature_preprocessor:kernel_pca:kernel&#39;: &#39;cosine&#39;, &#39;feature_preprocessor:kernel_pca:n_components&#39;: 503},
+[(0.460000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;random_forest&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;NoPreprocessing&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;, &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;, &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;, &#39;classifier:random_forest:max_features&#39;: 0.5, &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0, &#39;classifier:random_forest:min_samples_leaf&#39;: 1, &#39;classifier:random_forest:min_samples_split&#39;: 2, &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0},
 dataset_properties={
   &#39;task&#39;: 1,
   &#39;sparse&#39;: False,
@@ -233,7 +233,7 @@ dataset_properties={
   &#39;multiclass&#39;: False,
   &#39;target_type&#39;: &#39;classification&#39;,
   &#39;signed&#39;: False})),
-(0.460000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;random_forest&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;NoPreprocessing&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;, &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;, &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;, &#39;classifier:random_forest:max_features&#39;: 0.5, &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0, &#39;classifier:random_forest:min_samples_leaf&#39;: 1, &#39;classifier:random_forest:min_samples_split&#39;: 2, &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0},
+(0.460000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;passive_aggressive&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;NoPreprocessing&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;kernel_pca&#39;, &#39;classifier:passive_aggressive:C&#39;: 7.328568999403367e-05, &#39;classifier:passive_aggressive:average&#39;: &#39;False&#39;, &#39;classifier:passive_aggressive:fit_intercept&#39;: &#39;True&#39;, &#39;classifier:passive_aggressive:loss&#39;: &#39;hinge&#39;, &#39;classifier:passive_aggressive:tol&#39;: 0.02258105767523384, &#39;feature_preprocessor:kernel_pca:kernel&#39;: &#39;cosine&#39;, &#39;feature_preprocessor:kernel_pca:n_components&#39;: 503},
 dataset_properties={
   &#39;task&#39;: 1,
   &#39;sparse&#39;: False,
@@ -241,7 +241,7 @@ dataset_properties={
   &#39;multiclass&#39;: False,
   &#39;target_type&#39;: &#39;classification&#39;,
   &#39;signed&#39;: False})),
-(0.020000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;lda&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;NoPreprocessing&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;select_rates_classification&#39;, &#39;classifier:lda:shrinkage&#39;: &#39;auto&#39;, &#39;classifier:lda:tol&#39;: 0.00010495766342828794, &#39;feature_preprocessor:select_rates_classification:alpha&#39;: 0.4886183647550176, &#39;feature_preprocessor:select_rates_classification:score_func&#39;: &#39;mutual_info_classif&#39;},
+(0.080000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;lda&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;NoPreprocessing&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;select_rates_classification&#39;, &#39;classifier:lda:shrinkage&#39;: &#39;auto&#39;, &#39;classifier:lda:tol&#39;: 0.00010495766342828794, &#39;feature_preprocessor:select_rates_classification:alpha&#39;: 0.4886183647550176, &#39;feature_preprocessor:select_rates_classification:score_func&#39;: &#39;mutual_info_classif&#39;},
 dataset_properties={
   &#39;task&#39;: 1,
   &#39;sparse&#39;: False,
@@ -252,7 +252,7 @@ dataset_properties={
 ]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  16.622 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  23.437 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-extending-data-preprocessor-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_data_preprocessor.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>
