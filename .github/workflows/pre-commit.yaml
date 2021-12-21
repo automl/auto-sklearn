@@ -1,6 +1,20 @@
 name: pre-commit
 
-on: [push, pull_request]
+on:
+  # Manually triggerable in github
+  workflow_dispatch:
+
+  # When a push occurs on either of these branches
+  push:
+    branches:
+      - master
+      - development
+
+  # When a push occurs on a PR that targets these branches
+  pull_request:
+    branches:
+      - master
+      - development
 
 jobs:
   run-all-files:
