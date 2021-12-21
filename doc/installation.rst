@@ -21,8 +21,8 @@ need:
 
 * SWIG (`get SWIG here <http://www.swig.org/survey.html>`_).
 
-For an explanation of missing Microsoft Windows and MAC OSX support please
-check the Section `Windows/OSX compatibility`_.
+For an explanation of missing Microsoft Windows and macOS support please
+check the Section `Windows/macOS compatibility`_.
 
 Installing auto-sklearn
 =======================
@@ -125,8 +125,8 @@ missed the `--recurse-submodules` option.
     pip install -e ".[test,doc,examples]"
 
 
-Windows/OSX compatibility
-=========================
+Windows/macOS compatibility
+===========================
 
 Windows
 ~~~~~~~
@@ -144,15 +144,15 @@ Possible solutions:
 * docker image
 
 
-Mac OSX
-~~~~~~~
+macOS
+~~~~~
 
-We currently do not know if *auto-sklearn* works on OSX. There are at least two
-issues holding us back from actively supporting OSX:
+We currently do not know if *auto-sklearn* works on macOS. There are at least two
+issues holding us back from actively supporting macOS:
 
 * The ``resource`` module cannot enforce a memory limit on a Python process
   (see `SMAC3/issues/115 <https://github.com/automl/SMAC3/issues/115>`_).
-* Not all dependencies we are using are set up to work on OSX.
+* Not all dependencies we are using are set up to work on macOS.
 
 In case you're having issues installing the `pyrfr package <https://github.com/automl/random_forest_run>`_, check out
 `this installation suggestion on github <https://github.com/automl/auto-sklearn/issues/360#issuecomment-335150470>`_.
