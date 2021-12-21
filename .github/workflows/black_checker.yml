@@ -1,6 +1,20 @@
 name: black-format-check
 
-on: [push, pull_request]
+on:
+  # Manually triggerable in github
+  workflow_dispatch:
+
+  # When a push occurs on either of these branches
+  push:
+    branches:
+      - master
+      - development
+
+  # When a push occurs on a PR that targets these branches
+  pull_request:
+    branches:
+      - master
+      - development
 
 env:
   #If STRICT is set to true, it will fail on black check fail

@@ -1,6 +1,20 @@
 name: isort-check
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  # Manually triggerable in github
+  workflow_dispatch:
+
+  # When a push occurs on either of these branches
+  push:
+    branches:
+      - master
+      - development
+
+  # When a push occurs on a PR that targets these branches
+  pull_request:
+    branches:
+      - master
+      - development
 
 env:
   #If STRICT is set to true, it will fail on isort check fail
@@ -8,7 +22,7 @@ env:
 
 jobs:
 
-  black-format-check:
+  isort-format-check:
     runs-on: ubuntu-latest
     steps:
 
