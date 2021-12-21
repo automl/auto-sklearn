@@ -68,7 +68,6 @@ setup(
     long_description_content_type='text/markdown',
     version=version,
     packages=find_packages(exclude=['test', 'scripts', 'examples']),
-    package_data={"autosklearn": ["py.typed"]},
     extras_require=extras_reqs,
     install_requires=install_reqs,
     include_package_data=True,
