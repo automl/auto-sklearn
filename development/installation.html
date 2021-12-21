@@ -114,9 +114,9 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#source-installation">Source Installation</a></li>
-<li><a class="reference internal" href="#windows-osx-compatibility">Windows/OSX compatibility</a><ul>
+<li><a class="reference internal" href="#windows-macos-compatibility">Windows/macOS compatibility</a><ul>
 <li><a class="reference internal" href="#windows">Windows</a></li>
-<li><a class="reference internal" href="#mac-osx">Mac OSX</a></li>
+<li><a class="reference internal" href="#macos">macOS</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#docker-image">Docker Image</a></li>
@@ -144,8 +144,8 @@ need:</p>
 <ul class="simple">
 <li><p>SWIG (<a class="reference external" href="http://www.swig.org/survey.html">get SWIG here</a>).</p></li>
 </ul>
-<p>For an explanation of missing Microsoft Windows and MAC OSX support please
-check the Section <a class="reference internal" href="#windows-osx-compatibility">Windows/OSX compatibility</a>.</p>
+<p>For an explanation of missing Microsoft Windows and macOS support please
+check the Section <a class="reference internal" href="#windows-macos-compatibility">Windows/macOS compatibility</a>.</p>
 </div>
 <div class="section" id="installing-auto-sklearn">
 <h2>Installing auto-sklearn<a class="headerlink" href="#installing-auto-sklearn" title="Permalink to this headline">¶</a></h2>
@@ -222,8 +222,8 @@ pip install -e <span class="s2">&quot;.[test,doc,examples]&quot;</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="windows-osx-compatibility">
-<h2>Windows/OSX compatibility<a class="headerlink" href="#windows-osx-compatibility" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="windows-macos-compatibility">
+<h2>Windows/macOS compatibility<a class="headerlink" href="#windows-macos-compatibility" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="windows">
 <h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
 <p><em>auto-sklearn</em> relies heavily on the Python module <code class="docutils literal notranslate"><span class="pre">resource</span></code>. <code class="docutils literal notranslate"><span class="pre">resource</span></code>
@@ -238,14 +238,14 @@ and not available on a Windows machine. Therefore, it is not possible to run
 <li><p>docker image</p></li>
 </ul>
 </div>
-<div class="section" id="mac-osx">
-<h3>Mac OSX<a class="headerlink" href="#mac-osx" title="Permalink to this headline">¶</a></h3>
-<p>We currently do not know if <em>auto-sklearn</em> works on OSX. There are at least two
-issues holding us back from actively supporting OSX:</p>
+<div class="section" id="macos">
+<h3>macOS<a class="headerlink" href="#macos" title="Permalink to this headline">¶</a></h3>
+<p>We currently do not know if <em>auto-sklearn</em> works on macOS. There are at least two
+issues holding us back from actively supporting macOS:</p>
 <ul class="simple">
 <li><p>The <code class="docutils literal notranslate"><span class="pre">resource</span></code> module cannot enforce a memory limit on a Python process
 (see <a class="reference external" href="https://github.com/automl/SMAC3/issues/115">SMAC3/issues/115</a>).</p></li>
-<li><p>Not all dependencies we are using are set up to work on OSX.</p></li>
+<li><p>Not all dependencies we are using are set up to work on macOS.</p></li>
 </ul>
 <p>In case you’re having issues installing the <a class="reference external" href="https://github.com/automl/random_forest_run">pyrfr package</a>, check out
 <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/360#issuecomment-335150470">this installation suggestion on github</a>.</p>
