@@ -121,7 +121,7 @@ Possible solutions:
 
 
 macOS
-~~~~~~~
+~~~~~
 
 We currently do not know if *auto-sklearn* works on macOS. There are at least two
 issues holding us back from actively supporting macOS:
