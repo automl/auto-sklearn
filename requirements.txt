@@ -7,8 +7,8 @@ scipy>=1.7.0
 joblib
 scikit-learn>=0.24.0,<0.25.0
 
-dask<2021.07
-distributed>=2.2.0,<2021.07
+dask>=2021.12
+distributed>=2012.12
 pyyaml
 pandas>=1.0
 liac-arff
