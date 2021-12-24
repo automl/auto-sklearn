@@ -9,6 +9,16 @@
 Releases
 ========
 
+Version 0.14.3
+==============
+* HOTFIX #1355: Update to dask 2021.12.0. Reliance on creating ``Nanny`` objects from
+  dask distributed does not work as shown in a now disabled example.
+
+Contributors v0.14.3
+********************
+
+* Eddie Bergman
+
 Version 0.14.2
 ==============
 
