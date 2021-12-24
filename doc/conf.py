@@ -79,7 +79,7 @@ sphinx_gallery_conf = {
     #},
     'backreferences_dir': None,
     'filename_pattern': 'example.*.py$',
-    'ignore_pattern': r'custom_metrics\.py|__init__\.py',
+    'ignore_pattern': r'custom_metrics\.py|__init__\.py|example_parallel_manual_spawning_python.py',
     'binder': {
          # Required keys
          'org': 'automl',

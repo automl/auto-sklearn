@@ -9,6 +9,12 @@
 Releases
 ========
 
+Version 0.14.3
+==============
+
+* HOTFIX #xxx: Updates dask to ``dask.distributed >=2012.12``.
+
+
 Version 0.14.2
 ==============
 
