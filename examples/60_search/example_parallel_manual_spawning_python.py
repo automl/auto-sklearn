@@ -3,6 +3,8 @@
 ===================================================
 Parallel Usage: Spawning workers from within Python
 ===================================================
+**DISABLED** See issue #5627 with dask distributed
+https://github.com/dask/distributed/issues/5627
 
 *Auto-sklearn* uses
 `dask.distributed <https://distributed.dask.org/en/latest/index.html>`_

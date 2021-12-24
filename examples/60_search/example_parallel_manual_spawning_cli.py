@@ -12,9 +12,13 @@ This example shows how to start the dask scheduler and spawn
 workers for *Auto-sklearn* manually from the command line. Use this example
 as a starting point to parallelize *Auto-sklearn* across multiple
 machines. If you want to start everything manually from within Python
-please see :ref:`sphx_glr_examples_60_search_example_parallel_manual_spawning_python.py`.
+please see ``sphx_glr_examples_60_search_example_parallel_manual_spawning_python.py``.
 To run *Auto-sklearn* in parallel on a single machine check out the example
 :ref:`sphx_glr_examples_60_search_example_parallel_n_jobs.py`.
+
+**Note**: The above exmaple with ``manual_spawning_python`` is
+currently disabled, see issue `#5627 <https://github.com/dask/distributed/issues/5627>`_
+with with ``dask.distributed``.
 
 You can learn more about the dask command line interface from
 https://docs.dask.org/en/latest/setup/cli.html.
