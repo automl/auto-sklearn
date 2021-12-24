@@ -10,7 +10,6 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
         self.alpha = alpha
         self.thetaL = thetaL
         self.thetaU = thetaU
-        # We ignore it
         self.random_state = random_state
         self.estimator = None
         self.scaler = None
@@ -25,7 +24,8 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
         n_features = X.shape[1]
         kernel = sklearn.gaussian_process.kernels.RBF(
             length_scale=[1.0]*n_features,
-            length_scale_bounds=[(self.thetaL, self.thetaU)]*n_features)
+            length_scale_bounds=[(self.thetaL, self.thetaU)]*n_features
+        )
 
         # Instanciate a Gaussian Process model
         self.estimator = sklearn.gaussian_process.GaussianProcessRegressor(
@@ -35,9 +35,11 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
             alpha=self.alpha,
             copy_X_train=True,
             random_state=self.random_state,
-            normalize_y=True)
+            normalize_y=True
+        )
 
         self.estimator.fit(X, y)
+
         return self
 
     def predict(self, X):

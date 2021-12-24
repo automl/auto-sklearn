@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 import copy
+import distro
 import io
 import json
 import platform
@@ -37,6 +38,8 @@ from sklearn.utils.validation import check_is_fitted
 from sklearn.metrics._classification import type_of_target
 from sklearn.dummy import DummyClassifier, DummyRegressor
 
+from autosklearn.automl_common.common.utils.backend import Backend, create
+
 from autosklearn.metrics import Scorer, default_metric_for_task
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.data.validation import (
@@ -49,7 +52,6 @@ from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, _fit_with_budget
 from autosklearn.metrics import calculate_metric
-from autosklearn.util.backend import Backend, create
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import (
     setup_logger,
@@ -171,8 +173,8 @@ class AutoML(BaseEstimator):
                  memory_limit=3072,
                  metadata_directory=None,
                  debug_mode=False,
-                 include=None,
-                 exclude=None,
+                 include: Optional[Dict[str, List[str]]] = None,
+                 exclude: Optional[Dict[str, List[str]]] = None,
                  resampling_strategy='holdout-iterative-fit',
                  resampling_strategy_arguments=None,
                  n_jobs=None,
@@ -280,6 +282,8 @@ class AutoML(BaseEstimator):
     def _create_backend(self) -> Backend:
         return create(
             temporary_directory=self._temporary_directory,
+            output_directory=None,
+            prefix="auto-sklearn",
             delete_tmp_folder_after_terminate=self._delete_tmp_folder_after_terminate,
         )
 
@@ -690,11 +694,10 @@ class AutoML(BaseEstimator):
         self._logger.debug('Starting to print environment information')
         self._logger.debug('  Python version: %s', sys.version.split('\n'))
         try:
-            self._logger.debug('  Distribution: %s', platform.linux_distribution())
+            self._logger.debug(f'\tDistribution: {distro.id()}-{distro.version()}-{distro.name()}')
         except AttributeError:
-            # platform.linux_distribution() was removed in Python3.8
-            # We should move to the distro package as soon as it supports Windows and OSX
             pass
+
         self._logger.debug('  System: %s', platform.system())
         self._logger.debug('  Machine: %s', platform.machine())
         self._logger.debug('  Platform: %s', platform.platform())
@@ -1844,10 +1847,14 @@ class AutoML(BaseEstimator):
 
             return sio.getvalue()
 
-    def _create_search_space(self, tmp_dir, backend, datamanager,
-                             include=None,
-                             exclude=None,
-                             ):
+    def _create_search_space(
+        self,
+        tmp_dir,
+        backend,
+        datamanager,
+        include: Optional[Dict[str, List[str]]] = None,
+        exclude: Optional[Dict[str, List[str]]] = None,
+    ):
         task_name = 'CreateConfigSpace'
 
         self._stopwatch.start_task(task_name)

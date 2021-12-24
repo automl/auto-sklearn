@@ -6,6 +6,7 @@ import tempfile
 import traceback
 import unittest
 import unittest.mock
+import warnings
 
 from joblib import Memory
 import numpy as np
@@ -15,6 +16,7 @@ from sklearn.base import clone
 import sklearn.ensemble
 import sklearn.svm
 from sklearn.utils.validation import check_is_fitted
+from sklearn.exceptions import ConvergenceWarning
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
@@ -27,6 +29,33 @@ from autosklearn.pipeline.components.base import AutoSklearnComponent, AutoSklea
 import autosklearn.pipeline.components.feature_preprocessing as preprocessing_components
 from autosklearn.pipeline.util import get_dataset
 from autosklearn.pipeline.constants import SPARSE, DENSE, SIGNED_DATA, UNSIGNED_DATA, PREDICTIONS
+
+ignored_warnings = [
+    (
+        UserWarning, (  # From QuantileTransformer
+            r"n_quantiles \(\d+\) is greater than the total number of samples \(\d+\)\."
+            r" n_quantiles is set to n_samples\."
+        )
+    ),
+    (
+        ConvergenceWarning, (  # From GaussianProcesses
+            r"The optimal value found for dimension \d+ of parameter \w+ is close"
+            r" to the specified (upper|lower) bound .*(Increasing|Decreasing) the bound"
+            r" and calling fit again may find a better value."
+        )
+    ),
+    (
+        UserWarning, (  # From FastICA
+            r"n_components is too large: it will be set to \d+"
+        )
+    ),
+    (
+        ConvergenceWarning, (  # From SGD
+            r"Maximum number of iteration reached before convergence\. Consider increasing"
+            r" max_iter to improve the fit\."
+        )
+    ),
+]
 
 
 class SimpleRegressionPipelineTest(unittest.TestCase):
@@ -123,10 +152,10 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 'X_test': X_test, 'Y_test': Y_test}
 
         dataset_properties = {'multioutput': True}
-        cs = SimpleRegressionPipeline(dataset_properties=dataset_properties).\
-            get_hyperparameter_search_space()
-        self._test_configurations(cs, data=data,
-                                  dataset_properties=dataset_properties)
+        pipeline = SimpleRegressionPipeline(dataset_properties=dataset_properties)
+        cs = pipeline.get_hyperparameter_search_space()
+
+        self._test_configurations(cs, data=data, dataset_properties=dataset_properties)
 
     def _test_configurations(self, configurations_space, make_sparse=False,
                              data=None, dataset_properties=None):
@@ -180,17 +209,21 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                     check_is_fitted(step)
 
             try:
-                cls.fit(X_train, Y_train)
-                # After fit, all components should be tagged as fitted
-                # by sklearn. Check is fitted raises an exception if that
-                # is not the case
-                try:
-                    for name, step in cls.named_steps.items():
-                        check_is_fitted(step)
-                except sklearn.exceptions.NotFittedError:
-                    self.fail("config={} raised NotFittedError unexpectedly!".format(
-                        config
-                    ))
+                with warnings.catch_warnings():
+                    for category, message in ignored_warnings:
+                        warnings.filterwarnings('ignore', category=category, message=message)
+
+                    cls.fit(X_train, Y_train)
+                    # After fit, all components should be tagged as fitted
+                    # by sklearn. Check is fitted raises an exception if that
+                    # is not the case
+                    try:
+                        for name, step in cls.named_steps.items():
+                            check_is_fitted(step)
+                    except sklearn.exceptions.NotFittedError:
+                        self.fail("config={} raised NotFittedError unexpectedly!".format(
+                            config
+                        ))
 
                 cls.predict(X_test)
             except MemoryError:
