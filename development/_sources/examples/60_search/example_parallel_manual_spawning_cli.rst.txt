@@ -29,10 +29,16 @@ for parallel optimization.
 This example shows how to start the dask scheduler and spawn
 workers for *Auto-sklearn* manually from the command line. Use this example
 as a starting point to parallelize *Auto-sklearn* across multiple
-machines. If you want to start everything manually from within Python
-please see :ref:`sphx_glr_examples_60_search_example_parallel_manual_spawning_python.py`.
+machines.
+
 To run *Auto-sklearn* in parallel on a single machine check out the example
 :ref:`sphx_glr_examples_60_search_example_parallel_n_jobs.py`.
+
+If you want to start everything manually from within Python
+please see ``:ref:sphx_glr_examples_60_search_example_parallel_manual_spawning_python.py``.
+
+**NOTE:** Above example is disabled due to issue https://github.com/dask/distributed/issues/5627
+
 
 You can learn more about the dask command line interface from
 https://docs.dask.org/en/latest/setup/cli.html.
@@ -64,12 +70,12 @@ be started from the command line and not from within a Python file via
 the ``subprocess`` module as done here (for the sake of having a self-contained
 example).
 
-.. GENERATED FROM PYTHON SOURCE LINES 51-53
+.. GENERATED FROM PYTHON SOURCE LINES 57-59
 
 Import statements
 =================
 
-.. GENERATED FROM PYTHON SOURCE LINES 53-70
+.. GENERATED FROM PYTHON SOURCE LINES 59-76
 
 .. code-block:: default
 
@@ -97,7 +103,7 @@ Import statements
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 71-79
+.. GENERATED FROM PYTHON SOURCE LINES 77-85
 
 0. Setup client-scheduler communication
 =======================================
@@ -108,7 +114,7 @@ relevant information in a file for which we provided the name and
 location. This filename is also given to the worker so they can find all
 relevant information to connect to the scheduler.
 
-.. GENERATED FROM PYTHON SOURCE LINES 79-83
+.. GENERATED FROM PYTHON SOURCE LINES 85-89
 
 .. code-block:: default
 
@@ -123,7 +129,7 @@ relevant information to connect to the scheduler.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 84-95
+.. GENERATED FROM PYTHON SOURCE LINES 90-101
 
 1. Start scheduler
 ==================
@@ -137,7 +143,7 @@ Starting the scheduler is done with the following bash command:
 We will now execute this bash command from within Python to have a
 self-contained example:
 
-.. GENERATED FROM PYTHON SOURCE LINES 95-118
+.. GENERATED FROM PYTHON SOURCE LINES 101-124
 
 .. code-block:: default
 
@@ -171,7 +177,7 @@ self-contained example:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 119-137
+.. GENERATED FROM PYTHON SOURCE LINES 125-143
 
 2. Start two workers
 ====================
@@ -192,7 +198,7 @@ compatible with Auto-sklearn creating new processes in the workers itself.
 We disable dask's memory management by passing ``--memory-limit`` as
 Auto-sklearn does the memory management itself.
 
-.. GENERATED FROM PYTHON SOURCE LINES 137-161
+.. GENERATED FROM PYTHON SOURCE LINES 143-167
 
 .. code-block:: default
 
@@ -227,7 +233,7 @@ Auto-sklearn does the memory management itself.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 162-167
+.. GENERATED FROM PYTHON SOURCE LINES 168-173
 
 3. Creating a client in Python
 ==============================
@@ -235,7 +241,7 @@ Auto-sklearn does the memory management itself.
 Finally we create a dask cluster which also connects to the scheduler via
 the information in the file created by the scheduler.
 
-.. GENERATED FROM PYTHON SOURCE LINES 167-170
+.. GENERATED FROM PYTHON SOURCE LINES 173-176
 
 .. code-block:: default
 
@@ -249,12 +255,12 @@ the information in the file created by the scheduler.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 171-173
+.. GENERATED FROM PYTHON SOURCE LINES 177-179
 
 Start Auto-sklearn
 ~~~~~~~~~~~~~~~~~~
 
-.. GENERATED FROM PYTHON SOURCE LINES 173-205
+.. GENERATED FROM PYTHON SOURCE LINES 179-211
 
 .. code-block:: default
 
@@ -301,13 +307,13 @@ Start Auto-sklearn
  .. code-block:: none
 
     auto-sklearn results:
-      Dataset name: e21aa017-6585-11ec-874f-c9dc32b036ee
+      Dataset name: 0ab37a10-65bc-11ec-878c-a7e7f15639d6
       Metric: accuracy
       Best validation score: 0.992908
       Number of target algorithm runs: 13
-      Number of successful target algorithm runs: 12
+      Number of successful target algorithm runs: 11
       Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 1
+      Number of target algorithms that exceeded the time limit: 2
       Number of target algorithms that exceeded the memory limit: 0
 
     Accuracy score 0.965034965034965
@@ -315,7 +321,7 @@ Start Auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 206-212
+.. GENERATED FROM PYTHON SOURCE LINES 212-218
 
 Wait until all workers are closed
 =================================
@@ -324,7 +330,7 @@ This is only necessary if the workers are started from within this python
 script. In a real application one would start them directly from the command
 line.
 
-.. GENERATED FROM PYTHON SOURCE LINES 212-216
+.. GENERATED FROM PYTHON SOURCE LINES 218-222
 
 .. code-block:: default
 
@@ -342,7 +348,7 @@ line.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  38.780 seconds)
+   **Total running time of the script:** ( 0 minutes  39.090 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_manual_spawning_cli.py:

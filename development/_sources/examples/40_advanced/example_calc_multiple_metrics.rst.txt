@@ -188,8 +188,7 @@ Get the Score of the final ensemble
                    29                    adaboost         0.943262                  0.943064          0.965517       0.943820   0.954545             0.056738
                    31               random_forest         0.936170                  0.937446          0.965116       0.932584   0.948571             0.063830
                    26                    adaboost         0.950355                  0.952679          0.976744       0.943820   0.960000             0.049645
-                   36                 extra_trees         0.631206                  0.500000          0.631206       1.000000   0.773913             0.368794
-                   35                 extra_trees         0.914894                  0.884615          0.881188       1.000000   0.936842             0.085106
+                   35                 extra_trees         0.631206                  0.500000          0.631206       1.000000   0.773913             0.368794
 
 
 
@@ -197,7 +196,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  56.624 seconds)
+   **Total running time of the script:** ( 1 minutes  59.051 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_calc_multiple_metrics.py:

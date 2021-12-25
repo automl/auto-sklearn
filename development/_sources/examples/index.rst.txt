@@ -427,27 +427,6 @@ Examples of changing the search procedure of Auto-sklearn.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="*Auto-sklearn* uses `dask.distributed &lt;https://distributed.dask.org/en/latest/index.html&gt;`_ for...">
-
-.. only:: html
-
- .. figure:: /examples/60_search/images/thumb/sphx_glr_example_parallel_manual_spawning_python_thumb.png
-     :alt: Parallel Usage: Spawning workers from within Python
-
-     :ref:`sphx_glr_examples_60_search_example_parallel_manual_spawning_python.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/60_search/example_parallel_manual_spawning_python
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="A crucial feature of *auto-sklearn* is automatically optimizing the hyperparameters through SMA...">
 
 .. only:: html
