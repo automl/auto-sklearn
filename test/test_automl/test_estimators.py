@@ -28,6 +28,7 @@ from sklearn.base import clone
 from sklearn.base import ClassifierMixin, RegressorMixin
 from sklearn.base import is_classifier
 from smac.tae import StatusType
+from dask.distributed import Client
 
 from autosklearn.data.validation import InputValidator
 import autosklearn.pipeline.util as putil
@@ -467,6 +468,157 @@ def test_leaderboard(
                 and 'ensemble_weight' in columns
             ):
                 assert all(leaderboard['ensemble_weight'] > 0)
+
+
+@pytest.mark.parametrize('estimator', [AutoSklearnRegressor])
+@pytest.mark.parametrize('resampling_strategy', ['holdout'])
+@pytest.mark.parametrize('X', [
+    np.asarray([[1.0, 1.0, 1.0]] * 25 + [[2.0, 2.0, 2.0]] * 25 +
+               [[3.0, 3.0, 3.0]] * 25 + [[4.0, 4.0, 4.0]] * 25)
+])
+@pytest.mark.parametrize('y', [
+    np.asarray([1.0] * 25 + [2.0] * 25 + [3.0] * 25 + [4.0] * 25)
+])
+def test_show_models_with_holdout(
+    tmp_dir: str,
+    dask_client: Client,
+    estimator: AutoSklearnEstimator,
+    resampling_strategy: str,
+    X: np.ndarray,
+    y: np.ndarray
+) -> None:
+    """
+    Parameters
+    ----------
+    tmp_dir: str
+        The temporary directory to use for this test
+
+    dask_client: dask.distributed.Client
+         The dask client to use for this test
+
+    estimator: AutoSklearnEstimator
+         The estimator to train
+
+    resampling_strategy: str
+         The resampling strategy to use
+
+    X: np.ndarray
+        The X data to use for this estimator
+
+    y: np.ndarray
+         The targets to use for this estimator
+
+    Expects
+    -------
+    * Expects all the model dictionaries to have ``model_keys``
+    * Expects all models to have an auto-sklearn wrapped model ``regressor``
+    * Expects all models to have a sklearn wrapped model ``sklearn_regressor``
+    * Expects no model to have any ``None`` value
+    """
+
+    automl = estimator(
+        time_left_for_this_task=60,
+        per_run_time_limit=5,
+        tmp_folder=tmp_dir,
+        resampling_strategy=resampling_strategy,
+        dask_client=dask_client
+    )
+    automl.fit(X, y)
+
+    models = automl.show_models().values()
+
+    model_keys = set([
+        'model_id', 'rank', 'cost', 'ensemble_weight',
+        'data_preprocessor', 'feature_preprocessor',
+        'regressor', 'sklearn_regressor'
+    ])
+
+    assert all([model_keys == set(model.keys()) for model in models])
+    assert all([model['regressor'] for model in models])
+    assert all([model['sklearn_regressor'] for model in models])
+    assert not any([None in model.values() for model in models])
+
+
+@pytest.mark.parametrize('estimator', [AutoSklearnClassifier])
+@pytest.mark.parametrize('resampling_strategy', ['cv'])
+@pytest.mark.parametrize('X', [
+    np.asarray([[1.0, 1.0, 1.0]] * 50 + [[2.0, 2.0, 2.0]] * 50)
+])
+@pytest.mark.parametrize('y', [
+    np.asarray([1] * 50 + [2] * 50)
+])
+def test_show_models_with_cv(
+    tmp_dir: str,
+    dask_client: Client,
+    estimator: AutoSklearnEstimator,
+    resampling_strategy: str,
+    X: np.ndarray,
+    y: np.ndarray
+) -> None:
+    """
+    Parameters
+    ----------
+    tmp_dir: str
+        The temporary directory to use for this test
+
+    dask_client: dask.distributed.Client
+         The dask client to use for this test
+
+    estimator: AutoSklearnEstimator
+         The estimator to train
+
+    resampling_strategy: str
+         The resampling strategy to use
+
+    X: np.ndarray
+        The X data to use for this estimator
+
+    y: np.ndarray
+         The targets to use for this estimator
+
+    Expects
+    -------
+    * Expects all the model dictionaries to have ``model_keys``
+    * Expects no model to have any ``None`` value
+    * Expects all the estimators in a model to have ``estimator_keys``
+    * Expects all model estimators to have an auto-sklearn wrapped model ``classifier``
+    * Expects all model estimators to have a sklearn wrapped model ``sklearn_classifier``
+    * Expects no estimator to have ``None`` value
+    """
+
+    automl = estimator(
+        time_left_for_this_task=120,
+        per_run_time_limit=5,
+        tmp_folder=tmp_dir,
+        resampling_strategy=resampling_strategy,
+        dask_client=dask_client
+    )
+    automl.fit(X, y)
+
+    models = automl.show_models().values()
+
+    model_keys = set([
+        'model_id', 'rank',
+        'cost', 'ensemble_weight',
+        'voting_model', 'estimators'
+    ])
+
+    estimator_keys = set([
+        'data_preprocessor', 'balancing',
+        'feature_preprocessor', 'classifier',
+        'sklearn_classifier'
+    ])
+
+    assert all([model_keys == set(model.keys()) for model in models])
+    assert not any([None in model.values() for model in models])
+    assert all([estimator_keys == set(estimator.keys())
+                for model in models for estimator in model['estimators']])
+    assert all([estimator['classifier']
+                for model in models for estimator in model['estimators']])
+    assert all([estimator['sklearn_classifier']
+                for model in models for estimator in model['estimators']])
+    assert not any([None in estimator.values()
+                    for model in models for estimator in model['estimators']])
 
 
 @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.build_automl')
