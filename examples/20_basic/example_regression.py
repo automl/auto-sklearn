@@ -7,6 +7,8 @@ Regression
 The following example shows how to fit a simple regression model with
 *auto-sklearn*.
 """
+from pprint import pprint
+
 import sklearn.datasets
 import sklearn.metrics
 
@@ -43,7 +45,7 @@ print(automl.leaderboard())
 # Print the final ensemble constructed by auto-sklearn
 # ====================================================
 
-print(automl.show_models())
+pprint(automl.show_models(), indent=4)
 
 #####################################
 # Get the Score of the final ensemble
