@@ -25,9 +25,11 @@ Interpretable models
 The following example shows how to inspect the models which *auto-sklearn*
 optimizes over and how to restrict them to an interpretable subset.
 
-.. GENERATED FROM PYTHON SOURCE LINES 10-14
+.. GENERATED FROM PYTHON SOURCE LINES 10-16
 
 .. code-block:: default
+
+    from pprint import pprint
 
     import autosklearn.classification
     import sklearn.datasets
@@ -40,7 +42,7 @@ optimizes over and how to restrict them to an interpretable subset.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 15-21
+.. GENERATED FROM PYTHON SOURCE LINES 17-23
 
 Show available classification models
 ====================================
@@ -49,7 +51,7 @@ We will first list all classifiers Auto-sklearn chooses from. A similar
 call is available for preprocessors (see below) and regression (not shown)
 as well.
 
-.. GENERATED FROM PYTHON SOURCE LINES 21-26
+.. GENERATED FROM PYTHON SOURCE LINES 23-28
 
 .. code-block:: default
 
@@ -88,12 +90,12 @@ as well.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 27-29
+.. GENERATED FROM PYTHON SOURCE LINES 29-31
 
 Show available preprocessors
 ============================
 
-.. GENERATED FROM PYTHON SOURCE LINES 29-35
+.. GENERATED FROM PYTHON SOURCE LINES 31-37
 
 .. code-block:: default
 
@@ -135,12 +137,12 @@ Show available preprocessors
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 36-38
+.. GENERATED FROM PYTHON SOURCE LINES 38-40
 
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 38-43
+.. GENERATED FROM PYTHON SOURCE LINES 40-45
 
 .. code-block:: default
 
@@ -156,7 +158,7 @@ Data Loading
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 44-52
+.. GENERATED FROM PYTHON SOURCE LINES 46-54
 
 Build and fit a classifier
 ==========================
@@ -167,7 +169,7 @@ single best model in the end. However, we would like to note that the
 choice of which models is deemed interpretable is very much up to the user
 and can change from use case to use case.
 
-.. GENERATED FROM PYTHON SOURCE LINES 52-69
+.. GENERATED FROM PYTHON SOURCE LINES 54-71
 
 .. code-block:: default
 
@@ -209,17 +211,17 @@ and can change from use case to use case.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 70-72
+.. GENERATED FROM PYTHON SOURCE LINES 72-74
 
 Print the final ensemble constructed by auto-sklearn
 ====================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 72-75
+.. GENERATED FROM PYTHON SOURCE LINES 74-77
 
 .. code-block:: default
 
 
-    print(automl.show_models())
+    pprint(automl.show_models(), indent=4)
 
 
 
@@ -231,25 +233,28 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    [(1.000000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'sgd', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:sgd:alpha': 9.999999999999991e-05, 'classifier:sgd:average': 'False', 'classifier:sgd:fit_intercept': 'True', 'classifier:sgd:learning_rate': 'invscaling', 'classifier:sgd:loss': 'modified_huber', 'classifier:sgd:penalty': 'l2', 'classifier:sgd:tol': 0.0004668987145850572, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'classifier:sgd:epsilon': 1.3700860264543197e-05, 'classifier:sgd:eta0': 0.010000000000000014, 'classifier:sgd:power_t': 0.5, 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01253391694297453},
-    dataset_properties={
-      'task': 1,
-      'sparse': False,
-      'multilabel': False,
-      'multiclass': False,
-      'target_type': 'classification',
-      'signed': False})),
-    ]
+    {   63: {   'balancing': Balancing(random_state=1),
+                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f4b86dd0490>,
+                'cost': 0.007092198581560294,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f4b8c5984c0>,
+                'ensemble_weight': 1.0,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f4b86dd05b0>,
+                'model_id': 63,
+                'rank': 1,
+                'sklearn_classifier': SGDClassifier(alpha=9.999999999999991e-05, epsilon=1.3700860264543197e-05,
+                  eta0=0.010000000000000014, learning_rate='invscaling',
+                  loss='modified_huber', max_iter=64, random_state=1,
+                  tol=0.0004668987145850572, warm_start=True)}}
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 76-78
+.. GENERATED FROM PYTHON SOURCE LINES 78-80
 
 Get the Score of the final ensemble
 ===================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 78-81
+.. GENERATED FROM PYTHON SOURCE LINES 80-83
 
 .. code-block:: default
 
@@ -274,7 +279,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  54.150 seconds)
+   **Total running time of the script:** ( 2 minutes  6.469 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_interpretable_models.py:

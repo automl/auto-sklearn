@@ -130,6 +130,7 @@ to download the full example code or to run this example in your browser via Bin
 <p>The following example shows how to fit a multioutput regression model with
 <em>auto-sklearn</em>.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
 
 <span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">make_regression</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">r2_score</span>
@@ -168,50 +169,53 @@ to download the full example code or to run this example in your browser via Bin
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight                 type      cost  duration
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight              type      cost  duration
 model_id
-2            1             0.60        random_forest  0.134781  2.559114
-21           2             0.30  k_nearest_neighbors  0.160808  0.932739
-20           3             0.08  k_nearest_neighbors  0.414915  0.513096
-17           4             0.02  k_nearest_neighbors  0.453393  0.491426
+12           1             0.68  gaussian_process  0.006317  3.029925
+19           2             0.26  gaussian_process  0.014410  1.835958
+15           3             0.06  gaussian_process  0.041176  4.600265
 </pre></div>
 </div>
 </div>
 <div class="section" id="print-the-final-ensemble-constructed-by-auto-sklearn">
 <h2>Print the final ensemble constructed by auto-sklearn<a class="headerlink" href="#print-the-final-ensemble-constructed-by-auto-sklearn" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">())</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pprint</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(0.600000, SimpleRegressionPipeline({&#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;regressor:__choice__&#39;: &#39;random_forest&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;regressor:random_forest:bootstrap&#39;: &#39;True&#39;, &#39;regressor:random_forest:criterion&#39;: &#39;mse&#39;, &#39;regressor:random_forest:max_depth&#39;: &#39;None&#39;, &#39;regressor:random_forest:max_features&#39;: 1.0, &#39;regressor:random_forest:max_leaf_nodes&#39;: &#39;None&#39;, &#39;regressor:random_forest:min_impurity_decrease&#39;: 0.0, &#39;regressor:random_forest:min_samples_leaf&#39;: 1, &#39;regressor:random_forest:min_samples_split&#39;: 2, &#39;regressor:random_forest:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01},
-dataset_properties={
-  &#39;task&#39;: 5,
-  &#39;sparse&#39;: False,
-  &#39;multioutput&#39;: True,
-  &#39;target_type&#39;: &#39;regression&#39;,
-  &#39;signed&#39;: False})),
-(0.300000, SimpleRegressionPipeline({&#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;extra_trees_preproc_for_regression&#39;, &#39;regressor:__choice__&#39;: &#39;k_nearest_neighbors&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;robust_scaler&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:bootstrap&#39;: &#39;True&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:criterion&#39;: &#39;mae&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:max_depth&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:max_features&#39;: 0.9487228844264749, &#39;feature_preprocessor:extra_trees_preproc_for_regression:max_leaf_nodes&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_regression:min_samples_leaf&#39;: 11, &#39;feature_preprocessor:extra_trees_preproc_for_regression:min_samples_split&#39;: 10, &#39;feature_preprocessor:extra_trees_preproc_for_regression:min_weight_fraction_leaf&#39;: 0.0, &#39;feature_preprocessor:extra_trees_preproc_for_regression:n_estimators&#39;: 100, &#39;regressor:k_nearest_neighbors:n_neighbors&#39;: 9, &#39;regressor:k_nearest_neighbors:p&#39;: 1, &#39;regressor:k_nearest_neighbors:weights&#39;: &#39;uniform&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max&#39;: 0.7565278541369966, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min&#39;: 0.11237097633903419},
-dataset_properties={
-  &#39;task&#39;: 5,
-  &#39;sparse&#39;: False,
-  &#39;multioutput&#39;: True,
-  &#39;target_type&#39;: &#39;regression&#39;,
-  &#39;signed&#39;: False})),
-(0.080000, SimpleRegressionPipeline({&#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;polynomial&#39;, &#39;regressor:__choice__&#39;: &#39;k_nearest_neighbors&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;power_transformer&#39;, &#39;feature_preprocessor:polynomial:degree&#39;: 2, &#39;feature_preprocessor:polynomial:include_bias&#39;: &#39;True&#39;, &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;False&#39;, &#39;regressor:k_nearest_neighbors:n_neighbors&#39;: 1, &#39;regressor:k_nearest_neighbors:p&#39;: 2, &#39;regressor:k_nearest_neighbors:weights&#39;: &#39;distance&#39;},
-dataset_properties={
-  &#39;task&#39;: 5,
-  &#39;sparse&#39;: False,
-  &#39;multioutput&#39;: True,
-  &#39;target_type&#39;: &#39;regression&#39;,
-  &#39;signed&#39;: False})),
-(0.020000, SimpleRegressionPipeline({&#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;regressor:__choice__&#39;: &#39;k_nearest_neighbors&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;regressor:k_nearest_neighbors:n_neighbors&#39;: 1, &#39;regressor:k_nearest_neighbors:p&#39;: 1, &#39;regressor:k_nearest_neighbors:weights&#39;: &#39;uniform&#39;},
-dataset_properties={
-  &#39;task&#39;: 5,
-  &#39;sparse&#39;: False,
-  &#39;multioutput&#39;: True,
-  &#39;target_type&#39;: &#39;regression&#39;,
-  &#39;signed&#39;: False})),
-]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   12: {   &#39;cost&#39;: 0.006317093020258735,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f4b8c419c10&gt;,
+            &#39;ensemble_weight&#39;: 0.68,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f4b8c4f0af0&gt;,
+            &#39;model_id&#39;: 12,
+            &#39;rank&#39;: 1,
+            &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f4b86f46040&gt;,
+            &#39;sklearn_regressor&#39;: GaussianProcessRegressor(alpha=1.0001184179669579e-14,
+                         kernel=RBF(length_scale=[1, 1, 1, 1, 1]),
+                         n_restarts_optimizer=10, normalize_y=True,
+                         random_state=1)},
+    15: {   &#39;cost&#39;: 0.04117578868348204,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f4b8c44c5b0&gt;,
+            &#39;ensemble_weight&#39;: 0.06,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f4b8c3c0b80&gt;,
+            &#39;model_id&#39;: 15,
+            &#39;rank&#39;: 3,
+            &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f4b8c3c0220&gt;,
+            &#39;sklearn_regressor&#39;: GaussianProcessRegressor(alpha=5.606392822363534e-08,
+                         kernel=RBF(length_scale=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]),
+                         n_restarts_optimizer=10, normalize_y=True,
+                         random_state=1)},
+    19: {   &#39;cost&#39;: 0.014410448559546318,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f4b86d189d0&gt;,
+            &#39;ensemble_weight&#39;: 0.26,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f4b8c5dff40&gt;,
+            &#39;model_id&#39;: 19,
+            &#39;rank&#39;: 2,
+            &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f4b8c5df760&gt;,
+            &#39;sklearn_regressor&#39;: GaussianProcessRegressor(alpha=0.07845654222041258,
+                         kernel=RBF(length_scale=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]),
+                         n_restarts_optimizer=10, normalize_y=True,
+                         random_state=1)}}
 </pre></div>
 </div>
 </div>
@@ -222,7 +226,7 @@ dataset_properties={
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.8495278157654642
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.993653880034913
 </pre></div>
 </div>
 </div>
@@ -423,7 +427,7 @@ dataset_properties={
     (Forbidden: regressor:__choice__ == &#39;random_forest&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  56.196 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  1.774 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-20-basic-example-multioutput-regression-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/20_basic/example_multioutput_regression.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo.svg" width="150px" /></a>

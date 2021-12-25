@@ -26,10 +26,11 @@ The following example demonstrates how to create a wrapper around the linear
 discriminant analysis (LDA) algorithm from sklearn and use it as a preprocessor
 in auto-sklearn.
 
-.. GENERATED FROM PYTHON SOURCE LINES 10-28
+.. GENERATED FROM PYTHON SOURCE LINES 10-29
 
 .. code-block:: default
 
+    from pprint import pprint
 
     from ConfigSpace.configuration_space import ConfigurationSpace
     from ConfigSpace.hyperparameters import UniformFloatHyperparameter, CategoricalHyperparameter
@@ -55,12 +56,12 @@ in auto-sklearn.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 29-31
+.. GENERATED FROM PYTHON SOURCE LINES 30-32
 
 Create LDA component for auto-sklearn
 =====================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-97
+.. GENERATED FROM PYTHON SOURCE LINES 32-98
 
 .. code-block:: default
 
@@ -137,12 +138,12 @@ Create LDA component for auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 98-100
+.. GENERATED FROM PYTHON SOURCE LINES 99-101
 
 Create dataset
 ==============
 
-.. GENERATED FROM PYTHON SOURCE LINES 100-104
+.. GENERATED FROM PYTHON SOURCE LINES 101-105
 
 .. code-block:: default
 
@@ -157,12 +158,12 @@ Create dataset
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 105-107
+.. GENERATED FROM PYTHON SOURCE LINES 106-108
 
 Configuration space
 ===================
 
-.. GENERATED FROM PYTHON SOURCE LINES 107-111
+.. GENERATED FROM PYTHON SOURCE LINES 108-112
 
 .. code-block:: default
 
@@ -192,12 +193,12 @@ Configuration space
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 112-114
+.. GENERATED FROM PYTHON SOURCE LINES 113-115
 
 Fit the model using LDA as preprocessor
 =======================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 114-127
+.. GENERATED FROM PYTHON SOURCE LINES 115-128
 
 .. code-block:: default
 
@@ -233,19 +234,19 @@ Fit the model using LDA as preprocessor
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 128-130
+.. GENERATED FROM PYTHON SOURCE LINES 129-131
 
 Print prediction score and statistics
 =====================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 130-134
+.. GENERATED FROM PYTHON SOURCE LINES 131-135
 
 .. code-block:: default
 
 
     y_pred = clf.predict(X_test)
     print("accuracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
-    print(clf.show_models())
+    pprint(clf.show_models(), indent=4)
 
 
 
@@ -256,16 +257,17 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    accuracy:  0.951048951048951
-    [(1.000000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'LDA', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'feature_preprocessor:LDA:solver': 'svd', 'feature_preprocessor:LDA:tol': 0.0001, 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01},
-    dataset_properties={
-      'task': 1,
-      'sparse': False,
-      'multilabel': False,
-      'multiclass': False,
-      'target_type': 'classification',
-      'signed': False})),
-    ]
+    accuracy:  0.9440559440559441
+    {   2: {   'balancing': Balancing(random_state=1),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f4b8fe63df0>,
+               'cost': 0.049645390070921946,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f4b86f6b790>,
+               'ensemble_weight': 1.0,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f4b847a4760>,
+               'model_id': 2,
+               'rank': 1,
+               'sklearn_classifier': RandomForestClassifier(max_features=1, n_estimators=512, n_jobs=1,
+                           random_state=1, warm_start=True)}}
 
 
 
@@ -273,7 +275,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  17.755 seconds)
+   **Total running time of the script:** ( 0 minutes  20.272 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_preprocessor.py:

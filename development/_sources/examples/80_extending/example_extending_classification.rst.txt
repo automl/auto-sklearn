@@ -25,10 +25,11 @@ Extending Auto-Sklearn with Classification Component
 The following example demonstrates how to create a new classification
 component for using in auto-sklearn.
 
-.. GENERATED FROM PYTHON SOURCE LINES 9-26
+.. GENERATED FROM PYTHON SOURCE LINES 9-27
 
 .. code-block:: default
 
+    from pprint import pprint
 
     from ConfigSpace.configuration_space import ConfigurationSpace
     from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
@@ -53,12 +54,12 @@ component for using in auto-sklearn.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 27-29
+.. GENERATED FROM PYTHON SOURCE LINES 28-30
 
 Create MLP classifier component for auto-sklearn
 ================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 29-122
+.. GENERATED FROM PYTHON SOURCE LINES 30-123
 
 .. code-block:: default
 
@@ -177,12 +178,12 @@ Create MLP classifier component for auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 123-125
+.. GENERATED FROM PYTHON SOURCE LINES 124-126
 
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 125-129
+.. GENERATED FROM PYTHON SOURCE LINES 126-130
 
 .. code-block:: default
 
@@ -197,12 +198,12 @@ Data Loading
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 130-132
+.. GENERATED FROM PYTHON SOURCE LINES 131-133
 
 Fit MLP classifier to the data
 ==============================
 
-.. GENERATED FROM PYTHON SOURCE LINES 132-146
+.. GENERATED FROM PYTHON SOURCE LINES 133-147
 
 .. code-block:: default
 
@@ -239,19 +240,19 @@ Fit MLP classifier to the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 147-149
+.. GENERATED FROM PYTHON SOURCE LINES 148-150
 
 Print test accuracy and statistics
 ==================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 149-153
+.. GENERATED FROM PYTHON SOURCE LINES 150-154
 
 .. code-block:: default
 
 
     y_pred = clf.predict(X_test)
     print("accuracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
-    print(clf.show_models())
+    pprint(clf.show_models(), indent=4)
 
 
 
@@ -262,24 +263,26 @@ Print test accuracy and statistics
 
  .. code-block:: none
 
-    accuracy:  0.965034965034965
-    [(0.500000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:MLPClassifier:activation': 'relu', 'classifier:MLPClassifier:alpha': 0.0001, 'classifier:MLPClassifier:hidden_layer_depth': 1, 'classifier:MLPClassifier:num_nodes_per_layer': 32, 'classifier:MLPClassifier:solver': 'adam', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01},
-    dataset_properties={
-      'task': 1,
-      'sparse': False,
-      'multilabel': False,
-      'multiclass': False,
-      'target_type': 'classification',
-      'signed': False})),
-    (0.500000, SimpleClassificationPipeline({'balancing:strategy': 'weighting', 'classifier:__choice__': 'MLPClassifier', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'select_rates_classification', 'classifier:MLPClassifier:activation': 'relu', 'classifier:MLPClassifier:alpha': 0.054648061621061846, 'classifier:MLPClassifier:hidden_layer_depth': 1, 'classifier:MLPClassifier:num_nodes_per_layer': 187, 'classifier:MLPClassifier:solver': 'adam', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'feature_preprocessor:select_rates_classification:alpha': 0.17677801820619737, 'feature_preprocessor:select_rates_classification:score_func': 'mutual_info_classif', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0684618323864864, 'data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max': 0.8465036896999549, 'data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min': 0.14555017892884228},
-    dataset_properties={
-      'task': 1,
-      'sparse': False,
-      'multilabel': False,
-      'multiclass': False,
-      'target_type': 'classification',
-      'signed': False})),
-    ]
+    accuracy:  0.986013986013986
+    {   2: {   'balancing': Balancing(random_state=1),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f4b8795aa60>,
+               'cost': 0.049645390070921946,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f4b81af8190>,
+               'ensemble_weight': 0.54,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f4b8abdc220>,
+               'model_id': 2,
+               'rank': 1,
+               'sklearn_classifier': MLPClassifier(hidden_layer_sizes=(32,), random_state=1)},
+        5: {   'balancing': Balancing(random_state=1, strategy='weighting'),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f4b8be634f0>,
+               'cost': 0.08510638297872342,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f4b8298bcd0>,
+               'ensemble_weight': 0.46,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f4b8aa7ed90>,
+               'model_id': 5,
+               'rank': 2,
+               'sklearn_classifier': MLPClassifier(alpha=0.054648061621061846, hidden_layer_sizes=(187,),
+                  random_state=1)}}
 
 
 
@@ -287,7 +290,7 @@ Print test accuracy and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  13.903 seconds)
+   **Total running time of the script:** ( 0 minutes  18.672 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_classification.py:

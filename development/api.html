@@ -724,11 +724,66 @@ possible to update each component of a nested object.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="autosklearn.classification.AutoSklearnClassifier.show_models">
 <span class="sig-name descname"><span class="pre">show_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.show_models" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a representation of the final ensemble found by auto-sklearn.</p>
+<dd><p>Returns a dictionary containing dictionaries of ensemble models.</p>
+<p>Each model in the ensemble can be accessed by giving its <code class="docutils literal notranslate"><span class="pre">model_id</span></code> as key.</p>
+<p>A model dictionary contains the following:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;model_id&quot;</span></code> - The id given to a model by <code class="docutils literal notranslate"><span class="pre">autosklearn</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;rank&quot;</span></code> - The rank of the model based on it’s <code class="docutils literal notranslate"><span class="pre">&quot;cost&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;cost&quot;</span></code> - The loss of the model on the validation set.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;ensemble_weight&quot;</span></code> - The weight given to the model in the ensemble.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;voting_model&quot;</span></code> - The <code class="docutils literal notranslate"><span class="pre">cv_voting_ensemble</span></code> model (for ‘cv’ resampling).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;estimators&quot;</span></code> - List of models (dicts) in <code class="docutils literal notranslate"><span class="pre">cv_voting_ensemble</span></code> (for ‘cv’ resampling).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;data_preprocessor&quot;</span></code> - The preprocessor used on the data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;balancing&quot;</span></code> - The balancing used on the data (for classification).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;feature_preprocessor&quot;</span></code> - The preprocessor for features types.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;classifier&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;regressor&quot;</span></code> - The autosklearn wrapped classifier or regressor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;sklearn_classifier&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;sklearn_regressor&quot;</span></code> - The sklearn classifier or regressor.</p></li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sklearn.datasets</span>
+<span class="kn">import</span> <span class="nn">sklearn.metrics</span>
+<span class="kn">import</span> <span class="nn">autosklearn.regression</span>
+
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_diabetes</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">regression</span><span class="o">.</span><span class="n">AutoSklearnRegressor</span><span class="p">(</span>
+    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">120</span>
+    <span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">dataset_name</span><span class="o">=</span><span class="s1">&#39;diabetes&#39;</span><span class="p">)</span>
+
+<span class="n">ensemble_dict</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ensemble_dict</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{
+    25: {&#39;model_id&#39;: 25.0,
+         &#39;rank&#39;: 1,
+         &#39;cost&#39;: 0.43667876507897496,
+         &#39;ensemble_weight&#39;: 0.38,
+         &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing....&gt;,
+         &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components....&gt;,
+         &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression....&gt;,
+         &#39;sklearn_regressor&#39;: SGDRegressor(alpha=0.0006517033225329654,...)
+        },
+    6: {&#39;model_id&#39;: 6.0,
+        &#39;rank&#39;: 2,
+        &#39;cost&#39;: 0.4550418898836528,
+        &#39;ensemble_weight&#39;: 0.3,
+        &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing....&gt;,
+        &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components....&gt;,
+        &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression....&gt;,
+        &#39;sklearn_regressor&#39;: ARDRegression(alpha_1=0.0003701926442639788,...)
+        }...
+}
+</pre></div>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><dl class="simple">
-<dt>str</dt><dd></dd>
+<dt><strong>Dict(int, Any)</strong><span class="classifier">dictionary of length = number of models in the ensemble</span></dt><dd><p>A dictionary of models in the ensemble, where <code class="docutils literal notranslate"><span class="pre">model_id</span></code> is the key.</p>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -1236,11 +1291,66 @@ possible to update each component of a nested object.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="autosklearn.experimental.askl2.AutoSklearn2Classifier.show_models">
 <span class="sig-name descname"><span class="pre">show_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.experimental.askl2.AutoSklearn2Classifier.show_models" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a representation of the final ensemble found by auto-sklearn.</p>
+<dd><p>Returns a dictionary containing dictionaries of ensemble models.</p>
+<p>Each model in the ensemble can be accessed by giving its <code class="docutils literal notranslate"><span class="pre">model_id</span></code> as key.</p>
+<p>A model dictionary contains the following:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;model_id&quot;</span></code> - The id given to a model by <code class="docutils literal notranslate"><span class="pre">autosklearn</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;rank&quot;</span></code> - The rank of the model based on it’s <code class="docutils literal notranslate"><span class="pre">&quot;cost&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;cost&quot;</span></code> - The loss of the model on the validation set.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;ensemble_weight&quot;</span></code> - The weight given to the model in the ensemble.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;voting_model&quot;</span></code> - The <code class="docutils literal notranslate"><span class="pre">cv_voting_ensemble</span></code> model (for ‘cv’ resampling).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;estimators&quot;</span></code> - List of models (dicts) in <code class="docutils literal notranslate"><span class="pre">cv_voting_ensemble</span></code> (for ‘cv’ resampling).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;data_preprocessor&quot;</span></code> - The preprocessor used on the data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;balancing&quot;</span></code> - The balancing used on the data (for classification).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;feature_preprocessor&quot;</span></code> - The preprocessor for features types.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;classifier&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;regressor&quot;</span></code> - The autosklearn wrapped classifier or regressor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;sklearn_classifier&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;sklearn_regressor&quot;</span></code> - The sklearn classifier or regressor.</p></li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sklearn.datasets</span>
+<span class="kn">import</span> <span class="nn">sklearn.metrics</span>
+<span class="kn">import</span> <span class="nn">autosklearn.regression</span>
+
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_diabetes</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">regression</span><span class="o">.</span><span class="n">AutoSklearnRegressor</span><span class="p">(</span>
+    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">120</span>
+    <span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">dataset_name</span><span class="o">=</span><span class="s1">&#39;diabetes&#39;</span><span class="p">)</span>
+
+<span class="n">ensemble_dict</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ensemble_dict</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{
+    25: {&#39;model_id&#39;: 25.0,
+         &#39;rank&#39;: 1,
+         &#39;cost&#39;: 0.43667876507897496,
+         &#39;ensemble_weight&#39;: 0.38,
+         &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing....&gt;,
+         &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components....&gt;,
+         &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression....&gt;,
+         &#39;sklearn_regressor&#39;: SGDRegressor(alpha=0.0006517033225329654,...)
+        },
+    6: {&#39;model_id&#39;: 6.0,
+        &#39;rank&#39;: 2,
+        &#39;cost&#39;: 0.4550418898836528,
+        &#39;ensemble_weight&#39;: 0.3,
+        &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing....&gt;,
+        &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components....&gt;,
+        &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression....&gt;,
+        &#39;sklearn_regressor&#39;: ARDRegression(alpha_1=0.0003701926442639788,...)
+        }...
+}
+</pre></div>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><dl class="simple">
-<dt>str</dt><dd></dd>
+<dt><strong>Dict(int, Any)</strong><span class="classifier">dictionary of length = number of models in the ensemble</span></dt><dd><p>A dictionary of models in the ensemble, where <code class="docutils literal notranslate"><span class="pre">model_id</span></code> is the key.</p>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -1854,11 +1964,66 @@ possible to update each component of a nested object.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="autosklearn.regression.AutoSklearnRegressor.show_models">
 <span class="sig-name descname"><span class="pre">show_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.show_models" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a representation of the final ensemble found by auto-sklearn.</p>
+<dd><p>Returns a dictionary containing dictionaries of ensemble models.</p>
+<p>Each model in the ensemble can be accessed by giving its <code class="docutils literal notranslate"><span class="pre">model_id</span></code> as key.</p>
+<p>A model dictionary contains the following:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;model_id&quot;</span></code> - The id given to a model by <code class="docutils literal notranslate"><span class="pre">autosklearn</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;rank&quot;</span></code> - The rank of the model based on it’s <code class="docutils literal notranslate"><span class="pre">&quot;cost&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;cost&quot;</span></code> - The loss of the model on the validation set.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;ensemble_weight&quot;</span></code> - The weight given to the model in the ensemble.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;voting_model&quot;</span></code> - The <code class="docutils literal notranslate"><span class="pre">cv_voting_ensemble</span></code> model (for ‘cv’ resampling).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;estimators&quot;</span></code> - List of models (dicts) in <code class="docutils literal notranslate"><span class="pre">cv_voting_ensemble</span></code> (for ‘cv’ resampling).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;data_preprocessor&quot;</span></code> - The preprocessor used on the data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;balancing&quot;</span></code> - The balancing used on the data (for classification).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;feature_preprocessor&quot;</span></code> - The preprocessor for features types.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;classifier&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;regressor&quot;</span></code> - The autosklearn wrapped classifier or regressor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;sklearn_classifier&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;sklearn_regressor&quot;</span></code> - The sklearn classifier or regressor.</p></li>
+</ul>
+<p><strong>Example</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sklearn.datasets</span>
+<span class="kn">import</span> <span class="nn">sklearn.metrics</span>
+<span class="kn">import</span> <span class="nn">autosklearn.regression</span>
+
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_diabetes</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">regression</span><span class="o">.</span><span class="n">AutoSklearnRegressor</span><span class="p">(</span>
+    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">120</span>
+    <span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">dataset_name</span><span class="o">=</span><span class="s1">&#39;diabetes&#39;</span><span class="p">)</span>
+
+<span class="n">ensemble_dict</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ensemble_dict</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{
+    25: {&#39;model_id&#39;: 25.0,
+         &#39;rank&#39;: 1,
+         &#39;cost&#39;: 0.43667876507897496,
+         &#39;ensemble_weight&#39;: 0.38,
+         &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing....&gt;,
+         &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components....&gt;,
+         &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression....&gt;,
+         &#39;sklearn_regressor&#39;: SGDRegressor(alpha=0.0006517033225329654,...)
+        },
+    6: {&#39;model_id&#39;: 6.0,
+        &#39;rank&#39;: 2,
+        &#39;cost&#39;: 0.4550418898836528,
+        &#39;ensemble_weight&#39;: 0.3,
+        &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing....&gt;,
+        &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components....&gt;,
+        &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression....&gt;,
+        &#39;sklearn_regressor&#39;: ARDRegression(alpha_1=0.0003701926442639788,...)
+        }...
+}
+</pre></div>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><dl class="simple">
-<dt>str</dt><dd></dd>
+<dt><strong>Dict(int, Any)</strong><span class="classifier">dictionary of length = number of models in the ensemble</span></dt><dd><p>A dictionary of models in the ensemble, where <code class="docutils literal notranslate"><span class="pre">model_id</span></code> is the key.</p>
+</dd>
 </dl>
 </dd>
 </dl>

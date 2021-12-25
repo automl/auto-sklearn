@@ -649,13 +649,74 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">show_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return a representation of the final ensemble found by auto-sklearn.</span>
+        <span class="sd">&quot;&quot;&quot; Returns a dictionary containing dictionaries of ensemble models.</span>
+
+<span class="sd">        Each model in the ensemble can be accessed by giving its ``model_id`` as key.</span>
+
+<span class="sd">        A model dictionary contains the following:</span>
+
+<span class="sd">        * ``&quot;model_id&quot;`` - The id given to a model by ``autosklearn``.</span>
+<span class="sd">        * ``&quot;rank&quot;`` - The rank of the model based on it&#39;s ``&quot;cost&quot;``.</span>
+<span class="sd">        * ``&quot;cost&quot;`` - The loss of the model on the validation set.</span>
+<span class="sd">        * ``&quot;ensemble_weight&quot;`` - The weight given to the model in the ensemble.</span>
+<span class="sd">        * ``&quot;voting_model&quot;`` - The ``cv_voting_ensemble`` model (for &#39;cv&#39; resampling).</span>
+<span class="sd">        * ``&quot;estimators&quot;`` - List of models (dicts) in ``cv_voting_ensemble`` (for &#39;cv&#39; resampling).</span>
+<span class="sd">        * ``&quot;data_preprocessor&quot;`` - The preprocessor used on the data.</span>
+<span class="sd">        * ``&quot;balancing&quot;`` - The balancing used on the data (for classification).</span>
+<span class="sd">        * ``&quot;feature_preprocessor&quot;`` - The preprocessor for features types.</span>
+<span class="sd">        * ``&quot;classifier&quot;`` or ``&quot;regressor&quot;`` - The autosklearn wrapped classifier or regressor.</span>
+<span class="sd">        * ``&quot;sklearn_classifier&quot;`` or ``&quot;sklearn_regressor&quot;`` - The sklearn classifier or regressor.</span>
+
+<span class="sd">        **Example**</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            import sklearn.datasets</span>
+<span class="sd">            import sklearn.metrics</span>
+<span class="sd">            import autosklearn.regression</span>
+
+<span class="sd">            X, y = sklearn.datasets.load_diabetes(return_X_y=True)</span>
+
+<span class="sd">            automl = autosklearn.regression.AutoSklearnRegressor(</span>
+<span class="sd">                time_left_for_this_task=120</span>
+<span class="sd">                )</span>
+<span class="sd">            automl.fit(X_train, y_train, dataset_name=&#39;diabetes&#39;)</span>
+
+<span class="sd">            ensemble_dict = automl.show_models()</span>
+<span class="sd">            print(ensemble_dict)</span>
+
+<span class="sd">        Output:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            {</span>
+<span class="sd">                25: {&#39;model_id&#39;: 25.0,</span>
+<span class="sd">                     &#39;rank&#39;: 1,</span>
+<span class="sd">                     &#39;cost&#39;: 0.43667876507897496,</span>
+<span class="sd">                     &#39;ensemble_weight&#39;: 0.38,</span>
+<span class="sd">                     &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing....&gt;,</span>
+<span class="sd">                     &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components....&gt;,</span>
+<span class="sd">                     &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression....&gt;,</span>
+<span class="sd">                     &#39;sklearn_regressor&#39;: SGDRegressor(alpha=0.0006517033225329654,...)</span>
+<span class="sd">                    },</span>
+<span class="sd">                6: {&#39;model_id&#39;: 6.0,</span>
+<span class="sd">                    &#39;rank&#39;: 2,</span>
+<span class="sd">                    &#39;cost&#39;: 0.4550418898836528,</span>
+<span class="sd">                    &#39;ensemble_weight&#39;: 0.3,</span>
+<span class="sd">                    &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing....&gt;,</span>
+<span class="sd">                    &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components....&gt;,</span>
+<span class="sd">                    &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression....&gt;,</span>
+<span class="sd">                    &#39;sklearn_regressor&#39;: ARDRegression(alpha_1=0.0003701926442639788,...)</span>
+<span class="sd">                    }...</span>
+<span class="sd">            }</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        str</span>
+<span class="sd">        Dict(int, Any) : dictionary of length = number of models in the ensemble</span>
+<span class="sd">            A dictionary of models in the ensemble, where ``model_id`` is the key.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">show_models</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">get_models_with_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

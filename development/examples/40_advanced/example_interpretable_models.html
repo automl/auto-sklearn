@@ -129,7 +129,9 @@ to download the full example code or to run this example in your browser via Bin
 <span id="sphx-glr-examples-40-advanced-example-interpretable-models-py"></span><h1>Interpretable models<a class="headerlink" href="#interpretable-models" title="Permalink to this headline">¶</a></h1>
 <p>The following example shows how to inspect the models which <em>auto-sklearn</em>
 optimizes over and how to restrict them to an interpretable subset.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+
+<span class="kn">import</span> <span class="nn">autosklearn.classification</span>
 <span class="kn">import</span> <span class="nn">sklearn.datasets</span>
 <span class="kn">import</span> <span class="nn">sklearn.metrics</span>
 </pre></div>
@@ -240,19 +242,22 @@ and can change from use case to use case.</p>
 </div>
 <div class="section" id="print-the-final-ensemble-constructed-by-auto-sklearn">
 <h2>Print the final ensemble constructed by auto-sklearn<a class="headerlink" href="#print-the-final-ensemble-constructed-by-auto-sklearn" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">())</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pprint</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(1.000000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;sgd&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;classifier:sgd:alpha&#39;: 9.999999999999991e-05, &#39;classifier:sgd:average&#39;: &#39;False&#39;, &#39;classifier:sgd:fit_intercept&#39;: &#39;True&#39;, &#39;classifier:sgd:learning_rate&#39;: &#39;invscaling&#39;, &#39;classifier:sgd:loss&#39;: &#39;modified_huber&#39;, &#39;classifier:sgd:penalty&#39;: &#39;l2&#39;, &#39;classifier:sgd:tol&#39;: 0.0004668987145850572, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;classifier:sgd:epsilon&#39;: 1.3700860264543197e-05, &#39;classifier:sgd:eta0&#39;: 0.010000000000000014, &#39;classifier:sgd:power_t&#39;: 0.5, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01253391694297453},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   63: {   &#39;balancing&#39;: Balancing(random_state=1),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f4b86dd0490&gt;,
+            &#39;cost&#39;: 0.007092198581560294,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f4b8c5984c0&gt;,
+            &#39;ensemble_weight&#39;: 1.0,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f4b86dd05b0&gt;,
+            &#39;model_id&#39;: 63,
+            &#39;rank&#39;: 1,
+            &#39;sklearn_classifier&#39;: SGDClassifier(alpha=9.999999999999991e-05, epsilon=1.3700860264543197e-05,
+              eta0=0.010000000000000014, learning_rate=&#39;invscaling&#39;,
+              loss=&#39;modified_huber&#39;, max_iter=64, random_state=1,
+              tol=0.0004668987145850572, warm_start=True)}}
 </pre></div>
 </div>
 </div>
@@ -266,7 +271,7 @@ dataset_properties={
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score: 0.965034965034965
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  54.150 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  6.469 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-interpretable-models-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_interpretable_models.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
