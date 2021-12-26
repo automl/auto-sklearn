@@ -1,57 +1,54 @@
+# If you see me, please update my `rev` field using the provided links
+# Click the repo and update to latest tags.
+# If things break on update, raise an issue
 repos:
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+        name: isort imports
+
+  - repo: https://github.com/ambv/black
+    rev: stable  # Updated automatically
+    hooks:
+      - id: black
+        name: black code formatter
+
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.761
+    rev: v0.930
     hooks:
       - id: mypy
-        args: [--show-error-codes]
         name: mypy auto-sklearn-ensembles
         files: autosklearn/ensembles
+
       - id: mypy
-        args: [--show-error-codes]
         name: mypy auto-sklearn-metrics
         files: autosklearn/metrics
+
       - id: mypy
-        args: [--show-error-codes]
         name: mypy auto-sklearn-data
         files: autosklearn/data
+
       - id: mypy
-        args: [--show-error-codes]
         name: mypy auto-sklearn-util
         files: autosklearn/util
+
       - id: mypy
-        args: [--show-error-codes]
         name: mypy auto-sklearn-evaluation
         files: autosklearn/evaluation
+
       - id: mypy
-        args: [--show-error-codes]
         name: mypy auto-sklearn-datapreprocessing
         files: autosklearn/pipeline/components/data_preprocessing/
+
   - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.8.3
+    rev: 4.0.1
     hooks:
       - id: flake8
-        name: flake8 auto-sklearn
+        name: flake8 autosklearn
         files: autosklearn/.*
+
       - id: flake8
-        name: flake8 file-order-data
-        files: autosklearn/data
-        additional_dependencies:
-          - flake8-import-order
-      - id: flake8
-        name: flake8 file-order-ensemble
-        files: autosklearn/ensembles
-        additional_dependencies:
-          - flake8-import-order
-      - id: flake8
-        name: flake8 file-order-metrics
-        files: autosklearn/metrics
-        additional_dependencies:
-          - flake8-import-order
-      - id: flake8
-        name: flake8 file-order-util
-        files:  autosklearn/util
-        additional_dependencies:
-          - flake8-import-order
-      - id: flake8
-        name: flake8 autosklearn-test
+        name: flake8 test
         files: test/.*

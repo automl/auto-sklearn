@@ -1,0 +1,27 @@
+[tool.pytest.ini_options]
+testpaths = ["test"]
+minversion = "3.7"
+
+[tool.mypy]
+python_version = "3.7"
+warn_unused_configs = true  # warn about unused [tool.mypy] lines
+
+ignore_missing_imports = true # prefer explicit ignores
+follow_imports = "normal" # Type check top level api code we use from imports
+show_error_codes = true
+disallow_untyped_defs = true # All functions must have types
+disallow_untyped_decorators = true # ... even decorators
+disallow_incomplete_defs = true # ...all types
+
+[tool.black]
+target-version = ['py37']
+line-length = 100 # We keep with old flake8 rule
+
+[tool.isort]
+py_version = "37"
+profile = "black" # Play nicely with black
+src_paths = ["src", "test"]
+force_to_top = ["typing"] # Always put typing at the top of it's section
+multiline_line_output = 3 # https://pycqa.github.io/isort/docs/configuration/multi_line_output_modes.html
+
+

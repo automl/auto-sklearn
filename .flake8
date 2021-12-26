@@ -1,7 +1,12 @@
 [flake8]
 max-line-length = 100
 show-source = True
-application-import-names = autosklearn
-exclude =
+extend-exclude =
     venv
+    .venv
     build
+
+# Side Note:
+#   If you got time and want to see opinionated programmers in relation to pyproject.toml
+#   for flake8.
+#   * https://github.com/PyCQA/flake8/issues/234
