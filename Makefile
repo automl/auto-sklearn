@@ -1,22 +1,16 @@
-# NOTE: Only supports linux
+# NOTE: Used on linux, limited support outside of Linux
 #
 # A simple makefile to help with small tasks related to development of autosklearn
 # These have been configured to only really run short tasks. Longer form tasks
 # are usually completed in github actions.
-# * install-dev - install everything required for dev purposes
-# * clean - cleans up any kind of build that happened, doc or dist
-# * build - builds the dist
-# * publish - publishes a release to pypi
-# * test-publish - publishes to testpypi for testing a release
-# * doc - Just make docs without examples
-# * links - Check link of docs
-# * examples - Make docs with examples
 
 .PHONY: help install-dev clean clean-doc clean-build build doc links examples publish
 
 help:
 	@echo "Makefile autosklearn"
 	@echo "* install-dev      to install dev requirements and init pre-commit"
+	@echo "* check            to check the source code for issues"
+	@echo "* format           to format the code with black and isort"
 	@echo "* clean            to clean the dist and doc build files"
 	@echo "* build            to build a dist"
 	@echo "* doc              to generate and view the html files"
@@ -40,6 +34,13 @@ INDEX_HTML := file://${DOCDIR}/html/build/index.html
 install-dev:
 	$(PIP) install -e ".[test,examples,docs]"
 	pre-commit install
+
+check:
+	pre-commit run --all-files
+
+format:
+	black .
+	isort .
 
 clean-doc:
 	$(MAKE) -C ${DOCDIR} clean
