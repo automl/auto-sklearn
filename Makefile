@@ -24,23 +24,41 @@ PYTEST ?= python -m pytest
 CTAGS ?= ctags
 PIP ?= python -m pip
 MAKE ?= make
+BLACK ?= black
+ISORT ?= isort
+PYDOCSTYLE ?= pydocstyle
+MYPY ?= mypy
 
 DIR := ${CURDIR}
 DIST := ${CURDIR}/dist
 DOCDIR := ${DIR}/doc
 INDEX_HTML := file://${DOCDIR}/html/build/index.html
 
-
 install-dev:
 	$(PIP) install -e ".[test,examples,docs]"
 	pre-commit install
 
-check:
-	pre-commit run --all-files
+check-black:
+	$(BLACK) autosklearn examples test scripts misc --check || :
 
-format:
-	black .
-	isort .
+check-isort:
+	$(ISORT) autosklearn --check || :
+
+check-pydocstyle:
+	$(PYDOCSTYLE) autosklearn || :
+
+check-mypy:
+	$(MYPY) autosklearn || :
+
+check: check-black check-isort check-pydocstyle check-mypy
+
+format-black:
+	$(BLACK) .
+
+format-isort:
+	$(ISORT) .
+
+format: format-black format-isort
 
 clean-doc:
 	$(MAKE) -C ${DOCDIR} clean
