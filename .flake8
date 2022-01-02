@@ -5,6 +5,24 @@ extend-exclude =
     venv
     .venv
     build
+extend-ignore =
+    # Indentation — black handles
+    E1
+    W1
+    # Whitespace — black handles
+    E2
+    W2
+    # Blank lines — black handles
+    E3
+    W3
+    # Imports — isort handles
+    E4
+    W4
+    # Line length — black handles
+    E5
+    W5
+    # No lambdas — too strict
+    E731
 
 # Side Note:
 #   If you got time and want to see opinionated programmers in relation to pyproject.toml
