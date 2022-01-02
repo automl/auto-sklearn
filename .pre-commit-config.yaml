@@ -10,10 +10,18 @@ repos:
         name: isort imports
 
   - repo: https://github.com/ambv/black
-    rev: stable  # Updated automatically
+    rev: 21.12b0
     hooks:
       - id: black
         name: black code formatter
+
+  # This is disabled as most modules fail this
+  - repo: https://github.com/pycqa/pydocstyle
+    rev: 6.1.1
+    hooks:
+      - id: pydocstyle
+        files: DISABLED
+        always_run: false
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v0.930
