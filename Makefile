@@ -51,8 +51,12 @@ check-pydocstyle:
 check-mypy:
 	$(MYPY) autosklearn || :
 
+check-flake8:
+	$(FLAKE8) autosklearn || :
+	$(FLAKE8) test || :
+
 # pydocstyle does not have easy ignore rules, instead, we include as they are covered
-check: check-black check-isort check-mypy # check-pydocstyle
+check: check-black check-isort check-mypy check-flake8 # check-pydocstyle
 
 pre-commit:
 	$(PRECOMMIT) run --all-files
