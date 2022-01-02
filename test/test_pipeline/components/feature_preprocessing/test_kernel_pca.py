@@ -1,7 +1,5 @@
 import unittest
 
-import pytest
-
 from sklearn.linear_model import RidgeClassifier
 from autosklearn.pipeline.components.feature_preprocessing.kernel_pca import \
     KernelPCA
