@@ -29,6 +29,7 @@ ISORT ?= isort
 PYDOCSTYLE ?= pydocstyle
 MYPY ?= mypy
 PRECOMMIT ?= pre-commit
+FLAKE8 ?= flake8
 
 DIR := ${CURDIR}
 DIST := ${CURDIR}/dist
@@ -40,10 +41,10 @@ install-dev:
 	pre-commit install
 
 check-black:
-	$(BLACK) autosklearn examples test scripts misc --check || :
+	$(BLACK) autosklearn examples test --check || :
 
 check-isort:
-	$(ISORT) autosklearn --check || :
+	$(ISORT) autosklearn test --check || :
 
 check-pydocstyle:
 	$(PYDOCSTYLE) autosklearn || :
