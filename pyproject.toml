@@ -51,9 +51,10 @@ disallow_untyped_decorators = true # ... even decorators
 disallow_incomplete_defs = true # ...all types
 
 
-# This is checked within automl_common, can be removed once automl_common is mypy compliant
+# This is a problem with the tests of `automl_common` being distributed as a submodule
+# probably indicative that is should be a package.
 [[tool.mypy.overrides]]
-module = [ "autosklearn.automl_common.*"]
+module = ["common.*"]
 ignore_errors = true
 
 # Submodules that need to be updated with mypy
