@@ -18,7 +18,8 @@ force_to_top = ["typing"] # Always put typing at the top of it's section
 multi_line_output = 3 # https://pycqa.github.io/isort/docs/configuration/multi_line_output_modes.html
 
 [tool.pydocstyle]
-ignore = [ # http://www.pydocstyle.org/en/stable/error_codes.html
+convention = "numpy"
+add-ignore = [ # http://www.pydocstyle.org/en/stable/error_codes.html
     "D100", # Missing docstring in public module
     "D101", # Missing docstring in public class
     "D104", # Missing docstring in public package
