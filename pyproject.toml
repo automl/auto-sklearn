@@ -36,7 +36,7 @@ disallow_incomplete_defs = true # ...all types
 
 [tool.black]
 target-version = ['py37']
-line-length = 100 # We keep with old flake8 rule
+line-length = 88
 
 [tool.isort]
 py_version = "37"
