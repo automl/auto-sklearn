@@ -1,6 +1,21 @@
+# For TOML reference
+#https://learnxinyminutes.com/docs/toml/
+
 [tool.pytest.ini_options]
 testpaths = ["test"]
 minversion = "3.7"
+
+
+[tool.black]
+target-version = ['py37']
+line-length = 88
+
+[tool.isort]
+py_version = "37"
+profile = "black" # Play nicely with black
+src_paths = ["src", "test"]
+force_to_top = ["typing"] # Always put typing at the top of it's section
+multi_line_output = 3 # https://pycqa.github.io/isort/docs/configuration/multi_line_output_modes.html
 
 [tool.pydocstyle]
 ignore = [ # http://www.pydocstyle.org/en/stable/error_codes.html
@@ -34,15 +49,82 @@ disallow_untyped_defs = true # All functions must have types
 disallow_untyped_decorators = true # ... even decorators
 disallow_incomplete_defs = true # ...all types
 
-[tool.black]
-target-version = ['py37']
-line-length = 88
 
-[tool.isort]
-py_version = "37"
-profile = "black" # Play nicely with black
-src_paths = ["src", "test"]
-force_to_top = ["typing"] # Always put typing at the top of it's section
-multi_line_output = 3 # https://pycqa.github.io/isort/docs/configuration/multi_line_output_modes.html
+# This is checked within automl_common, can be removed once automl_common is mypy compliant
+[[tool.mypy.overrides]]
+module = [ "autosklearn.automl_common.*"]
+ignore_errors = true
 
+# Submodules that need to be updated with mypy
+[[tool.mypy.overrides]]
+module = [
+    "autosklearn", #__init__
+    "autosklearn.estimators",
+    "autosklearn.automl",
+    "autosklearn.smbo",
+    "autosklearn.experimental.askl2",
+    "autosklearn.ensemble_builder",
+    "autosklearn.ensembles.singlebest_ensemble",
+    "autosklearn.ensembles.ensemble_selection",
+    "autosklearn.evaluation", #__init__
+    "autosklearn.evaluation.abstract_evaluator",
+    "autosklearn.evaluation.test_evaluator",
+    "autosklearn.evaluation.train_evaluator",
+    "autosklearn.metalearning.input.aslib_simple",
+    "autosklearn.metalearning.mismbo",
+    "autosklearn.metalearning.metafeatures.metafeature",
+    "autosklearn.metalearning.metafeatures.metafeatures",
+    "autosklearn.metalearning.metalearning.meta_base",
+    "autosklearn.metalearning.metalearning.metrics.misc",
+    "autosklearn.metalearning.metalearning.create_datasets",
+    "autosklearn.metalearning.metalearning.kNearestDatasets.kND",
+    "autosklearn.metalearning.metalearning.clustering.gmeans",
+    "autosklearn.metalearning.optimizers.optimizer_base",
+    "autosklearn.metalearning.optimizers.metalearn_optimizer.metalearn_optimizer_parser",
+    "autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner",
+    "autosklearn.pipeline.base",
+    "autosklearn.pipeline.classification",
+    "autosklearn.pipeline.regression",
+    "autosklearn.pipeline.components.base",
+    "autosklearn.pipeline.components.data_preprocessing.*",
+    "autosklearn.pipeline.components.regression.*",
+    "autosklearn.pipeline.components.classification.*",
+    "autosklearn.pipeline.components.feature_preprocessing.*",
+    "autosklearn.pipeline.util",
+    "autosklearn.pipeline.logging_",
+    "autosklearn.pipeline.create_searchspace_util",
+    "autosklearn.pipeline.implementations.util",
+    "autosklearn.pipeline.implementations.SparseOneHotEncoder",
+    "autosklearn.pipeline.implementations.MinorityCoalescer",
+    "autosklearn.pipeline.implementations.CategoryShift",
+    "autosklearn.experimental.selector",
+    "autosklearn.data.validation",
+    "autosklearn.data.abstract_data_manager",
+    "autosklearn.data.xy_data_manager",
+    "autosklearn.data.target_validator",
+    "autosklearn.data.feature_validator",
+    "autosklearn.util.single_threaded_client",
+    "autosklearn.util.logging_",
+]
+ignore_errors = true
+
+# Packages without exported types
+[[tool.mypy.overrides]]
+module = [
+    "sklearn.*",
+    "dask.*",
+    "ConfigSpace.*",
+    "arff.*",
+    "scipy.*",
+    "smac.*",
+    "pandas.*",
+    "pynisher.*",
+    "distro.*",
+    "joblib.*",
+    "threadpoolctl.*",
+    "setuptools.*",
+    "pkg_resources.*",
+    "yaml.*",
+]
+ignore_missing_imports = true
 
