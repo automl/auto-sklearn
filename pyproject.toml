@@ -4,11 +4,14 @@ minversion = "3.7"
 
 [tool.mypy]
 python_version = "3.7"
+
+show_error_codes = true
+
 warn_unused_configs = true  # warn about unused [tool.mypy] lines
 
-ignore_missing_imports = true # prefer explicit ignores
 follow_imports = "normal" # Type check top level api code we use from imports
-show_error_codes = true
+ignore_missing_imports = false # prefer explicit ignores
+
 disallow_untyped_defs = true # All functions must have types
 disallow_untyped_decorators = true # ... even decorators
 disallow_incomplete_defs = true # ...all types
