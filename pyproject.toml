@@ -50,11 +50,13 @@ disallow_untyped_defs = true # All functions must have types
 disallow_untyped_decorators = true # ... even decorators
 disallow_incomplete_defs = true # ...all types
 
-
 # This is a problem with the tests of `automl_common` being distributed as a submodule
 # probably indicative that is should be a package.
+exclude = "autosklearn/automl_common/test"
+
+# This is handled by automl_common itself in its own CI
 [[tool.mypy.overrides]]
-module = ["common.*"]
+module = ["autosklearn.automl_common.common.*"]
 ignore_errors = true
 
 # Submodules that need to be updated with mypy
