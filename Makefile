@@ -11,6 +11,7 @@ help:
 	@echo "* install-dev      to install dev requirements and init pre-commit"
 	@echo "* check            to check the source code for issues"
 	@echo "* format           to format the code with black and isort"
+	@echo "* pre-commit       to clean the dist and doc build files"
 	@echo "* clean            to clean the dist and doc build files"
 	@echo "* build            to build a dist"
 	@echo "* doc              to generate and view the html files"
