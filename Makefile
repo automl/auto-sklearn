@@ -8,10 +8,10 @@
 
 help:
 	@echo "Makefile autosklearn"
-	@echo "* install-dev      to install dev requirements and init pre-commit"
+	@echo "* install-dev      to install all dev requirements and install pre-commit"
 	@echo "* check            to check the source code for issues"
 	@echo "* format           to format the code with black and isort"
-	@echo "* pre-commit       to clean the dist and doc build files"
+	@echo "* pre-commit       to run the pre-commit check"
 	@echo "* clean            to clean the dist and doc build files"
 	@echo "* build            to build a dist"
 	@echo "* doc              to generate and view the html files"
