@@ -17,9 +17,6 @@ extend-ignore =
     # Imports — isort handles
     E4
     W4
-    # Line length — black handles
-    E5
-    W5
     # No lambdas — too strict
     E731
 
