@@ -13,7 +13,7 @@ py_version = "37"
 profile = "black" # Play nicely with black
 src_paths = ["src", "test"]
 known_types = ["typing", "abc"] # We put these in their own section "types"
-sections = ["TYPES", "FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"] # section ordering
+sections = ["FUTURE", "TYPES", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"] # section ordering
 known_first_party = ["autosklearn"]
 multi_line_output = 3 # https://pycqa.github.io/isort/docs/configuration/multi_line_output_modes.html
 
