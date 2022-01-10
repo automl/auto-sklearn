@@ -4,6 +4,20 @@
 [tool.pytest.ini_options]
 testpaths = ["test"]
 minversion = "3.7"
+#addopts = "--cov=autosklearn"
+
+[tool.coverage.run]
+branch = true
+context = "autosklearn"
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_lines = [
+    "pragma: no cover",
+    '\.\.\.',
+    "raise NotImplementedError"
+]
 
 [tool.black]
 target-version = ['py37']
