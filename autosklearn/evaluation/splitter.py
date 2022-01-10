@@ -1,29 +1,28 @@
 import numpy as np
-
-from sklearn.model_selection import StratifiedShuffleSplit, StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit
 from sklearn.model_selection._split import _validate_shuffle_split
-from sklearn.utils import indexable, check_random_state
-from sklearn.utils import _approximate_mode
-from sklearn.utils.validation import _num_samples, column_or_1d
-from sklearn.utils.validation import check_array
+from sklearn.utils import _approximate_mode, check_random_state, indexable
 from sklearn.utils.multiclass import type_of_target
+from sklearn.utils.validation import _num_samples, check_array, column_or_1d
 
 
 class CustomStratifiedShuffleSplit(StratifiedShuffleSplit):
-    """Stratified ShuffleSplit cross-validator that deals with classes with too few samples
-    """
+    """Splitter that deals with classes with too few samples"""
 
     def _iter_indices(self, X, y, groups=None):  # type: ignore
         n_samples = _num_samples(X)
         y = check_array(y, ensure_2d=False, dtype=None)
         n_train, n_test = _validate_shuffle_split(
-            n_samples, self.test_size, self.train_size,
-            default_test_size=self._default_test_size)
+            n_samples,
+            self.test_size,
+            self.train_size,
+            default_test_size=self._default_test_size,
+        )
 
         if y.ndim == 2:
             # for multi-label y, map each distinct row to a string repr
             # using join because str(row) uses an ellipsis if len(row) > 1000
-            y = np.array([' '.join(row.astype('str')) for row in y])
+            y = np.array([" ".join(row.astype("str")) for row in y])
 
         classes, y_indices = np.unique(y, return_inverse=True)
         n_classes = classes.shape[0]
@@ -32,18 +31,21 @@ class CustomStratifiedShuffleSplit(StratifiedShuffleSplit):
         # print(class_counts)
 
         if n_train < n_classes:
-            raise ValueError('The train_size = %d should be greater or '
-                             'equal to the number of classes = %d' %
-                             (n_train, n_classes))
+            raise ValueError(
+                "The train_size = %d should be greater or "
+                "equal to the number of classes = %d" % (n_train, n_classes)
+            )
         if n_test < n_classes:
-            raise ValueError('The test_size = %d should be greater or '
-                             'equal to the number of classes = %d' %
-                             (n_test, n_classes))
+            raise ValueError(
+                "The test_size = %d should be greater or "
+                "equal to the number of classes = %d" % (n_test, n_classes)
+            )
 
         # Find the sorted list of instances for each class:
         # (np.unique above performs a sort, so code is O(n logn) already)
-        class_indices = np.split(np.argsort(y_indices, kind='mergesort'),
-                                 np.cumsum(class_counts)[:-1])
+        class_indices = np.split(
+            np.argsort(y_indices, kind="mergesort"), np.cumsum(class_counts)[:-1]
+        )
 
         rng = check_random_state(self.random_state)
 
@@ -59,15 +61,14 @@ class CustomStratifiedShuffleSplit(StratifiedShuffleSplit):
             for i in range(n_classes):
                 # print("Before", i, class_counts[i], n_i[i], t_i[i])
                 permutation = rng.permutation(class_counts[i])
-                perm_indices_class_i = class_indices[i].take(permutation,
-                                                             mode='clip')
+                perm_indices_class_i = class_indices[i].take(permutation, mode="clip")
                 if n_i[i] == 0:
                     n_i[i] = 1
                     t_i[i] = t_i[i] - 1
 
                 # print("After", i, class_counts[i], n_i[i], t_i[i])
-                train.extend(perm_indices_class_i[:n_i[i]])
-                test.extend(perm_indices_class_i[n_i[i]:n_i[i] + t_i[i]])
+                train.extend(perm_indices_class_i[: n_i[i]])
+                test.extend(perm_indices_class_i[n_i[i] : n_i[i] + t_i[i]])
 
             train = rng.permutation(train)
             test = rng.permutation(test)
@@ -84,11 +85,13 @@ class CustomStratifiedKFold(StratifiedKFold):
         rng = check_random_state(self.random_state)
         y = np.asarray(y)
         type_of_target_y = type_of_target(y)
-        allowed_target_types = ('binary', 'multiclass')
+        allowed_target_types = ("binary", "multiclass")
         if type_of_target_y not in allowed_target_types:
             raise ValueError(
-                'Supported target types are: {}. Got {!r} instead.'.format(
-                    allowed_target_types, type_of_target_y))
+                "Supported target types are: {}. Got {!r} instead.".format(
+                    allowed_target_types, type_of_target_y
+                )
+            )
 
         y = column_or_1d(y)
 
@@ -106,13 +109,16 @@ class CustomStratifiedKFold(StratifiedKFold):
         # counts, but that code is unreadable.)
         y_order = np.sort(y_encoded)
         allocation = np.asarray(
-            [np.bincount(y_order[i::self.n_splits], minlength=n_classes)
-             for i in range(self.n_splits)])
+            [
+                np.bincount(y_order[i :: self.n_splits], minlength=n_classes)
+                for i in range(self.n_splits)
+            ]
+        )
 
         # To maintain the data order dependencies as best as possible within
         # the stratification constraint, we assign samples from each class in
         # blocks (and then mess that up when shuffle=True).
-        test_folds = np.empty(len(y), dtype='i')
+        test_folds = np.empty(len(y), dtype="i")
         for k in range(n_classes):
             # since the kth column of allocation stores the number of samples
             # of class k in each test set, this generates blocks of fold
@@ -129,12 +135,11 @@ class CustomStratifiedKFold(StratifiedKFold):
         n_samples = _num_samples(X)
         if self.n_splits > n_samples:
             raise ValueError(
-                ("Cannot have number of splits n_splits={0} greater"
-                 " than the number of samples: n_samples={1}.")
-                .format(self.n_splits, n_samples))
+                f"Cannot have number of splits n_splits={self.n_splits} greater"
+                f" than the number of samples: n_samples={n_samples}."
+            )
 
         for train, test in super().split(X, y, groups):
-            # print(len(np.unique(y)), len(np.unique(y[train])), len(np.unique(y[test])))
             all_classes = np.unique(y)
             train_classes = np.unique(y[train])
             train = list(train)
@@ -151,11 +156,5 @@ class CustomStratifiedKFold(StratifiedKFold):
                     # print(len(train), len(test))
             train = np.array(train, dtype=int)
             test = np.array(test, dtype=int)
-            # print(
-            #     len(np.unique(y)),
-            #     len(np.unique(y[train])),
-            #     len(np.unique(y[test])),
-            #     len(train), len(test),
-            # )
 
             yield train, test

@@ -5,11 +5,7 @@ from typing import List, Union
 
 import numpy as np
 
-__all__ = [
-    'predict_RAM_usage',
-    'convert_to_num',
-    'convert_to_bin'
-]
+__all__ = ["predict_RAM_usage", "convert_to_num", "convert_to_bin"]
 
 
 def binarization(array: Union[List, np.ndarray]) -> np.ndarray:
@@ -17,8 +13,10 @@ def binarization(array: Union[List, np.ndarray]) -> np.ndarray:
     # into 1 and the min into 0
     array = np.array(array, dtype=float)  # conversion needed to use np.inf
     if len(np.unique(array)) > 2:
-        raise ValueError('The argument must be a binary-class datafile. '
-                         '{} classes detected'.format(len(np.unique(array))))
+        raise ValueError(
+            "The argument must be a binary-class datafile. "
+            "{} classes detected".format(len(np.unique(array)))
+        )
 
     # manipulation which aims at avoid error in data
     # with for example classes '1' and '2'.

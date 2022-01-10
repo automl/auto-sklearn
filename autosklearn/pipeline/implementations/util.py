@@ -18,7 +18,7 @@ def softmax(df):
 
 
 def convert_multioutput_multiclass_to_multilabel(probas):
-    """ Converts the model predicted probabilities to useable format.
+    """Converts the model predicted probabilities to useable format.
 
     In some cases, models predicted_proba can output an array of shape
     (2, n_samples, n_labels) where the 2 stands for the probability of positive
@@ -55,8 +55,10 @@ def convert_multioutput_multiclass_to_multilabel(probas):
             # In case multioutput-multiclass input was used, where we have
             # a probability for each class
             elif n_probabilities > 2:
-                raise ValueError('Multioutput-Multiclass supported by '
-                                 'scikit-learn, but not by auto-sklearn!')
+                raise ValueError(
+                    "Multioutput-Multiclass supported by "
+                    "scikit-learn, but not by auto-sklearn!"
+                )
             else:
                 RuntimeError(f"Unkown predict_proba output={probas}")
 
@@ -64,7 +66,7 @@ def convert_multioutput_multiclass_to_multilabel(probas):
 
     elif isinstance(probas, np.ndarray):
         if len(probas.shape) > 2:
-            raise ValueError('New unsupported sklearn output!')
+            raise ValueError("New unsupported sklearn output!")
         else:
             return probas
 

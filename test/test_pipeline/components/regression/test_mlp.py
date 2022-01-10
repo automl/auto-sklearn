@@ -47,6 +47,6 @@ class MLPComponentTest(BaseRegressionComponentTest):
     sk_mod = sklearn.neural_network.MLPRegressor
     module = MLPRegressor
     step_hyperparameter = {
-        'name': 'n_iter_',
-        'value': module.get_max_iter(),
+        "name": "n_iter_",
+        "value": module.get_max_iter(),
     }

@@ -1,7 +1,7 @@
 import sklearn.ensemble
 
-from autosklearn.pipeline.components.classification.adaboost import \
-    AdaboostClassifier
+from autosklearn.pipeline.components.classification.adaboost import AdaboostClassifier
+
 from .test_base import BaseClassificationComponentTest
 
 

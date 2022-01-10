@@ -1,17 +1,26 @@
 import numpy as np
-
+from ConfigSpace.conditions import EqualsCondition, InCondition
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    UniformIntegerHyperparameter, CategoricalHyperparameter
-from ConfigSpace.conditions import InCondition, EqualsCondition
+from ConfigSpace.hyperparameters import (
+    CategoricalHyperparameter,
+    UniformFloatHyperparameter,
+    UniformIntegerHyperparameter,
+)
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import SPARSE, DENSE, UNSIGNED_DATA, INPUT, SIGNED_DATA
+from autosklearn.pipeline.constants import (
+    DENSE,
+    INPUT,
+    SIGNED_DATA,
+    SPARSE,
+    UNSIGNED_DATA,
+)
 
 
 class Nystroem(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, kernel, n_components, gamma=1.0, degree=3,
-                 coef0=1, random_state=None):
+    def __init__(
+        self, kernel, n_components, gamma=1.0, degree=3, coef0=1, random_state=None
+    ):
         self.kernel = kernel
         self.n_components = n_components
         self.gamma = gamma
@@ -29,13 +38,17 @@ class Nystroem(AutoSklearnPreprocessingAlgorithm):
         self.coef0 = float(self.coef0)
 
         self.preprocessor = sklearn.kernel_approximation.Nystroem(
-            kernel=self.kernel, n_components=self.n_components,
-            gamma=self.gamma, degree=self.degree, coef0=self.coef0,
-            random_state=self.random_state)
+            kernel=self.kernel,
+            n_components=self.n_components,
+            gamma=self.gamma,
+            degree=self.degree,
+            coef0=self.coef0,
+            random_state=self.random_state,
+        )
 
         # Because the pipeline guarantees that each feature is positive,
         # clip all values below zero to zero
-        if self.kernel == 'chi2':
+        if self.kernel == "chi2":
             if scipy.sparse.issparse(X):
                 X.data[X.data < 0] = 0.0
             else:
@@ -49,7 +62,7 @@ class Nystroem(AutoSklearnPreprocessingAlgorithm):
 
         # Because the pipeline guarantees that each feature is positive,
         # clip all values below zero to zero
-        if self.kernel == 'chi2':
+        if self.kernel == "chi2":
             if scipy.sparse.issparse(X):
                 X.data[X.data < 0] = 0.0
             else:
@@ -64,38 +77,43 @@ class Nystroem(AutoSklearnPreprocessingAlgorithm):
         data_type = UNSIGNED_DATA
 
         if dataset_properties is not None:
-            signed = dataset_properties.get('signed')
+            signed = dataset_properties.get("signed")
             if signed is not None:
                 data_type = SIGNED_DATA if signed is True else UNSIGNED_DATA
-        return {'shortname': 'Nystroem',
-                'name': 'Nystroem kernel approximation',
-                'handles_regression': True,
-                'handles_classification': True,
-                'handles_multiclass': True,
-                'handles_multilabel': True,
-                'handles_multioutput': True,
-                'is_deterministic': True,
-                'input': (SPARSE, DENSE, data_type),
-                'output': (INPUT, UNSIGNED_DATA)}
+        return {
+            "shortname": "Nystroem",
+            "name": "Nystroem kernel approximation",
+            "handles_regression": True,
+            "handles_classification": True,
+            "handles_multiclass": True,
+            "handles_multilabel": True,
+            "handles_multioutput": True,
+            "is_deterministic": True,
+            "input": (SPARSE, DENSE, data_type),
+            "output": (INPUT, UNSIGNED_DATA),
+        }
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        if dataset_properties is not None and \
-                (dataset_properties.get("sparse") is True or
-                 dataset_properties.get("signed") is False):
+        if dataset_properties is not None and (
+            dataset_properties.get("sparse") is True
+            or dataset_properties.get("signed") is False
+        ):
             allow_chi2 = False
         else:
             allow_chi2 = True
 
-        possible_kernels = ['poly', 'rbf', 'sigmoid', 'cosine']
+        possible_kernels = ["poly", "rbf", "sigmoid", "cosine"]
         if allow_chi2:
             possible_kernels.append("chi2")
-        kernel = CategoricalHyperparameter('kernel', possible_kernels, 'rbf')
+        kernel = CategoricalHyperparameter("kernel", possible_kernels, "rbf")
         n_components = UniformIntegerHyperparameter(
-            "n_components", 50, 10000, default_value=100, log=True)
-        gamma = UniformFloatHyperparameter("gamma", 3.0517578125e-05, 8,
-                                           log=True, default_value=0.1)
-        degree = UniformIntegerHyperparameter('degree', 2, 5, 3)
+            "n_components", 50, 10000, default_value=100, log=True
+        )
+        gamma = UniformFloatHyperparameter(
+            "gamma", 3.0517578125e-05, 8, log=True, default_value=0.1
+        )
+        degree = UniformIntegerHyperparameter("degree", 2, 5, 3)
         coef0 = UniformFloatHyperparameter("coef0", -1, 1, default_value=0)
 
         cs = ConfigurationSpace()

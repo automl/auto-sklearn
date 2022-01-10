@@ -7,21 +7,26 @@ REGRESSION = 4
 MULTIOUTPUT_REGRESSION = 5
 
 REGRESSION_TASKS = [REGRESSION, MULTIOUTPUT_REGRESSION]
-CLASSIFICATION_TASKS = [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION,
-                        MULTILABEL_CLASSIFICATION]
+CLASSIFICATION_TASKS = [
+    BINARY_CLASSIFICATION,
+    MULTICLASS_CLASSIFICATION,
+    MULTILABEL_CLASSIFICATION,
+]
 
 TASK_TYPES = REGRESSION_TASKS + CLASSIFICATION_TASKS
 
-TASK_TYPES_TO_STRING = \
-    {BINARY_CLASSIFICATION: 'binary.classification',
-     MULTICLASS_CLASSIFICATION: 'multiclass.classification',
-     MULTILABEL_CLASSIFICATION: 'multilabel.classification',
-     REGRESSION: 'regression',
-     MULTIOUTPUT_REGRESSION: 'multioutput.regression'}
+TASK_TYPES_TO_STRING = {
+    BINARY_CLASSIFICATION: "binary.classification",
+    MULTICLASS_CLASSIFICATION: "multiclass.classification",
+    MULTILABEL_CLASSIFICATION: "multilabel.classification",
+    REGRESSION: "regression",
+    MULTIOUTPUT_REGRESSION: "multioutput.regression",
+}
 
-STRING_TO_TASK_TYPES = \
-    {'binary.classification': BINARY_CLASSIFICATION,
-     'multiclass.classification': MULTICLASS_CLASSIFICATION,
-     'multilabel.classification': MULTILABEL_CLASSIFICATION,
-     'regression': REGRESSION,
-     'multioutput.regression': MULTIOUTPUT_REGRESSION}
+STRING_TO_TASK_TYPES = {
+    "binary.classification": BINARY_CLASSIFICATION,
+    "multiclass.classification": MULTICLASS_CLASSIFICATION,
+    "multilabel.classification": MULTILABEL_CLASSIFICATION,
+    "regression": REGRESSION,
+    "multioutput.regression": MULTIOUTPUT_REGRESSION,
+}

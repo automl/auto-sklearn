@@ -22,8 +22,9 @@ import autosklearn.classification
 # ======================================
 
 X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-X_train, X_test, y_train, y_test = \
-    sklearn.model_selection.train_test_split(X, y, random_state=1)
+X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+    X, y, random_state=1
+)
 
 ############################################################################
 # Build and fit the classifier
@@ -32,14 +33,14 @@ X_train, X_test, y_train, y_test = \
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
     per_run_time_limit=30,
-    tmp_folder='/tmp/autosklearn_sequential_example_tmp',
+    tmp_folder="/tmp/autosklearn_sequential_example_tmp",
     # Do not construct ensembles in parallel to avoid using more than one
     # core at a time. The ensemble will be constructed after auto-sklearn
     # finished fitting all machine learning models.
     ensemble_size=0,
     delete_tmp_folder_after_terminate=False,
 )
-automl.fit(X_train, y_train, dataset_name='breast_cancer')
+automl.fit(X_train, y_train, dataset_name="breast_cancer")
 
 # This call to fit_ensemble uses all models trained in the previous call
 # to fit to build an ensemble which can be used with automl.predict()

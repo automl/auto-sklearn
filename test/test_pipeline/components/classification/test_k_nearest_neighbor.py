@@ -1,7 +1,8 @@
 import sklearn.neighbors
 
-from autosklearn.pipeline.components.classification.k_nearest_neighbors import \
-    KNearestNeighborsClassifier
+from autosklearn.pipeline.components.classification.k_nearest_neighbors import (
+    KNearestNeighborsClassifier,
+)
 
 from .test_base import BaseClassificationComponentTest
 

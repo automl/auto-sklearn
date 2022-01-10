@@ -1,7 +1,9 @@
 import sklearn.neighbors
 
-from autosklearn.pipeline.components.regression.k_nearest_neighbors import \
-    KNearestNeighborsRegressor
+from autosklearn.pipeline.components.regression.k_nearest_neighbors import (
+    KNearestNeighborsRegressor,
+)
+
 from .test_base import BaseRegressionComponentTest
 
 
