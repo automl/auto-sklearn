@@ -1,14 +1,12 @@
 # For TOML reference
-#https://learnxinyminutes.com/docs/toml/
+# https://learnxinyminutes.com/docs/toml/
 
 [tool.pytest.ini_options]
 testpaths = ["test"]
 minversion = "3.7"
 
-
 [tool.black]
 target-version = ['py37']
-line-length = 88
 
 [tool.isort]
 py_version = "37"
@@ -28,6 +26,7 @@ add-ignore = [ # http://www.pydocstyle.org/en/stable/error_codes.html
     "D105", # Missing docstring in magic method
 
     "D203", # 1 blank line required before class docstring
+    "D205", # 1 blank line required between summary and description
     "D210", # No whitespaces allowed surrounding docstring text
     "D212", # Multi-line docstring summary should start at the first line
     "D213", # Multi-line docstring summary should start at the second line
