@@ -1,7 +1,5 @@
 import unittest
 
-import pytest
-
 from sklearn.linear_model import RidgeClassifier
 from autosklearn.pipeline.components.feature_preprocessing.kernel_pca import \
     KernelPCA
@@ -25,7 +23,6 @@ class KernelPCAComponentTest(PreprocessingTestCase):
         self.assertEqual(transformation.shape[0], original.shape[0])
         self.assertFalse((transformation == 0).all())
 
-    @pytest.mark.flaky()
     def test_default_configuration_classify(self):
         for i in range(5):
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
