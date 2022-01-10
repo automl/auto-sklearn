@@ -35,7 +35,6 @@ extras_reqs = {
         "isort",
         "black",
         "pydocstyle",
-        "flaky",
         "openml",
         "pre-commit",
     ],
