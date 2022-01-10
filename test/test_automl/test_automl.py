@@ -589,7 +589,7 @@ def test_fail_if_dummy_prediction_fails(ta_run_mock, dask_client):
     ta_run_mock.return_value = StatusType.CRASHED, None, None, {"exitcode": -6}
     with pytest.raises(
         ValueError,
-        match="The error suggests that the provided memory limits were too tight.",
+        match="The error suggests that the provided memory limits are too tight.",
     ):
         auto._do_dummy_prediction(datamanager, 1)
 
