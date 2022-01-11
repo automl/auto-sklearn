@@ -41,6 +41,7 @@ repos:
       - id: pydocstyle
         files: DISABLED # autosklearn/.*
         always_run: false
+        additional_dependencies: ["toml"] # Needed to parse pyproject.toml
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v0.930
