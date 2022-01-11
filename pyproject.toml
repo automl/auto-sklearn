@@ -16,7 +16,7 @@ skip_covered = true
 exclude_lines = [
     "pragma: no cover",
     '\.\.\.',
-    "raise NotImplementedError"
+    "raise NotImplementedError",
     "if TYPE_CHECKING"
 ]
 
