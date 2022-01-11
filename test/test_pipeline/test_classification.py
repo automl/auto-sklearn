@@ -193,7 +193,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         """
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris', make_multilabel=True)
 
-        classifier = SimpleClassificationPipeline(dataset_properties={'multilabel': True})
+        classifier = SimpleClassificationPipeline(
+            dataset_properties={'multilabel': True},
+            random_state=0
+        )
         cs = classifier.get_hyperparameter_search_space()
 
         default = cs.get_default_configuration()
@@ -222,7 +225,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             include={
                 'classifier': ['random_forest'],
                 'feature_preprocessor': ['no_preprocessing']
-            }
+            },
+            random_state=0
         )
         classifier.fit_transformer(X_train, Y_train)
 
