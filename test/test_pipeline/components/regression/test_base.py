@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, Container
 
 import unittest
 
@@ -33,6 +33,9 @@ class BaseRegressionComponentTest(unittest.TestCase):
         if self.__class__ == BaseRegressionComponentTest:
             return
 
+        fixture = self.res["default_boston"]
+        places = self.res.get("default_boston_places", 7)
+
         for _ in range(2):
 
             with ignore_warnings(regressor_warnings):
@@ -41,28 +44,20 @@ class BaseRegressionComponentTest(unittest.TestCase):
                     Regressor=self.module
                 )
 
+            score = sklearn.metrics.r2_score(y_true=targets, y_pred=predictions)
+
             if "default_boston_le_ge" in self.res:
                 # Special treatment for Gaussian Process Regression
-                self.assertLessEqual(
-                    sklearn.metrics.r2_score(y_true=targets, y_pred=predictions),
-                    self.res["default_boston_le_ge"][0]
-                )
-                self.assertGreaterEqual(
-                    sklearn.metrics.r2_score(y_true=targets, y_pred=predictions),
-                    self.res["default_boston_le_ge"][1]
-                )
+                self.assertLessEqual(score, self.res["default_boston_le_ge"][0])
+                self.assertGreaterEqual(score, self.res["default_boston_le_ge"][1])
+
             else:
-                score = sklearn.metrics.r2_score(targets, predictions)
-                fixture = self.res["default_boston"]
                 if score < -1e10:
                     print(f"score = {score}, fixture = {fixture}")
                     score = np.log(-score)
                     fixture = np.log(-fixture)
-                self.assertAlmostEqual(
-                    fixture,
-                    score,
-                    places=self.res.get("default_boston_places", 7),
-                )
+
+                self.assertAlmostEqual(fixture, score, places)
 
             if self.res.get("boston_n_calls"):
                 self.assertEqual(self.res["boston_n_calls"], n_calls)
@@ -84,23 +79,28 @@ class BaseRegressionComponentTest(unittest.TestCase):
 
             score = sklearn.metrics.r2_score(targets, predictions)
             fixture = self.res["default_boston_iterative"]
+            places = self.res.get("default_boston_iterative_places", 7)
 
             if score < -1e10:
                 print(f"score = {score}, fixture = {fixture}")
                 score = np.log(-score)
                 fixture = np.log(-fixture)
 
-            self.assertAlmostEqual(
-                fixture,
-                score,
-                places=self.res.get("default_boston_iterative_places", 7),
-            )
+            self.assertAlmostEqual(fixture, score, places)
 
             if self.step_hyperparameter is not None:
-                self.assertEqual(
-                    getattr(regressor.estimator, self.step_hyperparameter['name']),
-                    self.res.get("boston_iterative_n_iter", self.step_hyperparameter['value'])
-                )
+                param_name = self.step_hyperparameter['name']
+                default = self.step_hyperparameter['value']
+
+                value = getattr(regressor.estimator, param_name)
+                expected = self.res.get("boston_iterative_n_iter", default)
+
+                # To currently allow for MLPRegressor which is indeterministic,
+                # we can have multiple values
+                if isinstance(expected, Container):
+                    assert value in expected
+                else:
+                    assert value == expected
 
     def test_default_boston_iterative_sparse_fit(self):
 
