@@ -46,8 +46,7 @@ class BaseRegressionComponentTest(unittest.TestCase):
             # Special treatment for Gaussian Process Regression
             if "default_boston_le_ge" in self.res:
                 upper, lower = self.res["default_boston_le_ge"]
-                self.assertLessEqual(score, upper)
-                self.assertGreaterEqual(score, lower)
+                assert lower <= score <= upper
 
             else:
                 fixture = self.res["default_boston"]
@@ -60,7 +59,11 @@ class BaseRegressionComponentTest(unittest.TestCase):
                 self.assertAlmostEqual(fixture, score, places)
 
             if "boston_n_calls" in self.res:
-                self.assertEqual(self.res["boston_n_calls"], n_calls)
+                expected = self.res["boston_n_calls"]
+                if isinstance(expected, Container):
+                    assert n_calls in expected
+                else:
+                    assert n_calls == expected
 
     def test_default_boston_iterative_fit(self):
 

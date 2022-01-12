@@ -37,12 +37,16 @@ class MLPComponentTest(BaseRegressionComponentTest):
     #
     # * decreased places from 3 -> 1 in 'default_boston_places'
     #   known-values = [0.29521793994422807, 0.2750079862455884]
+    #
+    # * Include two value for 'boston_n_calls'
+    #   known-values = [8, 9]
+    __test__ = True
     __test__ = True
 
     res: Dict[str, Any] = {}
     res["default_boston"] = 0.2750079862455884
     res["default_boston_places"] = 1
-    res["boston_n_calls"] = 8
+    res["boston_n_calls"] = [8, 9]
     res["boston_iterative_n_iter"] = [236, 331]
     res["default_boston_iterative"] = res["default_boston"]
     res["default_boston_iterative_places"] = 1
