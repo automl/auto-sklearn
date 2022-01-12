@@ -214,6 +214,9 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 elif 'The condensed distance matrix must contain only finite ' \
                      'values.' in e.args[0]:
                     continue
+                elif "zero-size array to reduction operation maximum which has no " \
+                     "identity" in e.args[0]:
+                    continue
                 else:
                     e.args += (f"config={config}",)
                     raise e
