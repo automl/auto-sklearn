@@ -233,18 +233,17 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    {   63: {   'balancing': Balancing(random_state=1),
-                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb3467423d0>,
+    {   20: {   'balancing': Balancing(random_state=1),
+                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f83428e2910>,
                 'cost': 0.007092198581560294,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb345aa0be0>,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f83428e2fd0>,
                 'ensemble_weight': 1.0,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb346742820>,
-                'model_id': 63,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f83428e2520>,
+                'model_id': 20,
                 'rank': 1,
-                'sklearn_classifier': SGDClassifier(alpha=9.999999999999991e-05, epsilon=1.3700860264543197e-05,
-                  eta0=0.010000000000000014, learning_rate='invscaling',
-                  loss='modified_huber', max_iter=64, random_state=1,
-                  tol=0.0004668987145850572, warm_start=True)}}
+                'sklearn_classifier': SGDClassifier(alpha=0.0003336259810364362, eta0=0.010000000000000014,
+                  learning_rate='invscaling', loss='log', max_iter=16,
+                  random_state=1, tol=0.006915066463246923, warm_start=True)}}
 
 
 
@@ -271,7 +270,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score: 0.965034965034965
+    Accuracy score: 0.958041958041958
 
 
 
@@ -279,7 +278,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  55.805 seconds)
+   **Total running time of the script:** ( 1 minutes  55.927 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_interpretable_models.py:
