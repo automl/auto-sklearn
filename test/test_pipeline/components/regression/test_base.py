@@ -33,9 +33,6 @@ class BaseRegressionComponentTest(unittest.TestCase):
         if self.__class__ == BaseRegressionComponentTest:
             return
 
-        fixture = self.res["default_boston"]
-        places = self.res.get("default_boston_places", 7)
-
         for _ in range(2):
 
             with ignore_warnings(regressor_warnings):
@@ -46,20 +43,23 @@ class BaseRegressionComponentTest(unittest.TestCase):
 
             score = sklearn.metrics.r2_score(y_true=targets, y_pred=predictions)
 
+            # Special treatment for Gaussian Process Regression
             if "default_boston_le_ge" in self.res:
-                # Special treatment for Gaussian Process Regression
-                self.assertLessEqual(score, self.res["default_boston_le_ge"][0])
-                self.assertGreaterEqual(score, self.res["default_boston_le_ge"][1])
+                upper, lower = self.res["default_boston_le_ge"]
+                self.assertLessEqual(score, upper)
+                self.assertGreaterEqual(score, lower)
 
             else:
+                fixture = self.res["default_boston"]
+                places = self.res.get("default_boston_places", 7)
+
                 if score < -1e10:
-                    print(f"score = {score}, fixture = {fixture}")
                     score = np.log(-score)
                     fixture = np.log(-fixture)
 
                 self.assertAlmostEqual(fixture, score, places)
 
-            if self.res.get("boston_n_calls"):
+            if "boston_n_calls" in self.res:
                 self.assertEqual(self.res["boston_n_calls"], n_calls)
 
     def test_default_boston_iterative_fit(self):
