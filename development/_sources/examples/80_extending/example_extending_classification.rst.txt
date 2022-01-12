@@ -263,22 +263,22 @@ Print test accuracy and statistics
 
  .. code-block:: none
 
-    accuracy:  0.986013986013986
+    accuracy:  0.965034965034965
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fdfac95df70>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fa4eaa9af40>,
                'cost': 0.007092198581560294,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fdfacc5e520>,
-               'ensemble_weight': 0.62,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fdfac7596a0>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fa4e823bf10>,
+               'ensemble_weight': 0.98,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fa4eaa9a0d0>,
                'model_id': 2,
                'rank': 1,
                'sklearn_classifier': MLPClassifier(hidden_layer_sizes=(32,), random_state=1)},
         5: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fdfab5e42e0>,
-               'cost': 0.08510638297872342,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fdfafd96f70>,
-               'ensemble_weight': 0.38,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fdfaaccff70>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fa4eaa9a760>,
+               'cost': 0.07801418439716312,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fa4e9fd1520>,
+               'ensemble_weight': 0.02,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fa4f02a5a60>,
                'model_id': 5,
                'rank': 2,
                'sklearn_classifier': MLPClassifier(alpha=0.054648061621061846, hidden_layer_sizes=(187,),
@@ -290,7 +290,7 @@ Print test accuracy and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  14.018 seconds)
+   **Total running time of the script:** ( 0 minutes  15.663 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_classification.py:
