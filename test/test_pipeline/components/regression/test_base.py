@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, Container
 
 import unittest
 
@@ -34,12 +34,6 @@ class BaseRegressionComponentTest(unittest.TestCase):
             return
 
         for _ in range(2):
-
-            with ignore_warnings(regressor_warnings):
-                predictions, targets, n_calls = _test_regressor(
-                    dataset="boston",
-                    Regressor=self.module
-                )
 
             with ignore_warnings(regressor_warnings):
                 predictions, targets, n_calls = _test_regressor(
