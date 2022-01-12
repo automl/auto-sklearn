@@ -113,8 +113,8 @@ To use ``n_jobs_`` we must guard the code
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.985816
-      Number of target algorithm runs: 46
-      Number of successful target algorithm runs: 44
+      Number of target algorithm runs: 50
+      Number of successful target algorithm runs: 48
       Number of crashed target algorithm runs: 0
       Number of target algorithms that exceeded the time limit: 2
       Number of target algorithms that exceeded the memory limit: 0
@@ -126,7 +126,7 @@ To use ``n_jobs_`` we must guard the code
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  5.788 seconds)
+   **Total running time of the script:** ( 2 minutes  7.947 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_n_jobs.py:
