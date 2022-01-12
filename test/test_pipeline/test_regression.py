@@ -1,9 +1,7 @@
 import copy
 import itertools
 import resource
-import sys
 import tempfile
-import traceback
 import unittest
 import unittest.mock
 
@@ -217,9 +215,9 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                      'values.' in e.args[0]:
                     continue
                 else:
-                    print(config)
-                    print(traceback.format_exc())
+                    e.args += (f"config={config}",)
                     raise e
+
             except RuntimeWarning as e:
                 if "invalid value encountered in sqrt" in e.args[0]:
                     continue
@@ -232,22 +230,21 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 elif "invalid value encountered in multiply" in e.args[0]:
                     continue
                 else:
-                    print(config)
-                    traceback.print_tb(sys.exc_info()[2])
+                    e.args += (f"config={config}",)
                     raise e
+
             except UserWarning as e:
                 if "FastICA did not converge" in e.args[0]:
                     continue
                 else:
-                    print(config)
-                    traceback.print_tb(sys.exc_info()[2])
+                    e.args += (f"config={config}",)
                     raise e
+
             except Exception as e:
                 if "Multiple input features cannot have the same target value" in e.args[0]:
                     continue
                 else:
-                    print(config)
-                    traceback.print_tb(sys.exc_info()[2])
+                    e.args += (f"config={config}",)
                     raise e
 
     def test_default_configuration(self):

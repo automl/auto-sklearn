@@ -5,7 +5,6 @@ import itertools
 import os
 import resource
 import tempfile
-import traceback
 import unittest
 import unittest.mock
 
@@ -519,8 +518,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             except np.linalg.LinAlgError:
                 continue
             except ValueError as e:
-                if "Floating-point under-/overflow occurred at epoch" in \
-                        e.args[0]:
+                if "Floating-point under-/overflow occurred at epoch" in e.args[0]:
                     continue
                 elif "removed all features" in e.args[0]:
                     continue
@@ -536,8 +534,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 elif 'Internal work array size computation failed' in e.args[0]:
                     continue
                 else:
-                    print(config)
-                    print(traceback.format_exc())
+                    e.args += (f"config={config}",)
                     raise e
 
             except RuntimeWarning as e:
@@ -554,15 +551,14 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 elif "invalid value encountered in multiply" in e.args[0]:
                     continue
                 else:
-                    print(traceback.format_exc())
-                    print(config)
+                    e.args += (f"config={config}",)
                     raise e
+
             except UserWarning as e:
                 if "FastICA did not converge" in e.args[0]:
                     continue
                 else:
-                    print(traceback.format_exc())
-                    print(config)
+                    e.args += (f"config={config}",)
                     raise e
 
     def test_get_hyperparameter_search_space(self):
@@ -1175,6 +1171,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             # to clean up with check in the future
             del preprocessing_components.additional_components.components['CrashPreprocessor']
             self.fail("cs={} config={} Exception={}".format(cs, config, e))
+
         cls.set_hyperparameters(config)
 
         with self.assertRaisesRegex(ValueError, "Make sure fit is called"):
