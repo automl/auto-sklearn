@@ -218,7 +218,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         ensemble_size : int, optional (default=50)
             Number of models added to the ensemble built by *Ensemble
             selection from libraries of models*. Models are drawn with
-            replacement.
+            replacement. If set to ``0`` no ensemble is fit.
 
         ensemble_nbest : int, optional (default=50)
             Only consider the ``ensemble_nbest`` models when building an
@@ -238,10 +238,14 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         memory_limit : int, optional (3072)
             Memory limit in MB for the machine learning algorithm.
             `auto-sklearn` will stop fitting the machine learning algorithm if
-            it tries to allocate more than `memory_limit` MB.
-            If None is provided, no memory limit is set.
-            In case of multi-processing, `memory_limit` will be per job.
-            This memory limit also applies to the ensemble creation process.
+            it tries to allocate more than ``memory_limit`` MB.
+            
+            **Important notes:** 
+            
+            * If ``None`` is provided, no memory limit is set.
+            * In case of multi-processing, ``memory_limit`` will be *per job*, so the total usage is 
+              ``n_jobs x memory_limit``.
+            * The memory limit also applies to the ensemble creation process.
 
         tmp_folder : string, optional (None)
             folder to store configuration output and log files, if ``None``
@@ -253,13 +257,15 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
 
         n_jobs : int, optional, experimental
             The number of jobs to run in parallel for ``fit()``. ``-1`` means
-            using all processors. By default, Auto-sklearn uses a single core
-            for fitting the machine learning model and a single core for fitting
-            an ensemble. Ensemble building is not affected by ``n_jobs`` but
-            can be controlled by the number of models in the ensemble. In
-            contrast to most scikit-learn models, ``n_jobs`` given in the
-            constructor is not applied to the ``predict()`` method. If
-            ``dask_client`` is None, a new dask client is created.
+            using all processors. 
+            
+            **Important notes**: 
+            
+            * By default, Auto-sklearn uses one core. 
+            * Ensemble building is not affected by ``n_jobs`` but can be controlled by the number 
+              of models in the ensemble.
+            * ``predict()`` is not affected by ``n_jobs`` (in contrast to most scikit-learn models)
+            * If ``dask_client`` is ``None``, a new dask client is created.
 
         dask_client : dask.distributed.Client, optional
             User-created dask client, can be used to start a dask cluster and then
@@ -275,7 +281,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             * ``'y_optimization'`` : do not save the predictions for the
               optimization/validation set, which would later on be used to build
               an ensemble.
-            * ``'model'`` : do not save any model files
+            * ``model`` : do not save any model files
 
         smac_scenario_args : dict, optional (None)
             Additional arguments inserted into the scenario of SMAC. See the
