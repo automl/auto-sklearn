@@ -9,6 +9,16 @@
 Releases
 ========
 
+Version 0.14.3
+==============
+
+* HOTFIX #1356: Updates dask to ``dask.distributed >=2012.12``.
+
+Contributors v0.14.3
+********************
+
+* Eddie Bergman
+
 Version 0.14.2
 ==============
 
@@ -35,7 +45,7 @@ Version 0.14.1
 Contributors v0.14.1
 ********************
 
-* Edward Bergman
+* Eddie Bergman
 * Michael Becker
 * Katharina Eggensperger
 
@@ -621,7 +631,7 @@ Version 0.4.0
   minimization problem.
 * Implements `#271 <https://github.com/automl/auto-sklearn/issues/271>`_:
   XGBoost is available again, even configuring the new dropout functionality.
-* New documentation section :ref:`inspecting_the_results`.
+* New documentation section :ref:`inspect`.
 * Fixes `#444 <https://github.com/automl/auto-sklearn/issues/444>`_:
   Auto-sklearn now only loads models for refit which are actually relevant
   for the ensemble.
