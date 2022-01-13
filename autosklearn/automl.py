@@ -295,7 +295,7 @@ class AutoML(BaseEstimator):
                 processes=False,
                 threads_per_worker=1,
                 # We use the temporal directory to save the
-                # dask workers, because deleting workers
+                # dask workers, because deleting workers takes
                 # more time than deleting backend directories
                 # This prevent an error saying that the worker
                 # file was deleted, so the client could not close
@@ -516,7 +516,7 @@ class AutoML(BaseEstimator):
         #   "multiclass" be mean either REGRESSION or MULTICLASS_CLASSIFICATION,
         #   and so this is where the subclasses are used to determine which.
         #   However, this could also be deduced from the `is_classification`
-        #   paramaeter.
+        #   parameter.
         #
         #   In the future, there is little need for the subclasses of `AutoML`
         #   and no need for the `task` parameter. The extra functionality
@@ -1455,8 +1455,9 @@ class AutoML(BaseEstimator):
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
         # AutoSklearn does not handle sparse y for now
+        if ensemble_size == 0:
+            raise ValueError("ensemble_size must be greater than 0 for fit_ensemble") 
         y = convert_if_sparse(y)
-
         if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit']:
             raise ValueError('Cannot call fit_ensemble with resampling '
                              'strategy %s.' % self._resampling_strategy)
@@ -1906,6 +1907,9 @@ class AutoML(BaseEstimator):
         """
 
         ensemble_dict = {}
+        if self._ensemble_size == 0:
+            self._logger.warning('No models in the ensemble. Kindly check the ensemble size.')
+            return ensemble_dict
 
         def has_key(rv, key):
             return rv.additional_info and key in rv.additional_info
