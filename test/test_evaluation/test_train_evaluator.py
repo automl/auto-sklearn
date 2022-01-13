@@ -19,12 +19,13 @@ from sklearn.model_selection import GroupKFold, GroupShuffleSplit, \
 import sklearn.model_selection
 from smac.tae import StatusType, TAEAbortException
 
+from autosklearn.automl_common.common.utils import backend
+
 import autosklearn.evaluation.splitter
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.evaluation.util import read_queue
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, \
     eval_holdout, eval_iterative_holdout, eval_cv, eval_partial_cv, subsample_indices
-from autosklearn.util import backend
 from autosklearn.util.pipeline import get_configuration_space
 from autosklearn.constants import BINARY_CLASSIFICATION, \
     MULTILABEL_CLASSIFICATION,\
@@ -92,7 +93,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.get_current_iter.return_value = 1
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="auto-sklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -160,7 +165,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.get_current_iter.side_effect = (2, 4, 8, 16, 32, 64, 128, 256, 512)
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="auto-sklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -259,7 +268,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.get_current_iter.side_effect = (2, 4, 8, 16, 32, 64, 128, 256, 512)
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="auto-sklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -331,7 +344,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.get_additional_run_info.return_value = None
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="auto-sklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -375,7 +392,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.get_additional_run_info.return_value = None
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="auto-sklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -431,7 +452,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.name = 'test'
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="auto-sklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -493,7 +518,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.get_current_iter.side_effect = (2, 4, 8, 16, 32, 64, 128, 256, 512)
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(self.tmp_dir)
+        backend_api = backend.create(
+            temporary_directory=self.tmp_dir,
+            output_directory=None,
+            prefix="auto-sklearn"
+        )
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -646,7 +675,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             )
         )
 
-    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_subsample_indices_classification(self, mock, backend_mock):
 
@@ -698,7 +727,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             'classes = 2', subsample_indices, train_indices, 0.9999, evaluator.task_type,
             evaluator.Y_train)
 
-    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_subsample_indices_regression(self, mock, backend_mock):
 
@@ -771,7 +800,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
     @unittest.mock.patch.object(TrainEvaluator, 'file_output')
     @unittest.mock.patch.object(TrainEvaluator, '_partial_fit_and_predict_standard')
-    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_fit_predict_and_loss_standard_additional_run_info(
         self, mock, backend_mock, _partial_fit_and_predict_mock,
@@ -864,7 +893,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
     @unittest.mock.patch.object(TrainEvaluator, '_loss')
     @unittest.mock.patch.object(TrainEvaluator, 'finish_up')
-    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_fit_predict_and_loss_iterative_additional_run_info(
             self, mock, backend_mock, finish_up_mock, loss_mock,
@@ -913,7 +942,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
     @unittest.mock.patch.object(TrainEvaluator, '_loss')
     @unittest.mock.patch.object(TrainEvaluator, 'finish_up')
-    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_fit_predict_and_loss_iterative_noniterativemodel_additional_run_info(
             self, mock, backend_mock, finish_up_mock, loss_mock,
@@ -952,7 +981,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
     @unittest.mock.patch.object(TrainEvaluator, '_loss')
     @unittest.mock.patch.object(TrainEvaluator, 'finish_up')
-    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_fit_predict_and_loss_budget_additional_run_info(
             self, mock, backend_mock, finish_up_mock, loss_mock,
@@ -1003,7 +1032,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
     @unittest.mock.patch.object(TrainEvaluator, '_loss')
     @unittest.mock.patch.object(TrainEvaluator, 'finish_up')
-    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.automl_common.common.utils.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_fit_predict_and_loss_budget_2_additional_run_info(
             self, mock, backend_mock, finish_up_mock, loss_mock,
