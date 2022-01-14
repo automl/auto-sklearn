@@ -1084,12 +1084,12 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name, logger,
                 sparse = scipy.sparse.issparse(X)
 
                 feat_type = {key: 'categorical' if value else 'numerical'
-                               for key, value in categorical.items()}
+                             for key, value in categorical.items()}
 
                 # Todo make this more cohesive to the overall structure (quick bug fix)
                 if isinstance(X, pd.DataFrame):
                     for key in X.select_dtypes(include="string").columns:
-                         feat_type[key] = "string"
+                        feat_type[key] = "string"
 
                 DPP = FeatTypeSplit(
                     # The difference between feat_type and categorical, is that

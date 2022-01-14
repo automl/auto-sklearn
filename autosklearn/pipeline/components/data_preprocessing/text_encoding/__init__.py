@@ -57,20 +57,17 @@ class BagOfWordChoice(AutoSklearnChoice):
                 "component.")
 
         if default is None:
-            #ToDo add the different verision
-            # how using 'relative' version
             defaults = ['bag_of_words_encoding']
             for default_ in defaults:
                 if default_ in available_preprocessors:
                     default = default_
                     break
 
-        # Todo how to add hps to available_preprocessors
         preprocessor = CategoricalHyperparameter('__choice__',
                                                  list(
                                                      available_preprocessors.keys()),
                                                  default_value=default)
-        #ToDo add hiracical hps for the different choices
+
         cs.add_hyperparameter(preprocessor)
         for name in available_preprocessors:
             preprocessor_configuration_space = available_preprocessors[name]. \
