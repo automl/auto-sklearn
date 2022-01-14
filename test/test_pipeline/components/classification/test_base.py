@@ -9,7 +9,7 @@ from autosklearn.pipeline.constants import SPARSE
 import sklearn.metrics
 import numpy as np
 
-from ...ignored_warnings import ignore_warnings, classifier_warnings
+from test.test_pipeline.ignored_warnings import ignore_warnings, classifier_warnings
 
 
 class BaseClassificationComponentTest(unittest.TestCase):
