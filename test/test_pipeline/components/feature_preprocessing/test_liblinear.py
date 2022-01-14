@@ -5,7 +5,7 @@ from autosklearn.pipeline.util import _test_preprocessing, PreprocessingTestCase
     get_dataset
 import sklearn.metrics
 
-from ...ignored_warnings import ignore_warnings, feature_preprocessing_warnings
+from test.test_pipeline.ignored_warnings import ignore_warnings, feature_preprocessing_warnings
 
 
 class LiblinearComponentTest(PreprocessingTestCase):
