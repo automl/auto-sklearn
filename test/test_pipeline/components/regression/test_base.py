@@ -13,7 +13,7 @@ from autosklearn.pipeline.components.regression.libsvm_svr import LibSVM_SVR
 
 from autosklearn.pipeline.components.regression import _regressors, RegressorChoice
 
-from ...ignored_warnings import regressor_warnings, ignore_warnings
+from test.test_pipeline.ignored_warnings import regressor_warnings, ignore_warnings
 
 
 class BaseRegressionComponentTest(unittest.TestCase):
