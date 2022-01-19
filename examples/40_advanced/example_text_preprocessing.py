@@ -5,13 +5,11 @@ Text Preprocessing
 ==================
 This example shows, how to use text features in *auto-sklearn*. *auto-sklearn* can automatically
 encode text features if they are provided as string type in a pandas dataframe.
-`https://pandas.pydata.org/pandas-docs/stable/user_guide/text.html`_
 
 For processing text features you need a pandas dataframe and set the desired
 text columns to string and the categorical columns to category.
 
 *auto-sklearn* text embedding creates a bag of words count.
-`https://scikit-learn.org/stable/tutorial/text_analytics/working_with_text_data.html`_
 """
 import sklearn.metrics
 import sklearn.datasets
