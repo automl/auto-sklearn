@@ -360,8 +360,6 @@ class FeatureValidator(BaseEstimator):
 
         # Store the dtypes and use in case of re-fit
         if len(self.dtypes) == 0:
-            # Categorical data is inferred as string. Convert to categorical.
-            # Warn the user about dtypes or request him to use a dataframe
             self.dtypes = {col: X_train[col].dtype.name.lower() for col in X_train.columns}
         else:
             for col in X_train.columns:

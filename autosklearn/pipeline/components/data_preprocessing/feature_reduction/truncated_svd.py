@@ -70,7 +70,6 @@ class FeatureReduction(AutoSklearnPreprocessingAlgorithm):
     def get_hyperparameter_search_space(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
                                         ) -> ConfigurationSpace:
         cs = ConfigurationSpace()
-        # Todo introduce a HP [0.1,...,1.0]
         cs.add_hyperparameter(
             CSH.UniformIntegerHyperparameter("n_components", lower=1, upper=10000,
                                              default_value=100, log=True))

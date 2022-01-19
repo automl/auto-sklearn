@@ -1086,7 +1086,7 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name, logger,
                 feat_type = {key: 'categorical' if value else 'numerical'
                              for key, value in categorical.items()}
 
-                # Todo make this more cohesive to the overall structure (quick bug fix)
+                # TODO make this more cohesive to the overall structure (quick bug fix)
                 if isinstance(X, pd.DataFrame):
                     for key in X.select_dtypes(include="string").columns:
                         feat_type[key] = "string"

@@ -82,6 +82,7 @@ class TextPreprocessingPipeline(BasePipeline):
 
         Parameters
         ----------
+        # TODO add parameter description
 
         Returns
         -------
@@ -107,7 +108,6 @@ class TextPreprocessingPipeline(BasePipeline):
         if dataset_properties is not None and isinstance(dataset_properties, dict):
             default_dataset_properties.update(dataset_properties)
 
-        # ToDo implemenent the feature reduction
         steps.extend([
             ("text_encoding", BagOfWordChoice(default_dataset_properties)),
             ("feature_reduction", FeatureReduction())

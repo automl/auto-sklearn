@@ -420,6 +420,8 @@ def test_list_to_dataframe(openml_id):
             assert is_string_dtype(X_pandas[col].dtype)
         elif is_categorical_dtype(X_pandas[col].dtype):
             assert is_categorical_dtype(X_pandas[col].dtype)
+        else:
+            raise NotImplementedError
 
     # Also make sure that at testing time
     # this work
@@ -432,6 +434,8 @@ def test_list_to_dataframe(openml_id):
             assert is_string_dtype(X_pandas[col].dtype)
         elif is_categorical_dtype(X_pandas[col].dtype):
             assert is_categorical_dtype(X_pandas[col].dtype)
+        else:
+            raise NotImplementedError
 
 
 @pytest.mark.parametrize(
