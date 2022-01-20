@@ -3,8 +3,9 @@ import importlib
 import inspect
 import pkgutil
 import sys
-from typing import Dict
+from typing import Dict, Optional
 
+import sklearn.base
 from sklearn.base import BaseEstimator, TransformerMixin
 
 from autosklearn.pipeline.constants import SPARSE
@@ -145,6 +146,9 @@ class AutoSklearnComponent(BaseEstimator):
         name = self.get_properties()['name']
         return "autosklearn.pipeline %s" % name
 
+    def to_sklearn(self) -> sklearn.base.BaseEstimator:
+        raise NotImplementedError()
+
 
 class IterativeComponent(AutoSklearnComponent):
 
@@ -188,7 +192,7 @@ class IterativeComponentWithSampleWeight(AutoSklearnComponent):
         raise NotImplementedError()
 
 
-class AutoSklearnClassificationAlgorithm(AutoSklearnComponent):
+class AutoSklearnClassificationAlgorithm(sklearn.base.ClassifierMixin, AutoSklearnComponent):
     """Provide an abstract interface for classification algorithms in
     auto-sklearn.
 
@@ -240,6 +244,9 @@ class AutoSklearnClassificationAlgorithm(AutoSklearnComponent):
         """
         return self.estimator
 
+    def to_sklearn(self) -> sklearn.base.BaseEstimator:
+        return self.estimator
+
 
 class AutoSklearnPreprocessingAlgorithm(TransformerMixin, AutoSklearnComponent):
     """Provide an abstract interface for preprocessing algorithms in
@@ -279,8 +286,11 @@ class AutoSklearnPreprocessingAlgorithm(TransformerMixin, AutoSklearnComponent):
         """
         return self.preprocessor
 
+    def to_sklearn(self) -> Optional[sklearn.base.BaseEstimator]:
+        return self.preprocessor
 
-class AutoSklearnRegressionAlgorithm(AutoSklearnComponent):
+
+class AutoSklearnRegressionAlgorithm(sklearn.base.RegressorMixin, AutoSklearnComponent):
     """Provide an abstract interface for regression algorithms in
     auto-sklearn.
 
@@ -318,6 +328,9 @@ class AutoSklearnRegressionAlgorithm(AutoSklearnComponent):
         -------
         estimator : the underlying estimator object
         """
+        return self.estimator
+
+    def to_sklearn(self) -> sklearn.base.BaseEstimator:
         return self.estimator
 
 
@@ -433,3 +446,6 @@ class AutoSklearnChoice(object):
 
     def predict(self, X):
         return self.choice.predict(X)
+
+    def to_sklearn(self) -> sklearn.base.BaseEstimator:
+        return self.choice.to_sklearn()

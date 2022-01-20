@@ -1,4 +1,4 @@
-from typing import Any, List, Dict, Optional, Tuple, Union
+from typing import cast, Any, List, Dict, Optional, Tuple, Union
 
 import sklearn.compose
 from scipy import sparse
@@ -237,3 +237,23 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
                 return FeatTypeSplit._get_hyperparameter_search_space_recursevely(
                     dataset_properties, cs, st_operation)
         return cs
+
+    def to_sklearn(self) -> sklearn.base.BaseEstimator:
+        original_column_transformer = cast(
+            sklearn.compose.ColumnTransformer,
+            self.column_transformer,
+        )
+        ct = [
+            (name, transformer.to_sklearn(), features)
+            for name, transformer, features in original_column_transformer.transformers_
+            if transformer is not None
+        ]
+        return sklearn.compose.ColumnTransformer(
+            transformers=ct,
+            # TODO potentially infer which args to copy
+            remainder=original_column_transformer.remainder,
+            sparse_threshold=original_column_transformer.sparse_threshold,
+            n_jobs=original_column_transformer.n_jobs,
+            transformer_weights=original_column_transformer.transformer_weights,
+            verbose=original_column_transformer.verbose,
+        )

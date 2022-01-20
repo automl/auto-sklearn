@@ -9,7 +9,7 @@ import multiprocessing
 import os
 import sys
 import time
-from typing import Any, Dict, Optional, List, Tuple, Union
+from typing import cast, Any, Dict, Optional, List, Tuple, Union
 import uuid
 import unittest.mock
 import tempfile
@@ -62,6 +62,7 @@ from autosklearn.util.logging_ import (
 )
 from autosklearn.util import pipeline, RE_PATTERN
 from autosklearn.util.parallel import preload_modules
+from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.smbo import AutoMLSMBO
@@ -1511,7 +1512,7 @@ class AutoML(BaseEstimator):
         return self
 
     def _load_models(self):
-        self.ensemble_ = self._backend.load_ensemble(self._seed)
+        self.ensemble_ = cast(AbstractEnsemble, self._backend.load_ensemble(self._seed))
 
         # If no ensemble is loaded, try to get the best performing model
         if not self.ensemble_:
@@ -1835,6 +1836,12 @@ class AutoML(BaseEstimator):
             self._load_models()
 
         return self.ensemble_.get_models_with_weights(self.models_)
+
+    def to_sklearn(self) -> sklearn.base.BaseEstimator:
+        if self.models_ is None or len(self.models_) == 0 or self.ensemble_ is None:
+            self._load_models()
+
+        return cast(AbstractEnsemble, self.ensemble_).to_sklearn(self.models_)
 
     def show_models(self) -> Dict[int, Any]:
         """ Returns a dictionary containing dictionaries of ensemble models.

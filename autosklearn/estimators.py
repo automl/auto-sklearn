@@ -1,5 +1,7 @@
 # -*- encoding: utf-8 -*-
 from typing import Optional, Dict, List, Tuple, Union, Iterable
+
+import sklearn.base
 from typing_extensions import Literal
 
 from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
@@ -535,6 +537,20 @@ class AutoSklearnEstimator(BaseEstimator):
 
     def score(self, X, y):
         return self.automl_.score(X, y)
+
+    def to_sklearn(self) -> sklearn.base.BaseEstimator:
+        """ Returns the current ensemble as raw scikit-learn model if possible
+
+        Returns
+        -------
+        sklearn.base.BaseEstimator
+
+        Note
+        ----
+        Not all operations used in Auto-sklearn have a scikit-learn equivalent. In such cases we
+        return the most raw version we have in Auto-sklearn.
+        """
+        return self.automl_.to_sklearn()
 
     def show_models(self):
         """ Returns a dictionary containing dictionaries of ensemble models.

@@ -4,9 +4,12 @@ from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
 
+from sklearn.ensemble import VotingClassifier, VotingRegressor
+from sklearn.ensemble._voting import _BaseVoting
+from sklearn.pipeline import Pipeline
 from sklearn.utils import check_random_state
 
-from autosklearn.constants import TASK_TYPES
+from autosklearn.constants import CLASSIFICATION_TASKS, REGRESSION_TASKS, TASK_TYPES
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.metrics import Scorer, calculate_loss
 from autosklearn.pipeline.base import BasePipeline
@@ -356,3 +359,32 @@ class EnsembleSelection(AbstractEnsemble):
 
     def get_validation_performance(self) -> float:
         return self.trajectory_[-1]
+
+    def to_sklearn(self, models: Dict[str, Pipeline]) -> _BaseVoting:
+        if self.task_type in CLASSIFICATION_TASKS:
+            voter = VotingClassifier(estimators=None)
+        elif self.task_type in REGRESSION_TASKS:
+            voter = VotingRegressor(estimators=None)
+        else:
+            raise NotImplementedError(self.task_type)
+
+        weights = []
+        models_ = []
+
+        for weight, identifier in zip(list(self.weights_), list(self.identifiers_)):
+            if weight == 0.0:
+                continue
+            weights.append(weight)
+
+            sklearn_model = models[identifier].to_sklearn()  # type: ignore
+            models_.append(sklearn_model)
+
+        voter.estimators = models_
+        voter.estimators_ = models_
+        voter.weights = weights
+
+        # TODO check where to put the label encoder???
+        # voter.le_ = sklearn.preprocessing.LabelEncoder().fit(y_train)
+        # voter.classes_ = askl_ensemble.le_.classes_
+
+        return voter

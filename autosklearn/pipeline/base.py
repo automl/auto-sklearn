@@ -1,6 +1,7 @@
 from abc import ABCMeta
 from typing import Dict, Union
 
+import sklearn.pipeline
 from ConfigSpace import Configuration
 
 import numpy as np
@@ -502,3 +503,7 @@ class BasePipeline(Pipeline):
                                          " argument is not valid. The supported components for the"
                                          " step '{}' for this task are {}"
                                          .format(component, key, arg, key, available_components))
+
+    def to_sklearn(self) -> sklearn.pipeline.Pipeline:
+        steps = [(name, step.to_sklearn()) for name, step in self.steps if step is not None]
+        return sklearn.pipeline.Pipeline(steps)

@@ -130,3 +130,6 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
         cs = ConfigurationSpace()
         cs.add_hyperparameter(strategy)
         return cs
+
+    def to_sklearn(self) -> Optional[BaseEstimator]:
+        return None
