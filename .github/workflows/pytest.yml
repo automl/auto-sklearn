@@ -32,6 +32,7 @@ env:
 
   # Arguments used for code-cov which is later used to annotate PR's on github
   code-cov-args: >-
+    --cov=autosklearn
     --cov-report=xml
 
 jobs:
