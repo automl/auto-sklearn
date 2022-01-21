@@ -4,7 +4,7 @@
 # These have been configured to only really run short tasks. Longer form tasks
 # are usually completed in github actions.
 
-.PHONY: help install-dev clean clean-doc clean-build build doc links examples publish
+.PHONY: help install-dev check format pre-commit clean clean-doc clean-build build doc links examples publish test
 
 help:
 	@echo "Makefile autosklearn"
@@ -18,6 +18,7 @@ help:
 	@echo "* linkcheck        to check the documentation links"
 	@echo "* examples         to run and generate the examples"
 	@echo "* publish          to help publish the current branch to pypi"
+	@echo "* test             to run the tests"
 
 PYTHON ?= python
 CYTHON ?= cython
@@ -112,3 +113,6 @@ publish: clean-build build
 	@echo
 	@echo "Once you have decided it works, publish to actual pypi with"
 	@echo "python -m twine upload dist/*"
+
+test:
+	$(PYTEST) test
