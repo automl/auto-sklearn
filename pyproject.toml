@@ -26,7 +26,7 @@ target-version = ['py37']
 [tool.isort]
 py_version = "37"
 profile = "black" # Play nicely with black
-src_paths = ["src", "test"]
+src_paths = ["autosklearn", "test"]
 known_types = ["typing", "abc"] # We put these in their own section "types"
 sections = ["FUTURE", "TYPES", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"] # section ordering
 known_first_party = ["autosklearn"]
