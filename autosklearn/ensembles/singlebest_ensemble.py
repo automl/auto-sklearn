@@ -1,7 +1,9 @@
 import os
-from typing import List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
+
+from sklearn.base import BaseEstimator
 
 from smac.runhistory.runhistory import RunHistory
 
@@ -36,6 +38,17 @@ class SingleBest(AbstractEnsemble):
         self.weights_ = [1.0]
         self.run_history = run_history
         self.identifiers_ = self.get_identifiers_from_run_history()
+
+    def fit(
+        self,
+        base_models_predictions: np.ndarray,
+        true_targets: np.ndarray,
+        model_identifiers: List[Tuple[int, int, float]],
+    ) -> "AbstractEnsemble":
+        raise NotImplementedError()
+
+    def get_validation_performance(self) -> float:
+        raise NotImplementedError()
 
     def get_identifiers_from_run_history(self) -> List[Tuple[int, int, float]]:
         """
@@ -118,3 +131,16 @@ class SingleBest(AbstractEnsemble):
                 output.append(identifier)
 
         return output
+
+    def to_sklearn(self, models: Dict[str, BasePipeline]) -> BaseEstimator:
+        model = []
+
+        for i, weight in enumerate(self.weights_):
+            if weight > 0.0:
+                identifier = self.identifiers_[i]
+                model.append(models[identifier])  # type: ignore
+
+        if len(model) != 1:
+            raise ValueError("Must select exactly one model")
+
+        return model[0].to_sklearn()
