@@ -48,7 +48,7 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
                 raise KeyError()
 
             all_text = itertools.chain.from_iterable(X[col] for col in X.columns)
-            self.preprocessor.fit(all_text)
+            self.preprocessor = self.preprocessor.fit(all_text)
 
         else:
             raise ValueError("Your text data is not encoded in a pandas.DataFrame\n"
