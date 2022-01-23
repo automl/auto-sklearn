@@ -6,6 +6,7 @@ from ConfigSpace import EqualsCondition
 
 import numpy as np
 import pandas as pd
+import itertools
 
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
@@ -48,8 +49,10 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
                                                     ngram_range=(1, self.ngram_range))
             else:
                 raise KeyError()
-            for feature in X.columns:
-                self.preprocessor = self.preprocessor.fit(X[feature])
+
+            all_text = itertools.chain.from_iterable(X[col] for col in X.columns)
+            self.preprocessor.fit(all_text)
+
         else:
             raise ValueError("Your text data is not encoded in a pandas.DataFrame\n"
                              "Please make sure to use a pandas.DataFrame and ensure"

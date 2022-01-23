@@ -9,8 +9,8 @@ from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
 from sklearn.base import BaseEstimator
 
-from ...base import AutoSklearnPreprocessingAlgorithm, find_components, \
-    ThirdPartyComponents, AutoSklearnChoice
+from ...base import AutoSklearnPreprocessingAlgorithm, AutoSklearnClassificationAlgorithm, \
+    find_components, ThirdPartyComponents, AutoSklearnChoice, _addons
 
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 
@@ -18,11 +18,13 @@ bow_directory = os.path.split(__file__)[0]
 _bows = find_components(__package__,
                         bow_directory,
                         AutoSklearnPreprocessingAlgorithm)
-_addons = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
+
+additional_components = ThirdPartyComponents(AutoSklearnClassificationAlgorithm)
+_addons['data_preprocessing.text_encoding'] = additional_components
 
 
-def add_bow(bow: 'BagOfWordChoice') -> None:
-    _addons.add_component(bow)
+def add_bow(classifier: 'BagOfWordChoice') -> None:
+    additional_components.add_component(classifier)
 
 
 class BagOfWordChoice(AutoSklearnChoice):
@@ -31,7 +33,7 @@ class BagOfWordChoice(AutoSklearnChoice):
     def get_components(cls: BaseEstimator) -> Dict[str, BaseEstimator]:
         components: Dict[str, BaseEstimator] = OrderedDict()
         components.update(_bows)
-        components.update(_addons.components)
+        components.update(additional_components.components)
         return components
 
     def get_hyperparameter_search_space(

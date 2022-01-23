@@ -34,21 +34,23 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
             ) -> 'BagOfWordEncoder':
 
         if isinstance(X, pd.DataFrame):
-            # define a CountVectorizer for every feature (implicitly defined by order of columns,
-            # maybe change the list
-            # to a dictionary with features as keys)
             if self.min_df_choice == "min_df_absolute":
-                self.preprocessor = [CountVectorizer(min_df=self.min_df_absolute,
-                                                     ngram_range=(1,
-                                                                  self.ngram_range)).fit(X[feature])
-                                     for feature in
-                                     X.columns]
+
+                self.preprocessor = {}
+
+                for feature in X.columns:
+                    vectorizer = CountVectorizer(min_df=self.min_df_absolute,
+                                                 ngram_range=(1, self.ngram_range)).fit(X[feature])
+                    self.preprocessor[feature] = vectorizer
+
             elif self.min_df_choice == "min_df_relative":
-                self.preprocessor = [CountVectorizer(min_df=self.min_df_relative,
-                                                     ngram_range=(1,
-                                                                  self.ngram_range)).fit(X[feature])
-                                     for feature in
-                                     X.columns]
+
+                self.preprocessor = {}
+
+                for feature in X.columns:
+                    vectorizer = CountVectorizer(min_df=self.min_df_absolute,
+                                                 ngram_range=(1, self.ngram_range)).fit(X[feature])
+                    self.preprocessor[feature] = vectorizer
             else:
                 raise KeyError()
         else:
@@ -61,13 +63,18 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
         X_new = None
         if self.preprocessor is None:
             raise NotImplementedError()
-        # iterate over the pretrained preprocessors and columns and transform the data
-        for preprocessor, feature in zip(self.preprocessor, X.columns):
-            if X_new is None:
-                # possiblity to add TruncatedSVD here
-                X_new = preprocessor.transform(X[feature])
+
+        for key_preprocessor, feature in zip(sorted(self.preprocessor.keys()), sorted(X.columns)):
+            if key_preprocessor != feature:
+                # ensure the correct preprocessor is applied to the correct column
+                raise KeyError
             else:
-                X_new = hstack([X_new, preprocessor.transform(X[feature])])
+                if X_new is None:
+                    X_new = self.preprocessor[key_preprocessor].transform(X[feature])
+                else:
+                    X_transformed = self.preprocessor[key_preprocessor].transform(X[feature])
+                    X_new = hstack([X_new, X_transformed])
+
         return X_new
 
     @staticmethod
