@@ -48,7 +48,7 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
                 self.preprocessor = {}
 
                 for feature in X.columns:
-                    vectorizer = CountVectorizer(min_df=self.min_df_absolute,
+                    vectorizer = CountVectorizer(min_df=self.min_df_relative,
                                                  ngram_range=(1, self.ngram_range)).fit(X[feature])
                     self.preprocessor[feature] = vectorizer
             else:
