@@ -14,18 +14,17 @@ Version 0.14.4
 
 * Fix #1356: SVR degree hyperparameter now only active with "poly" kernel.
 * Add #1311: Black format checking (non-strict).
-* Maint #1306: Run history is now saved every iteration incase of crashes.
-* Doc #1309: Updated doc faqs and manual
+* Maint #1306: Run history is now saved every iteration
+* Doc #1309: Updated the doc faqs to include many use cases and the manual for early introductions
 * Doc #1322: Fix typo in contribution guide
 * Maint #1326: Add isort checker (non-strict)
 * Maint #1238, #1346, #1368, #1370: Update warnings in tests
 * Maint #1325: Test workflow can now be manually triggered
 * Maint #1332: Update docstring and typing of ``include`` and ``exclude`` params
-* Maint #1260: Add Python 3.10 to our tests
-* Add #1318: First update to use ``automl_common``
+* Add #1260: Support for Python 3.10
+* Add #1318: First update to use the shared backend in ``automl_common``
 * Fix #1339: Resolve dependancy issues with ``sphinx_toolbox``
-* Fix #1335: Fix issue where some regression algorithm gave incorrect output dimensions
-    as raised in #1297
+* Fix #1335: Fix issue where some regression algorithm gave incorrect output dimensions as raised in #1297
 * Doc #1340: Update example for predefined splits
 * Fix #1329: Fix random state not being passed to the ConfigurationSpace
 * Maint #1348: Stop double triggering of github workflows
