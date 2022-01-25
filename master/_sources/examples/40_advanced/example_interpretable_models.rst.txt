@@ -238,11 +238,11 @@ Print the final ensemble constructed by auto-sklearn
  .. code-block:: none
 
     {   63: {   'balancing': Balancing(random_state=1),
-                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc78c482160>,
+                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f7f20524100>,
                 'cost': 0.007092198581560294,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc78f80b910>,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7f25584790>,
                 'ensemble_weight': 1.0,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78c482eb0>,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f7f20524040>,
                 'model_id': 63,
                 'rank': 1,
                 'sklearn_classifier': SGDClassifier(alpha=9.999999999999991e-05, epsilon=1.3700860264543197e-05,
@@ -283,7 +283,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  54.044 seconds)
+   **Total running time of the script:** ( 2 minutes  0.765 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_interpretable_models.py:

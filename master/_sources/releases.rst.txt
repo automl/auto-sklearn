@@ -9,6 +9,15 @@
 Releases
 ========
 
+Version 0.14.5
+==============
+
+* HOTFIX: Release PyPi package with ``automl_common`` included
+
+Contributors v0.14.5
+********************
+* Eddie Bergman
+
 Version 0.14.4
 ==============
 
