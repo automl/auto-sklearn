@@ -1,4 +1,4 @@
-name: pre-commit
+name: isort-check
 
 on:
   # Manually triggerable in github
@@ -16,24 +16,30 @@ on:
       - master
       - development
 
+env:
+  #If STRICT is set to true, it will fail on isort check fail
+  STRICT: false
+
 jobs:
-  run-all-files:
+
+  isort-format-check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+
+    - name: Checkout
+      uses: actions/checkout@v2
       with:
         submodules: recursive
 
     - name: Setup Python 3.7
       uses: actions/setup-python@v2
       with:
-        python-version: 3.7
+        python-version: "3.7"
 
-    - name: Install pre-commit
+    - name: Install isort
       run: |
-        pip install pre-commit
-        pre-commit install
+        pip install isort
 
-    - name: Run pre-commit
+    - name: Run isort Check
       run: |
-        pre-commit run --all-files
+        isort --check-only autosklearn || ! $STRICT

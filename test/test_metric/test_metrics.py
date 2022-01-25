@@ -1,4 +1,5 @@
 import unittest
+import warnings
 
 import pytest
 
@@ -381,6 +382,17 @@ class TestMetric(unittest.TestCase):
             self.assertLess(current_score, previous_score)
 
     def test_classification_multiclass(self):
+        # The last check in this test has a mismatch between the number of
+        # labels predicted in y_pred and the number of labels in y_true.
+        # This triggers several warnings but we are aware.
+        #
+        # TODO convert to pytest with fixture
+        #
+        #   This test should be parameterized so we can identify which metrics
+        #   cause which warning specifically and rectify if needed.
+        ignored_warnings = [
+            (UserWarning, 'y_pred contains classes not in y_true')
+        ]
 
         for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
             # Skip functions not applicable for multiclass classification.
@@ -388,27 +400,51 @@ class TestMetric(unittest.TestCase):
                           'precision', 'recall', 'f1', 'precision_samples',
                           'recall_samples', 'f1_samples']:
                 continue
-            y_true = np.array([0.0, 0.0, 1.0, 1.0, 2.0])
-            y_pred = np.array([[1.0, 0.0, 0.0], [1.0, 0.0, 0.0],
-                              [0.0, 1.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+
+            y_true = np.array(
+                [0.0, 0.0, 1.0, 1.0, 2.0]
+            )
+
+            y_pred = np.array([
+                [1.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, 0.0, 1.0]
+            ])
             previous_score = scorer._optimum
             current_score = scorer(y_true, y_pred)
             self.assertAlmostEqual(current_score, previous_score)
 
-            y_pred = np.array([[1.0, 0.0, 0.0], [1.0, 0.0, 0.0],
-                              [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+            y_pred = np.array([
+                [1.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, 0.0, 1.0],
+            ])
             previous_score = current_score
             current_score = scorer(y_true, y_pred)
             self.assertLess(current_score, previous_score)
 
-            y_pred = np.array([[0.0, 0.0, 1.0], [0.0, 1.0, 0.0],
-                              [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 1.0, 0.0]])
+            y_pred = np.array([
+                [0.0, 0.0, 1.0],
+                [0.0, 1.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0]
+            ])
             previous_score = current_score
             current_score = scorer(y_true, y_pred)
             self.assertLess(current_score, previous_score)
 
-            y_pred = np.array([[0.0, 0.0, 1.0], [0.0, 0.0, 1.0],
-                              [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
+            y_pred = np.array([
+                [0.0, 0.0, 1.0],
+                [0.0, 0.0, 1.0],
+                [1.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0]
+            ])
             previous_score = current_score
             current_score = scorer(y_true, y_pred)
             self.assertLess(current_score, previous_score)
@@ -419,8 +455,15 @@ class TestMetric(unittest.TestCase):
                 [1.0, 0.0, 0.0], [1.0, 0.0, 0.0],
                 [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
             )
-            score = scorer(y_true, y_pred)
-            self.assertTrue(np.isfinite(score))
+
+            with warnings.catch_warnings():
+                for category, message in ignored_warnings:
+                    warnings.filterwarnings(
+                        'ignore', category=category, message=message
+                    )
+
+                score = scorer(y_true, y_pred)
+                self.assertTrue(np.isfinite(score))
 
     def test_classification_multilabel(self):
 

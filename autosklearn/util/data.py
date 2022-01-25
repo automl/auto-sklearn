@@ -53,7 +53,7 @@ def convert_to_bin(Ycont: List, nval: int, verbose: bool = True) -> List:
     Ybin = [[0] * nval for x in range(len(Ycont))]
     for i in range(len(Ybin)):
         line = Ybin[i]
-        line[np.int(Ycont[i])] = 1
+        line[int(Ycont[i])] = 1
         Ybin[i] = line
     return Ybin
 

@@ -1,9 +1,7 @@
 import copy
 import itertools
 import resource
-import sys
 import tempfile
-import traceback
 import unittest
 import unittest.mock
 
@@ -27,6 +25,8 @@ from autosklearn.pipeline.components.base import AutoSklearnComponent, AutoSklea
 import autosklearn.pipeline.components.feature_preprocessing as preprocessing_components
 from autosklearn.pipeline.util import get_dataset
 from autosklearn.pipeline.constants import SPARSE, DENSE, SIGNED_DATA, UNSIGNED_DATA, PREDICTIONS
+
+from test.test_pipeline.ignored_warnings import regressor_warnings, ignore_warnings
 
 
 class SimpleRegressionPipelineTest(unittest.TestCase):
@@ -123,10 +123,10 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 'X_test': X_test, 'Y_test': Y_test}
 
         dataset_properties = {'multioutput': True}
-        cs = SimpleRegressionPipeline(dataset_properties=dataset_properties).\
-            get_hyperparameter_search_space()
-        self._test_configurations(cs, data=data,
-                                  dataset_properties=dataset_properties)
+        pipeline = SimpleRegressionPipeline(dataset_properties=dataset_properties)
+        cs = pipeline.get_hyperparameter_search_space()
+
+        self._test_configurations(cs, data=data, dataset_properties=dataset_properties)
 
     def _test_configurations(self, configurations_space, make_sparse=False,
                              data=None, dataset_properties=None):
@@ -180,7 +180,9 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                     check_is_fitted(step)
 
             try:
-                cls.fit(X_train, Y_train)
+                with ignore_warnings(regressor_warnings):
+                    cls.fit(X_train, Y_train)
+
                 # After fit, all components should be tagged as fitted
                 # by sklearn. Check is fitted raises an exception if that
                 # is not the case
@@ -212,10 +214,13 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 elif 'The condensed distance matrix must contain only finite ' \
                      'values.' in e.args[0]:
                     continue
+                elif "zero-size array to reduction operation maximum which has no " \
+                     "identity" in e.args[0]:
+                    continue
                 else:
-                    print(config)
-                    print(traceback.format_exc())
+                    e.args += (f"config={config}",)
                     raise e
+
             except RuntimeWarning as e:
                 if "invalid value encountered in sqrt" in e.args[0]:
                     continue
@@ -228,22 +233,21 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 elif "invalid value encountered in multiply" in e.args[0]:
                     continue
                 else:
-                    print(config)
-                    traceback.print_tb(sys.exc_info()[2])
+                    e.args += (f"config={config}",)
                     raise e
+
             except UserWarning as e:
                 if "FastICA did not converge" in e.args[0]:
                     continue
                 else:
-                    print(config)
-                    traceback.print_tb(sys.exc_info()[2])
+                    e.args += (f"config={config}",)
                     raise e
+
             except Exception as e:
                 if "Multiple input features cannot have the same target value" in e.args[0]:
                     continue
                 else:
-                    print(config)
-                    traceback.print_tb(sys.exc_info()[2])
+                    e.args += (f"config={config}",)
                     raise e
 
     def test_default_configuration(self):

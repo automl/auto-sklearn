@@ -147,13 +147,16 @@ class AutoSklearnComponent(BaseEstimator):
 
 
 class IterativeComponent(AutoSklearnComponent):
+
     def fit(self, X, y, sample_weight=None):
         self.iterative_fit(X, y, n_iter=2, refit=True)
+
         iteration = 2
         while not self.configuration_fully_fitted():
             n_iter = int(2 ** iteration / 2)
             self.iterative_fit(X, y, n_iter=n_iter, refit=False)
             iteration += 1
+
         return self
 
     @staticmethod
@@ -165,15 +168,16 @@ class IterativeComponent(AutoSklearnComponent):
 
 
 class IterativeComponentWithSampleWeight(AutoSklearnComponent):
+
     def fit(self, X, y, sample_weight=None):
-        self.iterative_fit(
-            X, y, n_iter=2, refit=True, sample_weight=sample_weight
-        )
+        self.iterative_fit(X, y, n_iter=2, refit=True, sample_weight=sample_weight)
+
         iteration = 2
         while not self.configuration_fully_fitted():
             n_iter = int(2 ** iteration / 2)
-            self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight)
+            self.iterative_fit(X, y, n_iter=n_iter, refit=False, sample_weight=sample_weight)
             iteration += 1
+
         return self
 
     @staticmethod

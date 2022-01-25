@@ -24,11 +24,12 @@ from smac.optimizer.smbo import SMBO
 from smac.runhistory.runhistory import RunInfo, RunValue
 from smac.tae.base import StatusType
 
-from autosklearn.util.backend import Backend
+from autosklearn.automl_common.common.utils.backend import Backend
+from autosklearn.automl_common.common.ensemble_building.abstract_ensemble import AbstractEnsemble
+
 from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.metrics import calculate_score, calculate_loss, Scorer
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
-from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.util.logging_ import get_named_client_logger
 from autosklearn.util.parallel import preload_modules
 
