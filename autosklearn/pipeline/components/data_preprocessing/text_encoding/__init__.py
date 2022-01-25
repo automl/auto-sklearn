@@ -9,8 +9,8 @@ from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
 from sklearn.base import BaseEstimator
 
-from ...base import AutoSklearnPreprocessingAlgorithm, AutoSklearnClassificationAlgorithm, \
-    find_components, ThirdPartyComponents, AutoSklearnChoice, _addons
+from ...base import AutoSklearnPreprocessingAlgorithm, find_components,\
+    ThirdPartyComponents, AutoSklearnChoice, _addons
 
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 
@@ -19,7 +19,7 @@ _bows = find_components(__package__,
                         bow_directory,
                         AutoSklearnPreprocessingAlgorithm)
 
-additional_components = ThirdPartyComponents(AutoSklearnClassificationAlgorithm)
+additional_components = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
 _addons['data_preprocessing.text_encoding'] = additional_components
 
 

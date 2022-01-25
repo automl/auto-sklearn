@@ -47,7 +47,7 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
             else:
                 raise KeyError()
 
-            all_text = itertools.chain.from_iterable(X[col] for col in X.columns)
+            all_text = itertools.chain.from_iterable(X[col].dropna() for col in X.columns)
             self.preprocessor = self.preprocessor.fit(all_text)
 
         else:

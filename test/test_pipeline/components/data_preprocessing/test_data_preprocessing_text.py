@@ -11,7 +11,7 @@ from autosklearn.pipeline.components.data_preprocessing.text_encoding.bag_of_wor
     BagOfWordEncoder as BOW_distinct
 
 
-class CategoricalPreprocessingPipelineTest(unittest.TestCase):
+class TextPreprocessingPipelineTest(unittest.TestCase):
 
     def test_fit_transform(self):
         X = pd.DataFrame({"col1": ["Hello World",

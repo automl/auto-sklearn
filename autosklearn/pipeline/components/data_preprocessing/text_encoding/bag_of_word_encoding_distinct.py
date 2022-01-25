@@ -64,16 +64,13 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
         if self.preprocessor is None:
             raise NotImplementedError()
 
-        for key_preprocessor, feature in zip(sorted(self.preprocessor.keys()), sorted(X.columns)):
-            if key_preprocessor != feature:
-                # ensure the correct preprocessor is applied to the correct column
-                raise KeyError
+        for feature in self.preprocessor:
+            # the names in the dataframe must not change
+            if X_new is None:
+                X_new = self.preprocessor[feature].transform(X[feature])
             else:
-                if X_new is None:
-                    X_new = self.preprocessor[key_preprocessor].transform(X[feature])
-                else:
-                    X_transformed = self.preprocessor[key_preprocessor].transform(X[feature])
-                    X_new = hstack([X_new, X_transformed])
+                X_transformed = self.preprocessor[feature].transform(X[feature])
+                X_new = hstack([X_new, X_transformed])
 
         return X_new
 
