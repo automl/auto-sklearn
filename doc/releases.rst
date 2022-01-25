@@ -22,7 +22,7 @@ Version 0.14.4
 * Maint #1325: Test workflow can now be manually triggered
 * Maint #1332: Update docstring and typing of ``include`` and ``exclude`` params
 * Add #1260: Support for Python 3.10
-* Add #1318: First update to use the shared backend in ``automl_common``
+* Add #1318: First update to use the shared backend in a new submodule `automl_common <https://github.com/automl/automl_common>`_
 * Fix #1339: Resolve dependancy issues with ``sphinx_toolbox``
 * Fix #1335: Fix issue where some regression algorithm gave incorrect output dimensions as raised in #1297
 * Doc #1340: Update example for predefined splits

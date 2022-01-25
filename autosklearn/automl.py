@@ -1928,7 +1928,6 @@ class AutoML(BaseEstimator):
             table_dict[model_id]['ensemble_weight'] = weight
 
         table = pd.DataFrame.from_dict(table_dict, orient='index')
-        table.sort_values(by='cost', inplace=True)
 
         # Checking which resampling strategy is chosen and selecting the appropriate models
         is_cv = (self._resampling_strategy == "cv")
