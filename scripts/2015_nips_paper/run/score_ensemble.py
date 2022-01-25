@@ -10,7 +10,7 @@ import numpy as np
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.metrics import balanced_accuracy
 
-from autosklearn.automl_common.common.utils.backend import create
+from autosklearn.util.backend import create
 
 
 def _load_file(f):
@@ -102,12 +102,9 @@ def main(input_directories, output_file, task_id, seed, ensemble_size, n_jobs=1)
     losses = []
     top_models_at_step = dict()
 
-    backend = create(
-        temporary_directory=input_directory,
-        output_directory=input_directory + "_output",
-        delete_tmp_folder_after_terminate=False,
-        prefix="auto-sklearn"
-    )
+    backend = create(input_directory, input_directory + "_output",
+                     delete_tmp_folder_after_terminate=False,
+                     shared_mode=True)
     valid_labels = backend.load_targets_ensemble()
     score = balanced_accuracy
 
@@ -168,11 +165,9 @@ def main(input_directories, output_file, task_id, seed, ensemble_size, n_jobs=1)
 
 def evaluate(input_directory, validation_files, test_files, ensemble_size=50):
 
-    backend = create(
-        temporary_directory=input_directory,
-        output_directory=input_directory + "_output",
-        delete_tmp_folder_after_terminate=False,
-    )
+    backend = create(input_directory, input_directory + "_output",
+                     delete_tmp_folder_after_terminate=False,
+                     shared_mode=True)
 
     valid_labels = backend.load_targets_ensemble()
     D = backend.load_datamanager()

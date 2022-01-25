@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 import numpy as np
 import pandas as pd
 
@@ -41,7 +39,7 @@ class MetaBase(object):
 
         aslib_reader = aslib_simple.AlgorithmSelectionProblem(self.aslib_directory)
         self.metafeatures = aslib_reader.metafeatures
-        self.algorithm_runs: OrderedDict[str, pd.DataFrame] = aslib_reader.algorithm_runs
+        self.algorithm_runs = aslib_reader.algorithm_runs
         self.configurations = aslib_reader.configurations
 
         configurations = dict()
@@ -67,7 +65,7 @@ class MetaBase(object):
             self.metafeatures.drop(name.lower(), inplace=True)
         self.metafeatures = self.metafeatures.append(metafeatures)
 
-        runs = pd.Series([], name=name, dtype=float)
+        runs = pd.Series([], name=name)
         for metric in self.algorithm_runs.keys():
             self.algorithm_runs[metric].append(runs)
 

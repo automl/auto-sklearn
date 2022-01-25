@@ -8,7 +8,6 @@ ensembles in parallel. However, it is also possible to run the two processes
 sequentially. The example below shows how to first fit the models and build the
 ensembles afterwards.
 """
-from pprint import pprint
 
 import sklearn.model_selection
 import sklearn.datasets
@@ -49,7 +48,7 @@ automl.fit_ensemble(y_train, ensemble_size=50)
 # Print the final ensemble constructed by auto-sklearn
 # ====================================================
 
-pprint(automl.show_models(), indent=4)
+print(automl.show_models())
 
 ############################################################################
 # Get the Score of the final ensemble

@@ -13,7 +13,7 @@ class KNearestNeighborsRegressor(AutoSklearnRegressionAlgorithm):
         self.p = p
         self.random_state = random_state
 
-    def fit(self, X, y):
+    def fit(self, X, Y):
         import sklearn.neighbors
 
         self.n_neighbors = int(self.n_neighbors)
@@ -24,11 +24,7 @@ class KNearestNeighborsRegressor(AutoSklearnRegressionAlgorithm):
                 n_neighbors=self.n_neighbors,
                 weights=self.weights,
                 p=self.p)
-
-        if y.ndim == 2 and y.shape[1] == 1:
-            y = y.flatten()
-
-        self.estimator.fit(X, y)
+        self.estimator.fit(X, Y)
         return self
 
     def predict(self, X):

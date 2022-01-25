@@ -5,7 +5,6 @@ Extending Auto-Sklearn with Data Preprocessor Component
 
 The following example demonstrates how to turn off data preprocessing step in auto-skearn.
 """
-from pprint import pprint
 
 import autosklearn.classification
 import autosklearn.pipeline.components.data_preprocessing
@@ -90,4 +89,4 @@ print(clf.sprint_statistics())
 
 y_pred = clf.predict(X_test)
 print("accuracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
-pprint(clf.show_models(), indent=4)
+print(clf.show_models())

@@ -7,8 +7,6 @@ Classification
 The following example shows how to fit a simple classification model with
 *auto-sklearn*.
 """
-from pprint import pprint
-
 import sklearn.datasets
 import sklearn.metrics
 
@@ -44,7 +42,7 @@ print(automl.leaderboard())
 # Print the final ensemble constructed by auto-sklearn
 # ====================================================
 
-pprint(automl.show_models(), indent=4)
+print(automl.show_models())
 
 ###########################################################################
 # Get the Score of the final ensemble

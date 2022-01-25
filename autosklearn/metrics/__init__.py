@@ -1,6 +1,5 @@
 from abc import ABCMeta, abstractmethod
 from functools import partial
-from itertools import product
 from typing import Any, Callable, Dict, List, Optional, Union, cast
 
 import numpy as np
@@ -279,14 +278,16 @@ median_absolute_error = make_scorer('median_absolute_error',
                                     optimum=0,
                                     worst_possible_result=MAXINT,
                                     greater_is_better=False)
-
-r2 = make_scorer('r2', sklearn.metrics.r2_score)
+r2 = make_scorer('r2',
+                 sklearn.metrics.r2_score)
 
 # Standard Classification Scores
 accuracy = make_scorer('accuracy',
                        sklearn.metrics.accuracy_score)
 balanced_accuracy = make_scorer('balanced_accuracy',
                                 sklearn.metrics.balanced_accuracy_score)
+f1 = make_scorer('f1',
+                 sklearn.metrics.f1_score)
 
 # Score functions that need decision values
 roc_auc = make_scorer('roc_auc',
@@ -296,20 +297,10 @@ roc_auc = make_scorer('roc_auc',
 average_precision = make_scorer('average_precision',
                                 sklearn.metrics.average_precision_score,
                                 needs_threshold=True)
-
-# NOTE: zero_division
-#
-#   Specified as the explicit default, see sklearn docs:
-#   https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_score.html#sklearn-metrics-precision-score
-precision = make_scorer(
-    'precision', partial(sklearn.metrics.precision_score, zero_division=0)
-)
-recall = make_scorer(
-    'recall', partial(sklearn.metrics.recall_score, zero_division=0)
-)
-f1 = make_scorer(
-    'f1', partial(sklearn.metrics.f1_score, zero_division=0)
-)
+precision = make_scorer('precision',
+                        sklearn.metrics.precision_score)
+recall = make_scorer('recall',
+                     sklearn.metrics.recall_score)
 
 # Score function for probabilistic classification
 log_loss = make_scorer('log_loss',
@@ -321,39 +312,29 @@ log_loss = make_scorer('log_loss',
 # TODO what about mathews correlation coefficient etc?
 
 
-REGRESSION_METRICS = {
-    scorer.name: scorer
-    for scorer in [
-        mean_absolute_error, mean_squared_error, root_mean_squared_error,
-        mean_squared_log_error, median_absolute_error, r2
-    ]
-}
+REGRESSION_METRICS = dict()
+for scorer in [mean_absolute_error, mean_squared_error, root_mean_squared_error,
+               mean_squared_log_error, median_absolute_error, r2]:
+    REGRESSION_METRICS[scorer.name] = scorer
 
-CLASSIFICATION_METRICS = {
-    scorer.name: scorer
-    for scorer in [
-        accuracy, balanced_accuracy, roc_auc, average_precision, log_loss
-    ]
-}
+CLASSIFICATION_METRICS = dict()
 
-# NOTE: zero_division
-#
-#   Specified as the explicit default, see sklearn docs:
-#   https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_score.html#sklearn-metrics-precision-score
-for (base_name, sklearn_metric), average in product(
-    [
-        ('precision', sklearn.metrics.precision_score),
-        ('recall', sklearn.metrics.recall_score),
-        ('f1', sklearn.metrics.f1_score),
-    ],
-    ['macro', 'micro', 'samples', 'weighted']
-):
-    name = f'{base_name}_{average}'
-    scorer = make_scorer(
-        name, partial(sklearn_metric, pos_label=None, average=average, zero_division=0)
-    )
-    globals()[name] = scorer  # Adds scorer to the module scope
-    CLASSIFICATION_METRICS[name] = scorer
+for scorer in [accuracy, balanced_accuracy, roc_auc, average_precision,
+               log_loss]:
+    CLASSIFICATION_METRICS[scorer.name] = scorer
+
+for name, metric in [('precision', sklearn.metrics.precision_score),
+                     ('recall', sklearn.metrics.recall_score),
+                     ('f1', sklearn.metrics.f1_score)]:
+    globals()[name] = make_scorer(name, metric)
+    CLASSIFICATION_METRICS[name] = globals()[name]
+    for average in ['macro', 'micro', 'samples', 'weighted']:
+        qualified_name = '{0}_{1}'.format(name, average)
+        globals()[qualified_name] = make_scorer(qualified_name,
+                                                partial(metric,
+                                                        pos_label=None,
+                                                        average=average))
+        CLASSIFICATION_METRICS[qualified_name] = globals()[qualified_name]
 
 
 def calculate_score(

@@ -158,7 +158,7 @@ def test_missing_values(sparse_data):
         X, y, logging.getLogger('Meta'), categorical)
     assert sparse.issparse(mf.value)
     assert mf.value.shape == X.shape
-    assert mf.value.dtype == bool
+    assert mf.value.dtype == np.bool
     assert 0 == np.sum(mf.value.data)
 
 

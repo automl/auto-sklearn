@@ -34,7 +34,7 @@ loggers:
     handlers: [file_handler]
     propagate: no
 
-  autosklearn.automl_common.common.utils.backend:
+  autosklearn.util.backend:
     level: DEBUG
     handlers: [file_handler]
     propagate: no

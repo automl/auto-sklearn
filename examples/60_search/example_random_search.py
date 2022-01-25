@@ -12,7 +12,6 @@ SMAC, as demonstrated in the example below. Furthermore, the example also demons
 as yet another alternative optimizatino strategy.
 Both examples are intended to show how the optimization strategy in *auto-sklearn* can be adapted.
 """  # noqa (links are too long)
-from pprint import pprint
 
 import sklearn.model_selection
 import sklearn.datasets
@@ -76,7 +75,7 @@ automl.fit(X_train, y_train, dataset_name='breast_cancer')
 print('#' * 80)
 print('Results for ROAR.')
 # Print the final ensemble constructed by auto-sklearn via ROAR.
-pprint(automl.show_models(), indent=4)
+print(automl.show_models())
 predictions = automl.predict(X_test)
 # Print statistics about the auto-sklearn run such as number of
 # iterations, number of models failed with a time out.
@@ -130,7 +129,7 @@ print('#' * 80)
 print('Results for random search.')
 
 # Print the final ensemble constructed by auto-sklearn via random search.
-pprint(automl.show_models(), indent=4)
+print(automl.show_models())
 
 # Print statistics about the auto-sklearn run such as number of
 # iterations, number of models failed with a time out.

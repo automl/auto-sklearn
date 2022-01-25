@@ -2,10 +2,11 @@ import resource
 import sys
 
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.conditions import InCondition, EqualsCondition
+from ConfigSpace.conditions import InCondition
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter
+
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
 from autosklearn.util.common import check_for_bool, check_none
@@ -28,7 +29,7 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
         self.random_state = random_state
         self.estimator = None
 
-    def fit(self, X, y):
+    def fit(self, X, Y):
         import sklearn.svm
 
         # Calculate the size of the kernel cache (in MB) for sklearn's LibSVM. The cache size is
@@ -87,19 +88,9 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
         )
         self.scaler = sklearn.preprocessing.StandardScaler(copy=True)
 
-        # Convert y to be at least 2d for the scaler
-        # [1,1,1] -> [[1], [1], [1]]
-        if y.ndim == 1:
-            y = y.reshape((-1, 1))
-
-        y_scaled = self.scaler.fit_transform(y)
-
-        # Flatten: [[0], [0], [0]] -> [0, 0, 0]
-        if y_scaled.ndim == 2 and y_scaled.shape[1] == 1:
-            y_scaled = y_scaled.flatten()
-
-        self.estimator.fit(X, y_scaled)
-
+        self.scaler.fit(Y.reshape((-1, 1)))
+        Y_scaled = self.scaler.transform(Y.reshape((-1, 1))).ravel()
+        self.estimator.fit(X, Y_scaled)
         return self
 
     def predict(self, X):
@@ -107,15 +98,8 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
             raise NotImplementedError
         if self.scaler is None:
             raise NotImplementedError
-        y_pred = self.estimator.predict(X)
-
-        inverse = self.scaler.inverse_transform(y_pred)
-
-        # Flatten: [[0], [0], [0]] -> [0, 0, 0]
-        if inverse.ndim == 2 and inverse.shape[1] == 1:
-            inverse = inverse.flatten()
-
-        return inverse
+        Y_pred = self.estimator.predict(X)
+        return self.scaler.inverse_transform(Y_pred)
 
     @staticmethod
     def get_properties(dataset_properties=None):
@@ -163,12 +147,13 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
         cs.add_hyperparameters([C, kernel, degree, gamma, coef0, shrinking,
                                tol, max_iter, epsilon])
 
-        degree_depends_on_poly = EqualsCondition(degree, kernel, "poly")
+        degree_depends_on_kernel = InCondition(child=degree, parent=kernel,
+                                               values=('poly', 'rbf', 'sigmoid'))
         gamma_depends_on_kernel = InCondition(child=gamma, parent=kernel,
                                               values=('poly', 'rbf'))
         coef0_depends_on_kernel = InCondition(child=coef0, parent=kernel,
                                               values=('poly', 'sigmoid'))
-        cs.add_conditions([degree_depends_on_poly, gamma_depends_on_kernel,
+        cs.add_conditions([degree_depends_on_kernel, gamma_depends_on_kernel,
                            coef0_depends_on_kernel])
 
         return cs

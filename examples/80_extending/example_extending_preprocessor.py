@@ -7,7 +7,6 @@ The following example demonstrates how to create a wrapper around the linear
 discriminant analysis (LDA) algorithm from sklearn and use it as a preprocessor
 in auto-sklearn.
 """
-from pprint import pprint
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, CategoricalHyperparameter
@@ -131,4 +130,4 @@ clf.fit(X_train, y_train)
 
 y_pred = clf.predict(X_test)
 print("accuracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
-pprint(clf.show_models(), indent=4)
+print(clf.show_models())

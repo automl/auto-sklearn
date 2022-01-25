@@ -1,4 +1,3 @@
-from typing import Dict, List, Optional
 import copy
 import json
 import logging
@@ -232,8 +231,8 @@ class AutoMLSMBO(object):
                  metadata_directory=None,
                  resampling_strategy='holdout',
                  resampling_strategy_args=None,
-                 include: Optional[Dict[str, List[str]]] = None,
-                 exclude: Optional[Dict[str, List[str]]] = None,
+                 include=None,
+                 exclude=None,
                  disable_file_output=False,
                  smac_scenario_args=None,
                  get_smac_object_callback=None,
@@ -436,7 +435,6 @@ class AutoMLSMBO(object):
         total_walltime_limit = self.total_walltime_limit - startup_time - 5
         scenario_dict = {
             'abort_on_first_run_crash': False,
-            'save-results-instantly': True,
             'cs': self.config_space,
             'cutoff_time': self.func_eval_time_limit,
             'deterministic': 'true',

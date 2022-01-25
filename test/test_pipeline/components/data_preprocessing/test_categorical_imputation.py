@@ -34,16 +34,15 @@ def test_default_imputation(input_data_imputation, categorical):
         X = X.astype('str').astype('object')
         X[mask] = np.nan
     else:
-        imputation_value = min(np.unique(X)) - 1
-
+        imputation_value = 0
     Y = CategoricalImputation().fit_transform(X.copy())
-
-    assert np.array_equal(Y == imputation_value, mask)
-    assert np.array_equal(Y != imputation_value, ~mask)
+    assert ((np.argwhere(Y == imputation_value) == np.argwhere(mask)).all())
+    assert ((np.argwhere(Y != imputation_value) == np.argwhere(np.logical_not(mask))).all())
 
 
 @pytest.mark.parametrize('format_type', ('numpy', 'pandas'))
 def test_nonzero_numerical_imputation(format_type):
+
     # First try with an array with 0 as only valid category. The imputation should
     # happen with -1
     X = np.full(fill_value=np.nan, shape=(10, 10))
@@ -70,9 +69,8 @@ def test_nonzero_numerical_imputation(format_type):
 @pytest.mark.parametrize('input_data_imputation', ('numpy'), indirect=True)
 def test_default_sparse(input_data_imputation):
     X, mask = input_data_imputation
-    X = sparse.csr_matrix(X)
+    X = sparse.csc_matrix(X)
     Y = CategoricalImputation().fit_transform(X)
     Y = Y.todense()
-
-    np.testing.assert_equal(Y == 0, mask)
-    np.testing.assert_equal(Y != 0, ~mask)
+    assert (np.argwhere(Y == 0) == np.argwhere(mask)).all()
+    assert (np.argwhere(Y != 0) == np.argwhere(np.logical_not(mask))).all()

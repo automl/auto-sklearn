@@ -90,36 +90,17 @@ class SGD(
                                           warm_start=True)
 
             self.scaler = sklearn.preprocessing.StandardScaler(copy=True)
-
-            if y.ndim == 1:
-                y = y.reshape((-1, 1))
-
-            y_scaled = self.scaler.fit_transform(y)
-
-            # Flatten: [[0], [0], [0]] -> [0, 0, 0]
-            if y_scaled.ndim == 2 and y_scaled.shape[1] == 1:
-                y_scaled = y_scaled.flatten()
-
-            self.estimator.fit(X, y_scaled)
+            self.scaler.fit(y.reshape((-1, 1)))
+            Y_scaled = self.scaler.transform(y.reshape((-1, 1))).ravel()
+            self.estimator.fit(X, Y_scaled)
             self.n_iter_ = self.estimator.n_iter_
         else:
             self.estimator.max_iter += n_iter
             self.estimator.max_iter = min(self.estimator.max_iter, self.max_iter)
-
-            # Convert y to be at least 2d for the scaler
-            # [1,1,1] -> [[1], [1], [1]]
-            if y.ndim == 1:
-                y = y.reshape((-1, 1))
-
-            y_scaled = self.scaler.transform(y)
-
-            # Flatten: [[0], [0], [0]] -> [0, 0, 0]
-            if y_scaled.ndim == 2 and y_scaled.shape[1] == 1:
-                y_scaled = y_scaled.flatten()
-
+            Y_scaled = self.scaler.transform(y.reshape((-1, 1))).ravel()
             self.estimator._validate_params()
             self.estimator._partial_fit(
-                X, y_scaled,
+                X, Y_scaled,
                 alpha=self.estimator.alpha,
                 C=1.0,
                 loss=self.estimator.loss,

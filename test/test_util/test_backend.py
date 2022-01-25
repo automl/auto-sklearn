@@ -3,7 +3,7 @@ import builtins
 import unittest
 import unittest.mock
 
-from autosklearn.automl_common.common.utils.backend import Backend
+from autosklearn.util.backend import Backend
 
 
 class BackendModelsTest(unittest.TestCase):
@@ -23,7 +23,7 @@ class BackendModelsTest(unittest.TestCase):
         exists_mock.return_value = False
         open_mock = unittest.mock.mock_open(read_data='Data')
         with unittest.mock.patch(
-            'autosklearn.automl_common.common.utils.backend.open',
+            'autosklearn.util.backend.open',
             open_mock,
             create=True,
         ):

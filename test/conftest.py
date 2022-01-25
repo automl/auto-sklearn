@@ -7,7 +7,7 @@ from dask.distributed import Client, get_client
 import psutil
 import pytest
 
-from autosklearn.automl_common.common.utils.backend import create, Backend
+from autosklearn.util.backend import create, Backend
 from autosklearn.automl import AutoML
 
 
@@ -49,9 +49,8 @@ def backend(request):
 
     # Make sure the folders we wanna create do not already exist.
     backend = create(
-        temporary_directory=tmp,
-        output_directory=None,
-        prefix="auto-sklearn"
+        tmp,
+        delete_tmp_folder_after_terminate=True,
     )
 
     def get_finalizer(tmp_dir):

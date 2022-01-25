@@ -8,7 +8,6 @@ problem. Details on multilabel classification can be found
 `here <https://scikit-learn.org/stable/modules/multiclass.html>`_.
 """
 import numpy as np
-from pprint import pprint
 
 import sklearn.datasets
 import sklearn.metrics
@@ -31,7 +30,7 @@ X, y = sklearn.datasets.fetch_openml(data_id=40594, return_X_y=True, as_frame=Fa
 # More information on: https://scikit-learn.org/stable/modules/multiclass.html
 y[y == 'TRUE'] = 1
 y[y == 'FALSE'] = 0
-y = y.astype(int)
+y = y.astype(np.int)
 
 # Using type of target is a good way to make sure your data
 # is properly formatted
@@ -66,7 +65,7 @@ print(automl.leaderboard())
 # Print the final ensemble constructed by auto-sklearn
 # ====================================================
 
-pprint(automl.show_models(), indent=4)
+print(automl.show_models())
 
 ############################################################################
 # Print statistics about the auto-sklearn run

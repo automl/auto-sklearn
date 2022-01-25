@@ -111,8 +111,7 @@ class MetaLearningOptimizer(object):
                 except KeyError:
                     # TODO should I really except this?
                     self.logger.info("Could not find runs for instance %s" % task_id)
-                    runs[task_id] = pd.Series([], name=task_id, dtype=float)
-
+                    runs[task_id] = pd.Series([], name=task_id)
             runs = pd.DataFrame(runs)
 
             kND.fit(all_other_metafeatures, runs)

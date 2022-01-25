@@ -8,7 +8,6 @@ The following example shows how to fit a multioutput regression model with
 *auto-sklearn*.
 """
 import numpy as numpy
-from pprint import pprint
 
 from sklearn.datasets import make_regression
 from sklearn.metrics import r2_score
@@ -47,7 +46,7 @@ print(automl.leaderboard())
 # Print the final ensemble constructed by auto-sklearn
 # ====================================================
 
-pprint(automl.show_models(), indent=4)
+print(automl.show_models())
 
 ###########################################################################
 # Get the Score of the final ensemble
