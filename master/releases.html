@@ -3,9 +3,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
-    <title>Releases &#8212; AutoSklearn 0.14.2 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Releases &#8212; AutoSklearn 0.14.4 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css" />
@@ -55,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.14.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.4</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -108,6 +107,14 @@
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
 <li><a class="reference internal" href="#">Releases</a><ul>
+<li><a class="reference internal" href="#version-0-14-4">Version 0.14.4</a><ul>
+<li><a class="reference internal" href="#contributors-v0-14-4">Contributors v0.14.4</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-14-3">Version 0.14.3</a><ul>
+<li><a class="reference internal" href="#contributors-v0-14-3">Contributors v0.14.3</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#version-0-14-2">Version 0.14.2</a><ul>
 <li><a class="reference internal" href="#contributors-v0-14-2">Contributors v0.14.2</a></li>
 </ul>
@@ -240,21 +247,69 @@
       </div>
     <div class="body col-md-9 content" role="main">
       
-  <section id="releases">
+  <div class="section" id="releases">
 <h1>Releases<a class="headerlink" href="#releases" title="Permalink to this headline">¶</a></h1>
-<section id="version-0-14-2">
+<div class="section" id="version-0-14-4">
+<h2>Version 0.14.4<a class="headerlink" href="#version-0-14-4" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Fix #1356: SVR degree hyperparameter now only active with “poly” kernel.</p></li>
+<li><p>Add #1311: Black format checking (non-strict).</p></li>
+<li><p>Maint #1306: Run history is now saved every iteration</p></li>
+<li><p>Doc #1309: Updated the doc faqs to include many use cases and the manual for early introductions</p></li>
+<li><p>Doc #1322: Fix typo in contribution guide</p></li>
+<li><p>Maint #1326: Add isort checker (non-strict)</p></li>
+<li><p>Maint #1238, #1346, #1368, #1370: Update warnings in tests</p></li>
+<li><p>Maint #1325: Test workflow can now be manually triggered</p></li>
+<li><p>Maint #1332: Update docstring and typing of <code class="docutils literal notranslate"><span class="pre">include</span></code> and <code class="docutils literal notranslate"><span class="pre">exclude</span></code> params</p></li>
+<li><p>Add #1260: Support for Python 3.10</p></li>
+<li><p>Add #1318: First update to use the shared backend in a new submodule <a class="reference external" href="https://github.com/automl/automl_common">automl_common</a></p></li>
+<li><p>Fix #1339: Resolve dependancy issues with <code class="docutils literal notranslate"><span class="pre">sphinx_toolbox</span></code></p></li>
+<li><p>Fix #1335: Fix issue where some regression algorithm gave incorrect output dimensions as raised in #1297</p></li>
+<li><p>Doc #1340: Update example for predefined splits</p></li>
+<li><p>Fix #1329: Fix random state not being passed to the ConfigurationSpace</p></li>
+<li><p>Maint #1348: Stop double triggering of github workflows</p></li>
+<li><p>Doc #1349: Rename OSX to macOS in docs</p></li>
+<li><p>Add #1321: Change <code class="docutils literal notranslate"><span class="pre">show_models()</span></code> to produce actual pipeline objects and not a <code class="docutils literal notranslate"><span class="pre">str</span></code></p></li>
+<li><p>Maint #1361: Remove <code class="docutils literal notranslate"><span class="pre">flaky</span></code> dependency</p></li>
+<li><p>Maint #1366: Make <code class="docutils literal notranslate"><span class="pre">SimpleClassificationPipeline</span></code> tests more deterministic</p></li>
+<li><p>Maint #1367: Update test values for <code class="docutils literal notranslate"><span class="pre">MLPRegressor</span></code> with newer numpy</p></li>
+</ul>
+<div class="section" id="contributors-v0-14-4">
+<h3>Contributors v0.14.4<a class="headerlink" href="#contributors-v0-14-4" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Eddie Bergman</p></li>
+<li><p>Matthias Feurer</p></li>
+<li><p>Katharina Eggensperger</p></li>
+<li><p>UserFindingSelf</p></li>
+<li><p>partev</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-14-3">
+<h2>Version 0.14.3<a class="headerlink" href="#version-0-14-3" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>HOTFIX #1356: Updates dask to <code class="docutils literal notranslate"><span class="pre">dask.distributed</span> <span class="pre">&gt;=2012.12</span></code>.</p></li>
+</ul>
+<div class="section" id="contributors-v0-14-3">
+<h3>Contributors v0.14.3<a class="headerlink" href="#contributors-v0-14-3" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Eddie Bergman</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-14-2">
 <h2>Version 0.14.2<a class="headerlink" href="#version-0-14-2" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>FIX #1290: Fixes a bug where it was not possible to extend Auto-sklearn and run it in parallel.</p></li>
 </ul>
-<section id="contributors-v0-14-2">
+<div class="section" id="contributors-v0-14-2">
 <h3>Contributors v0.14.2<a class="headerlink" href="#contributors-v0-14-2" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-14-1">
+</div>
+</div>
+<div class="section" id="version-0-14-1">
 <h2>Version 0.14.1<a class="headerlink" href="#version-0-14-1" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>FIX #1248: Allow for sparse <code class="docutils literal notranslate"><span class="pre">y_test</span></code>.</p></li>
@@ -267,16 +322,16 @@ being chosen.</p></li>
 <li><p>DOC #1271: Fix a typo in an example in the documentation.</p></li>
 <li><p>DOC #1282: Add a contribution guide.</p></li>
 </ul>
-<section id="contributors-v0-14-1">
+<div class="section" id="contributors-v0-14-1">
 <h3>Contributors v0.14.1<a class="headerlink" href="#contributors-v0-14-1" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li><p>Edward Bergman</p></li>
+<li><p>Eddie Bergman</p></li>
 <li><p>Michael Becker</p></li>
 <li><p>Katharina Eggensperger</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-14-0">
+</div>
+</div>
+<div class="section" id="version-0-14-0">
 <h2>Version 0.14.0<a class="headerlink" href="#version-0-14-0" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>ADD #900: Make data preprocessing more configurable, for example allow to completely disable it.</p></li>
@@ -306,7 +361,7 @@ link-checking.</p></li>
 github actions.</p></li>
 <li><p>MAINT #1239: Increase the timeout for github actions to 60 minutes.</p></li>
 </ul>
-<section id="contributors-v0-14-0">
+<div class="section" id="contributors-v0-14-0">
 <h3>Contributors v0.14.0<a class="headerlink" href="#contributors-v0-14-0" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Pieter Gijsbers</p></li>
@@ -320,9 +375,9 @@ github actions.</p></li>
 <li><p>Oli</p></li>
 <li><p>Matthias Feurer</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-13-0">
+</div>
+</div>
+<div class="section" id="version-0-13-0">
 <h2>Version 0.13.0<a class="headerlink" href="#version-0-13-0" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>ADD #1100: Provide access to the callbacks of SMAC.</p></li>
@@ -346,7 +401,7 @@ challenges.</p></li>
 <li><p>DOC #1158: New example on how to configure the logger for Auto-sklearn.</p></li>
 <li><p>DOC #1165: Improve the readme page.</p></li>
 </ul>
-<section id="contributors-v0-13-0">
+<div class="section" id="contributors-v0-13-0">
 <h3>Contributors v0.13.0<a class="headerlink" href="#contributors-v0-13-0" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
@@ -354,21 +409,21 @@ challenges.</p></li>
 <li><p>bitsbuffer</p></li>
 <li><p>Francisco Rivera Valverde</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-12-8">
+</div>
+</div>
+<div class="section" id="version-0-12-8">
 <h2>Version 0.12.8<a class="headerlink" href="#version-0-12-8" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>MAINT #1183: Introduce an upper bound on the dask version to retain compatibility with SMAC3.</p></li>
 </ul>
-<section id="contributors-v0-12-8">
+<div class="section" id="contributors-v0-12-8">
 <h3>Contributors v0.12.8<a class="headerlink" href="#contributors-v0-12-8" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Eddie Bergman</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-12-7">
+</div>
+</div>
+<div class="section" id="version-0-12-7">
 <h2>Version 0.12.7<a class="headerlink" href="#version-0-12-7" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>ADD #1178: Reduce precision if dataset is too large for given memory limit.</p></li>
@@ -382,7 +437,7 @@ days it then closes the issue.</p></li>
 <li><p>MAINT #1168: Upper-bound scipy to <cite>1.6.3</cite> as <cite>1.7.0</cite> is incompatible with <cite>SMAC</cite>.</p></li>
 <li><p>MAINT #1173: Update the license files to be recognized by github.</p></li>
 </ul>
-<section id="contributors-v0-12-7">
+<div class="section" id="contributors-v0-12-7">
 <h3>Contributors v0.12.7<a class="headerlink" href="#contributors-v0-12-7" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Francisco Rivera Valverde</p></li>
@@ -394,9 +449,9 @@ days it then closes the issue.</p></li>
 <li><p>Eddie Bergman</p></li>
 <li><p>olehb007</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-12-6">
+</div>
+</div>
+<div class="section" id="version-0-12-6">
 <h2>Version 0.12.6<a class="headerlink" href="#version-0-12-6" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>ADD #886: Provide new function which allows fitting only a single configuration.</p></li>
@@ -412,7 +467,7 @@ to be minimized where the function previously returned the loss and not the scor
 <li><p>FIX #1115/#1124: Fix a bug which would prevent Auto-sklearn from computing meta-features in the
 multiprocessing case.</p></li>
 </ul>
-<section id="contributors-v0-12-6">
+<div class="section" id="contributors-v0-12-6">
 <h3>Contributors v0.12.6<a class="headerlink" href="#contributors-v0-12-6" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Francisco Rivera Valverde</p></li>
@@ -421,21 +476,21 @@ multiprocessing case.</p></li>
 <li><p>Matthias Feurer</p></li>
 <li><p>Rohit Agarwal</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-12-5">
+</div>
+</div>
+<div class="section" id="version-0-12-5">
 <h2>Version 0.12.5<a class="headerlink" href="#version-0-12-5" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>MAINT: Remove <code class="docutils literal notranslate"><span class="pre">Cython</span></code> and <code class="docutils literal notranslate"><span class="pre">numpy</span></code> as installation requirements.</p></li>
 </ul>
-<section id="contributors-v0-12-5">
+<div class="section" id="contributors-v0-12-5">
 <h3>Contributors v0.12.5<a class="headerlink" href="#contributors-v0-12-5" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-12-4">
+</div>
+</div>
+<div class="section" id="version-0-12-4">
 <h2>Version 0.12.4<a class="headerlink" href="#version-0-12-4" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>ADD #660: Enable scikit-learn’s power transformation for input features.</p></li>
@@ -446,7 +501,7 @@ if possible.</p></li>
 <li><p>FIX #1072: Fixes a bug where the <code class="docutils literal notranslate"><span class="pre">AutoSklearn2Classifier</span></code> could not be created due to trying to
 cache to the wrong directory.</p></li>
 </ul>
-<section id="contributors-v0-12-4">
+<div class="section" id="contributors-v0-12-4">
 <h3>Contributors v0.12.4<a class="headerlink" href="#contributors-v0-12-4" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
@@ -454,9 +509,9 @@ cache to the wrong directory.</p></li>
 <li><p>Maximilian Greil</p></li>
 <li><p>Pepe Berba</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-12-3">
+</div>
+</div>
+<div class="section" id="version-0-12-3">
 <h2>Version 0.12.3<a class="headerlink" href="#version-0-12-3" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>FIX #1061: Fixes a bug where the model could not be printed in a jupyter notebook.</p></li>
@@ -469,16 +524,16 @@ such as <code class="docutils literal notranslate"><span class="pre">logloss</sp
 <li><p>MAINT #1076: Uses the correct multiprocessing context for computing meta-features</p></li>
 <li><p>MAINT: Cleanup readme and main directory</p></li>
 </ul>
-<section id="contributors-v0-12-3">
+<div class="section" id="contributors-v0-12-3">
 <h3>Contributors v0.12.3<a class="headerlink" href="#contributors-v0-12-3" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
 <li><p>ROHIT AGARWAL</p></li>
 <li><p>Francisco Rivera</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-12-2">
+</div>
+</div>
+<div class="section" id="version-0-12-2">
 <h2>Version 0.12.2<a class="headerlink" href="#version-0-12-2" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>ADD #1045: New example demonstrating how to log multiple metrics during a run of Auto-sklearn.</p></li>
@@ -492,7 +547,7 @@ overhead.</p></li>
 <li><p>MAINT #1053: Remove the restriction to guard single-core Auto-sklearn by
 <code class="docutils literal notranslate"><span class="pre">__main__</span> <span class="pre">==</span> <span class="pre">&quot;__name__&quot;</span></code> again.</p></li>
 </ul>
-<section id="contributors-v0-12-2">
+<div class="section" id="contributors-v0-12-2">
 <h3>Contributors v0.12.2<a class="headerlink" href="#contributors-v0-12-2" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
@@ -500,9 +555,9 @@ overhead.</p></li>
 <li><p>Francisco Rivera</p></li>
 <li><p>Katharina Eggensperger</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-12-1">
+</div>
+</div>
+<div class="section" id="version-0-12-1">
 <h2>Version 0.12.1<a class="headerlink" href="#version-0-12-1" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>ADD: A new heuristic which gives a warning and subsamples the data if it is too large for the
@@ -514,16 +569,16 @@ given <code class="docutils literal notranslate"><span class="pre">memory_limit<
 used for Auto-sklearn 1.0.</p></li>
 <li><p>MAINT #1040: Minor speed improvements in the ensemble selection algorithm.</p></li>
 </ul>
-<section id="contributors-v0-12-1">
+<div class="section" id="contributors-v0-12-1">
 <h3>Contributors v0.12.1<a class="headerlink" href="#contributors-v0-12-1" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
 <li><p>Katharina Eggensperger</p></li>
 <li><p>Francisco Rivera</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-12-0">
+</div>
+</div>
+<div class="section" id="version-0-12-0">
 <h2>Version 0.12.0<a class="headerlink" href="#version-0-12-0" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>BREAKING: Auto-sklearn must now be guarded by <code class="docutils literal notranslate"><span class="pre">__name__</span> <span class="pre">==</span> <span class="pre">&quot;__main__&quot;</span></code> due to the use of the
@@ -538,16 +593,16 @@ DataFrame.</p></li>
 <li><p>FIX #1007, #1012 and #1014: Log multiprocessing output via a new log server. Remove several
 potential deadlocks related to the joint use of multi-processing, multi-threading and logging.</p></li>
 </ul>
-<section id="contributors-v0-12-0">
+<div class="section" id="contributors-v0-12-0">
 <h3>Contributors v0.12.0<a class="headerlink" href="#contributors-v0-12-0" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
 <li><p>ROHIT AGARWAL</p></li>
 <li><p>Francisco Rivera</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-11-1">
+</div>
+</div>
+<div class="section" id="version-0-11-1">
 <h2>Version 0.11.1<a class="headerlink" href="#version-0-11-1" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>FIX #989: Fixes a bug where <cite>y</cite> was not passed to all data preprocessors which made 3rd party
@@ -555,14 +610,14 @@ category encoders fail.</p></li>
 <li><p>FIX #1001: Fixes a bug which could make Auto-sklearn fail at random.</p></li>
 <li><p>MAINT #1000: Introduce a minimal version for <code class="docutils literal notranslate"><span class="pre">dask.distributed</span></code>.</p></li>
 </ul>
-<section id="contributors-v0-11-1">
+<div class="section" id="contributors-v0-11-1">
 <h3>Contributors v0.11.1<a class="headerlink" href="#contributors-v0-11-1" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-11-0">
+</div>
+</div>
+<div class="section" id="version-0-11-0">
 <h2>Version 0.11.0<a class="headerlink" href="#version-0-11-0" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>ADD #992: Move ensemble building from being a separate process to a job submitted to the dask
@@ -577,7 +632,7 @@ important metrics.</p></li>
 <li><p>MAINT #997: Improve memory handling in the ensemble building process. This allows building
 ensembles for larger datasets.</p></li>
 </ul>
-<section id="contributors-v0-11-0">
+<div class="section" id="contributors-v0-11-0">
 <h3>Contributors v0.11.0<a class="headerlink" href="#contributors-v0-11-0" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
@@ -585,9 +640,9 @@ ensembles for larger datasets.</p></li>
 <li><p>Karl Leswing</p></li>
 <li><p>ROHIT AGARWAL</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-10-0">
+</div>
+</div>
+<div class="section" id="version-0-10-0">
 <h2>Version 0.10.0<a class="headerlink" href="#version-0-10-0" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>ADD #325: Allow to separately optimize metrics for metadata generation.</p></li>
@@ -615,7 +670,7 @@ use a single core.</p></li>
 <li><p>MAINT #949: Replace <cite>pip</cite> by <cite>pip3</cite> in the installation guidelines.</p></li>
 <li><p>MAINT #280, #535, #956: Update meta-data and include regression meta-data again.</p></li>
 </ul>
-<section id="contributors-v0-10-0">
+<div class="section" id="contributors-v0-10-0">
 <h3>Contributors v0.10.0<a class="headerlink" href="#contributors-v0-10-0" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Francisco Rivera</p></li>
@@ -624,9 +679,9 @@ use a single core.</p></li>
 <li><p>Chu-Cheng Fu</p></li>
 <li><p>Francois Berenger</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-9-0">
+</div>
+</div>
+<div class="section" id="version-0-9-0">
 <h2>Version 0.9.0<a class="headerlink" href="#version-0-9-0" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>ADD #157,#889: Improve handling of pandas dataframes, including the possibility to use pandas’
@@ -650,7 +705,7 @@ branch and also push them to dockerhub and the github docker registry.</p></li>
 <li><p>FIX #916: Fixes a bug where the data preprocessing configurations were ignored.</p></li>
 <li><p>FIX #925: make internal data preprocessing objects clonable.</p></li>
 </ul>
-<section id="contributors-v0-9-0">
+<div class="section" id="contributors-v0-9-0">
 <h3>Contributors v0.9.0<a class="headerlink" href="#contributors-v0-9-0" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Francisco Rivera</p></li>
@@ -658,23 +713,23 @@ branch and also push them to dockerhub and the github docker registry.</p></li>
 <li><p>felixleungsc</p></li>
 <li><p>Vladislav Skripniuk</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-8">
+</div>
+</div>
+<div class="section" id="version-0-8">
 <h2>Version 0.8<a class="headerlink" href="#version-0-8" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>ADD #803: multi-output regression</p></li>
 <li><p>ADD #893: new Auto-sklearn mode Auto-sklearn 2.0</p></li>
 </ul>
-<section id="contributors-v0-8-0">
+<div class="section" id="contributors-v0-8-0">
 <h3>Contributors v0.8.0<a class="headerlink" href="#contributors-v0-8-0" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Chu-Cheng Fu</p></li>
 <li><p>Matthias Feurer</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-7-1">
+</div>
+</div>
+<div class="section" id="version-0-7-1">
 <h2>Version 0.7.1<a class="headerlink" href="#version-0-7-1" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>ADD #764: support for automatic per_run_time_limit selection</p></li>
@@ -694,16 +749,16 @@ branch and also push them to dockerhub and the github docker registry.</p></li>
 <li><p>FIX #876: allow Auto-sklearn model to be cloned</p></li>
 <li><p>FIX #879: allow 1-D binary predictions</p></li>
 </ul>
-<section id="contributors-v0-7-1">
+<div class="section" id="contributors-v0-7-1">
 <h3>Contributors v0.7.1<a class="headerlink" href="#contributors-v0-7-1" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
 <li><p>Xiaodong DENG</p></li>
 <li><p>Francisco Rivera</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-7-0">
+</div>
+</div>
+<div class="section" id="version-0-7-0">
 <h2>Version 0.7.0<a class="headerlink" href="#version-0-7-0" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>ADD #785: user control to reduce the hard drive memory required to store ensembles</p></li>
@@ -720,7 +775,7 @@ branch and also push them to dockerhub and the github docker registry.</p></li>
 <li><p>FIX #778: support for python 3.8</p></li>
 <li><p>FIX #781: support for pandas 1.x</p></li>
 </ul>
-<section id="contributors-v0-7-0">
+<div class="section" id="contributors-v0-7-0">
 <h3>Contributors v0.7.0<a class="headerlink" href="#contributors-v0-7-0" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Andrew Nader</p></li>
@@ -733,9 +788,9 @@ branch and also push them to dockerhub and the github docker registry.</p></li>
 <li><p>Valentin Geffrier</p></li>
 <li><p>Francisco Rivera</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-6-0">
+</div>
+</div>
+<div class="section" id="version-0-6-0">
 <h2>Version 0.6.0<a class="headerlink" href="#version-0-6-0" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>MAINT: move from scikit-learn 0.19.X to 0.21.X</p></li>
@@ -743,16 +798,16 @@ branch and also push them to dockerhub and the github docker registry.</p></li>
 <li><p>FIX #680: Remove unnecessary print statement</p></li>
 <li><p>FIX #600: Remove unnecessary warning</p></li>
 </ul>
-<section id="contributors-v0-6-0">
+<div class="section" id="contributors-v0-6-0">
 <h3>Contributors v0.6.0<a class="headerlink" href="#contributors-v0-6-0" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Guilherme Miotto</p></li>
 <li><p>Matthias Feurer</p></li>
 <li><p>Jin Woo Ahn</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-5-2">
+</div>
+</div>
+<div class="section" id="version-0-5-2">
 <h2>Version 0.5.2<a class="headerlink" href="#version-0-5-2" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>FIX #669: Correctly handle arguments to the <code class="docutils literal notranslate"><span class="pre">AutoMLRegressor</span></code></p></li>
@@ -760,7 +815,7 @@ branch and also push them to dockerhub and the github docker registry.</p></li>
 <li><p>ADD #676: Allow brackets [ ] inside the temporary and output directory paths.</p></li>
 <li><p>ADD #424: (Experimental) scripts to reproduce the results from the original Auto-sklearn paper.</p></li>
 </ul>
-<section id="contributors-v0-5-2">
+<div class="section" id="contributors-v0-5-2">
 <h3>Contributors v0.5.2<a class="headerlink" href="#contributors-v0-5-2" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Jin Woo Ahn</p></li>
@@ -768,9 +823,9 @@ branch and also push them to dockerhub and the github docker registry.</p></li>
 <li><p>Matthias Feurer</p></li>
 <li><p>yazanobeidi</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-5-1">
+</div>
+</div>
+<div class="section" id="version-0-5-1">
 <h2>Version 0.5.1<a class="headerlink" href="#version-0-5-1" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>ADD #650: Auto-sklearn will immediately stop if prediction using scikit-learn’s dummy predictor
@@ -782,7 +837,7 @@ be wrong.</p></li>
 <li><p>FIX #626: Fixes an issue where losses were not minimized, but maximized.</p></li>
 <li><p>MAINT #646: Do no longer restrict the numpy version to be less than 1.14.5.</p></li>
 </ul>
-<section id="contributors-v0-5-1">
+<div class="section" id="contributors-v0-5-1">
 <h3>Contributors v0.5.1<a class="headerlink" href="#contributors-v0-5-1" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Jin Woo Ahn</p></li>
@@ -790,9 +845,9 @@ be wrong.</p></li>
 <li><p>Matthias Feurer</p></li>
 <li><p>jianswang</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-5-0">
+</div>
+</div>
+<div class="section" id="version-0-5-0">
 <h2>Version 0.5.0<a class="headerlink" href="#version-0-5-0" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>ADD #593: Auto-sklearn supports the <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> argument for parallel
@@ -802,7 +857,7 @@ computing on a single machine.</p></li>
 <li><p>TEST #614: Test installation with clean Ubuntu on travis-ci.</p></li>
 <li><p>MAINT: Fixed broken link and typo in the documentation.</p></li>
 </ul>
-<section id="contributors-v0-5-0">
+<div class="section" id="contributors-v0-5-0">
 <h3>Contributors v0.5.0<a class="headerlink" href="#contributors-v0-5-0" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Mohd Shahril</p></li>
@@ -811,9 +866,9 @@ computing on a single machine.</p></li>
 <li><p>Jirka Borovec</p></li>
 <li><p>Pradeep Reddy Raamana</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-4-2">
+</div>
+</div>
+<div class="section" id="version-0-4-2">
 <h2>Version 0.4.2<a class="headerlink" href="#version-0-4-2" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>Fixes #538: Remove rounding errors when giving a training set fraction for
@@ -830,7 +885,7 @@ scikit-learn hyperparameter with different meaning.</p></li>
 <li><p>MAINT: remove dependency on the six package</p></li>
 <li><p>MAINT: upgrade to XGBoost 0.80</p></li>
 </ul>
-<section id="contributors-v0-4-2">
+<div class="section" id="contributors-v0-4-2">
 <h3>Contributors v0.4.2<a class="headerlink" href="#contributors-v0-4-2" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Taneli Mielikäinen</p></li>
@@ -840,9 +895,9 @@ scikit-learn hyperparameter with different meaning.</p></li>
 <li><p>Teresa Conceição</p></li>
 <li><p>Jin Woo Ahn</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-4-1">
+</div>
+</div>
+<div class="section" id="version-0-4-1">
 <h2>Version 0.4.1<a class="headerlink" href="#version-0-4-1" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>Added documentation on <a class="reference external" href="https://github.com/automl/auto-sklearn/pull/510">how to extend Auto-sklearn</a>
@@ -865,7 +920,7 @@ target type was given for classification and regression before call to <code cla
 <li><p>Travis-ci now runs flake8 to enforce pep8 style guide, and uses travis-ci instead of circle-ci
 for deployment.</p></li>
 </ul>
-<section id="contributors-v0-4-1">
+<div class="section" id="contributors-v0-4-1">
 <h3>Contributors v0.4.1<a class="headerlink" href="#contributors-v0-4-1" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
@@ -874,9 +929,9 @@ for deployment.</p></li>
 <li><p>Katharina Eggensperger</p></li>
 <li><p>Jin Woo Ahn</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-4-0">
+</div>
+</div>
+<div class="section" id="version-0-4-0">
 <h2>Version 0.4.0<a class="headerlink" href="#version-0-4-0" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>Fixes <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/409">#409</a>: fixes
@@ -904,7 +959,7 @@ function), the output of the ensemble builder is now also the output of a
 minimization problem.</p></li>
 <li><p>Implements <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/271">#271</a>:
 XGBoost is available again, even configuring the new dropout functionality.</p></li>
-<li><p>New documentation section <a class="reference internal" href="manual.html#inspecting-the-results"><span class="std std-ref">Inspecting the results</span></a>.</p></li>
+<li><p>New documentation section <a class="reference internal" href="manual.html#inspect"><span class="std std-ref">Inspecting the results</span></a>.</p></li>
 <li><p>Fixes <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/444">#444</a>:
 Auto-sklearn now only loads models for refit which are actually relevant
 for the ensemble.</p></li>
@@ -914,7 +969,7 @@ to not accidentaly run on a Windows machine.</p></li>
 <li><p>Safeguard Auto-sklearn against deleting directories it did not create (Issue
 <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/317">#317</a>.</p></li>
 </ul>
-<section id="contributors-v0-4-0">
+<div class="section" id="contributors-v0-4-0">
 <h3>Contributors v0.4.0<a class="headerlink" href="#contributors-v0-4-0" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
@@ -928,9 +983,9 @@ to not accidentaly run on a Windows machine.</p></li>
 <li><p>Marius Lindauer</p></li>
 <li><p>Yassine Morakakam</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-3-0">
+</div>
+</div>
+<div class="section" id="version-0-3-0">
 <h2>Version 0.3.0<a class="headerlink" href="#version-0-3-0" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>Upgrade to scikit-learn 0.19.1.</p></li>
@@ -945,15 +1000,15 @@ and <code class="docutils literal notranslate"><span class="pre">GradientBoostin
 <li><p>Allow passing an SMBO object into the <code class="docutils literal notranslate"><span class="pre">AutoSklearnClassifier</span></code> and
 <code class="docutils literal notranslate"><span class="pre">AutoSklearnRegressor</span></code>.</p></li>
 </ul>
-<section id="contributors-v0-3-0">
+<div class="section" id="contributors-v0-3-0">
 <h3>Contributors v0.3.0<a class="headerlink" href="#contributors-v0-3-0" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
 <li><p>Jesper van Engelen</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-2-1">
+</div>
+</div>
+<div class="section" id="version-0-2-1">
 <h2>Version 0.2.1<a class="headerlink" href="#version-0-2-1" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>Allows the usage of scikit-learn 0.18.2.</p></li>
@@ -966,7 +1021,7 @@ using holdout resampling strategy.</p></li>
 <li><p>Typo fixes in print statements.</p></li>
 <li><p>New method to retrieve the models used in the final ensemble.</p></li>
 </ul>
-<section id="contributors-v0-2-1">
+<div class="section" id="contributors-v0-2-1">
 <h3>Contributors v0.2.1<a class="headerlink" href="#contributors-v0-2-1" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
@@ -977,9 +1032,9 @@ using holdout resampling strategy.</p></li>
 <li><p>Vicente Alencar</p></li>
 <li><p>Lukas Großberger</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-2-0">
+</div>
+</div>
+<div class="section" id="version-0-2-0">
 <h2>Version 0.2.0<a class="headerlink" href="#version-0-2-0" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><strong>auto-sklearn supports custom metrics and all metrics included in
@@ -992,7 +1047,7 @@ the pyninsher.</p></li>
 <li><p><em>auto-sklearn</em> can use multiprocessing in calls to <code class="docutils literal notranslate"><span class="pre">predict()</span></code> and
 <code class="docutils literal notranslate"><span class="pre">predict_proba</span></code>. By <a class="reference external" href="https://github.com/lsorber">Laurent Sorber</a>.</p></li>
 </ul>
-<section id="contributors-v0-2-0">
+<div class="section" id="contributors-v0-2-0">
 <h3>Contributors v0.2.0<a class="headerlink" href="#contributors-v0-2-0" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
@@ -1000,12 +1055,12 @@ the pyninsher.</p></li>
 <li><p>Laurent Sorber</p></li>
 <li><p>Rafael Calsaverini</p></li>
 </ul>
-</section>
-</section>
-<section id="version-0-1-x">
+</div>
+</div>
+<div class="section" id="version-0-1-x">
 <h2>Version 0.1.x<a class="headerlink" href="#version-0-1-x" title="Permalink to this headline">¶</a></h2>
 <p>There are no release notes for auto-sklearn prior to version 0.2.0.</p>
-<section id="contributors-v0-1-x">
+<div class="section" id="contributors-v0-1-x">
 <h3>Contributors v0.1.x<a class="headerlink" href="#contributors-v0-1-x" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Matthias Feurer</p></li>
@@ -1025,9 +1080,9 @@ the pyninsher.</p></li>
 <li><p>_329_</p></li>
 <li><p>Iver Jordal</p></li>
 </ul>
-</section>
-</section>
-</section>
+</div>
+</div>
+</div>
 
 
     </div>
@@ -1048,7 +1103,7 @@ the pyninsher.</p></li>
       
     </p>
     <p>
-        &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
+        &copy; Copyright 2014-2022, Machine Learning Professorship Freiburg.<br/>
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br/>
     </p>
   </div>

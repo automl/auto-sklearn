@@ -3,9 +3,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
-    <title>Extending Auto-Sklearn with Classification Component &#8212; AutoSklearn 0.14.2 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Extending Auto-Sklearn with Classification Component &#8212; AutoSklearn 0.14.4 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
@@ -55,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.14.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.4</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -125,11 +124,13 @@
 <p>Click <a class="reference internal" href="#sphx-glr-download-examples-80-extending-example-extending-classification-py"><span class="std std-ref">here</span></a>
 to download the full example code or to run this example in your browser via Binder</p>
 </div>
-<section class="sphx-glr-example-title" id="extending-auto-sklearn-with-classification-component">
+<div class="sphx-glr-example-title section" id="extending-auto-sklearn-with-classification-component">
 <span id="sphx-glr-examples-80-extending-example-extending-classification-py"></span><h1>Extending Auto-Sklearn with Classification Component<a class="headerlink" href="#extending-auto-sklearn-with-classification-component" title="Permalink to this headline">¶</a></h1>
 <p>The following example demonstrates how to create a new classification
 component for using in auto-sklearn.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ConfigSpace.configuration_space</span> <span class="kn">import</span> <span class="n">ConfigurationSpace</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+
+<span class="kn">from</span> <span class="nn">ConfigSpace.configuration_space</span> <span class="kn">import</span> <span class="n">ConfigurationSpace</span>
 <span class="kn">from</span> <span class="nn">ConfigSpace.hyperparameters</span> <span class="kn">import</span> <span class="n">CategoricalHyperparameter</span><span class="p">,</span> \
     <span class="n">UniformIntegerHyperparameter</span><span class="p">,</span> <span class="n">UniformFloatHyperparameter</span>
 
@@ -145,7 +146,7 @@ component for using in auto-sklearn.</p>
 <span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
 </pre></div>
 </div>
-<section id="create-mlp-classifier-component-for-auto-sklearn">
+<div class="section" id="create-mlp-classifier-component-for-auto-sklearn">
 <h2>Create MLP classifier component for auto-sklearn<a class="headerlink" href="#create-mlp-classifier-component-for-auto-sklearn" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MLPClassifier</span><span class="p">(</span><span class="n">AutoSklearnClassificationAlgorithm</span><span class="p">):</span>
 
@@ -250,15 +251,15 @@ component for using in auto-sklearn.</p>
     solver, Type: Categorical, Choices: {lbfgs, sgd, adam}, Default: adam
 </pre></div>
 </div>
-</section>
-<section id="data-loading">
+</div>
+<div class="section" id="data-loading">
 <h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="fit-mlp-classifier-to-the-data">
+</div>
+<div class="section" id="fit-mlp-classifier-to-the-data">
 <h2>Fit MLP classifier to the data<a class="headerlink" href="#fit-mlp-classifier-to-the-data" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">clf</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
     <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
@@ -282,36 +283,38 @@ component for using in auto-sklearn.</p>
                       time_left_for_this_task=30)
 </pre></div>
 </div>
-</section>
-<section id="print-test-accuracy-and-statistics">
+</div>
+<div class="section" id="print-test-accuracy-and-statistics">
 <h2>Print test accuracy and statistics<a class="headerlink" href="#print-test-accuracy-and-statistics" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">y_pred</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;accuracy: &quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y_test</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">clf</span><span class="o">.</span><span class="n">show_models</span><span class="p">())</span>
+<span class="n">pprint</span><span class="p">(</span><span class="n">clf</span><span class="o">.</span><span class="n">show_models</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.951048951048951
-[(0.580000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;MLPClassifier&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;classifier:MLPClassifier:activation&#39;: &#39;relu&#39;, &#39;classifier:MLPClassifier:alpha&#39;: 0.0001, &#39;classifier:MLPClassifier:hidden_layer_depth&#39;: 1, &#39;classifier:MLPClassifier:num_nodes_per_layer&#39;: 32, &#39;classifier:MLPClassifier:solver&#39;: &#39;adam&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.420000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;MLPClassifier&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;select_rates_classification&#39;, &#39;classifier:MLPClassifier:activation&#39;: &#39;relu&#39;, &#39;classifier:MLPClassifier:alpha&#39;: 0.054648061621061846, &#39;classifier:MLPClassifier:hidden_layer_depth&#39;: 1, &#39;classifier:MLPClassifier:num_nodes_per_layer&#39;: 187, &#39;classifier:MLPClassifier:solver&#39;: &#39;adam&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;robust_scaler&#39;, &#39;feature_preprocessor:select_rates_classification:alpha&#39;: 0.17677801820619737, &#39;feature_preprocessor:select_rates_classification:score_func&#39;: &#39;mutual_info_classif&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.06846183238648647, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max&#39;: 0.8465036896999549, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min&#39;: 0.14555017892884228},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.986013986013986
+{   2: {   &#39;balancing&#39;: Balancing(random_state=1),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc78f92cc70&gt;,
+           &#39;cost&#39;: 0.049645390070921946,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc786854e20&gt;,
+           &#39;ensemble_weight&#39;: 0.52,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78a9eab80&gt;,
+           &#39;model_id&#39;: 2,
+           &#39;rank&#39;: 1,
+           &#39;sklearn_classifier&#39;: MLPClassifier(hidden_layer_sizes=(32,), random_state=1)},
+    5: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc78b2896a0&gt;,
+           &#39;cost&#39;: 0.1063829787234043,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc786854430&gt;,
+           &#39;ensemble_weight&#39;: 0.48,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78c93bf10&gt;,
+           &#39;model_id&#39;: 5,
+           &#39;rank&#39;: 2,
+           &#39;sklearn_classifier&#39;: MLPClassifier(alpha=0.054648061621061846, hidden_layer_sizes=(187,),
+              random_state=1)}}
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  18.369 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  12.500 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-extending-classification-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_classification.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>
@@ -324,8 +327,8 @@ dataset_properties={
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
-</section>
-</section>
+</div>
+</div>
 
 
     </div>
@@ -346,7 +349,7 @@ dataset_properties={
       
     </p>
     <p>
-        &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
+        &copy; Copyright 2014-2022, Machine Learning Professorship Freiburg.<br/>
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br/>
     </p>
   </div>

@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>autosklearn.estimators &#8212; AutoSklearn 0.14.2 documentation</title>
+    <title>autosklearn.estimators &#8212; AutoSklearn 0.14.4 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.14.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.4</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -147,8 +147,8 @@
         <span class="n">max_models_on_disc</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
         <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">memory_limit</span><span class="o">=</span><span class="mi">3072</span><span class="p">,</span>
-        <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">include</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">exclude</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">resampling_strategy</span><span class="o">=</span><span class="s1">&#39;holdout&#39;</span><span class="p">,</span>
         <span class="n">resampling_strategy_arguments</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">tmp_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -189,7 +189,7 @@
 <span class="sd">        ensemble_size : int, optional (default=50)</span>
 <span class="sd">            Number of models added to the ensemble built by *Ensemble</span>
 <span class="sd">            selection from libraries of models*. Models are drawn with</span>
-<span class="sd">            replacement.</span>
+<span class="sd">            replacement. If set to ``0`` no ensemble is fit.</span>
 
 <span class="sd">        ensemble_nbest : int, optional (default=50)</span>
 <span class="sd">            Only consider the ``ensemble_nbest`` models when building an</span>
@@ -209,21 +209,64 @@
 <span class="sd">        memory_limit : int, optional (3072)</span>
 <span class="sd">            Memory limit in MB for the machine learning algorithm.</span>
 <span class="sd">            `auto-sklearn` will stop fitting the machine learning algorithm if</span>
-<span class="sd">            it tries to allocate more than `memory_limit` MB.</span>
-<span class="sd">            If None is provided, no memory limit is set.</span>
-<span class="sd">            In case of multi-processing, `memory_limit` will be per job.</span>
-<span class="sd">            This memory limit also applies to the ensemble creation process.</span>
+<span class="sd">            it tries to allocate more than ``memory_limit`` MB.</span>
 
-<span class="sd">        include : dict, optional (None)</span>
-<span class="sd">            If None, all possible algorithms are used. Otherwise specifies</span>
-<span class="sd">            set of algorithms for each added component is used. Include and </span>
-<span class="sd">            exclude are incompatible if used together on the same component</span>
+<span class="sd">            **Important notes:**</span>
 
-<span class="sd">        exclude : dict, optional (None)</span>
-<span class="sd">            If None, all possible algorithms are used. Otherwise specifies</span>
-<span class="sd">            set of algorithms for each added component is not used.</span>
-<span class="sd">            Incompatible with include. Include and exclude are incompatible</span>
-<span class="sd">            if used together on the same component</span>
+<span class="sd">            * If ``None`` is provided, no memory limit is set.</span>
+<span class="sd">            * In case of multi-processing, ``memory_limit`` will be *per job*, so the total usage is</span>
+<span class="sd">              ``n_jobs x memory_limit``.</span>
+<span class="sd">            * The memory limit also applies to the ensemble creation process.</span>
+
+<span class="sd">        include : Optional[Dict[str, List[str]]] = None</span>
+<span class="sd">            If None, all possible algorithms are used.</span>
+
+<span class="sd">            Otherwise, specifies a step and the components that are included in search.</span>
+<span class="sd">            See ``/pipeline/components/&lt;step&gt;/*`` for available components.</span>
+
+<span class="sd">            Incompatible with parameter ``exclude``.</span>
+
+<span class="sd">            **Possible Steps**:</span>
+
+<span class="sd">            * ``&quot;data_preprocessor&quot;``</span>
+<span class="sd">            * ``&quot;balancing&quot;``</span>
+<span class="sd">            * ``&quot;feature_preprocessor&quot;``</span>
+<span class="sd">            * ``&quot;classifier&quot;`` - Only for when when using ``AutoSklearnClasssifier``</span>
+<span class="sd">            * ``&quot;regressor&quot;`` - Only for when when using ``AutoSklearnRegressor``</span>
+
+<span class="sd">            **Example**:</span>
+
+<span class="sd">            .. code-block:: python</span>
+
+<span class="sd">                include = {</span>
+<span class="sd">                    &#39;classifier&#39;: [&quot;random_forest&quot;],</span>
+<span class="sd">                    &#39;feature_preprocessor&#39;: [&quot;no_preprocessing&quot;]</span>
+<span class="sd">                }</span>
+
+<span class="sd">        exclude : Optional[Dict[str, List[str]]] = None</span>
+<span class="sd">            If None, all possible algorithms are used.</span>
+
+<span class="sd">            Otherwise, specifies a step and the components that are excluded from search.</span>
+<span class="sd">            See ``/pipeline/components/&lt;step&gt;/*`` for available components.</span>
+
+<span class="sd">            Incompatible with parameter ``include``.</span>
+
+<span class="sd">            **Possible Steps**:</span>
+
+<span class="sd">            * ``&quot;data_preprocessor&quot;``</span>
+<span class="sd">            * ``&quot;balancing&quot;``</span>
+<span class="sd">            * ``&quot;feature_preprocessor&quot;``</span>
+<span class="sd">            * ``&quot;classifier&quot;`` - Only for when when using ``AutoSklearnClasssifier``</span>
+<span class="sd">            * ``&quot;regressor&quot;`` - Only for when when using ``AutoSklearnRegressor``</span>
+
+<span class="sd">            **Example**:</span>
+
+<span class="sd">            .. code-block:: python</span>
+
+<span class="sd">                exclude = {</span>
+<span class="sd">                    &#39;classifier&#39;: [&quot;random_forest&quot;],</span>
+<span class="sd">                    &#39;feature_preprocessor&#39;: [&quot;no_preprocessing&quot;]</span>
+<span class="sd">                }</span>
 
 <span class="sd">        resampling_strategy : string or object, optional (&#39;holdout&#39;)</span>
 <span class="sd">            how to to handle overfitting, might need &#39;resampling_strategy_arguments&#39;</span>
@@ -258,10 +301,10 @@
 <span class="sd">            * &#39;cv-iterative-fit&#39;: {&#39;folds&#39;: int}</span>
 <span class="sd">            * &#39;partial-cv&#39;: {&#39;folds&#39;: int, &#39;shuffle&#39;: bool}</span>
 <span class="sd">            * BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments</span>
-<span class="sd">                required by chosen class as specified in scikit-learn documentation.</span>
-<span class="sd">                If arguments are not provided, scikit-learn defaults are used.</span>
-<span class="sd">                If no defaults are available, an exception is raised.</span>
-<span class="sd">                Refer to the &#39;n_splits&#39; argument as &#39;folds&#39;.</span>
+<span class="sd">              required by chosen class as specified in scikit-learn documentation.</span>
+<span class="sd">              If arguments are not provided, scikit-learn defaults are used.</span>
+<span class="sd">              If no defaults are available, an exception is raised.</span>
+<span class="sd">              Refer to the &#39;n_splits&#39; argument as &#39;folds&#39;.</span>
 
 <span class="sd">        tmp_folder : string, optional (None)</span>
 <span class="sd">            folder to store configuration output and log files, if ``None``</span>
@@ -273,13 +316,15 @@
 
 <span class="sd">        n_jobs : int, optional, experimental</span>
 <span class="sd">            The number of jobs to run in parallel for ``fit()``. ``-1`` means</span>
-<span class="sd">            using all processors. By default, Auto-sklearn uses a single core</span>
-<span class="sd">            for fitting the machine learning model and a single core for fitting</span>
-<span class="sd">            an ensemble. Ensemble building is not affected by ``n_jobs`` but</span>
-<span class="sd">            can be controlled by the number of models in the ensemble. In</span>
-<span class="sd">            contrast to most scikit-learn models, ``n_jobs`` given in the</span>
-<span class="sd">            constructor is not applied to the ``predict()`` method. If</span>
-<span class="sd">            ``dask_client`` is None, a new dask client is created.</span>
+<span class="sd">            using all processors. </span>
+<span class="sd">            </span>
+<span class="sd">            **Important notes**: </span>
+<span class="sd">            </span>
+<span class="sd">            * By default, Auto-sklearn uses one core. </span>
+<span class="sd">            * Ensemble building is not affected by ``n_jobs`` but can be controlled by the number </span>
+<span class="sd">              of models in the ensemble.</span>
+<span class="sd">            * ``predict()`` is not affected by ``n_jobs`` (in contrast to most scikit-learn models)</span>
+<span class="sd">            * If ``dask_client`` is ``None``, a new dask client is created.</span>
 
 <span class="sd">        dask_client : dask.distributed.Client, optional</span>
 <span class="sd">            User-created dask client, can be used to start a dask cluster and then</span>
@@ -295,7 +340,7 @@
 <span class="sd">            * ``&#39;y_optimization&#39;`` : do not save the predictions for the</span>
 <span class="sd">              optimization/validation set, which would later on be used to build</span>
 <span class="sd">              an ensemble.</span>
-<span class="sd">            * ``&#39;model&#39;`` : do not save any model files</span>
+<span class="sd">            * ``model`` : do not save any model files</span>
 
 <span class="sd">        smac_scenario_args : dict, optional (None)</span>
 <span class="sd">            Additional arguments inserted into the scenario of SMAC. See the</span>
@@ -341,13 +386,13 @@
 <span class="sd">        Attributes</span>
 <span class="sd">        ----------</span>
 
-<span class="sd">        cv_results\_ : dict of numpy (masked) ndarrays</span>
+<span class="sd">        cv_results_ : dict of numpy (masked) ndarrays</span>
 <span class="sd">            A dict with keys as column headers and values as columns, that can be</span>
 <span class="sd">            imported into a pandas ``DataFrame``.</span>
 
 <span class="sd">            Not all keys returned by scikit-learn are supported yet.</span>
 
-<span class="sd">        performance_over_time\_ : pandas.core.frame.DataFrame</span>
+<span class="sd">        performance_over_time_ : pandas.core.frame.DataFrame</span>
 <span class="sd">            A ``DataFrame`` containing the models performance over time data. Can be</span>
 <span class="sd">            used for plotting directly. Please refer to the example</span>
 <span class="sd">            :ref:`Train and Test Inputs &lt;sphx_glr_examples_40_advanced_example_pandas_train_test.py&gt;`.</span>
@@ -605,13 +650,74 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">show_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return a representation of the final ensemble found by auto-sklearn.</span>
+        <span class="sd">&quot;&quot;&quot; Returns a dictionary containing dictionaries of ensemble models.</span>
+
+<span class="sd">        Each model in the ensemble can be accessed by giving its ``model_id`` as key.</span>
+
+<span class="sd">        A model dictionary contains the following:</span>
+
+<span class="sd">        * ``&quot;model_id&quot;`` - The id given to a model by ``autosklearn``.</span>
+<span class="sd">        * ``&quot;rank&quot;`` - The rank of the model based on it&#39;s ``&quot;cost&quot;``.</span>
+<span class="sd">        * ``&quot;cost&quot;`` - The loss of the model on the validation set.</span>
+<span class="sd">        * ``&quot;ensemble_weight&quot;`` - The weight given to the model in the ensemble.</span>
+<span class="sd">        * ``&quot;voting_model&quot;`` - The ``cv_voting_ensemble`` model (for &#39;cv&#39; resampling).</span>
+<span class="sd">        * ``&quot;estimators&quot;`` - List of models (dicts) in ``cv_voting_ensemble`` (for &#39;cv&#39; resampling).</span>
+<span class="sd">        * ``&quot;data_preprocessor&quot;`` - The preprocessor used on the data.</span>
+<span class="sd">        * ``&quot;balancing&quot;`` - The balancing used on the data (for classification).</span>
+<span class="sd">        * ``&quot;feature_preprocessor&quot;`` - The preprocessor for features types.</span>
+<span class="sd">        * ``&quot;classifier&quot;`` or ``&quot;regressor&quot;`` - The autosklearn wrapped classifier or regressor.</span>
+<span class="sd">        * ``&quot;sklearn_classifier&quot;`` or ``&quot;sklearn_regressor&quot;`` - The sklearn classifier or regressor.</span>
+
+<span class="sd">        **Example**</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            import sklearn.datasets</span>
+<span class="sd">            import sklearn.metrics</span>
+<span class="sd">            import autosklearn.regression</span>
+
+<span class="sd">            X, y = sklearn.datasets.load_diabetes(return_X_y=True)</span>
+
+<span class="sd">            automl = autosklearn.regression.AutoSklearnRegressor(</span>
+<span class="sd">                time_left_for_this_task=120</span>
+<span class="sd">                )</span>
+<span class="sd">            automl.fit(X_train, y_train, dataset_name=&#39;diabetes&#39;)</span>
+
+<span class="sd">            ensemble_dict = automl.show_models()</span>
+<span class="sd">            print(ensemble_dict)</span>
+
+<span class="sd">        Output:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            {</span>
+<span class="sd">                25: {&#39;model_id&#39;: 25.0,</span>
+<span class="sd">                     &#39;rank&#39;: 1,</span>
+<span class="sd">                     &#39;cost&#39;: 0.43667876507897496,</span>
+<span class="sd">                     &#39;ensemble_weight&#39;: 0.38,</span>
+<span class="sd">                     &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing....&gt;,</span>
+<span class="sd">                     &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components....&gt;,</span>
+<span class="sd">                     &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression....&gt;,</span>
+<span class="sd">                     &#39;sklearn_regressor&#39;: SGDRegressor(alpha=0.0006517033225329654,...)</span>
+<span class="sd">                    },</span>
+<span class="sd">                6: {&#39;model_id&#39;: 6.0,</span>
+<span class="sd">                    &#39;rank&#39;: 2,</span>
+<span class="sd">                    &#39;cost&#39;: 0.4550418898836528,</span>
+<span class="sd">                    &#39;ensemble_weight&#39;: 0.3,</span>
+<span class="sd">                    &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing....&gt;,</span>
+<span class="sd">                    &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components....&gt;,</span>
+<span class="sd">                    &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression....&gt;,</span>
+<span class="sd">                    &#39;sklearn_regressor&#39;: ARDRegression(alpha_1=0.0003701926442639788,...)</span>
+<span class="sd">                    }...</span>
+<span class="sd">            }</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        str</span>
+<span class="sd">        Dict(int, Any) : dictionary of length = number of models in the ensemble</span>
+<span class="sd">            A dictionary of models in the ensemble, where ``model_id`` is the key.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">show_models</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">get_models_with_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -672,7 +778,7 @@
 <span class="sd">        Gives an overview of all models trained during the search process along</span>
 <span class="sd">        with various statistics about their training.</span>
 
-<span class="sd">        The availble statistics are:</span>
+<span class="sd">        The available statistics are:</span>
 
 <span class="sd">        **Simple**:</span>
 
@@ -1239,7 +1345,7 @@
       
     </p>
     <p>
-        &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
+        &copy; Copyright 2014-2022, Machine Learning Professorship Freiburg.<br/>
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br/>
     </p>
   </div>

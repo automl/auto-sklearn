@@ -3,9 +3,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
-    <title>Parallel Usage: Spawning workers from the command line &#8212; AutoSklearn 0.14.2 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Parallel Usage: Spawning workers from the command line &#8212; AutoSklearn 0.14.4 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
@@ -55,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.14.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.4</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -131,7 +130,7 @@
 <p>Click <a class="reference internal" href="#sphx-glr-download-examples-60-search-example-parallel-manual-spawning-cli-py"><span class="std std-ref">here</span></a>
 to download the full example code or to run this example in your browser via Binder</p>
 </div>
-<section class="sphx-glr-example-title" id="parallel-usage-spawning-workers-from-the-command-line">
+<div class="sphx-glr-example-title section" id="parallel-usage-spawning-workers-from-the-command-line">
 <span id="sphx-glr-examples-60-search-example-parallel-manual-spawning-cli-py"></span><h1>Parallel Usage: Spawning workers from the command line<a class="headerlink" href="#parallel-usage-spawning-workers-from-the-command-line" title="Permalink to this headline">¶</a></h1>
 <p><em>Auto-sklearn</em> uses
 <a class="reference external" href="https://distributed.dask.org/en/latest/index.html">dask.distributed</a>
@@ -139,17 +138,19 @@ for parallel optimization.</p>
 <p>This example shows how to start the dask scheduler and spawn
 workers for <em>Auto-sklearn</em> manually from the command line. Use this example
 as a starting point to parallelize <em>Auto-sklearn</em> across multiple
-machines. If you want to start everything manually from within Python
-please see <a class="reference internal" href="example_parallel_manual_spawning_python.html#sphx-glr-examples-60-search-example-parallel-manual-spawning-python-py"><span class="std std-ref">Parallel Usage: Spawning workers from within Python</span></a>.
-To run <em>Auto-sklearn</em> in parallel on a single machine check out the example
+machines.</p>
+<p>To run <em>Auto-sklearn</em> in parallel on a single machine check out the example
 <a class="reference internal" href="example_parallel_n_jobs.html#sphx-glr-examples-60-search-example-parallel-n-jobs-py"><span class="std std-ref">Parallel Usage  on a single machine</span></a>.</p>
+<p>If you want to start everything manually from within Python
+please see <code class="docutils literal notranslate"><span class="pre">:ref:sphx_glr_examples_60_search_example_parallel_manual_spawning_python.py</span></code>.</p>
+<p><strong>NOTE:</strong> Above example is disabled due to issue <a class="reference external" href="https://github.com/dask/distributed/issues/5627">https://github.com/dask/distributed/issues/5627</a></p>
 <p>You can learn more about the dask command line interface from
 <a class="reference external" href="https://docs.dask.org/en/latest/setup/cli.html">https://docs.dask.org/en/latest/setup/cli.html</a>.</p>
 <p>When manually passing a dask client to Auto-sklearn, all logic
 must be guarded by <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">__name__</span> <span class="pre">==</span> <span class="pre">&quot;__main__&quot;:</span></code> statements! We use
 multiple such statements to properly render this example as a notebook
 and also allow execution via the command line.</p>
-<section id="background">
+<div class="section" id="background">
 <h2>Background<a class="headerlink" href="#background" title="Permalink to this headline">¶</a></h2>
 <p>To run Auto-sklearn distributed on multiple machines we need to set
 up three components:</p>
@@ -169,8 +170,8 @@ workers and client. Also, in a real setup, the scheduler and the workers should
 be started from the command line and not from within a Python file via
 the <code class="docutils literal notranslate"><span class="pre">subprocess</span></code> module as done here (for the sake of having a self-contained
 example).</p>
-</section>
-<section id="import-statements">
+</div>
+<div class="section" id="import-statements">
 <h2>Import statements<a class="headerlink" href="#import-statements" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">multiprocessing</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
@@ -188,8 +189,8 @@ example).</p>
 <span class="n">worker_processes</span> <span class="o">=</span> <span class="p">[]</span>
 </pre></div>
 </div>
-</section>
-<section id="setup-client-scheduler-communication">
+</div>
+<div class="section" id="setup-client-scheduler-communication">
 <h2>0. Setup client-scheduler communication<a class="headerlink" href="#setup-client-scheduler-communication" title="Permalink to this headline">¶</a></h2>
 <p>In this examples the dask scheduler is started without an explicit
 address and port. Instead, the scheduler takes a free port and stores
@@ -199,8 +200,8 @@ relevant information to connect to the scheduler.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scheduler_file_name</span> <span class="o">=</span> <span class="s1">&#39;scheduler-file.json&#39;</span>
 </pre></div>
 </div>
-</section>
-<section id="start-scheduler">
+</div>
+<div class="section" id="start-scheduler">
 <h2>1. Start scheduler<a class="headerlink" href="#start-scheduler" title="Permalink to this headline">¶</a></h2>
 <p>Starting the scheduler is done with the following bash command:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>dask-scheduler --scheduler-file scheduler-file.json --idle-timeout <span class="m">10</span>
@@ -230,8 +231,8 @@ self-contained example:</p>
     <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="start-two-workers">
+</div>
+<div class="section" id="start-two-workers">
 <h2>2. Start two workers<a class="headerlink" href="#start-two-workers" title="Permalink to this headline">¶</a></h2>
 <p>Starting the scheduler is done with the following bash command:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">DASK_DISTRIBUTED__WORKER__DAEMON</span><span class="o">=</span>False <span class="se">\</span>
@@ -270,15 +271,15 @@ Auto-sklearn does the memory management itself.</p>
     <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="creating-a-client-in-python">
+</div>
+<div class="section" id="creating-a-client-in-python">
 <h2>3. Creating a client in Python<a class="headerlink" href="#creating-a-client-in-python" title="Permalink to this headline">¶</a></h2>
 <p>Finally we create a dask cluster which also connects to the scheduler via
 the information in the file created by the scheduler.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">client</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">scheduler_file</span><span class="o">=</span><span class="n">scheduler_file_name</span><span class="p">)</span>
 </pre></div>
 </div>
-<section id="start-auto-sklearn">
+<div class="section" id="start-auto-sklearn">
 <h3>Start Auto-sklearn<a class="headerlink" href="#start-auto-sklearn" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -313,22 +314,26 @@ the information in the file created by the scheduler.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>auto-sklearn results:
-  Dataset name: 4433d19e-4199-11ec-8a32-1b4c952643c3
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.metafeatures = self.metafeatures.append(metafeatures)
+/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.algorithm_runs[metric].append(runs)
+auto-sklearn results:
+  Dataset name: 74d6c3db-7dfd-11ec-875f-3137a7553b01
   Metric: accuracy
   Best validation score: 0.992908
-  Number of target algorithm runs: 12
-  Number of successful target algorithm runs: 11
+  Number of target algorithm runs: 14
+  Number of successful target algorithm runs: 13
   Number of crashed target algorithm runs: 0
   Number of target algorithms that exceeded the time limit: 1
   Number of target algorithms that exceeded the memory limit: 0
 
-Accuracy score 0.965034965034965
+Accuracy score 0.958041958041958
 </pre></div>
 </div>
-</section>
-</section>
-<section id="wait-until-all-workers-are-closed">
+</div>
+</div>
+<div class="section" id="wait-until-all-workers-are-closed">
 <h2>Wait until all workers are closed<a class="headerlink" href="#wait-until-all-workers-are-closed" title="Permalink to this headline">¶</a></h2>
 <p>This is only necessary if the workers are started from within this python
 script. In a real application one would start them directly from the command
@@ -339,7 +344,7 @@ line.</p>
         <span class="n">process</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  39.363 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  39.167 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-60-search-example-parallel-manual-spawning-cli-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/60_search/example_parallel_manual_spawning_cli.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo2.svg" width="150px" /></a>
@@ -352,8 +357,8 @@ line.</p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
-</section>
-</section>
+</div>
+</div>
 
 
     </div>
@@ -374,7 +379,7 @@ line.</p>
       
     </p>
     <p>
-        &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
+        &copy; Copyright 2014-2022, Machine Learning Professorship Freiburg.<br/>
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br/>
     </p>
   </div>

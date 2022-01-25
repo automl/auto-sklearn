@@ -7,6 +7,8 @@ Interpretable models
 The following example shows how to inspect the models which *auto-sklearn*
 optimizes over and how to restrict them to an interpretable subset.
 """
+from pprint import pprint
+
 import autosklearn.classification
 import sklearn.datasets
 import sklearn.metrics
@@ -70,7 +72,7 @@ automl.fit(X_train, y_train, dataset_name='breast_cancer')
 # Print the final ensemble constructed by auto-sklearn
 # ====================================================
 
-print(automl.show_models())
+pprint(automl.show_models(), indent=4)
 
 ###########################################################################
 # Get the Score of the final ensemble

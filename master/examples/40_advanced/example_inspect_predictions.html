@@ -3,9 +3,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
-    <title>Model Explanation &#8212; AutoSklearn 0.14.2 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Model Explanation &#8212; AutoSklearn 0.14.4 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
@@ -55,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.14.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.4</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -125,7 +124,7 @@
 <p>Click <a class="reference internal" href="#sphx-glr-download-examples-40-advanced-example-inspect-predictions-py"><span class="std std-ref">here</span></a>
 to download the full example code or to run this example in your browser via Binder</p>
 </div>
-<section class="sphx-glr-example-title" id="model-explanation">
+<div class="sphx-glr-example-title section" id="model-explanation">
 <span id="sphx-glr-examples-40-advanced-example-inspect-predictions-py"></span><h1>Model Explanation<a class="headerlink" href="#model-explanation" title="Permalink to this headline">¶</a></h1>
 <p>The following example shows how to fit a simple classification model with
 <em>auto-sklearn</em> and use the <a class="reference external" href="https://scikit-learn.org/stable/inspection.html">inspect module</a> from
@@ -136,7 +135,7 @@ scikit-learn to understand what affects the predictions.</p>
 <span class="kn">import</span> <span class="nn">autosklearn.classification</span>
 </pre></div>
 </div>
-<section id="load-data-and-build-a-model">
+<div class="section" id="load-data-and-build-a-model">
 <h2>Load Data and Build a Model<a class="headerlink" href="#load-data-and-build-a-model" title="Permalink to this headline">¶</a></h2>
 <p>We start by loading the “Run or walk” dataset from OpenML and train an auto-sklearn model on it.
 For this dataset, the goal is to predict whether a person is running or walking based on
@@ -166,12 +165,16 @@ accelerometer and gyroscope data collected by a phone. For more information see
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Train score 0.9954285714285714
-Test score 0.9826666666666667
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.metafeatures = self.metafeatures.append(metafeatures)
+/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.algorithm_runs[metric].append(runs)
+Train score 0.9957142857142857
+Test score 0.984
 </pre></div>
 </div>
-</section>
-<section id="compute-permutation-importance-part-1">
+</div>
+<div class="section" id="compute-permutation-importance-part-1">
 <h2>Compute permutation importance - part 1<a class="headerlink" href="#compute-permutation-importance-part-1" title="Permalink to this headline">¶</a></h2>
 <p>Since auto-sklearn implements the scikit-learn interface, it can be used with the scikit-learn’s
 inspection module. So, now we first look at the <a class="reference external" href="https://christophm.github.io/interpretable-ml-book/feature-importance.html">permutation importance</a>, which defines the
@@ -195,16 +198,16 @@ in the <a class="reference external" href="https://scikit-learn.org/stable/modul
 </pre></div>
 </div>
 <img src="../../_images/sphx_glr_example_inspect_predictions_001.png" srcset="../../_images/sphx_glr_example_inspect_predictions_001.png" alt="example inspect predictions" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>gyro_y    : 0.000 +/- 0.001
-gyro_x    : 0.025 +/- 0.003
-gyro_z    : 0.037 +/- 0.003
-acceleration_x: 0.056 +/- 0.006
-acceleration_z: 0.126 +/- 0.006
-acceleration_y: 0.280 +/- 0.006
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>gyro_y    : 0.001 +/- 0.002
+gyro_x    : 0.023 +/- 0.002
+gyro_z    : 0.036 +/- 0.003
+acceleration_x: 0.051 +/- 0.006
+acceleration_z: 0.144 +/- 0.007
+acceleration_y: 0.272 +/- 0.006
 </pre></div>
 </div>
-</section>
-<section id="create-partial-dependence-pd-and-individual-conditional-expectation-ice-plots-part-2">
+</div>
+<div class="section" id="create-partial-dependence-pd-and-individual-conditional-expectation-ice-plots-part-2">
 <h2>Create partial dependence (PD) and individual conditional expectation (ICE) plots - part 2<a class="headerlink" href="#create-partial-dependence-pd-and-individual-conditional-expectation-ice-plots-part-2" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="https://christophm.github.io/interpretable-ml-book/ice.html">ICE plots</a> describe the relation
 between feature values and the response value for each sample
@@ -226,8 +229,8 @@ combining ICE (thin lines) and PD (thick line)</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_example_inspect_predictions_002.png" srcset="../../_images/sphx_glr_example_inspect_predictions_002.png" alt="example inspect predictions" class = "sphx-glr-single-img"/></section>
-<section id="create-partial-dependence-pdp-plots-for-more-than-one-feature-part-3">
+<img src="../../_images/sphx_glr_example_inspect_predictions_002.png" srcset="../../_images/sphx_glr_example_inspect_predictions_002.png" alt="example inspect predictions" class = "sphx-glr-single-img"/></div>
+<div class="section" id="create-partial-dependence-pdp-plots-for-more-than-one-feature-part-3">
 <h2>Create partial dependence (PDP) plots for more than one feature - part 3<a class="headerlink" href="#create-partial-dependence-pdp-plots-for-more-than-one-feature-part-3" title="Permalink to this headline">¶</a></h2>
 <p>A PD plot can also be generated for two features and thus allow to inspect the interaction between
 these features. Again, we’ll look at acceleration_y and acceleration_z.</p>
@@ -240,7 +243,7 @@ these features. Again, we’ll look at acceleration_y and acceleration_z.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_example_inspect_predictions_003.png" srcset="../../_images/sphx_glr_example_inspect_predictions_003.png" alt="example inspect predictions" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 4 minutes  2.065 seconds)</p>
+<img src="../../_images/sphx_glr_example_inspect_predictions_003.png" srcset="../../_images/sphx_glr_example_inspect_predictions_003.png" alt="example inspect predictions" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 4 minutes  6.567 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-inspect-predictions-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_inspect_predictions.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
@@ -253,8 +256,8 @@ these features. Again, we’ll look at acceleration_y and acceleration_z.</p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
-</section>
-</section>
+</div>
+</div>
 
 
     </div>
@@ -275,7 +278,7 @@ these features. Again, we’ll look at acceleration_y and acceleration_z.</p>
       
     </p>
     <p>
-        &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
+        &copy; Copyright 2014-2022, Machine Learning Professorship Freiburg.<br/>
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br/>
     </p>
   </div>

@@ -3,9 +3,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
-    <title>Sequential Usage &#8212; AutoSklearn 0.14.2 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sequential Usage &#8212; AutoSklearn 0.14.4 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
@@ -55,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.14.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.4</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -125,28 +124,30 @@
 <p>Click <a class="reference internal" href="#sphx-glr-download-examples-60-search-example-sequential-py"><span class="std std-ref">here</span></a>
 to download the full example code or to run this example in your browser via Binder</p>
 </div>
-<section class="sphx-glr-example-title" id="sequential-usage">
+<div class="sphx-glr-example-title section" id="sequential-usage">
 <span id="sphx-glr-examples-60-search-example-sequential-py"></span><h1>Sequential Usage<a class="headerlink" href="#sequential-usage" title="Permalink to this headline">¶</a></h1>
 <p>By default, <em>auto-sklearn</em> fits the machine learning models and build their
 ensembles in parallel. However, it is also possible to run the two processes
 sequentially. The example below shows how to first fit the models and build the
 ensembles afterwards.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sklearn.model_selection</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+
+<span class="kn">import</span> <span class="nn">sklearn.model_selection</span>
 <span class="kn">import</span> <span class="nn">sklearn.datasets</span>
 <span class="kn">import</span> <span class="nn">sklearn.metrics</span>
 
 <span class="kn">import</span> <span class="nn">autosklearn.classification</span>
 </pre></div>
 </div>
-<section id="data-loading">
+<div class="section" id="data-loading">
 <h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> \
     <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="build-and-fit-the-classifier">
+</div>
+<div class="section" id="build-and-fit-the-classifier">
 <h2>Build and fit the classifier<a class="headerlink" href="#build-and-fit-the-classifier" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
     <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
@@ -166,199 +167,317 @@ ensembles afterwards.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(delete_tmp_folder_after_terminate=False, ensemble_size=0,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.metafeatures = self.metafeatures.append(metafeatures)
+/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.algorithm_runs[metric].append(runs)
+
+AutoSklearnClassifier(delete_tmp_folder_after_terminate=False, ensemble_size=0,
                       per_run_time_limit=30, time_left_for_this_task=120,
                       tmp_folder=&#39;/tmp/autosklearn_sequential_example_tmp&#39;)
 </pre></div>
 </div>
-</section>
-<section id="print-the-final-ensemble-constructed-by-auto-sklearn">
+</div>
+<div class="section" id="print-the-final-ensemble-constructed-by-auto-sklearn">
 <h2>Print the final ensemble constructed by auto-sklearn<a class="headerlink" href="#print-the-final-ensemble-constructed-by-auto-sklearn" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">())</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pprint</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(0.100000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;libsvm_svc&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;feature_agglomeration&#39;, &#39;classifier:libsvm_svc:C&#39;: 0.07563955664363409, &#39;classifier:libsvm_svc:gamma&#39;: 1.9836355993007913, &#39;classifier:libsvm_svc:kernel&#39;: &#39;rbf&#39;, &#39;classifier:libsvm_svc:max_iter&#39;: -1, &#39;classifier:libsvm_svc:shrinking&#39;: &#39;True&#39;, &#39;classifier:libsvm_svc:tol&#39;: 0.005003173341372008, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;minmax&#39;, &#39;feature_preprocessor:feature_agglomeration:affinity&#39;: &#39;cosine&#39;, &#39;feature_preprocessor:feature_agglomeration:linkage&#39;: &#39;complete&#39;, &#39;feature_preprocessor:feature_agglomeration:n_clusters&#39;: 58, &#39;feature_preprocessor:feature_agglomeration:pooling_func&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.15890408760884822},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.080000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;mlp&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;feature_agglomeration&#39;, &#39;classifier:mlp:activation&#39;: &#39;tanh&#39;, &#39;classifier:mlp:alpha&#39;: 0.0001363185819149026, &#39;classifier:mlp:batch_size&#39;: &#39;auto&#39;, &#39;classifier:mlp:beta_1&#39;: 0.9, &#39;classifier:mlp:beta_2&#39;: 0.999, &#39;classifier:mlp:early_stopping&#39;: &#39;valid&#39;, &#39;classifier:mlp:epsilon&#39;: 1e-08, &#39;classifier:mlp:hidden_layer_depth&#39;: 3, &#39;classifier:mlp:learning_rate_init&#39;: 0.00018009776276177523, &#39;classifier:mlp:n_iter_no_change&#39;: 32, &#39;classifier:mlp:num_nodes_per_layer&#39;: 115, &#39;classifier:mlp:shuffle&#39;: &#39;True&#39;, &#39;classifier:mlp:solver&#39;: &#39;adam&#39;, &#39;classifier:mlp:tol&#39;: 0.0001, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:feature_agglomeration:affinity&#39;: &#39;euclidean&#39;, &#39;feature_preprocessor:feature_agglomeration:linkage&#39;: &#39;ward&#39;, &#39;feature_preprocessor:feature_agglomeration:n_clusters&#39;: 182, &#39;feature_preprocessor:feature_agglomeration:pooling_func&#39;: &#39;mean&#39;, &#39;classifier:mlp:validation_fraction&#39;: 0.1},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.080000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;gradient_boosting&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;extra_trees_preproc_for_classification&#39;, &#39;classifier:gradient_boosting:early_stop&#39;: &#39;valid&#39;, &#39;classifier:gradient_boosting:l2_regularization&#39;: 8.057778875694463e-05, &#39;classifier:gradient_boosting:learning_rate&#39;: 0.09179220974965213, &#39;classifier:gradient_boosting:loss&#39;: &#39;auto&#39;, &#39;classifier:gradient_boosting:max_bins&#39;: 255, &#39;classifier:gradient_boosting:max_depth&#39;: &#39;None&#39;, &#39;classifier:gradient_boosting:max_leaf_nodes&#39;: 200, &#39;classifier:gradient_boosting:min_samples_leaf&#39;: 20, &#39;classifier:gradient_boosting:scoring&#39;: &#39;loss&#39;, &#39;classifier:gradient_boosting:tol&#39;: 1e-07, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;quantile_transformer&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:bootstrap&#39;: &#39;False&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:criterion&#39;: &#39;gini&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:max_depth&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:max_features&#39;: 0.9984367650965825, &#39;feature_preprocessor:extra_trees_preproc_for_classification:max_leaf_nodes&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_impurity_decrease&#39;: 0.0, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_samples_leaf&#39;: 13, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_samples_split&#39;: 18, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_weight_fraction_leaf&#39;: 0.0, &#39;feature_preprocessor:extra_trees_preproc_for_classification:n_estimators&#39;: 100, &#39;classifier:gradient_boosting:n_iter_no_change&#39;: 18, &#39;classifier:gradient_boosting:validation_fraction&#39;: 0.14295295806077554, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.008542188583124829, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles&#39;: 1102, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution&#39;: &#39;uniform&#39;},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.080000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;extra_trees&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;feature_agglomeration&#39;, &#39;classifier:extra_trees:bootstrap&#39;: &#39;True&#39;, &#39;classifier:extra_trees:criterion&#39;: &#39;entropy&#39;, &#39;classifier:extra_trees:max_depth&#39;: &#39;None&#39;, &#39;classifier:extra_trees:max_features&#39;: 0.3871420537981852, &#39;classifier:extra_trees:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:extra_trees:min_impurity_decrease&#39;: 0.0, &#39;classifier:extra_trees:min_samples_leaf&#39;: 5, &#39;classifier:extra_trees:min_samples_split&#39;: 14, &#39;classifier:extra_trees:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;robust_scaler&#39;, &#39;feature_preprocessor:feature_agglomeration:affinity&#39;: &#39;manhattan&#39;, &#39;feature_preprocessor:feature_agglomeration:linkage&#39;: &#39;complete&#39;, &#39;feature_preprocessor:feature_agglomeration:n_clusters&#39;: 355, &#39;feature_preprocessor:feature_agglomeration:pooling_func&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max&#39;: 0.726182961545702, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min&#39;: 0.02260942170772907},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.060000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;extra_trees&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;polynomial&#39;, &#39;classifier:extra_trees:bootstrap&#39;: &#39;False&#39;, &#39;classifier:extra_trees:criterion&#39;: &#39;gini&#39;, &#39;classifier:extra_trees:max_depth&#39;: &#39;None&#39;, &#39;classifier:extra_trees:max_features&#39;: 0.5707983257382487, &#39;classifier:extra_trees:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:extra_trees:min_impurity_decrease&#39;: 0.0, &#39;classifier:extra_trees:min_samples_leaf&#39;: 3, &#39;classifier:extra_trees:min_samples_split&#39;: 11, &#39;classifier:extra_trees:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;none&#39;, &#39;feature_preprocessor:polynomial:degree&#39;: 2, &#39;feature_preprocessor:polynomial:include_bias&#39;: &#39;False&#39;, &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;False&#39;},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.060000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;extra_trees&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;polynomial&#39;, &#39;classifier:extra_trees:bootstrap&#39;: &#39;False&#39;, &#39;classifier:extra_trees:criterion&#39;: &#39;gini&#39;, &#39;classifier:extra_trees:max_depth&#39;: &#39;None&#39;, &#39;classifier:extra_trees:max_features&#39;: 0.4791448484072812, &#39;classifier:extra_trees:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:extra_trees:min_impurity_decrease&#39;: 0.0, &#39;classifier:extra_trees:min_samples_leaf&#39;: 1, &#39;classifier:extra_trees:min_samples_split&#39;: 6, &#39;classifier:extra_trees:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;none&#39;, &#39;feature_preprocessor:polynomial:degree&#39;: 3, &#39;feature_preprocessor:polynomial:include_bias&#39;: &#39;True&#39;, &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;True&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.17184142431776436},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.060000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;gradient_boosting&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;liblinear_svc_preprocessor&#39;, &#39;classifier:gradient_boosting:early_stop&#39;: &#39;train&#39;, &#39;classifier:gradient_boosting:l2_regularization&#39;: 0.005326508887463406, &#39;classifier:gradient_boosting:learning_rate&#39;: 0.060800813211425456, &#39;classifier:gradient_boosting:loss&#39;: &#39;auto&#39;, &#39;classifier:gradient_boosting:max_bins&#39;: 255, &#39;classifier:gradient_boosting:max_depth&#39;: &#39;None&#39;, &#39;classifier:gradient_boosting:max_leaf_nodes&#39;: 6, &#39;classifier:gradient_boosting:min_samples_leaf&#39;: 5, &#39;classifier:gradient_boosting:scoring&#39;: &#39;loss&#39;, &#39;classifier:gradient_boosting:tol&#39;: 1e-07, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;minmax&#39;, &#39;feature_preprocessor:liblinear_svc_preprocessor:C&#39;: 13.550960330919455, &#39;feature_preprocessor:liblinear_svc_preprocessor:dual&#39;: &#39;False&#39;, &#39;feature_preprocessor:liblinear_svc_preprocessor:fit_intercept&#39;: &#39;True&#39;, &#39;feature_preprocessor:liblinear_svc_preprocessor:intercept_scaling&#39;: 1, &#39;feature_preprocessor:liblinear_svc_preprocessor:loss&#39;: &#39;squared_hinge&#39;, &#39;feature_preprocessor:liblinear_svc_preprocessor:multi_class&#39;: &#39;ovr&#39;, &#39;feature_preprocessor:liblinear_svc_preprocessor:penalty&#39;: &#39;l1&#39;, &#39;feature_preprocessor:liblinear_svc_preprocessor:tol&#39;: 1.2958033930435781e-05, &#39;classifier:gradient_boosting:n_iter_no_change&#39;: 5},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.060000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;extra_trees&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;polynomial&#39;, &#39;classifier:extra_trees:bootstrap&#39;: &#39;True&#39;, &#39;classifier:extra_trees:criterion&#39;: &#39;entropy&#39;, &#39;classifier:extra_trees:max_depth&#39;: &#39;None&#39;, &#39;classifier:extra_trees:max_features&#39;: 0.3793256905143867, &#39;classifier:extra_trees:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:extra_trees:min_impurity_decrease&#39;: 0.0, &#39;classifier:extra_trees:min_samples_leaf&#39;: 20, &#39;classifier:extra_trees:min_samples_split&#39;: 5, &#39;classifier:extra_trees:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;none&#39;, &#39;feature_preprocessor:polynomial:degree&#39;: 3, &#39;feature_preprocessor:polynomial:include_bias&#39;: &#39;False&#39;, &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;True&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.00010083678209087315},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.040000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;gradient_boosting&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;select_percentile_classification&#39;, &#39;classifier:gradient_boosting:early_stop&#39;: &#39;train&#39;, &#39;classifier:gradient_boosting:l2_regularization&#39;: 3.387912939529945e-10, &#39;classifier:gradient_boosting:learning_rate&#39;: 0.30755227194768237, &#39;classifier:gradient_boosting:loss&#39;: &#39;auto&#39;, &#39;classifier:gradient_boosting:max_bins&#39;: 255, &#39;classifier:gradient_boosting:max_depth&#39;: &#39;None&#39;, &#39;classifier:gradient_boosting:max_leaf_nodes&#39;: 60, &#39;classifier:gradient_boosting:min_samples_leaf&#39;: 39, &#39;classifier:gradient_boosting:scoring&#39;: &#39;loss&#39;, &#39;classifier:gradient_boosting:tol&#39;: 1e-07, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;none&#39;, &#39;feature_preprocessor:select_percentile_classification:percentile&#39;: 93.39844669585806, &#39;feature_preprocessor:select_percentile_classification:score_func&#39;: &#39;f_classif&#39;, &#39;classifier:gradient_boosting:n_iter_no_change&#39;: 18, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.010000000000000004},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.040000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;extra_trees&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;classifier:extra_trees:bootstrap&#39;: &#39;False&#39;, &#39;classifier:extra_trees:criterion&#39;: &#39;gini&#39;, &#39;classifier:extra_trees:max_depth&#39;: &#39;None&#39;, &#39;classifier:extra_trees:max_features&#39;: 0.661377361743419, &#39;classifier:extra_trees:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:extra_trees:min_impurity_decrease&#39;: 0.0, &#39;classifier:extra_trees:min_samples_leaf&#39;: 2, &#39;classifier:extra_trees:min_samples_split&#39;: 13, &#39;classifier:extra_trees:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;none&#39;},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.040000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;extra_trees&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;polynomial&#39;, &#39;classifier:extra_trees:bootstrap&#39;: &#39;False&#39;, &#39;classifier:extra_trees:criterion&#39;: &#39;entropy&#39;, &#39;classifier:extra_trees:max_depth&#39;: &#39;None&#39;, &#39;classifier:extra_trees:max_features&#39;: 0.993803313878608, &#39;classifier:extra_trees:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:extra_trees:min_impurity_decrease&#39;: 0.0, &#39;classifier:extra_trees:min_samples_leaf&#39;: 2, &#39;classifier:extra_trees:min_samples_split&#39;: 20, &#39;classifier:extra_trees:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;robust_scaler&#39;, &#39;feature_preprocessor:polynomial:degree&#39;: 2, &#39;feature_preprocessor:polynomial:include_bias&#39;: &#39;True&#39;, &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;True&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.41826215858914706, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max&#39;: 0.7305615609807856, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min&#39;: 0.25595970768123566},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.040000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;gradient_boosting&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;extra_trees_preproc_for_classification&#39;, &#39;classifier:gradient_boosting:early_stop&#39;: &#39;train&#39;, &#39;classifier:gradient_boosting:l2_regularization&#39;: 0.4635442279519353, &#39;classifier:gradient_boosting:learning_rate&#39;: 0.09809681787962342, &#39;classifier:gradient_boosting:loss&#39;: &#39;auto&#39;, &#39;classifier:gradient_boosting:max_bins&#39;: 255, &#39;classifier:gradient_boosting:max_depth&#39;: &#39;None&#39;, &#39;classifier:gradient_boosting:max_leaf_nodes&#39;: 328, &#39;classifier:gradient_boosting:min_samples_leaf&#39;: 2, &#39;classifier:gradient_boosting:scoring&#39;: &#39;loss&#39;, &#39;classifier:gradient_boosting:tol&#39;: 1e-07, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:bootstrap&#39;: &#39;False&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:criterion&#39;: &#39;entropy&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:max_depth&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:max_features&#39;: 0.989729761503726, &#39;feature_preprocessor:extra_trees_preproc_for_classification:max_leaf_nodes&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_impurity_decrease&#39;: 0.0, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_samples_leaf&#39;: 19, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_samples_split&#39;: 5, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_weight_fraction_leaf&#39;: 0.0, &#39;feature_preprocessor:extra_trees_preproc_for_classification:n_estimators&#39;: 100, &#39;classifier:gradient_boosting:n_iter_no_change&#39;: 2, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.0208475757765491},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.040000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;extra_trees&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;extra_trees_preproc_for_classification&#39;, &#39;classifier:extra_trees:bootstrap&#39;: &#39;False&#39;, &#39;classifier:extra_trees:criterion&#39;: &#39;gini&#39;, &#39;classifier:extra_trees:max_depth&#39;: &#39;None&#39;, &#39;classifier:extra_trees:max_features&#39;: 0.9292309396985746, &#39;classifier:extra_trees:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:extra_trees:min_impurity_decrease&#39;: 0.0, &#39;classifier:extra_trees:min_samples_leaf&#39;: 1, &#39;classifier:extra_trees:min_samples_split&#39;: 10, &#39;classifier:extra_trees:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;normalize&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:bootstrap&#39;: &#39;False&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:criterion&#39;: &#39;entropy&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:max_depth&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:max_features&#39;: 0.9929881254946676, &#39;feature_preprocessor:extra_trees_preproc_for_classification:max_leaf_nodes&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_impurity_decrease&#39;: 0.0, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_samples_leaf&#39;: 1, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_samples_split&#39;: 2, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_weight_fraction_leaf&#39;: 0.0, &#39;feature_preprocessor:extra_trees_preproc_for_classification:n_estimators&#39;: 100, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.032719158639429445},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.040000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;random_forest&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;select_rates_classification&#39;, &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;, &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;, &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;, &#39;classifier:random_forest:max_features&#39;: 0.5561389303694175, &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0, &#39;classifier:random_forest:min_samples_leaf&#39;: 16, &#39;classifier:random_forest:min_samples_split&#39;: 4, &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;quantile_transformer&#39;, &#39;feature_preprocessor:select_rates_classification:alpha&#39;: 0.48507733455436836, &#39;feature_preprocessor:select_rates_classification:score_func&#39;: &#39;f_classif&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles&#39;: 1567, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution&#39;: &#39;normal&#39;, &#39;feature_preprocessor:select_rates_classification:mode&#39;: &#39;fpr&#39;},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.040000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;libsvm_svc&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;select_percentile_classification&#39;, &#39;classifier:libsvm_svc:C&#39;: 5121.989374401993, &#39;classifier:libsvm_svc:gamma&#39;: 0.0024386428371511353, &#39;classifier:libsvm_svc:kernel&#39;: &#39;rbf&#39;, &#39;classifier:libsvm_svc:max_iter&#39;: -1, &#39;classifier:libsvm_svc:shrinking&#39;: &#39;True&#39;, &#39;classifier:libsvm_svc:tol&#39;: 0.0706216214952021, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;robust_scaler&#39;, &#39;feature_preprocessor:select_percentile_classification:percentile&#39;: 90.1749860017522, &#39;feature_preprocessor:select_percentile_classification:score_func&#39;: &#39;chi2&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.00017888891850981892, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max&#39;: 0.7393440007191528, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min&#39;: 0.04986510953238},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.020000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;mlp&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;fast_ica&#39;, &#39;classifier:mlp:activation&#39;: &#39;relu&#39;, &#39;classifier:mlp:alpha&#39;: 0.0017940473175767063, &#39;classifier:mlp:batch_size&#39;: &#39;auto&#39;, &#39;classifier:mlp:beta_1&#39;: 0.9, &#39;classifier:mlp:beta_2&#39;: 0.999, &#39;classifier:mlp:early_stopping&#39;: &#39;valid&#39;, &#39;classifier:mlp:epsilon&#39;: 1e-08, &#39;classifier:mlp:hidden_layer_depth&#39;: 2, &#39;classifier:mlp:learning_rate_init&#39;: 0.0004684917334431039, &#39;classifier:mlp:n_iter_no_change&#39;: 32, &#39;classifier:mlp:num_nodes_per_layer&#39;: 101, &#39;classifier:mlp:shuffle&#39;: &#39;True&#39;, &#39;classifier:mlp:solver&#39;: &#39;adam&#39;, &#39;classifier:mlp:tol&#39;: 0.0001, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:fast_ica:algorithm&#39;: &#39;parallel&#39;, &#39;feature_preprocessor:fast_ica:fun&#39;: &#39;exp&#39;, &#39;feature_preprocessor:fast_ica:whiten&#39;: &#39;False&#39;, &#39;classifier:mlp:validation_fraction&#39;: 0.1},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.020000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;mlp&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;extra_trees_preproc_for_classification&#39;, &#39;classifier:mlp:activation&#39;: &#39;tanh&#39;, &#39;classifier:mlp:alpha&#39;: 2.5550223982458062e-06, &#39;classifier:mlp:batch_size&#39;: &#39;auto&#39;, &#39;classifier:mlp:beta_1&#39;: 0.9, &#39;classifier:mlp:beta_2&#39;: 0.999, &#39;classifier:mlp:early_stopping&#39;: &#39;train&#39;, &#39;classifier:mlp:epsilon&#39;: 1e-08, &#39;classifier:mlp:hidden_layer_depth&#39;: 3, &#39;classifier:mlp:learning_rate_init&#39;: 0.00027271287919467994, &#39;classifier:mlp:n_iter_no_change&#39;: 32, &#39;classifier:mlp:num_nodes_per_layer&#39;: 54, &#39;classifier:mlp:shuffle&#39;: &#39;True&#39;, &#39;classifier:mlp:solver&#39;: &#39;adam&#39;, &#39;classifier:mlp:tol&#39;: 0.0001, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:bootstrap&#39;: &#39;False&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:criterion&#39;: &#39;entropy&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:max_depth&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:max_features&#39;: 0.7171678618990129, &#39;feature_preprocessor:extra_trees_preproc_for_classification:max_leaf_nodes&#39;: &#39;None&#39;, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_impurity_decrease&#39;: 0.0, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_samples_leaf&#39;: 4, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_samples_split&#39;: 17, &#39;feature_preprocessor:extra_trees_preproc_for_classification:min_weight_fraction_leaf&#39;: 0.0, &#39;feature_preprocessor:extra_trees_preproc_for_classification:n_estimators&#39;: 100, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.017116661677715188},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.020000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;liblinear_svc&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;select_percentile_classification&#39;, &#39;classifier:liblinear_svc:C&#39;: 140.23434217313954, &#39;classifier:liblinear_svc:dual&#39;: &#39;False&#39;, &#39;classifier:liblinear_svc:fit_intercept&#39;: &#39;True&#39;, &#39;classifier:liblinear_svc:intercept_scaling&#39;: 1, &#39;classifier:liblinear_svc:loss&#39;: &#39;squared_hinge&#39;, &#39;classifier:liblinear_svc:multi_class&#39;: &#39;ovr&#39;, &#39;classifier:liblinear_svc:penalty&#39;: &#39;l2&#39;, &#39;classifier:liblinear_svc:tol&#39;: 0.0002944604673080368, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;quantile_transformer&#39;, &#39;feature_preprocessor:select_percentile_classification:percentile&#39;: 29.807816607300627, &#39;feature_preprocessor:select_percentile_classification:score_func&#39;: &#39;chi2&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.034330895903523305, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles&#39;: 1450, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution&#39;: &#39;uniform&#39;},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.020000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;mlp&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;feature_agglomeration&#39;, &#39;classifier:mlp:activation&#39;: &#39;relu&#39;, &#39;classifier:mlp:alpha&#39;: 4.2841884333778574e-06, &#39;classifier:mlp:batch_size&#39;: &#39;auto&#39;, &#39;classifier:mlp:beta_1&#39;: 0.9, &#39;classifier:mlp:beta_2&#39;: 0.999, &#39;classifier:mlp:early_stopping&#39;: &#39;train&#39;, &#39;classifier:mlp:epsilon&#39;: 1e-08, &#39;classifier:mlp:hidden_layer_depth&#39;: 3, &#39;classifier:mlp:learning_rate_init&#39;: 0.0011804284312897009, &#39;classifier:mlp:n_iter_no_change&#39;: 32, &#39;classifier:mlp:num_nodes_per_layer&#39;: 263, &#39;classifier:mlp:shuffle&#39;: &#39;True&#39;, &#39;classifier:mlp:solver&#39;: &#39;adam&#39;, &#39;classifier:mlp:tol&#39;: 0.0001, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;minmax&#39;, &#39;feature_preprocessor:feature_agglomeration:affinity&#39;: &#39;manhattan&#39;, &#39;feature_preprocessor:feature_agglomeration:linkage&#39;: &#39;average&#39;, &#39;feature_preprocessor:feature_agglomeration:n_clusters&#39;: 338, &#39;feature_preprocessor:feature_agglomeration:pooling_func&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.004071801722749603},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.020000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;mlp&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;fast_ica&#39;, &#39;classifier:mlp:activation&#39;: &#39;relu&#39;, &#39;classifier:mlp:alpha&#39;: 0.02847755502162456, &#39;classifier:mlp:batch_size&#39;: &#39;auto&#39;, &#39;classifier:mlp:beta_1&#39;: 0.9, &#39;classifier:mlp:beta_2&#39;: 0.999, &#39;classifier:mlp:early_stopping&#39;: &#39;train&#39;, &#39;classifier:mlp:epsilon&#39;: 1e-08, &#39;classifier:mlp:hidden_layer_depth&#39;: 2, &#39;classifier:mlp:learning_rate_init&#39;: 0.000421568792103947, &#39;classifier:mlp:n_iter_no_change&#39;: 32, &#39;classifier:mlp:num_nodes_per_layer&#39;: 123, &#39;classifier:mlp:shuffle&#39;: &#39;True&#39;, &#39;classifier:mlp:solver&#39;: &#39;adam&#39;, &#39;classifier:mlp:tol&#39;: 0.0001, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;minmax&#39;, &#39;feature_preprocessor:fast_ica:algorithm&#39;: &#39;parallel&#39;, &#39;feature_preprocessor:fast_ica:fun&#39;: &#39;exp&#39;, &#39;feature_preprocessor:fast_ica:whiten&#39;: &#39;False&#39;},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.020000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;bernoulli_nb&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;select_rates_classification&#39;, &#39;classifier:bernoulli_nb:alpha&#39;: 39.87397441278958, &#39;classifier:bernoulli_nb:fit_prior&#39;: &#39;False&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:select_rates_classification:alpha&#39;: 0.3094962987325228, &#39;feature_preprocessor:select_rates_classification:score_func&#39;: &#39;mutual_info_classif&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.09580337973953734},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-(0.020000, SimpleClassificationPipeline({&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;passive_aggressive&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;classifier:passive_aggressive:C&#39;: 0.14268277711454813, &#39;classifier:passive_aggressive:average&#39;: &#39;False&#39;, &#39;classifier:passive_aggressive:fit_intercept&#39;: &#39;True&#39;, &#39;classifier:passive_aggressive:loss&#39;: &#39;hinge&#39;, &#39;classifier:passive_aggressive:tol&#39;: 0.0002600768160857831, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;none&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.0070580904199417415},
-dataset_properties={
-  &#39;task&#39;: 1,
-  &#39;sparse&#39;: False,
-  &#39;multilabel&#39;: False,
-  &#39;multiclass&#39;: False,
-  &#39;target_type&#39;: &#39;classification&#39;,
-  &#39;signed&#39;: False})),
-]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   2: {   &#39;balancing&#39;: Balancing(random_state=1),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc7901c5dc0&gt;,
+           &#39;cost&#39;: 0.028368794326241176,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc78a5f4f70&gt;,
+           &#39;ensemble_weight&#39;: 0.020000000000000004,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc790049a90&gt;,
+           &#39;model_id&#39;: 2,
+           &#39;rank&#39;: 4,
+           &#39;sklearn_classifier&#39;: RandomForestClassifier(max_features=5, n_estimators=512, n_jobs=1,
+                       random_state=1, warm_start=True)},
+    4: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc786184580&gt;,
+           &#39;cost&#39;: 0.05673758865248224,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc7879e2c10&gt;,
+           &#39;ensemble_weight&#39;: 0.04000000000000001,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78fb05610&gt;,
+           &#39;model_id&#39;: 4,
+           &#39;rank&#39;: 21,
+           &#39;sklearn_classifier&#39;: MLPClassifier(activation=&#39;tanh&#39;, alpha=0.00021148999718383549, beta_1=0.999,
+              beta_2=0.9, hidden_layer_sizes=(113, 113, 113),
+              learning_rate_init=0.0007452270241186694, max_iter=64,
+              n_iter_no_change=32, random_state=1, validation_fraction=0.0,
+              verbose=0, warm_start=True)},
+    5: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc786918190&gt;,
+           &#39;cost&#39;: 0.03546099290780147,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc785e4f4f0&gt;,
+           &#39;ensemble_weight&#39;: 0.020000000000000004,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc787a9e310&gt;,
+           &#39;model_id&#39;: 5,
+           &#39;rank&#39;: 14,
+           &#39;sklearn_classifier&#39;: RandomForestClassifier(criterion=&#39;entropy&#39;, max_features=3, min_samples_leaf=2,
+                       n_estimators=512, n_jobs=1, random_state=1,
+                       warm_start=True)},
+    6: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc78c944ca0&gt;,
+           &#39;cost&#39;: 0.028368794326241176,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc7902bd4f0&gt;,
+           &#39;ensemble_weight&#39;: 0.10000000000000002,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78c944160&gt;,
+           &#39;model_id&#39;: 6,
+           &#39;rank&#39;: 5,
+           &#39;sklearn_classifier&#39;: MLPClassifier(alpha=0.0017940473175767063, beta_1=0.999, beta_2=0.9,
+              early_stopping=True, hidden_layer_sizes=(101, 101),
+              learning_rate_init=0.0004684917334431039, max_iter=32,
+              n_iter_no_change=32, random_state=1, verbose=0, warm_start=True)},
+    7: {   &#39;balancing&#39;: Balancing(random_state=1),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc78a7d9bb0&gt;,
+           &#39;cost&#39;: 0.014184397163120588,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc78ca46460&gt;,
+           &#39;ensemble_weight&#39;: 0.04000000000000001,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78ff934c0&gt;,
+           &#39;model_id&#39;: 7,
+           &#39;rank&#39;: 1,
+           &#39;sklearn_classifier&#39;: ExtraTreesClassifier(max_features=34, min_samples_leaf=3, min_samples_split=11,
+                     n_estimators=512, n_jobs=1, random_state=1,
+                     warm_start=True)},
+    8: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc787005400&gt;,
+           &#39;cost&#39;: 0.03546099290780147,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc787e71580&gt;,
+           &#39;ensemble_weight&#39;: 0.060000000000000005,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc786918580&gt;,
+           &#39;model_id&#39;: 8,
+           &#39;rank&#39;: 15,
+           &#39;sklearn_classifier&#39;: RandomForestClassifier(max_features=2, min_samples_leaf=2, n_estimators=512,
+                       n_jobs=1, random_state=1, warm_start=True)},
+    9: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc78fc1f100&gt;,
+           &#39;cost&#39;: 0.04255319148936165,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc7857b5a30&gt;,
+           &#39;ensemble_weight&#39;: 0.060000000000000005,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78bae9040&gt;,
+           &#39;model_id&#39;: 9,
+           &#39;rank&#39;: 19,
+           &#39;sklearn_classifier&#39;: ExtraTreesClassifier(max_features=9, min_samples_split=10, n_estimators=512,
+                     n_jobs=1, random_state=1, warm_start=True)},
+    10: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc78f986940&gt;,
+            &#39;cost&#39;: 0.028368794326241176,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc78c482100&gt;,
+            &#39;ensemble_weight&#39;: 0.060000000000000005,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78bcec7c0&gt;,
+            &#39;model_id&#39;: 10,
+            &#39;rank&#39;: 6,
+            &#39;sklearn_classifier&#39;: RandomForestClassifier(criterion=&#39;entropy&#39;, max_features=4, min_samples_split=6,
+                       n_estimators=512, n_jobs=1, random_state=1,
+                       warm_start=True)},
+    11: {   &#39;balancing&#39;: Balancing(random_state=1),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc78ab3f070&gt;,
+            &#39;cost&#39;: 0.028368794326241176,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc78be43c70&gt;,
+            &#39;ensemble_weight&#39;: 0.04000000000000001,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78ab3f550&gt;,
+            &#39;model_id&#39;: 11,
+            &#39;rank&#39;: 7,
+            &#39;sklearn_classifier&#39;: RandomForestClassifier(criterion=&#39;entropy&#39;, max_features=23, min_samples_leaf=7,
+                       n_estimators=512, n_jobs=1, random_state=1,
+                       warm_start=True)},
+    13: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc78b2344c0&gt;,
+            &#39;cost&#39;: 0.028368794326241176,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc786095eb0&gt;,
+            &#39;ensemble_weight&#39;: 0.020000000000000004,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78b2451f0&gt;,
+            &#39;model_id&#39;: 13,
+            &#39;rank&#39;: 8,
+            &#39;sklearn_classifier&#39;: HistGradientBoostingClassifier(early_stopping=False,
+                               l2_regularization=1.0647401999412075e-10,
+                               learning_rate=0.08291320147381159, max_iter=512,
+                               max_leaf_nodes=39, n_iter_no_change=0,
+                               random_state=1, validation_fraction=None,
+                               warm_start=True)},
+    15: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc78c482310&gt;,
+            &#39;cost&#39;: 0.049645390070921946,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc785872910&gt;,
+            &#39;ensemble_weight&#39;: 0.020000000000000004,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78fc1fc40&gt;,
+            &#39;model_id&#39;: 15,
+            &#39;rank&#39;: 20,
+            &#39;sklearn_classifier&#39;: MLPClassifier(alpha=4.2841884333778574e-06, beta_1=0.999, beta_2=0.9,
+              hidden_layer_sizes=(263, 263, 263),
+              learning_rate_init=0.0011804284312897009, max_iter=128,
+              n_iter_no_change=32, random_state=1, validation_fraction=0.0,
+              verbose=0, warm_start=True)},
+    17: {   &#39;balancing&#39;: Balancing(random_state=1),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc785b7d6a0&gt;,
+            &#39;cost&#39;: 0.03546099290780147,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc7870329a0&gt;,
+            &#39;ensemble_weight&#39;: 0.020000000000000004,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc7870056d0&gt;,
+            &#39;model_id&#39;: 17,
+            &#39;rank&#39;: 16,
+            &#39;sklearn_classifier&#39;: HistGradientBoostingClassifier(early_stopping=True,
+                               l2_regularization=0.4635442279519353,
+                               learning_rate=0.09809681787962342, max_iter=512,
+                               max_leaf_nodes=328, min_samples_leaf=2,
+                               n_iter_no_change=2, random_state=1,
+                               validation_fraction=None, warm_start=True)},
+    18: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc78a38fd30&gt;,
+            &#39;cost&#39;: 0.03546099290780147,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc78790c850&gt;,
+            &#39;ensemble_weight&#39;: 0.04000000000000001,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc785b7d5e0&gt;,
+            &#39;model_id&#39;: 18,
+            &#39;rank&#39;: 17,
+            &#39;sklearn_classifier&#39;: RandomForestClassifier(criterion=&#39;entropy&#39;, max_features=3, n_estimators=512,
+                       n_jobs=1, random_state=1, warm_start=True)},
+    19: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc78438b220&gt;,
+            &#39;cost&#39;: 0.028368794326241176,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc786c78730&gt;,
+            &#39;ensemble_weight&#39;: 0.020000000000000004,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78438b070&gt;,
+            &#39;model_id&#39;: 19,
+            &#39;rank&#39;: 9,
+            &#39;sklearn_classifier&#39;: ExtraTreesClassifier(criterion=&#39;entropy&#39;, max_features=448, min_samples_leaf=2,
+                     min_samples_split=20, n_estimators=512, n_jobs=1,
+                     random_state=1, warm_start=True)},
+    21: {   &#39;balancing&#39;: Balancing(random_state=1),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc78a791d30&gt;,
+            &#39;cost&#39;: 0.021276595744680882,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc78a593e50&gt;,
+            &#39;ensemble_weight&#39;: 0.04000000000000001,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc79068ba00&gt;,
+            &#39;model_id&#39;: 21,
+            &#39;rank&#39;: 3,
+            &#39;sklearn_classifier&#39;: ExtraTreesClassifier(criterion=&#39;entropy&#39;, max_features=4, min_samples_leaf=2,
+                     min_samples_split=15, n_estimators=512, n_jobs=1,
+                     random_state=1, warm_start=True)},
+    26: {   &#39;balancing&#39;: Balancing(random_state=1),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc7857f8c40&gt;,
+            &#39;cost&#39;: 0.028368794326241176,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc78ab77d60&gt;,
+            &#39;ensemble_weight&#39;: 0.04000000000000001,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc7857f88e0&gt;,
+            &#39;model_id&#39;: 26,
+            &#39;rank&#39;: 10,
+            &#39;sklearn_classifier&#39;: ExtraTreesClassifier(criterion=&#39;entropy&#39;, max_features=414, min_samples_leaf=2,
+                     min_samples_split=19, n_estimators=512, n_jobs=1,
+                     random_state=1, warm_start=True)},
+    27: {   &#39;balancing&#39;: Balancing(random_state=1),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc784e47520&gt;,
+            &#39;cost&#39;: 0.028368794326241176,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc786b74100&gt;,
+            &#39;ensemble_weight&#39;: 0.020000000000000004,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc784e47160&gt;,
+            &#39;model_id&#39;: 27,
+            &#39;rank&#39;: 11,
+            &#39;sklearn_classifier&#39;: ExtraTreesClassifier(bootstrap=True, criterion=&#39;entropy&#39;, max_features=4126,
+                     min_samples_leaf=7, min_samples_split=13, n_estimators=512,
+                     n_jobs=1, random_state=1, warm_start=True)},
+    28: {   &#39;balancing&#39;: Balancing(random_state=1),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc78b4f2310&gt;,
+            &#39;cost&#39;: 0.06382978723404253,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc78666a6d0&gt;,
+            &#39;ensemble_weight&#39;: 0.020000000000000004,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc790366ac0&gt;,
+            &#39;model_id&#39;: 28,
+            &#39;rank&#39;: 22,
+            &#39;sklearn_classifier&#39;: LinearDiscriminantAnalysis(tol=0.032840833359764676)},
+    29: {   &#39;balancing&#39;: Balancing(random_state=1),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc78c53a9d0&gt;,
+            &#39;cost&#39;: 0.028368794326241176,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc787368bb0&gt;,
+            &#39;ensemble_weight&#39;: 0.020000000000000004,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78c53a5e0&gt;,
+            &#39;model_id&#39;: 29,
+            &#39;rank&#39;: 12,
+            &#39;sklearn_classifier&#39;: ExtraTreesClassifier(criterion=&#39;entropy&#39;, max_features=8, min_samples_leaf=11,
+                     min_samples_split=5, n_estimators=512, n_jobs=1,
+                     random_state=1, warm_start=True)},
+    31: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc78a378070&gt;,
+            &#39;cost&#39;: 0.03546099290780147,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc785fb2160&gt;,
+            &#39;ensemble_weight&#39;: 0.04000000000000001,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78a38fc40&gt;,
+            &#39;model_id&#39;: 31,
+            &#39;rank&#39;: 18,
+            &#39;sklearn_classifier&#39;: LinearSVC(class_weight=&#39;balanced&#39;, dual=False, intercept_scaling=1.0,
+          random_state=1, tol=0.0001350687148423338)},
+    32: {   &#39;balancing&#39;: Balancing(random_state=1),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc7850a2c70&gt;,
+            &#39;cost&#39;: 0.028368794326241176,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc784f51070&gt;,
+            &#39;ensemble_weight&#39;: 0.04000000000000001,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc7850a2760&gt;,
+            &#39;model_id&#39;: 32,
+            &#39;rank&#39;: 13,
+            &#39;sklearn_classifier&#39;: LinearSVC(C=832.5744883902069, dual=False, intercept_scaling=1.0,
+          random_state=1, tol=0.015340961719445064)},
+    34: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc784c102e0&gt;,
+            &#39;cost&#39;: 0.06382978723404253,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc786abb970&gt;,
+            &#39;ensemble_weight&#39;: 0.020000000000000004,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc784b3b400&gt;,
+            &#39;model_id&#39;: 34,
+            &#39;rank&#39;: 23,
+            &#39;sklearn_classifier&#39;: RandomForestClassifier(bootstrap=False, criterion=&#39;entropy&#39;, max_features=54,
+                       min_samples_leaf=14, min_samples_split=3,
+                       n_estimators=512, n_jobs=1, random_state=1,
+                       warm_start=True)},
+    36: {   &#39;balancing&#39;: Balancing(random_state=1),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc786a9d310&gt;,
+            &#39;cost&#39;: 0.36879432624113473,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc787e1a9a0&gt;,
+            &#39;ensemble_weight&#39;: 0.08000000000000002,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc786a909a0&gt;,
+            &#39;model_id&#39;: 36,
+            &#39;rank&#39;: 26,
+            &#39;sklearn_classifier&#39;: ExtraTreesClassifier(bootstrap=True, max_features=4, min_samples_leaf=13,
+                     min_samples_split=11, n_estimators=512, n_jobs=1,
+                     random_state=1, warm_start=True)},
+    39: {   &#39;balancing&#39;: Balancing(random_state=1),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc78f69f220&gt;,
+            &#39;cost&#39;: 0.014184397163120588,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc78c384be0&gt;,
+            &#39;ensemble_weight&#39;: 0.060000000000000005,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc790366ee0&gt;,
+            &#39;model_id&#39;: 39,
+            &#39;rank&#39;: 2,
+            &#39;sklearn_classifier&#39;: ExtraTreesClassifier(criterion=&#39;entropy&#39;, max_features=32, min_samples_leaf=8,
+                     min_samples_split=8, n_estimators=512, n_jobs=1,
+                     random_state=1, warm_start=True)},
+    41: {   &#39;balancing&#39;: Balancing(random_state=1),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc78612c5b0&gt;,
+            &#39;cost&#39;: 0.07092198581560283,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc78febd7c0&gt;,
+            &#39;ensemble_weight&#39;: 0.020000000000000004,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78612c280&gt;,
+            &#39;model_id&#39;: 41,
+            &#39;rank&#39;: 24,
+            &#39;sklearn_classifier&#39;: DecisionTreeClassifier(max_depth=1, min_samples_leaf=15, min_samples_split=5,
+                       random_state=1)},
+    43: {   &#39;balancing&#39;: Balancing(random_state=1),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc78bc70c10&gt;,
+            &#39;cost&#39;: 0.09219858156028371,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc7873bf130&gt;,
+            &#39;ensemble_weight&#39;: 0.04000000000000001,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78b800b20&gt;,
+            &#39;model_id&#39;: 43,
+            &#39;rank&#39;: 25,
+            &#39;sklearn_classifier&#39;: ExtraTreesClassifier(bootstrap=True, criterion=&#39;entropy&#39;, max_features=12,
+                     min_samples_leaf=19, min_samples_split=17,
+                     n_estimators=512, n_jobs=1, random_state=1,
+                     warm_start=True)}}
 </pre></div>
 </div>
-</section>
-<section id="get-the-score-of-the-final-ensemble">
+</div>
+<div class="section" id="get-the-score-of-the-final-ensemble">
 <h2>Get the Score of the final ensemble<a class="headerlink" href="#get-the-score-of-the-final-ensemble" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">sprint_statistics</span><span class="p">())</span>
@@ -370,16 +489,16 @@ dataset_properties={
   Dataset name: breast_cancer
   Metric: accuracy
   Best validation score: 0.985816
-  Number of target algorithm runs: 41
-  Number of successful target algorithm runs: 41
+  Number of target algorithm runs: 44
+  Number of successful target algorithm runs: 43
   Number of crashed target algorithm runs: 0
-  Number of target algorithms that exceeded the time limit: 0
+  Number of target algorithms that exceeded the time limit: 1
   Number of target algorithms that exceeded the memory limit: 0
 
-Accuracy score 0.951048951048951
+Accuracy score 0.958041958041958
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  4.152 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  1.878 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-60-search-example-sequential-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/60_search/example_sequential.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo2.svg" width="150px" /></a>
@@ -392,8 +511,8 @@ Accuracy score 0.951048951048951
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
-</section>
-</section>
+</div>
+</div>
 
 
     </div>
@@ -414,7 +533,7 @@ Accuracy score 0.951048951048951
       
     </p>
     <p>
-        &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
+        &copy; Copyright 2014-2022, Machine Learning Professorship Freiburg.<br/>
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br/>
     </p>
   </div>

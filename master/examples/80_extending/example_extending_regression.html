@@ -3,9 +3,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
-    <title>Extending Auto-Sklearn with Regression Component &#8212; AutoSklearn 0.14.2 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Extending Auto-Sklearn with Regression Component &#8212; AutoSklearn 0.14.4 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
@@ -55,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.14.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.4</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -125,11 +124,13 @@
 <p>Click <a class="reference internal" href="#sphx-glr-download-examples-80-extending-example-extending-regression-py"><span class="std std-ref">here</span></a>
 to download the full example code or to run this example in your browser via Binder</p>
 </div>
-<section class="sphx-glr-example-title" id="extending-auto-sklearn-with-regression-component">
+<div class="sphx-glr-example-title section" id="extending-auto-sklearn-with-regression-component">
 <span id="sphx-glr-examples-80-extending-example-extending-regression-py"></span><h1>Extending Auto-Sklearn with Regression Component<a class="headerlink" href="#extending-auto-sklearn-with-regression-component" title="Permalink to this headline">¶</a></h1>
 <p>The following example demonstrates how to create a new regression
 component for using in auto-sklearn.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ConfigSpace.configuration_space</span> <span class="kn">import</span> <span class="n">ConfigurationSpace</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+
+<span class="kn">from</span> <span class="nn">ConfigSpace.configuration_space</span> <span class="kn">import</span> <span class="n">ConfigurationSpace</span>
 <span class="kn">from</span> <span class="nn">ConfigSpace.hyperparameters</span> <span class="kn">import</span> <span class="n">UniformFloatHyperparameter</span><span class="p">,</span> \
     <span class="n">UniformIntegerHyperparameter</span><span class="p">,</span> <span class="n">CategoricalHyperparameter</span>
 <span class="kn">from</span> <span class="nn">ConfigSpace.conditions</span> <span class="kn">import</span> <span class="n">EqualsCondition</span>
@@ -145,7 +146,7 @@ component for using in auto-sklearn.</p>
 <span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
 </pre></div>
 </div>
-<section id="implement-kernel-ridge-regression-component-for-auto-sklearn">
+<div class="section" id="implement-kernel-ridge-regression-component-for-auto-sklearn">
 <h2>Implement kernel ridge regression component for auto-sklearn<a class="headerlink" href="#implement-kernel-ridge-regression-component-for-auto-sklearn" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">KernelRidgeRegression</span><span class="p">(</span><span class="n">AutoSklearnRegressionAlgorithm</span><span class="p">):</span>
 
@@ -242,15 +243,15 @@ component for using in auto-sklearn.</p>
     degree | kernel == &#39;polynomial&#39;
 </pre></div>
 </div>
-</section>
-<section id="generate-data">
+</div>
+<div class="section" id="generate-data">
 <h2>Generate data<a class="headerlink" href="#generate-data" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_diabetes</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="fit-the-model-using-krr">
+</div>
+<div class="section" id="fit-the-model-using-krr">
 <h2>Fit the model using KRR<a class="headerlink" href="#fit-the-model-using-krr" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">reg</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">regression</span><span class="o">.</span><span class="n">AutoSklearnRegressor</span><span class="p">(</span>
     <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
@@ -274,27 +275,27 @@ component for using in auto-sklearn.</p>
                      time_left_for_this_task=30)
 </pre></div>
 </div>
-</section>
-<section id="print-prediction-score-and-statistics">
+</div>
+<div class="section" id="print-prediction-score-and-statistics">
 <h2>Print prediction score and statistics<a class="headerlink" href="#print-prediction-score-and-statistics" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">y_pred</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;r2 score: &quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y_test</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">reg</span><span class="o">.</span><span class="n">show_models</span><span class="p">())</span>
+<span class="n">pprint</span><span class="p">(</span><span class="n">reg</span><span class="o">.</span><span class="n">show_models</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>r2 score:  0.1280839244790386
-[(1.000000, SimpleRegressionPipeline({&#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;, &#39;regressor:__choice__&#39;: &#39;KernelRidgeRegression&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;regressor:KernelRidgeRegression:alpha&#39;: 1.0, &#39;regressor:KernelRidgeRegression:gamma&#39;: 0.1, &#39;regressor:KernelRidgeRegression:kernel&#39;: &#39;polynomial&#39;, &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.01, &#39;regressor:KernelRidgeRegression:coef0&#39;: 1.0, &#39;regressor:KernelRidgeRegression:degree&#39;: 3},
-dataset_properties={
-  &#39;task&#39;: 4,
-  &#39;sparse&#39;: False,
-  &#39;multioutput&#39;: False,
-  &#39;target_type&#39;: &#39;regression&#39;,
-  &#39;signed&#39;: False})),
-]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>r2 score:  0.11103398852619628
+{   2: {   &#39;cost&#39;: 0.65199313632313,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc7863feee0&gt;,
+           &#39;ensemble_weight&#39;: 1.0,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78f6db9a0&gt;,
+           &#39;model_id&#39;: 2,
+           &#39;rank&#39;: 1,
+           &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fc78a826580&gt;,
+           &#39;sklearn_regressor&#39;: KernelRidge(alpha=1.0, coef0=1.0, gamma=0.1, kernel=&#39;polynomial&#39;)}}
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  11.876 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  11.558 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-extending-regression-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_regression.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>
@@ -307,8 +308,8 @@ dataset_properties={
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
-</section>
-</section>
+</div>
+</div>
 
 
     </div>
@@ -329,7 +330,7 @@ dataset_properties={
       
     </p>
     <p>
-        &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
+        &copy; Copyright 2014-2022, Machine Learning Professorship Freiburg.<br/>
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br/>
     </p>
   </div>

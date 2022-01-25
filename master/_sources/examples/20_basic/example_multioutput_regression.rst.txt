@@ -25,11 +25,12 @@ Multi-output Regression
 The following example shows how to fit a multioutput regression model with
 *auto-sklearn*.
 
-.. GENERATED FROM PYTHON SOURCE LINES 10-19
+.. GENERATED FROM PYTHON SOURCE LINES 10-20
 
 .. code-block:: default
 
     import numpy as numpy
+    from pprint import pprint
 
     from sklearn.datasets import make_regression
     from sklearn.metrics import r2_score
@@ -45,12 +46,12 @@ The following example shows how to fit a multioutput regression model with
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 20-22
+.. GENERATED FROM PYTHON SOURCE LINES 21-23
 
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 22-27
+.. GENERATED FROM PYTHON SOURCE LINES 23-28
 
 .. code-block:: default
 
@@ -66,12 +67,12 @@ Data Loading
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 28-30
+.. GENERATED FROM PYTHON SOURCE LINES 29-31
 
 Build and fit a regressor
 =========================
 
-.. GENERATED FROM PYTHON SOURCE LINES 30-38
+.. GENERATED FROM PYTHON SOURCE LINES 31-39
 
 .. code-block:: default
 
@@ -99,12 +100,12 @@ Build and fit a regressor
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 39-41
+.. GENERATED FROM PYTHON SOURCE LINES 40-42
 
 View the models found by auto-sklearn
 =====================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 41-45
+.. GENERATED FROM PYTHON SOURCE LINES 42-46
 
 .. code-block:: default
 
@@ -122,26 +123,26 @@ View the models found by auto-sklearn
 
  .. code-block:: none
 
-              rank  ensemble_weight                 type      cost  duration
-    model_id                                                                
-    2            1             0.62        random_forest  0.157218  2.282688
-    5            2             0.18  k_nearest_neighbors  0.207332  0.459119
-    25           3             0.20  k_nearest_neighbors  0.318861  0.454935
+              rank  ensemble_weight           type      cost  duration
+    model_id                                                          
+    22           1             0.32    extra_trees  0.136510  5.840576
+    2            2             0.42  random_forest  0.142814  2.232426
+    21           3             0.26  random_forest  0.224804  1.676522
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 46-48
+.. GENERATED FROM PYTHON SOURCE LINES 47-49
 
 Print the final ensemble constructed by auto-sklearn
 ====================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 48-51
+.. GENERATED FROM PYTHON SOURCE LINES 49-52
 
 .. code-block:: default
 
 
-    print(automl.show_models())
+    pprint(automl.show_models(), indent=4)
 
 
 
@@ -153,38 +154,46 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    [(0.620000, SimpleRegressionPipeline({'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'no_preprocessing', 'regressor:__choice__': 'random_forest', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'regressor:random_forest:bootstrap': 'True', 'regressor:random_forest:criterion': 'mse', 'regressor:random_forest:max_depth': 'None', 'regressor:random_forest:max_features': 1.0, 'regressor:random_forest:max_leaf_nodes': 'None', 'regressor:random_forest:min_impurity_decrease': 0.0, 'regressor:random_forest:min_samples_leaf': 1, 'regressor:random_forest:min_samples_split': 2, 'regressor:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01},
-    dataset_properties={
-      'task': 5,
-      'sparse': False,
-      'multioutput': True,
-      'target_type': 'regression',
-      'signed': False})),
-    (0.200000, SimpleRegressionPipeline({'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'polynomial', 'regressor:__choice__': 'k_nearest_neighbors', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'minmax', 'feature_preprocessor:polynomial:degree': 3, 'feature_preprocessor:polynomial:include_bias': 'False', 'feature_preprocessor:polynomial:interaction_only': 'True', 'regressor:k_nearest_neighbors:n_neighbors': 1, 'regressor:k_nearest_neighbors:p': 2, 'regressor:k_nearest_neighbors:weights': 'distance'},
-    dataset_properties={
-      'task': 5,
-      'sparse': False,
-      'multioutput': True,
-      'target_type': 'regression',
-      'signed': False})),
-    (0.180000, SimpleRegressionPipeline({'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'regressor:__choice__': 'k_nearest_neighbors', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'normalize', 'feature_preprocessor:pca:keep_variance': 0.8772654126094648, 'feature_preprocessor:pca:whiten': 'True', 'regressor:k_nearest_neighbors:n_neighbors': 14, 'regressor:k_nearest_neighbors:p': 1, 'regressor:k_nearest_neighbors:weights': 'uniform'},
-    dataset_properties={
-      'task': 5,
-      'sparse': False,
-      'multioutput': True,
-      'target_type': 'regression',
-      'signed': False})),
-    ]
+    {   2: {   'cost': 0.14281372797350056,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc78f7b94c0>,
+               'ensemble_weight': 0.42,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78c920640>,
+               'model_id': 2,
+               'rank': 2,
+               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fc78c920430>,
+               'sklearn_regressor': RandomForestRegressor(max_features=1.0, n_estimators=512, n_jobs=1,
+                          random_state=1, warm_start=True)},
+        21: {   'cost': 0.22480405782181234,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc78f8d10a0>,
+                'ensemble_weight': 0.26,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78ca212e0>,
+                'model_id': 21,
+                'rank': 3,
+                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fc78ca210d0>,
+                'sklearn_regressor': RandomForestRegressor(criterion='friedman_mse', max_features=0.9689529284463153,
+                          min_samples_leaf=5, min_samples_split=4, n_estimators=512,
+                          n_jobs=1, random_state=1, warm_start=True)},
+        22: {   'cost': 0.13651009800609504,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc78f7b9640>,
+                'ensemble_weight': 0.32,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78f7b94f0>,
+                'model_id': 22,
+                'rank': 1,
+                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fc78f7b9f10>,
+                'sklearn_regressor': ExtraTreesRegressor(bootstrap=True, criterion='mae',
+                        max_features=0.9195228400065838, min_samples_leaf=2,
+                        min_samples_split=7, n_estimators=512, n_jobs=1,
+                        random_state=1, warm_start=True)}}
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 52-54
+.. GENERATED FROM PYTHON SOURCE LINES 53-55
 
 Get the Score of the final ensemble
 ===================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 54-58
+.. GENERATED FROM PYTHON SOURCE LINES 55-59
 
 .. code-block:: default
 
@@ -202,17 +211,17 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.8683277328634489
+    R2 score: 0.8858495026618883
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 59-61
+.. GENERATED FROM PYTHON SOURCE LINES 60-62
 
 Get the configuration space
 ===========================
 
-.. GENERATED FROM PYTHON SOURCE LINES 61-64
+.. GENERATED FROM PYTHON SOURCE LINES 62-65
 
 .. code-block:: default
 
@@ -425,7 +434,7 @@ Get the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  55.310 seconds)
+   **Total running time of the script:** ( 1 minutes  56.218 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multioutput_regression.py:

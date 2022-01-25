@@ -26,11 +26,12 @@ This examples shows how to format the targets for a multilabel classification
 problem. Details on multilabel classification can be found
 `here <https://scikit-learn.org/stable/modules/multiclass.html>`_.
 
-.. GENERATED FROM PYTHON SOURCE LINES 10-19
+.. GENERATED FROM PYTHON SOURCE LINES 10-20
 
 .. code-block:: default
 
     import numpy as np
+    from pprint import pprint
 
     import sklearn.datasets
     import sklearn.metrics
@@ -46,12 +47,12 @@ problem. Details on multilabel classification can be found
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 20-22
+.. GENERATED FROM PYTHON SOURCE LINES 21-23
 
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 22-43
+.. GENERATED FROM PYTHON SOURCE LINES 23-44
 
 .. code-block:: default
 
@@ -66,7 +67,7 @@ Data Loading
     # More information on: https://scikit-learn.org/stable/modules/multiclass.html
     y[y == 'TRUE'] = 1
     y[y == 'FALSE'] = 0
-    y = y.astype(np.int)
+    y = y.astype(int)
 
     # Using type of target is a good way to make sure your data
     # is properly formatted
@@ -86,20 +87,17 @@ Data Loading
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/examples/20_basic/example_multilabel_classification.py:33: DeprecationWarning: `np.int` is a deprecated alias for the builtin `int`. To silence this warning, use `int` by itself. Doing this will not modify any behavior and is safe. When replacing `np.int`, you may wish to use e.g. `np.int64` or `np.int32` to specify the precision. If you wish to review your current use, check the release note link for additional information.
-    Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
-      y = y.astype(np.int)
     type_of_target=multilabel-indicator
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 44-46
+.. GENERATED FROM PYTHON SOURCE LINES 45-47
 
 Building the classifier
 =======================
 
-.. GENERATED FROM PYTHON SOURCE LINES 46-57
+.. GENERATED FROM PYTHON SOURCE LINES 47-58
 
 .. code-block:: default
 
@@ -132,12 +130,12 @@ Building the classifier
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 58-60
+.. GENERATED FROM PYTHON SOURCE LINES 59-61
 
 View the models found by auto-sklearn
 =====================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 60-64
+.. GENERATED FROM PYTHON SOURCE LINES 61-65
 
 .. code-block:: default
 
@@ -157,22 +155,22 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight           type      cost  duration
     model_id                                                          
-    2            1              1.0  random_forest  0.447294  3.636021
+    2            1              1.0  random_forest  0.447294  3.264884
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 65-67
+.. GENERATED FROM PYTHON SOURCE LINES 66-68
 
 Print the final ensemble constructed by auto-sklearn
 ====================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 67-70
+.. GENERATED FROM PYTHON SOURCE LINES 68-71
 
 .. code-block:: default
 
 
-    print(automl.show_models())
+    pprint(automl.show_models(), indent=4)
 
 
 
@@ -184,25 +182,26 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    [(1.000000, SimpleClassificationPipeline({'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'no_preprocessing', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01},
-    dataset_properties={
-      'task': 3,
-      'sparse': False,
-      'multilabel': True,
-      'multiclass': False,
-      'target_type': 'classification',
-      'signed': False})),
-    ]
+    {   2: {   'balancing': Balancing(random_state=1),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc78ca21f10>,
+               'cost': 0.4472941828699525,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc78a8d7610>,
+               'ensemble_weight': 1.0,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc78ca21670>,
+               'model_id': 2,
+               'rank': 1,
+               'sklearn_classifier': RandomForestClassifier(max_features=15, n_estimators=512, n_jobs=1,
+                           random_state=1, warm_start=True)}}
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 71-73
+.. GENERATED FROM PYTHON SOURCE LINES 72-74
 
 Print statistics about the auto-sklearn run
 ===========================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 73-78
+.. GENERATED FROM PYTHON SOURCE LINES 74-79
 
 .. code-block:: default
 
@@ -235,12 +234,12 @@ Print statistics about the auto-sklearn run
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 79-81
+.. GENERATED FROM PYTHON SOURCE LINES 80-82
 
 Get the Score of the final ensemble
 ===================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 81-84
+.. GENERATED FROM PYTHON SOURCE LINES 82-85
 
 .. code-block:: default
 
@@ -265,7 +264,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  15.973 seconds)
+   **Total running time of the script:** ( 0 minutes  12.175 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multilabel_classification.py:

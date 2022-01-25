@@ -3,9 +3,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
-    <title>FAQ &#8212; AutoSklearn 0.14.2 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FAQ &#8212; AutoSklearn 0.14.4 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css" />
@@ -55,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.14.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.4</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -108,40 +107,15 @@
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
 <li><a class="reference internal" href="#">FAQ</a><ul>
-<li><a class="reference internal" href="#issues">Issues</a><ul>
-<li><a class="reference internal" href="#auto-sklearn-is-extremely-memory-hungry-in-a-sequential-setting">Auto-sklearn is extremely memory hungry in a sequential setting</a></li>
-<li><a class="reference internal" href="#auto-sklearn-is-extremely-memory-hungry-in-a-parallel-setting">Auto-sklearn is extremely memory hungry in a parallel setting</a></li>
-<li><a class="reference internal" href="#auto-sklearn-crashes-with-a-segmentation-fault">Auto-sklearn crashes with a segmentation fault</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#log-files-and-output">Log files and output</a><ul>
-<li><a class="reference internal" href="#where-does-auto-sklearn-output-files-by-default">Where does Auto-sklearn output files by default?</a></li>
-<li><a class="reference internal" href="#auto-sklearn-eats-up-all-my-disk-space">Auto-sklearn eats up all my disk space</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#available-machine-learning-models">Available machine learning models</a><ul>
-<li><a class="reference internal" href="#will-non-scikit-learn-models-be-added-to-auto-sklearn">Will non-scikit-learn models be added to Auto-sklearn?</a></li>
-<li><a class="reference internal" href="#can-the-preprocessing-be-disabled">Can the preprocessing be disabled</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#usage">Usage</a><ul>
-<li><a class="reference internal" href="#only-use-interpretable-models">Only use interpretable models</a></li>
-<li><a class="reference internal" href="#limiting-the-number-of-model-evaluations">Limiting the number of model evaluations</a></li>
-<li><a class="reference internal" href="#ensemble-contains-only-a-dummy-model">Ensemble contains only a dummy model</a></li>
-<li><a class="reference internal" href="#parallel-processing-and-oversubscription">Parallel processing and oversubscription</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#meta-learning">Meta-Learning</a><ul>
-<li><a class="reference internal" href="#which-datasets-are-used-for-meta-learning">Which datasets are used for meta-learning?</a></li>
-<li><a class="reference internal" href="#how-can-datasets-from-the-meta-data-be-excluded">How can datasets from the meta-data be excluded?</a></li>
-<li><a class="reference internal" href="#which-meta-features-are-used-for-meta-learning">Which meta-features are used for meta-learning?</a></li>
-<li><a class="reference internal" href="#how-is-the-meta-data-generated">How is the meta-data generated?</a><ul>
-<li><a class="reference internal" href="#auto-sklearn-1-0">Auto-sklearn 1.0</a></li>
-<li><a class="reference internal" href="#auto-sklearn-2-0">Auto-sklearn 2.0</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li><a class="reference internal" href="#general">General</a></li>
+<li><a class="reference internal" href="#resource-management">Resource Management</a></li>
+<li><a class="reference internal" href="#results-log-files-and-output">Results, Log Files and Output</a></li>
+<li><a class="reference internal" href="#the-search-space">The Search Space</a></li>
+<li><a class="reference internal" href="#ensembling">Ensembling</a></li>
+<li><a class="reference internal" href="#configuring-the-search-procedure">Configuring the Search Procedure</a></li>
+<li><a class="reference internal" href="#meta-learning">Meta-Learning</a></li>
+<li><a class="reference internal" href="#issues-and-debugging">Issues and Debugging</a></li>
+<li><a class="reference internal" href="#other">Other</a></li>
 </ul>
 </li>
 </ul>
@@ -150,13 +124,115 @@
       </div>
     <div class="body col-md-9 content" role="main">
       
-  <section id="faq">
+  <div class="section" id="faq">
 <span id="id1"></span><h1>FAQ<a class="headerlink" href="#faq" title="Permalink to this headline">¶</a></h1>
-<section id="issues">
-<h2>Issues<a class="headerlink" href="#issues" title="Permalink to this headline">¶</a></h2>
-<section id="auto-sklearn-is-extremely-memory-hungry-in-a-sequential-setting">
-<h3>Auto-sklearn is extremely memory hungry in a sequential setting<a class="headerlink" href="#auto-sklearn-is-extremely-memory-hungry-in-a-sequential-setting" title="Permalink to this headline">¶</a></h3>
-<p>Auto-sklearn can appear very memory hungry (i.e. requiring a lot of memory for small datasets) due
+<div class="section" id="general">
+<h2>General<a class="headerlink" href="#general" title="Permalink to this headline">¶</a></h2>
+<details class="summary-b-where-can-i-find-examples-on-how-to-use-auto-sklearn-b">
+<summary><b>Where can I find examples on how to use auto-sklearn?</b></summary><p>We provide examples on using <em>auto-sklearn</em> for multiple use cases ranging from
+simple classification to advanced uses such as feature importance, parallel runs
+and customization. They can be found in the <a class="reference internal" href="examples/index.html#sphx-glr-examples"><span class="std std-ref">Examples</span></a>.</p>
+</details><details class="summary-b-what-type-of-tasks-can-auto-sklearn-tackle-b">
+<summary><b>What type of tasks can auto-sklearn tackle?</b></summary><p><em>auto-sklearn</em> can accept targets for the following tasks (more details on <a class="reference external" href="https://scikit-learn.org/stable/modules/multiclass.html">Sklearn algorithms</a>):</p>
+<ul class="simple">
+<li><p>Binary Classification</p></li>
+<li><p>Multiclass Classification</p></li>
+<li><p>Multilabel Classification</p></li>
+<li><p>Regression</p></li>
+<li><p>Multioutput Regression</p></li>
+</ul>
+<p>You can provide feature and target training pairs (X_train/y_train) to <em>auto-sklearn</em> to fit an
+ensemble of pipelines as described in the next section. This X_train/y_train dataset must belong
+to one of the supported formats: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.
+Optionally, you can measure the ability of this fitted model to generalize to unseen data by
+providing an optional testing pair (X_test/Y_test). For further details, please refer to the
+Example <a class="reference internal" href="examples/40_advanced/example_pandas_train_test.html#sphx-glr-examples-40-advanced-example-pandas-train-test-py"><span class="std std-ref">Performance-over-time plot</span></a>.
+Supported formats for these training and testing pairs are: np.ndarray,
+pd.DataFrame, scipy.sparse.csr_matrix and python lists.</p>
+<p>If your data contains categorical values (in the features or targets), autosklearn will automatically encode your
+data using a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html">sklearn.preprocessing.LabelEncoder</a>
+for unidimensional data and a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html">sklearn.preprocessing.OrdinalEncoder</a>
+for multidimensional data.</p>
+<p>Regarding the features, there are two methods to guide <em>auto-sklearn</em> to properly encode categorical columns:</p>
+<ul class="simple">
+<li><p>Providing a X_train/X_test numpy array with the optional flag feat_type. For further details, you
+can check the Example <a class="reference internal" href="examples/40_advanced/example_feature_types.html#sphx-glr-examples-40-advanced-example-feature-types-py"><span class="std std-ref">Feature Types</span></a>.</p></li>
+<li><p>You can provide a pandas DataFrame, with properly formatted columns. If a column has numerical
+dtype, <em>auto-sklearn</em> will not encode it and it will be passed directly to scikit-learn. If the
+column has a categorical/boolean class, it will be encoded. If the column is of any other type
+(Object or Timeseries), an error will be raised. For further details on how to properly encode
+your data, you can check the Pandas Example
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html">Working with categorical data</a>).
+If you are working with time series, it is recommended that you follow this approach
+<a class="reference external" href="https://stats.stackexchange.com/questions/311494/">Working with time data</a>.</p></li>
+</ul>
+<p>Regarding the targets (y_train/y_test), if the task involves a classification problem, such features will be
+automatically encoded. It is recommended to provide both y_train and y_test during fit, so that a common encoding
+is created between these splits (if only y_train is provided during fit, the categorical encoder will not be able
+to handle new classes that are exclusive to y_test). If the task is regression, no encoding happens on the
+targets.</p>
+</details><details class="summary-b-where-can-i-find-slides-and-notebooks-from-talks-and-tutorials-b">
+<summary><b>Where can I find slides and notebooks from talks and tutorials?</b></summary><p>We provide resources for talks, tutorials and presentations on <em>auto-sklearn</em> under <a class="reference external" href="https://github.com/automl/auto-sklearn-talks">auto-sklearn-talks</a></p>
+</details><details class="summary-b-how-should-i-cite-auto-sklearn-in-a-scientific-publication-b">
+<summary><b>How should I cite auto-sklearn in a scientific publication?</b></summary><p>If you’ve used auto-sklearn in scientific publications, we would appreciate citations.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@inproceedings</span><span class="p">{</span><span class="n">feurer</span><span class="o">-</span><span class="n">neurips15a</span><span class="p">,</span>
+    <span class="n">title</span>     <span class="o">=</span> <span class="p">{</span><span class="n">Efficient</span> <span class="ow">and</span> <span class="n">Robust</span> <span class="n">Automated</span> <span class="n">Machine</span> <span class="n">Learning</span><span class="p">},</span>
+    <span class="n">author</span>    <span class="o">=</span> <span class="p">{</span><span class="n">Feurer</span><span class="p">,</span> <span class="n">Matthias</span> <span class="ow">and</span> <span class="n">Klein</span><span class="p">,</span> <span class="n">Aaron</span> <span class="ow">and</span> <span class="n">Eggensperger</span><span class="p">,</span> <span class="n">Katharina</span>  <span class="n">Springenberg</span><span class="p">,</span> <span class="n">Jost</span> <span class="ow">and</span> <span class="n">Blum</span><span class="p">,</span> <span class="n">Manuel</span> <span class="ow">and</span> <span class="n">Hutter</span><span class="p">,</span> <span class="n">Frank</span><span class="p">},</span>
+    <span class="n">booktitle</span> <span class="o">=</span> <span class="p">{</span><span class="n">Advances</span> <span class="ow">in</span> <span class="n">Neural</span> <span class="n">Information</span> <span class="n">Processing</span> <span class="n">Systems</span> <span class="mi">28</span> <span class="p">(</span><span class="mi">2015</span><span class="p">)},</span>
+    <span class="n">pages</span>     <span class="o">=</span> <span class="p">{</span><span class="mi">2962</span><span class="o">--</span><span class="mi">2970</span><span class="p">},</span>
+    <span class="n">year</span>      <span class="o">=</span> <span class="p">{</span><span class="mi">2015</span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Or this, if you’ve used auto-sklearn 2.0 in your work:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@article</span><span class="p">{</span><span class="n">feurer</span><span class="o">-</span><span class="n">arxiv20a</span><span class="p">,</span>
+    <span class="n">title</span>     <span class="o">=</span> <span class="p">{</span><span class="n">Auto</span><span class="o">-</span><span class="n">Sklearn</span> <span class="mf">2.0</span><span class="p">:</span> <span class="n">Hands</span><span class="o">-</span><span class="n">free</span> <span class="n">AutoML</span> <span class="n">via</span> <span class="n">Meta</span><span class="o">-</span><span class="n">Learning</span><span class="p">},</span>
+    <span class="n">author</span>    <span class="o">=</span> <span class="p">{</span><span class="n">Feurer</span><span class="p">,</span> <span class="n">Matthias</span> <span class="ow">and</span> <span class="n">Eggensperger</span><span class="p">,</span> <span class="n">Katharina</span> <span class="ow">and</span> <span class="n">Falkner</span><span class="p">,</span> <span class="n">Stefan</span> <span class="ow">and</span> <span class="n">Lindauer</span><span class="p">,</span> <span class="n">Marius</span> <span class="ow">and</span> <span class="n">Hutter</span><span class="p">,</span> <span class="n">Frank</span><span class="p">},</span>
+    <span class="n">booktitle</span> <span class="o">=</span> <span class="p">{</span><span class="n">arXiv</span><span class="p">:</span><span class="mf">2007.04074</span> <span class="p">[</span><span class="n">cs</span><span class="o">.</span><span class="n">LG</span><span class="p">]},</span>
+    <span class="n">year</span>      <span class="o">=</span> <span class="p">{</span><span class="mi">2020</span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</details><details class="summary-b-i-want-to-contribute-what-can-i-do-b">
+<summary><b>I want to contribute. What can I do?</b></summary><p>This sounds great. Please have a look at our <a class="reference external" href="https://github.com/automl/auto-sklearn/blob/master/CONTRIBUTING.md">contribution guide</a></p>
+</details><details class="summary-b-i-have-a-question-which-is-not-answered-here-what-should-i-do-b">
+<summary><b>I have a question which is not answered here. What should I do?</b></summary><p>Thanks a lot. We regularly update this section with questions from our issue tracker. So please use the
+<a class="reference external" href="https://github.com/automl/auto-sklearn/issues">issue tracker</a></p>
+</details></div>
+<div class="section" id="resource-management">
+<h2>Resource Management<a class="headerlink" href="#resource-management" title="Permalink to this headline">¶</a></h2>
+<details class="summary-b-how-should-i-set-the-time-and-memory-limits-b">
+<summary><b>How should I set the time and memory limits?</b></summary><p>While <em>auto-sklearn</em> alleviates manual hyperparameter tuning, the user still
+has to set memory and time limits. For most datasets a memory limit of 3GB or
+6GB as found on most modern computers is sufficient. For the time limits it
+is harder to give clear guidelines. If possible, a good default is a total
+time limit of one day, and a time limit of 30 minutes for a single run.</p>
+<p>Further guidelines can be found in
+<a class="reference external" href="https://github.com/automl/auto-sklearn/issues/142">auto-sklearn/issues/142</a>.</p>
+</details><details class="summary-b-how-many-cpu-cores-does-auto-sklearn-use-by-default-b">
+<summary><b>How many CPU cores does auto-sklearn use by default?</b></summary><p>By default, <em>auto-sklearn</em> uses <strong>one core</strong>. See also <a class="reference internal" href="manual.html#parallel"><span class="std std-ref">Parallel computation</span></a> on how to configure this.</p>
+</details><details class="summary-b-how-can-i-run-auto-sklearn-in-parallel-b">
+<summary><b>How can I run auto-sklearn in parallel?</b></summary><p>Nevertheless, <em>auto-sklearn</em> also supports parallel Bayesian optimization via the use of
+<a class="reference external" href="https://distributed.dask.org/">Dask.distributed</a>. By providing the arguments <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code>
+to the estimator construction, one can control the number of cores available to <em>auto-sklearn</em>
+(As shown in the Example <a class="reference internal" href="examples/60_search/example_parallel_n_jobs.html#sphx-glr-examples-60-search-example-parallel-n-jobs-py"><span class="std std-ref">Parallel Usage  on a single machine</span></a>).
+Distributed processes are also supported by providing a custom client object to <em>auto-sklearn</em> like
+in the Example: <a class="reference internal" href="examples/60_search/example_parallel_manual_spawning_cli.html#sphx-glr-examples-60-search-example-parallel-manual-spawning-cli-py"><span class="std std-ref">Parallel Usage: Spawning workers from the command line</span></a>. When
+multiple cores are
+available, <em>auto-sklearn</em> will create a worker per core, and use the available workers to both search
+for better machine learning models as well as building an ensemble with them until the time resource
+is exhausted.</p>
+<p><strong>Note:</strong> <em>auto-sklearn</em> requires all workers to have access to a shared file system for storing training data and models.</p>
+<p><em>auto-sklearn</em> employs <a class="reference external" href="https://github.com/joblib/threadpoolctl/">threadpoolctl</a> to control the number of threads employed by scientific libraries like numpy or scikit-learn. This is done exclusively during the building procedure of models, not during inference. In particular, <em>auto-sklearn</em> allows each pipeline to use at most 1 thread during training. At predicting and scoring time this limitation is not enforced by <em>auto-sklearn</em>. You can control the number of resources
+employed by the pipelines by setting the following variables in your environment, prior to running <em>auto-sklearn</em>:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">export</span> <span class="nv">OPENBLAS_NUM_THREADS</span><span class="o">=</span><span class="m">1</span>
+<span class="gp">$ </span><span class="nb">export</span> <span class="nv">MKL_NUM_THREADS</span><span class="o">=</span><span class="m">1</span>
+<span class="gp">$ </span><span class="nb">export</span> <span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">1</span>
+</pre></div>
+</div>
+<p>For further information about how scikit-learn handles multiprocessing, please check the <a class="reference external" href="https://scikit-learn.org/stable/computing/parallelism.html">Parallelism, resource management, and configuration</a> documentation from the library.</p>
+</details><details class="summary-b-auto-sklearn-is-extremely-memory-hungry-in-a-sequential-setting-b">
+<summary><b>Auto-sklearn is extremely memory hungry in a sequential setting</b></summary><p>Auto-sklearn can appear very memory hungry (i.e. requiring a lot of memory for small datasets) due
 to the use of <code class="docutils literal notranslate"><span class="pre">fork</span></code> for creating new processes when running in sequential manner (if this
 happens in a parallel setting or if you pass your own dask client this is due to a different
 issue, see the other issues below).</p>
@@ -197,19 +273,15 @@ a <code class="docutils literal notranslate"><span class="pre">forkserver</span>
 </li>
 </ol>
 <p>We therefore suggest using one of the above settings by default.</p>
-</section>
-<section id="auto-sklearn-is-extremely-memory-hungry-in-a-parallel-setting">
-<h3>Auto-sklearn is extremely memory hungry in a parallel setting<a class="headerlink" href="#auto-sklearn-is-extremely-memory-hungry-in-a-parallel-setting" title="Permalink to this headline">¶</a></h3>
-<p>When running Auto-sklearn in a parallel setting it starts new processes for evaluating machine
+</details><details class="summary-b-auto-sklearn-is-extremely-memory-hungry-in-a-parallel-setting-b">
+<summary><b>Auto-sklearn is extremely memory hungry in a parallel setting</b></summary><p>When running Auto-sklearn in a parallel setting it starts new processes for evaluating machine
 learning models using the <code class="docutils literal notranslate"><span class="pre">forkserver</span></code> mechanism. Code that is in the main script and that is
 not guarded by <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">__name__</span> <span class="pre">==</span> <span class="pre">&quot;__main__&quot;</span></code> will be executed for each subprocess. If, for example,
 you are loading your dataset outside of the guarded code, your dataset will be loaded for each
 evaluation of a machine learning algorithm and thus blocking your RAM.</p>
 <p>We therefore suggest moving all code inside functions or the main block.</p>
-</section>
-<section id="auto-sklearn-crashes-with-a-segmentation-fault">
-<h3>Auto-sklearn crashes with a segmentation fault<a class="headerlink" href="#auto-sklearn-crashes-with-a-segmentation-fault" title="Permalink to this headline">¶</a></h3>
-<p>Please make sure that you have read and followed the <a class="reference internal" href="installation.html#installation"><span class="std std-ref">Installation</span></a> section! In case
+</details><details class="summary-b-auto-sklearn-crashes-with-a-segmentation-fault-b">
+<summary><b>Auto-sklearn crashes with a segmentation fault</b></summary><p>Please make sure that you have read and followed the <a class="reference internal" href="installation.html#installation"><span class="std std-ref">Installation</span></a> section! In case
 everything is set up correctly, this is most likely due to the dependency
 <a class="reference external" href="https://github.com/automl/random_forest_run">pyrfr</a> not being compiled correctly. If this is the
 case please execute:</p>
@@ -230,27 +302,47 @@ dependencies.</p></li>
 github issues for suggestions: <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/1025">1025</a>,
 <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/856">856</a></p></li>
 </ol>
-</section>
-</section>
-<section id="log-files-and-output">
-<h2>Log files and output<a class="headerlink" href="#log-files-and-output" title="Permalink to this headline">¶</a></h2>
-<section id="where-does-auto-sklearn-output-files-by-default">
-<h3>Where does Auto-sklearn output files by default?<a class="headerlink" href="#where-does-auto-sklearn-output-files-by-default" title="Permalink to this headline">¶</a></h3>
-<p><em>Auto-sklearn</em> heavily uses the hard drive to store temporary data, models and log files which can
+</details></div>
+<div class="section" id="results-log-files-and-output">
+<h2>Results, Log Files and Output<a class="headerlink" href="#results-log-files-and-output" title="Permalink to this headline">¶</a></h2>
+<details class="summary-b-how-can-i-get-an-overview-of-the-run-statistics-b">
+<summary><b>How can I get an overview of the run statistics?</b></summary><p><code class="docutils literal notranslate"><span class="pre">sprint_statistics()</span></code> is a method that prints the name of the  dataset, the metric used, and the best validation score
+obtained by running <em>auto-sklearn</em>. It additionally prints the number of both successful and unsuccessful
+algorithm runs.</p>
+</details><details class="summary-b-what-was-the-performance-over-time-b">
+<summary><b>What was the performance over time?</b></summary><p><code class="docutils literal notranslate"><span class="pre">performance_over_time_</span></code>  returns a DataFrame containing the models performance over time data, which can
+be used for plotting directly (Here is an example: <a class="reference internal" href="examples/40_advanced/example_pandas_train_test.html#sphx-glr-examples-40-advanced-example-pandas-train-test-py"><span class="std std-ref">Performance-over-time plot</span></a>).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">automl</span><span class="o">.</span><span class="n">performance_over_time_</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="s1">&#39;Timestamp&#39;</span><span class="p">,</span>
+        <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;line&#39;</span><span class="p">,</span>
+        <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Auto-sklearn accuracy over time&#39;</span><span class="p">,</span>
+        <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</details><details class="summary-b-which-models-were-evaluated-b">
+<summary><b>Which models were evaluated?</b></summary><p>You can see all models evaluated using <a class="reference internal" href="api.html#autosklearn.classification.AutoSklearnClassifier.leaderboard" title="autosklearn.classification.AutoSklearnClassifier.leaderboard"><code class="xref py py-meth docutils literal notranslate"><span class="pre">automl.leaderboard(ensemble_only=False)</span></code></a>.</p>
+</details><details class="summary-b-which-models-are-in-the-final-ensemble-b">
+<summary><b>Which models are in the final ensemble?</b></summary><p>Use either <a class="reference internal" href="api.html#autosklearn.classification.AutoSklearnClassifier.leaderboard" title="autosklearn.classification.AutoSklearnClassifier.leaderboard"><code class="xref py py-meth docutils literal notranslate"><span class="pre">automl.leaderboard(ensemble_only=True)</span></code></a> or <code class="docutils literal notranslate"><span class="pre">automl.show_models()</span></code></p>
+</details><details class="summary-b-is-there-more-data-i-can-look-at-b">
+<summary><b>Is there more data I can look at?</b></summary><p><code class="docutils literal notranslate"><span class="pre">cv_results_</span></code> returns a dict with keys as column headers and values as columns, that can be imported into
+a pandas DataFrame, e.g. <code class="docutils literal notranslate"><span class="pre">df</span> <span class="pre">=</span> <span class="pre">pd.DataFrame(automl.cv_results_)</span></code></p>
+</details><details class="summary-b-where-does-auto-sklearn-output-files-by-default-b">
+<summary><b>Where does Auto-sklearn output files by default?</b></summary><p><em>Auto-sklearn</em> heavily uses the hard drive to store temporary data, models and log files which can
 be used to inspect the behavior of Auto-sklearn. Each run of Auto-sklearn requires
 its own directory. If not provided by the user, <em>Auto-sklearn</em> requests a temporary directory from
 Python, which by default is located under <code class="docutils literal notranslate"><span class="pre">/tmp</span></code> and starts with <code class="docutils literal notranslate"><span class="pre">autosklearn_tmp_</span></code> followed
 by a random string. By default, this directory is deleted when the <em>Auto-sklearn</em> object is
-destroyed. If you want to keep these files you can pass the argument
+finished fitting. If you want to keep these files you can pass the argument
 <code class="docutils literal notranslate"><span class="pre">delete_tmp_folder_after_terminate=True</span></code> to the <em>Auto-sklearn</em> object.</p>
 <p>The <a class="reference internal" href="api.html#autosklearn.classification.AutoSklearnClassifier" title="autosklearn.classification.AutoSklearnClassifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">autosklearn.classification.AutoSklearnClassifier</span></code></a> and all other <em>auto-sklearn</em>
-estimators accept the argument <code class="docutils literal notranslate"><span class="pre">tmp_directory</span></code> which change where such output is written to.</p>
+estimators accept the argument <code class="docutils literal notranslate"><span class="pre">tmp_folder</span></code> which change where such output is written to.</p>
 <p>There’s an additional argument <code class="docutils literal notranslate"><span class="pre">output_directory</span></code> which can be passed to <em>Auto-sklearn</em> and it
 controls where test predictions of the ensemble are stored if the test set is passed to <code class="docutils literal notranslate"><span class="pre">fit()</span></code>.</p>
-</section>
-<section id="auto-sklearn-eats-up-all-my-disk-space">
-<h3>Auto-sklearn eats up all my disk space<a class="headerlink" href="#auto-sklearn-eats-up-all-my-disk-space" title="Permalink to this headline">¶</a></h3>
-<p><em>Auto-sklearn</em> heavily uses the hard drive to store temporary data, models and log files which can
+</details><details class="summary-b-auto-sklearn-s-logfiles-eat-up-all-my-disk-space-what-can-i-do-b">
+<summary><b>Auto-sklearn's logfiles eat up all my disk space. What can I do?</b></summary><p><em>Auto-sklearn</em> heavily uses the hard drive to store temporary data, models and log files which can
 be used to inspect the behavior of Auto-sklearn. By default, <em>Auto-sklearn</em> stores 50
 models and their predictions on the validation data (which is a subset of the training data in
 case of holdout and the full training data in case of cross-validation) on the hard drive.
@@ -274,13 +366,51 @@ one run of the ensemble builder and thus <em>Auto-sklearn</em> can exceed the gi
 <p>These limits do only apply to models and their predictions, but not to other files stored in
 the temporary directory such as the log files.</p>
 </div>
-</section>
-</section>
-<section id="available-machine-learning-models">
-<h2>Available machine learning models<a class="headerlink" href="#available-machine-learning-models" title="Permalink to this headline">¶</a></h2>
-<section id="will-non-scikit-learn-models-be-added-to-auto-sklearn">
-<h3>Will non-scikit-learn models be added to Auto-sklearn?<a class="headerlink" href="#will-non-scikit-learn-models-be-added-to-auto-sklearn" title="Permalink to this headline">¶</a></h3>
-<p>The short answer: no.</p>
+</details></div>
+<div class="section" id="the-search-space">
+<h2>The Search Space<a class="headerlink" href="#the-search-space" title="Permalink to this headline">¶</a></h2>
+<details class="summary-b-how-can-i-restrict-the-searchspace-b">
+<summary><b>How can I restrict the searchspace?</b></summary><p>The following shows an example of how to exclude all preprocessing methods and restrict the configuration space to
+only random forests.</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
+<span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">include</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;classifier&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;random_forest&quot;</span><span class="p">],</span>
+        <span class="s1">&#39;feature_preprocessor&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;no_preprocessing&quot;</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Note:</strong> The strings used to identify estimators and preprocessors are the filenames without <em>.py</em>.</p>
+<p>For a full list please have a look at the source code (in <cite>autosklearn/pipeline/components/</cite>):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/classification">Classifiers</a></p></li>
+<li><p><a class="reference external" href="https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/regression">Regressors</a></p></li>
+<li><p><a class="reference external" href="https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/feature_preprocessing">Preprocessors</a></p></li>
+</ul>
+</div></blockquote>
+<p>We do also provide an example on how to restrict the classifiers to search over
+<a class="reference internal" href="examples/40_advanced/example_interpretable_models.html#sphx-glr-examples-40-advanced-example-interpretable-models-py"><span class="std std-ref">Interpretable models</span></a>.</p>
+</div></blockquote>
+</details><details class="summary-b-how-can-i-turn-off-data-preprocessing-b">
+<summary><b>How can I turn off data preprocessing?</b></summary><p>Data preprocessing includes One-Hot encoding of categorical features, imputation
+of missing values and the normalization of features or samples. These ensure that
+the data the gets to the sklearn models is well formed and can be used for
+training models.</p>
+<p>While this is necessary in general, if you’d like to disable this step, please
+refer to this <a class="reference internal" href="examples/80_extending/example_extending_data_preprocessor.html#sphx-glr-examples-80-extending-example-extending-data-preprocessor-py"><span class="std std-ref">example</span></a>.</p>
+</details><details class="summary-b-how-can-i-turn-off-feature-preprocessing-b">
+<summary><b>How can I turn off feature preprocessing?</b></summary><p>Feature preprocessing is a single transformer which implements for example feature
+selection or transformation of features into a different space (i.e. PCA).</p>
+<p>This can be turned off by setting
+<code class="docutils literal notranslate"><span class="pre">include={'feature_preprocessor'=[&quot;no_preprocessing&quot;]}</span></code> as shown in the example above.</p>
+</details><details class="summary-b-will-non-scikit-learn-models-be-added-to-auto-sklearn-b">
+<summary><b>Will non-scikit-learn models be added to Auto-sklearn?</b></summary><p>The short answer: no.</p>
 <p>The long answer answer is a bit more nuanced: maintaining Auto-sklearn requires a lot of time and
 effort, which would grow even larger when depending on more libraries. Also, adding more
 libraries would require us to generate meta-data more often. Lastly, having more choices does not
@@ -290,47 +420,83 @@ good models and can lead to more overfitting.</p>
 following the <a class="reference external" href="https://automl.github.io/auto-sklearn/master/examples/index.html#extension-examples">examples on how to extend Auto-sklearn</a>.</p>
 <p>If there is interest in creating a Auto-sklearn-contrib repository with 3rd-party models please
 open an issue for that.</p>
-</section>
-<section id="can-the-preprocessing-be-disabled">
-<h3>Can the preprocessing be disabled<a class="headerlink" href="#can-the-preprocessing-be-disabled" title="Permalink to this headline">¶</a></h3>
-<p>Feature preprocessing can be disabled as discussed in the example
-<a class="reference internal" href="manual.html#restricting-the-searchspace"><span class="std std-ref">Restricting the searchspace</span></a>. Other preprocessing steps such as one hot encoding, missing
-feature imputation and normalization cannot yet be disabled, but we’re working on that.</p>
-</section>
-</section>
-<section id="usage">
-<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
-<section id="only-use-interpretable-models">
-<h3>Only use interpretable models<a class="headerlink" href="#only-use-interpretable-models" title="Permalink to this headline">¶</a></h3>
-<p>Auto-sklearn can be restricted to only use interpretable models and preprocessing algorithms.
-Please see the Section <a class="reference internal" href="manual.html#restricting-the-searchspace"><span class="std std-ref">Restricting the searchspace</span></a> to learn how to restrict the models
+</details><details class="summary-b-how-can-i-only-search-for-interpretable-models-b">
+<summary><b>How can I only search for interpretable models</b></summary><p>Auto-sklearn can be restricted to only use interpretable models and preprocessing algorithms.
+Please see the Section <a class="reference internal" href="manual.html#space"><span class="std std-ref">The search space</span></a> to learn how to restrict the models
 which are searched over or see the Example
 <a class="reference internal" href="examples/40_advanced/example_interpretable_models.html#sphx-glr-examples-40-advanced-example-interpretable-models-py"><span class="std std-ref">Interpretable models</span></a>.</p>
 <p>We don’t provide a judgement which of the models are interpretable as this is very much up to the
 specific use case, but would like to note that decision trees and linear models usually most
 interpretable.</p>
-</section>
-<section id="limiting-the-number-of-model-evaluations">
-<h3>Limiting the number of model evaluations<a class="headerlink" href="#limiting-the-number-of-model-evaluations" title="Permalink to this headline">¶</a></h3>
-<p>In certain cases, for example for debugging, it can be helpful to limit the number of
+</details></div>
+<div class="section" id="ensembling">
+<h2>Ensembling<a class="headerlink" href="#ensembling" title="Permalink to this headline">¶</a></h2>
+<details class="summary-b-what-can-i-configure-wrt-the-ensemble-building-process-b">
+<summary><b>What can I configure wrt the ensemble building process?</b></summary><p>The following hyperparameters control how the ensemble is constructed:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ensemble_size</span></code> determines the maximal size of the ensemble. If it is set to zero, no ensemble will be constructed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> allows the user to directly specify the number of models considered for the ensemble.  This hyperparameter can be an integer <em>n</em>, such that only the best <em>n</em> models are used in the final ensemble. If a float between 0.0 and 1.0 is provided, <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> would be interpreted as a fraction suggesting the percentage of models to use in the ensemble building process (namely, if ensemble_nbest is a float, library pruning is implemented as described in <a class="reference external" href="https://dl.acm.org/doi/10.1109/ICDM.2006.76">Caruana et al. (2006)</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_models_on_disc</span></code> defines the maximum number of models that are kept on the disc, as a mechanism to control the amount of disc space consumed by <em>auto-sklearn</em>. Throughout the automl process, different individual models are optimized, and their predictions (and other metadata) is stored on disc. The user can set the upper bound on how many models are acceptable to keep on disc, yet this variable takes priority in the definition of the number of models used by the ensemble builder (that is, the minimum of <code class="docutils literal notranslate"><span class="pre">ensemble_size</span></code>, <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> and <code class="docutils literal notranslate"><span class="pre">max_models_on_disc</span></code> determines the maximal amount of models used in the ensemble). If set to None, this feature is disabled.</p></li>
+</ul>
+</details><details class="summary-b-which-models-are-in-the-final-ensemble-b">
+<summary><b>Which models are in the final ensemble?</b></summary><p>The results obtained from the final ensemble can be printed by calling <code class="docutils literal notranslate"><span class="pre">show_models()</span></code> or  <code class="docutils literal notranslate"><span class="pre">leaderboard()</span></code>.
+The <em>auto-sklearn</em> ensemble is composed of scikit-learn models that can be inspected as exemplified
+in the Example <a class="reference internal" href="examples/40_advanced/example_get_pipeline_components.html#sphx-glr-examples-40-advanced-example-get-pipeline-components-py"><span class="std std-ref">Obtain run information</span></a>.</p>
+</details><details class="summary-b-can-i-fit-an-ensemble-also-only-post-hoc-b">
+<summary><b>Can I fit an ensemble also only post-hoc?</b></summary><p>It is possible to build ensembles post-hoc. An example on how to do this (first searching for individual models, and then building an ensemble from them) can be seen in <a class="reference internal" href="examples/60_search/example_sequential.html#sphx-glr-examples-60-search-example-sequential-py"><span class="std std-ref">Sequential Usage</span></a>.</p>
+</details></div>
+<div class="section" id="configuring-the-search-procedure">
+<h2>Configuring the Search Procedure<a class="headerlink" href="#configuring-the-search-procedure" title="Permalink to this headline">¶</a></h2>
+<details class="summary-b-can-i-change-the-resampling-strategy-b">
+<summary><b>Can I change the resampling strategy?</b></summary><p>Examples for using holdout and cross-validation can be found in <a class="reference internal" href="examples/40_advanced/example_resampling.html#sphx-glr-examples-40-advanced-example-resampling-py"><span class="std std-ref">example</span></a></p>
+</details><details class="summary-b-can-i-use-a-custom-metric-b">
+<summary><b>Can I use a custom metric</b></summary><p>Examples for using a custom metric can be found in <a class="reference internal" href="examples/40_advanced/example_metrics.html#sphx-glr-examples-40-advanced-example-metrics-py"><span class="std std-ref">example</span></a></p>
+</details></div>
+<div class="section" id="meta-learning">
+<h2>Meta-Learning<a class="headerlink" href="#meta-learning" title="Permalink to this headline">¶</a></h2>
+<details class="summary-b-which-datasets-are-used-for-meta-learning-b">
+<summary><b>Which datasets are used for meta-learning?</b></summary><p>We updated the list of datasets used for meta-learning several times and this list now differs
+significantly from the original 140 datasets we used in 2015 when the paper and the package were
+released. An up-to-date list of <a class="reference external" href="https://docs.openml.org/#tasks">OpenML task IDs</a> can be found
+on <a class="reference external" href="https://github.com/automl/auto-sklearn/blob/master/scripts/update_metadata_util.py">github</a>.</p>
+</details><details class="summary-b-how-can-datasets-from-the-meta-data-be-excluded-b">
+<summary><b>How can datasets from the meta-data be excluded?</b></summary><p>For <em>Auto-sklearn 1.0</em> one can pass the dataset name via the <code class="docutils literal notranslate"><span class="pre">fit()</span></code> function. If a dataset
+with the same name is within the meta-data, that datasets will not be used.</p>
+<p>For <em>Auto-sklearn 2.0</em> it is not possible to do so because of the method used to construct the
+meta-data.</p>
+</details><details class="summary-b-which-meta-features-are-used-for-meta-learning-b">
+<summary><b>Which meta-features are used for meta-learning?</b></summary><p>We do not have a user guide on meta-features but they are all pretty simple and can be found
+<a class="reference external" href="https://github.com/automl/auto-sklearn/blob/master/autosklearn/metalearning/metafeatures/metafeatures.py">in the source code</a>.</p>
+</details><details class="summary-b-how-is-the-meta-data-generated-for-auto-sklearn-1-0-b">
+<summary><b>How is the meta-data generated for Auto-sklearn 1.0?</b></summary><p>We currently generate meta-data the following way. First, for each of the datasets mentioned
+above, we run Auto-sklearn without meta-learning for a total of two days on multiple metrics (for
+classification these are accuracy, balanced accuracy, log loss and the area under the curce).
+Second, for each run we then have a look at each models that improved the score, i.e. the
+trajectory of the best known model at a time, and refit it on the whole training data. Third, for
+each of these models we then compute all scores we’re interested in, these also include other
+ones such F1 and precision. Finally, for each combination of dataset and metric we store the best
+model we know of.</p>
+</details><details class="summary-b-how-is-the-meta-data-generated-for-auto-sklearn-2-0-b">
+<summary><b>How is the meta-data generated for Auto-sklearn 2.0?</b></summary><p>Please check <a class="reference external" href="https://arxiv.org/abs/2007.04074">our paper</a> for details.</p>
+</details></div>
+<div class="section" id="issues-and-debugging">
+<h2>Issues and Debugging<a class="headerlink" href="#issues-and-debugging" title="Permalink to this headline">¶</a></h2>
+<details class="summary-b-how-can-i-limit-the-number-of-model-evaluations-for-debugging-b">
+<summary><b>How can I limit the number of model evaluations for debugging?</b></summary><p>In certain cases, for example for debugging, it can be helpful to limit the number of
 model evaluations. We do not provide this as an argument in the API as we believe that it
 should NOT be used in practice, but that the user should rather provide time limits.
 An example on how to add the number of models to try as an additional stopping condition
 can be found <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/451#issuecomment-376445607">in this github issue</a>.
 Please note that Auto-sklearn will stop when either the time limit or the number of
 models termination condition is reached.</p>
-</section>
-<section id="ensemble-contains-only-a-dummy-model">
-<h3>Ensemble contains only a dummy model<a class="headerlink" href="#ensemble-contains-only-a-dummy-model" title="Permalink to this headline">¶</a></h3>
-<p>This is a symptom of the problem that all runs started by Auto-sklearn failed. Usually, the issue
+</details><details class="summary-b-why-does-the-final-ensemble-contains-only-a-dummy-model-b">
+<summary><b>Why does the final ensemble contains only a dummy model?</b></summary><p>This is a symptom of the problem that all runs started by Auto-sklearn failed. Usually, the issue
 is that the runtime or memory limit were too tight. Please check the output of
-<code class="docutils literal notranslate"><span class="pre">sprint_statistics</span></code> to see the distribution of why runs failed. If there are mostly crashed
+<code class="docutils literal notranslate"><span class="pre">sprint_statistics()</span></code> to see the distribution of why runs failed. If there are mostly crashed
 runs, please check the log file for further details. If there are mostly runs that exceed the
 memory or time limit, please increase the respective limit and rerun the optimization.</p>
-</section>
-<section id="parallel-processing-and-oversubscription">
-<h3>Parallel processing and oversubscription<a class="headerlink" href="#parallel-processing-and-oversubscription" title="Permalink to this headline">¶</a></h3>
-<p>Auto-sklearn wraps scikit-learn and therefore inherits its parallelism implementation. In short,
+</details><details class="summary-b-auto-sklearn-does-not-use-the-specified-amount-of-resources-b">
+<summary><b>Auto-sklearn does not use the specified amount of resources?</b></summary><p>Auto-sklearn wraps scikit-learn and therefore inherits its parallelism implementation. In short,
 scikit-learn uses two modes of parallelizing computations:</p>
 <ol class="arabic simple">
 <li><p>By using joblib to distribute independent function calls on multiple cores.</p></li>
@@ -346,49 +512,30 @@ with the number of requested CPUs). This can be done by setting the following en
 variables: <code class="docutils literal notranslate"><span class="pre">MKL_NUM_THREADS</span></code>, <code class="docutils literal notranslate"><span class="pre">OPENBLAS_NUM_THREADS</span></code>, <code class="docutils literal notranslate"><span class="pre">BLIS_NUM_THREADS</span></code> and
 <code class="docutils literal notranslate"><span class="pre">OMP_NUM_THREADS</span></code>.</p>
 <p>More details can be found in the <a class="reference external" href="https://scikit-learn.org/stable/computing/parallelism.html?highlight=joblib#parallelism">scikit-learn docs</a>.</p>
-</section>
-</section>
-<section id="meta-learning">
-<h2>Meta-Learning<a class="headerlink" href="#meta-learning" title="Permalink to this headline">¶</a></h2>
-<section id="which-datasets-are-used-for-meta-learning">
-<h3>Which datasets are used for meta-learning?<a class="headerlink" href="#which-datasets-are-used-for-meta-learning" title="Permalink to this headline">¶</a></h3>
-<p>We updated the list of datasets used for meta-learning several times and this list now differs
-significantly from the original 140 datasets we used in 2015 when the paper and the package were
-released. An up-to-date list of <a class="reference external" href="https://docs.openml.org/#tasks">OpenML task IDs</a> can be found
-on <a class="reference external" href="https://github.com/automl/auto-sklearn/blob/master/scripts/update_metadata_util.py">github</a>.</p>
-</section>
-<section id="how-can-datasets-from-the-meta-data-be-excluded">
-<h3>How can datasets from the meta-data be excluded?<a class="headerlink" href="#how-can-datasets-from-the-meta-data-be-excluded" title="Permalink to this headline">¶</a></h3>
-<p>For <em>Auto-sklearn 1.0</em> one can pass the dataset name via the <code class="docutils literal notranslate"><span class="pre">fit()</span></code> function. If a dataset
-with the same name is within the meta-data, that datasets will not be used.</p>
-<p>For <em>Auto-sklearn 2.0</em> it is not possible to do so because of the method used to construct the
-meta-data.</p>
-</section>
-<section id="which-meta-features-are-used-for-meta-learning">
-<h3>Which meta-features are used for meta-learning?<a class="headerlink" href="#which-meta-features-are-used-for-meta-learning" title="Permalink to this headline">¶</a></h3>
-<p>We do not have a user guide on meta-features but they are all pretty simple and can be found
-<a class="reference external" href="https://github.com/automl/auto-sklearn/blob/master/autosklearn/metalearning/metafeatures/metafeatures.py">in the source code</a>.</p>
-</section>
-<section id="how-is-the-meta-data-generated">
-<h3>How is the meta-data generated?<a class="headerlink" href="#how-is-the-meta-data-generated" title="Permalink to this headline">¶</a></h3>
-<section id="auto-sklearn-1-0">
-<h4>Auto-sklearn 1.0<a class="headerlink" href="#auto-sklearn-1-0" title="Permalink to this headline">¶</a></h4>
-<p>We currently generate meta-data the following way. First, for each of the datasets mentioned
-above, we run Auto-sklearn without meta-learning for a total of two days on multiple metrics (for
-classification these are accuracy, balanced accuracy, log loss and the area under the curce).
-Second, for each run we then have a look at each models that improved the score, i.e. the
-trajectory of the best known model at a time, and refit it on the whole training data. Third, for
-each of these models we then compute all scores we’re interested in, these also include other
-ones such F1 and precision. Finally, for each combination of dataset and metric we store the best
-model we know of.</p>
-</section>
-<section id="auto-sklearn-2-0">
-<h4>Auto-sklearn 2.0<a class="headerlink" href="#auto-sklearn-2-0" title="Permalink to this headline">¶</a></h4>
-<p>Please check <a class="reference external" href="https://arxiv.org/abs/2007.04074">our paper</a> for details.</p>
-</section>
-</section>
-</section>
-</section>
+</details></div>
+<div class="section" id="other">
+<h2>Other<a class="headerlink" href="#other" title="Permalink to this headline">¶</a></h2>
+<details class="summary-b-model-persistence-b">
+<summary><b>Model persistence</b></summary><p><em>auto-sklearn</em> is mostly a wrapper around scikit-learn. Therefore, it is
+possible to follow the
+<a class="reference external" href="https://scikit-learn.org/stable/modules/model_persistence.html">persistence Example</a>
+from scikit-learn.</p>
+</details><details class="summary-b-vanilla-auto-sklearn-b">
+<summary><b>Vanilla auto-sklearn</b></summary><p>In order to obtain <em>vanilla auto-sklearn</em> as used in <a class="reference external" href="https://papers.neurips.cc/paper/5872-efficient-and-robust-automated-machine-learning">Efficient and Robust Automated Machine Learning</a>
+set <code class="docutils literal notranslate"><span class="pre">ensemble_size=1</span></code> and <code class="docutils literal notranslate"><span class="pre">initial_configurations_via_metalearning=0</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
+<span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">ensemble_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>An ensemble of size one will result in always choosing the current best model
+according to its performance on the validation set. Setting the initial
+configurations found by meta-learning to zero makes <em>auto-sklearn</em> use the
+regular SMAC algorithm for suggesting new hyperparameter configurations.</p>
+</details></div>
+</div>
 
 
     </div>
@@ -409,7 +556,7 @@ model we know of.</p>
       
     </p>
     <p>
-        &copy; Copyright 2014-2021, Machine Learning Professorship Freiburg.<br/>
+        &copy; Copyright 2014-2022, Machine Learning Professorship Freiburg.<br/>
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br/>
     </p>
   </div>
