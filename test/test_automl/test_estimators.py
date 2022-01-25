@@ -28,6 +28,7 @@ from sklearn.base import clone
 from sklearn.base import ClassifierMixin, RegressorMixin
 from sklearn.base import is_classifier
 from smac.tae import StatusType
+from dask.distributed import Client
 
 from autosklearn.data.validation import InputValidator
 import autosklearn.pipeline.util as putil
@@ -79,6 +80,7 @@ def test_fit_n_jobs(tmp_dir):
         get_smac_object_callback=get_smac_object_wrapper_instance,
         max_models_on_disc=None,
     )
+
     automl.fit(X_train, Y_train)
 
     # Test that the argument is correctly passed to SMAC
@@ -272,6 +274,7 @@ def test_performance_over_time_no_ensemble(tmp_dir):
                                 seed=1,
                                 initial_configurations_via_metalearning=0,
                                 ensemble_size=0,)
+
     cls.fit(X_train, Y_train, X_test, Y_test)
 
     performance_over_time = cls.performance_over_time_
@@ -297,6 +300,7 @@ def test_cv_results(tmp_dir):
     original_params = copy.deepcopy(params)
 
     cls.fit(X_train, Y_train)
+
     cv_results = cls.cv_results_
     assert isinstance(cv_results, dict), type(cv_results)
     assert isinstance(cv_results['mean_test_score'], np.ndarray), type(
@@ -382,6 +386,7 @@ def test_leaderboard(
         tmp_folder=tmp_dir,
         seed=1
     )
+
     model.fit(X_train, Y_train)
 
     for params in params_generator:
@@ -465,6 +470,157 @@ def test_leaderboard(
                 assert all(leaderboard['ensemble_weight'] > 0)
 
 
+@pytest.mark.parametrize('estimator', [AutoSklearnRegressor])
+@pytest.mark.parametrize('resampling_strategy', ['holdout'])
+@pytest.mark.parametrize('X', [
+    np.asarray([[1.0, 1.0, 1.0]] * 25 + [[2.0, 2.0, 2.0]] * 25 +
+               [[3.0, 3.0, 3.0]] * 25 + [[4.0, 4.0, 4.0]] * 25)
+])
+@pytest.mark.parametrize('y', [
+    np.asarray([1.0] * 25 + [2.0] * 25 + [3.0] * 25 + [4.0] * 25)
+])
+def test_show_models_with_holdout(
+    tmp_dir: str,
+    dask_client: Client,
+    estimator: AutoSklearnEstimator,
+    resampling_strategy: str,
+    X: np.ndarray,
+    y: np.ndarray
+) -> None:
+    """
+    Parameters
+    ----------
+    tmp_dir: str
+        The temporary directory to use for this test
+
+    dask_client: dask.distributed.Client
+         The dask client to use for this test
+
+    estimator: AutoSklearnEstimator
+         The estimator to train
+
+    resampling_strategy: str
+         The resampling strategy to use
+
+    X: np.ndarray
+        The X data to use for this estimator
+
+    y: np.ndarray
+         The targets to use for this estimator
+
+    Expects
+    -------
+    * Expects all the model dictionaries to have ``model_keys``
+    * Expects all models to have an auto-sklearn wrapped model ``regressor``
+    * Expects all models to have a sklearn wrapped model ``sklearn_regressor``
+    * Expects no model to have any ``None`` value
+    """
+
+    automl = estimator(
+        time_left_for_this_task=60,
+        per_run_time_limit=5,
+        tmp_folder=tmp_dir,
+        resampling_strategy=resampling_strategy,
+        dask_client=dask_client
+    )
+    automl.fit(X, y)
+
+    models = automl.show_models().values()
+
+    model_keys = set([
+        'model_id', 'rank', 'cost', 'ensemble_weight',
+        'data_preprocessor', 'feature_preprocessor',
+        'regressor', 'sklearn_regressor'
+    ])
+
+    assert all([model_keys == set(model.keys()) for model in models])
+    assert all([model['regressor'] for model in models])
+    assert all([model['sklearn_regressor'] for model in models])
+    assert not any([None in model.values() for model in models])
+
+
+@pytest.mark.parametrize('estimator', [AutoSklearnClassifier])
+@pytest.mark.parametrize('resampling_strategy', ['cv'])
+@pytest.mark.parametrize('X', [
+    np.asarray([[1.0, 1.0, 1.0]] * 50 + [[2.0, 2.0, 2.0]] * 50)
+])
+@pytest.mark.parametrize('y', [
+    np.asarray([1] * 50 + [2] * 50)
+])
+def test_show_models_with_cv(
+    tmp_dir: str,
+    dask_client: Client,
+    estimator: AutoSklearnEstimator,
+    resampling_strategy: str,
+    X: np.ndarray,
+    y: np.ndarray
+) -> None:
+    """
+    Parameters
+    ----------
+    tmp_dir: str
+        The temporary directory to use for this test
+
+    dask_client: dask.distributed.Client
+         The dask client to use for this test
+
+    estimator: AutoSklearnEstimator
+         The estimator to train
+
+    resampling_strategy: str
+         The resampling strategy to use
+
+    X: np.ndarray
+        The X data to use for this estimator
+
+    y: np.ndarray
+         The targets to use for this estimator
+
+    Expects
+    -------
+    * Expects all the model dictionaries to have ``model_keys``
+    * Expects no model to have any ``None`` value
+    * Expects all the estimators in a model to have ``estimator_keys``
+    * Expects all model estimators to have an auto-sklearn wrapped model ``classifier``
+    * Expects all model estimators to have a sklearn wrapped model ``sklearn_classifier``
+    * Expects no estimator to have ``None`` value
+    """
+
+    automl = estimator(
+        time_left_for_this_task=120,
+        per_run_time_limit=5,
+        tmp_folder=tmp_dir,
+        resampling_strategy=resampling_strategy,
+        dask_client=dask_client
+    )
+    automl.fit(X, y)
+
+    models = automl.show_models().values()
+
+    model_keys = set([
+        'model_id', 'rank',
+        'cost', 'ensemble_weight',
+        'voting_model', 'estimators'
+    ])
+
+    estimator_keys = set([
+        'data_preprocessor', 'balancing',
+        'feature_preprocessor', 'classifier',
+        'sklearn_classifier'
+    ])
+
+    assert all([model_keys == set(model.keys()) for model in models])
+    assert not any([None in model.values() for model in models])
+    assert all([estimator_keys == set(estimator.keys())
+                for model in models for estimator in model['estimators']])
+    assert all([estimator['classifier']
+                for model in models for estimator in model['estimators']])
+    assert all([estimator['sklearn_classifier']
+                for model in models for estimator in model['estimators']])
+    assert not any([None in estimator.values()
+                    for model in models for estimator in model['estimators']])
+
+
 @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.build_automl')
 def test_fit_n_jobs_negative(build_automl_patch):
     n_cores = cpu_count()
@@ -540,6 +696,7 @@ def test_can_pickle_classifier(tmp_dir, dask_client):
                                    tmp_folder=tmp_dir,
                                    dask_client=dask_client,
                                    )
+
     automl.fit(X_train, Y_train)
 
     initial_predictions = automl.predict(X_test)
@@ -637,7 +794,7 @@ def test_classification_pandas_support(tmp_dir, dask_client):
     )
 
     # Drop NAN!!
-    X = X.dropna('columns')
+    X = X.dropna(axis='columns')
 
     # This test only make sense if input is dataframe
     assert isinstance(X, pd.DataFrame)
@@ -765,12 +922,14 @@ def test_autosklearn_classification_methods_returns_self(dask_client):
                                    exclude={'feature_preprocessor': ['fast_ica']})
 
     automl_fitted = automl.fit(X_train, y_train)
+
     assert automl is automl_fitted
 
     automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
     assert automl is automl_ensemble_fitted
 
     automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+
     assert automl is automl_refitted
 
 
@@ -801,12 +960,14 @@ def test_autosklearn2_classification_methods_returns_self(dask_client):
                                     dask_client=dask_client)
 
     automl_fitted = automl.fit(X_train, y_train)
+
     assert automl is automl_fitted
 
     automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
     assert automl is automl_ensemble_fitted
 
     automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+
     assert automl is automl_refitted
 
     predictions = automl_fitted.predict(X_test)
@@ -824,12 +985,14 @@ def test_autosklearn2_classification_methods_returns_self_sparse(dask_client):
                                     dask_client=dask_client)
 
     automl_fitted = automl.fit(X_train, y_train)
+
     assert automl is automl_fitted
 
     automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
     assert automl is automl_ensemble_fitted
 
     automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+
     assert automl is automl_refitted
 
     predictions = automl_fitted.predict(X_test)
@@ -933,10 +1096,15 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
                                             X_test=X_test, y_test=y_test,
                                             ).get_default_configuration()
 
-    pipeline, run_info, run_value = automl.fit_pipeline(X=X_train, y=y_train, config=config,
-                                                        X_test=X_test, y_test=y_test,
-                                                        disable_file_output=disable_file_output,
-                                                        resampling_strategy=resampling_strategy)
+    pipeline, run_info, run_value = automl.fit_pipeline(
+        X=X_train,
+        y=y_train,
+        config=config,
+        X_test=X_test,
+        y_test=y_test,
+        disable_file_output=disable_file_output,
+        resampling_strategy=resampling_strategy
+    )
 
     assert isinstance(run_info.config, Configuration)
     assert run_info.cutoff == 30
@@ -1090,11 +1258,14 @@ def test_autosklearn_anneal(as_frame):
     if as_frame:
         # Let autosklearn calculate the feat types
         automl_fitted = automl.fit(X, y)
+
     else:
         X_, y_ = sklearn.datasets.fetch_openml(data_id=2, return_X_y=True, as_frame=True)
         feat_type = ['categorical' if X_[col].dtype.name == 'category' else 'numerical'
                      for col in X_.columns]
+
         automl_fitted = automl.fit(X, y, feat_type=feat_type)
+
     assert automl is automl_fitted
 
     automl_ensemble_fitted = automl.fit_ensemble(y, ensemble_size=5)

@@ -14,6 +14,8 @@ Auto-sklearn is a wrapper on top of
 the sklearn models. This example illustrates how to interact
 with the sklearn components directly, in this case a PCA preprocessor.
 """
+from pprint import pprint
+
 import sklearn.datasets
 import sklearn.metrics
 
@@ -62,10 +64,17 @@ print("Accuracy score:{}".format(
 # `Ensemble Selection <https://www.cs.cornell.edu/~alexn/papers/shotgun.icml04.revised.rev2.pdf>`_
 # to construct ensembles in a post-hoc fashion. The ensemble is a linear
 # weighting of all models constructed during the hyperparameter optimization.
-# This prints the final ensemble. It is a list of tuples, each tuple being
-# the model weight in the ensemble and the model itself.
+# This prints the final ensemble. It is a dictionary where ``model_id`` of
+# each model is a key, and value is a dictionary containing information
+# of that model. A model's dict contains its ``'model_id'``, ``'rank'``,
+# ``'cost'``, ``'ensemble_weight'``, and the model itself. The model is
+# given by the ``'data_preprocessor'``, ``'feature_preprocessor'``,
+# ``'regressor'/'classifier'`` and ``'sklearn_regressor'/'sklearn_classifier'``
+# entries. But for the ``'cv'`` resampling strategy, the same for each cv
+# model is stored in the ``'estimators'`` list in the dict, along with the
+# ``'voting_model'``.
 
-print(automl.show_models())
+pprint(automl.show_models(), indent=4)
 
 ###########################################################################
 # Report statistics about the search

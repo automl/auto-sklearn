@@ -9,8 +9,8 @@ import sklearn.datasets
 from sklearn import preprocessing
 import sklearn.model_selection
 
+from autosklearn.automl_common.common.utils.backend import Backend
 
-from autosklearn.util.backend import Backend
 from autosklearn.constants import \
     MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION, BINARY_CLASSIFICATION, REGRESSION
 from autosklearn.util.data import convert_to_bin

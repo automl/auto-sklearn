@@ -6,6 +6,7 @@ Extending Auto-Sklearn with Regression Component
 The following example demonstrates how to create a new regression
 component for using in auto-sklearn.
 """
+from pprint import pprint
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -137,4 +138,4 @@ reg.fit(X_train, y_train)
 # =====================================
 y_pred = reg.predict(X_test)
 print("r2 score: ", sklearn.metrics.r2_score(y_pred, y_test))
-print(reg.show_models())
+pprint(reg.show_models(), indent=4)

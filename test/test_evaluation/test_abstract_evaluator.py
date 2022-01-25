@@ -10,10 +10,11 @@ import tempfile
 import numpy as np
 import sklearn.dummy
 
+from autosklearn.automl_common.common.utils.backend import Backend, BackendContext
+
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 from autosklearn.pipeline.components.base import _addons
 from autosklearn.metrics import accuracy
-from autosklearn.util.backend import Backend, BackendContext
 from smac.tae import StatusType
 
 this_directory = os.path.dirname(__file__)
@@ -252,12 +253,15 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         context = BackendContext(
             temporary_directory=os.path.join(self.working_directory, 'tmp'),
+            output_directory=os.path.join(self.working_directory, 'tmp_output'),
             delete_tmp_folder_after_terminate=True,
+            delete_output_folder_after_terminate=True,
+            prefix="auto-sklearn"
         )
         with unittest.mock.patch.object(Backend, 'load_datamanager') as load_datamanager_mock:
             load_datamanager_mock.return_value = get_multiclass_classification_datamanager()
 
-            backend = Backend(context)
+            backend = Backend(context, prefix="auto-sklearn")
 
             ae = AbstractEvaluator(
                 backend=backend,
@@ -294,11 +298,14 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         context = BackendContext(
             temporary_directory=os.path.join(self.working_directory, 'tmp'),
+            output_directory=os.path.join(self.working_directory, 'tmp_output'),
             delete_tmp_folder_after_terminate=True,
+            delete_output_folder_after_terminate=True,
+            prefix="auto-sklearn"
         )
         with unittest.mock.patch.object(Backend, 'load_datamanager') as load_datamanager_mock:
             load_datamanager_mock.return_value = get_multiclass_classification_datamanager()
-            backend = Backend(context)
+            backend = Backend(context, prefix="auto-sklearn")
 
             with unittest.mock.patch.object(_addons['classification'], 'add_component') as _:
 

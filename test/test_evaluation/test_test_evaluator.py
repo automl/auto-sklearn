@@ -13,12 +13,13 @@ import unittest.mock
 import numpy as np
 from smac.tae import StatusType
 
+from autosklearn.automl_common.common.utils.backend import Backend
+
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, BINARY_CLASSIFICATION, \
     MULTICLASS_CLASSIFICATION, REGRESSION
 from autosklearn.evaluation.test_evaluator import TestEvaluator, eval_t
 from autosklearn.evaluation.util import read_queue
 from autosklearn.util.pipeline import get_configuration_space
-from autosklearn.util.backend import Backend
 from autosklearn.metrics import accuracy, r2, f1_macro
 
 this_directory = os.path.dirname(__file__)

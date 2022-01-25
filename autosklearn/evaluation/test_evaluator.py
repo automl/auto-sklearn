@@ -8,13 +8,14 @@ import numpy as np
 
 from smac.tae import StatusType
 
+from autosklearn.automl_common.common.utils.backend import Backend
+
 from autosklearn.evaluation.abstract_evaluator import (
     AbstractEvaluator,
     _fit_and_suppress_warnings,
 )
 from autosklearn.pipeline.components.base import ThirdPartyComponents
 from autosklearn.metrics import calculate_loss, Scorer
-from autosklearn.util.backend import Backend
 
 
 __all__ = [

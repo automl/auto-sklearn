@@ -14,7 +14,7 @@ It uses Successive Halving instead of `Hyperband <https://jmlr.org/papers/volume
 To get the BOHB algorithm, simply import Hyperband and use it as the intensification strategy.
 
 """  # noqa (links are too long)
-
+from pprint import pprint
 
 import sklearn.model_selection
 import sklearn.datasets
@@ -110,7 +110,7 @@ automl = autosklearn.classification.AutoSklearnClassifier(
 )
 automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
-print(automl.show_models())
+pprint(automl.show_models(), indent=4)
 predictions = automl.predict(X_test)
 # Print statistics about the auto-sklearn run such as number of
 # iterations, number of models failed with a time out.
@@ -143,7 +143,7 @@ automl = autosklearn.classification.AutoSklearnClassifier(
 automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
 # Print the final ensemble constructed by auto-sklearn.
-print(automl.show_models())
+pprint(automl.show_models(), indent=4)
 automl.refit(X_train, y_train)
 predictions = automl.predict(X_test)
 # Print statistics about the auto-sklearn run such as number of
@@ -177,7 +177,7 @@ automl = autosklearn.classification.AutoSklearnClassifier(
 automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
 # Print the final ensemble constructed by auto-sklearn.
-print(automl.show_models())
+pprint(automl.show_models(), indent=4)
 automl.refit(X_train, y_train)
 predictions = automl.predict(X_test)
 # Print statistics about the auto-sklearn run such as number of
@@ -208,7 +208,7 @@ automl = autosklearn.classification.AutoSklearnClassifier(
 automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
 # Print the final ensemble constructed by auto-sklearn.
-print(automl.show_models())
+pprint(automl.show_models(), indent=4)
 predictions = automl.predict(X_test)
 # Print statistics about the auto-sklearn run such as number of
 # iterations, number of models failed with a time out.
@@ -245,7 +245,7 @@ automl = autosklearn.classification.AutoSklearnClassifier(
 automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
 # Print the final ensemble constructed by auto-sklearn.
-print(automl.show_models())
+pprint(automl.show_models(), indent=4)
 predictions = automl.predict(X_test)
 # Print statistics about the auto-sklearn run such as number of
 # iterations, number of models failed with a time out.

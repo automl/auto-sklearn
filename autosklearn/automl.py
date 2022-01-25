@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 import copy
+import distro
 import io
 import json
 import platform
@@ -37,6 +38,8 @@ from sklearn.utils.validation import check_is_fitted
 from sklearn.metrics._classification import type_of_target
 from sklearn.dummy import DummyClassifier, DummyRegressor
 
+from autosklearn.automl_common.common.utils.backend import Backend, create
+
 from autosklearn.metrics import Scorer, default_metric_for_task
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.data.validation import (
@@ -49,7 +52,6 @@ from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, _fit_with_budget
 from autosklearn.metrics import calculate_metric
-from autosklearn.util.backend import Backend, create
 from autosklearn.util.stopwatch import StopWatch
 from autosklearn.util.logging_ import (
     setup_logger,
@@ -171,8 +173,8 @@ class AutoML(BaseEstimator):
                  memory_limit=3072,
                  metadata_directory=None,
                  debug_mode=False,
-                 include=None,
-                 exclude=None,
+                 include: Optional[Dict[str, List[str]]] = None,
+                 exclude: Optional[Dict[str, List[str]]] = None,
                  resampling_strategy='holdout-iterative-fit',
                  resampling_strategy_arguments=None,
                  n_jobs=None,
@@ -280,6 +282,8 @@ class AutoML(BaseEstimator):
     def _create_backend(self) -> Backend:
         return create(
             temporary_directory=self._temporary_directory,
+            output_directory=None,
+            prefix="auto-sklearn",
             delete_tmp_folder_after_terminate=self._delete_tmp_folder_after_terminate,
         )
 
@@ -690,11 +694,10 @@ class AutoML(BaseEstimator):
         self._logger.debug('Starting to print environment information')
         self._logger.debug('  Python version: %s', sys.version.split('\n'))
         try:
-            self._logger.debug('  Distribution: %s', platform.linux_distribution())
+            self._logger.debug(f'\tDistribution: {distro.id()}-{distro.version()}-{distro.name()}')
         except AttributeError:
-            # platform.linux_distribution() was removed in Python3.8
-            # We should move to the distro package as soon as it supports Windows and OSX
             pass
+
         self._logger.debug('  System: %s', platform.system())
         self._logger.debug('  Machine: %s', platform.machine())
         self._logger.debug('  Platform: %s', platform.platform())
@@ -1833,21 +1836,159 @@ class AutoML(BaseEstimator):
 
         return self.ensemble_.get_models_with_weights(self.models_)
 
-    def show_models(self):
-        models_with_weights = self.get_models_with_weights()
+    def show_models(self) -> Dict[int, Any]:
+        """ Returns a dictionary containing dictionaries of ensemble models.
 
-        with io.StringIO() as sio:
-            sio.write("[")
-            for weight, model in models_with_weights:
-                sio.write("(%f, %s),\n" % (weight, model))
-            sio.write("]")
+        Each model in the ensemble can be accessed by giving its ``model_id`` as key.
 
-            return sio.getvalue()
+        A model dictionary contains the following:
 
-    def _create_search_space(self, tmp_dir, backend, datamanager,
-                             include=None,
-                             exclude=None,
-                             ):
+        * ``"model_id"`` - The id given to a model by ``autosklearn``.
+        * ``"rank"`` - The rank of the model based on it's ``"cost"``.
+        * ``"cost"`` - The loss of the model on the validation set.
+        * ``"ensemble_weight"`` - The weight given to the model in the ensemble.
+        * ``"voting_model"`` - The ``cv_voting_ensemble`` model (for 'cv' resampling).
+        * ``"estimators"`` - List of models (dicts) in ``cv_voting_ensemble`` (for 'cv' resampling).
+        * ``"data_preprocessor"`` - The preprocessor used on the data.
+        * ``"balancing"`` - The balancing used on the data (for classification).
+        * ``"feature_preprocessor"`` - The preprocessor for features types.
+        * ``"classifier"`` or ``"regressor"`` - The autosklearn wrapped classifier or regressor.
+        * ``"sklearn_classifier"`` or ``"sklearn_regressor"`` - The sklearn classifier or regressor.
+
+        **Example**
+
+        .. code-block:: python
+
+            import sklearn.datasets
+            import sklearn.metrics
+            import autosklearn.regression
+
+            X, y = sklearn.datasets.load_diabetes(return_X_y=True)
+
+            automl = autosklearn.regression.AutoSklearnRegressor(
+                time_left_for_this_task=120
+                )
+            automl.fit(X_train, y_train, dataset_name='diabetes')
+
+            ensemble_dict = automl.show_models()
+            print(ensemble_dict)
+
+        Output:
+
+        .. code-block:: text
+
+            {
+                25: {'model_id': 25.0,
+                     'rank': 1,
+                     'cost': 0.43667876507897496,
+                     'ensemble_weight': 0.38,
+                     'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing....>,
+                     'feature_preprocessor': <autosklearn.pipeline.components....>,
+                     'regressor': <autosklearn.pipeline.components.regression....>,
+                     'sklearn_regressor': SGDRegressor(alpha=0.0006517033225329654,...)
+                    },
+                6: {'model_id': 6.0,
+                    'rank': 2,
+                    'cost': 0.4550418898836528,
+                    'ensemble_weight': 0.3,
+                    'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing....>,
+                    'feature_preprocessor': <autosklearn.pipeline.components....>,
+                    'regressor': <autosklearn.pipeline.components.regression....>,
+                    'sklearn_regressor': ARDRegression(alpha_1=0.0003701926442639788,...)
+                    }...
+            }
+
+        Returns
+        -------
+        Dict(int, Any) : dictionary of length = number of models in the ensemble
+            A dictionary of models in the ensemble, where ``model_id`` is the key.
+
+        """
+
+        ensemble_dict = {}
+
+        def has_key(rv, key):
+            return rv.additional_info and key in rv.additional_info
+
+        table_dict = {}
+        for rkey, rval in self.runhistory_.data.items():
+            if has_key(rval, 'num_run'):
+                model_id = rval.additional_info['num_run']
+                table_dict[model_id] = {
+                        'model_id': model_id,
+                        'cost': rval.cost
+                        }
+
+        # Checking if the dictionary is empty
+        if not table_dict:
+            raise RuntimeError('No model found. Try increasing \'time_left_for_this_task\'.')
+
+        for i, weight in enumerate(self.ensemble_.weights_):
+            (_, model_id, _) = self.ensemble_.identifiers_[i]
+            table_dict[model_id]['ensemble_weight'] = weight
+
+        table = pd.DataFrame.from_dict(table_dict, orient='index')
+
+        # Checking which resampling strategy is chosen and selecting the appropriate models
+        is_cv = (self._resampling_strategy == "cv")
+        models = self.cv_models_ if is_cv else self.models_
+
+        rank = 1  # Initializing rank for the first model
+        for (_, model_id, _), model in models.items():
+            model_dict = {}  # Declaring model dictionary
+
+            # Inserting model_id, rank, cost and ensemble weight
+            model_dict['model_id'] = table.loc[model_id]['model_id'].astype(int)
+            model_dict['rank'] = rank
+            model_dict['cost'] = table.loc[model_id]['cost']
+            model_dict['ensemble_weight'] = table.loc[model_id]['ensemble_weight']
+            rank += 1  # Incrementing rank by 1 for the next model
+
+            # The steps in the models pipeline are as follows:
+            # 'data_preprocessor': DataPreprocessor,
+            # 'balancing': Balancing,
+            # 'feature_preprocessor': FeaturePreprocessorChoice,
+            # 'classifier'/'regressor': ClassifierChoice/RegressorChoice (autosklearn wrapped model)
+
+            # For 'cv' (cross validation) strategy
+            if is_cv:
+                # Voting model created by cross validation
+                cv_voting_ensemble = model
+                model_dict['voting_model'] = cv_voting_ensemble
+
+                # List of models, each trained on one cv fold
+                cv_models = []
+                for cv_model in cv_voting_ensemble.estimators_:
+                    estimator = dict(cv_model.steps)
+
+                    # Adding sklearn model to the model dictionary
+                    model_type, autosklearn_wrapped_model = cv_model.steps[-1]
+                    estimator[f'sklearn_{model_type}'] = autosklearn_wrapped_model.choice.estimator
+                    cv_models.append(estimator)
+                model_dict['estimators'] = cv_models
+
+            # For any other strategy
+            else:
+                steps = dict(model.steps)
+                model_dict.update(steps)
+
+                # Adding sklearn model to the model dictionary
+                model_type, autosklearn_wrapped_model = model.steps[-1]
+                model_dict[f'sklearn_{model_type}'] = autosklearn_wrapped_model.choice.estimator
+
+            # Insterting model_dict in the ensemble dictionary
+            ensemble_dict[model_id] = model_dict
+
+        return ensemble_dict
+
+    def _create_search_space(
+        self,
+        tmp_dir,
+        backend,
+        datamanager,
+        include: Optional[Dict[str, List[str]]] = None,
+        exclude: Optional[Dict[str, List[str]]] = None,
+    ):
         task_name = 'CreateConfigSpace'
 
         self._stopwatch.start_task(task_name)

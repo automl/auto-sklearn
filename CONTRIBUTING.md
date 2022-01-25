@@ -30,16 +30,23 @@ Following that we'll tell you about how you can test your changes locally and th
     It's important to work off the latest changes on the **development** branch.
     ```bash
     # With https
-    git clone https://github.com/your-username/auto-sklearn
+    # Note the --recurse-submodules args, we use a submodule autosklearn/automl_common
+    # so it needs to be downloaded too
+    git clone --recurse-submodules https://github.com/your-username/auto-sklearn
 
     # ... or with ssh
-    git clone git@github.com:your-username/auto-sklearn.git
+    git clone --recurse-submodules git@github.com:your-username/auto-sklearn.git
 
     # Navigate into the cloned repo
     cd auto-sklearn
 
     # Create a new branch based off the development one
     git checkout -b my_new_branch development
+
+    # If you missed the --recurse-submodules arg during clone or need to install the
+    # submodule manually, then execute the following line:
+    #
+    # git submodule update --init --recursive
 
     # ... Alternatively, if you would prefer a more manual method
     # Show all the available branches with a * beside your current one
@@ -50,6 +57,11 @@ Following that we'll tell you about how you can test your changes locally and th
 
     # Create a new branch based on the currently active branch
     git checkout -b my_new_branch
+
+    # If you missed the --recurse-submodules arg during clone or need to install the
+    # submodule manually, then execute the following line:
+    #
+    # git submodule udate --init --recursive
     ```
 
     The reason to create a new branch is two fold:
@@ -81,7 +93,7 @@ Following that we'll tell you about how you can test your changes locally and th
     # If you're using shells other than bash you'll need to use
     pip install -e ".[test,examples,doc]"
     ```
-    *   If you're only exposure to using pip is `pip install package_name` then this might be a bit confusing.
+    *   If your only exposure to using pip is `pip install package_name` then this might be a bit confusing.
     *   If we type `pip install -e .` (notice the 'dot'), this tells `pip` to install a package located here, in this directory, `.`.
         The `-e` flag indicates that it should be editable, meaning you will not have to run `pip install .` every time you make a change and want to try it.
     *   Finally the `[test,examples,doc]` tells `pip` that there's some extra optional dependencies that we want to install.
@@ -334,6 +346,9 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     git clone git@github.com:your-username/auto-sklearn.git
     cd auto-sklearn
     git checkout -b my_new_branch development
+
+    # Initialize autosklearn/automl_common submodule
+    git submodule update --init --recursive
 
     # Create a virtual environment and activate it so there are no package
     # conflicts

@@ -56,6 +56,10 @@ class DecisionTree(AutoSklearnRegressionAlgorithm):
             min_weight_fraction_leaf=self.min_weight_fraction_leaf,
             min_impurity_decrease=self.min_impurity_decrease,
             random_state=self.random_state)
+
+        if y.ndim == 2 and y.shape[1] == 1:
+            y = y.flatten()
+
         self.estimator.fit(X, y, sample_weight=sample_weight)
         return self
 
