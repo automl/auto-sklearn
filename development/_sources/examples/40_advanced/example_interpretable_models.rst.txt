@@ -200,6 +200,10 @@ and can change from use case to use case.
 
  .. code-block:: none
 
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+      self.metafeatures = self.metafeatures.append(metafeatures)
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+      self.algorithm_runs[metric].append(runs)
 
     AutoSklearnClassifier(ensemble_size=1,
                           include={'classifier': ['decision_tree', 'lda', 'sgd'],
@@ -233,17 +237,18 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    {   20: {   'balancing': Balancing(random_state=1),
-                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f8e5fadcc10>,
+    {   63: {   'balancing': Balancing(random_state=1),
+                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7facc5a8ff10>,
                 'cost': 0.007092198581560294,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f8e7793b970>,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7facc1d9c2b0>,
                 'ensemble_weight': 1.0,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f8e5fadc1c0>,
-                'model_id': 20,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7facc5a8ffd0>,
+                'model_id': 63,
                 'rank': 1,
-                'sklearn_classifier': SGDClassifier(alpha=0.0003336259810364362, eta0=0.010000000000000014,
-                  learning_rate='invscaling', loss='log', max_iter=16,
-                  random_state=1, tol=0.006915066463246923, warm_start=True)}}
+                'sklearn_classifier': SGDClassifier(alpha=9.999999999999991e-05, epsilon=1.3700860264543197e-05,
+                  eta0=0.010000000000000014, learning_rate='invscaling',
+                  loss='modified_huber', max_iter=64, random_state=1,
+                  tol=0.0004668987145850572, warm_start=True)}}
 
 
 
@@ -270,7 +275,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score: 0.958041958041958
+    Accuracy score: 0.965034965034965
 
 
 
@@ -278,7 +283,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  54.940 seconds)
+   **Total running time of the script:** ( 1 minutes  56.826 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_interpretable_models.py:
