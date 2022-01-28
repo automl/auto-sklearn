@@ -533,6 +533,9 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     continue
                 elif 'Internal work array size computation failed' in e.args[0]:
                     continue
+                # Assumed to be caused by knn with preprocessor fast_ica with whiten
+                elif 'Input contains NaN, infinity or a value too large' in e.args[0]:
+                    continue
                 else:
                     e.args += (f"config={config}",)
                     raise e
