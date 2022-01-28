@@ -18,10 +18,10 @@ from sklearn.feature_extraction.text import CountVectorizer
 class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
     def __init__(
         self,
-        ngram_range: Optional[int] = None,
-        min_df_choice: Optional[str] = None,
-        min_df_absolute: Optional[int] = None,
-        min_df_relative: Optional[float] = None,
+        ngram_range: int = 1,
+        min_df_choice: str = "min_df_absolute",
+        min_df_absolute: int = 0,
+        min_df_relative: float = 0.01,
         random_state: Optional[Union[int, np.random.RandomState]] = None
     ) -> None:
         self.ngram_range = ngram_range

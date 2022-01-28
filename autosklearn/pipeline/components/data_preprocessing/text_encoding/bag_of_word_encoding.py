@@ -19,10 +19,10 @@ from sklearn.feature_extraction.text import CountVectorizer
 class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
     def __init__(
         self,
-        ngram_range: Optional[int] = None,
-        min_df_choice: Optional[str] = None,
-        min_df_absolute: Optional[int] = None,
-        min_df_relative: Optional[float] = None,
+        ngram_range: int = 1,
+        min_df_choice: str = "min_df_absolute",
+        min_df_absolute: int = 0,
+        min_df_relative: float = 0.01,
         random_state: Optional[Union[int, np.random.RandomState]] = None
     ) -> None:
         self.ngram_range = ngram_range
@@ -57,16 +57,9 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
         return self
 
     def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
-        X_new = None
         if self.preprocessor is None:
             raise NotImplementedError()
-        # iterate over the pretrained preprocessors and columns and transform the data
-        for feature in X.columns:
-            if X_new is None:
-                X_new = self.preprocessor.transform(X[feature])
-            else:
-                X_new += self.preprocessor.transform(X[feature])
-        return X_new
+        return sum(self.preprocessor.transform(X[feature] for feature in X.columns))
 
     @staticmethod
     def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
