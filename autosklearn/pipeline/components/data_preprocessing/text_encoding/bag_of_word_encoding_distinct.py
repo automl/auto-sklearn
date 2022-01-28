@@ -34,14 +34,14 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
             ) -> 'BagOfWordEncoder':
 
         if isinstance(X, pd.DataFrame):
+            X.fillna("", inplace=True)
             if self.min_df_choice == "min_df_absolute":
 
                 self.preprocessor = {}
 
                 for feature in X.columns:
                     vectorizer = CountVectorizer(min_df=self.min_df_absolute,
-                                                 ngram_range=(1, self.ngram_range)).fit(
-                        X[feature].dropna())
+                                                 ngram_range=(1, self.ngram_range)).fit(X[feature])
                     self.preprocessor[feature] = vectorizer
 
             elif self.min_df_choice == "min_df_relative":
@@ -50,8 +50,7 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
 
                 for feature in X.columns:
                     vectorizer = CountVectorizer(min_df=self.min_df_relative,
-                                                 ngram_range=(1, self.ngram_range)).fit(
-                        X[feature].dropna())
+                                                 ngram_range=(1, self.ngram_range)).fit(X[feature])
                     self.preprocessor[feature] = vectorizer
             else:
                 raise KeyError()

@@ -36,6 +36,7 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
             ) -> 'TfidfEncoder':
 
         if isinstance(X, pd.DataFrame):
+            X.fillna("", inplace=True)
             # define a CountVectorizer for every feature (implicitly defined by order of columns,
             # maybe change the list
             # to a dictionary with features as keys)
@@ -50,7 +51,7 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
             else:
                 raise KeyError()
 
-            all_text = itertools.chain.from_iterable(X[col].dropna() for col in X.columns)
+            all_text = itertools.chain.from_iterable(X[col] for col in X.columns)
             self.preprocessor = self.preprocessor.fit(all_text)
 
         else:
