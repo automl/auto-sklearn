@@ -109,8 +109,9 @@ class TextPreprocessingPipeline(BasePipeline):
             default_dataset_properties.update(dataset_properties)
 
         steps.extend([
-            ("text_encoding", BagOfWordChoice(default_dataset_properties)),
-            ("feature_reduction", FeatureReduction())
+            ("text_encoding", BagOfWordChoice(default_dataset_properties,
+                                              random_state=self.random_state)),
+            ("feature_reduction", FeatureReduction(random_state=self.random_state))
         ])
         return steps
 

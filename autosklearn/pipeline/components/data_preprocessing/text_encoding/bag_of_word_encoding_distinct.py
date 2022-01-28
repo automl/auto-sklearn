@@ -40,7 +40,8 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
 
                 for feature in X.columns:
                     vectorizer = CountVectorizer(min_df=self.min_df_absolute,
-                                                 ngram_range=(1, self.ngram_range)).fit(X[feature])
+                                                 ngram_range=(1, self.ngram_range)).fit(
+                        X[feature].dropna())
                     self.preprocessor[feature] = vectorizer
 
             elif self.min_df_choice == "min_df_relative":
@@ -49,7 +50,8 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
 
                 for feature in X.columns:
                     vectorizer = CountVectorizer(min_df=self.min_df_relative,
-                                                 ngram_range=(1, self.ngram_range)).fit(X[feature])
+                                                 ngram_range=(1, self.ngram_range)).fit(
+                        X[feature].dropna())
                     self.preprocessor[feature] = vectorizer
             else:
                 raise KeyError()
@@ -60,6 +62,7 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
         return self
 
     def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
+        X.fillna("", inplace=True)
         X_new = None
         if self.preprocessor is None:
             raise NotImplementedError()

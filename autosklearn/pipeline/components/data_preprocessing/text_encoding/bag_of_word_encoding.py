@@ -57,6 +57,7 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
         return self
 
     def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
+        X.fillna("", inplace=True)
         if self.preprocessor is None:
             raise NotImplementedError()
         return sum(self.preprocessor.transform(X[feature] for feature in X.columns))
