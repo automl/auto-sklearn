@@ -62,9 +62,15 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
 
     def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         X.fillna("", inplace=True)
+        X_transformed = None
         if self.preprocessor is None:
             raise NotImplementedError()
-        return sum(self.preprocessor.transform(X[feature]) for feature in X.columns)
+        for feature in X.columns:
+            if X_transformed is None:
+                X_transformed = self.preprocessor.transform(X[feature])
+            else:
+                X_transformed += self.preprocessor.transform(X[feature])
+        return X_transformed
 
     @staticmethod
     def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
