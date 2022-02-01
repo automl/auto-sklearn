@@ -169,10 +169,9 @@ to download the full example code or to run this example in your browser via Bin
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight           type      cost  duration
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight              type          cost  duration
 model_id
-2            1             0.94  random_forest  0.144406  2.573841
-25           2             0.06  random_forest  0.341540  3.723741
+23           1              1.0  gaussian_process  1.250491e-09  9.298741
 </pre></div>
 </div>
 </div>
@@ -182,26 +181,17 @@ model_id
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   2: {   &#39;cost&#39;: 0.14440599167790935,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7facc1fcca30&gt;,
-           &#39;ensemble_weight&#39;: 0.94,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7facc1880eb0&gt;,
-           &#39;model_id&#39;: 2,
-           &#39;rank&#39;: 1,
-           &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7facc1880f40&gt;,
-           &#39;sklearn_regressor&#39;: RandomForestRegressor(max_features=1.0, n_estimators=512, n_jobs=1,
-                      random_state=1, warm_start=True)},
-    25: {   &#39;cost&#39;: 0.34154027518036534,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7facbe5d7610&gt;,
-            &#39;ensemble_weight&#39;: 0.06,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7facbc985f40&gt;,
-            &#39;model_id&#39;: 25,
-            &#39;rank&#39;: 2,
-            &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7facbc86ae80&gt;,
-            &#39;sklearn_regressor&#39;: RandomForestRegressor(criterion=&#39;friedman_mse&#39;, max_features=0.929991924163003,
-                      min_samples_leaf=4, min_samples_split=18,
-                      n_estimators=512, n_jobs=1, random_state=1,
-                      warm_start=True)}}
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   23: {   &#39;cost&#39;: 1.250491266091558e-09,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f979f57eac0&gt;,
+            &#39;ensemble_weight&#39;: 1.0,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f979dc93640&gt;,
+            &#39;model_id&#39;: 23,
+            &#39;rank&#39;: 1,
+            &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f97b3088df0&gt;,
+            &#39;sklearn_regressor&#39;: GaussianProcessRegressor(alpha=1.3925975700063739e-11,
+                         kernel=RBF(length_scale=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]),
+                         n_restarts_optimizer=10, normalize_y=True,
+                         random_state=1)}}
 </pre></div>
 </div>
 </div>
@@ -212,7 +202,7 @@ model_id
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.8681408622884761
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.9999999998503689
 </pre></div>
 </div>
 </div>
@@ -232,7 +222,7 @@ model_id
     data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Type: Categorical, Choices: {mean, median, most_frequent}, Default: mean
     data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Type: Categorical, Choices: {minmax, none, normalize, power_transformer, quantile_transformer, robust_scaler, standardize}, Default: standardize
     data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles, Type: UniformInteger, Range: [10, 2000], Default: 1000
-    data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution, Type: Categorical, Choices: {uniform, normal}, Default: uniform
+    data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution, Type: Categorical, Choices: {normal, uniform}, Default: normal
     data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max, Type: UniformFloat, Range: [0.7, 0.999], Default: 0.75
     data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min, Type: UniformFloat, Range: [0.001, 0.3], Default: 0.25
     feature_preprocessor:__choice__, Type: Categorical, Choices: {extra_trees_preproc_for_regression, fast_ica, feature_agglomeration, kernel_pca, kitchen_sinks, no_preprocessing, nystroem_sampler, pca, polynomial, random_trees_embedding}, Default: no_preprocessing
@@ -413,7 +403,7 @@ model_id
     (Forbidden: regressor:__choice__ == &#39;random_forest&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  55.260 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  57.174 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-20-basic-example-multioutput-regression-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/20_basic/example_multioutput_regression.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo.svg" width="150px" /></a>

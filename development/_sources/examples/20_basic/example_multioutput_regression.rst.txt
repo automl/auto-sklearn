@@ -123,10 +123,9 @@ View the models found by auto-sklearn
 
  .. code-block:: none
 
-              rank  ensemble_weight           type      cost  duration
-    model_id                                                          
-    2            1             0.94  random_forest  0.144406  2.573841
-    25           2             0.06  random_forest  0.341540  3.723741
+              rank  ensemble_weight              type          cost  duration
+    model_id                                                                 
+    23           1              1.0  gaussian_process  1.250491e-09  9.298741
 
 
 
@@ -153,26 +152,17 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    {   2: {   'cost': 0.14440599167790935,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7facc1fcca30>,
-               'ensemble_weight': 0.94,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7facc1880eb0>,
-               'model_id': 2,
-               'rank': 1,
-               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7facc1880f40>,
-               'sklearn_regressor': RandomForestRegressor(max_features=1.0, n_estimators=512, n_jobs=1,
-                          random_state=1, warm_start=True)},
-        25: {   'cost': 0.34154027518036534,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7facbe5d7610>,
-                'ensemble_weight': 0.06,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7facbc985f40>,
-                'model_id': 25,
-                'rank': 2,
-                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7facbc86ae80>,
-                'sklearn_regressor': RandomForestRegressor(criterion='friedman_mse', max_features=0.929991924163003,
-                          min_samples_leaf=4, min_samples_split=18,
-                          n_estimators=512, n_jobs=1, random_state=1,
-                          warm_start=True)}}
+    {   23: {   'cost': 1.250491266091558e-09,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f979f57eac0>,
+                'ensemble_weight': 1.0,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f979dc93640>,
+                'model_id': 23,
+                'rank': 1,
+                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f97b3088df0>,
+                'sklearn_regressor': GaussianProcessRegressor(alpha=1.3925975700063739e-11,
+                             kernel=RBF(length_scale=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]),
+                             n_restarts_optimizer=10, normalize_y=True,
+                             random_state=1)}}
 
 
 
@@ -200,7 +190,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.8681408622884761
+    R2 score: 0.9999999998503689
 
 
 
@@ -236,7 +226,7 @@ Get the configuration space
         data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Type: Categorical, Choices: {mean, median, most_frequent}, Default: mean
         data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Type: Categorical, Choices: {minmax, none, normalize, power_transformer, quantile_transformer, robust_scaler, standardize}, Default: standardize
         data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles, Type: UniformInteger, Range: [10, 2000], Default: 1000
-        data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution, Type: Categorical, Choices: {uniform, normal}, Default: uniform
+        data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution, Type: Categorical, Choices: {normal, uniform}, Default: normal
         data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max, Type: UniformFloat, Range: [0.7, 0.999], Default: 0.75
         data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min, Type: UniformFloat, Range: [0.001, 0.3], Default: 0.25
         feature_preprocessor:__choice__, Type: Categorical, Choices: {extra_trees_preproc_for_regression, fast_ica, feature_agglomeration, kernel_pca, kitchen_sinks, no_preprocessing, nystroem_sampler, pca, polynomial, random_trees_embedding}, Default: no_preprocessing
@@ -423,7 +413,7 @@ Get the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  55.260 seconds)
+   **Total running time of the script:** ( 1 minutes  57.174 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multioutput_regression.py:

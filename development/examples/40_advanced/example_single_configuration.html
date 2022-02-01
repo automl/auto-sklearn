@@ -207,14 +207,14 @@ get further documentation about Scikit-Learn models here: &lt;<a class="referenc
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{&#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7facc1e671f0&gt;, &#39;balancing&#39;: Balancing(random_state=1), &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7facbc88d1c0&gt;, &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7facc068fb50&gt;}
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{&#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f979f487280&gt;, &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;), &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f979bac72e0&gt;, &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f979bac7a00&gt;}
 RunInfo(config=Configuration:
-  balancing:strategy, Value: &#39;none&#39;
+  balancing:strategy, Value: &#39;weighting&#39;
   classifier:__choice__, Value: &#39;random_forest&#39;
-  classifier:random_forest:bootstrap, Value: &#39;False&#39;
+  classifier:random_forest:bootstrap, Value: &#39;True&#39;
   classifier:random_forest:criterion, Value: &#39;entropy&#39;
   classifier:random_forest:max_depth, Constant: &#39;None&#39;
-  classifier:random_forest:max_features, Value: 0.6868519780745863
+  classifier:random_forest:max_features, Value: 0.9716922628862237
   classifier:random_forest:max_leaf_nodes, Constant: &#39;None&#39;
   classifier:random_forest:min_impurity_decrease, Constant: 0.0
   classifier:random_forest:min_samples_leaf, Value: 11
@@ -223,26 +223,21 @@ RunInfo(config=Configuration:
   data_preprocessor:__choice__, Value: &#39;feature_type&#39;
   data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__, Value: &#39;no_encoding&#39;
   data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__, Value: &#39;minority_coalescer&#39;
-  data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Value: 0.006279985694711565
-  data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Value: &#39;most_frequent&#39;
+  data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Value: 0.11830688735139595
+  data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Value: &#39;mean&#39;
   data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Value: &#39;power_transformer&#39;
-  feature_preprocessor:__choice__, Value: &#39;random_trees_embedding&#39;
-  feature_preprocessor:random_trees_embedding:bootstrap, Value: &#39;False&#39;
-  feature_preprocessor:random_trees_embedding:max_depth, Value: 9
-  feature_preprocessor:random_trees_embedding:max_leaf_nodes, Constant: &#39;None&#39;
-  feature_preprocessor:random_trees_embedding:min_samples_leaf, Value: 14
-  feature_preprocessor:random_trees_embedding:min_samples_split, Value: 2
-  feature_preprocessor:random_trees_embedding:min_weight_fraction_leaf, Constant: 1.0
-  feature_preprocessor:random_trees_embedding:n_estimators, Value: 34
+  feature_preprocessor:__choice__, Value: &#39;select_percentile_classification&#39;
+  feature_preprocessor:select_percentile_classification:percentile, Value: 25.440287631479773
+  feature_preprocessor:select_percentile_classification:score_func, Value: &#39;f_classif&#39;
 , instance=None, instance_specific=None, seed=1, cutoff=60, capped=False, budget=0.0, source_id=0)
-RunValue(cost=0.01611374407582944, time=4.083183765411377, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1643375080.7119424, endtime=1643375084.8191836, additional_info={&#39;duration&#39;: 3.980604887008667, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.012143858010275621, &#39;configuration_origin&#39;: None})
+RunValue(cost=0.05876777251184839, time=2.062886953353882, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1643721239.018911, endtime=1643721241.1037197, additional_info={&#39;duration&#39;: 1.9773643016815186, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.0579168612797758, &#39;configuration_origin&#39;: None})
 Passed Configuration: Configuration:
-  balancing:strategy, Value: &#39;none&#39;
+  balancing:strategy, Value: &#39;weighting&#39;
   classifier:__choice__, Value: &#39;random_forest&#39;
-  classifier:random_forest:bootstrap, Value: &#39;False&#39;
+  classifier:random_forest:bootstrap, Value: &#39;True&#39;
   classifier:random_forest:criterion, Value: &#39;entropy&#39;
   classifier:random_forest:max_depth, Constant: &#39;None&#39;
-  classifier:random_forest:max_features, Value: 0.6868519780745863
+  classifier:random_forest:max_features, Value: 0.9716922628862237
   classifier:random_forest:max_leaf_nodes, Constant: &#39;None&#39;
   classifier:random_forest:min_impurity_decrease, Constant: 0.0
   classifier:random_forest:min_samples_leaf, Value: 11
@@ -251,29 +246,23 @@ Passed Configuration: Configuration:
   data_preprocessor:__choice__, Value: &#39;feature_type&#39;
   data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__, Value: &#39;no_encoding&#39;
   data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__, Value: &#39;minority_coalescer&#39;
-  data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Value: 0.006279985694711565
-  data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Value: &#39;most_frequent&#39;
+  data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Value: 0.11830688735139595
+  data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Value: &#39;mean&#39;
   data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Value: &#39;power_transformer&#39;
-  feature_preprocessor:__choice__, Value: &#39;random_trees_embedding&#39;
-  feature_preprocessor:random_trees_embedding:bootstrap, Value: &#39;False&#39;
-  feature_preprocessor:random_trees_embedding:max_depth, Value: 9
-  feature_preprocessor:random_trees_embedding:max_leaf_nodes, Constant: &#39;None&#39;
-  feature_preprocessor:random_trees_embedding:min_samples_leaf, Value: 14
-  feature_preprocessor:random_trees_embedding:min_samples_split, Value: 2
-  feature_preprocessor:random_trees_embedding:min_weight_fraction_leaf, Constant: 1.0
-  feature_preprocessor:random_trees_embedding:n_estimators, Value: 34
+  feature_preprocessor:__choice__, Value: &#39;select_percentile_classification&#39;
+  feature_preprocessor:select_percentile_classification:percentile, Value: 25.440287631479773
+  feature_preprocessor:select_percentile_classification:score_func, Value: &#39;f_classif&#39;
 
-Random Forest: RandomForestClassifier(bootstrap=False, criterion=&#39;entropy&#39;, max_features=103,
-                       min_samples_leaf=11, min_samples_split=11,
-                       n_estimators=512, n_jobs=1, random_state=1,
-                       warm_start=True)
+Random Forest: RandomForestClassifier(criterion=&#39;entropy&#39;, max_features=8, min_samples_leaf=11,
+                       min_samples_split=11, n_estimators=512, n_jobs=1,
+                       random_state=1, warm_start=True)
 /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
   self.metafeatures = self.metafeatures.append(metafeatures)
 /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
   self.algorithm_runs[metric].append(runs)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  7.403 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  3.174 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-single-configuration-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_single_configuration.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>

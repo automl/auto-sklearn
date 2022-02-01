@@ -346,7 +346,7 @@ Print the configuration space
         data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Type: Categorical, Choices: {mean, median, most_frequent}, Default: mean
         data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Type: Categorical, Choices: {minmax, none, normalize, power_transformer, quantile_transformer, robust_scaler, standardize}, Default: standardize
         data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles, Type: UniformInteger, Range: [10, 2000], Default: 1000
-        data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution, Type: Categorical, Choices: {uniform, normal}, Default: uniform
+        data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution, Type: Categorical, Choices: {normal, uniform}, Default: normal
         data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max, Type: UniformFloat, Range: [0.7, 0.999], Default: 0.75
         data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min, Type: UniformFloat, Range: [0.001, 0.3], Default: 0.25
         feature_preprocessor:LDA:shrinkage, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.5
@@ -628,7 +628,7 @@ Print the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  7.280 seconds)
+   **Total running time of the script:** ( 0 minutes  6.455 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_restrict_number_of_hyperparameters.py:
