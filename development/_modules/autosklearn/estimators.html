@@ -111,7 +111,7 @@
       
   <h1>Source code for autosklearn.estimators</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- encoding: utf-8 -*-</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Iterable</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Iterable</span>
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
 <span class="kn">from</span> <span class="nn">ConfigSpace.configuration_space</span> <span class="kn">import</span> <span class="n">Configuration</span><span class="p">,</span> <span class="n">ConfigurationSpace</span>
@@ -162,7 +162,8 @@
         <span class="n">metric</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">scoring_functions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">load_models</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">get_trials_callback</span><span class="o">=</span><span class="kc">None</span>
+        <span class="n">get_trials_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dataset_compression</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
@@ -267,22 +268,37 @@
 <span class="sd">                    &#39;feature_preprocessor&#39;: [&quot;no_preprocessing&quot;]</span>
 <span class="sd">                }</span>
 
-<span class="sd">        resampling_strategy : string or object, optional (&#39;holdout&#39;)</span>
-<span class="sd">            how to to handle overfitting, might need &#39;resampling_strategy_arguments&#39;</span>
+<span class="sd">        resampling_strategy : Union[str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit] = &quot;holdout&quot;</span>
+<span class="sd">            How to to handle overfitting, might need to use ``resampling_strategy_arguments``</span>
+<span class="sd">            if using ``&quot;cv&quot;`` based method or a Splitter object.</span>
 
-<span class="sd">            * &#39;holdout&#39;: 67:33 (train:test) split</span>
-<span class="sd">            * &#39;holdout-iterative-fit&#39;:  67:33 (train:test) split, calls iterative</span>
-<span class="sd">              fit where possible</span>
-<span class="sd">            * &#39;cv&#39;: crossvalidation, requires &#39;folds&#39;</span>
-<span class="sd">            * &#39;cv-iterative-fit&#39;: crossvalidation, calls iterative fit where possible</span>
-<span class="sd">            * &#39;partial-cv&#39;: crossvalidation with intensification, requires</span>
-<span class="sd">              &#39;folds&#39;</span>
-<span class="sd">            * BaseCrossValidator object: any BaseCrossValidator class found</span>
-<span class="sd">                                        in scikit-learn model_selection module</span>
-<span class="sd">            * _RepeatedSplits object: any _RepeatedSplits class found</span>
-<span class="sd">                                      in scikit-learn model_selection module</span>
-<span class="sd">            * BaseShuffleSplit object: any BaseShuffleSplit class found</span>
-<span class="sd">                                      in scikit-learn model_selection module</span>
+<span class="sd">            If using a Splitter object that relies on the dataset retaining it&#39;s current</span>
+<span class="sd">            size and order, you will need to look at the ``dataset_compression`` argument</span>
+<span class="sd">            and ensure that ``&quot;subsample&quot;`` is not included in the applied compression</span>
+<span class="sd">            ``&quot;methods&quot;`` or disable it entirely with ``False``.</span>
+
+<span class="sd">            **Options**</span>
+
+<span class="sd">            *   ``&quot;holdout&quot;``:</span>
+<span class="sd">                    67:33 (train:test) split</span>
+<span class="sd">            *   ``&quot;holdout-iterative-fit&quot;``:</span>
+<span class="sd">                    67:33 (train:test) split, iterative fit where possible</span>
+<span class="sd">            *   ``&quot;cv&quot;``:</span>
+<span class="sd">                    crossvalidation,</span>
+<span class="sd">                    requires ``&quot;folds&quot;`` in ``resampling_strategy_arguments``</span>
+<span class="sd">            *   ``&quot;cv-iterative-fit&quot;``:</span>
+<span class="sd">                    crossvalidation,</span>
+<span class="sd">                    calls iterative fit where possible,</span>
+<span class="sd">                    requires ``&quot;folds&quot;`` in ``resampling_strategy_arguments``</span>
+<span class="sd">            *   &#39;partial-cv&#39;:</span>
+<span class="sd">                    crossvalidation with intensification,</span>
+<span class="sd">                    requires ``&quot;folds&quot;`` in ``resampling_strategy_arguments``</span>
+<span class="sd">            *   ``BaseCrossValidator`` subclass:</span>
+<span class="sd">                    any BaseCrossValidator subclass (found in scikit-learn model_selection module)</span>
+<span class="sd">            *   ``_RepeatedSplits`` subclass:</span>
+<span class="sd">                    any _RepeatedSplits subclass (found in scikit-learn model_selection module)</span>
+<span class="sd">            *   ``BaseShuffleSplit`` subclass:</span>
+<span class="sd">                    any BaseShuffleSplit subclass (found in scikit-learn model_selection module)</span>
 
 <span class="sd">        resampling_strategy_arguments : dict, optional if &#39;holdout&#39; (train_size default=0.67)</span>
 <span class="sd">            Additional arguments for resampling_strategy:</span>
@@ -375,16 +391,71 @@
 
 <span class="sd">        load_models : bool, optional (True)</span>
 <span class="sd">            Whether to load the models after fitting Auto-sklearn.</span>
-<span class="sd">           </span>
+
 <span class="sd">        get_trials_callback: callable</span>
 <span class="sd">            Callback function to create an object of subclass defined in module</span>
 <span class="sd">            `smac.callbacks &lt;https://automl.github.io/SMAC3/master/apidoc/smac.callbacks.html&gt;`_.</span>
 <span class="sd">            This is an advanced feature. Use only if you are familiar with</span>
 <span class="sd">            `SMAC &lt;https://automl.github.io/SMAC3/master/index.html&gt;`_.</span>
 
+<span class="sd">        dataset_compression: Union[bool, Mapping[str, Any]] = True</span>
+<span class="sd">            We compress datasets so that they fit into some predefined amount of memory.</span>
+<span class="sd">            Currently this does not apply to dataframes or sparse arrays, only to raw numpy arrays.</span>
+
+<span class="sd">            **NOTE**</span>
+
+<span class="sd">            If using a custom ``resampling_strategy`` that relies on specific</span>
+<span class="sd">            size or ordering of data, this must be disabled to preserve these properties.</span>
+
+<span class="sd">            You can disable this entirely by passing ``False``.</span>
+
+<span class="sd">            Default configuration when left as ``True``:</span>
+
+<span class="sd">            .. code-block:: python</span>
+
+<span class="sd">                {</span>
+<span class="sd">                    &quot;memory_allocation&quot;: 0.1,</span>
+<span class="sd">                    &quot;methods&quot;: [&quot;precision&quot;, &quot;subsample&quot;]</span>
+<span class="sd">                }</span>
+
+<span class="sd">            You can also pass your own configuration with the same keys and choosing</span>
+<span class="sd">            from the available ``&quot;methods&quot;``.</span>
+
+<span class="sd">            The available options are described here:</span>
+
+<span class="sd">            **memory_allocation**</span>
+
+<span class="sd">            By default, we attempt to fit the dataset into ``0.1 * memory_limit``. This</span>
+<span class="sd">            float value can be set with ``&quot;memory_allocation&quot;: 0.1``. We also allow for</span>
+<span class="sd">            specifying absolute memory in MB, e.g. 10MB is ``&quot;memory_allocation&quot;: 10``.</span>
+
+<span class="sd">            The memory used by the dataset is checked after each reduction method is</span>
+<span class="sd">            performed. If the dataset fits into the allocated memory, any further methods</span>
+<span class="sd">            listed in ``&quot;methods&quot;`` will not be performed.</span>
+
+<span class="sd">            For example, if ``methods: [&quot;precision&quot;, &quot;subsample&quot;]`` and the</span>
+<span class="sd">            ``&quot;precision&quot;`` reduction step was enough to make the dataset fit into memory,</span>
+<span class="sd">            then the ``&quot;subsample&quot;`` reduction step will not be performed.</span>
+
+<span class="sd">            **methods**</span>
+
+<span class="sd">            We currently provide the following methods for reducing the dataset size.</span>
+<span class="sd">            These can be provided in a list and are performed in the order as given.</span>
+
+<span class="sd">            *   ``&quot;precision&quot;`` - We reduce floating point precision as follows:</span>
+<span class="sd">                *   ``np.float128 -&gt; np.float64``</span>
+<span class="sd">                *   ``np.float96 -&gt; np.float64``</span>
+<span class="sd">                *   ``np.float64 -&gt; np.float32``</span>
+
+<span class="sd">            *   ``subsample`` - We subsample data such that it **fits directly into the</span>
+<span class="sd">                memory allocation** ``memory_allocation * memory_limit``. Therefore, this</span>
+<span class="sd">                should likely be the last method listed in ``&quot;methods&quot;``.</span>
+<span class="sd">                Subsampling takes into account classification labels and stratifies</span>
+<span class="sd">                accordingly. We guarantee that at least one occurrence of each label is</span>
+<span class="sd">                included in the sampled set.</span>
+
 <span class="sd">        Attributes</span>
 <span class="sd">        ----------</span>
-
 <span class="sd">        cv_results_ : dict of numpy (masked) ndarrays</span>
 <span class="sd">            A dict with keys as column headers and values as columns, that can be</span>
 <span class="sd">            imported into a pandas ``DataFrame``.</span>
@@ -426,6 +497,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">scoring_functions</span> <span class="o">=</span> <span class="n">scoring_functions</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_models</span> <span class="o">=</span> <span class="n">load_models</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_trials_callback</span> <span class="o">=</span> <span class="n">get_trials_callback</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_compression</span> <span class="o">=</span> <span class="n">dataset_compression</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[AutoML]</span>
 
@@ -471,7 +543,8 @@
             <span class="n">metadata_directory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_directory</span><span class="p">,</span>
             <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span>
             <span class="n">scoring_functions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scoring_functions</span><span class="p">,</span>
-            <span class="n">get_trials_callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_trials_callback</span>
+            <span class="n">get_trials_callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_trials_callback</span><span class="p">,</span>
+            <span class="n">dataset_compression</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_compression</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">automl</span>
@@ -1080,10 +1153,7 @@
 
 
 <div class="viewcode-block" id="AutoSklearnClassifier"><a class="viewcode-back" href="../../api.html#autosklearn.classification.AutoSklearnClassifier">[docs]</a><span class="k">class</span> <span class="nc">AutoSklearnClassifier</span><span class="p">(</span><span class="n">AutoSklearnEstimator</span><span class="p">,</span> <span class="n">ClassifierMixin</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This class implements the classification task.</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;This class implements the classification task. &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="AutoSklearnClassifier.fit"><a class="viewcode-back" href="../../api.html#autosklearn.classification.AutoSklearnClassifier.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>
             <span class="n">X_test</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1097,7 +1167,6 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-
 <span class="sd">        X : array-like or sparse matrix of shape = [n_samples, n_features]</span>
 <span class="sd">            The training input samples.</span>
 
@@ -1129,7 +1198,6 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        self</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># AutoSklearn does not handle sparse y for now</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">convert_if_sparse</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -1181,12 +1249,10 @@
 <span class="sd">        -------</span>
 <span class="sd">        y : array of shape = [n_samples] or [n_samples, n_labels]</span>
 <span class="sd">            The predicted classes.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AutoSklearnClassifier.predict_proba"><a class="viewcode-back" href="../../api.html#autosklearn.classification.AutoSklearnClassifier.predict_proba">[docs]</a>    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;Predict probabilities of classes for all samples X.</span>
 
 <span class="sd">        Parameters</span>
@@ -1202,7 +1268,6 @@
 <span class="sd">        -------</span>
 <span class="sd">        y : array of shape = [n_samples, n_classes] or [n_samples, n_labels]</span>
 <span class="sd">            The predicted class probabilities.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">pred_proba</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span>
             <span class="n">X</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)</span>

@@ -90,6 +90,8 @@ accelerometer and gyroscope data collected by a phone. For more information see
 
  .. code-block:: none
 
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:175: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
+      warnings.warn("Fitting transformer with a pandas series which"
     /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
       self.metafeatures = self.metafeatures.append(metafeatures)
     /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
@@ -237,7 +239,7 @@ these features. Again, we'll look at acceleration_y and acceleration_z.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 4 minutes  21.061 seconds)
+   **Total running time of the script:** ( 3 minutes  59.560 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_inspect_predictions.py:
