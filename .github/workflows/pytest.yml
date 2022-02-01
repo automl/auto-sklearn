@@ -71,6 +71,11 @@ jobs:
             python-version: 3.7
             kind: 'dist'
 
+          - os: ubuntu-latest
+            python-version: 3.7
+            kind: 'source'
+            sklearnex: true
+
     steps:
 
     - name: Checkout
@@ -130,6 +135,8 @@ jobs:
 
         if [ ${{ matrix.code-cov }} ]; then
           $PYTHON -m pytest ${{ env.pytest-args }} ${{ env.code-cov-args }} test
+        elif [ ${{ matrix.sklearnex }} ]; then
+          $PYTHON -m pytest --sklearnex ${{ env.pytest-args }} test
         else
           $PYTHON -m pytest ${{ env.pytest-args }} test
         fi

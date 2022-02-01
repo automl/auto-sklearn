@@ -11,6 +11,31 @@ from autosklearn.automl_common.common.utils.backend import create, Backend
 from autosklearn.automl import AutoML
 
 
+def pytest_addoption(parser) -> None:
+    """Add options to the pytest command."""
+    parser.addoption(
+        '--sklearnex',
+        action='store_const',
+        const=True,
+        help="Enable sklearnex injection to each test"
+    )
+
+
+@pytest.fixture(scope="function", autouse=True)
+def sklearnex_enable(request: pytest.FixtureRequest) -> None:
+    """Injects sklearnex into each test.
+
+    This is defaulted to be off but by using the below command, can be turned on
+
+        $ pytest --sklearnx ...
+    """
+    print("hello")
+    if request.config.getoption("--sklearnex"):
+        print("wolr")
+        from sklearnex import patch_sklearn  # type: ignore
+        patch_sklearn()
+
+
 class AutoMLStub(AutoML):
     def __init__(self):
         self.__class__ = AutoML
