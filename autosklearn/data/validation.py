@@ -1,10 +1,12 @@
 # -*- encoding: utf-8 -*-
 import logging
-import typing
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 
-from scipy.sparse import issparse, spmatrix
+import pandas as pd
+
+from scipy.sparse import spmatrix
 
 from sklearn.base import BaseEstimator
 from sklearn.exceptions import NotFittedError
@@ -15,8 +17,8 @@ from autosklearn.util.logging_ import get_named_client_logger
 
 
 def convert_if_sparse(
-    y: typing.Union[SUPPORTED_TARGET_TYPES, spmatrix]
-) -> SUPPORTED_TARGET_TYPES:
+    y: SUPPORTED_TARGET_TYPES
+) -> Union[np.ndarray, List, pd.DataFrame, pd.Series]:
     """If the labels `y` are sparse, it will convert it to its dense representation
 
     Parameters
@@ -28,16 +30,17 @@ def convert_if_sparse(
     -------
     np.ndarray of shape (n_samples, ) or (n_samples, n_outputs)
     """
-    if issparse(y):
-        y = typing.cast(spmatrix, y)
-        y = y.toarray()
-        y = typing.cast(np.ndarray, y)
+    if isinstance(y, spmatrix):
+        y_ = y.toarray()
 
-        # For one dimensional data, toarray will return (1, nrows)
-        if y.shape[0] == 1:
-            y = y.flatten()
+        # For sparse one dimensional data, y.toarray will return [[1], [2], [3], ...]
+        # We need to flatten this before returning it
+        if y_.shape[0] == 1:
+            y_ = y_.flatten()
+    else:
+        y_ = y
 
-    return y
+    return y_
 
 
 class InputValidator(BaseEstimator):
@@ -50,7 +53,7 @@ class InputValidator(BaseEstimator):
     via informative errors.
     Attributes
     ----------
-        feat_type: typing.Optional[typing.List[str]]
+        feat_type: Optional[List[str]]
             In case the dataset is not a pandas DataFrame:
                 + If provided, this list indicates which columns should be treated as categorical
                   it is internally transformed into a dictionary that indicates a mapping from
@@ -70,9 +73,9 @@ class InputValidator(BaseEstimator):
     """
     def __init__(
         self,
-        feat_type: typing.Optional[typing.List[str]] = None,
+        feat_type: Optional[List[str]] = None,
         is_classification: bool = False,
-        logger_port: typing.Optional[int] = None,
+        logger_port: Optional[int] = None,
     ) -> None:
         self.feat_type = feat_type
         self.is_classification = is_classification
@@ -95,8 +98,8 @@ class InputValidator(BaseEstimator):
         self,
         X_train: SUPPORTED_FEAT_TYPES,
         y_train: SUPPORTED_TARGET_TYPES,
-        X_test: typing.Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: typing.Optional[SUPPORTED_TARGET_TYPES] = None,
+        X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
+        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
     ) -> BaseEstimator:
         """
         Validates and fit a categorical encoder (if needed) to the features, and
@@ -119,7 +122,7 @@ class InputValidator(BaseEstimator):
                 be instantiated and trained with this data.
             y_train: SUPPORTED_TARGET_TYPES
                 A set of targets that are going to be encoded if the task is for classification
-            X_test: typing.Optional[SUPPORTED_FEAT_TYPES]
+            X_test: Optional[SUPPORTED_FEAT_TYPES]
                 A hold out set of features used for checking
             y_test: SUPPORTED_TARGET_TYPES
                 A hold out set of targets used for checking. Additionally, if the current task
@@ -152,8 +155,8 @@ class InputValidator(BaseEstimator):
     def transform(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: typing.Optional[SUPPORTED_TARGET_TYPES] = None,
-    ) -> typing.Tuple[np.ndarray, typing.Optional[np.ndarray]]:
+        y: Optional[Union[List, pd.Series, pd.DataFrame, np.ndarray]] = None,
+    ) -> Tuple[Union[np.ndarray, pd.DataFrame, spmatrix], Optional[np.ndarray]]:
         """
         Transform the given target or features to a numpy array
 
@@ -161,7 +164,7 @@ class InputValidator(BaseEstimator):
         ----------
             X: SUPPORTED_FEAT_TYPES
                 A set of features to transform
-            y: typing.Optional[SUPPORTED_TARGET_TYPES]
+            y: Optional[SUPPORTED_TARGET_TYPES]
                 A set of targets to transform
 
         Return
@@ -173,8 +176,10 @@ class InputValidator(BaseEstimator):
         """
         if not self._is_fitted:
             raise NotFittedError("Cannot call transform on a validator that is not fitted")
+
         X_transformed = self.feature_validator.transform(X)
         if y is not None:
-            return X_transformed, self.target_validator.transform(y)
+            y_transformed = self.target_validator.transform(y)
+            return X_transformed, y_transformed
         else:
-            return X_transformed, y
+            return X_transformed, None

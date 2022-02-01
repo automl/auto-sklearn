@@ -1,4 +1,4 @@
-from typing import Type, cast
+from typing import Any, Dict, Type, Union, cast
 
 import copy
 import glob
@@ -1044,21 +1044,32 @@ def test_selector_file_askl2_can_be_created(selector_path):
     importlib.reload(autosklearn.experimental.askl2)
 
 
-def test_check_askl2_same_arguments_as_askl():
-    # In case a new attribute is created, make sure it is there also in
-    # ASKL2
-    extra_arguments = list(set(
-        inspect.getfullargspec(AutoSklearnEstimator.__init__).args) - set(
-            inspect.getfullargspec(AutoSklearn2Classifier.__init__).args))
-    expected_extra_args = ['exclude',
-                           'include',
-                           'resampling_strategy_arguments',
-                           'get_smac_object_callback',
-                           'initial_configurations_via_metalearning',
-                           'resampling_strategy',
-                           'metadata_directory',
-                           'get_trials_callback']
-    unexpected_args = set(extra_arguments) - set(expected_extra_args)
+def test_check_askl2_same_arguments_as_askl() -> None:
+    """Check the asklearn2 has the same args as asklearn1
+
+    This test is useful for when adding args to asklearn1 to make sure we update asklearn2
+
+    Expects
+    -------
+    * The set of arguments for AutoSklearnClassifier is the same as AutoSklearn2Classifier
+        except for a few expected arugments
+    """
+    autosklearn1_classifier_args = set(inspect.getfullargspec(AutoSklearnEstimator.__init__).args)
+    autosklearn2_classifier_args = set(inspect.getfullargspec(AutoSklearn2Classifier.__init__).args)
+    extra_arguments = autosklearn1_classifier_args - autosklearn2_classifier_args
+
+    expected_extra_args = set([
+        'exclude',
+        'include',
+        'resampling_strategy_arguments',
+        'get_smac_object_callback',
+        'initial_configurations_via_metalearning',
+        'resampling_strategy',
+        'metadata_directory',
+        'get_trials_callback',
+    ])
+    unexpected_args = extra_arguments - expected_extra_args
+
     assert len(unexpected_args) == 0, unexpected_args
 
 
@@ -1276,3 +1287,24 @@ def test_autosklearn_anneal(as_frame):
     # can be used in a meaningful way -- not meant for generalization,
     # hence we use the train dataset
     assert automl_fitted.score(X, y) > 0.75
+
+
+@pytest.mark.parametrize("dataset_compression", [
+    False, True, {"memory_allocation": 0.2}
+])
+def test_param_dataset_compression(dataset_compression: Union[bool, Dict[str, Any]]):
+    """We expect this does not get parsed and modified until it gets to the AutoML class,
+    In the meantime, it's value remains whatever was passed in.
+
+    Parameters
+    ----------
+    dataset_compression: Union[bool, Dict[str, Any]
+        The arg to pass to the estimator
+
+    Expects
+    -------
+    * The private attribute should be set to what was passed
+    """
+    model = AutoSklearnClassifier(dataset_compression=dataset_compression)
+
+    assert model.dataset_compression == dataset_compression
