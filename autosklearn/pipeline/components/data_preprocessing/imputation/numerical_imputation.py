@@ -62,7 +62,7 @@ class NumericalImputation(AutoSklearnPreprocessingAlgorithm):
                                         ) -> ConfigurationSpace:
         # TODO add replace by zero!
         strategy = CategoricalHyperparameter(
-            "strategy", ["mean", "median", "most_frequent"], default_value="mean")
+            "strategy", ["mean", "median"], default_value="mean")
         cs = ConfigurationSpace()
         cs.add_hyperparameter(strategy)
         return cs
