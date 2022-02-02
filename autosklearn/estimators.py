@@ -188,7 +188,8 @@ class AutoSklearnEstimator(BaseEstimator):
                 }
 
             If using a custom splitter class, which takes ``n_splits`` such as
-            `PredefinedSplit <https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html#sklearn-model-selection-kfold>`_, the value of ``"folds"`` will be used.
+            `PredefinedSplit <https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html#sklearn-model-selection-kfold>`_,
+            the value of ``"folds"`` will be used.
 
         tmp_folder : string, optional (None)
             folder to store configuration output and log files, if ``None``
