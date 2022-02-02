@@ -175,9 +175,10 @@ class AutoSklearnEstimator(BaseEstimator):
             and ensure that ``"subsample"`` is not included in the applied compression
             ``"methods"`` or disable it entirely with ``False``.
 
-        resampling_strategy_arguments : Optional[Dict]
+        resampling_strategy_arguments : Optional[Dict] = None
             Additional arguments for ``resampling_strategy``, this is required if
-            using a ``cv`` based strategy:
+            using a ``cv`` based strategy. The default arguments if left as ``None``
+            are:
 
             .. code-block:: python
 
