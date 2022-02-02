@@ -29,9 +29,7 @@ def sklearnex_enable(request: pytest.FixtureRequest) -> None:
 
         $ pytest --sklearnx ...
     """
-    print("hello")
     if request.config.getoption("--sklearnex"):
-        print("wolr")
         from sklearnex import patch_sklearn  # type: ignore
         patch_sklearn()
 
