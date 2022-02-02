@@ -45,54 +45,6 @@ tested.
 
     By default, *auto-sklearn* uses **one core**. See also :ref:`parallel` on how to configure this.
 
-
-.. collapse:: <b>Managing data compression</b>
-
-    .. _manual_managing_data_compression:
-
-    Auto-sklearn will attempt to fit the dataset into 1/10th of the ``memory_limit``.
-    This won't happen unless your dataset is quite large or you have small a
-    ``memory_limit``. This is done using two methods, reducing **precision** and
-    to **subsample**. One reason you may want to control this is if you require high
-    precision or you rely on predefined splits for which subsampling does not account
-    for.
-
-    To turn off data preprocessing:
-
-    .. code:: python
-
-        AutoSklearnClassifier(
-            dataset_compression = False
-        )
-
-    You can specify which of the methods are performed using:
-
-    .. code:: python
-
-        AutoSklearnClassifier(
-            dataset_compression = { "methods": ["precision", "subsample"] },
-        )
-
-    You can change the memory allocation for the dataset to a percentage of ``memory_limit``
-    or an absolute amount using:
-
-    .. code:: python
-
-        AutoSklearnClassifier(
-            dataset_compression = { "memory_allocation": 0.2 },
-        )
-
-    The default arguments are used when ``dataset_compression = True`` are:
-
-    .. code:: python
-
-        {
-            "memory_allocation": 0.1,
-            "methods": ["precision", "subsample"]
-        }
-
-    The full description is given at :class:`AutoSklearnClassifier(dataset_compression=...) <autosklearn.classification.AutoSklearnClassifier>`.
-
 .. _space:
 
 The search space

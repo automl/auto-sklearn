@@ -63,7 +63,6 @@
                 <li><a href="../../index.html">Start</a></li>
                 <li><a href="../../releases.html">Releases</a></li>
                 <li><a href="../../installation.html">Installation</a></li>
-                <li><a href="../../manual.html">Manual</a></li>
                 <li><a href="../../examples/index.html">Examples</a></li>
                 <li><a href="../../api.html">API</a></li>
                 <li><a href="../../extending.html">Extending</a></li>
@@ -269,39 +268,58 @@
 <span class="sd">                    &#39;feature_preprocessor&#39;: [&quot;no_preprocessing&quot;]</span>
 <span class="sd">                }</span>
 
-<span class="sd">        resampling_strategy : str | BaseCrossValidator | _RepeatedSplits | BaseShuffleSplit = &quot;holdout&quot;</span>
+<span class="sd">        resampling_strategy : Union[str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit] = &quot;holdout&quot;</span>
 <span class="sd">            How to to handle overfitting, might need to use ``resampling_strategy_arguments``</span>
 <span class="sd">            if using ``&quot;cv&quot;`` based method or a Splitter object.</span>
-
-<span class="sd">            * **Options**</span>
-<span class="sd">                *   ``&quot;holdout&quot;`` - Use a 67:33 (train:test) split</span>
-<span class="sd">                *   ``&quot;cv&quot;``: perform cross validation, requires &quot;folds&quot; in ``resampling_strategy_arguments``</span>
-<span class="sd">                *   ``&quot;holdout-iterative-fit&quot;`` - Same as &quot;holdout&quot; but iterative fit where possible</span>
-<span class="sd">                *   ``&quot;cv-iterative-fit&quot;``: Same as &quot;cv&quot; but iterative fit where possible</span>
-<span class="sd">                *   ``&quot;partial-cv&quot;``: Same as &quot;cv&quot; but uses intensification.</span>
-<span class="sd">                *   ``BaseCrossValidator`` - any BaseCrossValidator subclass (found in scikit-learn model_selection module)</span>
-<span class="sd">                *   ``_RepeatedSplits`` - any _RepeatedSplits subclass (found in scikit-learn model_selection module)</span>
-<span class="sd">                *   ``BaseShuffleSplit`` - any BaseShuffleSplit subclass (found in scikit-learn model_selection module)</span>
 
 <span class="sd">            If using a Splitter object that relies on the dataset retaining it&#39;s current</span>
 <span class="sd">            size and order, you will need to look at the ``dataset_compression`` argument</span>
 <span class="sd">            and ensure that ``&quot;subsample&quot;`` is not included in the applied compression</span>
 <span class="sd">            ``&quot;methods&quot;`` or disable it entirely with ``False``.</span>
 
-<span class="sd">        resampling_strategy_arguments : Optional[Dict]</span>
-<span class="sd">            Additional arguments for ``resampling_strategy``, this is required if</span>
-<span class="sd">            using a ``cv`` based strategy:</span>
+<span class="sd">            **Options**</span>
 
-<span class="sd">            .. code-block:: python</span>
+<span class="sd">            *   ``&quot;holdout&quot;``:</span>
+<span class="sd">                    67:33 (train:test) split</span>
+<span class="sd">            *   ``&quot;holdout-iterative-fit&quot;``:</span>
+<span class="sd">                    67:33 (train:test) split, iterative fit where possible</span>
+<span class="sd">            *   ``&quot;cv&quot;``:</span>
+<span class="sd">                    crossvalidation,</span>
+<span class="sd">                    requires ``&quot;folds&quot;`` in ``resampling_strategy_arguments``</span>
+<span class="sd">            *   ``&quot;cv-iterative-fit&quot;``:</span>
+<span class="sd">                    crossvalidation,</span>
+<span class="sd">                    calls iterative fit where possible,</span>
+<span class="sd">                    requires ``&quot;folds&quot;`` in ``resampling_strategy_arguments``</span>
+<span class="sd">            *   &#39;partial-cv&#39;:</span>
+<span class="sd">                    crossvalidation with intensification,</span>
+<span class="sd">                    requires ``&quot;folds&quot;`` in ``resampling_strategy_arguments``</span>
+<span class="sd">            *   ``BaseCrossValidator`` subclass:</span>
+<span class="sd">                    any BaseCrossValidator subclass (found in scikit-learn model_selection module)</span>
+<span class="sd">            *   ``_RepeatedSplits`` subclass:</span>
+<span class="sd">                    any _RepeatedSplits subclass (found in scikit-learn model_selection module)</span>
+<span class="sd">            *   ``BaseShuffleSplit`` subclass:</span>
+<span class="sd">                    any BaseShuffleSplit subclass (found in scikit-learn model_selection module)</span>
 
-<span class="sd">                {</span>
-<span class="sd">                    &quot;train_size&quot;: 0.67,     # The size of the training set</span>
-<span class="sd">                    &quot;shuffle&quot;: True,        # Whether to shuffle before splitting data</span>
-<span class="sd">                    &quot;folds&quot;: 5              # Used in &#39;cv&#39; based resampling strategies</span>
-<span class="sd">                }</span>
+<span class="sd">        resampling_strategy_arguments : dict, optional if &#39;holdout&#39; (train_size default=0.67)</span>
+<span class="sd">            Additional arguments for resampling_strategy:</span>
 
-<span class="sd">            If using a custom splitter class, which takes ``n_splits`` such as</span>
-<span class="sd">            `PredefinedSplit &lt;https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html#sklearn-model-selection-kfold&gt;`_, the value of ``&quot;folds&quot;`` will be used.</span>
+<span class="sd">            * ``train_size`` should be between 0.0 and 1.0 and represent the</span>
+<span class="sd">              proportion of the dataset to include in the train split.</span>
+<span class="sd">            * ``shuffle`` determines whether the data is shuffled prior to</span>
+<span class="sd">              splitting it into train and validation.</span>
+
+<span class="sd">            Available arguments:</span>
+
+<span class="sd">            * &#39;holdout&#39;: {&#39;train_size&#39;: float}</span>
+<span class="sd">            * &#39;holdout-iterative-fit&#39;:  {&#39;train_size&#39;: float}</span>
+<span class="sd">            * &#39;cv&#39;: {&#39;folds&#39;: int}</span>
+<span class="sd">            * &#39;cv-iterative-fit&#39;: {&#39;folds&#39;: int}</span>
+<span class="sd">            * &#39;partial-cv&#39;: {&#39;folds&#39;: int, &#39;shuffle&#39;: bool}</span>
+<span class="sd">            * BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments</span>
+<span class="sd">              required by chosen class as specified in scikit-learn documentation.</span>
+<span class="sd">              If arguments are not provided, scikit-learn defaults are used.</span>
+<span class="sd">              If no defaults are available, an exception is raised.</span>
+<span class="sd">              Refer to the &#39;n_splits&#39; argument as &#39;folds&#39;.</span>
 
 <span class="sd">        tmp_folder : string, optional (None)</span>
 <span class="sd">            folder to store configuration output and log files, if ``None``</span>
@@ -313,12 +331,12 @@
 
 <span class="sd">        n_jobs : int, optional, experimental</span>
 <span class="sd">            The number of jobs to run in parallel for ``fit()``. ``-1`` means</span>
-<span class="sd">            using all processors.</span>
-
-<span class="sd">            **Important notes**:</span>
-
-<span class="sd">            * By default, Auto-sklearn uses one core.</span>
-<span class="sd">            * Ensemble building is not affected by ``n_jobs`` but can be controlled by the number</span>
+<span class="sd">            using all processors. </span>
+<span class="sd">            </span>
+<span class="sd">            **Important notes**: </span>
+<span class="sd">            </span>
+<span class="sd">            * By default, Auto-sklearn uses one core. </span>
+<span class="sd">            * Ensemble building is not affected by ``n_jobs`` but can be controlled by the number </span>
 <span class="sd">              of models in the ensemble.</span>
 <span class="sd">            * ``predict()`` is not affected by ``n_jobs`` (in contrast to most scikit-learn models)</span>
 <span class="sd">            * If ``dask_client`` is ``None``, a new dask client is created.</span>
@@ -382,14 +400,16 @@
 
 <span class="sd">        dataset_compression: Union[bool, Mapping[str, Any]] = True</span>
 <span class="sd">            We compress datasets so that they fit into some predefined amount of memory.</span>
-<span class="sd">            Currently this does not apply to dataframes or sparse arrays, only to raw</span>
-<span class="sd">            numpy arrays.</span>
+<span class="sd">            Currently this does not apply to dataframes or sparse arrays, only to raw numpy arrays.</span>
 
-<span class="sd">            **NOTE** - If using a custom ``resampling_strategy`` that relies on specific</span>
+<span class="sd">            **NOTE**</span>
+
+<span class="sd">            If using a custom ``resampling_strategy`` that relies on specific</span>
 <span class="sd">            size or ordering of data, this must be disabled to preserve these properties.</span>
 
-<span class="sd">            You can disable this entirely by passing ``False`` or leave as the default</span>
-<span class="sd">            ``True`` for configuration below.</span>
+<span class="sd">            You can disable this entirely by passing ``False``.</span>
+
+<span class="sd">            Default configuration when left as ``True``:</span>
 
 <span class="sd">            .. code-block:: python</span>
 
@@ -403,36 +423,36 @@
 
 <span class="sd">            The available options are described here:</span>
 
-<span class="sd">            * **memory_allocation**</span>
-<span class="sd">                By default, we attempt to fit the dataset into ``0.1 * memory_limit``.</span>
-<span class="sd">                This float value can be set with ``&quot;memory_allocation&quot;: 0.1``.</span>
-<span class="sd">                We also allow for specifying absolute memory in MB, e.g. 10MB is</span>
-<span class="sd">                ``&quot;memory_allocation&quot;: 10``.</span>
+<span class="sd">            **memory_allocation**</span>
 
-<span class="sd">                The memory used by the dataset is checked after each reduction method is</span>
-<span class="sd">                performed. If the dataset fits into the allocated memory, any further</span>
-<span class="sd">                methods listed in ``&quot;methods&quot;`` will not be performed.</span>
+<span class="sd">            By default, we attempt to fit the dataset into ``0.1 * memory_limit``. This</span>
+<span class="sd">            float value can be set with ``&quot;memory_allocation&quot;: 0.1``. We also allow for</span>
+<span class="sd">            specifying absolute memory in MB, e.g. 10MB is ``&quot;memory_allocation&quot;: 10``.</span>
 
-<span class="sd">                For example, if ``methods: [&quot;precision&quot;, &quot;subsample&quot;]`` and the</span>
-<span class="sd">                ``&quot;precision&quot;`` reduction step was enough to make the dataset fit into</span>
-<span class="sd">                memory, then the ``&quot;subsample&quot;`` reduction step will not be performed.</span>
+<span class="sd">            The memory used by the dataset is checked after each reduction method is</span>
+<span class="sd">            performed. If the dataset fits into the allocated memory, any further methods</span>
+<span class="sd">            listed in ``&quot;methods&quot;`` will not be performed.</span>
 
-<span class="sd">            * **methods**</span>
-<span class="sd">                We provide the following methods for reducing the dataset size.</span>
-<span class="sd">                These can be provided in a list and are performed in the order as given.</span>
+<span class="sd">            For example, if ``methods: [&quot;precision&quot;, &quot;subsample&quot;]`` and the</span>
+<span class="sd">            ``&quot;precision&quot;`` reduction step was enough to make the dataset fit into memory,</span>
+<span class="sd">            then the ``&quot;subsample&quot;`` reduction step will not be performed.</span>
 
-<span class="sd">                *   ``&quot;precision&quot;`` - We reduce floating point precision as follows:</span>
-<span class="sd">                    *   ``np.float128 -&gt; np.float64``</span>
-<span class="sd">                    *   ``np.float96 -&gt; np.float64``</span>
-<span class="sd">                    *   ``np.float64 -&gt; np.float32``</span>
+<span class="sd">            **methods**</span>
 
-<span class="sd">                *   ``subsample`` - We subsample data such that it **fits directly into</span>
-<span class="sd">                    the memory allocation** ``memory_allocation * memory_limit``.</span>
-<span class="sd">                    Therefore, this should likely be the last method listed in</span>
-<span class="sd">                    ``&quot;methods&quot;``.</span>
-<span class="sd">                    Subsampling takes into account classification labels and stratifies</span>
-<span class="sd">                    accordingly. We guarantee that at least one occurrence of each</span>
-<span class="sd">                    label is included in the sampled set.</span>
+<span class="sd">            We currently provide the following methods for reducing the dataset size.</span>
+<span class="sd">            These can be provided in a list and are performed in the order as given.</span>
+
+<span class="sd">            *   ``&quot;precision&quot;`` - We reduce floating point precision as follows:</span>
+<span class="sd">                *   ``np.float128 -&gt; np.float64``</span>
+<span class="sd">                *   ``np.float96 -&gt; np.float64``</span>
+<span class="sd">                *   ``np.float64 -&gt; np.float32``</span>
+
+<span class="sd">            *   ``subsample`` - We subsample data such that it **fits directly into the</span>
+<span class="sd">                memory allocation** ``memory_allocation * memory_limit``. Therefore, this</span>
+<span class="sd">                should likely be the last method listed in ``&quot;methods&quot;``.</span>
+<span class="sd">                Subsampling takes into account classification labels and stratifies</span>
+<span class="sd">                accordingly. We guarantee that at least one occurrence of each label is</span>
+<span class="sd">                included in the sampled set.</span>
 
 <span class="sd">        Attributes</span>
 <span class="sd">        ----------</span>

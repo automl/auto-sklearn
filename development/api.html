@@ -64,7 +64,6 @@
                 <li><a href="index.html">Start</a></li>
                 <li><a href="releases.html">Releases</a></li>
                 <li><a href="installation.html">Installation</a></li>
-                <li><a href="manual.html">Manual</a></li>
                 <li><a href="examples/index.html">Examples</a></li>
                 <li><a href="#">API</a></li>
                 <li><a href="extending.html">Extending</a></li>
@@ -225,40 +224,80 @@ See <code class="docutils literal notranslate"><span class="pre">/pipeline/compo
 </pre></div>
 </div>
 </dd>
-<dt><strong>resampling_strategy</strong><span class="classifier">str | BaseCrossValidator | _RepeatedSplits | BaseShuffleSplit = “holdout”</span></dt><dd><p>How to to handle overfitting, might need to use <code class="docutils literal notranslate"><span class="pre">resampling_strategy_arguments</span></code>
+<dt><strong>resampling_strategy</strong><span class="classifier">Union[str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit] = “holdout”</span></dt><dd><p>How to to handle overfitting, might need to use <code class="docutils literal notranslate"><span class="pre">resampling_strategy_arguments</span></code>
 if using <code class="docutils literal notranslate"><span class="pre">&quot;cv&quot;</span></code> based method or a Splitter object.</p>
-<ul class="simple">
-<li><dl class="simple">
-<dt><strong>Options</strong></dt><dd><ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;holdout&quot;</span></code> - Use a 67:33 (train:test) split</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;cv&quot;</span></code>: perform cross validation, requires “folds” in <code class="docutils literal notranslate"><span class="pre">resampling_strategy_arguments</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;holdout-iterative-fit&quot;</span></code> - Same as “holdout” but iterative fit where possible</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;cv-iterative-fit&quot;</span></code>: Same as “cv” but iterative fit where possible</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;partial-cv&quot;</span></code>: Same as “cv” but uses intensification.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">BaseCrossValidator</span></code> - any BaseCrossValidator subclass (found in scikit-learn model_selection module)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">_RepeatedSplits</span></code> - any _RepeatedSplits subclass (found in scikit-learn model_selection module)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">BaseShuffleSplit</span></code> - any BaseShuffleSplit subclass (found in scikit-learn model_selection module)</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-</ul>
 <p>If using a Splitter object that relies on the dataset retaining it’s current
 size and order, you will need to look at the <code class="docutils literal notranslate"><span class="pre">dataset_compression</span></code> argument
 and ensure that <code class="docutils literal notranslate"><span class="pre">&quot;subsample&quot;</span></code> is not included in the applied compression
 <code class="docutils literal notranslate"><span class="pre">&quot;methods&quot;</span></code> or disable it entirely with <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<p><strong>Options</strong></p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">&quot;holdout&quot;</span></code>:</dt><dd><p>67:33 (train:test) split</p>
 </dd>
-<dt><strong>resampling_strategy_arguments</strong><span class="classifier">Optional[Dict]</span></dt><dd><p>Additional arguments for <code class="docutils literal notranslate"><span class="pre">resampling_strategy</span></code>, this is required if
-using a <code class="docutils literal notranslate"><span class="pre">cv</span></code> based strategy:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-    <span class="s2">&quot;train_size&quot;</span><span class="p">:</span> <span class="mf">0.67</span><span class="p">,</span>     <span class="c1"># The size of the training set</span>
-    <span class="s2">&quot;shuffle&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>        <span class="c1"># Whether to shuffle before splitting data</span>
-    <span class="s2">&quot;folds&quot;</span><span class="p">:</span> <span class="mi">5</span>              <span class="c1"># Used in &#39;cv&#39; based resampling strategies</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p>If using a custom splitter class, which takes <code class="docutils literal notranslate"><span class="pre">n_splits</span></code> such as
-<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html#sklearn-model-selection-kfold">PredefinedSplit</a>, the value of <code class="docutils literal notranslate"><span class="pre">&quot;folds&quot;</span></code> will be used.</p>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">&quot;holdout-iterative-fit&quot;</span></code>:</dt><dd><p>67:33 (train:test) split, iterative fit where possible</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">&quot;cv&quot;</span></code>:</dt><dd><p>crossvalidation,
+requires <code class="docutils literal notranslate"><span class="pre">&quot;folds&quot;</span></code> in <code class="docutils literal notranslate"><span class="pre">resampling_strategy_arguments</span></code></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">&quot;cv-iterative-fit&quot;</span></code>:</dt><dd><p>crossvalidation,
+calls iterative fit where possible,
+requires <code class="docutils literal notranslate"><span class="pre">&quot;folds&quot;</span></code> in <code class="docutils literal notranslate"><span class="pre">resampling_strategy_arguments</span></code></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>‘partial-cv’:</dt><dd><p>crossvalidation with intensification,
+requires <code class="docutils literal notranslate"><span class="pre">&quot;folds&quot;</span></code> in <code class="docutils literal notranslate"><span class="pre">resampling_strategy_arguments</span></code></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">BaseCrossValidator</span></code> subclass:</dt><dd><p>any BaseCrossValidator subclass (found in scikit-learn model_selection module)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">_RepeatedSplits</span></code> subclass:</dt><dd><p>any _RepeatedSplits subclass (found in scikit-learn model_selection module)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">BaseShuffleSplit</span></code> subclass:</dt><dd><p>any BaseShuffleSplit subclass (found in scikit-learn model_selection module)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt><strong>resampling_strategy_arguments</strong><span class="classifier">dict, optional if ‘holdout’ (train_size default=0.67)</span></dt><dd><p>Additional arguments for resampling_strategy:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">train_size</span></code> should be between 0.0 and 1.0 and represent the
+proportion of the dataset to include in the train split.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">shuffle</span></code> determines whether the data is shuffled prior to
+splitting it into train and validation.</p></li>
+</ul>
+<p>Available arguments:</p>
+<ul class="simple">
+<li><p>‘holdout’: {‘train_size’: float}</p></li>
+<li><p>‘holdout-iterative-fit’:  {‘train_size’: float}</p></li>
+<li><p>‘cv’: {‘folds’: int}</p></li>
+<li><p>‘cv-iterative-fit’: {‘folds’: int}</p></li>
+<li><p>‘partial-cv’: {‘folds’: int, ‘shuffle’: bool}</p></li>
+<li><p>BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments
+required by chosen class as specified in scikit-learn documentation.
+If arguments are not provided, scikit-learn defaults are used.
+If no defaults are available, an exception is raised.
+Refer to the ‘n_splits’ argument as ‘folds’.</p></li>
+</ul>
 </dd>
 <dt><strong>tmp_folder</strong><span class="classifier">string, optional (None)</span></dt><dd><p>folder to store configuration output and log files, if <code class="docutils literal notranslate"><span class="pre">None</span></code>
 automatically use <code class="docutils literal notranslate"><span class="pre">/tmp/autosklearn_tmp_$pid_$random_number</span></code></p>
@@ -271,7 +310,7 @@ using all processors.</p>
 <p><strong>Important notes</strong>:</p>
 <ul class="simple">
 <li><p>By default, Auto-sklearn uses one core.</p></li>
-<li><p>Ensemble building is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> but can be controlled by the number
+<li><p>Ensemble building is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> but can be controlled by the number 
 of models in the ensemble.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">predict()</span></code> is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> (in contrast to most scikit-learn models)</p></li>
 <li><p>If <code class="docutils literal notranslate"><span class="pre">dask_client</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, a new dask client is created.</p></li>
@@ -326,12 +365,12 @@ This is an advanced feature. Use only if you are familiar with
 <a class="reference external" href="https://automl.github.io/SMAC3/master/index.html">SMAC</a>.</p>
 </dd>
 <dt><strong>dataset_compression: Union[bool, Mapping[str, Any]] = True</strong></dt><dd><p>We compress datasets so that they fit into some predefined amount of memory.
-Currently this does not apply to dataframes or sparse arrays, only to raw
-numpy arrays.</p>
-<p><strong>NOTE</strong> - If using a custom <code class="docutils literal notranslate"><span class="pre">resampling_strategy</span></code> that relies on specific
+Currently this does not apply to dataframes or sparse arrays, only to raw numpy arrays.</p>
+<p><strong>NOTE</strong></p>
+<p>If using a custom <code class="docutils literal notranslate"><span class="pre">resampling_strategy</span></code> that relies on specific
 size or ordering of data, this must be disabled to preserve these properties.</p>
-<p>You can disable this entirely by passing <code class="docutils literal notranslate"><span class="pre">False</span></code> or leave as the default
-<code class="docutils literal notranslate"><span class="pre">True</span></code> for configuration below.</p>
+<p>You can disable this entirely by passing <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<p>Default configuration when left as <code class="docutils literal notranslate"><span class="pre">True</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;memory_allocation&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
     <span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;precision&quot;</span><span class="p">,</span> <span class="s2">&quot;subsample&quot;</span><span class="p">]</span>
@@ -341,40 +380,30 @@ size or ordering of data, this must be disabled to preserve these properties.</p
 <p>You can also pass your own configuration with the same keys and choosing
 from the available <code class="docutils literal notranslate"><span class="pre">&quot;methods&quot;</span></code>.</p>
 <p>The available options are described here:</p>
-<ul>
-<li><dl>
-<dt><strong>memory_allocation</strong></dt><dd><p>By default, we attempt to fit the dataset into <code class="docutils literal notranslate"><span class="pre">0.1</span> <span class="pre">*</span> <span class="pre">memory_limit</span></code>.
-This float value can be set with <code class="docutils literal notranslate"><span class="pre">&quot;memory_allocation&quot;:</span> <span class="pre">0.1</span></code>.
-We also allow for specifying absolute memory in MB, e.g. 10MB is
-<code class="docutils literal notranslate"><span class="pre">&quot;memory_allocation&quot;:</span> <span class="pre">10</span></code>.</p>
+<p><strong>memory_allocation</strong></p>
+<p>By default, we attempt to fit the dataset into <code class="docutils literal notranslate"><span class="pre">0.1</span> <span class="pre">*</span> <span class="pre">memory_limit</span></code>. This
+float value can be set with <code class="docutils literal notranslate"><span class="pre">&quot;memory_allocation&quot;:</span> <span class="pre">0.1</span></code>. We also allow for
+specifying absolute memory in MB, e.g. 10MB is <code class="docutils literal notranslate"><span class="pre">&quot;memory_allocation&quot;:</span> <span class="pre">10</span></code>.</p>
 <p>The memory used by the dataset is checked after each reduction method is
-performed. If the dataset fits into the allocated memory, any further
-methods listed in <code class="docutils literal notranslate"><span class="pre">&quot;methods&quot;</span></code> will not be performed.</p>
+performed. If the dataset fits into the allocated memory, any further methods
+listed in <code class="docutils literal notranslate"><span class="pre">&quot;methods&quot;</span></code> will not be performed.</p>
 <p>For example, if <code class="docutils literal notranslate"><span class="pre">methods:</span> <span class="pre">[&quot;precision&quot;,</span> <span class="pre">&quot;subsample&quot;]</span></code> and the
-<code class="docutils literal notranslate"><span class="pre">&quot;precision&quot;</span></code> reduction step was enough to make the dataset fit into
-memory, then the <code class="docutils literal notranslate"><span class="pre">&quot;subsample&quot;</span></code> reduction step will not be performed.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><strong>methods</strong></dt><dd><p>We provide the following methods for reducing the dataset size.
+<code class="docutils literal notranslate"><span class="pre">&quot;precision&quot;</span></code> reduction step was enough to make the dataset fit into memory,
+then the <code class="docutils literal notranslate"><span class="pre">&quot;subsample&quot;</span></code> reduction step will not be performed.</p>
+<p><strong>methods</strong></p>
+<p>We currently provide the following methods for reducing the dataset size.
 These can be provided in a list and are performed in the order as given.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;precision&quot;</span></code> - We reduce floating point precision as follows:
 *   <code class="docutils literal notranslate"><span class="pre">np.float128</span> <span class="pre">-&gt;</span> <span class="pre">np.float64</span></code>
 *   <code class="docutils literal notranslate"><span class="pre">np.float96</span> <span class="pre">-&gt;</span> <span class="pre">np.float64</span></code>
 *   <code class="docutils literal notranslate"><span class="pre">np.float64</span> <span class="pre">-&gt;</span> <span class="pre">np.float32</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">subsample</span></code> - We subsample data such that it <strong>fits directly into
-the memory allocation</strong> <code class="docutils literal notranslate"><span class="pre">memory_allocation</span> <span class="pre">*</span> <span class="pre">memory_limit</span></code>.
-Therefore, this should likely be the last method listed in
-<code class="docutils literal notranslate"><span class="pre">&quot;methods&quot;</span></code>.
+<li><p><code class="docutils literal notranslate"><span class="pre">subsample</span></code> - We subsample data such that it <strong>fits directly into the
+memory allocation</strong> <code class="docutils literal notranslate"><span class="pre">memory_allocation</span> <span class="pre">*</span> <span class="pre">memory_limit</span></code>. Therefore, this
+should likely be the last method listed in <code class="docutils literal notranslate"><span class="pre">&quot;methods&quot;</span></code>.
 Subsampling takes into account classification labels and stratifies
-accordingly. We guarantee that at least one occurrence of each
-label is included in the sampled set.</p></li>
-</ul>
-</dd>
-</dl>
-</li>
+accordingly. We guarantee that at least one occurrence of each label is
+included in the sampled set.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1514,40 +1543,80 @@ See <code class="docutils literal notranslate"><span class="pre">/pipeline/compo
 </pre></div>
 </div>
 </dd>
-<dt><strong>resampling_strategy</strong><span class="classifier">str | BaseCrossValidator | _RepeatedSplits | BaseShuffleSplit = “holdout”</span></dt><dd><p>How to to handle overfitting, might need to use <code class="docutils literal notranslate"><span class="pre">resampling_strategy_arguments</span></code>
+<dt><strong>resampling_strategy</strong><span class="classifier">Union[str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit] = “holdout”</span></dt><dd><p>How to to handle overfitting, might need to use <code class="docutils literal notranslate"><span class="pre">resampling_strategy_arguments</span></code>
 if using <code class="docutils literal notranslate"><span class="pre">&quot;cv&quot;</span></code> based method or a Splitter object.</p>
-<ul class="simple">
-<li><dl class="simple">
-<dt><strong>Options</strong></dt><dd><ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;holdout&quot;</span></code> - Use a 67:33 (train:test) split</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;cv&quot;</span></code>: perform cross validation, requires “folds” in <code class="docutils literal notranslate"><span class="pre">resampling_strategy_arguments</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;holdout-iterative-fit&quot;</span></code> - Same as “holdout” but iterative fit where possible</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;cv-iterative-fit&quot;</span></code>: Same as “cv” but iterative fit where possible</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;partial-cv&quot;</span></code>: Same as “cv” but uses intensification.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">BaseCrossValidator</span></code> - any BaseCrossValidator subclass (found in scikit-learn model_selection module)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">_RepeatedSplits</span></code> - any _RepeatedSplits subclass (found in scikit-learn model_selection module)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">BaseShuffleSplit</span></code> - any BaseShuffleSplit subclass (found in scikit-learn model_selection module)</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-</ul>
 <p>If using a Splitter object that relies on the dataset retaining it’s current
 size and order, you will need to look at the <code class="docutils literal notranslate"><span class="pre">dataset_compression</span></code> argument
 and ensure that <code class="docutils literal notranslate"><span class="pre">&quot;subsample&quot;</span></code> is not included in the applied compression
 <code class="docutils literal notranslate"><span class="pre">&quot;methods&quot;</span></code> or disable it entirely with <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<p><strong>Options</strong></p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">&quot;holdout&quot;</span></code>:</dt><dd><p>67:33 (train:test) split</p>
 </dd>
-<dt><strong>resampling_strategy_arguments</strong><span class="classifier">Optional[Dict]</span></dt><dd><p>Additional arguments for <code class="docutils literal notranslate"><span class="pre">resampling_strategy</span></code>, this is required if
-using a <code class="docutils literal notranslate"><span class="pre">cv</span></code> based strategy:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-    <span class="s2">&quot;train_size&quot;</span><span class="p">:</span> <span class="mf">0.67</span><span class="p">,</span>     <span class="c1"># The size of the training set</span>
-    <span class="s2">&quot;shuffle&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>        <span class="c1"># Whether to shuffle before splitting data</span>
-    <span class="s2">&quot;folds&quot;</span><span class="p">:</span> <span class="mi">5</span>              <span class="c1"># Used in &#39;cv&#39; based resampling strategies</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p>If using a custom splitter class, which takes <code class="docutils literal notranslate"><span class="pre">n_splits</span></code> such as
-<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html#sklearn-model-selection-kfold">PredefinedSplit</a>, the value of <code class="docutils literal notranslate"><span class="pre">&quot;folds&quot;</span></code> will be used.</p>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">&quot;holdout-iterative-fit&quot;</span></code>:</dt><dd><p>67:33 (train:test) split, iterative fit where possible</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">&quot;cv&quot;</span></code>:</dt><dd><p>crossvalidation,
+requires <code class="docutils literal notranslate"><span class="pre">&quot;folds&quot;</span></code> in <code class="docutils literal notranslate"><span class="pre">resampling_strategy_arguments</span></code></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">&quot;cv-iterative-fit&quot;</span></code>:</dt><dd><p>crossvalidation,
+calls iterative fit where possible,
+requires <code class="docutils literal notranslate"><span class="pre">&quot;folds&quot;</span></code> in <code class="docutils literal notranslate"><span class="pre">resampling_strategy_arguments</span></code></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>‘partial-cv’:</dt><dd><p>crossvalidation with intensification,
+requires <code class="docutils literal notranslate"><span class="pre">&quot;folds&quot;</span></code> in <code class="docutils literal notranslate"><span class="pre">resampling_strategy_arguments</span></code></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">BaseCrossValidator</span></code> subclass:</dt><dd><p>any BaseCrossValidator subclass (found in scikit-learn model_selection module)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">_RepeatedSplits</span></code> subclass:</dt><dd><p>any _RepeatedSplits subclass (found in scikit-learn model_selection module)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">BaseShuffleSplit</span></code> subclass:</dt><dd><p>any BaseShuffleSplit subclass (found in scikit-learn model_selection module)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt><strong>resampling_strategy_arguments</strong><span class="classifier">dict, optional if ‘holdout’ (train_size default=0.67)</span></dt><dd><p>Additional arguments for resampling_strategy:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">train_size</span></code> should be between 0.0 and 1.0 and represent the
+proportion of the dataset to include in the train split.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">shuffle</span></code> determines whether the data is shuffled prior to
+splitting it into train and validation.</p></li>
+</ul>
+<p>Available arguments:</p>
+<ul class="simple">
+<li><p>‘holdout’: {‘train_size’: float}</p></li>
+<li><p>‘holdout-iterative-fit’:  {‘train_size’: float}</p></li>
+<li><p>‘cv’: {‘folds’: int}</p></li>
+<li><p>‘cv-iterative-fit’: {‘folds’: int}</p></li>
+<li><p>‘partial-cv’: {‘folds’: int, ‘shuffle’: bool}</p></li>
+<li><p>BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments
+required by chosen class as specified in scikit-learn documentation.
+If arguments are not provided, scikit-learn defaults are used.
+If no defaults are available, an exception is raised.
+Refer to the ‘n_splits’ argument as ‘folds’.</p></li>
+</ul>
 </dd>
 <dt><strong>tmp_folder</strong><span class="classifier">string, optional (None)</span></dt><dd><p>folder to store configuration output and log files, if <code class="docutils literal notranslate"><span class="pre">None</span></code>
 automatically use <code class="docutils literal notranslate"><span class="pre">/tmp/autosklearn_tmp_$pid_$random_number</span></code></p>
@@ -1560,7 +1629,7 @@ using all processors.</p>
 <p><strong>Important notes</strong>:</p>
 <ul class="simple">
 <li><p>By default, Auto-sklearn uses one core.</p></li>
-<li><p>Ensemble building is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> but can be controlled by the number
+<li><p>Ensemble building is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> but can be controlled by the number 
 of models in the ensemble.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">predict()</span></code> is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> (in contrast to most scikit-learn models)</p></li>
 <li><p>If <code class="docutils literal notranslate"><span class="pre">dask_client</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, a new dask client is created.</p></li>
@@ -1615,12 +1684,12 @@ This is an advanced feature. Use only if you are familiar with
 <a class="reference external" href="https://automl.github.io/SMAC3/master/index.html">SMAC</a>.</p>
 </dd>
 <dt><strong>dataset_compression: Union[bool, Mapping[str, Any]] = True</strong></dt><dd><p>We compress datasets so that they fit into some predefined amount of memory.
-Currently this does not apply to dataframes or sparse arrays, only to raw
-numpy arrays.</p>
-<p><strong>NOTE</strong> - If using a custom <code class="docutils literal notranslate"><span class="pre">resampling_strategy</span></code> that relies on specific
+Currently this does not apply to dataframes or sparse arrays, only to raw numpy arrays.</p>
+<p><strong>NOTE</strong></p>
+<p>If using a custom <code class="docutils literal notranslate"><span class="pre">resampling_strategy</span></code> that relies on specific
 size or ordering of data, this must be disabled to preserve these properties.</p>
-<p>You can disable this entirely by passing <code class="docutils literal notranslate"><span class="pre">False</span></code> or leave as the default
-<code class="docutils literal notranslate"><span class="pre">True</span></code> for configuration below.</p>
+<p>You can disable this entirely by passing <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<p>Default configuration when left as <code class="docutils literal notranslate"><span class="pre">True</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;memory_allocation&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
     <span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;precision&quot;</span><span class="p">,</span> <span class="s2">&quot;subsample&quot;</span><span class="p">]</span>
@@ -1630,40 +1699,30 @@ size or ordering of data, this must be disabled to preserve these properties.</p
 <p>You can also pass your own configuration with the same keys and choosing
 from the available <code class="docutils literal notranslate"><span class="pre">&quot;methods&quot;</span></code>.</p>
 <p>The available options are described here:</p>
-<ul>
-<li><dl>
-<dt><strong>memory_allocation</strong></dt><dd><p>By default, we attempt to fit the dataset into <code class="docutils literal notranslate"><span class="pre">0.1</span> <span class="pre">*</span> <span class="pre">memory_limit</span></code>.
-This float value can be set with <code class="docutils literal notranslate"><span class="pre">&quot;memory_allocation&quot;:</span> <span class="pre">0.1</span></code>.
-We also allow for specifying absolute memory in MB, e.g. 10MB is
-<code class="docutils literal notranslate"><span class="pre">&quot;memory_allocation&quot;:</span> <span class="pre">10</span></code>.</p>
+<p><strong>memory_allocation</strong></p>
+<p>By default, we attempt to fit the dataset into <code class="docutils literal notranslate"><span class="pre">0.1</span> <span class="pre">*</span> <span class="pre">memory_limit</span></code>. This
+float value can be set with <code class="docutils literal notranslate"><span class="pre">&quot;memory_allocation&quot;:</span> <span class="pre">0.1</span></code>. We also allow for
+specifying absolute memory in MB, e.g. 10MB is <code class="docutils literal notranslate"><span class="pre">&quot;memory_allocation&quot;:</span> <span class="pre">10</span></code>.</p>
 <p>The memory used by the dataset is checked after each reduction method is
-performed. If the dataset fits into the allocated memory, any further
-methods listed in <code class="docutils literal notranslate"><span class="pre">&quot;methods&quot;</span></code> will not be performed.</p>
+performed. If the dataset fits into the allocated memory, any further methods
+listed in <code class="docutils literal notranslate"><span class="pre">&quot;methods&quot;</span></code> will not be performed.</p>
 <p>For example, if <code class="docutils literal notranslate"><span class="pre">methods:</span> <span class="pre">[&quot;precision&quot;,</span> <span class="pre">&quot;subsample&quot;]</span></code> and the
-<code class="docutils literal notranslate"><span class="pre">&quot;precision&quot;</span></code> reduction step was enough to make the dataset fit into
-memory, then the <code class="docutils literal notranslate"><span class="pre">&quot;subsample&quot;</span></code> reduction step will not be performed.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><strong>methods</strong></dt><dd><p>We provide the following methods for reducing the dataset size.
+<code class="docutils literal notranslate"><span class="pre">&quot;precision&quot;</span></code> reduction step was enough to make the dataset fit into memory,
+then the <code class="docutils literal notranslate"><span class="pre">&quot;subsample&quot;</span></code> reduction step will not be performed.</p>
+<p><strong>methods</strong></p>
+<p>We currently provide the following methods for reducing the dataset size.
 These can be provided in a list and are performed in the order as given.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;precision&quot;</span></code> - We reduce floating point precision as follows:
 *   <code class="docutils literal notranslate"><span class="pre">np.float128</span> <span class="pre">-&gt;</span> <span class="pre">np.float64</span></code>
 *   <code class="docutils literal notranslate"><span class="pre">np.float96</span> <span class="pre">-&gt;</span> <span class="pre">np.float64</span></code>
 *   <code class="docutils literal notranslate"><span class="pre">np.float64</span> <span class="pre">-&gt;</span> <span class="pre">np.float32</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">subsample</span></code> - We subsample data such that it <strong>fits directly into
-the memory allocation</strong> <code class="docutils literal notranslate"><span class="pre">memory_allocation</span> <span class="pre">*</span> <span class="pre">memory_limit</span></code>.
-Therefore, this should likely be the last method listed in
-<code class="docutils literal notranslate"><span class="pre">&quot;methods&quot;</span></code>.
+<li><p><code class="docutils literal notranslate"><span class="pre">subsample</span></code> - We subsample data such that it <strong>fits directly into the
+memory allocation</strong> <code class="docutils literal notranslate"><span class="pre">memory_allocation</span> <span class="pre">*</span> <span class="pre">memory_limit</span></code>. Therefore, this
+should likely be the last method listed in <code class="docutils literal notranslate"><span class="pre">&quot;methods&quot;</span></code>.
 Subsampling takes into account classification labels and stratifies
-accordingly. We guarantee that at least one occurrence of each
-label is included in the sampled set.</p></li>
-</ul>
-</dd>
-</dl>
-</li>
+accordingly. We guarantee that at least one occurrence of each label is
+included in the sampled set.</p></li>
 </ul>
 </dd>
 </dl>
