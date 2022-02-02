@@ -136,6 +136,7 @@ jobs:
         if [ ${{ matrix.code-cov }} ]; then
           $PYTHON -m pytest ${{ env.pytest-args }} ${{ env.code-cov-args }} test
         elif [ ${{ matrix.sklearnex }} ]; then
+          $PYTHON -m pip install scikit-learn-intelex
           $PYTHON -m pytest --sklearnex ${{ env.pytest-args }} test
         else
           $PYTHON -m pytest ${{ env.pytest-args }} test
