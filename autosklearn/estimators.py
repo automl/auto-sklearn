@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
-from typing import Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Optional, Dict, List, Mapping, Tuple, Union, Iterable
+from typing_extensions import Literal
 
 import dask.distributed
 import joblib
@@ -50,6 +51,7 @@ class AutoSklearnEstimator(BaseEstimator):
         scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
         get_trials_callback=None,
+        dataset_compression: Union[bool, Mapping[str, Any]] = True
     ):
         """
         Parameters
@@ -154,43 +156,41 @@ class AutoSklearnEstimator(BaseEstimator):
                     'feature_preprocessor': ["no_preprocessing"]
                 }
 
-        resampling_strategy : string or object, optional ('holdout')
-            how to to handle overfitting, might need 'resampling_strategy_arguments'
+        resampling_strategy : str | BaseCrossValidator | _RepeatedSplits | BaseShuffleSplit = "holdout"
+            How to to handle overfitting, might need to use ``resampling_strategy_arguments``
+            if using ``"cv"`` based method or a Splitter object.
 
-            * 'holdout': 67:33 (train:test) split
-            * 'holdout-iterative-fit':  67:33 (train:test) split, calls iterative
-              fit where possible
-            * 'cv': crossvalidation, requires 'folds'
-            * 'cv-iterative-fit': crossvalidation, calls iterative fit where possible
-            * 'partial-cv': crossvalidation with intensification, requires
-              'folds'
-            * BaseCrossValidator object: any BaseCrossValidator class found
-                                        in scikit-learn model_selection module
-            * _RepeatedSplits object: any _RepeatedSplits class found
-                                      in scikit-learn model_selection module
-            * BaseShuffleSplit object: any BaseShuffleSplit class found
-                                      in scikit-learn model_selection module
+            * **Options**
+                *   ``"holdout"`` - Use a 67:33 (train:test) split
+                *   ``"cv"``: perform cross validation, requires "folds" in ``resampling_strategy_arguments``
+                *   ``"holdout-iterative-fit"`` - Same as "holdout" but iterative fit where possible
+                *   ``"cv-iterative-fit"``: Same as "cv" but iterative fit where possible
+                *   ``"partial-cv"``: Same as "cv" but uses intensification.
+                *   ``BaseCrossValidator`` - any BaseCrossValidator subclass (found in scikit-learn model_selection module)
+                *   ``_RepeatedSplits`` - any _RepeatedSplits subclass (found in scikit-learn model_selection module)
+                *   ``BaseShuffleSplit`` - any BaseShuffleSplit subclass (found in scikit-learn model_selection module)
 
-        resampling_strategy_arguments : dict, optional if 'holdout' (train_size default=0.67)
-            Additional arguments for resampling_strategy:
+            If using a Splitter object that relies on the dataset retaining it's current
+            size and order, you will need to look at the ``dataset_compression`` argument
+            and ensure that ``"subsample"`` is not included in the applied compression
+            ``"methods"`` or disable it entirely with ``False``.
 
-            * ``train_size`` should be between 0.0 and 1.0 and represent the
-              proportion of the dataset to include in the train split.
-            * ``shuffle`` determines whether the data is shuffled prior to
-              splitting it into train and validation.
+        resampling_strategy_arguments : Optional[Dict] = None
+            Additional arguments for ``resampling_strategy``, this is required if
+            using a ``cv`` based strategy. The default arguments if left as ``None``
+            are:
 
-            Available arguments:
+            .. code-block:: python
 
-            * 'holdout': {'train_size': float}
-            * 'holdout-iterative-fit':  {'train_size': float}
-            * 'cv': {'folds': int}
-            * 'cv-iterative-fit': {'folds': int}
-            * 'partial-cv': {'folds': int, 'shuffle': bool}
-            * BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments
-              required by chosen class as specified in scikit-learn documentation.
-              If arguments are not provided, scikit-learn defaults are used.
-              If no defaults are available, an exception is raised.
-              Refer to the 'n_splits' argument as 'folds'.
+                {
+                    "train_size": 0.67,     # The size of the training set
+                    "shuffle": True,        # Whether to shuffle before splitting data
+                    "folds": 5              # Used in 'cv' based resampling strategies
+                }
+
+            If using a custom splitter class, which takes ``n_splits`` such as
+            `PredefinedSplit <https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html#sklearn-model-selection-kfold>`_,
+            the value of ``"folds"`` will be used.
 
         tmp_folder : string, optional (None)
             folder to store configuration output and log files, if ``None``
@@ -269,9 +269,62 @@ class AutoSklearnEstimator(BaseEstimator):
             This is an advanced feature. Use only if you are familiar with
             `SMAC <https://automl.github.io/SMAC3/master/index.html>`_.
 
+        dataset_compression: Union[bool, Mapping[str, Any]] = True
+            We compress datasets so that they fit into some predefined amount of memory.
+            Currently this does not apply to dataframes or sparse arrays, only to raw
+            numpy arrays.
+
+            **NOTE** - If using a custom ``resampling_strategy`` that relies on specific
+            size or ordering of data, this must be disabled to preserve these properties.
+
+            You can disable this entirely by passing ``False`` or leave as the default
+            ``True`` for configuration below.
+
+            .. code-block:: python
+
+                {
+                    "memory_allocation": 0.1,
+                    "methods": ["precision", "subsample"]
+                }
+
+            You can also pass your own configuration with the same keys and choosing
+            from the available ``"methods"``.
+
+            The available options are described here:
+
+            * **memory_allocation**
+                By default, we attempt to fit the dataset into ``0.1 * memory_limit``.
+                This float value can be set with ``"memory_allocation": 0.1``.
+                We also allow for specifying absolute memory in MB, e.g. 10MB is
+                ``"memory_allocation": 10``.
+
+                The memory used by the dataset is checked after each reduction method is
+                performed. If the dataset fits into the allocated memory, any further
+                methods listed in ``"methods"`` will not be performed.
+
+                For example, if ``methods: ["precision", "subsample"]`` and the
+                ``"precision"`` reduction step was enough to make the dataset fit into
+                memory, then the ``"subsample"`` reduction step will not be performed.
+
+            * **methods**
+                We provide the following methods for reducing the dataset size.
+                These can be provided in a list and are performed in the order as given.
+
+                *   ``"precision"`` - We reduce floating point precision as follows:
+                    *   ``np.float128 -> np.float64``
+                    *   ``np.float96 -> np.float64``
+                    *   ``np.float64 -> np.float32``
+
+                *   ``subsample`` - We subsample data such that it **fits directly into
+                    the memory allocation** ``memory_allocation * memory_limit``.
+                    Therefore, this should likely be the last method listed in
+                    ``"methods"``.
+                    Subsampling takes into account classification labels and stratifies
+                    accordingly. We guarantee that at least one occurrence of each
+                    label is included in the sampled set.
+
         Attributes
         ----------
-
         cv_results_ : dict of numpy (masked) ndarrays
             A dict with keys as column headers and values as columns, that can be
             imported into a pandas ``DataFrame``.
@@ -314,6 +367,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.scoring_functions = scoring_functions
         self.load_models = load_models
         self.get_trials_callback = get_trials_callback
+        self.dataset_compression = dataset_compression
 
         self.automl_ = None  # type: Optional[AutoML]
 
@@ -361,6 +415,7 @@ class AutoSklearnEstimator(BaseEstimator):
             metric=self.metric,
             scoring_functions=self.scoring_functions,
             get_trials_callback=self.get_trials_callback,
+            dataset_compression=self.dataset_compression
         )
 
         return automl
@@ -1028,10 +1083,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
 
 class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
-    """
-    This class implements the classification task.
-
-    """
+    """This class implements the classification task. """
 
     def fit(self, X, y, X_test=None, y_test=None, feat_type=None, dataset_name=None):
         """Fit *auto-sklearn* to given training set (X, y).
@@ -1041,7 +1093,6 @@ class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
 
         Parameters
         ----------
-
         X : array-like or sparse matrix of shape = [n_samples, n_features]
             The training input samples.
 
@@ -1073,7 +1124,6 @@ class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
         Returns
         -------
         self
-
         """
         # AutoSklearn does not handle sparse y for now
         y = convert_if_sparse(y)
@@ -1123,12 +1173,10 @@ class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
         -------
         y : array of shape = [n_samples] or [n_samples, n_labels]
             The predicted classes.
-
         """
         return super().predict(X, batch_size=batch_size, n_jobs=n_jobs)
 
     def predict_proba(self, X, batch_size=None, n_jobs=1):
-
         """Predict probabilities of classes for all samples X.
 
         Parameters
@@ -1144,7 +1192,6 @@ class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
         -------
         y : array of shape = [n_samples, n_classes] or [n_samples, n_labels]
             The predicted class probabilities.
-
         """
         pred_proba = super().predict_proba(X, batch_size=batch_size, n_jobs=n_jobs)
 

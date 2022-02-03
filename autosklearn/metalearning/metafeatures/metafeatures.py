@@ -1137,15 +1137,20 @@ def calculate_all_metafeatures(
                 # TODO make sure this is done as efficient as possible (no copy for
                 # sparse matrices because of wrong sparse format)
                 sparse = scipy.sparse.issparse(X)
+
+                feat_type = {key: 'categorical' if value else 'numerical'
+                             for key, value in categorical.items()}
+
+                # TODO make this more cohesive to the overall structure (quick bug fix)
+                if isinstance(X, pd.DataFrame):
+                    for key in X.select_dtypes(include="string").columns:
+                        feat_type[key] = "string"
+
                 DPP = FeatTypeSplit(
                     # The difference between feat_type and categorical, is that
                     # categorical has True/False instead of categorical/numerical
-                    feat_type={
-                        key: "categorical" if value else "numerical"
-                        for key, value in categorical.items()
-                    },
-                    force_sparse_output=True,
-                )
+                    feat_type=feat_type,
+                    force_sparse_output=True)
                 X_transformed = DPP.fit_transform(X)
                 categorical_transformed = {
                     i: False for i in range(X_transformed.shape[1])

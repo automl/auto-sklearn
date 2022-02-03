@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+from pandas.api.types import is_numeric_dtype, is_categorical_dtype, is_string_dtype
+
 import pytest
 import sklearn.datasets
 import sklearn.model_selection
@@ -326,18 +328,11 @@ def test_features_unsupported_calls_are_raised():
     ):
         validator.fit({"input1": 1, "input2": 2})
     validator = FeatureValidator()
-    with pytest.raises(ValueError, match=r"has unsupported dtype string"):
-        validator.fit(pd.DataFrame([{"A": 1, "B": 2}], dtype="string"))
-    with pytest.raises(
-        ValueError, match=r"The feature dimensionality of the train and test"
-    ):
-        validator.fit(
-            X_train=np.array([[1, 2, 3], [4, 5, 6]]),
-            X_test=np.array([[1, 2, 3, 4], [4, 5, 6, 7]]),
-        )
-    with pytest.raises(
-        ValueError, match=r"Cannot call transform on a validator that is not fit"
-    ):
+    with pytest.raises(ValueError, match=r"The feature dimensionality of the train and test"):
+        validator.fit(X_train=np.array([[1, 2, 3], [4, 5, 6]]),
+                      X_test=np.array([[1, 2, 3, 4], [4, 5, 6, 7]]),
+                      )
+    with pytest.raises(ValueError, match=r"Cannot call transform on a validator that is not fit"):
         validator.transform(np.array([[1, 2, 3], [4, 5, 6]]))
     validator = FeatureValidator(feat_type=["Numerical"])
     with pytest.raises(
@@ -349,8 +344,8 @@ def test_features_unsupported_calls_are_raised():
     validator = FeatureValidator(feat_type=[1, 2, 3])
     with pytest.raises(ValueError, match=r"feat_type must only contain strings.*"):
         validator.fit(np.array([[1, 2, 3], [4, 5, 6]]))
-    validator = FeatureValidator(feat_type=["1", "2", "3"])
-    with pytest.raises(ValueError, match=r"Only `Categorical` and `Numerical` are.*"):
+    validator = FeatureValidator(feat_type=['1', '2', '3'])
+    with pytest.raises(ValueError, match=r"Only `Categorical`, `Numerical` and `String` are.*"):
         validator.fit(np.array([[1, 2, 3], [4, 5, 6]]))
 
 
@@ -452,8 +447,12 @@ def test_list_to_dataframe(openml_id):
         if is_numeric_dtype(X_pandas[col].dtype):
             # convert dtype translates 72.0 to 72. Be robust against this!
             assert is_numeric_dtype(transformed_X[i].dtype)
+        elif is_string_dtype(X_pandas[col].dtype):
+            assert is_string_dtype(X_pandas[col].dtype)
+        elif is_categorical_dtype(X_pandas[col].dtype):
+            assert is_categorical_dtype(X_pandas[col].dtype)
         else:
-            assert X_pandas[col].dtype.name == transformed_X[i].dtype.name, col
+            raise NotImplementedError
 
     # Also make sure that at testing time
     # this work
@@ -462,8 +461,12 @@ def test_list_to_dataframe(openml_id):
         if is_numeric_dtype(X_pandas[col].dtype):
             # convert dtype translates 72.0 to 72. Be robust against this!
             assert is_numeric_dtype(transformed_X[i].dtype)
+        elif is_string_dtype(X_pandas[col].dtype):
+            assert is_string_dtype(X_pandas[col].dtype)
+        elif is_categorical_dtype(X_pandas[col].dtype):
+            assert is_categorical_dtype(X_pandas[col].dtype)
         else:
-            assert X_pandas[col].dtype.name == transformed_X[i].dtype.name, col
+            raise NotImplementedError
 
 
 @pytest.mark.parametrize(

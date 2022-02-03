@@ -1,6 +1,10 @@
 import numpy as np
 import pandas as pd
 import pytest
+from pandas.api.types import is_numeric_dtype, is_bool_dtype
+
+from scipy import sparse
+
 import sklearn.datasets
 import sklearn.model_selection
 from pandas.api.types import is_numeric_dtype
@@ -103,143 +107,143 @@ def input_data_targettest(request):
 @pytest.mark.parametrize(
     "input_data_targettest",
     (
-        "series_binary",
-        "series_multiclass",
-        "series_continuous",
-        "pandas_binary",
-        "pandas_multiclass",
-        "pandas_multilabel",
-        "pandas_continuous",
-        "pandas_continuous-multioutput",
-        "numpy_binary",
-        "numpy_multiclass",
-        "numpy_multilabel",
-        "numpy_continuous",
-        "numpy_continuous-multioutput",
-        "list_binary",
-        "list_multiclass",
-        "list_multilabel",
-        "list_continuous",
-        "list_continuous-multioutput",
-        "sparse_bsr_nonan",
-        "sparse_coo_nonan",
-        "sparse_csc_nonan",
-        "sparse_csr_nonan",
-        "sparse_lil_nonan",
-        "openml_204",
+        'series_binary',
+        'series_multiclass',
+        'series_continuous',
+        'pandas_binary',
+        'pandas_multiclass',
+        'pandas_multilabel',
+        'pandas_continuous',
+        'pandas_continuous-multioutput',
+        'numpy_binary',
+        'numpy_multiclass',
+        'numpy_multilabel',
+        'numpy_continuous',
+        'numpy_continuous-multioutput',
+        'list_binary',
+        'list_multiclass',
+        'list_multilabel',
+        'list_continuous',
+        'list_continuous-multioutput',
+        'openml_204',
     ),
     indirect=True,
 )
 def test_targetvalidator_supported_types_noclassification(input_data_targettest):
+    y = input_data_targettest
+
     validator = TargetValidator(is_classification=False)
     validator.fit(input_data_targettest)
-    transformed_y = validator.transform(input_data_targettest)
-    if sparse.issparse(input_data_targettest):
-        assert sparse.issparse(transformed_y)
-    else:
-        assert isinstance(transformed_y, np.ndarray)
-    epected_shape = np.shape(input_data_targettest)
-    if len(epected_shape) > 1 and epected_shape[1] == 1:
-        # The target should have (N,) dimensionality instead of (N, 1)
-        epected_shape = (epected_shape[0],)
-    assert epected_shape == np.shape(transformed_y)
-    assert np.issubdtype(transformed_y.dtype, np.number)
+
+    y_encoded: np.ndarray = validator.transform(y)
+
+    # Assert the validator was fitted
     assert validator._is_fitted
 
-    # Because there is no classification, we do not expect a encoder
+    # Assert no encoder if is_classification = False
     assert validator.encoder is None
 
-    if hasattr(input_data_targettest, "iloc"):
-        np.testing.assert_array_equal(
-            np.ravel(input_data_targettest.to_numpy()), np.ravel(transformed_y)
-        )
-    elif sparse.issparse(input_data_targettest):
-        np.testing.assert_array_equal(
-            np.ravel(input_data_targettest.todense()), np.ravel(transformed_y.todense())
-        )
-    else:
-        np.testing.assert_array_equal(
-            np.ravel(np.array(input_data_targettest)), np.ravel(transformed_y)
-        )
+    # Assert it returns y_inverse, y_encoded as ndarray
+    assert isinstance(y_encoded, np.ndarray)
+
+    # Assert the return value is equal to the one passed in
+    np.testing.assert_array_equal(y_encoded, y)
 
 
 @pytest.mark.parametrize(
     "input_data_targettest",
     (
-        "series_binary",
-        "series_multiclass",
-        "pandas_binary",
-        "pandas_multiclass",
-        "numpy_binary",
-        "numpy_multiclass",
-        "list_binary",
-        "list_multiclass",
-        "sparse_bsr_nonan",
-        "sparse_coo_nonan",
-        "sparse_csc_nonan",
-        "sparse_csr_nonan",
-        "sparse_lil_nonan",
-        "openml_2",
+        'series_binary',
+        'series_multiclass',
+        'pandas_binary',
+        'pandas_multiclass',
+        'numpy_binary',
+        'numpy_multiclass',
+        'list_binary',
+        'list_multiclass',
+        'openml_2',
     ),
     indirect=True,
 )
 def test_targetvalidator_supported_types_classification(input_data_targettest):
+    y = input_data_targettest  # Just to remove visual clutter
+
     validator = TargetValidator(is_classification=True)
-    validator.fit(input_data_targettest)
-    transformed_y = validator.transform(input_data_targettest)
-    if sparse.issparse(input_data_targettest):
-        assert sparse.issparse(transformed_y)
-    else:
-        assert isinstance(transformed_y, np.ndarray)
-    epected_shape = np.shape(input_data_targettest)
-    if len(epected_shape) > 1 and epected_shape[1] == 1:
-        # The target should have (N,) dimensionality instead of (N, 1)
-        epected_shape = (epected_shape[0],)
-    assert epected_shape == np.shape(transformed_y)
-    assert np.issubdtype(transformed_y.dtype, np.number)
+    validator.fit(y)
+
+    y_encoded: np.ndarray = validator.transform(y)
+    y_inverse: np.ndarray = validator.inverse_transform(y_encoded)
+
+    # Assert the validator was fitted
     assert validator._is_fitted
 
-    # Because there is no classification, we do not expect a encoder
-    if not sparse.issparse(input_data_targettest):
+    # Assert it returns y_inverse, y_encoded as ndarray
+    assert isinstance(y_encoded, np.ndarray)
+    assert isinstance(y_inverse, np.ndarray)
+
+    # Assert that y_encoded is numeric and not boolean
+    assert (
+        is_numeric_dtype(y_encoded.dtype)
+        and not is_bool_dtype(y_encoded.dtype)
+    )
+
+    # Assert dtype is presevered with y -> y_encoded -> y_inverse
+    def dtype(arr):
+        if isinstance(arr, list):
+            if isinstance(arr[0], list):
+                return type(arr[0][0])
+            else:
+                return type(arr[0])
+        elif isinstance(arr, pd.DataFrame):
+            return arr.dtypes[0]
+        else:
+            return arr.dtype
+
+    if is_numeric_dtype(dtype(y)):
+        assert y_inverse.dtype == dtype(y)
+
+    # Assert that y == y_inverse, giving back the original values
+    np.testing.assert_array_equal(y_inverse, np.array(y).reshape(-1))
+
+    # Assert the y_inverse, y_encoded have the expected shape
+    shape = np.shape(y)
+    if len(shape) == 2 and shape[1] == 1:
+        # For cases where y = [[1], [2], [3]],
+        # we expect y_inverse, y_encodedd to have been flattened to [1,2,3]
+        expected_shape = (shape[0], )
+    else:
+        expected_shape = shape
+
+    assert y_encoded.shape == expected_shape
+    assert y_inverse.shape == expected_shape
+
+    # These next part of the tests rely on some encoding to have taken place
+    # This happens when `is_classification` and not task_type = multilabel-indicator
+    #
+    # As state in TargetValidator._fit()
+    # > Also, encoding multilabel indicator data makes the data multiclass
+    #   Let the user employ a MultiLabelBinarizer if needed
+    #
+    # As a result of this, we don't encode 'multilabel-indicator' labels and
+    # there is nothing else to check here
+    if validator.type_of_target == 'multilabel-indicator':
+        assert validator.encoder is None
+
+    else:
         assert validator.encoder is not None
 
-        # The encoding should be per column
-        if len(transformed_y.shape) == 1:
-            assert np.min(transformed_y) == 0
-            assert np.max(transformed_y) == len(np.unique(transformed_y)) - 1
-        else:
-            for col in range(transformed_y.shape[1]):
-                assert np.min(transformed_y[:, col]) == 0
-                assert (
-                    np.max(transformed_y[:, col])
-                    == len(np.unique(transformed_y[:, col])) - 1
-                )
+        # Assert the columns have had their labels converted
+        if y_encoded.ndim == 1:
+            max_label = len(np.unique(y_encoded)) - 1
+            assert np.min(y_encoded) == 0
+            assert np.max(y_encoded) == max_label
 
-        # Make sure we can perform inverse transform
-        y_inverse = validator.inverse_transform(transformed_y)
-        if hasattr(input_data_targettest, "dtype"):
-            # In case of numeric, we need to make sure dtype is preserved
-            if is_numeric_dtype(input_data_targettest.dtype):
-                assert y_inverse.dtype == input_data_targettest.dtype
-            # Then make sure every value is properly inverse-transformed
-            np.testing.assert_array_equal(
-                np.array(y_inverse), np.array(input_data_targettest)
-            )
-        elif hasattr(input_data_targettest, "dtypes"):
-            if is_numeric_dtype(input_data_targettest.dtypes[0]):
-                assert y_inverse.dtype == input_data_targettest.dtypes[0]
-            # Then make sure every value is properly inverse-transformed
-            np.testing.assert_array_equal(
-                np.array(y_inverse),
-                # pandas is always (N, 1) but targets are ravel()
-                input_data_targettest.to_numpy().reshape(-1),
-            )
-    else:
-        # Sparse is not encoded, mainly because the sparse data is expected
-        # to be numpy of numerical type -- which currently does not require encoding
-        np.testing.assert_array_equal(
-            np.ravel(input_data_targettest.todense()), np.ravel(transformed_y.todense())
-        )
+        else:
+            for col in range(y_encoded.shape[1]):
+                column = y_encoded[:, col]
+                max_label = len(np.unique(y_encoded[:, col])) - 1
+                assert np.min(column) == 0
+                assert np.max(column) == max_label
 
 
 @pytest.mark.parametrize(
@@ -432,13 +436,9 @@ def test_target_unsupported():
         ValueError, match=r"arget values cannot contain missing/NaN values"
     ):
         validator.fit(sparse.csr_matrix(np.array([1, 2, np.nan])))
-    with pytest.raises(
-        ValueError, match=r"Cannot call transform on a validator that is not fit"
-    ):
+    with pytest.raises(ValueError, match=r"TargetValidator must have fit\(\) called first"):
         validator.transform(np.array([1, 2, 3]))
-    with pytest.raises(
-        ValueError, match=r"Cannot call inverse_transform on a validator that is"
-    ):
+    with pytest.raises(ValueError, match=r"TargetValidator must have fit\(\) called first"):
         validator.inverse_transform(np.array([1, 2, 3]))
     with pytest.raises(
         ValueError, match=r"Multi-dimensional classification is not yet supported"

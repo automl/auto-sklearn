@@ -1,9 +1,7 @@
 import copy
 import itertools
 import resource
-import sys
 import tempfile
-import traceback
 import unittest
 import unittest.mock
 
@@ -36,7 +34,7 @@ from autosklearn.pipeline.constants import (
 from autosklearn.pipeline.regression import SimpleRegressionPipeline
 from autosklearn.pipeline.util import get_dataset
 
-from .ignored_warnings import ignore_warnings, regressor_warnings
+from test.test_pipeline.ignored_warnings import regressor_warnings, ignore_warnings
 
 
 class SimpleRegressionPipelineTest(unittest.TestCase):
@@ -243,10 +241,13 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                     "values." in e.args[0]
                 ):
                     continue
+                elif "zero-size array to reduction operation maximum which has no " \
+                     "identity" in e.args[0]:
+                    continue
                 else:
-                    print(config)
-                    print(traceback.format_exc())
+                    e.args += (f"config={config}",)
                     raise e
+
             except RuntimeWarning as e:
                 if "invalid value encountered in sqrt" in e.args[0]:
                     continue
@@ -259,16 +260,16 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 elif "invalid value encountered in multiply" in e.args[0]:
                     continue
                 else:
-                    print(config)
-                    traceback.print_tb(sys.exc_info()[2])
+                    e.args += (f"config={config}",)
                     raise e
+
             except UserWarning as e:
                 if "FastICA did not converge" in e.args[0]:
                     continue
                 else:
-                    print(config)
-                    traceback.print_tb(sys.exc_info()[2])
+                    e.args += (f"config={config}",)
                     raise e
+
             except Exception as e:
                 if (
                     "Multiple input features cannot have the same target value"
@@ -276,8 +277,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 ):
                     continue
                 else:
-                    print(config)
-                    traceback.print_tb(sys.exc_info()[2])
+                    e.args += (f"config={config}",)
                     raise e
 
     def test_default_configuration(self):
@@ -317,7 +317,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
         forbiddens = cs.get_forbiddens()
-        self.assertEqual(156, len(hyperparameters))
+        self.assertEqual(171, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 3, len(conditions))
         self.assertEqual(len(forbiddens), 35)
 
@@ -539,8 +539,9 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         if "data_preprocessor:__choice__" in expected_key:
             # We have to check both the numerical and categorical
             to_check = {
-                "numerical_transformer": implementation.choice.numer_ppl.named_steps,
-                "categorical_transformer": implementation.choice.categ_ppl.named_steps,
+                'numerical_transformer': implementation.choice.numer_ppl.named_steps,
+                'categorical_transformer': implementation.choice.categ_ppl.named_steps,
+                'text_transformer': implementation.choice.txt_ppl.named_steps,
             }
 
             for data_type, pipeline in to_check.items():

@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
-import glob
+from typing import Dict, List, Union
+
 import itertools
 import os
 import pickle
@@ -12,11 +13,31 @@ import warnings
 import numpy as np
 import pandas as pd
 import pytest
+from scipy.sparse import csr_matrix, spmatrix
 import sklearn.datasets
 from scipy.sparse import csr_matrix
 from sklearn.ensemble import VotingClassifier, VotingRegressor
 from smac.facade.roar_facade import ROAR
-from smac.scenario.scenario import Scenario
+
+from autosklearn.automl import AutoML, AutoMLClassifier, AutoMLRegressor, _model_predict
+from autosklearn.data.validation import InputValidator
+import autosklearn.automl
+from autosklearn.data.xy_data_manager import XYDataManager
+from autosklearn.metrics import (
+    accuracy, log_loss, balanced_accuracy, default_metric_for_task
+)
+from autosklearn.evaluation.abstract_evaluator import MyDummyClassifier, MyDummyRegressor
+from autosklearn.util.data import default_dataset_compression_arg
+from autosklearn.util.logging_ import PickableLoggerAdapter
+import autosklearn.pipeline.util as putil
+from autosklearn.constants import (
+    MULTICLASS_CLASSIFICATION,
+    BINARY_CLASSIFICATION,
+    MULTILABEL_CLASSIFICATION,
+    REGRESSION,
+    MULTIOUTPUT_REGRESSION,
+    CLASSIFICATION_TASKS,
+)
 from smac.tae import StatusType
 
 import autosklearn.automl
@@ -57,19 +78,18 @@ from automl_utils import (  # noqa (E402: module level import not at top of file
 
 
 class AutoMLStub(AutoML):
-    def __init__(self):
-        self.__class__ = AutoML
+    def __init__(self, classifier: bool = False):
         self._task = None
         self._dask_client = None
         self._is_dask_client_internally_created = False
+        self._classifier = classifier
 
     def __del__(self):
         pass
 
 
 def test_fit(dask_client):
-
-    X_train, Y_train, X_test, Y_test = putil.get_dataset("iris")
+    X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
     automl = autosklearn.automl.AutoML(
         seed=0,
         time_left_for_this_task=30,
@@ -736,85 +756,6 @@ def test_fail_if_feat_type_on_pandas_input(dask_client):
         )
 
 
-@pytest.mark.parametrize(
-    "memory_limit,precision,task",
-    [
-        (memory_limit, precision, task)
-        for task in itertools.chain(CLASSIFICATION_TASKS, REGRESSION_TASKS)
-        for precision in (float, np.float32, np.float64, np.float128)
-        for memory_limit in (1, 100, None)
-    ],
-)
-def test_subsample_if_too_large(memory_limit, precision, task):
-    fixture = {
-        BINARY_CLASSIFICATION: {
-            1: {float: 1310, np.float32: 2621, np.float64: 1310, np.float128: 655},
-            100: {
-                float: 12000,
-                np.float32: 12000,
-                np.float64: 12000,
-                np.float128: 12000,
-            },
-            None: {
-                float: 12000,
-                np.float32: 12000,
-                np.float64: 12000,
-                np.float128: 12000,
-            },
-        },
-        MULTICLASS_CLASSIFICATION: {
-            1: {float: 204, np.float32: 409, np.float64: 204, np.float128: 102},
-            100: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
-            None: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
-        },
-        MULTILABEL_CLASSIFICATION: {
-            1: {float: 204, np.float32: 409, np.float64: 204, np.float128: 102},
-            100: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
-            None: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
-        },
-        REGRESSION: {
-            1: {float: 655, np.float32: 1310, np.float64: 655, np.float128: 327},
-            100: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
-            None: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
-        },
-        MULTIOUTPUT_REGRESSION: {
-            1: {float: 655, np.float32: 1310, np.float64: 655, np.float128: 327},
-            100: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
-            None: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
-        },
-    }
-    mock = unittest.mock.Mock()
-    if task == BINARY_CLASSIFICATION:
-        X, y = sklearn.datasets.make_hastie_10_2()
-    elif task == MULTICLASS_CLASSIFICATION:
-        X, y = sklearn.datasets.load_digits(return_X_y=True)
-    elif task == MULTILABEL_CLASSIFICATION:
-        X, y_ = sklearn.datasets.load_digits(return_X_y=True)
-        y = np.zeros((X.shape[0], 10))
-        for i, j in enumerate(y_):
-            y[i, j] = 1
-    elif task == REGRESSION:
-        X, y = sklearn.datasets.make_friedman1(n_samples=5000, n_features=20)
-    elif task == MULTIOUTPUT_REGRESSION:
-        X, y = sklearn.datasets.make_friedman1(n_samples=5000, n_features=20)
-        y = np.vstack((y, y)).transpose()
-    else:
-        raise ValueError(task)
-    X = X.astype(precision)
-
-    assert X.shape[0] == y.shape[0]
-
-    X_new, y_new = AutoML.subsample_if_too_large(X, y, mock, 1, memory_limit, task)
-    assert X_new.shape[0] == fixture[task][memory_limit][precision]
-    if memory_limit == 1:
-        if precision in (np.float128, np.float64, float):
-            assert mock.warning.call_count == 2
-        else:
-            assert mock.warning.call_count == 1
-    else:
-        assert mock.warning.call_count == 0
-
-
 def data_input_and_target_types():
     n_rows = 100
 
@@ -1068,43 +1009,188 @@ def test_model_predict_outputs_to_stdout_if_no_logger():
         assert len(w) == 1, "One warning sould have been emmited"
 
 
-@pytest.mark.parametrize(
-    "task, y",
-    [
-        (BINARY_CLASSIFICATION, np.asarray(9999 * [0] + 1 * [1])),
-        (
-            MULTICLASS_CLASSIFICATION,
-            np.asarray(4999 * [1] + 4999 * [2] + 1 * [3] + 1 * [4]),
-        ),
-        (
-            MULTILABEL_CLASSIFICATION,
-            np.asarray(
-                4999 * [[0, 1, 1]]
-                + 4999 * [[1, 1, 0]]
-                + 1 * [[1, 0, 1]]
-                + 1 * [[0, 0, 0]]
-            ),
-        ),
-    ],
-)
-def test_subsample_classification_unique_labels_stay_in_training_set(task, y):
-    n_samples = 10000
-    X = np.random.random(size=(n_samples, 3))
-    memory_limit = 1  # Force subsampling
-    mock = unittest.mock.Mock()
+@pytest.mark.parametrize("dataset_compression", [False])
+def test_param_dataset_compression_false(dataset_compression: bool) -> None:
+    """
+    Parameters
+    ----------
+    dataset_compression: bool
+        The dataset_compression arg set as False
 
-    # Make sure our test assumptions are correct
-    assert len(y) == n_samples, "Ensure tests are correctly setup"
-
-    values, counts = np.unique(y, axis=0, return_counts=True)
-    unique_labels = [value for value, count in zip(values, counts) if count == 1]
-    assert len(unique_labels), "Ensure we have unique labels in the test"
-
-    _, y_sampled = AutoML.subsample_if_too_large(
-        X, y, logger=mock, seed=1, memory_limit=memory_limit, task=task
+    Expects
+    -------
+    * Should set the private attribute to None
+    """
+    auto = AutoMLRegressor(
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        dataset_compression=dataset_compression
     )
 
-    assert len(y_sampled) <= len(y), "Ensure sampling took place"
-    assert all(
-        label in y_sampled for label in unique_labels
-    ), "All unique labels present in the return sampled set"
+    assert auto._dataset_compression is None
+
+
+@pytest.mark.parametrize("dataset_compression", [True])
+def test_construction_param_dataset_compression_true(dataset_compression: bool) -> None:
+    """
+    Parameters
+    ----------
+    dataset_compression: bool
+        The dataset_compression arg set as True
+
+    Expects
+    -------
+    * Should set the private attribute to the defaults
+    """
+    auto = AutoMLRegressor(
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        dataset_compression=dataset_compression
+    )
+
+    assert auto._dataset_compression == default_dataset_compression_arg
+
+
+@pytest.mark.parametrize("dataset_compression", [{"memory_allocation": 0.2}])
+def test_construction_param_dataset_compression_valid_dict(dataset_compression: Dict) -> None:
+    """
+    Parameters
+    ----------
+    dataset_compression: Dict
+        The dataset_compression arg set partially specified
+
+    Expects
+    -------
+    * Should set the private attribute to the passed dataset_compression arg + defaults
+    """
+    auto = AutoMLRegressor(
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        dataset_compression=dataset_compression
+    )
+
+    expected_memory_allocation = dataset_compression["memory_allocation"]
+    expected_methods = default_dataset_compression_arg["methods"]
+
+    assert auto._dataset_compression is not None
+    assert auto._dataset_compression["memory_allocation"] == expected_memory_allocation
+    assert auto._dataset_compression["methods"] == expected_methods
+
+
+@pytest.mark.parametrize("dataset_compression", [{"methods": ["precision", "subsample"]}])
+@pytest.mark.parametrize("X", [np.ones((100, 10), dtype=int)])
+@pytest.mark.parametrize("y", [np.random.random((100,))])
+@unittest.mock.patch("autosklearn.automl.reduce_dataset_size_if_too_large")
+def test_fit_performs_dataset_compression_without_precision_with_int(
+    mock_reduce_dataset: unittest.mock.MagicMock,
+    dataset_compression: Dict,
+    X: np.ndarray,
+    y: np.ndarray
+) -> None:
+    """We can't reduce the precision of ints as we do with floats. Suppose someone
+    was to pass a column with `max_int64` and `min_int64`, any reduction of bits will
+    cause this information to be lost and not simply reduce precision as it does with
+    floats.
+
+    Parameters
+    ----------
+    mock_reduce_dataset: MagicMock
+        A mock function to check the parameters that were passed in
+
+    dataset_compression: Dict
+        The dataset_compression arg with "precision" set in it
+
+    X: np.ndarray
+        An array of ints which we can't reduce precision of
+
+    y: np.ndarray
+        An array of floats as the regression target
+
+    Expects
+    -------
+    * Should call reduce_dataset_size_if_too_large
+    * "precision" should have been removed from the "methods" passed to the keyword
+        argument "operations" of `reduce_dataset_size_if_too_large`
+    """
+    # We just return the data
+    mock_reduce_dataset.return_value = X, y
+
+    auto = AutoMLRegressor(
+        time_left_for_this_task=30,  # not used but required
+        per_run_time_limit=5,  # not used but required
+        dataset_compression=dataset_compression
+    )
+
+    # To prevent fitting anything we use `only_return_configuration_space`
+    auto.fit(X, y, only_return_configuration_space=True)
+
+    assert mock_reduce_dataset.call_count == 1
+
+    args, kwargs = mock_reduce_dataset.call_args
+    assert kwargs["operations"] == ["subsample"]
+
+
+@pytest.mark.parametrize("dataset_compression", [True])
+@pytest.mark.parametrize("X", [
+    np.empty((10, 10)),
+    csr_matrix(np.identity(10)),
+    pytest.param(
+        np.empty((10, 10)).tolist(),
+        marks=pytest.mark.xfail(reason="Converted to dataframe by InputValidator")
+    ),
+    pytest.param(
+        pd.DataFrame(np.empty((10, 10))),
+        marks=pytest.mark.xfail(reason="No pandas support yet for dataset compression")
+    )
+])
+@pytest.mark.parametrize("y", [
+    np.random.random((10, 1)),
+    np.random.random((10, 1)).tolist(),
+    pytest.param(
+        pd.Series(np.random.random((10,))),
+        marks=pytest.mark.xfail(reason="No pandas support yet for dataset compression")
+    ),
+    pytest.param(
+        pd.DataFrame(np.random.random((10, 10))),
+        marks=pytest.mark.xfail(reason="No pandas support yet for dataset compression")
+    )
+])
+@unittest.mock.patch("autosklearn.automl.reduce_dataset_size_if_too_large")
+def test_fit_performs_dataset_compression(
+    mock_reduce_dataset: unittest.mock.MagicMock,
+    dataset_compression: bool,
+    X: Union[np.ndarray, spmatrix, List, pd.DataFrame],
+    y: Union[np.ndarray, List, pd.Series, pd.DataFrame]
+) -> None:
+    """
+    Parameters
+    ----------
+    mock_reduce_dataset: MagicMock
+        A mock function to view call count
+
+    dataset_compression: bool
+        Dataset compression set to True
+
+    X: Union[np.ndarray, spmatrix, List, pd.Dataframe]
+        Feature to reduce
+
+    y: Union[np.ndarray, List, pd.Series, pd.Dataframe]
+        Target to reduce (regression values)
+
+    Expects
+    -------
+    * Should call reduce_dataset_size_if_too_large
+    """
+    # We just return the data
+    mock_reduce_dataset.return_value = X, y
+
+    auto = AutoMLRegressor(
+        time_left_for_this_task=30,  # not used but required
+        per_run_time_limit=5,  # not used but required
+        dataset_compression=dataset_compression
+    )
+
+    # To prevent fitting anything we use `only_return_configuration_space`
+    auto.fit(X, y, only_return_configuration_space=True)
+
+    assert mock_reduce_dataset.called

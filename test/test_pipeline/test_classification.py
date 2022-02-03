@@ -5,7 +5,6 @@ import itertools
 import os
 import resource
 import tempfile
-import traceback
 import unittest
 import unittest.mock
 
@@ -41,7 +40,7 @@ from autosklearn.pipeline.constants import (
 )
 from autosklearn.pipeline.util import get_dataset
 
-from .ignored_warnings import classifier_warnings, ignore_warnings
+from test.test_pipeline.ignored_warnings import classifier_warnings, ignore_warnings
 
 
 class DummyClassifier(AutoSklearnClassificationAlgorithm):
@@ -610,9 +609,11 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     continue
                 elif "Internal work array size computation failed" in e.args[0]:
                     continue
+                # Assumed to be caused by knn with preprocessor fast_ica with whiten
+                elif 'Input contains NaN, infinity or a value too large' in e.args[0]:
+                    continue
                 else:
-                    print(config)
-                    print(traceback.format_exc())
+                    e.args += (f"config={config}",)
                     raise e
 
             except RuntimeWarning as e:
@@ -629,15 +630,14 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 elif "invalid value encountered in multiply" in e.args[0]:
                     continue
                 else:
-                    print(traceback.format_exc())
-                    print(config)
+                    e.args += (f"config={config}",)
                     raise e
+
             except UserWarning as e:
                 if "FastICA did not converge" in e.args[0]:
                     continue
                 else:
-                    print(traceback.format_exc())
-                    print(config)
+                    e.args += (f"config={config}",)
                     raise e
 
     def test_get_hyperparameter_search_space(self):
@@ -649,7 +649,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         * 7 rescaling choices
         * 16 classifier choices
         * 13 features preprocessor choices
-        * 168 total hyperparameters
+        * 183 total hyperparameters
         * (n_hyperparameters - 4) different conditionals for the pipeline
         * 53 forbidden combinations
         """
@@ -672,7 +672,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual(n_preprocessors, 13)
 
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(len(hyperparameters), 168)
+        self.assertEqual(len(hyperparameters), 183)
 
         # for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp
@@ -1119,8 +1119,9 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         if "data_preprocessor:__choice__" in expected_key:
             # We have to check both the numerical and categorical
             to_check = {
-                "numerical_transformer": implementation.choice.numer_ppl.named_steps,
-                "categorical_transformer": implementation.choice.categ_ppl.named_steps,
+                'numerical_transformer': implementation.choice.numer_ppl.named_steps,
+                'categorical_transformer': implementation.choice.categ_ppl.named_steps,
+                'text_transformer': implementation.choice.txt_ppl.named_steps,
             }
 
             for data_type, pipeline in to_check.items():
@@ -1293,6 +1294,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 "CrashPreprocessor"
             ]
             self.fail("cs={} config={} Exception={}".format(cs, config, e))
+
         cls.set_hyperparameters(config)
 
         with self.assertRaisesRegex(ValueError, "Make sure fit is called"):
