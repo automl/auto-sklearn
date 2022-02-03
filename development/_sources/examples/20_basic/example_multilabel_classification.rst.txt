@@ -155,7 +155,7 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight           type      cost  duration
     model_id                                                          
-    2            1              1.0  random_forest  0.447294  3.261986
+    2            1              1.0  random_forest  0.447294  3.303658
 
 
 
@@ -183,11 +183,11 @@ Print the final ensemble constructed by auto-sklearn
  .. code-block:: none
 
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f72ab73cf10>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f92152dd910>,
                'cost': 0.4472941828699525,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f72ab4cef40>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f92152f1760>,
                'ensemble_weight': 1.0,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f72ab73ce20>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f92152ddcd0>,
                'model_id': 2,
                'rank': 1,
                'sklearn_classifier': RandomForestClassifier(max_features=15, n_estimators=512, n_jobs=1,
@@ -264,7 +264,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  12.451 seconds)
+   **Total running time of the script:** ( 0 minutes  12.832 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multilabel_classification.py:

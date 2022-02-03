@@ -63,6 +63,7 @@
                 <li><a href="../../index.html">Start</a></li>
                 <li><a href="../../releases.html">Releases</a></li>
                 <li><a href="../../installation.html">Installation</a></li>
+                <li><a href="../../manual.html">Manual</a></li>
                 <li><a href="../index.html">Examples</a></li>
                 <li><a href="../../api.html">API</a></li>
                 <li><a href="../../extending.html">Extending</a></li>
@@ -376,6 +377,21 @@ but with different hyperparameters .</p>
     data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution, Type: Categorical, Choices: {normal, uniform}, Default: normal
     data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max, Type: UniformFloat, Range: [0.7, 0.999], Default: 0.75
     data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min, Type: UniformFloat, Range: [0.001, 0.3], Default: 0.25
+    data_preprocessor:feature_type:text_transformer:feature_reduction:n_components, Type: UniformInteger, Range: [1, 10000], Default: 100, on log-scale
+    data_preprocessor:feature_type:text_transformer:text_encoding:__choice__, Type: Categorical, Choices: {bag_of_word_encoding, bag_of_word_encoding_distinct, tfidf_encoding}, Default: bag_of_word_encoding
+    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute, Type: UniformInteger, Range: [0, 10], Default: 0
+    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice, Type: Categorical, Choices: {min_df_absolute, min_df_relative}, Default: min_df_absolute
+    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_relative, Type: UniformFloat, Range: [0.01, 1.0], Default: 0.01, on log-scale
+    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_range, Type: UniformInteger, Range: [1, 3], Default: 1
+    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_absolute, Type: UniformInteger, Range: [0, 10], Default: 0
+    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice, Type: Categorical, Choices: {min_df_absolute, min_df_relative}, Default: min_df_absolute
+    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_relative, Type: UniformFloat, Range: [0.01, 1.0], Default: 0.01, on log-scale
+    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_range, Type: UniformInteger, Range: [1, 3], Default: 1
+    data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_absolute, Type: UniformInteger, Range: [0, 10], Default: 0
+    data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice, Type: Categorical, Choices: {min_df_absolute, min_df_relative}, Default: min_df_absolute
+    data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_relative, Type: UniformFloat, Range: [0.01, 1.0], Default: 0.01, on log-scale
+    data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_range, Type: UniformInteger, Range: [1, 3], Default: 1
+    data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf, Type: Categorical, Choices: {False, True}, Default: False
     feature_preprocessor:LDA:shrinkage, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.5
     feature_preprocessor:LDA:solver, Type: Categorical, Choices: {svd, lsqr, eigen}, Default: svd
     feature_preprocessor:LDA:tol, Type: UniformFloat, Range: [0.0001, 1.0], Default: 0.0001
@@ -538,6 +554,21 @@ but with different hyperparameters .</p>
     data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == &#39;quantile_transformer&#39;
     data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == &#39;robust_scaler&#39;
     data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == &#39;robust_scaler&#39;
+    data_preprocessor:feature_type:text_transformer:feature_reduction:n_components | data_preprocessor:__choice__ == &#39;feature_type&#39;
+    data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ | data_preprocessor:__choice__ == &#39;feature_type&#39;
+    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute | data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice == &#39;min_df_absolute&#39;
+    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == &#39;bag_of_word_encoding&#39;
+    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_relative | data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice == &#39;min_df_relative&#39;
+    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_range | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == &#39;bag_of_word_encoding&#39;
+    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_absolute | data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice == &#39;min_df_absolute&#39;
+    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == &#39;bag_of_word_encoding_distinct&#39;
+    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_relative | data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice == &#39;min_df_relative&#39;
+    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_range | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == &#39;bag_of_word_encoding_distinct&#39;
+    data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_absolute | data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice == &#39;min_df_absolute&#39;
+    data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == &#39;tfidf_encoding&#39;
+    data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_relative | data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice == &#39;min_df_relative&#39;
+    data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_range | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == &#39;tfidf_encoding&#39;
+    data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == &#39;tfidf_encoding&#39;
     feature_preprocessor:LDA:shrinkage | feature_preprocessor:LDA:solver in {&#39;lsqr&#39;, &#39;eigen&#39;}
     feature_preprocessor:LDA:solver | feature_preprocessor:__choice__ == &#39;LDA&#39;
     feature_preprocessor:LDA:tol | feature_preprocessor:__choice__ == &#39;LDA&#39;
@@ -649,7 +680,7 @@ but with different hyperparameters .</p>
     (Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  6.938 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  6.637 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-restrict-number-of-hyperparameters-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_restrict_number_of_hyperparameters.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>

@@ -63,6 +63,7 @@
                 <li><a href="index.html">Start</a></li>
                 <li><a href="releases.html">Releases</a></li>
                 <li><a href="installation.html">Installation</a></li>
+                <li><a href="#">Manual</a></li>
                 <li><a href="examples/index.html">Examples</a></li>
                 <li><a href="api.html">API</a></li>
                 <li><a href="extending.html">Extending</a></li>
@@ -148,6 +149,40 @@ time limit of one day, and a time limit of 30 minutes for a single run.</p>
 <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/142">auto-sklearn/issues/142</a>.</p>
 </details><details class="summary-b-cpu-cores-b">
 <summary><b>CPU cores</b></summary><p>By default, <em>auto-sklearn</em> uses <strong>one core</strong>. See also <a class="reference internal" href="#parallel"><span class="std std-ref">Parallel computation</span></a> on how to configure this.</p>
+</details><details class="summary-b-managing-data-compression-b">
+<summary><b>Managing data compression</b></summary><p id="manual-managing-data-compression">Auto-sklearn will attempt to fit the dataset into 1/10th of the <code class="docutils literal notranslate"><span class="pre">memory_limit</span></code>.
+This won’t happen unless your dataset is quite large or you have small a
+<code class="docutils literal notranslate"><span class="pre">memory_limit</span></code>. This is done using two methods, reducing <strong>precision</strong> and
+to <strong>subsample</strong>. One reason you may want to control this is if you require high
+precision or you rely on predefined splits for which subsampling does not account
+for.</p>
+<p>To turn off data preprocessing:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">dataset_compression</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>You can specify which of the methods are performed using:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">dataset_compression</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;precision&quot;</span><span class="p">,</span> <span class="s2">&quot;subsample&quot;</span><span class="p">]</span> <span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>You can change the memory allocation for the dataset to a percentage of <code class="docutils literal notranslate"><span class="pre">memory_limit</span></code>
+or an absolute amount using:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">dataset_compression</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;memory_allocation&quot;</span><span class="p">:</span> <span class="mf">0.2</span> <span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The default arguments are used when <code class="docutils literal notranslate"><span class="pre">dataset_compression</span> <span class="pre">=</span> <span class="pre">True</span></code> are:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;memory_allocation&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+    <span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;precision&quot;</span><span class="p">,</span> <span class="s2">&quot;subsample&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The full description is given at <a class="reference internal" href="api.html#autosklearn.classification.AutoSklearnClassifier" title="autosklearn.classification.AutoSklearnClassifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoSklearnClassifier(dataset_compression=...)</span></code></a>.</p>
 </details></div>
 <div class="section" id="the-search-space">
 <span id="space"></span><h2>The search space<a class="headerlink" href="#the-search-space" title="Permalink to this headline">¶</a></h2>

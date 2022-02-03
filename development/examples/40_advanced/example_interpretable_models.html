@@ -63,6 +63,7 @@
                 <li><a href="../../index.html">Start</a></li>
                 <li><a href="../../releases.html">Releases</a></li>
                 <li><a href="../../installation.html">Installation</a></li>
+                <li><a href="../../manual.html">Manual</a></li>
                 <li><a href="../index.html">Examples</a></li>
                 <li><a href="../../api.html">API</a></li>
                 <li><a href="../../extending.html">Extending</a></li>
@@ -251,18 +252,20 @@ AutoSklearnClassifier(ensemble_size=1,
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   54: {   &#39;balancing&#39;: Balancing(random_state=1),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f72ab4b3370&gt;,
-            &#39;cost&#39;: 0.014184397163120588,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f72b086d1c0&gt;,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   44: {   &#39;balancing&#39;: Balancing(random_state=1),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f92123d40a0&gt;,
+            &#39;cost&#39;: 0.007092198581560294,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f92123d43a0&gt;,
             &#39;ensemble_weight&#39;: 1.0,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f72ab4b3a00&gt;,
-            &#39;model_id&#39;: 54,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f92123d4250&gt;,
+            &#39;model_id&#39;: 44,
             &#39;rank&#39;: 1,
-            &#39;sklearn_classifier&#39;: SGDClassifier(alpha=0.00010138667059338354, average=True,
-              eta0=0.02613410368578406, learning_rate=&#39;invscaling&#39;, loss=&#39;log&#39;,
-              max_iter=512, penalty=&#39;l1&#39;, power_t=0.5201382988199265,
-              random_state=1, tol=4.7673752612014345e-05, warm_start=True)}}
+            &#39;sklearn_classifier&#39;: SGDClassifier(alpha=2.9408089858100495e-06, average=True,
+              epsilon=1.4595123079991757e-05, eta0=0.01186975812112113,
+              l1_ratio=6.172715523781272e-06, learning_rate=&#39;invscaling&#39;,
+              loss=&#39;modified_huber&#39;, max_iter=128, penalty=&#39;elasticnet&#39;,
+              power_t=0.28535858665694225, random_state=1,
+              tol=5.529401896651241e-05, warm_start=True)}}
 </pre></div>
 </div>
 </div>
@@ -273,10 +276,10 @@ AutoSklearnClassifier(ensemble_size=1,
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score: 0.958041958041958
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score: 0.972027972027972
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  0.846 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  55.816 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-interpretable-models-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_interpretable_models.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>

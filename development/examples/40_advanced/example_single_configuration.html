@@ -63,6 +63,7 @@
                 <li><a href="../../index.html">Start</a></li>
                 <li><a href="../../releases.html">Releases</a></li>
                 <li><a href="../../installation.html">Installation</a></li>
+                <li><a href="../../manual.html">Manual</a></li>
                 <li><a href="../index.html">Examples</a></li>
                 <li><a href="../../api.html">API</a></li>
                 <li><a href="../../extending.html">Extending</a></li>
@@ -209,14 +210,14 @@ get further documentation about Scikit-Learn models here: &lt;<a class="referenc
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:175: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
   warnings.warn(&quot;Fitting transformer with a pandas series which&quot;
-{&#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f72ab3e06d0&gt;, &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;), &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f72a93824c0&gt;, &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f72a9382a30&gt;}
+{&#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f920f636be0&gt;, &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;), &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f921509f1f0&gt;, &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f921509f760&gt;}
 RunInfo(config=Configuration:
   balancing:strategy, Value: &#39;weighting&#39;
   classifier:__choice__, Value: &#39;random_forest&#39;
   classifier:random_forest:bootstrap, Value: &#39;True&#39;
   classifier:random_forest:criterion, Value: &#39;gini&#39;
   classifier:random_forest:max_depth, Constant: &#39;None&#39;
-  classifier:random_forest:max_features, Value: 0.8952555229810948
+  classifier:random_forest:max_features, Value: 0.7941654983456143
   classifier:random_forest:max_leaf_nodes, Constant: &#39;None&#39;
   classifier:random_forest:min_impurity_decrease, Constant: 0.0
   classifier:random_forest:min_samples_leaf, Value: 5
@@ -224,23 +225,27 @@ RunInfo(config=Configuration:
   classifier:random_forest:min_weight_fraction_leaf, Constant: 0.0
   data_preprocessor:__choice__, Value: &#39;feature_type&#39;
   data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__, Value: &#39;one_hot_encoding&#39;
-  data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__, Value: &#39;no_coalescense&#39;
-  data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Value: &#39;most_frequent&#39;
-  data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Value: &#39;quantile_transformer&#39;
-  data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles, Value: 738
-  data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution, Value: &#39;uniform&#39;
-  feature_preprocessor:__choice__, Value: &#39;pca&#39;
-  feature_preprocessor:pca:keep_variance, Value: 0.8070658181685735
-  feature_preprocessor:pca:whiten, Value: &#39;False&#39;
+  data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__, Value: &#39;minority_coalescer&#39;
+  data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Value: 0.0048868030641950775
+  data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Value: &#39;mean&#39;
+  data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Value: &#39;normalize&#39;
+  data_preprocessor:feature_type:text_transformer:feature_reduction:n_components, Value: 801
+  data_preprocessor:feature_type:text_transformer:text_encoding:__choice__, Value: &#39;bag_of_word_encoding_distinct&#39;
+  data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice, Value: &#39;min_df_relative&#39;
+  data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_relative, Value: 0.5572928922114809
+  data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_range, Value: 2
+  feature_preprocessor:__choice__, Value: &#39;select_percentile_classification&#39;
+  feature_preprocessor:select_percentile_classification:percentile, Value: 76.0805486592324
+  feature_preprocessor:select_percentile_classification:score_func, Value: &#39;chi2&#39;
 , instance=None, instance_specific=None, seed=1, cutoff=60, capped=False, budget=0.0, source_id=0)
-RunValue(cost=0.0606635071090047, time=9.029444456100464, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1643823990.9343426, endtime=1643823999.9873629, additional_info={&#39;duration&#39;: 8.934290885925293, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.017281644091545978, &#39;configuration_origin&#39;: None})
+RunValue(cost=0.03127962085308056, time=2.626687526702881, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1643882001.373512, endtime=1643882004.0238822, additional_info={&#39;duration&#39;: 2.5322744846343994, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.019149929939280663, &#39;configuration_origin&#39;: None})
 Passed Configuration: Configuration:
   balancing:strategy, Value: &#39;weighting&#39;
   classifier:__choice__, Value: &#39;random_forest&#39;
   classifier:random_forest:bootstrap, Value: &#39;True&#39;
   classifier:random_forest:criterion, Value: &#39;gini&#39;
   classifier:random_forest:max_depth, Constant: &#39;None&#39;
-  classifier:random_forest:max_features, Value: 0.8952555229810948
+  classifier:random_forest:max_features, Value: 0.7941654983456143
   classifier:random_forest:max_leaf_nodes, Constant: &#39;None&#39;
   classifier:random_forest:min_impurity_decrease, Constant: 0.0
   classifier:random_forest:min_samples_leaf, Value: 5
@@ -248,16 +253,20 @@ Passed Configuration: Configuration:
   classifier:random_forest:min_weight_fraction_leaf, Constant: 0.0
   data_preprocessor:__choice__, Value: &#39;feature_type&#39;
   data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__, Value: &#39;one_hot_encoding&#39;
-  data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__, Value: &#39;no_coalescense&#39;
-  data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Value: &#39;most_frequent&#39;
-  data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Value: &#39;quantile_transformer&#39;
-  data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles, Value: 738
-  data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution, Value: &#39;uniform&#39;
-  feature_preprocessor:__choice__, Value: &#39;pca&#39;
-  feature_preprocessor:pca:keep_variance, Value: 0.8070658181685735
-  feature_preprocessor:pca:whiten, Value: &#39;False&#39;
+  data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__, Value: &#39;minority_coalescer&#39;
+  data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Value: 0.0048868030641950775
+  data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Value: &#39;mean&#39;
+  data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Value: &#39;normalize&#39;
+  data_preprocessor:feature_type:text_transformer:feature_reduction:n_components, Value: 801
+  data_preprocessor:feature_type:text_transformer:text_encoding:__choice__, Value: &#39;bag_of_word_encoding_distinct&#39;
+  data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice, Value: &#39;min_df_relative&#39;
+  data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_relative, Value: 0.5572928922114809
+  data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_range, Value: 2
+  feature_preprocessor:__choice__, Value: &#39;select_percentile_classification&#39;
+  feature_preprocessor:select_percentile_classification:percentile, Value: 76.0805486592324
+  feature_preprocessor:select_percentile_classification:score_func, Value: &#39;chi2&#39;
 
-Random Forest: RandomForestClassifier(max_features=11, min_samples_leaf=5,
+Random Forest: RandomForestClassifier(max_features=23, min_samples_leaf=5,
                        min_samples_split=11, n_estimators=512, n_jobs=1,
                        random_state=1, warm_start=True)
 /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:175: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
@@ -268,7 +277,7 @@ Random Forest: RandomForestClassifier(max_features=11, min_samples_leaf=5,
   self.algorithm_runs[metric].append(runs)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  29.302 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  5.629 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-single-configuration-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_single_configuration.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
