@@ -288,7 +288,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
         forbiddens = cs.get_forbiddens()
-        self.assertEqual(156, len(hyperparameters))
+        self.assertEqual(171, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 3, len(conditions))
         self.assertEqual(len(forbiddens), 35)
 
@@ -514,6 +514,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             to_check = {
                 'numerical_transformer': implementation.choice.numer_ppl.named_steps,
                 'categorical_transformer': implementation.choice.categ_ppl.named_steps,
+                'text_transformer': implementation.choice.txt_ppl.named_steps,
             }
 
             for data_type, pipeline in to_check.items():
