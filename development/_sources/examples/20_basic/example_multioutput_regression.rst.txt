@@ -80,9 +80,9 @@ Build and fit a regressor
     automl = AutoSklearnRegressor(
         time_left_for_this_task=120,
         per_run_time_limit=30,
-        tmp_folder='/tmp/autosklearn_multioutput_regression_example_tmp',
+        tmp_folder="/tmp/autosklearn_multioutput_regression_example_tmp",
     )
-    automl.fit(X_train, y_train, dataset_name='synthetic')
+    automl.fit(X_train, y_train, dataset_name="synthetic")
 
 
 
@@ -125,7 +125,7 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight              type          cost  duration
     model_id                                                                 
-    4            1              1.0  gaussian_process  3.992627e-08  2.577799
+    25           1              1.0  gaussian_process  8.582849e-09  6.730993
 
 
 
@@ -152,14 +152,14 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    {   4: {   'cost': 3.992626640414443e-08,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc05035b370>,
-               'ensemble_weight': 1.0,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc037aeb040>,
-               'model_id': 4,
-               'rank': 1,
-               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fc037aebdf0>,
-               'sklearn_regressor': GaussianProcessRegressor(alpha=3.388513090075372e-08,
+    {   25: {   'cost': 8.582849431171269e-09,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7ff08ac71700>,
+                'ensemble_weight': 1.0,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7ff08aeecb20>,
+                'model_id': 25,
+                'rank': 1,
+                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7ff08aeecb50>,
+                'sklearn_regressor': GaussianProcessRegressor(alpha=1.3448003159809006e-14,
                              kernel=RBF(length_scale=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]),
                              n_restarts_optimizer=10, normalize_y=True,
                              random_state=1)}}
@@ -190,7 +190,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.9999999561752116
+    R2 score: 0.9999999960994922
 
 
 
@@ -443,7 +443,7 @@ Get the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  54.155 seconds)
+   **Total running time of the script:** ( 1 minutes  55.775 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multioutput_regression.py:

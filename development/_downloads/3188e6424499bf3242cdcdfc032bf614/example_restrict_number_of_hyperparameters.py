@@ -9,15 +9,19 @@ but with different hyperparameters .
 """
 
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.hyperparameters import UniformIntegerHyperparameter, UniformFloatHyperparameter
+from ConfigSpace.hyperparameters import (
+    UniformIntegerHyperparameter,
+    UniformFloatHyperparameter,
+)
 
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
 
 import autosklearn.classification
 import autosklearn.pipeline.components.classification
-from autosklearn.pipeline.components.classification \
-    import AutoSklearnClassificationAlgorithm
+from autosklearn.pipeline.components.classification import (
+    AutoSklearnClassificationAlgorithm,
+)
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
 
 
@@ -29,8 +33,8 @@ from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SP
 # default parametrization (``max_features``). Instead, it also
 # tunes the number of estimators (``n_estimators``).
 
-class CustomRandomForest(AutoSklearnClassificationAlgorithm):
 
+class CustomRandomForest(AutoSklearnClassificationAlgorithm):
     def __init__(self, n_estimators, max_features, random_state=None):
         self.n_estimators = n_estimators
         self.max_features = max_features
@@ -67,16 +71,16 @@ class CustomRandomForest(AutoSklearnClassificationAlgorithm):
     @staticmethod
     def get_properties(dataset_properties=None):
         return {
-            'shortname': 'RF',
-            'name': 'Random Forest Classifier',
-            'handles_regression': False,
-            'handles_classification': True,
-            'handles_multiclass': True,
-            'handles_multilabel': True,
-            'handles_multioutput': False,
-            'is_deterministic': True,
-            'input': (DENSE, SPARSE, UNSIGNED_DATA),
-            'output': (PREDICTIONS,)
+            "shortname": "RF",
+            "name": "Random Forest Classifier",
+            "handles_regression": False,
+            "handles_classification": True,
+            "handles_multiclass": True,
+            "handles_multilabel": True,
+            "handles_multioutput": False,
+            "is_deterministic": True,
+            "input": (DENSE, SPARSE, UNSIGNED_DATA),
+            "output": (PREDICTIONS,),
         }
 
     @staticmethod
@@ -87,8 +91,12 @@ class CustomRandomForest(AutoSklearnClassificationAlgorithm):
         # m is the total number of features, and max_features is the hyperparameter specified below.
         # The default is 0.5, which yields sqrt(m) features as max_features in the estimator. This
         # corresponds with Geurts' heuristic.
-        max_features = UniformFloatHyperparameter("max_features", 0., 1., default_value=0.5)
-        n_estimators = UniformIntegerHyperparameter("n_estimators", 10, 1000, default_value=100)
+        max_features = UniformFloatHyperparameter(
+            "max_features", 0.0, 1.0, default_value=0.5
+        )
+        n_estimators = UniformIntegerHyperparameter(
+            "n_estimators", 10, 1000, default_value=100
+        )
 
         cs.add_hyperparameters([max_features, n_estimators])
         return cs
@@ -114,13 +122,11 @@ clf = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=30,
     per_run_time_limit=10,
     # Here we exclude auto-sklearn's default random forest component
-    exclude={
-        'classifier': ['random_forest']
-    },
+    exclude={"classifier": ["random_forest"]},
     # Bellow two flags are provided to speed up calculations
     # Not recommended for a real implementation
     initial_configurations_via_metalearning=0,
-    smac_scenario_args={'runcount_limit': 1},
+    smac_scenario_args={"runcount_limit": 1},
 )
 clf.fit(X_train, y_train)
 
@@ -131,5 +137,5 @@ clf.fit(X_train, y_train)
 # Observe that this configuration space only contains our custom random
 # forest, but not auto-sklearn's ``random_forest``
 cs = clf.get_configuration_space(X_train, y_train)
-assert 'random_forest' not in str(cs)
+assert "random_forest" not in str(cs)
 print(cs)

@@ -146,8 +146,9 @@ directory structure.</p>
 <p>Load kr-vs-kp dataset from <a class="reference external" href="https://www.openml.org/d/3">https://www.openml.org/d/3</a></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">data</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">fetch_openml</span><span class="p">(</span><span class="n">data_id</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> \
-     <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -157,33 +158,31 @@ directory structure.</p>
 <a class="reference external" href="https://github.com/automl/auto-sklearn/blob/master/autosklearn/util/logging.yaml">logging config</a>
 We will instead create a custom one as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">logging_config</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s1">&#39;disable_existing_loggers&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="s1">&#39;formatters&#39;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s1">&#39;custom&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">&quot;disable_existing_loggers&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;formatters&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;custom&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="c1"># More format options are available in the official</span>
             <span class="c1"># `documentation &lt;https://docs.python.org/3/howto/logging-cookbook.html&gt;`_</span>
-            <span class="s1">&#39;format&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(name)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span>
+            <span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(name)s</span><span class="s2"> - </span><span class="si">%(levelname)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span>
         <span class="p">}</span>
     <span class="p">},</span>
-
     <span class="c1"># Any INFO level msg will be printed to the console</span>
-    <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s1">&#39;console&#39;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;INFO&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;formatter&#39;</span><span class="p">:</span> <span class="s1">&#39;custom&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;logging.StreamHandler&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;stream&#39;</span><span class="p">:</span> <span class="s1">&#39;ext://sys.stdout&#39;</span><span class="p">,</span>
+    <span class="s2">&quot;handlers&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;console&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;formatter&quot;</span><span class="p">:</span> <span class="s2">&quot;custom&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;logging.StreamHandler&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;stream&quot;</span><span class="p">:</span> <span class="s2">&quot;ext://sys.stdout&quot;</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">},</span>
-
-    <span class="s1">&#39;loggers&#39;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="p">{</span>  <span class="c1"># root logger</span>
-            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;DEBUG&#39;</span><span class="p">,</span>
+    <span class="s2">&quot;loggers&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;&quot;</span><span class="p">:</span> <span class="p">{</span>  <span class="c1"># root logger</span>
+            <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="s1">&#39;Client-EnsembleBuilder&#39;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;DEBUG&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;console&#39;</span><span class="p">],</span>
+        <span class="s2">&quot;Client-EnsembleBuilder&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;handlers&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;console&quot;</span><span class="p">],</span>
         <span class="p">},</span>
     <span class="p">},</span>
 <span class="p">}</span>
@@ -197,11 +196,11 @@ We will instead create a custom one as follows:</p>
     <span class="c1"># Bellow two flags are provided to speed up calculations</span>
     <span class="c1"># Not recommended for a real implementation</span>
     <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-    <span class="n">smac_scenario_args</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;runcount_limit&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+    <span class="n">smac_scenario_args</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;runcount_limit&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
     <span class="c1"># Pass the config file we created</span>
     <span class="n">logging_config</span><span class="o">=</span><span class="n">logging_config</span><span class="p">,</span>
     <span class="c1"># *auto-sklearn* generates temporal files under tmp_folder</span>
-    <span class="n">tmp_folder</span><span class="o">=</span><span class="s1">&#39;./tmp_folder&#39;</span><span class="p">,</span>
+    <span class="n">tmp_folder</span><span class="o">=</span><span class="s2">&quot;./tmp_folder&quot;</span><span class="p">,</span>
     <span class="c1"># By default tmp_folder is deleted. We will preserve it</span>
     <span class="c1"># for debug purposes</span>
     <span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -218,23 +217,23 @@ We will instead create a custom one as follows:</p>
 <span class="c1">#   * tmp_folder/smac3-output</span>
 <span class="c1"># Auto-sklearn always outputs to this log file</span>
 <span class="c1"># tmp_folder/AutoML*.log</span>
-<span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s1">&#39;./tmp_folder&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">):</span>
+<span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./tmp_folder&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:175: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
-  warnings.warn(&quot;Fitting transformer with a pandas series which&quot;
-2022-02-03 14:22:44,191 - Client-EnsembleBuilder - INFO - DummyFuture: ([{&#39;Timestamp&#39;: Timestamp(&#39;2022-02-03 14:22:44.175507&#39;), &#39;ensemble_optimization_score&#39;: 0.9886363636363636, &#39;ensemble_test_score&#39;: 0.9899874843554443}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2022.02.03-14.22.44 for iteration 0.
-2022-02-03 14:22:47,708 - Client-EnsembleBuilder - INFO - DummyFuture: ([{&#39;Timestamp&#39;: Timestamp(&#39;2022-02-03 14:22:47.692712&#39;), &#39;ensemble_optimization_score&#39;: 0.9886363636363636, &#39;ensemble_test_score&#39;: 0.9899874843554443}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2022.02.03-14.22.47 for iteration 1.
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:188: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
+  warnings.warn(
+2022-02-03 16:37:25,440 - Client-EnsembleBuilder - INFO - DummyFuture: ([{&#39;Timestamp&#39;: Timestamp(&#39;2022-02-03 16:37:25.420826&#39;), &#39;ensemble_optimization_score&#39;: 0.47853535353535354, &#39;ensemble_test_score&#39;: 0.47434292866082606}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2022.02.03-16.37.25 for iteration 0.
+2022-02-03 16:37:30,300 - Client-EnsembleBuilder - INFO - DummyFuture: ([{&#39;Timestamp&#39;: Timestamp(&#39;2022-02-03 16:37:30.280285&#39;), &#39;ensemble_optimization_score&#39;: 0.9646464646464646, &#39;ensemble_test_score&#39;: 0.9762202753441802}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2022.02.03-16.37.30 for iteration 1.
 tmp_folder/.auto-sklearn
 tmp_folder/smac3-output
+tmp_folder/AutoML(1):8e4550b6-850f-11ec-87c5-17c8039ce04b.log
 tmp_folder/space.json
-tmp_folder/AutoML(1):be6c931b-84fc-11ec-8791-4d3378ae0e1f.log
 tmp_folder/distributed.log
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  14.545 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  15.763 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-debug-logging-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_debug_logging.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>

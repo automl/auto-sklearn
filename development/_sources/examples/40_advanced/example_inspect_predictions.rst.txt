@@ -71,9 +71,9 @@ accelerometer and gyroscope data collected by a phone. For more information see
     automl = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=120,
         per_run_time_limit=30,
-        tmp_folder='/tmp/autosklearn_inspect_predictions_example_tmp',
+        tmp_folder="/tmp/autosklearn_inspect_predictions_example_tmp",
     )
-    automl.fit(X_train, y_train, dataset_name='Run_or_walk_information')
+    automl.fit(X_train, y_train, dataset_name="Run_or_walk_information")
 
     s = automl.score(X_train, y_train)
     print(f"Train score {s}")
@@ -90,14 +90,14 @@ accelerometer and gyroscope data collected by a phone. For more information see
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:175: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
-      warnings.warn("Fitting transformer with a pandas series which"
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:188: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
+      warnings.warn(
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:76: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
       self.metafeatures = self.metafeatures.append(metafeatures)
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
       self.algorithm_runs[metric].append(runs)
-    Train score 0.996
-    Test score 0.984
+    Train score 0.9951428571428571
+    Test score 0.982
 
 
 
@@ -116,7 +116,7 @@ the more does the model's predictions depend on this feature.
 **Note:** There are some pitfalls in interpreting these numbers, which can be found
 in the `scikit-learn docs <https://scikit-learn.org/stable/modules/permutation_importance.html>`_.
 
-.. GENERATED FROM PYTHON SOURCE LINES 60-75
+.. GENERATED FROM PYTHON SOURCE LINES 60-78
 
 .. code-block:: default
 
@@ -124,16 +124,19 @@ in the `scikit-learn docs <https://scikit-learn.org/stable/modules/permutation_i
     r = permutation_importance(automl, X_test, y_test, n_repeats=10, random_state=0)
     sort_idx = r.importances_mean.argsort()[::-1]
 
-    plt.boxplot(r.importances[sort_idx].T,
-                labels=[dataset.feature_names[i] for i in sort_idx])
+    plt.boxplot(
+        r.importances[sort_idx].T, labels=[dataset.feature_names[i] for i in sort_idx]
+    )
 
     plt.xticks(rotation=90)
     plt.tight_layout()
     plt.show()
 
     for i in sort_idx[::-1]:
-        print(f"{dataset.feature_names[i]:10s}: {r.importances_mean[i]:.3f} +/- "
-              f"{r.importances_std[i]:.3f}")
+        print(
+            f"{dataset.feature_names[i]:10s}: {r.importances_mean[i]:.3f} +/- "
+            f"{r.importances_std[i]:.3f}"
+        )
 
 
 
@@ -150,17 +153,17 @@ in the `scikit-learn docs <https://scikit-learn.org/stable/modules/permutation_i
 
  .. code-block:: none
 
-    gyro_y    : 0.001 +/- 0.001
-    gyro_x    : 0.023 +/- 0.002
-    gyro_z    : 0.035 +/- 0.003
-    acceleration_x: 0.050 +/- 0.006
-    acceleration_z: 0.144 +/- 0.006
-    acceleration_y: 0.273 +/- 0.007
+    gyro_y    : 0.000 +/- 0.001
+    gyro_x    : 0.019 +/- 0.002
+    gyro_z    : 0.036 +/- 0.004
+    acceleration_x: 0.066 +/- 0.008
+    acceleration_z: 0.130 +/- 0.005
+    acceleration_y: 0.267 +/- 0.008
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 76-91
+.. GENERATED FROM PYTHON SOURCE LINES 79-94
 
 Create partial dependence (PD) and individual conditional expectation (ICE) plots - part 2
 ==========================================================================================
@@ -178,17 +181,20 @@ Since ``acceleration_y`` and ``acceleration_z`` turned out to have the largest i
 value according to the permutation dependence, we'll first look at them and generate a plot
 combining ICE (thin lines) and PD (thick line)
 
-.. GENERATED FROM PYTHON SOURCE LINES 91-101
+.. GENERATED FROM PYTHON SOURCE LINES 94-107
 
 .. code-block:: default
 
 
     features = [1, 2]
-    plot_partial_dependence(automl, dataset.data,
-                            features=features,
-                            grid_resolution=5,
-                            kind="both",
-                            feature_names=dataset.feature_names)
+    plot_partial_dependence(
+        automl,
+        dataset.data,
+        features=features,
+        grid_resolution=5,
+        kind="both",
+        feature_names=dataset.feature_names,
+    )
     plt.tight_layout()
     plt.show()
 
@@ -204,7 +210,7 @@ combining ICE (thin lines) and PD (thick line)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 102-107
+.. GENERATED FROM PYTHON SOURCE LINES 108-113
 
 Create partial dependence (PDP) plots for more than one feature - part 3
 ========================================================================
@@ -212,16 +218,19 @@ Create partial dependence (PDP) plots for more than one feature - part 3
 A PD plot can also be generated for two features and thus allow to inspect the interaction between
 these features. Again, we'll look at acceleration_y and acceleration_z.
 
-.. GENERATED FROM PYTHON SOURCE LINES 107-115
+.. GENERATED FROM PYTHON SOURCE LINES 113-124
 
 .. code-block:: default
 
 
     features = [[1, 2]]
-    plot_partial_dependence(automl, dataset.data,
-                            features=features,
-                            grid_resolution=5,
-                            feature_names=dataset.feature_names)
+    plot_partial_dependence(
+        automl,
+        dataset.data,
+        features=features,
+        grid_resolution=5,
+        feature_names=dataset.feature_names,
+    )
     plt.tight_layout()
     plt.show()
 
@@ -239,7 +248,7 @@ these features. Again, we'll look at acceleration_y and acceleration_z.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 3 minutes  46.595 seconds)
+   **Total running time of the script:** ( 3 minutes  49.602 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_inspect_predictions.py:

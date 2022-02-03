@@ -49,7 +49,7 @@ text columns to string and the categorical columns to category.
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 21-68
+.. GENERATED FROM PYTHON SOURCE LINES 21-80
 
 .. code-block:: default
 
@@ -60,20 +60,28 @@ Data Loading
     print(f"{X.info()}\n")
 
     # manually convert these to string columns
-    X = X.astype({'name': 'string', 'ticket': 'string', 'cabin': 'string', 'boat': 'string',
-                  'home.dest': 'string'})
+    X = X.astype(
+        {
+            "name": "string",
+            "ticket": "string",
+            "cabin": "string",
+            "boat": "string",
+            "home.dest": "string",
+        }
+    )
 
     # now *auto-sklearn* handles the string columns with its text feature preprocessing pipeline
 
-    X_train, X_test, y_train, y_test = \
-         sklearn.model_selection.train_test_split(X, y, random_state=1)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+        X, y, random_state=1
+    )
 
     cls = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=30,
         # Bellow two flags are provided to speed up calculations
         # Not recommended for a real implementation
         initial_configurations_via_metalearning=0,
-        smac_scenario_args={'runcount_limit': 1},
+        smac_scenario_args={"runcount_limit": 1},
     )
 
     cls.fit(X_train, y_train, X_test, y_test)
@@ -83,23 +91,27 @@ Data Loading
 
 
     X, y = sklearn.datasets.fetch_openml(data_id=40945, return_X_y=True, as_frame=True)
-    X = X.select_dtypes(exclude=['object'])
+    X = X.select_dtypes(exclude=["object"])
 
-    X_train, X_test, y_train, y_test = \
-         sklearn.model_selection.train_test_split(X, y, random_state=1)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+        X, y, random_state=1
+    )
 
     cls = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=30,
         # Bellow two flags are provided to speed up calculations
         # Not recommended for a real implementation
         initial_configurations_via_metalearning=0,
-        smac_scenario_args={'runcount_limit': 1},
+        smac_scenario_args={"runcount_limit": 1},
     )
 
     cls.fit(X_train, y_train, X_test, y_test)
 
     predictions = cls.predict(X_test)
-    print("Accuracy score without text preprocessing", sklearn.metrics.accuracy_score(y_test, predictions))
+    print(
+        "Accuracy score without text preprocessing",
+        sklearn.metrics.accuracy_score(y_test, predictions),
+    )
 
 
 
@@ -132,11 +144,11 @@ Data Loading
     memory usage: 115.4+ KB
     None
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:175: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
-      warnings.warn("Fitting transformer with a pandas series which"
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:188: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
+      warnings.warn(
     Accuracy score 0.5945121951219512
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:175: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
-      warnings.warn("Fitting transformer with a pandas series which"
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:188: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
+      warnings.warn(
     Accuracy score without text preprocessing 0.7835365853658537
 
 
@@ -145,7 +157,7 @@ Data Loading
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  33.077 seconds)
+   **Total running time of the script:** ( 0 minutes  27.337 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_text_preprocessing.py:

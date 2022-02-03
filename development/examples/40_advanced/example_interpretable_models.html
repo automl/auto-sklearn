@@ -170,7 +170,9 @@ sgd
 </div>
 <div class="section" id="show-available-preprocessors">
 <h2>Show available preprocessors<a class="headerlink" href="#show-available-preprocessors" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">autosklearn.pipeline.components.feature_preprocessing</span> <span class="kn">import</span> <span class="n">FeaturePreprocessorChoice</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">autosklearn.pipeline.components.feature_preprocessing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">FeaturePreprocessorChoice</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">FeaturePreprocessorChoice</span><span class="o">.</span><span class="n">get_components</span><span class="p">():</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
@@ -201,8 +203,9 @@ truncatedSVD
 <div class="section" id="data-loading">
 <h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> \
-    <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -216,24 +219,24 @@ and can change from use case to use case.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
     <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
     <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-    <span class="n">tmp_folder</span><span class="o">=</span><span class="s1">&#39;/tmp/autosklearn_interpretable_models_example_tmp&#39;</span><span class="p">,</span>
+    <span class="n">tmp_folder</span><span class="o">=</span><span class="s2">&quot;/tmp/autosklearn_interpretable_models_example_tmp&quot;</span><span class="p">,</span>
     <span class="n">include</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;classifier&#39;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="s1">&#39;decision_tree&#39;</span><span class="p">,</span> <span class="s1">&#39;lda&#39;</span><span class="p">,</span> <span class="s1">&#39;sgd&#39;</span>
+        <span class="s2">&quot;classifier&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;decision_tree&quot;</span><span class="p">,</span> <span class="s2">&quot;lda&quot;</span><span class="p">,</span> <span class="s2">&quot;sgd&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;feature_preprocessor&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;no_preprocessing&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;polynomial&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;select_percentile_classification&quot;</span><span class="p">,</span>
         <span class="p">],</span>
-        <span class="s1">&#39;feature_preprocessor&#39;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="s1">&#39;no_preprocessing&#39;</span><span class="p">,</span> <span class="s1">&#39;polynomial&#39;</span><span class="p">,</span> <span class="s1">&#39;select_percentile_classification&#39;</span>
-        <span class="p">]</span>
     <span class="p">},</span>
     <span class="n">ensemble_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">dataset_name</span><span class="o">=</span><span class="s1">&#39;breast_cancer&#39;</span><span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;breast_cancer&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:76: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
   self.metafeatures = self.metafeatures.append(metafeatures)
-/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
   self.algorithm_runs[metric].append(runs)
 
 AutoSklearnClassifier(ensemble_size=1,
@@ -252,18 +255,18 @@ AutoSklearnClassifier(ensemble_size=1,
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   30: {   &#39;balancing&#39;: Balancing(random_state=1),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc0329379d0&gt;,
-            &#39;cost&#39;: 0.007092198581560294,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc0342756d0&gt;,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   29: {   &#39;balancing&#39;: Balancing(random_state=1),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7ff085f8f370&gt;,
+            &#39;cost&#39;: 0.014184397163120588,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7ff08b18b4c0&gt;,
             &#39;ensemble_weight&#39;: 1.0,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc0329375e0&gt;,
-            &#39;model_id&#39;: 30,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7ff085f8fd00&gt;,
+            &#39;model_id&#39;: 29,
             &#39;rank&#39;: 1,
-            &#39;sklearn_classifier&#39;: SGDClassifier(alpha=2.990894200652787e-05, eta0=0.001784135741736084,
-              l1_ratio=0.011776069362168242, learning_rate=&#39;invscaling&#39;,
-              max_iter=16, penalty=&#39;elasticnet&#39;, power_t=0.4592501225875914,
-              random_state=1, tol=0.07231667943825462, warm_start=True)}}
+            &#39;sklearn_classifier&#39;: SGDClassifier(alpha=0.0011078166273542282, eta0=0.01,
+              l1_ratio=0.4464888170256162, loss=&#39;log&#39;, max_iter=16,
+              penalty=&#39;elasticnet&#39;, random_state=1, tol=1.41753546805735e-05,
+              warm_start=True)}}
 </pre></div>
 </div>
 </div>
@@ -274,10 +277,10 @@ AutoSklearnClassifier(ensemble_size=1,
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score: 0.9440559440559441
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score: 0.972027972027972
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  58.045 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  54.546 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-interpretable-models-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_interpretable_models.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>

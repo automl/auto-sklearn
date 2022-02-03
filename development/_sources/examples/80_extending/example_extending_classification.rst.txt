@@ -25,23 +25,29 @@ Extending Auto-Sklearn with Classification Component
 The following example demonstrates how to create a new classification
 component for using in auto-sklearn.
 
-.. GENERATED FROM PYTHON SOURCE LINES 9-27
+.. GENERATED FROM PYTHON SOURCE LINES 9-33
 
 .. code-block:: default
 
     from pprint import pprint
 
     from ConfigSpace.configuration_space import ConfigurationSpace
-    from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
-        UniformIntegerHyperparameter, UniformFloatHyperparameter
+    from ConfigSpace.hyperparameters import (
+        CategoricalHyperparameter,
+        UniformIntegerHyperparameter,
+        UniformFloatHyperparameter,
+    )
 
     import sklearn.metrics
     import autosklearn.classification
     import autosklearn.pipeline.components.classification
-    from autosklearn.pipeline.components.base \
-        import AutoSklearnClassificationAlgorithm
-    from autosklearn.pipeline.constants import DENSE, SIGNED_DATA, UNSIGNED_DATA, \
-        PREDICTIONS
+    from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
+    from autosklearn.pipeline.constants import (
+        DENSE,
+        SIGNED_DATA,
+        UNSIGNED_DATA,
+        PREDICTIONS,
+    )
 
     from sklearn.datasets import load_breast_cancer
     from sklearn.model_selection import train_test_split
@@ -54,18 +60,18 @@ component for using in auto-sklearn.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 28-30
+.. GENERATED FROM PYTHON SOURCE LINES 34-36
 
 Create MLP classifier component for auto-sklearn
 ================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 30-123
+.. GENERATED FROM PYTHON SOURCE LINES 36-139
 
 .. code-block:: default
 
 
-    class MLPClassifier(AutoSklearnClassificationAlgorithm):
 
+    class MLPClassifier(AutoSklearnClassificationAlgorithm):
         def __init__(
             self,
             hidden_layer_depth,
@@ -88,15 +94,18 @@ Create MLP classifier component for auto-sklearn
             self.alpha = float(self.alpha)
 
             from sklearn.neural_network import MLPClassifier
+
             hidden_layer_sizes = tuple(
                 self.num_nodes_per_layer for i in range(self.hidden_layer_depth)
             )
 
-            self.estimator = MLPClassifier(hidden_layer_sizes=hidden_layer_sizes,
-                                           activation=self.activation,
-                                           alpha=self.alpha,
-                                           solver=self.solver,
-                                           random_state=self.random_state)
+            self.estimator = MLPClassifier(
+                hidden_layer_sizes=hidden_layer_sizes,
+                activation=self.activation,
+                alpha=self.alpha,
+                solver=self.solver,
+                random_state=self.random_state,
+            )
             self.estimator.fit(X, y)
             return self
 
@@ -113,17 +122,17 @@ Create MLP classifier component for auto-sklearn
         @staticmethod
         def get_properties(dataset_properties=None):
             return {
-                'shortname': 'MLP Classifier',
-                'name': 'MLP CLassifier',
-                'handles_regression': False,
-                'handles_classification': True,
-                'handles_multiclass': True,
-                'handles_multilabel': False,
-                'handles_multioutput': False,
-                'is_deterministic': False,
+                "shortname": "MLP Classifier",
+                "name": "MLP CLassifier",
+                "handles_regression": False,
+                "handles_classification": True,
+                "handles_multiclass": True,
+                "handles_multilabel": False,
+                "handles_multioutput": False,
+                "is_deterministic": False,
                 # Both input and output must be tuple(iterable)
-                'input': [DENSE, SIGNED_DATA, UNSIGNED_DATA],
-                'output': [PREDICTIONS]
+                "input": [DENSE, SIGNED_DATA, UNSIGNED_DATA],
+                "output": [PREDICTIONS],
             }
 
         @staticmethod
@@ -136,18 +145,25 @@ Create MLP classifier component for auto-sklearn
                 name="num_nodes_per_layer", lower=16, upper=216, default_value=32
             )
             activation = CategoricalHyperparameter(
-                name="activation", choices=['identity', 'logistic', 'tanh', 'relu'],
-                default_value='relu'
+                name="activation",
+                choices=["identity", "logistic", "tanh", "relu"],
+                default_value="relu",
             )
             alpha = UniformFloatHyperparameter(
                 name="alpha", lower=0.0001, upper=1.0, default_value=0.0001
             )
             solver = CategoricalHyperparameter(
-                name="solver", choices=['lbfgs', 'sgd', 'adam'], default_value='adam'
+                name="solver", choices=["lbfgs", "sgd", "adam"], default_value="adam"
             )
-            cs.add_hyperparameters([
-                hidden_layer_depth, num_nodes_per_layer, activation, alpha, solver,
-            ])
+            cs.add_hyperparameters(
+                [
+                    hidden_layer_depth,
+                    num_nodes_per_layer,
+                    activation,
+                    alpha,
+                    solver,
+                ]
+            )
             return cs
 
 
@@ -178,12 +194,12 @@ Create MLP classifier component for auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 124-126
+.. GENERATED FROM PYTHON SOURCE LINES 140-142
 
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 126-130
+.. GENERATED FROM PYTHON SOURCE LINES 142-146
 
 .. code-block:: default
 
@@ -198,12 +214,12 @@ Data Loading
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 131-133
+.. GENERATED FROM PYTHON SOURCE LINES 147-149
 
 Fit MLP classifier to the data
 ==============================
 
-.. GENERATED FROM PYTHON SOURCE LINES 133-147
+.. GENERATED FROM PYTHON SOURCE LINES 149-161
 
 .. code-block:: default
 
@@ -211,13 +227,11 @@ Fit MLP classifier to the data
     clf = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=30,
         per_run_time_limit=10,
-        include={
-            'classifier': ['MLPClassifier']
-        },
+        include={"classifier": ["MLPClassifier"]},
         # Bellow two flags are provided to speed up calculations
         # Not recommended for a real implementation
         initial_configurations_via_metalearning=0,
-        smac_scenario_args={'runcount_limit': 5},
+        smac_scenario_args={"runcount_limit": 5},
     )
     clf.fit(X_train, y_train)
 
@@ -240,12 +254,12 @@ Fit MLP classifier to the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 148-150
+.. GENERATED FROM PYTHON SOURCE LINES 162-164
 
 Print test accuracy and statistics
 ==================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 150-154
+.. GENERATED FROM PYTHON SOURCE LINES 164-168
 
 .. code-block:: default
 
@@ -263,13 +277,13 @@ Print test accuracy and statistics
 
  .. code-block:: none
 
-    accuracy:  0.965034965034965
+    accuracy:  0.993006993006993
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc02b592fd0>,
-               'cost': 0.014184397163120588,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc03273af10>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7ff085e46490>,
+               'cost': 0.028368794326241176,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7ff086380070>,
                'ensemble_weight': 1.0,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc02b5926a0>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7ff085e46d00>,
                'model_id': 2,
                'rank': 1,
                'sklearn_classifier': MLPClassifier(hidden_layer_sizes=(32,), random_state=1)}}
@@ -280,7 +294,7 @@ Print test accuracy and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  13.178 seconds)
+   **Total running time of the script:** ( 0 minutes  16.700 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_classification.py:

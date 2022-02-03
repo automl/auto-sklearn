@@ -184,7 +184,7 @@ example).</p>
 <span class="kn">from</span> <span class="nn">autosklearn.classification</span> <span class="kn">import</span> <span class="n">AutoSklearnClassifier</span>
 <span class="kn">from</span> <span class="nn">autosklearn.constants</span> <span class="kn">import</span> <span class="n">MULTICLASS_CLASSIFICATION</span>
 
-<span class="n">tmp_folder</span> <span class="o">=</span> <span class="s1">&#39;/tmp/autosklearn_parallel_3_example_tmp&#39;</span>
+<span class="n">tmp_folder</span> <span class="o">=</span> <span class="s2">&quot;/tmp/autosklearn_parallel_3_example_tmp&quot;</span>
 
 <span class="n">worker_processes</span> <span class="o">=</span> <span class="p">[]</span>
 </pre></div>
@@ -197,7 +197,7 @@ address and port. Instead, the scheduler takes a free port and stores
 relevant information in a file for which we provided the name and
 location. This filename is also given to the worker so they can find all
 relevant information to connect to the scheduler.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scheduler_file_name</span> <span class="o">=</span> <span class="s1">&#39;scheduler-file.json&#39;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scheduler_file_name</span> <span class="o">=</span> <span class="s2">&quot;scheduler-file.json&quot;</span>
 </pre></div>
 </div>
 </div>
@@ -210,11 +210,14 @@ relevant information to connect to the scheduler.</p>
 <p>We will now execute this bash command from within Python to have a
 self-contained example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cli_start_scheduler</span><span class="p">(</span><span class="n">scheduler_file_name</span><span class="p">):</span>
-    <span class="n">command</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;dask-scheduler --scheduler-file </span><span class="si">{</span><span class="n">scheduler_file_name</span><span class="si">}</span><span class="s2"> --idle-timeout 10&quot;</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;dask-scheduler --scheduler-file </span><span class="si">{</span><span class="n">scheduler_file_name</span><span class="si">}</span><span class="s2"> --idle-timeout 10&quot;</span>
+    <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+        <span class="n">command</span><span class="p">,</span>
+        <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+        <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span>
+        <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
-                          <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">while</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
@@ -222,7 +225,7 @@ self-contained example:</p>
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">process_python_worker</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span>
         <span class="n">target</span><span class="o">=</span><span class="n">cli_start_scheduler</span><span class="p">,</span>
-        <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">scheduler_file_name</span><span class="p">,</span> <span class="p">),</span>
+        <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">scheduler_file_name</span><span class="p">,),</span>
     <span class="p">)</span>
     <span class="n">process_python_worker</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">worker_processes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">process_python_worker</span><span class="p">)</span>
@@ -253,16 +256,18 @@ Auto-sklearn does the memory management itself.</p>
         <span class="s2">&quot;dask-worker --nthreads 1 --lifetime 35 --memory-limit 0 &quot;</span>
         <span class="sa">f</span><span class="s2">&quot;--scheduler-file </span><span class="si">{</span><span class="n">scheduler_file_name</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="p">)</span>
-    <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
-                          <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+        <span class="n">command</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
     <span class="k">while</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
         <span class="n">process_cli_worker</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span>
             <span class="n">target</span><span class="o">=</span><span class="n">cli_start_worker</span><span class="p">,</span>
-            <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">scheduler_file_name</span><span class="p">,</span> <span class="p">),</span>
+            <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">scheduler_file_name</span><span class="p">,),</span>
         <span class="p">)</span>
         <span class="n">process_cli_worker</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
         <span class="n">worker_processes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">process_cli_worker</span><span class="p">)</span>
@@ -283,8 +288,9 @@ the information in the file created by the scheduler.</p>
 <h3>Start Auto-sklearn<a class="headerlink" href="#start-auto-sklearn" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> \
-        <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">)</span>
 
     <span class="n">automl</span> <span class="o">=</span> <span class="n">AutoSklearnClassifier</span><span class="p">(</span>
         <span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -303,7 +309,7 @@ the information in the file created by the scheduler.</p>
     <span class="n">automl</span><span class="o">.</span><span class="n">fit_ensemble</span><span class="p">(</span>
         <span class="n">y_train</span><span class="p">,</span>
         <span class="n">task</span><span class="o">=</span><span class="n">MULTICLASS_CLASSIFICATION</span><span class="p">,</span>
-        <span class="n">dataset_name</span><span class="o">=</span><span class="s1">&#39;digits&#39;</span><span class="p">,</span>
+        <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;digits&quot;</span><span class="p">,</span>
         <span class="n">ensemble_size</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
         <span class="n">ensemble_nbest</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
     <span class="p">)</span>
@@ -314,21 +320,21 @@ the information in the file created by the scheduler.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:76: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
   self.metafeatures = self.metafeatures.append(metafeatures)
-/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
   self.algorithm_runs[metric].append(runs)
 auto-sklearn results:
-  Dataset name: 599a1eec-84ff-11ec-8791-4d3378ae0e1f
+  Dataset name: d7c480de-8511-11ec-87c5-17c8039ce04b
   Metric: accuracy
   Best validation score: 0.992908
-  Number of target algorithm runs: 12
-  Number of successful target algorithm runs: 11
+  Number of target algorithm runs: 10
+  Number of successful target algorithm runs: 8
   Number of crashed target algorithm runs: 0
-  Number of target algorithms that exceeded the time limit: 1
+  Number of target algorithms that exceeded the time limit: 2
   Number of target algorithms that exceeded the memory limit: 0
 
-Accuracy score 0.965034965034965
+Accuracy score 0.958041958041958
 </pre></div>
 </div>
 </div>
@@ -338,13 +344,13 @@ Accuracy score 0.965034965034965
 <p>This is only necessary if the workers are started from within this python
 script. In a real application one would start them directly from the command
 line.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">process_python_worker</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">process</span> <span class="ow">in</span> <span class="n">worker_processes</span><span class="p">:</span>
         <span class="n">process</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  39.627 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  39.702 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-60-search-example-parallel-manual-spawning-cli-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/60_search/example_parallel_manual_spawning_cli.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo2.svg" width="150px" /></a>

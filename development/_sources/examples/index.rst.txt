@@ -200,27 +200,6 @@ procedure.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="For processing text features you need a pandas dataframe and set the desired text columns to st...">
-
-.. only:: html
-
- .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_text_preprocessing_thumb.png
-     :alt: Text Preprocessing
-
-     :ref:`sphx_glr_examples_40_advanced_example_text_preprocessing.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/40_advanced/example_text_preprocessing
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to fit a simple classification model with *auto-sklearn* and us...">
 
 .. only:: html
@@ -239,6 +218,27 @@ procedure.
    :hidden:
 
    /examples/40_advanced/example_inspect_predictions
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="For processing text features you need a pandas dataframe and set the desired text columns to st...">
+
+.. only:: html
+
+ .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_text_preprocessing_thumb.png
+     :alt: Text Preprocessing
+
+     :ref:`sphx_glr_examples_40_advanced_example_text_preprocessing.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/40_advanced/example_text_preprocessing
 
 .. raw:: html
 
@@ -263,27 +263,6 @@ procedure.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to provide a custom logging configuration to *auto-sklearn*. We will be ...">
-
-.. only:: html
-
- .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_debug_logging_thumb.png
-     :alt: Logging and debugging
-
-     :ref:`sphx_glr_examples_40_advanced_example_debug_logging.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/40_advanced/example_debug_logging
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="*Auto-sklearn* searches for the best combination of machine learning algorithms and their hyper...">
 
 .. only:: html
@@ -302,6 +281,27 @@ procedure.
    :hidden:
 
    /examples/40_advanced/example_single_configuration
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to provide a custom logging configuration to *auto-sklearn*. We will be ...">
+
+.. only:: html
+
+ .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_debug_logging_thumb.png
+     :alt: Logging and debugging
+
+     :ref:`sphx_glr_examples_40_advanced_example_debug_logging.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/40_advanced/example_debug_logging
 
 .. raw:: html
 

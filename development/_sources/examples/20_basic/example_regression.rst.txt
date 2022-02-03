@@ -49,15 +49,16 @@ The following example shows how to fit a simple regression model with
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 21-27
+.. GENERATED FROM PYTHON SOURCE LINES 21-28
 
 .. code-block:: default
 
 
     X, y = sklearn.datasets.load_diabetes(return_X_y=True)
 
-    X_train, X_test, y_train, y_test = \
-        sklearn.model_selection.train_test_split(X, y, random_state=1)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+        X, y, random_state=1
+    )
 
 
 
@@ -66,12 +67,12 @@ Data Loading
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 28-30
+.. GENERATED FROM PYTHON SOURCE LINES 29-31
 
 Build and fit a regressor
 =========================
 
-.. GENERATED FROM PYTHON SOURCE LINES 30-38
+.. GENERATED FROM PYTHON SOURCE LINES 31-39
 
 .. code-block:: default
 
@@ -79,9 +80,9 @@ Build and fit a regressor
     automl = autosklearn.regression.AutoSklearnRegressor(
         time_left_for_this_task=120,
         per_run_time_limit=30,
-        tmp_folder='/tmp/autosklearn_regression_example_tmp',
+        tmp_folder="/tmp/autosklearn_regression_example_tmp",
     )
-    automl.fit(X_train, y_train, dataset_name='diabetes')
+    automl.fit(X_train, y_train, dataset_name="diabetes")
 
 
 
@@ -93,9 +94,9 @@ Build and fit a regressor
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:76: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
       self.metafeatures = self.metafeatures.append(metafeatures)
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
       self.algorithm_runs[metric].append(runs)
 
     AutoSklearnRegressor(per_run_time_limit=30, time_left_for_this_task=120,
@@ -103,12 +104,12 @@ Build and fit a regressor
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 39-41
+.. GENERATED FROM PYTHON SOURCE LINES 40-42
 
 View the models found by auto-sklearn
 =====================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 41-44
+.. GENERATED FROM PYTHON SOURCE LINES 42-45
 
 .. code-block:: default
 
@@ -125,23 +126,23 @@ View the models found by auto-sklearn
 
  .. code-block:: none
 
-              rank  ensemble_weight               type      cost  duration
-    model_id                                                              
-    25           1             0.46                sgd  0.436679  0.710681
-    6            2             0.32     ard_regression  0.455042  0.731147
-    27           3             0.14     ard_regression  0.462249  0.706374
-    11           4             0.02      random_forest  0.507400  9.179214
-    7            5             0.06  gradient_boosting  0.518673  1.210682
+              rank  ensemble_weight               type      cost   duration
+    model_id                                                               
+    25           1             0.46                sgd  0.436679   0.931150
+    6            2             0.32     ard_regression  0.455042   0.941593
+    27           3             0.14     ard_regression  0.462249   0.933331
+    11           4             0.02      random_forest  0.507400  10.686857
+    7            5             0.06  gradient_boosting  0.518673   1.659646
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-47
+.. GENERATED FROM PYTHON SOURCE LINES 46-48
 
 Print the final ensemble constructed by auto-sklearn
 ====================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 47-50
+.. GENERATED FROM PYTHON SOURCE LINES 48-51
 
 .. code-block:: default
 
@@ -159,58 +160,58 @@ Print the final ensemble constructed by auto-sklearn
  .. code-block:: none
 
     {   6: {   'cost': 0.4550418898836528,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc03277b280>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7ff08667bfa0>,
                'ensemble_weight': 0.32,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc032937a90>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7ff0863433a0>,
                'model_id': 6,
                'rank': 2,
-               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fc032937a30>,
+               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7ff0863436d0>,
                'sklearn_regressor': ARDRegression(alpha_1=0.0003701926442639788, alpha_2=2.2118001735899097e-07,
                   copy_X=False, lambda_1=1.2037591637980971e-06,
                   lambda_2=4.358378124977852e-09,
                   threshold_lambda=1136.5286041327277, tol=0.021944240404849075)},
         7: {   'cost': 0.5186726734789994,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc034181280>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7ff08ac670a0>,
                'ensemble_weight': 0.06,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc0342639d0>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7ff0862ed430>,
                'model_id': 7,
                'rank': 5,
-               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fc0342639a0>,
+               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7ff0862ed550>,
                'sklearn_regressor': HistGradientBoostingRegressor(l2_regularization=1.8428972335335263e-10,
                                   learning_rate=0.012607824914758717, max_iter=512,
                                   max_leaf_nodes=10, min_samples_leaf=8,
                                   n_iter_no_change=0, random_state=1,
                                   validation_fraction=None, warm_start=True)},
         11: {   'cost': 0.5073997164657239,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc0340ab220>,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7ff08ad79c10>,
                 'ensemble_weight': 0.02,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc02eaeb730>,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7ff08ad8b340>,
                 'model_id': 11,
                 'rank': 4,
-                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fc02eaebbb0>,
+                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7ff08ad8b670>,
                 'sklearn_regressor': RandomForestRegressor(bootstrap=False, criterion='mae',
                           max_features=0.6277363920171745, min_samples_leaf=6,
                           min_samples_split=15, n_estimators=512, n_jobs=1,
                           random_state=1, warm_start=True)},
         25: {   'cost': 0.43667876507897496,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc032729a60>,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7ff0896c7490>,
                 'ensemble_weight': 0.46,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc033fa0ac0>,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7ff08b218880>,
                 'model_id': 25,
                 'rank': 1,
-                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fc033fa0d00>,
+                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7ff08b218fa0>,
                 'sklearn_regressor': SGDRegressor(alpha=0.0006517033225329654, epsilon=0.012150149892783745,
                  eta0=0.016444224834275295, l1_ratio=1.7462342366289323e-09,
                  loss='epsilon_insensitive', max_iter=16, penalty='elasticnet',
                  power_t=0.21521743568582094, random_state=1,
                  tol=0.002431731981071206, warm_start=True)},
         27: {   'cost': 0.4622486119001967,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc03408afa0>,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7ff0895a1d00>,
                 'ensemble_weight': 0.14,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc0342a6130>,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7ff08966aaf0>,
                 'model_id': 27,
                 'rank': 3,
-                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fc0342a6c70>,
+                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7ff08966a820>,
                 'sklearn_regressor': ARDRegression(alpha_1=2.7664515192592053e-05, alpha_2=9.504988116581138e-07,
                   copy_X=False, lambda_1=6.50650698230178e-09,
                   lambda_2=4.238533890074848e-07,
@@ -219,7 +220,7 @@ Print the final ensemble constructed by auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 51-57
+.. GENERATED FROM PYTHON SOURCE LINES 52-58
 
 Get the Score of the final ensemble
 ===================================
@@ -228,7 +229,7 @@ is the `R2 score <https://scikit-learn.org/stable/modules/model_evaluation.html#
 The values range between -inf and 1 with 1 being the best possible value. A dummy estimator
 predicting the data mean has an R2 score of 0.
 
-.. GENERATED FROM PYTHON SOURCE LINES 57-63
+.. GENERATED FROM PYTHON SOURCE LINES 58-64
 
 .. code-block:: default
 
@@ -254,7 +255,7 @@ predicting the data mean has an R2 score of 0.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 64-71
+.. GENERATED FROM PYTHON SOURCE LINES 65-72
 
 Plot the predictions
 ====================
@@ -264,17 +265,17 @@ predictions. Points below the diagonal were overestimated by the model (predicte
 than the true value), points above the diagonal were underestimated (predicted value is lower than
 the true value).
 
-.. GENERATED FROM PYTHON SOURCE LINES 71-82
+.. GENERATED FROM PYTHON SOURCE LINES 72-83
 
 .. code-block:: default
 
 
-    plt.scatter(train_predictions, y_train, label="Train samples", c='#d95f02')
-    plt.scatter(test_predictions, y_test, label="Test samples", c='#7570b3')
+    plt.scatter(train_predictions, y_train, label="Train samples", c="#d95f02")
+    plt.scatter(test_predictions, y_test, label="Test samples", c="#7570b3")
     plt.xlabel("Predicted value")
     plt.ylabel("True value")
     plt.legend()
-    plt.plot([30, 400], [30, 400], c='k', zorder=0)
+    plt.plot([30, 400], [30, 400], c="k", zorder=0)
     plt.xlim([30, 400])
     plt.ylim([30, 400])
     plt.tight_layout()
@@ -294,7 +295,7 @@ the true value).
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  2.113 seconds)
+   **Total running time of the script:** ( 2 minutes  5.095 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_regression.py:

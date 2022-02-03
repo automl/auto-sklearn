@@ -65,8 +65,8 @@ Data Loading
     # This is to comply with Scikit-learn requirement:
     # "Positive classes are indicated with 1 and negative classes with 0 or -1."
     # More information on: https://scikit-learn.org/stable/modules/multiclass.html
-    y[y == 'TRUE'] = 1
-    y[y == 'FALSE'] = 0
+    y[y == "TRUE"] = 1
+    y[y == "FALSE"] = 0
     y = y.astype(int)
 
     # Using type of target is a good way to make sure your data
@@ -108,9 +108,9 @@ Building the classifier
         # Bellow two flags are provided to speed up calculations
         # Not recommended for a real implementation
         initial_configurations_via_metalearning=0,
-        smac_scenario_args={'runcount_limit': 1},
+        smac_scenario_args={"runcount_limit": 1},
     )
-    automl.fit(X_train, y_train, dataset_name='reuters')
+    automl.fit(X_train, y_train, dataset_name="reuters")
 
 
 
@@ -155,7 +155,7 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight           type      cost  duration
     model_id                                                          
-    2            1              1.0  random_forest  0.447294  3.286872
+    2            1              1.0  random_forest  0.447294  4.312203
 
 
 
@@ -183,11 +183,11 @@ Print the final ensemble constructed by auto-sklearn
  .. code-block:: none
 
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc034275910>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7ff085f7f2e0>,
                'cost': 0.4472941828699525,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc02ef7ab80>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7ff08609fe20>,
                'ensemble_weight': 1.0,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc0342cd5e0>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7ff085f7f7c0>,
                'model_id': 2,
                'rank': 1,
                'sklearn_classifier': RandomForestClassifier(max_features=15, n_estimators=512, n_jobs=1,
@@ -264,7 +264,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  24.387 seconds)
+   **Total running time of the script:** ( 0 minutes  19.939 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multilabel_classification.py:

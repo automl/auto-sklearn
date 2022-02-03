@@ -52,14 +52,13 @@ The following example demonstrates how to turn off data preprocessing step in au
 Create NoPreprocessing component for auto-sklearn
 =================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 23-60
+.. GENERATED FROM PYTHON SOURCE LINES 23-59
 
 .. code-block:: default
 
     class NoPreprocessing(AutoSklearnPreprocessingAlgorithm):
-
         def __init__(self, **kwargs):
-            """ This preprocessors does not change the data """
+            """This preprocessors does not change the data"""
             # Some internal checks makes sure parameters are set
             for key, val in kwargs.items():
                 setattr(self, key, val)
@@ -73,16 +72,16 @@ Create NoPreprocessing component for auto-sklearn
         @staticmethod
         def get_properties(dataset_properties=None):
             return {
-                'shortname': 'NoPreprocessing',
-                'name': 'NoPreprocessing',
-                'handles_regression': True,
-                'handles_classification': True,
-                'handles_multiclass': True,
-                'handles_multilabel': True,
-                'handles_multioutput': True,
-                'is_deterministic': True,
-                'input': (SPARSE, DENSE, UNSIGNED_DATA),
-                'output': (INPUT,)
+                "shortname": "NoPreprocessing",
+                "name": "NoPreprocessing",
+                "handles_regression": True,
+                "handles_classification": True,
+                "handles_multiclass": True,
+                "handles_multilabel": True,
+                "handles_multioutput": True,
+                "is_deterministic": True,
+                "input": (SPARSE, DENSE, UNSIGNED_DATA),
+                "output": (INPUT,),
             }
 
         @staticmethod
@@ -100,12 +99,12 @@ Create NoPreprocessing component for auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 61-63
+.. GENERATED FROM PYTHON SOURCE LINES 60-62
 
 Create dataset
 ==============
 
-.. GENERATED FROM PYTHON SOURCE LINES 63-67
+.. GENERATED FROM PYTHON SOURCE LINES 62-66
 
 .. code-block:: default
 
@@ -120,25 +119,23 @@ Create dataset
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 68-70
+.. GENERATED FROM PYTHON SOURCE LINES 67-69
 
 Fit the model without performing data preprocessing
 ===================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 70-87
+.. GENERATED FROM PYTHON SOURCE LINES 69-84
 
 .. code-block:: default
 
 
     clf = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=120,
-        include={
-            'data_preprocessor': ['NoPreprocessing']
-        },
+        include={"data_preprocessor": ["NoPreprocessing"]},
         # Bellow two flags are provided to speed up calculations
         # Not recommended for a real implementation
         initial_configurations_via_metalearning=0,
-        smac_scenario_args={'runcount_limit': 5},
+        smac_scenario_args={"runcount_limit": 5},
     )
     clf.fit(X_train, y_train)
 
@@ -157,9 +154,9 @@ Fit the model without performing data preprocessing
  .. code-block:: none
 
     auto-sklearn results:
-      Dataset name: 2d641c58-8500-11ec-8791-4d3378ae0e1f
+      Dataset name: a118f613-8512-11ec-87c5-17c8039ce04b
       Metric: accuracy
-      Best validation score: 0.992908
+      Best validation score: 0.950355
       Number of target algorithm runs: 5
       Number of successful target algorithm runs: 4
       Number of crashed target algorithm runs: 1
@@ -170,12 +167,12 @@ Fit the model without performing data preprocessing
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 88-90
+.. GENERATED FROM PYTHON SOURCE LINES 85-87
 
 Print prediction score and statistics
 =====================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 90-94
+.. GENERATED FROM PYTHON SOURCE LINES 87-91
 
 .. code-block:: default
 
@@ -193,17 +190,49 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    accuracy:  0.9230769230769231
+    accuracy:  0.972027972027972
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc02ee5a610>,
-               'cost': 0.007092198581560294,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc02fe43ee0>,
-               'ensemble_weight': 1.0,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc030d6ed60>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7ff086a92580>,
+               'cost': 0.049645390070921946,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7ff08205e760>,
+               'ensemble_weight': 0.38,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7ff0877b15b0>,
                'model_id': 2,
                'rank': 1,
                'sklearn_classifier': RandomForestClassifier(max_features=5, n_estimators=512, n_jobs=1,
-                           random_state=1, warm_start=True)}}
+                           random_state=1, warm_start=True)},
+        3: {   'balancing': Balancing(random_state=1),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7ff083a1e940>,
+               'cost': 0.17021276595744683,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7ff086631f70>,
+               'ensemble_weight': 0.02,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7ff086faf2b0>,
+               'model_id': 3,
+               'rank': 3,
+               'sklearn_classifier': AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=9),
+                       learning_rate=1.077525751047041, n_estimators=208,
+                       random_state=1)},
+        4: {   'balancing': Balancing(random_state=1, strategy='weighting'),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7ff0828fd7f0>,
+               'cost': 0.3829787234042553,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7ff083607a90>,
+               'ensemble_weight': 0.46,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7ff0895af9a0>,
+               'model_id': 4,
+               'rank': 4,
+               'sklearn_classifier': PassiveAggressiveClassifier(C=7.328568999403367e-05, max_iter=16,
+                                random_state=1, tol=0.02258105767523384,
+                                warm_start=True)},
+        6: {   'balancing': Balancing(random_state=1),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7ff08ac56fd0>,
+               'cost': 0.12765957446808507,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7ff086a92a30>,
+               'ensemble_weight': 0.14,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7ff08aea1c10>,
+               'model_id': 6,
+               'rank': 2,
+               'sklearn_classifier': LinearDiscriminantAnalysis(shrinkage='auto', solver='lsqr',
+                               tol=0.00010495766342828794)}}
 
 
 
@@ -211,7 +240,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  15.960 seconds)
+   **Total running time of the script:** ( 0 minutes  19.891 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_data_preprocessor.py:

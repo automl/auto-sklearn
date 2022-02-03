@@ -77,7 +77,7 @@ list or numpy arrays as there is no per-column dtype (further details in the exa
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 49-83
+.. GENERATED FROM PYTHON SOURCE LINES 49-80
 
 .. code-block:: default
 
@@ -93,22 +93,19 @@ Data Loading
     # Targets for classification are also automatically encoded
     # If using fetch_openml, data is already properly encoded, below
     # is an example for user reference
-    X = pd.DataFrame(
-        data=X,
-        columns=['A' + str(i) for i in range(1, 15)]
-    )
-    desired_boolean_columns = ['A1']
-    desired_categorical_columns = ['A4', 'A5', 'A6', 'A8', 'A9', 'A11', 'A12']
-    desired_numerical_columns = ['A2', 'A3', 'A7', 'A10', 'A13', 'A14']
+    X = pd.DataFrame(data=X, columns=["A" + str(i) for i in range(1, 15)])
+    desired_boolean_columns = ["A1"]
+    desired_categorical_columns = ["A4", "A5", "A6", "A8", "A9", "A11", "A12"]
+    desired_numerical_columns = ["A2", "A3", "A7", "A10", "A13", "A14"]
     for column in X.columns:
         if column in desired_boolean_columns:
-            X[column] = X[column].astype('bool')
+            X[column] = X[column].astype("bool")
         elif column in desired_categorical_columns:
-            X[column] = X[column].astype('category')
+            X[column] = X[column].astype("category")
         else:
             X[column] = pd.to_numeric(X[column])
 
-    y = pd.DataFrame(y, dtype='category')
+    y = pd.DataFrame(y, dtype="category")
 
     X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
         X, y, test_size=0.5, random_state=3
@@ -144,12 +141,12 @@ Data Loading
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 84-86
+.. GENERATED FROM PYTHON SOURCE LINES 81-83
 
 Build and fit a classifier
 ==========================
 
-.. GENERATED FROM PYTHON SOURCE LINES 86-93
+.. GENERATED FROM PYTHON SOURCE LINES 83-90
 
 .. code-block:: default
 
@@ -170,21 +167,21 @@ Build and fit a classifier
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:76: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
       self.metafeatures = self.metafeatures.append(metafeatures)
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
       self.algorithm_runs[metric].append(runs)
 
     AutoSklearnClassifier(per_run_time_limit=30, time_left_for_this_task=120)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 94-96
+.. GENERATED FROM PYTHON SOURCE LINES 91-93
 
 Get the Score of the final ensemble
 ===================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 96-100
+.. GENERATED FROM PYTHON SOURCE LINES 93-97
 
 .. code-block:: default
 
@@ -202,29 +199,29 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score 0.8434782608695652
+    Accuracy score 0.8521739130434782
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 101-105
+.. GENERATED FROM PYTHON SOURCE LINES 98-102
 
 Plot the ensemble performance
 ===================================
-The *performance_over_time_* attribute returns a pandas dataframe, which can 
+The *performance_over_time_* attribute returns a pandas dataframe, which can
 be directly used for plotting
 
-.. GENERATED FROM PYTHON SOURCE LINES 105-115
+.. GENERATED FROM PYTHON SOURCE LINES 102-112
 
 .. code-block:: default
 
 
     poT = cls.performance_over_time_
     poT.plot(
-        x='Timestamp',
-        kind='line',
+        x="Timestamp",
+        kind="line",
         legend=True,
-        title='Auto-sklearn accuracy over time',
+        title="Auto-sklearn accuracy over time",
         grid=True,
     )
     plt.show()
@@ -243,7 +240,7 @@ be directly used for plotting
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  57.638 seconds)
+   **Total running time of the script:** ( 1 minutes  58.419 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_pandas_train_test.py:

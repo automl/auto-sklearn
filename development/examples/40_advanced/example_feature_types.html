@@ -125,9 +125,10 @@ to download the full example code or to run this example in your browser via Bin
 </div>
 <div class="sphx-glr-example-title section" id="feature-types">
 <span id="sphx-glr-examples-40-advanced-example-feature-types-py"></span><h1>Feature Types<a class="headerlink" href="#feature-types" title="Permalink to this headline">¶</a></h1>
-<p>In <em>auto-sklearn</em> it is possible to specify the feature types of a dataset when calling the method
-<a class="reference internal" href="../../api.html#autosklearn.classification.AutoSklearnClassifier.fit" title="autosklearn.classification.AutoSklearnClassifier.fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code></a> by specifying the argument
-<code class="docutils literal notranslate"><span class="pre">feat_type</span></code>. The following example demonstrates a way it can be done.</p>
+<p>In <em>auto-sklearn</em> it is possible to specify the feature types of a dataset when calling
+the method <a class="reference internal" href="../../api.html#autosklearn.classification.AutoSklearnClassifier.fit" title="autosklearn.classification.AutoSklearnClassifier.fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fit()</span></code></a> by
+specifying the argument <code class="docutils literal notranslate"><span class="pre">feat_type</span></code>.
+The following example demonstrates a way it can be done.</p>
 <p>Additionally, you can provide a properly formatted pandas DataFrame, and the feature
 types will be automatically inferred, as demonstrated in
 <a class="reference internal" href="example_pandas_train_test.html#sphx-glr-examples-40-advanced-example-pandas-train-test-py"><span class="std std-ref">Performance-over-time plot</span></a>.</p>
@@ -144,11 +145,12 @@ types will be automatically inferred, as demonstrated in
 <h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
 <p>Load Australian dataset from <a class="reference external" href="https://www.openml.org/d/40981">https://www.openml.org/d/40981</a></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bunch</span> <span class="o">=</span> <span class="n">data</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">fetch_openml</span><span class="p">(</span><span class="n">data_id</span><span class="o">=</span><span class="mi">40981</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">bunch</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
-<span class="n">X</span> <span class="o">=</span> <span class="n">bunch</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">bunch</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">bunch</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
 
-<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> \
-     <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
 
 <span class="c1"># Auto-sklearn can automatically recognize categorical/numerical data from a pandas</span>
 <span class="c1"># DataFrame. This example highlights how the user can provide the feature types,</span>
@@ -156,15 +158,14 @@ types will be automatically inferred, as demonstrated in
 <span class="c1"># feat_type is a list that tags each column from a DataFrame/ numpy array / list</span>
 <span class="c1"># with the case-insensitive string categorical or numerical, accordingly.</span>
 <span class="n">feat_type</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;Categorical&#39;</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;category&#39;</span> <span class="k">else</span> <span class="s1">&#39;Numerical&#39;</span>
-    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">bunch</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dtypes</span>
+    <span class="s2">&quot;Categorical&quot;</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;category&quot;</span> <span class="k">else</span> <span class="s2">&quot;Numerical&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">bunch</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dtypes</span>
 <span class="p">]</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/examples/40_advanced/example_feature_types.py:30: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/examples/40_advanced/example_feature_types.py:31: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
 Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
-  X = bunch[&#39;data&#39;].to_numpy(np.float)
+  X = bunch[&quot;data&quot;].to_numpy(np.float)
 </pre></div>
 </div>
 </div>
@@ -175,7 +176,7 @@ Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdo
     <span class="c1"># Bellow two flags are provided to speed up calculations</span>
     <span class="c1"># Not recommended for a real implementation</span>
     <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-    <span class="n">smac_scenario_args</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;runcount_limit&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+    <span class="n">smac_scenario_args</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;runcount_limit&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
 <span class="p">)</span>
 <span class="bp">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">feat_type</span><span class="o">=</span><span class="n">feat_type</span><span class="p">)</span>
 </pre></div>
@@ -198,7 +199,7 @@ Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdo
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score 0.8786127167630058
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  16.974 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  12.851 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-feature-types-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_feature_types.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>

@@ -26,21 +26,25 @@ The following example demonstrates how to replace an existing
 component with a new component, implementing the same classifier,
 but with different hyperparameters .
 
-.. GENERATED FROM PYTHON SOURCE LINES 10-24
+.. GENERATED FROM PYTHON SOURCE LINES 10-28
 
 .. code-block:: default
 
 
     from ConfigSpace.configuration_space import ConfigurationSpace
-    from ConfigSpace.hyperparameters import UniformIntegerHyperparameter, UniformFloatHyperparameter
+    from ConfigSpace.hyperparameters import (
+        UniformIntegerHyperparameter,
+        UniformFloatHyperparameter,
+    )
 
     from sklearn.datasets import load_breast_cancer
     from sklearn.model_selection import train_test_split
 
     import autosklearn.classification
     import autosklearn.pipeline.components.classification
-    from autosklearn.pipeline.components.classification \
-        import AutoSklearnClassificationAlgorithm
+    from autosklearn.pipeline.components.classification import (
+        AutoSklearnClassificationAlgorithm,
+    )
     from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
 
 
@@ -51,12 +55,12 @@ but with different hyperparameters .
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 25-27
+.. GENERATED FROM PYTHON SOURCE LINES 29-31
 
 Subclass auto-sklearn's random forest classifier
 ================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 27-102
+.. GENERATED FROM PYTHON SOURCE LINES 31-110
 
 .. code-block:: default
 
@@ -65,8 +69,8 @@ Subclass auto-sklearn's random forest classifier
     # default parametrization (``max_features``). Instead, it also
     # tunes the number of estimators (``n_estimators``).
 
-    class CustomRandomForest(AutoSklearnClassificationAlgorithm):
 
+    class CustomRandomForest(AutoSklearnClassificationAlgorithm):
         def __init__(self, n_estimators, max_features, random_state=None):
             self.n_estimators = n_estimators
             self.max_features = max_features
@@ -103,16 +107,16 @@ Subclass auto-sklearn's random forest classifier
         @staticmethod
         def get_properties(dataset_properties=None):
             return {
-                'shortname': 'RF',
-                'name': 'Random Forest Classifier',
-                'handles_regression': False,
-                'handles_classification': True,
-                'handles_multiclass': True,
-                'handles_multilabel': True,
-                'handles_multioutput': False,
-                'is_deterministic': True,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (PREDICTIONS,)
+                "shortname": "RF",
+                "name": "Random Forest Classifier",
+                "handles_regression": False,
+                "handles_classification": True,
+                "handles_multiclass": True,
+                "handles_multilabel": True,
+                "handles_multioutput": False,
+                "is_deterministic": True,
+                "input": (DENSE, SPARSE, UNSIGNED_DATA),
+                "output": (PREDICTIONS,),
             }
 
         @staticmethod
@@ -123,8 +127,12 @@ Subclass auto-sklearn's random forest classifier
             # m is the total number of features, and max_features is the hyperparameter specified below.
             # The default is 0.5, which yields sqrt(m) features as max_features in the estimator. This
             # corresponds with Geurts' heuristic.
-            max_features = UniformFloatHyperparameter("max_features", 0., 1., default_value=0.5)
-            n_estimators = UniformIntegerHyperparameter("n_estimators", 10, 1000, default_value=100)
+            max_features = UniformFloatHyperparameter(
+                "max_features", 0.0, 1.0, default_value=0.5
+            )
+            n_estimators = UniformIntegerHyperparameter(
+                "n_estimators", 10, 1000, default_value=100
+            )
 
             cs.add_hyperparameters([max_features, n_estimators])
             return cs
@@ -154,12 +162,12 @@ Subclass auto-sklearn's random forest classifier
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 103-105
+.. GENERATED FROM PYTHON SOURCE LINES 111-113
 
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 105-109
+.. GENERATED FROM PYTHON SOURCE LINES 113-117
 
 .. code-block:: default
 
@@ -174,12 +182,12 @@ Data Loading
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 110-112
+.. GENERATED FROM PYTHON SOURCE LINES 118-120
 
 Fit Random forest classifier to the data
 ========================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 112-127
+.. GENERATED FROM PYTHON SOURCE LINES 120-133
 
 .. code-block:: default
 
@@ -188,13 +196,11 @@ Fit Random forest classifier to the data
         time_left_for_this_task=30,
         per_run_time_limit=10,
         # Here we exclude auto-sklearn's default random forest component
-        exclude={
-            'classifier': ['random_forest']
-        },
+        exclude={"classifier": ["random_forest"]},
         # Bellow two flags are provided to speed up calculations
         # Not recommended for a real implementation
         initial_configurations_via_metalearning=0,
-        smac_scenario_args={'runcount_limit': 1},
+        smac_scenario_args={"runcount_limit": 1},
     )
     clf.fit(X_train, y_train)
 
@@ -217,12 +223,12 @@ Fit Random forest classifier to the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 128-130
+.. GENERATED FROM PYTHON SOURCE LINES 134-136
 
 Print the configuration space
 =============================
 
-.. GENERATED FROM PYTHON SOURCE LINES 130-136
+.. GENERATED FROM PYTHON SOURCE LINES 136-142
 
 .. code-block:: default
 
@@ -230,7 +236,7 @@ Print the configuration space
     # Observe that this configuration space only contains our custom random
     # forest, but not auto-sklearn's ``random_forest``
     cs = clf.get_configuration_space(X_train, y_train)
-    assert 'random_forest' not in str(cs)
+    assert "random_forest" not in str(cs)
     print(cs)
 
 
@@ -658,7 +664,7 @@ Print the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  6.627 seconds)
+   **Total running time of the script:** ( 0 minutes  7.517 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_restrict_number_of_hyperparameters.py:

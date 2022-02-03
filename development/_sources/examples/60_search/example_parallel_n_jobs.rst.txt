@@ -57,13 +57,14 @@ To run *Auto-sklearn* on multiple machines check the example
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 29-33
+.. GENERATED FROM PYTHON SOURCE LINES 29-34
 
 .. code-block:: default
 
     X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-    X_train, X_test, y_train, y_test = \
-        sklearn.model_selection.train_test_split(X, y, random_state=1)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+        X, y, random_state=1
+    )
 
 
 
@@ -72,29 +73,29 @@ Data Loading
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 34-38
+.. GENERATED FROM PYTHON SOURCE LINES 35-39
 
 Build and fit a classifier
 ==========================
 
 To use ``n_jobs_`` we must guard the code
 
-.. GENERATED FROM PYTHON SOURCE LINES 38-54
+.. GENERATED FROM PYTHON SOURCE LINES 39-55
 
 .. code-block:: default
 
-    if __name__ == '__main__':
+    if __name__ == "__main__":
 
         automl = autosklearn.classification.AutoSklearnClassifier(
             time_left_for_this_task=120,
             per_run_time_limit=30,
-            tmp_folder='/tmp/autosklearn_parallel_1_example_tmp',
+            tmp_folder="/tmp/autosklearn_parallel_1_example_tmp",
             n_jobs=4,
             # Each one of the 4 jobs is allocated 3GB
             memory_limit=3072,
             seed=5,
         )
-        automl.fit(X_train, y_train, dataset_name='breast_cancer')
+        automl.fit(X_train, y_train, dataset_name="breast_cancer")
 
         # Print statistics about the auto-sklearn run such as number of
         # iterations, number of models failed with a time out.
@@ -109,18 +110,18 @@ To use ``n_jobs_`` we must guard the code
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:76: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
       self.metafeatures = self.metafeatures.append(metafeatures)
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
       self.algorithm_runs[metric].append(runs)
     auto-sklearn results:
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.985816
-      Number of target algorithm runs: 45
-      Number of successful target algorithm runs: 43
+      Number of target algorithm runs: 36
+      Number of successful target algorithm runs: 36
       Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 2
+      Number of target algorithms that exceeded the time limit: 0
       Number of target algorithms that exceeded the memory limit: 0
 
 
@@ -130,7 +131,7 @@ To use ``n_jobs_`` we must guard the code
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  2.680 seconds)
+   **Total running time of the script:** ( 2 minutes  6.981 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_n_jobs.py:

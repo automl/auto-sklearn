@@ -482,7 +482,8 @@ strategy, or memory constraints, unless directly provided to the method.
 By default, this method supports the same signature as fit(), and any extra
 arguments are redirected to the TAE evaluation function, which allows for
 further customization while building a pipeline.</p>
-<p>Any additional argument provided is directly passed to the worker exercising the run.</p>
+<p>Any additional argument provided is directly passed to the
+worker exercising the run.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
@@ -495,7 +496,7 @@ further customization while building a pipeline.</p>
 <dt><strong>y_test: array-like</strong></dt><dd><p>If provided, the testing performance will be tracked on this labels</p>
 </dd>
 <dt><strong>config: Union[Configuration,  Dict[str, Union[str, float, int]]]</strong></dt><dd><p>A configuration object used to define the pipeline steps.
-If a dictionary is passed, a configuration is created based on this dictionary.</p>
+If a dict is passed, a configuration is created based on this dict.</p>
 </dd>
 <dt><strong>dataset_name: Optional[str]</strong></dt><dd><p>Name that will be used to tag the Auto-Sklearn run and identify the
 Auto-Sklearn run</p>
@@ -776,12 +777,18 @@ possible to update each component of a nested object.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;cost&quot;</span></code> - The loss of the model on the validation set.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;ensemble_weight&quot;</span></code> - The weight given to the model in the ensemble.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;voting_model&quot;</span></code> - The <code class="docutils literal notranslate"><span class="pre">cv_voting_ensemble</span></code> model (for ‘cv’ resampling).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;estimators&quot;</span></code> - List of models (dicts) in <code class="docutils literal notranslate"><span class="pre">cv_voting_ensemble</span></code> (for ‘cv’ resampling).</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">&quot;estimators&quot;</span></code> - List of models (dicts) in <code class="docutils literal notranslate"><span class="pre">cv_voting_ensemble</span></code></dt><dd><p>(‘cv’ resampling).</p>
+</dd>
+</dl>
+</li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;data_preprocessor&quot;</span></code> - The preprocessor used on the data.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;balancing&quot;</span></code> - The balancing used on the data (for classification).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;feature_preprocessor&quot;</span></code> - The preprocessor for features types.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;classifier&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;regressor&quot;</span></code> - The autosklearn wrapped classifier or regressor.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;sklearn_classifier&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;sklearn_regressor&quot;</span></code> - The sklearn classifier or regressor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;classifier&quot;</span></code> / <code class="docutils literal notranslate"><span class="pre">&quot;regressor&quot;</span></code>
+- The autosklearn wrapped classifier or regressor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;sklearn_classifier&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;sklearn_regressor&quot;</span></code>
+- The sklearn classifier or regressor.</p></li>
 </ul>
 <p><strong>Example</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sklearn.datasets</span>
@@ -895,7 +902,7 @@ it tries to allocate more than <code class="docutils literal notranslate"><span 
 <p><strong>Important notes:</strong></p>
 <ul class="simple">
 <li><p>If <code class="docutils literal notranslate"><span class="pre">None</span></code> is provided, no memory limit is set.</p></li>
-<li><p>In case of multi-processing, <code class="docutils literal notranslate"><span class="pre">memory_limit</span></code> will be <em>per job</em>, so the total usage is 
+<li><p>In case of multi-processing, <code class="docutils literal notranslate"><span class="pre">memory_limit</span></code> will be <em>per job</em>, so the total usage is
 <code class="docutils literal notranslate"><span class="pre">n_jobs</span> <span class="pre">x</span> <span class="pre">memory_limit</span></code>.</p></li>
 <li><p>The memory limit also applies to the ensemble creation process.</p></li>
 </ul>
@@ -911,7 +918,7 @@ using all processors.</p>
 <p><strong>Important notes</strong>:</p>
 <ul class="simple">
 <li><p>By default, Auto-sklearn uses one core.</p></li>
-<li><p>Ensemble building is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> but can be controlled by the number 
+<li><p>Ensemble building is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> but can be controlled by the number
 of models in the ensemble.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">predict()</span></code> is not affected by <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code> (in contrast to most scikit-learn models)</p></li>
 <li><p>If <code class="docutils literal notranslate"><span class="pre">dask_client</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, a new dask client is created.</p></li>
@@ -1049,7 +1056,8 @@ strategy, or memory constraints, unless directly provided to the method.
 By default, this method supports the same signature as fit(), and any extra
 arguments are redirected to the TAE evaluation function, which allows for
 further customization while building a pipeline.</p>
-<p>Any additional argument provided is directly passed to the worker exercising the run.</p>
+<p>Any additional argument provided is directly passed to the
+worker exercising the run.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
@@ -1062,7 +1070,7 @@ further customization while building a pipeline.</p>
 <dt><strong>y_test: array-like</strong></dt><dd><p>If provided, the testing performance will be tracked on this labels</p>
 </dd>
 <dt><strong>config: Union[Configuration,  Dict[str, Union[str, float, int]]]</strong></dt><dd><p>A configuration object used to define the pipeline steps.
-If a dictionary is passed, a configuration is created based on this dictionary.</p>
+If a dict is passed, a configuration is created based on this dict.</p>
 </dd>
 <dt><strong>dataset_name: Optional[str]</strong></dt><dd><p>Name that will be used to tag the Auto-Sklearn run and identify the
 Auto-Sklearn run</p>
@@ -1343,12 +1351,18 @@ possible to update each component of a nested object.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;cost&quot;</span></code> - The loss of the model on the validation set.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;ensemble_weight&quot;</span></code> - The weight given to the model in the ensemble.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;voting_model&quot;</span></code> - The <code class="docutils literal notranslate"><span class="pre">cv_voting_ensemble</span></code> model (for ‘cv’ resampling).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;estimators&quot;</span></code> - List of models (dicts) in <code class="docutils literal notranslate"><span class="pre">cv_voting_ensemble</span></code> (for ‘cv’ resampling).</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">&quot;estimators&quot;</span></code> - List of models (dicts) in <code class="docutils literal notranslate"><span class="pre">cv_voting_ensemble</span></code></dt><dd><p>(‘cv’ resampling).</p>
+</dd>
+</dl>
+</li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;data_preprocessor&quot;</span></code> - The preprocessor used on the data.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;balancing&quot;</span></code> - The balancing used on the data (for classification).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;feature_preprocessor&quot;</span></code> - The preprocessor for features types.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;classifier&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;regressor&quot;</span></code> - The autosklearn wrapped classifier or regressor.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;sklearn_classifier&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;sklearn_regressor&quot;</span></code> - The sklearn classifier or regressor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;classifier&quot;</span></code> / <code class="docutils literal notranslate"><span class="pre">&quot;regressor&quot;</span></code>
+- The autosklearn wrapped classifier or regressor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;sklearn_classifier&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;sklearn_regressor&quot;</span></code>
+- The sklearn classifier or regressor.</p></li>
 </ul>
 <p><strong>Example</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sklearn.datasets</span>
@@ -1771,7 +1785,8 @@ strategy, or memory constraints, unless directly provided to the method.
 By default, this method supports the same signature as fit(), and any extra
 arguments are redirected to the TAE evaluation function, which allows for
 further customization while building a pipeline.</p>
-<p>Any additional argument provided is directly passed to the worker exercising the run.</p>
+<p>Any additional argument provided is directly passed to the
+worker exercising the run.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
@@ -1784,7 +1799,7 @@ further customization while building a pipeline.</p>
 <dt><strong>y_test: array-like</strong></dt><dd><p>If provided, the testing performance will be tracked on this labels</p>
 </dd>
 <dt><strong>config: Union[Configuration,  Dict[str, Union[str, float, int]]]</strong></dt><dd><p>A configuration object used to define the pipeline steps.
-If a dictionary is passed, a configuration is created based on this dictionary.</p>
+If a dict is passed, a configuration is created based on this dict.</p>
 </dd>
 <dt><strong>dataset_name: Optional[str]</strong></dt><dd><p>Name that will be used to tag the Auto-Sklearn run and identify the
 Auto-Sklearn run</p>
@@ -2058,12 +2073,18 @@ possible to update each component of a nested object.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;cost&quot;</span></code> - The loss of the model on the validation set.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;ensemble_weight&quot;</span></code> - The weight given to the model in the ensemble.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;voting_model&quot;</span></code> - The <code class="docutils literal notranslate"><span class="pre">cv_voting_ensemble</span></code> model (for ‘cv’ resampling).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;estimators&quot;</span></code> - List of models (dicts) in <code class="docutils literal notranslate"><span class="pre">cv_voting_ensemble</span></code> (for ‘cv’ resampling).</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">&quot;estimators&quot;</span></code> - List of models (dicts) in <code class="docutils literal notranslate"><span class="pre">cv_voting_ensemble</span></code></dt><dd><p>(‘cv’ resampling).</p>
+</dd>
+</dl>
+</li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;data_preprocessor&quot;</span></code> - The preprocessor used on the data.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;balancing&quot;</span></code> - The balancing used on the data (for classification).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;feature_preprocessor&quot;</span></code> - The preprocessor for features types.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;classifier&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;regressor&quot;</span></code> - The autosklearn wrapped classifier or regressor.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;sklearn_classifier&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;sklearn_regressor&quot;</span></code> - The sklearn classifier or regressor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;classifier&quot;</span></code> / <code class="docutils literal notranslate"><span class="pre">&quot;regressor&quot;</span></code>
+- The autosklearn wrapped classifier or regressor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;sklearn_classifier&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;sklearn_regressor&quot;</span></code>
+- The sklearn classifier or regressor.</p></li>
 </ul>
 <p><strong>Example</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sklearn.datasets</span>

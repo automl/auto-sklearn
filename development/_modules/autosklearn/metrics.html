@@ -112,20 +112,24 @@
       
   <h1>Source code for autosklearn.metrics</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">sklearn.metrics</span>
 <span class="kn">from</span> <span class="nn">sklearn.utils.multiclass</span> <span class="kn">import</span> <span class="n">type_of_target</span>
-
 <span class="kn">from</span> <span class="nn">smac.utils.constants</span> <span class="kn">import</span> <span class="n">MAXINT</span>
 
 <span class="kn">from</span> <span class="nn">autosklearn.constants</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">BINARY_CLASSIFICATION</span><span class="p">,</span> <span class="n">MULTICLASS_CLASSIFICATION</span><span class="p">,</span> <span class="n">MULTILABEL_CLASSIFICATION</span><span class="p">,</span>
-    <span class="n">MULTIOUTPUT_REGRESSION</span><span class="p">,</span> <span class="n">REGRESSION</span><span class="p">,</span> <span class="n">REGRESSION_TASKS</span><span class="p">,</span> <span class="n">TASK_TYPES</span><span class="p">,</span>
+    <span class="n">BINARY_CLASSIFICATION</span><span class="p">,</span>
+    <span class="n">MULTICLASS_CLASSIFICATION</span><span class="p">,</span>
+    <span class="n">MULTILABEL_CLASSIFICATION</span><span class="p">,</span>
+    <span class="n">MULTIOUTPUT_REGRESSION</span><span class="p">,</span>
+    <span class="n">REGRESSION</span><span class="p">,</span>
+    <span class="n">REGRESSION_TASKS</span><span class="p">,</span>
+    <span class="n">TASK_TYPES</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">sanitize_array</span>
@@ -139,7 +143,7 @@
         <span class="n">optimum</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">worst_possible_result</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">sign</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
+        <span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
@@ -153,7 +157,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-        <span class="n">sample_weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">sample_weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">pass</span>
 
@@ -166,7 +170,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-        <span class="n">sample_weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">sample_weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Evaluate predicted target values for X relative to y_true.</span>
 
@@ -187,34 +191,37 @@
 <span class="sd">            Score function applied to prediction of estimator on X.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">type_true</span> <span class="o">=</span> <span class="n">type_of_target</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">type_true</span> <span class="o">==</span> <span class="s1">&#39;binary&#39;</span> <span class="ow">and</span> <span class="n">type_of_target</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span> <span class="ow">and</span> \
-                <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">type_true</span> <span class="o">==</span> <span class="s2">&quot;binary&quot;</span>
+            <span class="ow">and</span> <span class="n">type_of_target</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;continuous&quot;</span>
+            <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="p">):</span>
             <span class="c1"># For a pred scorer, no threshold, nor probability is required</span>
             <span class="c1"># If y_true is binary, and y_pred is continuous</span>
             <span class="c1"># it means that a rounding is necessary to obtain the binary class</span>
             <span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">y_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> \
-                <span class="n">type_true</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">y_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">type_true</span> <span class="o">==</span> <span class="s2">&quot;continuous&quot;</span>
+        <span class="p">):</span>
             <span class="c1"># must be regression, all other task types would return at least</span>
             <span class="c1"># two probabilities</span>
             <span class="k">pass</span>
-        <span class="k">elif</span> <span class="n">type_true</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;binary&#39;</span><span class="p">,</span> <span class="s1">&#39;multiclass&#39;</span><span class="p">]:</span>
+        <span class="k">elif</span> <span class="n">type_true</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;binary&quot;</span><span class="p">,</span> <span class="s2">&quot;multiclass&quot;</span><span class="p">]:</span>
             <span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">type_true</span> <span class="o">==</span> <span class="s1">&#39;multilabel-indicator&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">type_true</span> <span class="o">==</span> <span class="s2">&quot;multilabel-indicator&quot;</span><span class="p">:</span>
             <span class="n">y_pred</span><span class="p">[</span><span class="n">y_pred</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
             <span class="n">y_pred</span><span class="p">[</span><span class="n">y_pred</span> <span class="o">&lt;=</span> <span class="mf">0.5</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="k">elif</span> <span class="n">type_true</span> <span class="o">==</span> <span class="s1">&#39;continuous-multioutput&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">type_true</span> <span class="o">==</span> <span class="s2">&quot;continuous-multioutput&quot;</span><span class="p">:</span>
             <span class="k">pass</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">type_true</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span>
-                                                 <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">,</span>
-                                                 <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span>
+                <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span>
-                                                 <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_ProbaScorer</span><span class="p">(</span><span class="n">Scorer</span><span class="p">):</span>
@@ -222,7 +229,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-        <span class="n">sample_weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">sample_weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Evaluate predicted probabilities for X relative to y_true.</span>
 <span class="sd">        Parameters</span>
@@ -249,21 +256,24 @@
             <span class="k">if</span> <span class="n">n_labels_pred</span> <span class="o">!=</span> <span class="n">n_labels_test</span><span class="p">:</span>
                 <span class="n">labels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_labels_pred</span><span class="p">))</span>
                 <span class="k">if</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span>
-                                                         <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">,</span>
-                                                         <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
-                                                         <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span>
+                        <span class="n">y_true</span><span class="p">,</span>
+                        <span class="n">y_pred</span><span class="p">,</span>
+                        <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">,</span>
+                        <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+                        <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">,</span>
+                    <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span>
-                                                         <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span>
+                        <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span>
+                    <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span>
-                                                 <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">,</span>
-                                                 <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span>
+                <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span>
-                                                 <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_ThresholdScorer</span><span class="p">(</span><span class="n">Scorer</span><span class="p">):</span>
@@ -271,7 +281,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-        <span class="n">sample_weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">sample_weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Evaluate decision function output for X relative to y_true.</span>
 <span class="sd">        Parameters</span>
@@ -302,9 +312,9 @@
             <span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">p</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">y_pred</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
 
         <span class="k">if</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span>
-                                                 <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">,</span>
-                                                 <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span>
+                <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
 
@@ -317,7 +327,7 @@
     <span class="n">greater_is_better</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">needs_proba</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">needs_threshold</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Scorer</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Make a scorer from a performance metric or loss function.</span>
 
@@ -357,96 +367,114 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">sign</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">greater_is_better</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
     <span class="k">if</span> <span class="n">needs_proba</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">_ProbaScorer</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">score_func</span><span class="p">,</span> <span class="n">optimum</span><span class="p">,</span> <span class="n">worst_possible_result</span><span class="p">,</span> <span class="n">sign</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_ProbaScorer</span><span class="p">(</span>
+            <span class="n">name</span><span class="p">,</span> <span class="n">score_func</span><span class="p">,</span> <span class="n">optimum</span><span class="p">,</span> <span class="n">worst_possible_result</span><span class="p">,</span> <span class="n">sign</span><span class="p">,</span> <span class="n">kwargs</span>
+        <span class="p">)</span>
     <span class="k">elif</span> <span class="n">needs_threshold</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">_ThresholdScorer</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">score_func</span><span class="p">,</span> <span class="n">optimum</span><span class="p">,</span> <span class="n">worst_possible_result</span><span class="p">,</span> <span class="n">sign</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_ThresholdScorer</span><span class="p">(</span>
+            <span class="n">name</span><span class="p">,</span> <span class="n">score_func</span><span class="p">,</span> <span class="n">optimum</span><span class="p">,</span> <span class="n">worst_possible_result</span><span class="p">,</span> <span class="n">sign</span><span class="p">,</span> <span class="n">kwargs</span>
+        <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">_PredictScorer</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">score_func</span><span class="p">,</span> <span class="n">optimum</span><span class="p">,</span> <span class="n">worst_possible_result</span><span class="p">,</span> <span class="n">sign</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">_PredictScorer</span><span class="p">(</span>
+            <span class="n">name</span><span class="p">,</span> <span class="n">score_func</span><span class="p">,</span> <span class="n">optimum</span><span class="p">,</span> <span class="n">worst_possible_result</span><span class="p">,</span> <span class="n">sign</span><span class="p">,</span> <span class="n">kwargs</span>
+        <span class="p">)</span></div>
 
 
 <span class="c1"># Standard regression scores</span>
-<span class="n">mean_absolute_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;mean_absolute_error&#39;</span><span class="p">,</span>
-                                  <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">mean_absolute_error</span><span class="p">,</span>
-                                  <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                  <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
-                                  <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">mean_squared_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span>
-                                 <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">mean_squared_error</span><span class="p">,</span>
-                                 <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                 <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
-                                 <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                 <span class="n">squared</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">root_mean_squared_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;root_mean_squared_error&#39;</span><span class="p">,</span>
-                                      <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">mean_squared_error</span><span class="p">,</span>
-                                      <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                      <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
-                                      <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                      <span class="n">squared</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">mean_squared_log_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;mean_squared_log_error&#39;</span><span class="p">,</span>
-                                     <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">mean_squared_log_error</span><span class="p">,</span>
-                                     <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                     <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
-                                     <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">,)</span>
-<span class="n">median_absolute_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;median_absolute_error&#39;</span><span class="p">,</span>
-                                    <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">median_absolute_error</span><span class="p">,</span>
-                                    <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                    <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
-                                    <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">mean_absolute_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span>
+    <span class="s2">&quot;mean_absolute_error&quot;</span><span class="p">,</span>
+    <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">mean_absolute_error</span><span class="p">,</span>
+    <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
+    <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">mean_squared_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span>
+    <span class="s2">&quot;mean_squared_error&quot;</span><span class="p">,</span>
+    <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">mean_squared_error</span><span class="p">,</span>
+    <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
+    <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">squared</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">root_mean_squared_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span>
+    <span class="s2">&quot;root_mean_squared_error&quot;</span><span class="p">,</span>
+    <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">mean_squared_error</span><span class="p">,</span>
+    <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
+    <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">squared</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">mean_squared_log_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span>
+    <span class="s2">&quot;mean_squared_log_error&quot;</span><span class="p">,</span>
+    <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">mean_squared_log_error</span><span class="p">,</span>
+    <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
+    <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">median_absolute_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span>
+    <span class="s2">&quot;median_absolute_error&quot;</span><span class="p">,</span>
+    <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">median_absolute_error</span><span class="p">,</span>
+    <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
+    <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
 
-<span class="n">r2</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;r2&#39;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">)</span>
+<span class="n">r2</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s2">&quot;r2&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">)</span>
 
 <span class="c1"># Standard Classification Scores</span>
-<span class="n">accuracy</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span>
-                       <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">)</span>
-<span class="n">balanced_accuracy</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;balanced_accuracy&#39;</span><span class="p">,</span>
-                                <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">balanced_accuracy_score</span><span class="p">)</span>
+<span class="n">accuracy</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s2">&quot;accuracy&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">)</span>
+<span class="n">balanced_accuracy</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span>
+    <span class="s2">&quot;balanced_accuracy&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">balanced_accuracy_score</span>
+<span class="p">)</span>
 
 <span class="c1"># Score functions that need decision values</span>
-<span class="n">roc_auc</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;roc_auc&#39;</span><span class="p">,</span>
-                      <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">roc_auc_score</span><span class="p">,</span>
-                      <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                      <span class="n">needs_threshold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">average_precision</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;average_precision&#39;</span><span class="p">,</span>
-                                <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">average_precision_score</span><span class="p">,</span>
-                                <span class="n">needs_threshold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">roc_auc</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span>
+    <span class="s2">&quot;roc_auc&quot;</span><span class="p">,</span>
+    <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">roc_auc_score</span><span class="p">,</span>
+    <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">needs_threshold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">average_precision</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span>
+    <span class="s2">&quot;average_precision&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">average_precision_score</span><span class="p">,</span> <span class="n">needs_threshold</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
 
 <span class="c1"># NOTE: zero_division</span>
 <span class="c1">#</span>
 <span class="c1">#   Specified as the explicit default, see sklearn docs:</span>
 <span class="c1">#   https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_score.html#sklearn-metrics-precision-score</span>
 <span class="n">precision</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span>
-    <span class="s1">&#39;precision&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">precision_score</span><span class="p">,</span> <span class="n">zero_division</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="s2">&quot;precision&quot;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">precision_score</span><span class="p">,</span> <span class="n">zero_division</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="p">)</span>
-<span class="n">recall</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span>
-    <span class="s1">&#39;recall&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">recall_score</span><span class="p">,</span> <span class="n">zero_division</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="p">)</span>
-<span class="n">f1</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span>
-    <span class="s1">&#39;f1&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">f1_score</span><span class="p">,</span> <span class="n">zero_division</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="p">)</span>
+<span class="n">recall</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s2">&quot;recall&quot;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">recall_score</span><span class="p">,</span> <span class="n">zero_division</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">f1</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s2">&quot;f1&quot;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">f1_score</span><span class="p">,</span> <span class="n">zero_division</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
 
 <span class="c1"># Score function for probabilistic classification</span>
-<span class="n">log_loss</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;log_loss&#39;</span><span class="p">,</span>
-                       <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">log_loss</span><span class="p">,</span>
-                       <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                       <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
-                       <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                       <span class="n">needs_proba</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">log_loss</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span>
+    <span class="s2">&quot;log_loss&quot;</span><span class="p">,</span>
+    <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">log_loss</span><span class="p">,</span>
+    <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">worst_possible_result</span><span class="o">=</span><span class="n">MAXINT</span><span class="p">,</span>
+    <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">needs_proba</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="c1"># TODO what about mathews correlation coefficient etc?</span>
 
 
 <span class="n">REGRESSION_METRICS</span> <span class="o">=</span> <span class="p">{</span>
     <span class="n">scorer</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">scorer</span>
     <span class="k">for</span> <span class="n">scorer</span> <span class="ow">in</span> <span class="p">[</span>
-        <span class="n">mean_absolute_error</span><span class="p">,</span> <span class="n">mean_squared_error</span><span class="p">,</span> <span class="n">root_mean_squared_error</span><span class="p">,</span>
-        <span class="n">mean_squared_log_error</span><span class="p">,</span> <span class="n">median_absolute_error</span><span class="p">,</span> <span class="n">r2</span>
+        <span class="n">mean_absolute_error</span><span class="p">,</span>
+        <span class="n">mean_squared_error</span><span class="p">,</span>
+        <span class="n">root_mean_squared_error</span><span class="p">,</span>
+        <span class="n">mean_squared_log_error</span><span class="p">,</span>
+        <span class="n">median_absolute_error</span><span class="p">,</span>
+        <span class="n">r2</span><span class="p">,</span>
     <span class="p">]</span>
 <span class="p">}</span>
 
 <span class="n">CLASSIFICATION_METRICS</span> <span class="o">=</span> <span class="p">{</span>
     <span class="n">scorer</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">scorer</span>
-    <span class="k">for</span> <span class="n">scorer</span> <span class="ow">in</span> <span class="p">[</span>
-        <span class="n">accuracy</span><span class="p">,</span> <span class="n">balanced_accuracy</span><span class="p">,</span> <span class="n">roc_auc</span><span class="p">,</span> <span class="n">average_precision</span><span class="p">,</span> <span class="n">log_loss</span>
-    <span class="p">]</span>
+    <span class="k">for</span> <span class="n">scorer</span> <span class="ow">in</span> <span class="p">[</span><span class="n">accuracy</span><span class="p">,</span> <span class="n">balanced_accuracy</span><span class="p">,</span> <span class="n">roc_auc</span><span class="p">,</span> <span class="n">average_precision</span><span class="p">,</span> <span class="n">log_loss</span><span class="p">]</span>
 <span class="p">}</span>
 
 <span class="c1"># NOTE: zero_division</span>
@@ -455,13 +483,13 @@
 <span class="c1">#   https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_score.html#sklearn-metrics-precision-score</span>
 <span class="k">for</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">sklearn_metric</span><span class="p">),</span> <span class="n">average</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span>
     <span class="p">[</span>
-        <span class="p">(</span><span class="s1">&#39;precision&#39;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">precision_score</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;recall&#39;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">recall_score</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;f1&#39;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">f1_score</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;precision&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">precision_score</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;recall&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">recall_score</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;f1&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">f1_score</span><span class="p">),</span>
     <span class="p">],</span>
-    <span class="p">[</span><span class="s1">&#39;macro&#39;</span><span class="p">,</span> <span class="s1">&#39;micro&#39;</span><span class="p">,</span> <span class="s1">&#39;samples&#39;</span><span class="p">,</span> <span class="s1">&#39;weighted&#39;</span><span class="p">]</span>
+    <span class="p">[</span><span class="s2">&quot;macro&quot;</span><span class="p">,</span> <span class="s2">&quot;micro&quot;</span><span class="p">,</span> <span class="s2">&quot;samples&quot;</span><span class="p">,</span> <span class="s2">&quot;weighted&quot;</span><span class="p">],</span>
 <span class="p">):</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">base_name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">average</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">average</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="n">scorer</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span>
         <span class="n">name</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="n">sklearn_metric</span><span class="p">,</span> <span class="n">pos_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="n">average</span><span class="p">,</span> <span class="n">zero_division</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="p">)</span>
@@ -474,7 +502,7 @@
     <span class="n">prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">metric</span><span class="p">:</span> <span class="n">Scorer</span><span class="p">,</span>
-    <span class="n">scoring_functions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">scoring_functions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a score (a magnitude that allows casting the</span>
@@ -509,11 +537,15 @@
 
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">score_dict</span><span class="p">[</span><span class="n">metric_</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_compute_scorer</span><span class="p">(</span>
-                        <span class="n">metric_</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">solution</span><span class="p">,</span> <span class="n">task_type</span><span class="p">)</span>
+                        <span class="n">metric_</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">solution</span><span class="p">,</span> <span class="n">task_type</span>
+                    <span class="p">)</span>
                 <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Mean Squared Logarithmic Error cannot be used when &quot;</span> \
-                                    <span class="s2">&quot;targets contain negative values.&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="o">==</span> <span class="s2">&quot;Mean Squared Logarithmic Error cannot be used when &quot;</span>
+                        <span class="s2">&quot;targets contain negative values.&quot;</span>
+                    <span class="p">):</span>
                         <span class="k">continue</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="n">e</span>
@@ -526,16 +558,21 @@
 
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">score_dict</span><span class="p">[</span><span class="n">metric_</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_compute_scorer</span><span class="p">(</span>
-                        <span class="n">metric_</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">solution</span><span class="p">,</span> <span class="n">task_type</span><span class="p">)</span>
+                        <span class="n">metric_</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">solution</span><span class="p">,</span> <span class="n">task_type</span>
+                    <span class="p">)</span>
                 <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;multiclass format is not supported&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;multiclass format is not supported&quot;</span><span class="p">:</span>
                         <span class="k">continue</span>
-                    <span class="k">elif</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Samplewise metrics are not available &quot;</span>\
-                            <span class="s2">&quot;outside of multilabel classification.&quot;</span><span class="p">:</span>
+                    <span class="k">elif</span> <span class="p">(</span>
+                        <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Samplewise metrics are not available &quot;</span>
+                        <span class="s2">&quot;outside of multilabel classification.&quot;</span>
+                    <span class="p">):</span>
                         <span class="k">continue</span>
-                    <span class="k">elif</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Target is multiclass but &quot;</span>\
-                            <span class="s2">&quot;average=&#39;binary&#39;. Please choose another average &quot;</span>\
-                            <span class="s2">&quot;setting, one of [None, &#39;micro&#39;, &#39;macro&#39;, &#39;weighted&#39;].&quot;</span><span class="p">:</span>
+                    <span class="k">elif</span> <span class="p">(</span>
+                        <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Target is multiclass but &quot;</span>
+                        <span class="s2">&quot;average=&#39;binary&#39;. Please choose another average &quot;</span>
+                        <span class="s2">&quot;setting, one of [None, &#39;micro&#39;, &#39;macro&#39;, &#39;weighted&#39;].&quot;</span>
+                    <span class="p">):</span>
                         <span class="k">continue</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="n">e</span>
@@ -551,7 +588,7 @@
     <span class="n">prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">metric</span><span class="p">:</span> <span class="n">Scorer</span><span class="p">,</span>
-    <span class="n">scoring_functions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">scoring_functions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a loss (a magnitude that allows casting the</span>
@@ -606,10 +643,7 @@
 
 
 <span class="k">def</span> <span class="nf">calculate_metric</span><span class="p">(</span>
-    <span class="n">metric</span><span class="p">:</span> <span class="n">Scorer</span><span class="p">,</span>
-    <span class="n">prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">solution</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">metric</span><span class="p">:</span> <span class="n">Scorer</span><span class="p">,</span> <span class="n">prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">solution</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a metric for the given Auto-Sklearn Scorer object.</span>
@@ -642,10 +676,7 @@
 
 
 <span class="k">def</span> <span class="nf">_compute_scorer</span><span class="p">(</span>
-    <span class="n">metric</span><span class="p">:</span> <span class="n">Scorer</span><span class="p">,</span>
-    <span class="n">prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">solution</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">metric</span><span class="p">:</span> <span class="n">Scorer</span><span class="p">,</span> <span class="n">prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">solution</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a score (a magnitude that allows casting the</span>
@@ -679,11 +710,11 @@
 
 <span class="c1"># Must be at bottom so all metrics are defined</span>
 <span class="n">default_metric_for_task</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Scorer</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="n">BINARY_CLASSIFICATION</span><span class="p">:</span> <span class="n">CLASSIFICATION_METRICS</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">],</span>
-    <span class="n">MULTICLASS_CLASSIFICATION</span><span class="p">:</span> <span class="n">CLASSIFICATION_METRICS</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">],</span>
-    <span class="n">MULTILABEL_CLASSIFICATION</span><span class="p">:</span> <span class="n">CLASSIFICATION_METRICS</span><span class="p">[</span><span class="s1">&#39;f1_macro&#39;</span><span class="p">],</span>
-    <span class="n">REGRESSION</span><span class="p">:</span> <span class="n">REGRESSION_METRICS</span><span class="p">[</span><span class="s1">&#39;r2&#39;</span><span class="p">],</span>
-    <span class="n">MULTIOUTPUT_REGRESSION</span><span class="p">:</span> <span class="n">REGRESSION_METRICS</span><span class="p">[</span><span class="s1">&#39;r2&#39;</span><span class="p">],</span>
+    <span class="n">BINARY_CLASSIFICATION</span><span class="p">:</span> <span class="n">CLASSIFICATION_METRICS</span><span class="p">[</span><span class="s2">&quot;accuracy&quot;</span><span class="p">],</span>
+    <span class="n">MULTICLASS_CLASSIFICATION</span><span class="p">:</span> <span class="n">CLASSIFICATION_METRICS</span><span class="p">[</span><span class="s2">&quot;accuracy&quot;</span><span class="p">],</span>
+    <span class="n">MULTILABEL_CLASSIFICATION</span><span class="p">:</span> <span class="n">CLASSIFICATION_METRICS</span><span class="p">[</span><span class="s2">&quot;f1_macro&quot;</span><span class="p">],</span>
+    <span class="n">REGRESSION</span><span class="p">:</span> <span class="n">REGRESSION_METRICS</span><span class="p">[</span><span class="s2">&quot;r2&quot;</span><span class="p">],</span>
+    <span class="n">MULTIOUTPUT_REGRESSION</span><span class="p">:</span> <span class="n">REGRESSION_METRICS</span><span class="p">[</span><span class="s2">&quot;r2&quot;</span><span class="p">],</span>
 <span class="p">}</span>
 </pre></div>
 

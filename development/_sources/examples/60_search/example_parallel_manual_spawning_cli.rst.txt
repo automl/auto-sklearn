@@ -91,7 +91,7 @@ Import statements
     from autosklearn.classification import AutoSklearnClassifier
     from autosklearn.constants import MULTICLASS_CLASSIFICATION
 
-    tmp_folder = '/tmp/autosklearn_parallel_3_example_tmp'
+    tmp_folder = "/tmp/autosklearn_parallel_3_example_tmp"
 
     worker_processes = []
 
@@ -119,7 +119,7 @@ relevant information to connect to the scheduler.
 .. code-block:: default
 
 
-    scheduler_file_name = 'scheduler-file.json'
+    scheduler_file_name = "scheduler-file.json"
 
 
 
@@ -143,17 +143,21 @@ Starting the scheduler is done with the following bash command:
 We will now execute this bash command from within Python to have a
 self-contained example:
 
-.. GENERATED FROM PYTHON SOURCE LINES 101-124
+.. GENERATED FROM PYTHON SOURCE LINES 101-128
 
 .. code-block:: default
 
 
+
     def cli_start_scheduler(scheduler_file_name):
-        command = (
-            f"dask-scheduler --scheduler-file {scheduler_file_name} --idle-timeout 10"
+        command = f"dask-scheduler --scheduler-file {scheduler_file_name} --idle-timeout 10"
+        proc = subprocess.run(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            shell=True,
+            check=True,
         )
-        proc = subprocess.run(command, stdout=subprocess.PIPE,
-                              stderr=subprocess.STDOUT, shell=True, check=True)
         while proc.returncode is None:
             time.sleep(1)
 
@@ -161,7 +165,7 @@ self-contained example:
     if __name__ == "__main__":
         process_python_worker = multiprocessing.Process(
             target=cli_start_scheduler,
-            args=(scheduler_file_name, ),
+            args=(scheduler_file_name,),
         )
         process_python_worker.start()
         worker_processes.append(process_python_worker)
@@ -177,7 +181,7 @@ self-contained example:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 125-143
+.. GENERATED FROM PYTHON SOURCE LINES 129-147
 
 2. Start two workers
 ====================
@@ -198,9 +202,10 @@ compatible with Auto-sklearn creating new processes in the workers itself.
 We disable dask's memory management by passing ``--memory-limit`` as
 Auto-sklearn does the memory management itself.
 
-.. GENERATED FROM PYTHON SOURCE LINES 143-167
+.. GENERATED FROM PYTHON SOURCE LINES 147-174
 
 .. code-block:: default
+
 
 
     def cli_start_worker(scheduler_file_name):
@@ -209,16 +214,18 @@ Auto-sklearn does the memory management itself.
             "dask-worker --nthreads 1 --lifetime 35 --memory-limit 0 "
             f"--scheduler-file {scheduler_file_name}"
         )
-        proc = subprocess.run(command, stdout=subprocess.PIPE,
-                              stderr=subprocess.STDOUT, shell=True)
+        proc = subprocess.run(
+            command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True
+        )
         while proc.returncode is None:
             time.sleep(1)
 
-    if __name__ == '__main__':
+
+    if __name__ == "__main__":
         for _ in range(2):
             process_cli_worker = multiprocessing.Process(
                 target=cli_start_worker,
-                args=(scheduler_file_name, ),
+                args=(scheduler_file_name,),
             )
             process_cli_worker.start()
             worker_processes.append(process_cli_worker)
@@ -233,7 +240,7 @@ Auto-sklearn does the memory management itself.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 168-173
+.. GENERATED FROM PYTHON SOURCE LINES 175-180
 
 3. Creating a client in Python
 ==============================
@@ -241,7 +248,7 @@ Auto-sklearn does the memory management itself.
 Finally we create a dask cluster which also connects to the scheduler via
 the information in the file created by the scheduler.
 
-.. GENERATED FROM PYTHON SOURCE LINES 173-176
+.. GENERATED FROM PYTHON SOURCE LINES 180-183
 
 .. code-block:: default
 
@@ -255,19 +262,20 @@ the information in the file created by the scheduler.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 177-179
+.. GENERATED FROM PYTHON SOURCE LINES 184-186
 
 Start Auto-sklearn
 ~~~~~~~~~~~~~~~~~~
 
-.. GENERATED FROM PYTHON SOURCE LINES 179-211
+.. GENERATED FROM PYTHON SOURCE LINES 186-219
 
 .. code-block:: default
 
     if __name__ == "__main__":
         X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-        X_train, X_test, y_train, y_test = \
-            sklearn.model_selection.train_test_split(X, y, random_state=1)
+        X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+            X, y, random_state=1
+        )
 
         automl = AutoSklearnClassifier(
             delete_tmp_folder_after_terminate=False,
@@ -286,7 +294,7 @@ Start Auto-sklearn
         automl.fit_ensemble(
             y_train,
             task=MULTICLASS_CLASSIFICATION,
-            dataset_name='digits',
+            dataset_name="digits",
             ensemble_size=20,
             ensemble_nbest=50,
         )
@@ -306,26 +314,26 @@ Start Auto-sklearn
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:76: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
       self.metafeatures = self.metafeatures.append(metafeatures)
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
       self.algorithm_runs[metric].append(runs)
     auto-sklearn results:
-      Dataset name: 599a1eec-84ff-11ec-8791-4d3378ae0e1f
+      Dataset name: d7c480de-8511-11ec-87c5-17c8039ce04b
       Metric: accuracy
       Best validation score: 0.992908
-      Number of target algorithm runs: 12
-      Number of successful target algorithm runs: 11
+      Number of target algorithm runs: 10
+      Number of successful target algorithm runs: 8
       Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 1
+      Number of target algorithms that exceeded the time limit: 2
       Number of target algorithms that exceeded the memory limit: 0
 
-    Accuracy score 0.965034965034965
+    Accuracy score 0.958041958041958
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 212-218
+.. GENERATED FROM PYTHON SOURCE LINES 220-226
 
 Wait until all workers are closed
 =================================
@@ -334,11 +342,11 @@ This is only necessary if the workers are started from within this python
 script. In a real application one would start them directly from the command
 line.
 
-.. GENERATED FROM PYTHON SOURCE LINES 218-222
+.. GENERATED FROM PYTHON SOURCE LINES 226-230
 
 .. code-block:: default
 
-    if __name__ == '__main__':
+    if __name__ == "__main__":
         process_python_worker.join()
         for process in worker_processes:
             process.join()
@@ -352,7 +360,7 @@ line.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  39.627 seconds)
+   **Total running time of the script:** ( 0 minutes  39.702 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_manual_spawning_cli.py:
