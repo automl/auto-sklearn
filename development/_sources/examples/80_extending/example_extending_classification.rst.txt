@@ -263,13 +263,13 @@ Print test accuracy and statistics
 
  .. code-block:: none
 
-    accuracy:  0.986013986013986
+    accuracy:  0.965034965034965
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f920e313880>,
-               'cost': 0.05673758865248224,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f920eea6040>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc02b592fd0>,
+               'cost': 0.014184397163120588,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc03273af10>,
                'ensemble_weight': 1.0,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f920e313850>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc02b5926a0>,
                'model_id': 2,
                'rank': 1,
                'sklearn_classifier': MLPClassifier(hidden_layer_sizes=(32,), random_state=1)}}
@@ -280,7 +280,7 @@ Print test accuracy and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  14.096 seconds)
+   **Total running time of the script:** ( 0 minutes  13.178 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_classification.py:

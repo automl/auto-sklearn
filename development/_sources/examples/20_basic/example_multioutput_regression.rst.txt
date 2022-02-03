@@ -125,7 +125,7 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight              type          cost  duration
     model_id                                                                 
-    4            1              1.0  gaussian_process  2.846763e-08  2.873569
+    4            1              1.0  gaussian_process  3.992627e-08  2.577799
 
 
 
@@ -152,13 +152,13 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    {   4: {   'cost': 2.846763125230467e-08,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f921291e040>,
+    {   4: {   'cost': 3.992626640414443e-08,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc05035b370>,
                'ensemble_weight': 1.0,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f921296f190>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc037aeb040>,
                'model_id': 4,
                'rank': 1,
-               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f921296fd00>,
+               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fc037aebdf0>,
                'sklearn_regressor': GaussianProcessRegressor(alpha=3.388513090075372e-08,
                              kernel=RBF(length_scale=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]),
                              n_restarts_optimizer=10, normalize_y=True,
@@ -190,7 +190,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.9999999670471489
+    R2 score: 0.9999999561752116
 
 
 
@@ -443,7 +443,7 @@ Get the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  54.820 seconds)
+   **Total running time of the script:** ( 1 minutes  54.155 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multioutput_regression.py:

@@ -252,20 +252,18 @@ AutoSklearnClassifier(ensemble_size=1,
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   44: {   &#39;balancing&#39;: Balancing(random_state=1),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f92123d40a0&gt;,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   30: {   &#39;balancing&#39;: Balancing(random_state=1),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc0329379d0&gt;,
             &#39;cost&#39;: 0.007092198581560294,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f92123d43a0&gt;,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc0342756d0&gt;,
             &#39;ensemble_weight&#39;: 1.0,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f92123d4250&gt;,
-            &#39;model_id&#39;: 44,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc0329375e0&gt;,
+            &#39;model_id&#39;: 30,
             &#39;rank&#39;: 1,
-            &#39;sklearn_classifier&#39;: SGDClassifier(alpha=2.9408089858100495e-06, average=True,
-              epsilon=1.4595123079991757e-05, eta0=0.01186975812112113,
-              l1_ratio=6.172715523781272e-06, learning_rate=&#39;invscaling&#39;,
-              loss=&#39;modified_huber&#39;, max_iter=128, penalty=&#39;elasticnet&#39;,
-              power_t=0.28535858665694225, random_state=1,
-              tol=5.529401896651241e-05, warm_start=True)}}
+            &#39;sklearn_classifier&#39;: SGDClassifier(alpha=2.990894200652787e-05, eta0=0.001784135741736084,
+              l1_ratio=0.011776069362168242, learning_rate=&#39;invscaling&#39;,
+              max_iter=16, penalty=&#39;elasticnet&#39;, power_t=0.4592501225875914,
+              random_state=1, tol=0.07231667943825462, warm_start=True)}}
 </pre></div>
 </div>
 </div>
@@ -276,10 +274,10 @@ AutoSklearnClassifier(ensemble_size=1,
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score: 0.972027972027972
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score: 0.9440559440559441
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  55.816 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  58.045 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-interpretable-models-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_interpretable_models.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
