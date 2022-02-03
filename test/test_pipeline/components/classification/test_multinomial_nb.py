@@ -1,10 +1,8 @@
 import numpy as np
-
 import sklearn.naive_bayes
 import sklearn.preprocessing
 
-from autosklearn.pipeline.components.classification.multinomial_nb import \
-    MultinomialNB
+from autosklearn.pipeline.components.classification.multinomial_nb import MultinomialNB
 from autosklearn.pipeline.util import get_dataset
 
 from .test_base import BaseClassificationComponentTest
@@ -32,17 +30,21 @@ class MultinomialNBComponentTest(BaseClassificationComponentTest):
 
     def test_default_configuration_negative_values(self):
         # Custon preprocessing test to check if clipping to zero works
-        X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
+        X_train, Y_train, X_test, Y_test = get_dataset(dataset="digits")
         ss = sklearn.preprocessing.StandardScaler()
         X_train = ss.fit_transform(X_train)
         configuration_space = MultinomialNB.get_hyperparameter_search_space()
         default = configuration_space.get_default_configuration()
 
-        cls = MultinomialNB(random_state=1, **{hp_name: default[hp_name]
-                                               for hp_name in default
-                                               if default[hp_name] is not None})
+        cls = MultinomialNB(
+            random_state=1,
+            **{
+                hp_name: default[hp_name]
+                for hp_name in default
+                if default[hp_name] is not None
+            },
+        )
 
         cls = cls.fit(X_train, Y_train)
         prediction = cls.predict(X_test)
-        self.assertAlmostEqual(np.nanmean(prediction == Y_test),
-                               0.88888888888888884)
+        self.assertAlmostEqual(np.nanmean(prediction == Y_test), 0.88888888888888884)

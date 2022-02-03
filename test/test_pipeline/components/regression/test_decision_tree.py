@@ -1,7 +1,7 @@
 import sklearn.tree
 
-from autosklearn.pipeline.components.regression.decision_tree import \
-    DecisionTree
+from autosklearn.pipeline.components.regression.decision_tree import DecisionTree
+
 from .test_base import BaseRegressionComponentTest
 
 

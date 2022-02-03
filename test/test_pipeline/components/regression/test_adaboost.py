@@ -1,7 +1,7 @@
 import sklearn.ensemble
 
-from autosklearn.pipeline.components.regression.adaboost import \
-    AdaboostRegressor
+from autosklearn.pipeline.components.regression.adaboost import AdaboostRegressor
+
 from .test_base import BaseRegressionComponentTest
 
 

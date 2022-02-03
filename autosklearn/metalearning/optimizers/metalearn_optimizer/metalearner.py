@@ -1,6 +1,7 @@
 import ast
-import pandas as pd
+
 import numpy as np
+import pandas as pd
 import sklearn.utils
 
 from autosklearn.metalearning.metalearning.kNearestDatasets.kND import KNearestDatasets
@@ -11,9 +12,17 @@ def test_function(params):
 
 
 class MetaLearningOptimizer(object):
-    def __init__(self, dataset_name, configuration_space,
-                 meta_base, logger, distance='l1', seed=None, use_features=None,
-                 distance_kwargs=None):
+    def __init__(
+        self,
+        dataset_name,
+        configuration_space,
+        meta_base,
+        logger,
+        distance="l1",
+        seed=None,
+        use_features=None,
+        distance_kwargs=None,
+    ):
         self.dataset_name = dataset_name
         self.configuration_space = configuration_space
         self.meta_base = meta_base
@@ -21,7 +30,7 @@ class MetaLearningOptimizer(object):
         self.seed = seed
         self.use_features = use_features
         self.distance_kwargs = distance_kwargs
-        self.kND = None     # For caching, makes things faster...
+        self.kND = None  # For caching, makes things faster...
 
         self.logger = logger
 
@@ -32,7 +41,9 @@ class MetaLearningOptimizer(object):
         hp_list = []
         for neighbor in neighbors:
             try:
-                configuration = self.meta_base.get_configuration_from_algorithm_index(neighbor[2])
+                configuration = self.meta_base.get_configuration_from_algorithm_index(
+                    neighbor[2]
+                )
                 self.logger.info("%s %s %s" % (neighbor[0], neighbor[1], configuration))
             except (KeyError):
                 self.logger.warning("Configuration %s not found" % neighbor[2])
@@ -42,14 +53,16 @@ class MetaLearningOptimizer(object):
         return hp_list
 
     def metalearning_suggest(self, history):
-        """Suggest the next most promising hyperparameters which were not yet evaluated"""
+        """Suggest the next promosing hyperparameters which were not yet evaluated"""
         # TODO test the object in the history!
         neighbors = self._learn()
         # Iterate over all datasets which are sorted ascending by distance
 
         history_with_indices = []
         for run in history:
-            history_with_indices.append(self.meta_base.get_algorithm_index_from_configuration(run))
+            history_with_indices.append(
+                self.meta_base.get_algorithm_index_from_configuration(run)
+            )
 
         for idx, neighbor in enumerate(neighbors):
             already_evaluated = False
@@ -62,16 +75,18 @@ class MetaLearningOptimizer(object):
                     break
 
             if not already_evaluated:
-                self.logger.info("Nearest dataset with hyperparameters of best value "
-                                 "not evaluated yet is %s with a distance of %f" %
-                                 (neighbor[0], neighbor[1]))
+                self.logger.info(
+                    "Nearest dataset with hyperparameters of best value "
+                    "not evaluated yet is %s with a distance of %f"
+                    % (neighbor[0], neighbor[1])
+                )
                 return self.meta_base.get_configuration_from_algorithm_index(
-                    neighbor[2])
+                    neighbor[2]
+                )
         raise StopIteration("No more values available.")
 
     def _learn(self, exclude_double_configurations=True):
-        dataset_metafeatures, all_other_metafeatures = \
-            self._split_metafeature_array()
+        dataset_metafeatures, all_other_metafeatures = self._split_metafeature_array()
 
         # Remove metafeatures which could not be calculated for the target
         # dataset
@@ -85,7 +100,8 @@ class MetaLearningOptimizer(object):
 
         # Do mean imputation of all other metafeatures
         all_other_metafeatures = all_other_metafeatures.fillna(
-            all_other_metafeatures.mean())
+            all_other_metafeatures.mean()
+        )
 
         if self.kND is None:
             # In case that we learn our distance function, get_value the parameters for
@@ -98,10 +114,12 @@ class MetaLearningOptimizer(object):
             # To keep the distance the same in every iteration, we create a new
             # random state
             random_state = sklearn.utils.check_random_state(self.seed)
-            kND = KNearestDatasets(metric=self.distance,
-                                   random_state=random_state,
-                                   logger=self.logger,
-                                   metric_params=rf_params)
+            kND = KNearestDatasets(
+                metric=self.distance,
+                random_state=random_state,
+                logger=self.logger,
+                metric_params=rf_params,
+            )
 
             runs = dict()
             # TODO move this code to the metabase
@@ -121,13 +139,15 @@ class MetaLearningOptimizer(object):
             dataset_metafeatures,
             k=-1,
             exclude_double_configurations=exclude_double_configurations,
-            )
+        )
 
     def _split_metafeature_array(self):
         dataset_metafeatures = self.meta_base.get_metafeatures(
-            self.dataset_name, self.use_features)
+            self.dataset_name, self.use_features
+        )
         all_other_datasets = self.meta_base.get_all_dataset_names()
         all_other_datasets.remove(self.dataset_name)
         all_other_metafeatures = self.meta_base.get_metafeatures(
-            all_other_datasets, self.use_features)
+            all_other_datasets, self.use_features
+        )
         return dataset_metafeatures, all_other_metafeatures

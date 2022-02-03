@@ -1,7 +1,7 @@
 import sklearn.linear_model
 
-from autosklearn.pipeline.components.regression.ard_regression import \
-    ARDRegression
+from autosklearn.pipeline.components.regression.ard_regression import ARDRegression
+
 from .test_base import BaseRegressionComponentTest
 
 

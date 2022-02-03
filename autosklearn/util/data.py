@@ -1,4 +1,3 @@
-import warnings
 from typing import (
     Any,
     Dict,
@@ -10,20 +9,17 @@ from typing import (
     Tuple,
     Type,
     Union,
-    cast
+    cast,
 )
 
+import warnings
+
 import numpy as np
-
 import pandas as pd
-
 from scipy.sparse import spmatrix
-
 from sklearn.model_selection import train_test_split
 
-from autosklearn.data.validation import SUPPORTED_FEAT_TYPES
 from autosklearn.evaluation.splitter import CustomStratifiedShuffleSplit
-
 
 # TODO: TypedDict with python 3.8
 #
@@ -32,15 +28,14 @@ from autosklearn.evaluation.splitter import CustomStratifiedShuffleSplit
 DatasetCompressionSpec = Dict[str, Union[float, List[str]]]
 
 # Default specification for arg `dataset_compression`
-default_dataset_compression_arg:  DatasetCompressionSpec = {
+default_dataset_compression_arg: DatasetCompressionSpec = {
     "memory_allocation": 0.1,
-    "methods": ["precision", "subsample"]
+    "methods": ["precision", "subsample"],
 }
 
 
 def validate_dataset_compression_arg(
-    dataset_compression: Mapping[str, Any],
-    memory_limit: int
+    dataset_compression: Mapping[str, Any], memory_limit: int
 ) -> DatasetCompressionSpec:
     """Validates and return a correct dataset_compression argument
 
@@ -58,22 +53,24 @@ def validate_dataset_compression_arg(
     """
     if isinstance(dataset_compression, Mapping):
         # Fill with defaults if they don't exist
-        dataset_compression = {
-            **default_dataset_compression_arg,
-            **dataset_compression
-        }
+        dataset_compression = {**default_dataset_compression_arg, **dataset_compression}
+
+        parsed_keys = set(dataset_compression.keys())
+        default_keys = set(default_dataset_compression_arg.keys())
 
         # Must contain known keys
-        if set(dataset_compression.keys()) != set(default_dataset_compression_arg.keys()):
+        if parsed_keys != default_keys:
             raise ValueError(
-                f"Unknown key in dataset_compression, {list(dataset_compression.keys())}."
-                f"\nPossible keys are {list(default_dataset_compression_arg.keys())}"
+                f"Unknown key(s) in ``dataset_compression``, {parsed_keys}."
+                f"\nPossible keys are {default_keys}"
             )
 
         memory_allocation = dataset_compression["memory_allocation"]
 
         # "memory_allocation" must be float or int
-        if not (isinstance(memory_allocation, float) or isinstance(memory_allocation, int)):
+        if not (
+            isinstance(memory_allocation, float) or isinstance(memory_allocation, int)
+        ):
             raise ValueError(
                 "key 'memory_allocation' must be an `int` or `float`"
                 f"\ntype = {memory_allocation}"
@@ -89,9 +86,11 @@ def validate_dataset_compression_arg(
             )
 
         # "memory_allocation" if absolute, should be > 0 and < memory_limit
-        if isinstance(memory_allocation, int) and not (0 < memory_allocation < memory_limit):
+        if isinstance(memory_allocation, int) and not (
+            0 < memory_allocation < memory_limit
+        ):
             raise ValueError(
-                f"key 'memory_allocation' if int must be in (0, memory_limit={memory_limit})"
+                f"key 'memory_allocation' if int must be in (0, {memory_limit})"
                 f"\nmemory_allocation = {memory_allocation}"
                 f"\ndataset_compression = {dataset_compression}"
             )
@@ -109,11 +108,13 @@ def validate_dataset_compression_arg(
 
         # "methods" must contain known methods
         if any(
-            method not in cast(Sequence, default_dataset_compression_arg["methods"])  # mypy
+            method
+            not in cast(Sequence, default_dataset_compression_arg["methods"])  # mypy
             for method in dataset_compression["methods"]
         ):
+            valid_methods = default_dataset_compression_arg["methods"]
             raise ValueError(
-                f"key 'methods' can only contain {default_dataset_compression_arg['methods']}"
+                f"key 'methods' can only contain {valid_methods}"
                 f"\nmethods = {dataset_compression['methods']}"
                 f"\ndataset_compression = {dataset_compression}"
             )
@@ -160,10 +161,10 @@ class _DtypeReductionMapping(Mapping):
     # provide only as much precision as np.longdouble,
     # that is, 80 bits on most x86 machines and 64 bits
     # in standard Windows builds.
-    if hasattr(np, 'float96'):
+    if hasattr(np, "float96"):
         _mapping[np.float96] = np.float64
 
-    if hasattr(np, 'float128'):
+    if hasattr(np, "float128"):
         _mapping[np.float128] = np.float64
 
     @classmethod
@@ -191,8 +192,10 @@ def binarization(array: Union[List, np.ndarray]) -> np.ndarray:
     # into 1 and the min into 0
     array = np.array(array, dtype=float)  # conversion needed to use np.inf
     if len(np.unique(array)) > 2:
-        raise ValueError('The argument must be a binary-class datafile. '
-                         '{} classes detected'.format(len(np.unique(array))))
+        raise ValueError(
+            "The argument must be a binary-class datafile. "
+            "{} classes detected".format(len(np.unique(array)))
+        )
 
     # manipulation which aims at avoid error in data
     # with for example classes '1' and '2'.
@@ -252,8 +255,8 @@ def subsample(
     is_classification: bool,
     sample_size: Union[float, int],
     random_state: Optional[Union[int, np.random.RandomState]] = None,
-) -> Tuple[SUPPORTED_FEAT_TYPES, Union[List, np.ndarray, pd.DataFrame, pd.Series]]:
-    """ Subsamples data returning the same type as it recieved.
+) -> Tuple[Union[np.ndarray, spmatrix], np.ndarray]:
+    """Subsamples data returning the same type as it recieved.
 
     If `is_classification`, we split using a stratified shuffle split which
     preserves unique labels in the training set.
@@ -298,8 +301,7 @@ def subsample(
 
     if is_classification:
         splitter = CustomStratifiedShuffleSplit(
-            train_size=sample_size,
-            random_state=random_state
+            train_size=sample_size, random_state=random_state
         )
         left_idxs, _ = next(splitter.split(X=X, y=y))
 
@@ -319,7 +321,8 @@ def subsample(
 
     else:
         X, _, y, _ = train_test_split(  # type: ignore
-            X, y,
+            X,
+            y,
             train_size=sample_size,
             random_state=random_state,
         )
@@ -330,7 +333,7 @@ def subsample(
 def reduce_precision(
     X: Union[np.ndarray, spmatrix]
 ) -> Tuple[Union[np.ndarray, spmatrix], Type]:
-    """ Reduces the precision of a np.ndarray or spmatrix containing floats
+    """Reduces the precision of a np.ndarray or spmatrix containing floats
 
     Parameters
     ----------
@@ -343,8 +346,10 @@ def reduce_precision(
         Returns the reduced data X along with the dtype it was reduced to.
     """
     if X.dtype not in supported_precision_reductions:
-        raise ValueError(f"X.dtype = {X.dtype} not equal to any supported"
-                         f" {supported_precision_reductions}")
+        raise ValueError(
+            f"X.dtype = {X.dtype} not equal to any supported"
+            f" {supported_precision_reductions}"
+        )
 
     precision = reduction_mapping[X.dtype]
     return X.astype(precision), precision
@@ -356,10 +361,10 @@ def reduce_dataset_size_if_too_large(
     memory_limit: int,
     is_classification: bool,
     random_state: Union[int, np.random.RandomState] = None,
-    operations: List[str] = ['precision', 'subsample'],
+    operations: List[str] = ["precision", "subsample"],
     memory_allocation: Union[int, float] = 0.1,
 ) -> Tuple[Union[np.ndarray, spmatrix], np.ndarray]:
-    f""" Reduces the size of the dataset if it's too close to the memory limit.
+    f"""Reduces the size of the dataset if it's too close to the memory limit.
 
     Follows the order of the operations passed in and retains the type of its
     input.
@@ -408,8 +413,8 @@ def reduce_dataset_size_if_too_large(
 
         **subsample**
 
-        Reduce the amount of samples of the dataset such that it fits into the allocated memory.
-        Ensures stratification and that unique labels are present
+        Reduce the amount of samples of the dataset such that it fits into the allocated
+        memory. Ensures stratification and that unique labels are present
 
     memory_allocation: Union[int, float] = 0.1
         The amount of memory to allocate to the dataset. A float specifys that the
@@ -437,27 +442,31 @@ def reduce_dataset_size_if_too_large(
         allocated_memory = memory_allocation
 
     else:
-        raise ValueError(f"Unknown type for `memory_allocation` {type(memory_allocation)}")
+        raise ValueError(
+            f"Unknown type for `memory_allocation` {type(memory_allocation)}"
+        )
 
-    if 'precision' in operations and X.dtype not in supported_precision_reductions:
+    if "precision" in operations and X.dtype not in supported_precision_reductions:
         raise ValueError(f"Unsupported type `{X.dtype}` for precision reduction")
 
     def megabytes(arr: Union[np.ndarray, spmatrix]) -> float:
-        return (arr.nbytes if isinstance(X, np.ndarray) else arr.data.nbytes) / (2**20)
+        return (arr.nbytes if isinstance(X, np.ndarray) else arr.data.nbytes) / (
+            2**20
+        )
 
     for operation in operations:
 
-        if operation == 'precision':
+        if operation == "precision":
             # If the dataset is too big for the allocated memory,
             # we then try to reduce the precision if it's a high precision dataset
             if megabytes(X) > allocated_memory:
                 X, precision = reduce_precision(X)
                 warnings.warn(
-                    f'Dataset too large for allocated memory {allocated_memory}MB, '
-                    f'reduced the precision from {X.dtype} to {precision}',
+                    f"Dataset too large for allocated memory {allocated_memory}MB, "
+                    f"reduced the precision from {X.dtype} to {precision}",
                 )
 
-        elif operation == 'subsample':
+        elif operation == "subsample":
             # If the dataset is still too big such that we couldn't fit
             # into the allocated memory, we subsample it so that it does
             if megabytes(X) > allocated_memory:
@@ -470,16 +479,18 @@ def reduce_dataset_size_if_too_large(
                 # Tried the generic `def subsample(X: T) -> T` approach but it was
                 # failing elsewhere, keeping it simple for now
                 X, y = subsample(  # type: ignore
-                    X, y,
+                    X,
+                    y,
                     sample_size=sample_percentage,
                     is_classification=is_classification,
-                    random_state=random_state
+                    random_state=random_state,
                 )
 
                 n_samples_after = X.shape[0]
                 warnings.warn(
-                    f"Dataset too large for allocated memory {allocated_memory}MB, reduced"
-                    f" number of samples from {n_samples_before} to {n_samples_after}."
+                    f"Dataset too large for allocated memory {allocated_memory}MB,"
+                    f" reduced number of samples from {n_samples_before} to"
+                    f" {n_samples_after}."
                 )
 
         else:
