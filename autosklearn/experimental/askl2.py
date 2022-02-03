@@ -1,11 +1,10 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Mapping, Optional, Union
 
 import hashlib
 import json
 import os
 import pathlib
 import pickle
-from typing import Any, Dict, List, Optional, Union, Mapping
 
 import dask.distributed
 import numpy as np
@@ -206,7 +205,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         metric: Optional[Scorer] = None,
         scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
-        dataset_compression: Union[bool, Mapping[str, Any]] = True
+        dataset_compression: Union[bool, Mapping[str, Any]] = True,
     ):
 
         """

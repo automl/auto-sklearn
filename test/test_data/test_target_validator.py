@@ -1,13 +1,9 @@
 import numpy as np
 import pandas as pd
 import pytest
-from pandas.api.types import is_numeric_dtype, is_bool_dtype
-
-from scipy import sparse
-
 import sklearn.datasets
 import sklearn.model_selection
-from pandas.api.types import is_numeric_dtype
+from pandas.api.types import is_bool_dtype, is_numeric_dtype
 from scipy import sparse
 from sklearn.utils.multiclass import type_of_target
 
@@ -107,25 +103,25 @@ def input_data_targettest(request):
 @pytest.mark.parametrize(
     "input_data_targettest",
     (
-        'series_binary',
-        'series_multiclass',
-        'series_continuous',
-        'pandas_binary',
-        'pandas_multiclass',
-        'pandas_multilabel',
-        'pandas_continuous',
-        'pandas_continuous-multioutput',
-        'numpy_binary',
-        'numpy_multiclass',
-        'numpy_multilabel',
-        'numpy_continuous',
-        'numpy_continuous-multioutput',
-        'list_binary',
-        'list_multiclass',
-        'list_multilabel',
-        'list_continuous',
-        'list_continuous-multioutput',
-        'openml_204',
+        "series_binary",
+        "series_multiclass",
+        "series_continuous",
+        "pandas_binary",
+        "pandas_multiclass",
+        "pandas_multilabel",
+        "pandas_continuous",
+        "pandas_continuous-multioutput",
+        "numpy_binary",
+        "numpy_multiclass",
+        "numpy_multilabel",
+        "numpy_continuous",
+        "numpy_continuous-multioutput",
+        "list_binary",
+        "list_multiclass",
+        "list_multilabel",
+        "list_continuous",
+        "list_continuous-multioutput",
+        "openml_204",
     ),
     indirect=True,
 )
@@ -153,15 +149,15 @@ def test_targetvalidator_supported_types_noclassification(input_data_targettest)
 @pytest.mark.parametrize(
     "input_data_targettest",
     (
-        'series_binary',
-        'series_multiclass',
-        'pandas_binary',
-        'pandas_multiclass',
-        'numpy_binary',
-        'numpy_multiclass',
-        'list_binary',
-        'list_multiclass',
-        'openml_2',
+        "series_binary",
+        "series_multiclass",
+        "pandas_binary",
+        "pandas_multiclass",
+        "numpy_binary",
+        "numpy_multiclass",
+        "list_binary",
+        "list_multiclass",
+        "openml_2",
     ),
     indirect=True,
 )
@@ -182,10 +178,7 @@ def test_targetvalidator_supported_types_classification(input_data_targettest):
     assert isinstance(y_inverse, np.ndarray)
 
     # Assert that y_encoded is numeric and not boolean
-    assert (
-        is_numeric_dtype(y_encoded.dtype)
-        and not is_bool_dtype(y_encoded.dtype)
-    )
+    assert is_numeric_dtype(y_encoded.dtype) and not is_bool_dtype(y_encoded.dtype)
 
     # Assert dtype is presevered with y -> y_encoded -> y_inverse
     def dtype(arr):
@@ -210,7 +203,7 @@ def test_targetvalidator_supported_types_classification(input_data_targettest):
     if len(shape) == 2 and shape[1] == 1:
         # For cases where y = [[1], [2], [3]],
         # we expect y_inverse, y_encodedd to have been flattened to [1,2,3]
-        expected_shape = (shape[0], )
+        expected_shape = (shape[0],)
     else:
         expected_shape = shape
 
@@ -226,7 +219,7 @@ def test_targetvalidator_supported_types_classification(input_data_targettest):
     #
     # As a result of this, we don't encode 'multilabel-indicator' labels and
     # there is nothing else to check here
-    if validator.type_of_target == 'multilabel-indicator':
+    if validator.type_of_target == "multilabel-indicator":
         assert validator.encoder is None
 
     else:
@@ -436,9 +429,13 @@ def test_target_unsupported():
         ValueError, match=r"arget values cannot contain missing/NaN values"
     ):
         validator.fit(sparse.csr_matrix(np.array([1, 2, np.nan])))
-    with pytest.raises(ValueError, match=r"TargetValidator must have fit\(\) called first"):
+    with pytest.raises(
+        ValueError, match=r"TargetValidator must have fit\(\) called first"
+    ):
         validator.transform(np.array([1, 2, 3]))
-    with pytest.raises(ValueError, match=r"TargetValidator must have fit\(\) called first"):
+    with pytest.raises(
+        ValueError, match=r"TargetValidator must have fit\(\) called first"
+    ):
         validator.inverse_transform(np.array([1, 2, 3]))
     with pytest.raises(
         ValueError, match=r"Multi-dimensional classification is not yet supported"

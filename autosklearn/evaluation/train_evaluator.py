@@ -873,7 +873,7 @@ class TrainEvaluator(AbstractEvaluator):
             while (
                 not model.configuration_fully_fitted() and model_current_iter < max_iter
             ):
-                n_iter = int(2 ** iteration / 2) if iteration > 1 else 2
+                n_iter = int(2**iteration / 2) if iteration > 1 else 2
                 total_n_iteration += n_iter
                 model.iterative_fit(
                     Xt,

@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Mapping, Optional, Tuple, Union, cast
 
 import copy
 import io
@@ -9,10 +9,6 @@ import multiprocessing
 import os
 import platform
 import sys
-import time
-from typing import Any, Dict, Mapping, Optional, List, Tuple, Union, cast
-import uuid
-import unittest.mock
 import tempfile
 import time
 import unittest.mock
@@ -68,30 +64,8 @@ from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, _fit_with_budget
+from autosklearn.metric import Scorer, default_metric_for_task
 from autosklearn.metrics import calculate_metric
-from autosklearn.util.data import (
-    reduce_dataset_size_if_too_large,
-    supported_precision_reductions,
-    validate_dataset_compression_arg,
-    default_dataset_compression_arg,
-    DatasetCompressionSpec,
-)
-from autosklearn.util.stopwatch import StopWatch
-from autosklearn.util.logging_ import (
-    setup_logger,
-    start_log_server,
-    get_named_client_logger,
-    warnings_to,
-    PicklableClientLogger,
-)
-from autosklearn.util import pipeline, RE_PATTERN
-from autosklearn.util.parallel import preload_modules
-from autosklearn.ensemble_builder import EnsembleBuilderManager
-from autosklearn.ensembles.singlebest_ensemble import SingleBest
-from autosklearn.smbo import AutoMLSMBO
-from autosklearn.constants import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
-    REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION, \
-    CLASSIFICATION_TASKS
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.components.classification import ClassifierChoice
 from autosklearn.pipeline.components.data_preprocessing.categorical_encoding import (
@@ -107,6 +81,13 @@ from autosklearn.pipeline.components.feature_preprocessing import (
 from autosklearn.pipeline.components.regression import RegressorChoice
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util import RE_PATTERN, pipeline
+from autosklearn.util.data import (
+    DatasetCompressionSpec,
+    default_dataset_compression_arg,
+    reduce_dataset_size_if_too_large,
+    supported_precision_reductions,
+    validate_dataset_compression_arg,
+)
 from autosklearn.util.logging_ import (
     PicklableClientLogger,
     get_named_client_logger,
@@ -200,7 +181,6 @@ def _model_predict(
 
 
 class AutoML(BaseEstimator):
-
     def __init__(
         self,
         time_left_for_this_task,
@@ -217,7 +197,7 @@ class AutoML(BaseEstimator):
         debug_mode=False,
         include=None,
         exclude=None,
-        resampling_strategy='holdout-iterative-fit',
+        resampling_strategy="holdout-iterative-fit",
         resampling_strategy_arguments=None,
         n_jobs=None,
         dask_client: Optional[dask.distributed.Client] = None,
@@ -229,7 +209,7 @@ class AutoML(BaseEstimator):
         metric=None,
         scoring_functions=None,
         get_trials_callback=None,
-        dataset_compression: Union[bool, Mapping[str, Any]] = True
+        dataset_compression: Union[bool, Mapping[str, Any]] = True,
     ):
         super(AutoML, self).__init__()
         self.configuration_space = None
@@ -267,10 +247,17 @@ class AutoML(BaseEstimator):
         self._disable_evaluator_output = disable_evaluator_output
         # Check arguments prior to doing anything!
         if not isinstance(self._disable_evaluator_output, (bool, List)):
-            raise ValueError('disable_evaluator_output must be of type bool '
-                             'or list.')
+            raise ValueError(
+                "disable_evaluator_output must be of type bool " "or list."
+            )
         if isinstance(self._disable_evaluator_output, List):
-            allowed_elements = ['model', 'cv_model', 'y_optimization', 'y_test', 'y_valid']
+            allowed_elements = [
+                "model",
+                "cv_model",
+                "y_optimization",
+                "y_test",
+                "y_valid",
+            ]
             for element in self._disable_evaluator_output:
                 if element not in allowed_elements:
                     raise ValueError(
@@ -715,10 +702,9 @@ class AutoML(BaseEstimator):
             memory_allocation = self._dataset_compression["memory_allocation"]
 
             # Remove precision reduction if we can't perform it
-            if (
-                X.dtype not in supported_precision_reductions
-                and "precision" in cast(List[str], methods)  # Removable with TypedDict
-            ):
+            if X.dtype not in supported_precision_reductions and "precision" in cast(
+                List[str], methods
+            ):  # Removable with TypedDict
                 methods = [method for method in methods if method != "precision"]
 
             with warnings_to(self._logger):
@@ -729,7 +715,7 @@ class AutoML(BaseEstimator):
                     is_classification=is_classification,
                     random_state=self._seed,
                     operations=methods,
-                    memory_allocation=memory_allocation
+                    memory_allocation=memory_allocation,
                 )
 
         # Check the re-sampling strategy
@@ -1585,9 +1571,10 @@ class AutoML(BaseEstimator):
             ):
                 raise ValueError("No models fitted!")
 
-        elif self._disable_evaluator_output is False or \
-                (isinstance(self._disable_evaluator_output, List) and
-                 'model' not in self._disable_evaluator_output):
+        elif self._disable_evaluator_output is False or (
+            isinstance(self._disable_evaluator_output, List)
+            and "model" not in self._disable_evaluator_output
+        ):
             model_names = self._backend.list_all_models(self._seed)
 
             if len(model_names) == 0 and self._resampling_strategy not in [

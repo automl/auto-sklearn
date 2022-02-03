@@ -1,15 +1,11 @@
 # -*- encoding: utf-8 -*-
-import logging
 from typing import List, Optional, Tuple, Union
 
 import logging
 
 import numpy as np
-
 import pandas as pd
-
 from scipy.sparse import spmatrix
-
 from sklearn.base import BaseEstimator
 from sklearn.exceptions import NotFittedError
 
@@ -19,7 +15,7 @@ from autosklearn.util.logging_ import get_named_client_logger
 
 
 def convert_if_sparse(
-    y: SUPPORTED_TARGET_TYPES
+    y: SUPPORTED_TARGET_TYPES,
 ) -> Union[np.ndarray, List, pd.DataFrame, pd.Series]:
     """If the labels `y` are sparse, it will convert it to its dense representation
 
@@ -56,23 +52,27 @@ class InputValidator(BaseEstimator):
 
     Attributes
     ----------
-        feat_type: Optional[List[str]]
-            In case the dataset is not a pandas DataFrame:
-                + If provided, this list indicates which columns should be treated as categorical
-                  it is internally transformed into a dictionary that indicates a mapping from
-                  column index to categorical/numerical
-                + If not provided, by default all columns are treated as numerical
-            If the input dataset is of type pandas dataframe, this argument
-            must be none, as the column type will be inferred from the pandas dtypes.
-        is_classification: bool
-            For classification task, this flag indicates that the target data
-            should be encoded
-        feature_validator: FeatureValidator
-            A FeatureValidator instance used to validate and encode feature columns to match
-            sklearn expectations on the data
-        target_validator: TargetValidator
-            A TargetValidator instance used to validate and encode (in case of classification)
-            the target values
+    feat_type: Optional[List[str]] = None
+        In case the dataset is not a pandas DataFrame:
+            +   If provided, this list indicates which columns should be treated as
+                categorical it is internally transformed into a dictionary that
+                indicates a mapping from column index to categorical/numerical.
+            +   If not provided, by default all columns are treated as numerical
+
+        If the input dataset is of type pandas dataframe, this argument
+        must be none, as the column type will be inferred from the pandas dtypes.
+
+    is_classification: bool
+        For classification task, this flag indicates that the target data
+        should be encoded
+
+    feature_validator: FeatureValidator
+        A FeatureValidator instance used to validate and encode feature columns to match
+        sklearn expectations on the data
+
+    target_validator: TargetValidator
+        A TargetValidator instance used for classification to validate and encode the
+        target values
     """
 
     def __init__(
@@ -124,18 +124,22 @@ class InputValidator(BaseEstimator):
 
         Parameters
         ----------
-            X_train: SUPPORTED_FEAT_TYPES
-                A set of features that are going to be validated (type and dimensionality
-                checks). If this data contains categorical columns, an encoder is going to
-                be instantiated and trained with this data.
-            y_train: SUPPORTED_TARGET_TYPES
-                A set of targets that are going to be encoded if the task is for classification
-            X_test: Optional[SUPPORTED_FEAT_TYPES]
-                A hold out set of features used for checking
-            y_test: SUPPORTED_TARGET_TYPES
-                A hold out set of targets used for checking. Additionally, if the current task
-                is a classification task, this y_test categories are also going to be used to
-                fit a pre-processing encoding (to prevent errors on unseen classes).
+        X_train: SUPPORTED_FEAT_TYPES
+            A set of features that are going to be validated (type and dimensionality
+            checks). If this data contains categorical columns, an encoder is going to
+            be instantiated and trained with this data.
+
+        y_train: SUPPORTED_TARGET_TYPES
+            A set of targets to encoded if the task is for classification.
+
+        X_test: Optional[SUPPORTED_FEAT_TYPES]
+            A hold out set of features used for checking
+
+        y_test: SUPPORTED_TARGET_TYPES
+            A hold out set of targets used for checking. Additionally, if the current
+            task is a classification task, this y_test categories are also going to be
+            used to fit a pre-processing encoding (to prevent errors on unseen classes).
+
         Returns
         -------
         self
@@ -187,7 +191,9 @@ class InputValidator(BaseEstimator):
                 The transformed targets array
         """
         if not self._is_fitted:
-            raise NotFittedError("Cannot call transform on a validator that is not fitted")
+            raise NotFittedError(
+                "Cannot call transform on a validator that is not fitted"
+            )
 
         X_transformed = self.feature_validator.transform(X)
         if y is not None:

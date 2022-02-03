@@ -9,22 +9,9 @@ from sklearn.base import BaseEstimator
 
 from autosklearn.data.validation import SUPPORTED_FEAT_TYPES, SUPPORTED_TARGET_TYPES
 from autosklearn.pipeline.base import (
-     BasePipeline,
-     DATASET_PROPERTIES_TYPE,
-     PIPELINE_DATA_DTYPE,
- )
-from autosklearn.pipeline.components.data_preprocessing.feature_type_categorical \
-    import CategoricalPreprocessingPipeline
-from autosklearn.pipeline.components.data_preprocessing.feature_type_numerical \
-    import NumericalPreprocessingPipeline
-from autosklearn.pipeline.components.data_preprocessing.feature_type_text \
-    import TextPreprocessingPipeline
-from autosklearn.pipeline.components.base import AutoSklearnComponent, AutoSklearnChoice, \
-    AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
-from autosklearn.data.validation import (
-    SUPPORTED_FEAT_TYPES,
-    SUPPORTED_TARGET_TYPES,
+    DATASET_PROPERTIES_TYPE,
+    PIPELINE_DATA_DTYPE,
+    BasePipeline,
 )
 from autosklearn.pipeline.components.base import (
     AutoSklearnChoice,
@@ -37,12 +24,17 @@ from autosklearn.pipeline.components.data_preprocessing.feature_type_categorical
 from autosklearn.pipeline.components.data_preprocessing.feature_type_numerical import (
     NumericalPreprocessingPipeline,
 )
+from autosklearn.pipeline.components.data_preprocessing.feature_type_text import (
+    TextPreprocessingPipeline,
+)
 from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 
 
 class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
-    """ This component is used to apply distinct transformations to categorical,
-    numerical and text features of a dataset. It is built on top of sklearn's ColumnTransformer.
+    """
+    This component is used to apply distinct transformations to categorical,
+    numerical and text features of a dataset. It is built on top of sklearn's
+    ColumnTransformer.
     """
 
     def __init__(
@@ -96,9 +88,14 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
         self.numer_ppl = NumericalPreprocessingPipeline(
-            config=None, steps=pipeline, dataset_properties=dataset_properties,
-            include=include, exclude=exclude, random_state=random_state,
-            init_params=init_params)
+            config=None,
+            steps=pipeline,
+            dataset_properties=dataset_properties,
+            include=include,
+            exclude=exclude,
+            random_state=random_state,
+            init_params=init_params,
+        )
 
         # The pipeline that will be applied to the text features (i.e. columns)
         # of the dataset
@@ -108,9 +105,14 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
         self.txt_ppl = TextPreprocessingPipeline(
-            config=None, steps=pipeline, dataset_properties=dataset_properties,
-            include=include, exclude=exclude, random_state=random_state,
-            init_params=init_params)
+            config=None,
+            steps=pipeline,
+            dataset_properties=dataset_properties,
+            include=include,
+            exclude=exclude,
+            random_state=random_state,
+            init_params=init_params,
+        )
 
         self._transformers: List[Tuple[str, AutoSklearnComponent]] = [
             ("categorical_transformer", self.categ_ppl),
@@ -137,28 +139,40 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
             else:
                 columns = set(range(n_feats))
             if expected != columns:
-                raise ValueError(f"Train data has columns={expected} yet the"
-                                 f" feat_types are feat={columns}")
-            categorical_features = [key for key, value in self.feat_type.items()
-                                    if value.lower() == 'categorical']
-            numerical_features = [key for key, value in self.feat_type.items()
-                                  if value.lower() == 'numerical']
-            text_features = [key for key, value in self.feat_type.items()
-                             if value.lower() == "string"]
+                raise ValueError(
+                    f"Train data has columns={expected} yet the"
+                    f" feat_types are feat={columns}"
+                )
+            categorical_features = [
+                key
+                for key, value in self.feat_type.items()
+                if value.lower() == "categorical"
+            ]
+            numerical_features = [
+                key
+                for key, value in self.feat_type.items()
+                if value.lower() == "numerical"
+            ]
+            text_features = [
+                key
+                for key, value in self.feat_type.items()
+                if value.lower() == "string"
+            ]
 
             sklearn_transf_spec = [
                 (name, transformer, feature_columns)
-                for name, transformer, feature_columns
-                in [
+                for name, transformer, feature_columns in [
                     ("text_transformer", self.txt_ppl, text_features),
                     ("categorical_transformer", self.categ_ppl, categorical_features),
-                    ("numerical_transformer", self.numer_ppl, numerical_features)
+                    ("numerical_transformer", self.numer_ppl, numerical_features),
                 ]
                 if len(feature_columns) > 0
             ]
         else:
             # self.feature_type == None assumes numerical case
-            sklearn_transf_spec = [("numerical_transformer", self.numer_ppl, [True]*n_feats)]
+            sklearn_transf_spec = [
+                ("numerical_transformer", self.numer_ppl, [True] * n_feats)
+            ]
 
         # And one last check in case feat type is None
         # And to make sure the final specification has all the columns
@@ -167,8 +181,10 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
             [len(features) for name, ppl, features in sklearn_transf_spec]
         )
         if total_columns != n_feats:
-            raise ValueError("Missing columns in the specification of the data validator"
-                             f" for train data={np.shape(X)} and spec={sklearn_transf_spec}")
+            raise ValueError(
+                "Missing columns in the specification of the data validator"
+                f" for train data={np.shape(X)} and spec={sklearn_transf_spec}"
+            )
 
         self.sparse_ = sparse.issparse(X) or self.force_sparse_output
         self.column_transformer = sklearn.compose.ColumnTransformer(

@@ -89,7 +89,7 @@ class KernelRidgeRegression(AutoSklearnRegressionAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
         alpha = UniformFloatHyperparameter(
-            name="alpha", lower=10 ** -5, upper=1, log=True, default_value=1.0
+            name="alpha", lower=10**-5, upper=1, log=True, default_value=1.0
         )
         kernel = CategoricalHyperparameter(
             name="kernel",

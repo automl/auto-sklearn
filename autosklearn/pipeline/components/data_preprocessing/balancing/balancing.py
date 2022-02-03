@@ -65,7 +65,7 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
         pre_: List[str] = []
         if classifier in clf_ or preprocessor in pre_:
             if len(Y.shape) > 1:
-                offsets = [2 ** i for i in range(Y.shape[1])]
+                offsets = [2**i for i in range(Y.shape[1])]
                 Y_ = np.sum(Y * offsets, axis=1)
             else:
                 Y_ = Y

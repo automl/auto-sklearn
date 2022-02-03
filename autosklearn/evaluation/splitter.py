@@ -64,18 +64,18 @@ class CustomStratifiedShuffleSplit(StratifiedShuffleSplit):
             #   Each list n_i, t_i represent the list of class in the
             #   training_set and test_set resepectively.
             #
-            #   n_i = [100, 100, 0, 3]  # 100 instance of class '0', 0 instance of class '2'
-            #   t_i = [300, 300, 1, 3]  # 300 instances of class '0', 1 instance of class '2'
+            #   n_i = [100, 100, 0, 3]  # 100 of class '0', 0 of class '2'
+            #   t_i = [300, 300, 1, 3]  # 300 of class '0', 1 of class '2'
             #
             #  To support unique labels such as class '2', which only has one sample
             #  between both n_i and t_i, we need to make sure that n_i has at least
             #  one sample of all classes. There is also the extra check to ensure
             #  that the sizes stay the same.
             #
-            #   n_i = [ 99, 100, 1, 3]  # 100 instance of class '0', 0 instance of class '2'
+            #   n_i = [ 99, 100, 1, 3]  # 100 of class '0', 0 of class '2'
             #            |       ^
             #            v       |
-            #   t_i = [301, 300, 0, 3]  # 300 instances of class '0', 1 instance of class '2'
+            #   t_i = [301, 300, 0, 3]  # 300 of class '0', 1 of class '2'
             #
             for i, class_count in enumerate(n_i):
                 if class_count == 0:
@@ -84,20 +84,21 @@ class CustomStratifiedShuffleSplit(StratifiedShuffleSplit):
 
                     j = np.argmax(n_i)
                     if n_i[j] == 1:
-                        warnings.warn("Can't respect size requirements for split.",
-                                      " The training set must contain all of the unique"
-                                      " labels that exist in the dataset.")
+                        warnings.warn(
+                            "Can't respect size requirements for split.",
+                            " The training set must contain all of the unique"
+                            " labels that exist in the dataset.",
+                        )
                     else:
                         n_i[j] -= 1
                         t_i[j] += 1
 
             for i in range(n_classes):
                 permutation = rng.permutation(class_counts[i])
-                perm_indices_class_i = class_indices[i].take(permutation,
-                                                             mode='clip')
+                perm_indices_class_i = class_indices[i].take(permutation, mode="clip")
 
-                train.extend(perm_indices_class_i[:n_i[i]])
-                test.extend(perm_indices_class_i[n_i[i]:n_i[i] + t_i[i]])
+                train.extend(perm_indices_class_i[: n_i[i]])
+                test.extend(perm_indices_class_i[n_i[i] : n_i[i] + t_i[i]])
 
             train = rng.permutation(train)
             test = rng.permutation(test)

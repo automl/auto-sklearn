@@ -1,7 +1,19 @@
 import sklearn.metrics
 from sklearn.linear_model import RidgeClassifier
 
-from test.test_pipeline.ignored_warnings import ignore_warnings, feature_preprocessing_warnings
+from autosklearn.pipeline.components.feature_preprocessing.liblinear_svc_preprocessor import (  # noqa: E501
+    LibLinear_Preprocessor,
+)
+from autosklearn.pipeline.util import (
+    PreprocessingTestCase,
+    _test_preprocessing,
+    get_dataset,
+)
+
+from test.test_pipeline.ignored_warnings import (
+    feature_preprocessing_warnings,
+    ignore_warnings,
+)
 
 
 class LiblinearComponentTest(PreprocessingTestCase):

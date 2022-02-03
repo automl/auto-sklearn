@@ -1,4 +1,4 @@
-from typing import Type, Container
+from typing import Container, Type
 
 import unittest
 
@@ -11,9 +11,7 @@ from autosklearn.pipeline.components.regression.libsvm_svr import LibSVM_SVR
 from autosklearn.pipeline.constants import SPARSE
 from autosklearn.pipeline.util import _test_regressor, _test_regressor_iterative_fit
 
-from autosklearn.pipeline.components.regression import _regressors, RegressorChoice
-
-from test.test_pipeline.ignored_warnings import regressor_warnings, ignore_warnings
+from test.test_pipeline.ignored_warnings import ignore_warnings, regressor_warnings
 
 
 class BaseRegressionComponentTest(unittest.TestCase):
@@ -90,8 +88,8 @@ class BaseRegressionComponentTest(unittest.TestCase):
             self.assertAlmostEqual(fixture, score, places)
 
             if self.step_hyperparameter is not None:
-                param_name = self.step_hyperparameter['name']
-                default = self.step_hyperparameter['value']
+                param_name = self.step_hyperparameter["name"]
+                default = self.step_hyperparameter["value"]
 
                 value = getattr(regressor.estimator, param_name)
                 expected = self.res.get("boston_iterative_n_iter", default)

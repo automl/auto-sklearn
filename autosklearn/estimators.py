@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
-from typing import Any, Optional, Dict, List, Mapping, Tuple, Union, Iterable
-from typing_extensions import Literal
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, Union
 
 import dask.distributed
 import joblib
@@ -51,7 +50,7 @@ class AutoSklearnEstimator(BaseEstimator):
         scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
         get_trials_callback=None,
-        dataset_compression: Union[bool, Mapping[str, Any]] = True
+        dataset_compression: Union[bool, Mapping[str, Any]] = True,
     ):
         """
         Parameters
@@ -415,7 +414,7 @@ class AutoSklearnEstimator(BaseEstimator):
             metric=self.metric,
             scoring_functions=self.scoring_functions,
             get_trials_callback=self.get_trials_callback,
-            dataset_compression=self.dataset_compression
+            dataset_compression=self.dataset_compression,
         )
 
         return automl
@@ -1083,7 +1082,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
 
 class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
-    """This class implements the classification task. """
+    """This class implements the classification task."""
 
     def fit(self, X, y, X_test=None, y_test=None, feat_type=None, dataset_name=None):
         """Fit *auto-sklearn* to given training set (X, y).

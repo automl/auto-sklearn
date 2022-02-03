@@ -5,7 +5,14 @@ import unittest
 import numpy as np
 import sklearn.metrics
 
-from test.test_pipeline.ignored_warnings import ignore_warnings, classifier_warnings
+from autosklearn.pipeline.constants import SPARSE
+from autosklearn.pipeline.util import (
+    _test_classifier,
+    _test_classifier_iterative_fit,
+    _test_classifier_predict_proba,
+)
+
+from test.test_pipeline.ignored_warnings import classifier_warnings, ignore_warnings
 
 
 class BaseClassificationComponentTest(unittest.TestCase):

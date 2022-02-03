@@ -17,7 +17,7 @@ repos:
         args: [--check]
 
   - repo: https://github.com/ambv/black
-    rev: 21.12b0
+    rev: 22.1.0
     hooks:
       - id: black
         name: black formatter autosklearn

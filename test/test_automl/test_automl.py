@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 from typing import Dict, List, Union
 
+import glob
 import itertools
 import os
 import pickle
-import sys
 import time
 import unittest
 import unittest.mock
@@ -13,31 +13,11 @@ import warnings
 import numpy as np
 import pandas as pd
 import pytest
-from scipy.sparse import csr_matrix, spmatrix
 import sklearn.datasets
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_matrix, spmatrix
 from sklearn.ensemble import VotingClassifier, VotingRegressor
 from smac.facade.roar_facade import ROAR
-
-from autosklearn.automl import AutoML, AutoMLClassifier, AutoMLRegressor, _model_predict
-from autosklearn.data.validation import InputValidator
-import autosklearn.automl
-from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.metrics import (
-    accuracy, log_loss, balanced_accuracy, default_metric_for_task
-)
-from autosklearn.evaluation.abstract_evaluator import MyDummyClassifier, MyDummyRegressor
-from autosklearn.util.data import default_dataset_compression_arg
-from autosklearn.util.logging_ import PickableLoggerAdapter
-import autosklearn.pipeline.util as putil
-from autosklearn.constants import (
-    MULTICLASS_CLASSIFICATION,
-    BINARY_CLASSIFICATION,
-    MULTILABEL_CLASSIFICATION,
-    REGRESSION,
-    MULTIOUTPUT_REGRESSION,
-    CLASSIFICATION_TASKS,
-)
+from smac.scenario.scenario import Scenario
 from smac.tae import StatusType
 
 import autosklearn.automl
@@ -50,7 +30,6 @@ from autosklearn.constants import (
     MULTILABEL_CLASSIFICATION,
     MULTIOUTPUT_REGRESSION,
     REGRESSION,
-    REGRESSION_TASKS,
 )
 from autosklearn.data.validation import InputValidator
 from autosklearn.data.xy_data_manager import XYDataManager
@@ -64,13 +43,12 @@ from autosklearn.metrics import (
     default_metric_for_task,
     log_loss,
 )
+from autosklearn.util.data import default_dataset_compression_arg
 from autosklearn.util.logging_ import PickableLoggerAdapter
 
-sys.path.append(os.path.dirname(__file__))
-from automl_utils import (  # noqa (E402: module level import not at top of file)
+from test.test_automl.automl_utils import (
     AutoMLLogParser,
     count_succeses,
-    includes_all_scores,
     includes_train_scores,
     performance_over_time_is_plausible,
     print_debug_information,
@@ -89,7 +67,7 @@ class AutoMLStub(AutoML):
 
 
 def test_fit(dask_client):
-    X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+    X_train, Y_train, X_test, Y_test = putil.get_dataset("iris")
     automl = autosklearn.automl.AutoML(
         seed=0,
         time_left_for_this_task=30,
@@ -1024,7 +1002,7 @@ def test_param_dataset_compression_false(dataset_compression: bool) -> None:
     auto = AutoMLRegressor(
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        dataset_compression=dataset_compression
+        dataset_compression=dataset_compression,
     )
 
     assert auto._dataset_compression is None
@@ -1045,14 +1023,16 @@ def test_construction_param_dataset_compression_true(dataset_compression: bool) 
     auto = AutoMLRegressor(
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        dataset_compression=dataset_compression
+        dataset_compression=dataset_compression,
     )
 
     assert auto._dataset_compression == default_dataset_compression_arg
 
 
 @pytest.mark.parametrize("dataset_compression", [{"memory_allocation": 0.2}])
-def test_construction_param_dataset_compression_valid_dict(dataset_compression: Dict) -> None:
+def test_construction_param_dataset_compression_valid_dict(
+    dataset_compression: Dict,
+) -> None:
     """
     Parameters
     ----------
@@ -1066,7 +1046,7 @@ def test_construction_param_dataset_compression_valid_dict(dataset_compression: 
     auto = AutoMLRegressor(
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        dataset_compression=dataset_compression
+        dataset_compression=dataset_compression,
     )
 
     expected_memory_allocation = dataset_compression["memory_allocation"]
@@ -1077,7 +1057,9 @@ def test_construction_param_dataset_compression_valid_dict(dataset_compression: 
     assert auto._dataset_compression["methods"] == expected_methods
 
 
-@pytest.mark.parametrize("dataset_compression", [{"methods": ["precision", "subsample"]}])
+@pytest.mark.parametrize(
+    "dataset_compression", [{"methods": ["precision", "subsample"]}]
+)
 @pytest.mark.parametrize("X", [np.ones((100, 10), dtype=int)])
 @pytest.mark.parametrize("y", [np.random.random((100,))])
 @unittest.mock.patch("autosklearn.automl.reduce_dataset_size_if_too_large")
@@ -1085,7 +1067,7 @@ def test_fit_performs_dataset_compression_without_precision_with_int(
     mock_reduce_dataset: unittest.mock.MagicMock,
     dataset_compression: Dict,
     X: np.ndarray,
-    y: np.ndarray
+    y: np.ndarray,
 ) -> None:
     """We can't reduce the precision of ints as we do with floats. Suppose someone
     was to pass a column with `max_int64` and `min_int64`, any reduction of bits will
@@ -1118,7 +1100,7 @@ def test_fit_performs_dataset_compression_without_precision_with_int(
     auto = AutoMLRegressor(
         time_left_for_this_task=30,  # not used but required
         per_run_time_limit=5,  # not used but required
-        dataset_compression=dataset_compression
+        dataset_compression=dataset_compression,
     )
 
     # To prevent fitting anything we use `only_return_configuration_space`
@@ -1131,36 +1113,48 @@ def test_fit_performs_dataset_compression_without_precision_with_int(
 
 
 @pytest.mark.parametrize("dataset_compression", [True])
-@pytest.mark.parametrize("X", [
-    np.empty((10, 10)),
-    csr_matrix(np.identity(10)),
-    pytest.param(
-        np.empty((10, 10)).tolist(),
-        marks=pytest.mark.xfail(reason="Converted to dataframe by InputValidator")
-    ),
-    pytest.param(
-        pd.DataFrame(np.empty((10, 10))),
-        marks=pytest.mark.xfail(reason="No pandas support yet for dataset compression")
-    )
-])
-@pytest.mark.parametrize("y", [
-    np.random.random((10, 1)),
-    np.random.random((10, 1)).tolist(),
-    pytest.param(
-        pd.Series(np.random.random((10,))),
-        marks=pytest.mark.xfail(reason="No pandas support yet for dataset compression")
-    ),
-    pytest.param(
-        pd.DataFrame(np.random.random((10, 10))),
-        marks=pytest.mark.xfail(reason="No pandas support yet for dataset compression")
-    )
-])
+@pytest.mark.parametrize(
+    "X",
+    [
+        np.empty((10, 10)),
+        csr_matrix(np.identity(10)),
+        pytest.param(
+            np.empty((10, 10)).tolist(),
+            marks=pytest.mark.xfail(reason="Converted to dataframe by InputValidator"),
+        ),
+        pytest.param(
+            pd.DataFrame(np.empty((10, 10))),
+            marks=pytest.mark.xfail(
+                reason="No pandas support yet for dataset compression"
+            ),
+        ),
+    ],
+)
+@pytest.mark.parametrize(
+    "y",
+    [
+        np.random.random((10, 1)),
+        np.random.random((10, 1)).tolist(),
+        pytest.param(
+            pd.Series(np.random.random((10,))),
+            marks=pytest.mark.xfail(
+                reason="No pandas support yet for dataset compression"
+            ),
+        ),
+        pytest.param(
+            pd.DataFrame(np.random.random((10, 10))),
+            marks=pytest.mark.xfail(
+                reason="No pandas support yet for dataset compression"
+            ),
+        ),
+    ],
+)
 @unittest.mock.patch("autosklearn.automl.reduce_dataset_size_if_too_large")
 def test_fit_performs_dataset_compression(
     mock_reduce_dataset: unittest.mock.MagicMock,
     dataset_compression: bool,
     X: Union[np.ndarray, spmatrix, List, pd.DataFrame],
-    y: Union[np.ndarray, List, pd.Series, pd.DataFrame]
+    y: Union[np.ndarray, List, pd.Series, pd.DataFrame],
 ) -> None:
     """
     Parameters
@@ -1187,7 +1181,7 @@ def test_fit_performs_dataset_compression(
     auto = AutoMLRegressor(
         time_left_for_this_task=30,  # not used but required
         per_run_time_limit=5,  # not used but required
-        dataset_compression=dataset_compression
+        dataset_compression=dataset_compression,
     )
 
     # To prevent fitting anything we use `only_return_configuration_space`

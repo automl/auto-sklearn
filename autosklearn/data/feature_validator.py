@@ -1,4 +1,3 @@
-import logging
 from typing import Dict, List, Optional, Tuple, Union, cast
 
 import logging
@@ -6,14 +5,11 @@ import logging
 import numpy as np
 import pandas as pd
 from pandas.api.types import is_numeric_dtype, is_sparse
-
 from scipy.sparse import csr_matrix, spmatrix
-
 from sklearn.base import BaseEstimator
 from sklearn.exceptions import NotFittedError
 
 from autosklearn.util.logging_ import PickableLoggerAdapter
-
 
 SUPPORTED_FEAT_TYPES = Union[List, pd.DataFrame, np.ndarray, spmatrix]
 
@@ -27,43 +23,37 @@ class FeatureValidator(BaseEstimator):
 
     Attributes
     ----------
-        feat_type: Optional[List[str]]
-            In case the dataset is not a pandas DataFrame:
-                + If provided, this list indicates which columns should be treated as categorical
-                  it is internally transformed into a dictionary that indicates a mapping from
-                  column index to categorical/numerical
-                + If not provided, by default all columns are treated as numerical
-            If the input dataset is of type pandas dataframe, this argument
-            must be none, as the column type will be inferred from the pandas dtypes.
-
-        If provided, this list indicates which columns should be treated as
-        categorical it is internally transformed into a dictionary that
-        indicates a mapping from column index to categorical/numerical
-
-        If not provided, by default all columns are treated as numerical
+    feat_type: Optional[List[str]] = None
+        In case the dataset is not a pandas DataFrame:
+            +   If provided, this list indicates which columns should be treated as
+                categorical it is internally transformed into a dictionary that
+                indicates a mapping from column index to categorical/numerical.
+            +   If not provided, by default all columns are treated as numerical
 
         If the input dataset is of type pandas dataframe, this argument
         must be none, as the column type will be inferred from the pandas dtypes.
 
     data_type:
-            Class name of the data type provided during fit.
+        Class name of the data type provided during fit.
     """
-    def __init__(self,
-                 feat_type: Optional[List[str]] = None,
-                 logger: Optional[PickableLoggerAdapter] = None,
-                 ) -> None:
+
+    def __init__(
+        self,
+        feat_type: Optional[List[str]] = None,
+        logger: Optional[PickableLoggerAdapter] = None,
+    ) -> None:
         # If a dataframe was provided, we populate
         # this attribute with a mapping from column to {numerical | categorical}
-        self.feat_type: Optional[
-            Dict[Union[str, int], str]
-        ] = None
+        self.feat_type: Optional[Dict[Union[str, int], str]] = None
         if feat_type is not None:
             if isinstance(feat_type, dict):
                 self.feat_type = feat_type
             elif not isinstance(feat_type, List):
-                raise ValueError("Auto-Sklearn expects a list of categorical/"
-                                 "numerical feature types, yet a"
-                                 " {} was provided".format(type(feat_type)))
+                raise ValueError(
+                    "Auto-Sklearn expects a list of categorical/"
+                    "numerical feature types, yet a"
+                    " {} was provided".format(type(feat_type))
+                )
             else:
 
                 # Convert to a dictionary which will be passed to the ColumnTransformer
@@ -82,7 +72,7 @@ class FeatureValidator(BaseEstimator):
         self,
         X_train: SUPPORTED_FEAT_TYPES,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-    ) -> 'FeatureValidator':
+    ) -> "FeatureValidator":
         """
         Validates input data to Auto-Sklearn.
         The supported data types are List, numpy arrays and pandas DataFrames.
@@ -139,9 +129,11 @@ class FeatureValidator(BaseEstimator):
                     )
 
                 for ft in self.feat_type.values():
-                    if ft.lower() not in ['categorical', 'numerical', 'string']:
-                        raise ValueError('Only `Categorical`, `Numerical` and `String` are '
-                                         'valid feature types')
+                    if ft.lower() not in ["categorical", "numerical", "string"]:
+                        raise ValueError(
+                            "Only `Categorical`, `Numerical` and `String` are "
+                            "valid feature types"
+                        )
 
         if X_test is not None:
             self._check_data(X_test)
@@ -195,9 +187,11 @@ class FeatureValidator(BaseEstimator):
         # Not all sparse format support index sorting
         if isinstance(X_transformed, spmatrix):
             if not isinstance(X_transformed, csr_matrix):
-                self.logger.warning(f"Sparse data provided is of type {type(X_transformed)} "
-                                    "yet Auto-Sklearn only support csr_matrix. Auto-sklearn "
-                                    "will convert the provided data to the csr_matrix format.")
+                self.logger.warning(
+                    f"Sparse data provided is of type {type(X_transformed)} "
+                    "yet Auto-Sklearn only support csr_matrix. Auto-sklearn "
+                    "will convert the provided data to the csr_matrix format."
+                )
                 X_transformed = X_transformed.tocsr(copy=False)
 
             X_transformed.sort_indices()
@@ -218,17 +212,19 @@ class FeatureValidator(BaseEstimator):
             and a encoder fitted in the case the data needs encoding
         """
         # We consider columns that are all nan in a pandas frame as category
-        if hasattr(X, 'columns'):
+        if hasattr(X, "columns"):
             for column in cast(pd.DataFrame, X).columns:
                 if X[column].isna().all():
                     X[column] = X[column].astype("category")
 
-        if not isinstance(X, (np.ndarray, pd.DataFrame)) and not isinstance(X, spmatrix):
-            raise ValueError("Auto-sklearn only supports Numpy arrays, Pandas DataFrames,"
-                             " scipy sparse and Python Lists, yet, the provided input is"
-                             " of type {}".format(
-                                 type(X)
-                             ))
+        if not isinstance(X, (np.ndarray, pd.DataFrame)) and not isinstance(
+            X, spmatrix
+        ):
+            raise ValueError(
+                "Auto-sklearn only supports Numpy arrays, Pandas DataFrames,"
+                " scipy sparse and Python Lists, yet, the provided input is"
+                " of type {}".format(type(X))
+            )
 
         if self.data_type is None:
             self.data_type = type(X)
@@ -296,12 +292,14 @@ class FeatureValidator(BaseEstimator):
         # Make sure each column is a valid type
         for i, column in enumerate(X.columns):
             if is_sparse(X[column]):
-                raise ValueError("Auto-sklearn does not yet support sparse pandas Series."
-                                 f" Please convert {column} to a dense format.")
-            elif X[column].dtype.name in ['category', 'bool']:
-                feat_type[column] = 'categorical'
+                raise ValueError(
+                    "Auto-sklearn does not yet support sparse pandas Series."
+                    f" Please convert {column} to a dense format."
+                )
+            elif X[column].dtype.name in ["category", "bool"]:
+                feat_type[column] = "categorical"
             elif X[column].dtype.name == "string":
-                feat_type[column] = 'string'
+                feat_type[column] = "string"
             # Move away from np.issubdtype as it causes
             # TypeError: data type not understood in certain pandas types
             elif not is_numeric_dtype(X[column]):
@@ -352,26 +350,26 @@ class FeatureValidator(BaseEstimator):
 
         Parameters
         ----------
-            X_train: SUPPORTED_FEAT_TYPES
-                A set of features that are going to be validated (type and dimensionality
-                checks) and a encoder fitted in the case the data needs encoding
-            X_test: Optional[SUPPORTED_FEAT_TYPES]
-                A hold out set of data used for checking
+        X_train: SUPPORTED_FEAT_TYPES
+            A set of features that are going to be validated (type and dimensionality
+            checks) and a encoder fitted in the case the data needs encoding
+
+        X_test: Optional[SUPPORTED_FEAT_TYPES]
+            A hold out set of data used for checking
 
         Returns
         -------
-        pd.DataFrame:
-            transformed train data from list to pandas DataFrame
-
-        pd.DataFrame:
-            transformed test data from list to pandas DataFrame
+        Union[pd.DataFrame, pd.DataFrame]:
+            transformed (train, test) data from list to pandas DataFrame
         """
         # If a list was provided, it will be converted to pandas
         X_train = pd.DataFrame(data=X_train).convert_dtypes()
 
         # Store the dtypes and use in case of re-fit
         if len(self.dtypes) == 0:
-            self.dtypes = {col: X_train[col].dtype.name.lower() for col in X_train.columns}
+            self.dtypes = {
+                col: X_train[col].dtype.name.lower() for col in X_train.columns
+            }
         else:
             for col in X_train.columns:
                 # Try to convert to the original dtype used to fit the validator
@@ -393,10 +391,10 @@ class FeatureValidator(BaseEstimator):
         )
         if X_test is not None:
             if not isinstance(X_test, List):
-                self.logger.warning("Train features are a list while the provided test data"
-                                    "is {}. X_test will be casted as DataFrame.".format(
-                                        type(X_test)
-                                    ))
+                self.logger.warning(
+                    "Train features are a list while the provided test data"
+                    "is {}. X_test will be casted as DataFrame.".format(type(X_test))
+                )
             X_test = pd.DataFrame(data=X_test)
             for col in X_test.columns:
                 try:

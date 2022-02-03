@@ -11,18 +11,22 @@ if os.name != "posix":
     raise ValueError(
         "Detected unsupported operating system: %s. Please check "
         "the compability information of auto-sklearn: https://automl.github.io"
-        "/auto-sklearn/master/installation.html#windows-osx-compatibility" % sys.platform
+        "/auto-sklearn/master/installation.html#windows-osx-compatibility"
+        % sys.platform
     )
 
 if sys.version_info < (3, 7):
     raise ValueError(
         "Unsupported Python version %d.%d.%d found. Auto-sklearn requires Python "
-        "3.7 or higher." % (sys.version_info.major, sys.version_info.minor, sys.version_info.micro)
+        "3.7 or higher."
+        % (sys.version_info.major, sys.version_info.minor, sys.version_info.micro)
     )
 
 with open(os.path.join(HERE, "requirements.txt")) as fp:
     install_reqs = [
-        r.rstrip() for r in fp.readlines() if not r.startswith("#") and not r.startswith("git+")
+        r.rstrip()
+        for r in fp.readlines()
+        if not r.startswith("#") and not r.startswith("git+")
     ]
 
 extras_reqs = {

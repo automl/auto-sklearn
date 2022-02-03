@@ -27,9 +27,10 @@ target-version = ['py37']
 py_version = "37"
 profile = "black" # Play nicely with black
 src_paths = ["autosklearn", "test"]
-known_types = ["typing", "abc"] # We put these in their own section "types"
-sections = ["FUTURE", "TYPES", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"] # section ordering
-known_first_party = ["autosklearn"]
+known_types = ["typing", "abc"] # We put these in their own section TYPES
+known_first_party = ["autosklearn"] # Say that autosklearn is FIRSTPARTY
+known_test = ["test"] # Say that test.* is TEST
+sections = ["FUTURE", "TYPES", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "TEST", "LOCALFOLDER"] # section ordering
 multi_line_output = 3 # https://pycqa.github.io/isort/docs/configuration/multi_line_output_modes.html
 
 [tool.pydocstyle]
@@ -48,6 +49,7 @@ add-ignore = [ # http://www.pydocstyle.org/en/stable/error_codes.html
 
     "D400", # First line should end with a period
     "D401", # First line should be in imperative mood
+    "D404", # First word of the docstring should not be "This"
     "D413", # Missing blank line after last section
     "D415"  # First line should end with a period, question mark, or exclamation point
 ]

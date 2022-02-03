@@ -7,26 +7,28 @@ import argparse
 import numpy as np
 import pandas as pd
 
-CLASSIFICATION_METRICS = ['acc', 'auc', 'balacc', 'logloss']
-REGRESSION_METRICS = ['mae', 'r2', 'rmse']
+CLASSIFICATION_METRICS = ["acc", "auc", "balacc", "logloss"]
+REGRESSION_METRICS = ["mae", "r2", "rmse"]
 METRICS = CLASSIFICATION_METRICS + REGRESSION_METRICS
 
-def _get_mean_results_across_folds(df) -> pd.DataFrame:
-    """ Returns a dataframe with the task, id, metric and the mean values
-        across folds
 
-        [idx: 'task', 'id', 'metric', ... mean metrics across folds ...]
+def _get_mean_results_across_folds(df) -> pd.DataFrame:
+    """Returns a dataframe with the task, id, metric and the mean values
+    across folds
+
+    [idx: 'task', 'id', 'metric', ... mean metrics across folds ...]
     """
     # Get the information about id and metric, only need info from first fold
 
     # [idx: task, id, metric]
-    df_info = df[df['fold'] == 0][['task', 'id', 'metric']].set_index('task')
+    df_info = df[df["fold"] == 0][["task", "id", "metric"]].set_index("task")
 
     # [idx: task, ... mean metrics across folds ...]
     available_metrics = list(set(METRICS).intersection(set(df.columns)))
-    df_means = df[['task'] + available_metrics].groupby(['task']).mean()
+    df_means = df[["task"] + available_metrics].groupby(["task"]).mean()
 
     return df_info.join(df_means)
+
 
 def generate_framework_def(
     user_dir: str,
@@ -34,7 +36,7 @@ def generate_framework_def(
     branch: str,
     commit: str,  # Not used in this setup but perhaps in a different one
 ):
-    """ Creates a framework definition to run an autosklearn repo.
+    """Creates a framework definition to run an autosklearn repo.
 
     Technically we only use the commit to pull the targeted version but for
     naming consistency, we need to know the branch too.
@@ -61,32 +63,36 @@ def generate_framework_def(
             or
             #8b474a437ce980bd0909db59141b40d56f6d5688
     """
-    assert len(commit) == 41 and commit[0] == '#' or len(commit) == 40, \
-        "Not a commit hash"
+    assert (
+        len(commit) == 41 and commit[0] == "#" or len(commit) == 40
+    ), "Not a commit hash"
 
     # automlbenchmark requires the '#' to identify it's a commit rather than
     # a branch being targeted
-    if commit[0] != '#':
-        commit = '#' + commit
+    if commit[0] != "#":
+        commit = "#" + commit
 
     # Tried commit and ssh repo but was getting errors with ssh
     # Tried commit and https but getting issues with commit ref
     # Using branch and https
     version = branch
-    repo = f'https://github.com/{username}/auto-sklearn.git'
+    repo = f"https://github.com/{username}/auto-sklearn.git"
 
     # Create the framework file
-    lines = '\n'.join([
-        f"---",
-        f"autosklearn_targeted:",
-        f"  extends: autosklearn",
-        f"  version: '{version}'",
-        f"  repo: '{repo}'"
-    ])
+    lines = "\n".join(
+        [
+            f"---",
+            f"autosklearn_targeted:",
+            f"  extends: autosklearn",
+            f"  version: '{version}'",
+            f"  repo: '{repo}'",
+        ]
+    )
 
-    filepath = os.path.join(user_dir, 'frameworks.yaml')
-    with open(filepath, 'w') as f:
+    filepath = os.path.join(user_dir, "frameworks.yaml")
+    with open(filepath, "w") as f:
         f.writelines(lines)
+
 
 def create_comparison(
     baseline_csv_classification: str,
@@ -94,7 +100,7 @@ def create_comparison(
     targeted_csv_classification: str,
     targeted_csv_regression: str,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """ Creates a csv with comparisons between the baseline and results.
+    """Creates a csv with comparisons between the baseline and results.
 
     Scores are averaged across folds for a given task.
 
@@ -143,28 +149,33 @@ def create_comparison(
     df_targeted_means = _get_mean_results_across_folds(df_targeted)
 
     # Find the set intersection of tasks they have in common
-    common_tasks = set(df_baseline_means.index).intersection(set(df_targeted_means.index))
+    common_tasks = set(df_baseline_means.index).intersection(
+        set(df_targeted_means.index)
+    )
 
     # Find the set of metrics that are comparable
     baseline_metrics = set(METRICS).intersection(set(df_baseline_means.columns))
     common_metrics = baseline_metrics.intersection(set(df_targeted_means.columns))
 
     # Calculate the differences for in common tasks, across all available metrics
-    df_differences = df_targeted_means.loc[common_tasks][common_metrics] \
+    df_differences = (
+        df_targeted_means.loc[common_tasks][common_metrics]
         - df_baseline_means.loc[common_tasks][common_metrics]
+    )
 
     # Get the metric used for training and the dataset id of common tasks
-    df_info = df_baseline_means.loc[common_tasks][['id', 'metric']]
+    df_info = df_baseline_means.loc[common_tasks][["id", "metric"]]
 
     # Join together the info and the differences
     return df_baseline_means, df_targeted_means, df_info.join(df_differences)
+
 
 def create_comparisons_markdown(
     baseline_means_csv: str,
     targeted_means_csv: str,
     compared_means_csv: str,
 ) -> str:
-    """ Creates markdown that can be posted to Github that shows
+    """Creates markdown that can be posted to Github that shows
     a comparison between the baseline and the targeted branch.
 
     Parameters
@@ -186,36 +197,40 @@ def create_comparisons_markdown(
     """
     # Create colours and func to create the markdown for it
     colours = {
-        'Worse': ['353536', '800000', 'bd0000', 'ff0000'],
-        'Better': ['353536', '306300', '51a800', '6fe600'],
-        'Good': '6fe600',
-        'Bad': 'ff0000',
-        'Neutral': '353536',
-        'NaN': '52544f',
+        "Worse": ["353536", "800000", "bd0000", "ff0000"],
+        "Better": ["353536", "306300", "51a800", "6fe600"],
+        "Good": "6fe600",
+        "Bad": "ff0000",
+        "Neutral": "353536",
+        "NaN": "52544f",
     }
+
     def colour(kind, scale=None):
         c = colours[kind] if scale is None else colours[kind][scale]
-        return f'![#{c}](https://via.placeholder.com/15/{c}/000000?text=+)'
+        return f"![#{c}](https://via.placeholder.com/15/{c}/000000?text=+)"
 
     # Metrics, whether positive is better and the tolerances between each
     # Neutral, kind of good/bad, very good/bad etc...
     metric_tolerances = {
-        'acc': { 'positive_is_better': True ,'tol': [0.001, 0.01, 0.2] },
-        'auc':{ 'positive_is_better': True ,'tol': [0.001, 0.01, 0.2] },
-        'balacc': { 'positive_is_better': True ,'tol': [0.001, 0.01, 0.2] },
-        'logloss': { 'positive_is_better': False ,'tol': [0.009, 0.01, 0.2] },
-        'mae': { 'positive_is_better': False ,'tol': [0.001, 0.01, 0.2] },
-        'r2': { 'positive_is_better': True ,'tol': [0.001, 0.01, 0.2] },
-        'rmse': { 'positive_is_better': False ,'tol': [0.001, 0.01, 0.2] },
+        "acc": {"positive_is_better": True, "tol": [0.001, 0.01, 0.2]},
+        "auc": {"positive_is_better": True, "tol": [0.001, 0.01, 0.2]},
+        "balacc": {"positive_is_better": True, "tol": [0.001, 0.01, 0.2]},
+        "logloss": {"positive_is_better": False, "tol": [0.009, 0.01, 0.2]},
+        "mae": {"positive_is_better": False, "tol": [0.001, 0.01, 0.2]},
+        "r2": {"positive_is_better": True, "tol": [0.001, 0.01, 0.2]},
+        "rmse": {"positive_is_better": False, "tol": [0.001, 0.01, 0.2]},
     }
+
     def is_good(score, metric):
         return (
-            score > 0 and metric_tolerances[metric]['positive_is_better']
-            or score < 0 and not metric_tolerances[metric]['positive_is_better']
+            score > 0
+            and metric_tolerances[metric]["positive_is_better"]
+            or score < 0
+            and not metric_tolerances[metric]["positive_is_better"]
         )
 
     def is_neutral(diff, baseline_score, metric):
-        tolerance = metric_tolerances[metric]['tol'][0]
+        tolerance = metric_tolerances[metric]["tol"][0]
         if baseline_score == 0:
             baseline_score = 1e-10
         prc_diff = diff / baseline_score
@@ -223,18 +238,18 @@ def create_comparisons_markdown(
 
     def tolerance_colour(baseline_value, comparison_value, metric):
         if np.isnan(baseline_value) or np.isnan(comparison_value):
-            return colour('NaN')
+            return colour("NaN")
 
         if baseline_value == 0:
             baseline_value = 1e-10
 
         prc_diff = comparison_value / baseline_value
 
-        tolerances = metric_tolerances[metric]['tol']
-        if metric_tolerances[metric]['positive_is_better']:
-            diff_color = 'Better' if prc_diff > 0 else 'Worse'
+        tolerances = metric_tolerances[metric]["tol"]
+        if metric_tolerances[metric]["positive_is_better"]:
+            diff_color = "Better" if prc_diff > 0 else "Worse"
         else:
-            diff_color = 'Better' if prc_diff < 0 else 'Worse'
+            diff_color = "Better" if prc_diff < 0 else "Worse"
 
         if abs(prc_diff) < tolerances[0]:
             return colour(diff_color, 0)
@@ -245,23 +260,24 @@ def create_comparisons_markdown(
         else:
             return colour(diff_color, 3)
 
-
     legend = {
-        'B': 'Baseline',
-        'T': 'Target Version',
-        '**Bold**': 'Training Metric',
-        '/': 'Missing Value',
-        '---': 'Missing Task'
+        "B": "Baseline",
+        "T": "Target Version",
+        "**Bold**": "Training Metric",
+        "/": "Missing Value",
+        "---": "Missing Task",
     }
-    legend.update({
-        key: colour(key)
-        for key in set(colours.keys()) - set(['Worse', 'Better', 'Good', 'Bad'])
-    })
+    legend.update(
+        {
+            key: colour(key)
+            for key in set(colours.keys()) - set(["Worse", "Better", "Good", "Bad"])
+        }
+    )
     # Worse and better are handled seperatly
 
-    compared = pd.read_csv(compared_means_csv, index_col='task')
-    baseline = pd.read_csv(baseline_means_csv, index_col='task')
-    targeted = pd.read_csv(targeted_means_csv, index_col='task')
+    compared = pd.read_csv(compared_means_csv, index_col="task")
+    baseline = pd.read_csv(baseline_means_csv, index_col="task")
+    targeted = pd.read_csv(targeted_means_csv, index_col="task")
 
     # Some things to keep track of for the textual summary
     n_performed_equally = 0
@@ -269,9 +285,9 @@ def create_comparisons_markdown(
     n_performed_worse = 0
     n_could_not_compare = 0
 
-    headers = ['task', 'metric'] + METRICS
-    table_header = '|'.join(headers)
-    seperator = '|'.join(len(headers) * ['---'])
+    headers = ["task", "metric"] + METRICS
+    table_header = "|".join(headers)
+    seperator = "|".join(len(headers) * ["---"])
 
     lines = [table_header, seperator]
 
@@ -279,13 +295,13 @@ def create_comparisons_markdown(
 
         # The chosen metric name and the csv column differ with neg_logloss and
         # logloss
-        training_metric = baseline.loc[task]['metric']
+        training_metric = baseline.loc[task]["metric"]
         if training_metric == "neg_logloss":
             training_metric = "logloss"
 
         # The baseline has tasks we can't compare with
         if task not in compared.index:
-            line = '|'.join([task, training_metric] + len(METRICS) * ['---'])
+            line = "|".join([task, training_metric] + len(METRICS) * ["---"])
             lines.append(line)
 
         # We can compare for a given tasks
@@ -299,34 +315,23 @@ def create_comparisons_markdown(
 
                 # If the metric does not exist for either, do fill it in as
                 # missing
-                if (
-                    metric not in baseline.columns
-                    and metric not in compared.columns
-                ):
+                if metric not in baseline.columns and metric not in compared.columns:
                     n_could_not_compare += 1
-                    entry = '/'
+                    entry = "/"
 
                 # If the metric exists in the baseline but not in the comparison
-                elif (
-                    metric in baseline.columns
-                    and not metric in compared.columns
-                ):
+                elif metric in baseline.columns and not metric in compared.columns:
                     n_could_not_compare += 1
-                    entry = '<br/>'.join([
-                        f' B : {baseline.loc[task][metric]:.3f}',
-                        f' T : /'
-                    ])
+                    entry = "<br/>".join(
+                        [f" B : {baseline.loc[task][metric]:.3f}", f" T : /"]
+                    )
 
                 # If the metric exists in the comparison but not in the baseline
-                elif (
-                    metric in compared.columns
-                    and not metric in baseline.columns
-                ):
+                elif metric in compared.columns and not metric in baseline.columns:
                     n_could_not_compare += 1
-                    entry = '<br/>'.join([
-                        f' B : /',
-                        f' T : {targeted.loc[task][metric]:.3f}'
-                    ])
+                    entry = "<br/>".join(
+                        [f" B : /", f" T : {targeted.loc[task][metric]:.3f}"]
+                    )
 
                 # The metric must exist in both
                 else:
@@ -339,44 +344,49 @@ def create_comparisons_markdown(
                     else:
                         n_performed_worse += 1
 
-                    diff_colour = tolerance_colour(baseline_score,
-                                                   compared_score,
-                                                   metric)
-                    entry = '<br/>'.join([
-                        f' B : {baseline.loc[task][metric]:.3f}',
-                        f' T : {targeted.loc[task][metric]:.3f}',
-                        f'{diff_colour}: {compared.loc[task][metric]:.3f}'
-                    ])
+                    diff_colour = tolerance_colour(
+                        baseline_score, compared_score, metric
+                    )
+                    entry = "<br/>".join(
+                        [
+                            f" B : {baseline.loc[task][metric]:.3f}",
+                            f" T : {targeted.loc[task][metric]:.3f}",
+                            f"{diff_colour}: {compared.loc[task][metric]:.3f}",
+                        ]
+                    )
 
                 # Make the training metric entry bold
                 if metric == training_metric:
-                    entry = '<b>' + entry + '</b>'
+                    entry = "<b>" + entry + "</b>"
 
                 entries.append(entry)
 
             # Create the line
-            line = '|'.join([task, training_metric] + entries)
+            line = "|".join([task, training_metric] + entries)
             lines.append(line)
 
     # Create the legend line
     score_scale = {
-        'worse': "".join(colour('Worse', scale) for scale in range(len(colours['Worse']) - 1, 0, -1)),
-        'better': "".join(colour('Better', scale) for scale in range(len(colours['Better'])))
+        "worse": "".join(
+            colour("Worse", scale) for scale in range(len(colours["Worse"]) - 1, 0, -1)
+        ),
+        "better": "".join(
+            colour("Better", scale) for scale in range(len(colours["Better"]))
+        ),
     }
     score_scale = f'worse {score_scale["worse"] + score_scale["better"]} better'
 
-    legend_str = '\t\t\t||\t\t'.join([score_scale] + [
-        f'{key} - {text}' for key, text in legend.items()
-    ])
+    legend_str = "\t\t\t||\t\t".join(
+        [score_scale] + [f"{key} - {text}" for key, text in legend.items()]
+    )
 
-    lines.append('')
+    lines.append("")
     lines.append(legend_str)
 
     # Create a textual summary to go at the top
     compared_metrics = list(set(METRICS).intersection(compared.columns))
     compared_tasks = list(compared.index)
     non_compared_tasks = list(set(baseline.index) - set(compared_tasks))
-
 
     # Populate info about each metric
     per_metric_info = {}
@@ -387,36 +397,37 @@ def create_comparisons_markdown(
 
         item_colour = ""
         if is_neutral(compared_average, baseline_average, metric):
-            item_colour = colour('Neutral')
+            item_colour = colour("Neutral")
         elif is_good(compared_average, metric):
-            item_colour = colour('Good')
+            item_colour = colour("Good")
         else:
-            item_colour = colour('Bad')
+            item_colour = colour("Bad")
 
         per_metric_info[metric] = {
-            'average': compared_average,
-            'n_compared': n_compared,
-            'colour': item_colour
+            "average": compared_average,
+            "n_compared": n_compared,
+            "colour": item_colour,
         }
 
-    summary = '\n'.join([
-        f"# Results",
-        f"Overall the targeted versions performance across {len(compared_tasks)} task(s) and {len(compared_metrics)} metric(s)",
-        f"",
-        f"*  Equally on <b>{n_performed_equally}</b> comparisons",
-        f"*  Better on <b>{n_performed_better}</b> comparisons",
-        f"*  Worse on <b>{n_performed_worse}</b> comparisons",
-        f"",
-        f"There were <b>{len(non_compared_tasks)}</b> task(s) that could not be compared.",
-        f"",
-        f"The average change for each metric is:"
-        f""
-        ] + [
+    summary = "\n".join(
+        [
+            f"# Results",
+            f"Overall the targeted versions performance across {len(compared_tasks)} task(s) and {len(compared_metrics)} metric(s)",
+            f"",
+            f"*  Equally on <b>{n_performed_equally}</b> comparisons",
+            f"*  Better on <b>{n_performed_better}</b> comparisons",
+            f"*  Worse on <b>{n_performed_worse}</b> comparisons",
+            f"",
+            f"There were <b>{len(non_compared_tasks)}</b> task(s) that could not be compared.",
+            f"",
+            f"The average change for each metric is:" f"",
+        ]
+        + [
             f"* <b>{metric}: </b> {info['colour']} {info['average']:.4f} across {info['n_compared']} task(s)"
             for metric, info in per_metric_info.items()
         ]
     )
-    return '\n'.join([summary] + [""] + lines)
+    return "\n".join([summary] + [""] + lines)
 
 
 if __name__ == "__main__":
@@ -424,30 +435,30 @@ if __name__ == "__main__":
 
     # Generates a framework definition for automlbenchmark so that we can target
     # auto-sklearn versions that are not our own
-    parser.add_argument('--generate-framework-def', action='store_true')
-    parser.add_argument('--user-dir', type=str)
-    parser.add_argument('--owner', type=str)
-    parser.add_argument('--branch', type=str)
-    parser.add_argument('--commit', type=str)
+    parser.add_argument("--generate-framework-def", action="store_true")
+    parser.add_argument("--user-dir", type=str)
+    parser.add_argument("--owner", type=str)
+    parser.add_argument("--branch", type=str)
+    parser.add_argument("--commit", type=str)
 
     # For comparing results generated by automlbenchmark for:
     #  -> baseline results generated [--baseline-csv]
     #  -> targeted results generated [--target-csv]
-    # by automlbenchmark and the target branch 'results' generated 
-    parser.add_argument('--compare-results', action='store_true')
-    parser.add_argument('--baseline-csv-classification', type=str)
-    parser.add_argument('--baseline-csv-regression', type=str)
-    parser.add_argument('--targeted-csv-classification', type=str)
-    parser.add_argument('--targeted-csv-regression', type=str)
-    parser.add_argument('--baseline-means-to', type=str)
-    parser.add_argument('--targeted-means-to', type=str)
-    parser.add_argument('--compared-means-to', type=str)
+    # by automlbenchmark and the target branch 'results' generated
+    parser.add_argument("--compare-results", action="store_true")
+    parser.add_argument("--baseline-csv-classification", type=str)
+    parser.add_argument("--baseline-csv-regression", type=str)
+    parser.add_argument("--targeted-csv-classification", type=str)
+    parser.add_argument("--targeted-csv-regression", type=str)
+    parser.add_argument("--baseline-means-to", type=str)
+    parser.add_argument("--targeted-means-to", type=str)
+    parser.add_argument("--compared-means-to", type=str)
 
     # For generating markdown that can be posted to github that shows the results
-    parser.add_argument('--generate-markdown', action='store_true')
-    parser.add_argument('--compared-means-csv', type=str)
-    parser.add_argument('--baseline-means-csv', type=str)
-    parser.add_argument('--targeted-means-csv', type=str)
+    parser.add_argument("--generate-markdown", action="store_true")
+    parser.add_argument("--compared-means-csv", type=str)
+    parser.add_argument("--baseline-means-csv", type=str)
+    parser.add_argument("--targeted-means-csv", type=str)
 
     args = parser.parse_args()
 
@@ -459,11 +470,17 @@ if __name__ == "__main__":
 
     elif args.compare_results:
 
-        assert all([
-            args.baseline_csv_classification, args.baseline_csv_regression,
-            args.targeted_csv_classification, args.baseline_csv_regression,
-            args.baseline_means_to, args.targeted_means_to, args.compared_means_to
-        ])
+        assert all(
+            [
+                args.baseline_csv_classification,
+                args.baseline_csv_regression,
+                args.targeted_csv_classification,
+                args.baseline_csv_regression,
+                args.baseline_means_to,
+                args.targeted_means_to,
+                args.compared_means_to,
+            ]
+        )
 
         baseline_means, targeted_means, compared_means = create_comparison(
             baseline_csv_classification=args.baseline_csv_classification,
@@ -480,9 +497,9 @@ if __name__ == "__main__":
             df.to_csv(path)
 
     elif args.generate_markdown:
-        assert all([
-            args.baseline_means_csv, args.targeted_means_csv, args.compared_means_csv
-        ])
+        assert all(
+            [args.baseline_means_csv, args.targeted_means_csv, args.compared_means_csv]
+        )
 
         comparisons_table = create_comparisons_markdown(
             baseline_means_csv=args.baseline_means_csv,

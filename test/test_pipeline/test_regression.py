@@ -34,7 +34,7 @@ from autosklearn.pipeline.constants import (
 from autosklearn.pipeline.regression import SimpleRegressionPipeline
 from autosklearn.pipeline.util import get_dataset
 
-from test.test_pipeline.ignored_warnings import regressor_warnings, ignore_warnings
+from test.test_pipeline.ignored_warnings import ignore_warnings, regressor_warnings
 
 
 class SimpleRegressionPipelineTest(unittest.TestCase):
@@ -241,8 +241,10 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                     "values." in e.args[0]
                 ):
                     continue
-                elif "zero-size array to reduction operation maximum which has no " \
-                     "identity" in e.args[0]:
+                elif (
+                    "zero-size array to reduction operation maximum which has no "
+                    "identity" in e.args[0]
+                ):
                     continue
                 else:
                     e.args += (f"config={config}",)
@@ -539,9 +541,9 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         if "data_preprocessor:__choice__" in expected_key:
             # We have to check both the numerical and categorical
             to_check = {
-                'numerical_transformer': implementation.choice.numer_ppl.named_steps,
-                'categorical_transformer': implementation.choice.categ_ppl.named_steps,
-                'text_transformer': implementation.choice.txt_ppl.named_steps,
+                "numerical_transformer": implementation.choice.numer_ppl.named_steps,
+                "categorical_transformer": implementation.choice.categ_ppl.named_steps,
+                "text_transformer": implementation.choice.txt_ppl.named_steps,
             }
 
             for data_type, pipeline in to_check.items():

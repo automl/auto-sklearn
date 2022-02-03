@@ -15,43 +15,43 @@ CONT = "continuous"
 CONST = "constant"
 UN = "unparameterized"
 
-template_string = \
-"""
+template_string = r"""
 \documentclass{article} %% For LaTeX2
 \usepackage[a4paper, left=5mm, right=5mm, top=5mm, bottom=5mm]{geometry}
 
-%%\\usepackage[landscape]{geometry}
-\\usepackage{multirow}           %% import command \multicolmun
-\\usepackage{tabularx}           %% Convenient table formatting
-\\usepackage{booktabs}           %% provides \\toprule, \midrule and \\bottomrule
+%%\usepackage[landscape]{geometry}
+\usepackage{multirow}           %% import command \multicolmun
+\usepackage{tabularx}           %% Convenient table formatting
+\usepackage{booktabs}           %% provides \\toprule, \midrule and \\bottomrule
 
-\\begin{document}
+\begin{document}
 
 %s
 
-\\end{document}
+\end{document}
 """
 
-caption_str = "Number of Hyperparameters for each possible %s " \
-              "for a dataset with these properties: %s"
+caption_str = (
+    "Number of Hyperparameters for each possible %s "
+    "for a dataset with these properties: %s"
+)
 
-table_str = \
-"""
-\\begin{table}[t!]
-\\centering
-\\scriptsize
-\\caption{ %s }
-\\begin{tabularx}{\\textwidth}{ X X X X X X }
-\\toprule
-name & \#$\lambda$ & cat (cond) & cont (cond) & const & un \\\\
-\\toprule
-\\\\
+table_str = r"""
+\begin{table}[t!]
+\centering
+\scriptsize
+\caption{ %s }
+\begin{tabularx}{\textwidth}{ X X X X X X }
+\toprule
+name & \#$\lambda$ & cat (cond) & cont (cond) & const & un \\
+\toprule
+\\
 %s
-\\\\
-\\toprule
-\\bottomrule
-\\end{tabularx}
-\\end{table}
+\\
+\toprule
+\bottomrule
+\end{tabularx}
+\end{table}
 """
 
 
@@ -59,11 +59,13 @@ def get_dict(task_type="classifier", **kwargs):
     assert task_type in ("classifier", "regressor")
 
     if task_type == "classifier":
-        cs = autosklearn.pipeline.classification.SimpleClassificationPipeline\
-            .get_hyperparameter_search_space(dataset_properties=kwargs)
+        cs = autosklearn.pipeline.classification.SimpleClassificationPipeline.get_hyperparameter_search_space(
+            dataset_properties=kwargs
+        )
     elif task_type == "regressor":
-        cs = autosklearn.pipeline.regression.SimpleRegressionPipeline\
-            .get_hyperparameter_search_space(dataset_properties=kwargs)
+        cs = autosklearn.pipeline.regression.SimpleRegressionPipeline.get_hyperparameter_search_space(
+            dataset_properties=kwargs
+        )
     else:
         raise ValueError("'task_type' is not in ('classifier', 'regressor')")
 
@@ -73,7 +75,7 @@ def get_dict(task_type="classifier", **kwargs):
     for h in cs.get_hyperparameters():
         if h.name == "feature_preprocessor:__choice__":
             preprocessor = h
-        elif h.name == (task_type + ':__choice__'):
+        elif h.name == (task_type + ":__choice__"):
             estimator = h
 
     if estimator is None:
@@ -100,8 +102,9 @@ def get_dict(task_type="classifier", **kwargs):
         preprocessor_dict[i][UN] = 0
 
     for h in cs.get_hyperparameters():
-        if h.name == "feature_preprocessor:__choice__" or \
-                h.name == (task_type + ':__choice__'):
+        if h.name == "feature_preprocessor:__choice__" or h.name == (
+            task_type + ":__choice__"
+        ):
             continue
         # walk over both dicts
         for d in (estimator_dict, preprocessor_dict):
@@ -116,14 +119,18 @@ def get_dict(task_type="classifier", **kwargs):
                 d[est][CAT] += 1
             elif isinstance(h, ConfigSpace.hyperparameters.Constant):
                 d[est][CONST] += 1
-            elif isinstance(h, ConfigSpace.hyperparameters.UnParametrizedHyperparameter):
+            elif isinstance(
+                h, ConfigSpace.hyperparameters.UnParametrizedHyperparameter
+            ):
                 d[est][UN] += 1
             else:
                 raise ValueError("Don't know that type: %s" % type(h))
 
     for h in cs.get_conditions():
-        if h.parent.name == (task_type + ':__choice__') or h.parent.name == \
-                "feature_preprocessor:__choice__":
+        if (
+            h.parent.name == (task_type + ":__choice__")
+            or h.parent.name == "feature_preprocessor:__choice__"
+        ):
             # ignore this condition
             # print "IGNORE", h
             continue
@@ -132,22 +139,30 @@ def get_dict(task_type="classifier", **kwargs):
         for d in (estimator_dict, preprocessor_dict):
             est = h.child.name.split(":")[1]
             if est not in d:
-                #print "Could not find %s" % est
+                # print "Could not find %s" % est
                 continue
 
-            #print "####"
-            #print vars(h)
-            #print h.parent
-            #print type(h)
-            if isinstance(h.child, ConfigSpace.hyperparameters.UniformIntegerHyperparameter):
+            # print "####"
+            # print vars(h)
+            # print h.parent
+            # print type(h)
+            if isinstance(
+                h.child, ConfigSpace.hyperparameters.UniformIntegerHyperparameter
+            ):
                 d[est][COND][CONT] += 1
-            elif isinstance(h.child, ConfigSpace.hyperparameters.UniformFloatHyperparameter):
+            elif isinstance(
+                h.child, ConfigSpace.hyperparameters.UniformFloatHyperparameter
+            ):
                 d[est][COND][CONT] += 1
-            elif isinstance(h.child, ConfigSpace.hyperparameters.CategoricalHyperparameter):
+            elif isinstance(
+                h.child, ConfigSpace.hyperparameters.CategoricalHyperparameter
+            ):
                 d[est][COND][CAT] += 1
             elif isinstance(h.child, ConfigSpace.hyperparameters.Constant):
                 d[est][COND][CONST] += 1
-            elif isinstance(h.child, ConfigSpace.hyperparameters.UnParametrizedHyperparameter):
+            elif isinstance(
+                h.child, ConfigSpace.hyperparameters.UnParametrizedHyperparameter
+            ):
                 d[est][COND][UN] += 1
             else:
                 raise ValueError("Don't know that type: %s" % type(h))
@@ -159,7 +174,11 @@ def build_table(d):
     lines = list()
     for est in d.keys():
         sum_ = 0
-        t_list = list([est.replace("_", " "), ])
+        t_list = list(
+            [
+                est.replace("_", " "),
+            ]
+        )
         for t in (CAT, CONT):
             sum_ += d[est][t]
             t_list.append("%d (%d)" % (d[est][t], d[est][COND][t]))
@@ -175,33 +194,68 @@ def main():
     parser = ArgumentParser()
 
     # General Options
-    parser.add_argument("-s", "--save", dest="save", default=None,
-                        help="Where to save plot instead of showing it?")
-    parser.add_argument("-t", "--type", dest="task_type", default="classifier",
-                        choices=("classifier", ), help="Type of dataset")
-    parser.add_argument("--sparse", dest="sparse", default=False,
-                        action="store_true", help="dataset property")
+    parser.add_argument(
+        "-s",
+        "--save",
+        dest="save",
+        default=None,
+        help="Where to save plot instead of showing it?",
+    )
+    parser.add_argument(
+        "-t",
+        "--type",
+        dest="task_type",
+        default="classifier",
+        choices=("classifier",),
+        help="Type of dataset",
+    )
+    parser.add_argument(
+        "--sparse",
+        dest="sparse",
+        default=False,
+        action="store_true",
+        help="dataset property",
+    )
     prop = parser.add_mutually_exclusive_group(required=True)
-    prop.add_argument("--multilabel", dest="multilabel", default=False,
-                      action="store_true", help="dataset property")
-    prop.add_argument("--multiclass", dest="multiclass", default=False,
-                      action="store_true", help="dataset property")
-    prop.add_argument("--binary", dest="binary", default=False,
-                      action="store_true", help="dataset property")
+    prop.add_argument(
+        "--multilabel",
+        dest="multilabel",
+        default=False,
+        action="store_true",
+        help="dataset property",
+    )
+    prop.add_argument(
+        "--multiclass",
+        dest="multiclass",
+        default=False,
+        action="store_true",
+        help="dataset property",
+    )
+    prop.add_argument(
+        "--binary",
+        dest="binary",
+        default=False,
+        action="store_true",
+        help="dataset property",
+    )
 
     args, unknown = parser.parse_known_args()
 
-    props = {"sparse": args.sparse,
-             "multilabel": args.multilabel,
-             "multiclass": args.multiclass}
+    props = {
+        "sparse": args.sparse,
+        "multilabel": args.multilabel,
+        "multiclass": args.multiclass,
+    }
     est_dict, preproc_dict = get_dict(task_type=args.task_type, **props)
 
     est_table = build_table(est_dict)
     preproc_table = build_table(preproc_dict)
 
     est_table = table_str % (caption_str % (args.task_type, str(props)), est_table)
-    preproc_table = table_str % (caption_str % (
-        "feature_preprocessor", str(props)), preproc_table)
+    preproc_table = table_str % (
+        caption_str % ("feature_preprocessor", str(props)),
+        preproc_table,
+    )
 
     tex_doc = template_string % "\n".join([est_table, preproc_table])
     if args.save is None:
@@ -210,7 +264,7 @@ def main():
         fh = open(args.save, "w")
         fh.write(tex_doc)
         fh.close()
-        proc = subprocess.Popen(shlex.split('pdflatex %s' % args.save))
+        proc = subprocess.Popen(shlex.split("pdflatex %s" % args.save))
         proc.communicate()
         try:
             os.remove(args.save.replace(".tex", ".aux"))
