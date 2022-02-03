@@ -64,8 +64,7 @@ from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, _fit_with_budget
-from autosklearn.metric import Scorer, default_metric_for_task
-from autosklearn.metrics import calculate_metric
+from autosklearn.metrics import Scorer, calculate_metric, default_metric_for_task
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.components.classification import ClassifierChoice
 from autosklearn.pipeline.components.data_preprocessing.categorical_encoding import (
