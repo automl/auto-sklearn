@@ -1,7 +1,6 @@
 import sklearn.svm
 
-from autosklearn.pipeline.components.classification.liblinear_svc import \
-    LibLinear_SVC
+from autosklearn.pipeline.components.classification.liblinear_svc import LibLinear_SVC
 
 from .test_base import BaseClassificationComponentTest
 

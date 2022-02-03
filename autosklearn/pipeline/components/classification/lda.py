@@ -1,17 +1,18 @@
-from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.hyperparameters import UniformFloatHyperparameter, CategoricalHyperparameter
 from ConfigSpace.conditions import EqualsCondition
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.hyperparameters import (
+    CategoricalHyperparameter,
+    UniformFloatHyperparameter,
+)
 
-from autosklearn.pipeline.components.base import \
-    AutoSklearnClassificationAlgorithm
-from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS
+from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
+from autosklearn.pipeline.constants import DENSE, PREDICTIONS, UNSIGNED_DATA
 from autosklearn.pipeline.implementations.util import softmax
 from autosklearn.util.common import check_none
 
 
 class LDA(AutoSklearnClassificationAlgorithm):
-    def __init__(self, shrinkage, tol, shrinkage_factor=0.5,
-                 random_state=None):
+    def __init__(self, shrinkage, tol, shrinkage_factor=0.5, random_state=None):
         self.shrinkage = shrinkage
         self.tol = tol
         self.shrinkage_factor = shrinkage_factor
@@ -23,20 +24,21 @@ class LDA(AutoSklearnClassificationAlgorithm):
 
         if check_none(self.shrinkage):
             self.shrinkage_ = None
-            solver = 'svd'
+            solver = "svd"
         elif self.shrinkage == "auto":
-            self.shrinkage_ = 'auto'
-            solver = 'lsqr'
+            self.shrinkage_ = "auto"
+            solver = "lsqr"
         elif self.shrinkage == "manual":
             self.shrinkage_ = float(self.shrinkage_factor)
-            solver = 'lsqr'
+            solver = "lsqr"
         else:
             raise ValueError(self.shrinkage)
 
         self.tol = float(self.tol)
 
         estimator = sklearn.discriminant_analysis.LinearDiscriminantAnalysis(
-            shrinkage=self.shrinkage_, tol=self.tol, solver=solver)
+            shrinkage=self.shrinkage_, tol=self.tol, solver=solver
+        )
 
         if len(Y.shape) == 2 and Y.shape[1] > 1:
             self.estimator = sklearn.multiclass.OneVsRestClassifier(estimator, n_jobs=1)
@@ -60,25 +62,29 @@ class LDA(AutoSklearnClassificationAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'LDA',
-                'name': 'Linear Discriminant Analysis',
-                'handles_regression': False,
-                'handles_classification': True,
-                'handles_multiclass': True,
-                'handles_multilabel': True,
-                'handles_multioutput': False,
-                'is_deterministic': True,
-                'input': (DENSE, UNSIGNED_DATA),
-                'output': (PREDICTIONS,)}
+        return {
+            "shortname": "LDA",
+            "name": "Linear Discriminant Analysis",
+            "handles_regression": False,
+            "handles_classification": True,
+            "handles_multiclass": True,
+            "handles_multilabel": True,
+            "handles_multioutput": False,
+            "is_deterministic": True,
+            "input": (DENSE, UNSIGNED_DATA),
+            "output": (PREDICTIONS,),
+        }
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
         shrinkage = CategoricalHyperparameter(
-            "shrinkage", ["None", "auto", "manual"], default_value="None")
-        shrinkage_factor = UniformFloatHyperparameter(
-            "shrinkage_factor", 0., 1., 0.5)
-        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-4, log=True)
+            "shrinkage", ["None", "auto", "manual"], default_value="None"
+        )
+        shrinkage_factor = UniformFloatHyperparameter("shrinkage_factor", 0.0, 1.0, 0.5)
+        tol = UniformFloatHyperparameter(
+            "tol", 1e-5, 1e-1, default_value=1e-4, log=True
+        )
         cs.add_hyperparameters([shrinkage, shrinkage_factor, tol])
 
         cs.add_condition(EqualsCondition(shrinkage_factor, shrinkage, "manual"))

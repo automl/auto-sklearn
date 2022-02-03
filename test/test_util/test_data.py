@@ -1,28 +1,32 @@
-from typing import Any, List, Dict, Union
-from itertools import chain
-import warnings
+from typing import Any, Dict, List, Union
 
-import pytest
+import warnings
+from itertools import chain
 
 import numpy as np
 import pandas as pd
+import pytest
 import sklearn.datasets
 from scipy.sparse import csr_matrix, spmatrix
 
 from autosklearn.constants import (
-    BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION,
-    REGRESSION, MULTIOUTPUT_REGRESSION, CLASSIFICATION_TASKS, REGRESSION_TASKS
+    BINARY_CLASSIFICATION,
+    CLASSIFICATION_TASKS,
+    MULTICLASS_CLASSIFICATION,
+    MULTILABEL_CLASSIFICATION,
+    MULTIOUTPUT_REGRESSION,
+    REGRESSION,
+    REGRESSION_TASKS,
 )
 from autosklearn.util.data import (
-    subsample,
+    default_dataset_compression_arg,
     reduce_dataset_size_if_too_large,
     reduce_precision,
     reduction_mapping,
+    subsample,
     supported_precision_reductions,
     validate_dataset_compression_arg,
-    default_dataset_compression_arg
 )
-
 
 parametrize = pytest.mark.parametrize
 
@@ -68,11 +72,14 @@ def test_validate_dataset_compression_arg_returns_with_memory_allocation(
     assert validate_arg["methods"] == expected_methods
 
 
-@parametrize("methods", [
-    ["precision"],
-    ["precision", "subsample"],
-    ["precision", "precision", "subsample"]
-])
+@parametrize(
+    "methods",
+    [
+        ["precision"],
+        ["precision", "subsample"],
+        ["precision", "precision", "subsample"],
+    ],
+)
 def test_validate_dataset_compression_arg_returns_with_same_methods(
     methods: List[str],
 ):
@@ -125,17 +132,14 @@ def test_validate_dataset_compression_arg_raises_error_with_bad_key(key: str):
     -------
     * Should raise a ValueError
     """
-    bad_arg = {
-        **default_dataset_compression_arg,
-        key: 1337
-    }
+    bad_arg = {**default_dataset_compression_arg, key: 1337}
     with pytest.raises(ValueError, match=r"Unknown key"):
         validate_dataset_compression_arg(bad_arg, memory_limit=10)
 
 
 @parametrize("memory_allocation", ["hello", {}, [1, 2, 3]])
 def test_validate_dataset_compression_arg_raises_error_with_bad_memory_allocation_type(
-    memory_allocation: Any
+    memory_allocation: Any,
 ):
     """
     Parameters
@@ -148,13 +152,15 @@ def test_validate_dataset_compression_arg_raises_error_with_bad_memory_allocatio
     * Should raise a ValueError
     """
     bad_arg = {"memory_allocation": memory_allocation}
-    with pytest.raises(ValueError, match=r"key 'memory_allocation' must be an `int` or `float`"):
+    with pytest.raises(
+        ValueError, match=r"key 'memory_allocation' must be an `int` or `float`"
+    ):
         validate_dataset_compression_arg(bad_arg, memory_limit=10)
 
 
 @parametrize("memory_allocation", [-0.5, 0.0, 1.0, 1.5])
 def test_validate_dataset_compression_arg_raises_error_with_bad_memory_allocation_float(
-    memory_allocation: float
+    memory_allocation: float,
 ):
     """
     Parameters
@@ -168,16 +174,17 @@ def test_validate_dataset_compression_arg_raises_error_with_bad_memory_allocatio
     """
     bad_arg = {"memory_allocation": memory_allocation}
 
-    with pytest.raises(ValueError, match=r"key 'memory_allocation' if float must be in \(0, 1\)"):
+    with pytest.raises(
+        ValueError, match=r"key 'memory_allocation' if float must be in \(0, 1\)"
+    ):
         validate_dataset_compression_arg(bad_arg, memory_limit=10)
 
 
-@parametrize("memory_allocation, memory_limit", [
-    (0, 10), (10, 10), (-20, 10), (20, 10)
-])
+@parametrize(
+    "memory_allocation, memory_limit", [(0, 10), (10, 10), (-20, 10), (20, 10)]
+)
 def test_validate_dataset_compression_arg_raises_error_with_bad_memory_allocation_int(
-    memory_allocation: int,
-    memory_limit: int
+    memory_allocation: int, memory_limit: int
 ):
     """
     Parameters
@@ -193,12 +200,16 @@ def test_validate_dataset_compression_arg_raises_error_with_bad_memory_allocatio
     * Should raise a ValueError
     """
     bad_arg = {"memory_allocation": memory_allocation}
-    with pytest.raises(ValueError, match=r"key 'memory_allocation' if int must be in \(0,"):
+    with pytest.raises(
+        ValueError, match=r"key 'memory_allocation' if int must be in \(0,"
+    ):
         validate_dataset_compression_arg(bad_arg, memory_limit=memory_limit)
 
 
 @parametrize("methods", [10, {"hello", "world"}, []])
-def test_validate_dataset_compression_arg_raises_error_with_bad_methods_type(methods: Any):
+def test_validate_dataset_compression_arg_raises_error_with_bad_methods_type(
+    methods: Any,
+):
     """
     Parameters
     ----------
@@ -214,12 +225,17 @@ def test_validate_dataset_compression_arg_raises_error_with_bad_methods_type(met
         validate_dataset_compression_arg(bad_arg, memory_limit=10)
 
 
-@parametrize("methods", [
-    ["bad", "worse"],
-    ["precision", "kind_of_bad"],
-    ["still_bad", "precision", "subsample"]
-])
-def test_validate_dataset_compression_arg_raises_error_with_bad_methods_entries(methods: Any):
+@parametrize(
+    "methods",
+    [
+        ["bad", "worse"],
+        ["precision", "kind_of_bad"],
+        ["still_bad", "precision", "subsample"],
+    ],
+)
+def test_validate_dataset_compression_arg_raises_error_with_bad_methods_entries(
+    methods: Any,
+):
     """
     Parameters
     ----------
@@ -235,11 +251,16 @@ def test_validate_dataset_compression_arg_raises_error_with_bad_methods_entries(
         validate_dataset_compression_arg(bad_arg, memory_limit=10)
 
 
-@parametrize("y", [
-    np.asarray(9999 * [0] + 1 * [1]),
-    np.asarray(4999 * [1] + 4999 * [2] + 1 * [3] + 1 * [4]),
-    np.asarray(4999 * [[0, 1, 1]] + 4999 * [[1, 1, 0]] + 1 * [[1, 0, 1]] + 1 * [[0, 0, 0]])
-])
+@parametrize(
+    "y",
+    [
+        np.asarray(9999 * [0] + 1 * [1]),
+        np.asarray(4999 * [1] + 4999 * [2] + 1 * [3] + 1 * [4]),
+        np.asarray(
+            4999 * [[0, 1, 1]] + 4999 * [[1, 1, 0]] + 1 * [[1, 0, 1]] + 1 * [[0, 0, 0]]
+        ),
+    ],
+)
 @parametrize("random_state", list(range(5)))
 def test_subsample_classification_unique_labels_stay_in_training_set(y, random_state):
     n_samples = len(y)
@@ -253,32 +274,37 @@ def test_subsample_classification_unique_labels_stay_in_training_set(y, random_s
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         X_sampled, y_sampled = subsample(
-            X, y,
+            X,
+            y,
             random_state=random_state,
             sample_size=sample_size,
-            is_classification=True
+            is_classification=True,
         )
 
     assert X_sampled.dtype == X.dtype and y_sampled.dtype == y.dtype
     assert len(y_sampled) == sample_size
-    assert all(label in y_sampled for label in unique_labels), \
-        f"sampled unique = {np.unique(y_sampled)}, original unique = {unique_labels}"
+    assert all(
+        label in y_sampled for label in unique_labels
+    ), f"sampled unique = {np.unique(y_sampled)}, original unique = {unique_labels}"
 
 
 @parametrize("X", [np.asarray([[1, 1, 1]] * 30)])
 @parametrize("x_type", [list, np.ndarray, csr_matrix, pd.DataFrame])
-@parametrize("y, task", [
-    (np.asarray([0] * 15 + [1] * 15), BINARY_CLASSIFICATION),
-    (np.asarray([0] * 10 + [1] * 10 + [2] * 10), MULTICLASS_CLASSIFICATION),
-    (np.asarray([[1, 0, 1]] * 30), MULTILABEL_CLASSIFICATION),
-    (np.asarray([1.0] * 30), REGRESSION),
-    (np.asarray([[1.0, 1.0, 1.0]] * 30), MULTIOUTPUT_REGRESSION),
-])
+@parametrize(
+    "y, task",
+    [
+        (np.asarray([0] * 15 + [1] * 15), BINARY_CLASSIFICATION),
+        (np.asarray([0] * 10 + [1] * 10 + [2] * 10), MULTICLASS_CLASSIFICATION),
+        (np.asarray([[1, 0, 1]] * 30), MULTILABEL_CLASSIFICATION),
+        (np.asarray([1.0] * 30), REGRESSION),
+        (np.asarray([[1.0, 1.0, 1.0]] * 30), MULTIOUTPUT_REGRESSION),
+    ],
+)
 @parametrize("y_type", [list, np.ndarray, pd.DataFrame, pd.Series])
 @parametrize("random_state", [0])
 @parametrize("sample_size", [0.25, 0.5, 5, 10])
 def test_subsample_validity(X, x_type, y, y_type, random_state, sample_size, task):
-    """ Asserts the validity of the function with all valid types
+    """Asserts the validity of the function with all valid types
 
     We want to make sure that `subsample` works correctly with all the types listed
     as x_type and y_type.
@@ -289,10 +315,10 @@ def test_subsample_validity(X, x_type, y, y_type, random_state, sample_size, tas
     """
     assert len(X) == len(y)  # Make sure our test data is correct
 
-    if (
-        y_type == pd.Series
-        and task in [MULTILABEL_CLASSIFICATION, MULTIOUTPUT_REGRESSION]
-    ):
+    if y_type == pd.Series and task in [
+        MULTILABEL_CLASSIFICATION,
+        MULTIOUTPUT_REGRESSION,
+    ]:
         # We can't have a pd.Series with multiple values as it's 1 dimensional
         pytest.skip("Can't have pd.Series as y when task is n-dimensional")
 
@@ -312,10 +338,11 @@ def test_subsample_validity(X, x_type, y, y_type, random_state, sample_size, tas
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         X_sampled, y_sampled = subsample(
-            X, y,
+            X,
+            y,
             random_state=random_state,
             sample_size=sample_size,
-            is_classification=task in CLASSIFICATION_TASKS
+            is_classification=task in CLASSIFICATION_TASKS,
         )
 
     # Function to get the type of an obj
@@ -359,9 +386,11 @@ def test_subsample_validity(X, x_type, y, y_type, random_state, sample_size, tas
         assert size(X_sampled) == sample_size
 
 
-@parametrize('X', [np.asarray([[0, 0, 1]] * 10)])
-@parametrize('dtype', supported_precision_reductions + [np.dtype('float32'), np.dtype('float64')])
-@parametrize('x_type', [np.ndarray, csr_matrix])
+@parametrize("X", [np.asarray([[0, 0, 1]] * 10)])
+@parametrize(
+    "dtype", supported_precision_reductions + [np.dtype("float32"), np.dtype("float64")]
+)
+@parametrize("x_type", [np.ndarray, csr_matrix])
 def test_reduce_precision_correctly_reduces_precision(X, dtype, x_type):
     X = X.astype(dtype)
     if x_type == csr_matrix:
@@ -376,13 +405,13 @@ def test_reduce_precision_correctly_reduces_precision(X, dtype, x_type):
     expected: Dict[type, type] = {
         np.float32: np.float32,
         np.float64: np.float32,
-        np.dtype('float32'): np.float32,
-        np.dtype('float64'): np.float32
+        np.dtype("float32"): np.float32,
+        np.dtype("float64"): np.float32,
     }
-    if hasattr(np, 'float96'):
+    if hasattr(np, "float96"):
         expected[np.float96] = np.float64
 
-    if hasattr(np, 'float128'):
+    if hasattr(np, "float128"):
         expected[np.float128] = np.float64
 
     assert precision == expected[dtype]
@@ -394,28 +423,40 @@ def test_reduce_precision_correctly_reduces_precision(X, dtype, x_type):
     assert type(X) == type(X_reduced)
 
 
-@parametrize('X', [np.asarray([0, 0, 1]) * 10])
-@parametrize('dtype', [np.int32, np.int64, np.complex128])
+@parametrize("X", [np.asarray([0, 0, 1]) * 10])
+@parametrize("dtype", [np.int32, np.int64, np.complex128])
 def test_reduce_precision_with_unsupported_dtypes(X, dtype):
     X = X.astype(dtype)
     with pytest.raises(ValueError) as err:
         reduce_precision(X)
 
-    expected = f"X.dtype = {X.dtype} not equal to any supported {supported_precision_reductions}"
+    expected = (
+        f"X.dtype = {X.dtype} not equal to any supported "
+        f"{supported_precision_reductions}"
+    )
+
     assert err.value.args[0] == expected
 
 
-@parametrize("X", [
-    np.ones((100000, 10), dtype=np.float64)  # Make it big for reductions to take place
-])
+@parametrize(
+    "X",
+    [
+        np.ones(
+            (100000, 10), dtype=np.float64
+        )  # Make it big for reductions to take place
+    ],
+)
 @parametrize("x_type", [csr_matrix, np.ndarray])
 @parametrize("dtype", supported_precision_reductions)
-@parametrize('y, is_classification', [
-    (np.ones((100000,)), True),
-    (np.ones((100000,)), False),
-])
-@parametrize('memory_allocation', [0.1, 1/5.2, 1/8, 1])
-@parametrize('operations', [['precision'], ['subsample'], ['precision', 'subsample']])
+@parametrize(
+    "y, is_classification",
+    [
+        (np.ones((100000,)), True),
+        (np.ones((100000,)), False),
+    ],
+)
+@parametrize("memory_allocation", [0.1, 1 / 5.2, 1 / 8, 1])
+@parametrize("operations", [["precision"], ["subsample"], ["precision", "subsample"]])
 def test_reduce_dataset_reduces_size_and_precision(
     X, x_type, dtype, y, is_classification, memory_allocation, operations
 ):
@@ -444,13 +485,13 @@ def test_reduce_dataset_reduces_size_and_precision(
         return arr.nbytes if isinstance(arr, np.ndarray) else arr.data.nbytes
 
     # If we expect some precision reduction unless at float32 already
-    if 'precision' in operations and dtype != np.float32:
+    if "precision" in operations and dtype != np.float32:
         expected = reduction_mapping[X.dtype]
         assert X_out.dtype == expected
         assert bytes(X_out) < bytes(X)
 
     # If we expect some subsampling
-    if 'subsample' in operations:
+    if "subsample" in operations:
         assert X_out.shape[0] < X.shape[0]
         assert y_out.shape[0] < y.shape[0]
         assert bytes(X_out) < bytes(X)
@@ -464,10 +505,10 @@ def test_reduce_dataset_invalid_dtype_for_precision_reduction():
         reduce_dataset_size_if_too_large(
             X=X,
             y=X,
-            operations=['precision'],
+            operations=["precision"],
             memory_limit=1,
             memory_allocation=0.1,
-            is_classification=False
+            is_classification=False,
         )
 
     expected_err = f"Unsupported type `{X.dtype}` for precision reduction"
@@ -485,7 +526,7 @@ def test_reduce_dataset_invalid_operations():
             operations=[invalid_op],
             memory_limit=1,
             memory_allocation=0.1,
-            is_classification=False
+            is_classification=False,
         )
 
     expected_err = f"Unknown operation `{invalid_op}`"
@@ -504,13 +545,15 @@ def test_reduce_dataset_invalid_memory_allocation_float(memory_allocation: float
     -------
     * Should raise a ValueError
     """
-    with pytest.raises(ValueError, match=r"memory_allocation if float must be in \(0, 1\)"):
+    with pytest.raises(
+        ValueError, match=r"memory_allocation if float must be in \(0, 1\)"
+    ):
         reduce_dataset_size_if_too_large(
             X=np.empty(1),
             y=np.empty(1),
             memory_limit=100,
             is_classification=True,
-            memory_allocation=memory_allocation
+            memory_allocation=memory_allocation,
         )
 
 
@@ -526,17 +569,19 @@ def test_reduce_dataset_invalid_memory_allocation_int(memory_allocation: int):
     -------
     * Should raise a ValueError
     """
-    with pytest.raises(ValueError, match=r"memory_allocation if int must be in \(0, memory_limit"):
+    with pytest.raises(
+        ValueError, match=r"memory_allocation if int must be in \(0, memory_limit"
+    ):
         reduce_dataset_size_if_too_large(
             X=np.empty(1),
             y=np.empty(1),
             is_classification=True,
             memory_limit=100,
-            memory_allocation=memory_allocation
+            memory_allocation=memory_allocation,
         )
 
 
-@parametrize("memory_allocation", ["100", {'a': 1}, [100]])
+@parametrize("memory_allocation", ["100", {"a": 1}, [100]])
 def test_reduce_dataset_invalid_memory_allocation_type(memory_allocation: Any):
     """
     Parameters
@@ -554,25 +599,30 @@ def test_reduce_dataset_invalid_memory_allocation_type(memory_allocation: Any):
             y=np.empty(1),
             memory_limit=100,
             is_classification=True,
-            memory_allocation=memory_allocation
+            memory_allocation=memory_allocation,
         )
 
 
 @pytest.mark.parametrize(
-    'memory_limit,precision,task',
+    "memory_limit,precision,task",
     [
         (memory_limit, precision, task)
         for task in chain(CLASSIFICATION_TASKS, REGRESSION_TASKS)
         for precision in (float, np.float32, np.float64, np.float128)
         for memory_limit in (1, 100)
-    ]
+    ],
 )
 def test_reduce_dataset_subsampling_explicit_values(memory_limit, precision, task):
     random_state = 0
     fixture = {
         BINARY_CLASSIFICATION: {
             1: {float: 2621, np.float32: 2621, np.float64: 2621, np.float128: 1310},
-            100: {float: 12000, np.float32: 12000, np.float64: 12000, np.float128: 12000},
+            100: {
+                float: 12000,
+                np.float32: 12000,
+                np.float64: 12000,
+                np.float128: 12000,
+            },
         },
         MULTICLASS_CLASSIFICATION: {
             1: {float: 409, np.float32: 409, np.float64: 409, np.float128: 204},
@@ -589,7 +639,7 @@ def test_reduce_dataset_subsampling_explicit_values(memory_limit, precision, tas
         MULTIOUTPUT_REGRESSION: {
             1: {float: 1310, np.float32: 1310, np.float64: 1310, np.float128: 655},
             100: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
-        }
+        },
     }
 
     # Create the task and data
@@ -620,12 +670,13 @@ def test_reduce_dataset_subsampling_explicit_values(memory_limit, precision, tas
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         X_new, y_new = reduce_dataset_size_if_too_large(
-            X=X, y=y,
+            X=X,
+            y=y,
             random_state=random_state,
             memory_limit=memory_limit,
             is_classification=task in CLASSIFICATION_TASKS,
-            operations=['precision', 'subsample'],
-            memory_allocation=0.1
+            operations=["precision", "subsample"],
+            memory_allocation=0.1,
         )
 
     # Assert the new number of samples

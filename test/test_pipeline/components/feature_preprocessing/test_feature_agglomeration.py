@@ -1,9 +1,14 @@
-from sklearn.ensemble import RandomForestClassifier
-from autosklearn.pipeline.components.feature_preprocessing.feature_agglomeration import \
-    FeatureAgglomeration
-from autosklearn.pipeline.util import _test_preprocessing, PreprocessingTestCase, \
-    get_dataset
 import sklearn.metrics
+from sklearn.ensemble import RandomForestClassifier
+
+from autosklearn.pipeline.components.feature_preprocessing.feature_agglomeration import (  # noqa: E501
+    FeatureAgglomeration,
+)
+from autosklearn.pipeline.util import (
+    PreprocessingTestCase,
+    _test_preprocessing,
+    get_dataset,
+)
 
 
 class FeatureAgglomerationComponentTest(PreprocessingTestCase):
@@ -14,13 +19,14 @@ class FeatureAgglomerationComponentTest(PreprocessingTestCase):
 
     def test_default_configuration_classify(self):
         for i in range(3):
-            X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
-                                                           make_sparse=False)
+            X_train, Y_train, X_test, Y_test = get_dataset(
+                dataset="digits", make_sparse=False
+            )
             configuration_space = FeatureAgglomeration.get_hyperparameter_search_space()
             default = configuration_space.get_default_configuration()
-            preprocessor = FeatureAgglomeration(random_state=1,
-                                                **{hp_name: default[hp_name] for
-                                                   hp_name in default})
+            preprocessor = FeatureAgglomeration(
+                random_state=1, **{hp_name: default[hp_name] for hp_name in default}
+            )
             preprocessor.fit(X_train, Y_train)
             X_train_trans = preprocessor.transform(X_train)
             X_test_trans = preprocessor.transform(X_test)
@@ -33,6 +39,6 @@ class FeatureAgglomerationComponentTest(PreprocessingTestCase):
             self.assertAlmostEqual(accuracy, 0.8761384335154827)
 
     def test_preprocessing_dtype(self):
-        super(FeatureAgglomerationComponentTest,
-              self)._test_preprocessing_dtype(FeatureAgglomeration,
-                                              test_sparse=False)
+        super(FeatureAgglomerationComponentTest, self)._test_preprocessing_dtype(
+            FeatureAgglomeration, test_sparse=False
+        )

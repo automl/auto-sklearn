@@ -1,4 +1,5 @@
 import typing
+
 from pathlib import Path
 
 import dask.distributed
@@ -9,6 +10,7 @@ class DummyFuture(dask.distributed.Future):
     A class that mimics a distributed Future, the outcome of
     performing submit on a distributed client.
     """
+
     def __init__(self, result: typing.Any) -> None:
         self._result = result  # type: typing.Any
 
@@ -33,13 +35,24 @@ class SingleThreadedClient(dask.distributed.Client):
     A class to Mock the Distributed Client class, in case
     Auto-Sklearn is meant to run in the current Thread.
     """
+
     def __init__(self) -> None:
 
         # Raise a not implemented error if using a method from Client
-        implemented_methods = ['submit', 'close', 'shutdown', 'write_scheduler_file',
-                               '_get_scheduler_info', 'nthreads']
-        method_list = [func for func in dir(dask.distributed.Client) if callable(
-            getattr(dask.distributed.Client, func)) and not func.startswith('__')]
+        implemented_methods = [
+            "submit",
+            "close",
+            "shutdown",
+            "write_scheduler_file",
+            "_get_scheduler_info",
+            "nthreads",
+        ]
+        method_list = [
+            func
+            for func in dir(dask.distributed.Client)
+            if callable(getattr(dask.distributed.Client, func))
+            and not func.startswith("__")
+        ]
         for method in method_list:
             if method in implemented_methods:
                 continue
@@ -70,17 +83,17 @@ class SingleThreadedClient(dask.distributed.Client):
 
     def _get_scheduler_info(self) -> typing.Dict:
         return {
-            'workers': ['127.0.0.1'],
-            'type': 'Scheduler',
+            "workers": ["127.0.0.1"],
+            "type": "Scheduler",
         }
 
     def nthreads(self) -> typing.Dict:
         return {
-            '127.0.0.1': 1,
+            "127.0.0.1": 1,
         }
 
     def __repr__(self) -> str:
-        return 'SingleThreadedClient()'
+        return "SingleThreadedClient()"
 
     def __del__(self) -> None:
         pass

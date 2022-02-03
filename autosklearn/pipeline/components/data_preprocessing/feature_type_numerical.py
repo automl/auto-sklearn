@@ -1,23 +1,20 @@
-from typing import Any, List, Dict, Optional, Tuple, Union
-
-from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
-
+from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
 from sklearn.base import BaseEstimator
 
-from autosklearn.pipeline.components.data_preprocessing import rescaling as \
-    rescaling_components
-from autosklearn.pipeline.components.data_preprocessing.imputation.numerical_imputation \
-    import NumericalImputation
-from autosklearn.pipeline.components.data_preprocessing.variance_threshold\
-    .variance_threshold import VarianceThreshold
-
-from autosklearn.pipeline.base import (
-    BasePipeline,
-    DATASET_PROPERTIES_TYPE,
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, BasePipeline
+from autosklearn.pipeline.components.data_preprocessing import (
+    rescaling as rescaling_components,
 )
-from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
+from autosklearn.pipeline.components.data_preprocessing.imputation.numerical_imputation import (  # noqa: E501
+    NumericalImputation,
+)
+from autosklearn.pipeline.components.data_preprocessing.variance_threshold.variance_threshold import (  # noqa: E501
+    VarianceThreshold,
+)
+from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 
 
 class NumericalPreprocessingPipeline(BasePipeline):
@@ -48,35 +45,43 @@ class NumericalPreprocessingPipeline(BasePipeline):
         include: Optional[Dict[str, str]] = None,
         exclude: Optional[Dict[str, str]] = None,
         random_state: Optional[Union[int, np.random.RandomState]] = None,
-        init_params: Optional[Dict[str, Any]] = None
+        init_params: Optional[Dict[str, Any]] = None,
     ) -> None:
         self._output_dtype = np.int32
         super().__init__(
-            config, steps, dataset_properties, include, exclude,
-            random_state, init_params
+            config,
+            steps,
+            dataset_properties,
+            include,
+            exclude,
+            random_state,
+            init_params,
         )
 
     @staticmethod
-    def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
-                       ) -> Dict[str, Optional[Union[str, int, bool, Tuple]]]:
-        return {'shortname': 'num_datapreproc',
-                'name': 'numeric data preprocessing',
-                'handles_missing_values': True,
-                'handles_nominal_values': True,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': False,
-                'prefers_data_normalized': False,
-                'handles_regression': True,
-                'handles_classification': True,
-                'handles_multiclass': True,
-                'handles_multilabel': True,
-                'is_deterministic': True,
-                # TODO find out if this is right!
-                'handles_sparse': True,
-                'handles_dense': True,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (INPUT,),
-                'preferred_dtype': None}
+    def get_properties(
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+    ) -> Dict[str, Optional[Union[str, int, bool, Tuple]]]:
+        return {
+            "shortname": "num_datapreproc",
+            "name": "numeric data preprocessing",
+            "handles_missing_values": True,
+            "handles_nominal_values": True,
+            "handles_numerical_features": True,
+            "prefers_data_scaled": False,
+            "prefers_data_normalized": False,
+            "handles_regression": True,
+            "handles_classification": True,
+            "handles_multiclass": True,
+            "handles_multilabel": True,
+            "is_deterministic": True,
+            # TODO find out if this is right!
+            "handles_sparse": True,
+            "handles_dense": True,
+            "input": (DENSE, SPARSE, UNSIGNED_DATA),
+            "output": (INPUT,),
+            "preferred_dtype": None,
+        }
 
     def _get_hyperparameter_search_space(
         self,
@@ -100,25 +105,35 @@ class NumericalPreprocessingPipeline(BasePipeline):
             dataset_properties = dict()
 
         cs = self._get_base_search_space(
-            cs=cs, dataset_properties=dataset_properties,
-            exclude=exclude, include=include, pipeline=self.steps)
+            cs=cs,
+            dataset_properties=dataset_properties,
+            exclude=exclude,
+            include=include,
+            pipeline=self.steps,
+        )
 
         return cs
 
-    def _get_pipeline_steps(self,
-                            dataset_properties: Optional[Dict[str, str]] = None,
-                            ) -> List[Tuple[str, BaseEstimator]]:
+    def _get_pipeline_steps(
+        self,
+        dataset_properties: Optional[Dict[str, str]] = None,
+    ) -> List[Tuple[str, BaseEstimator]]:
         steps = []
 
         default_dataset_properties = {}
         if dataset_properties is not None and isinstance(dataset_properties, dict):
             default_dataset_properties.update(dataset_properties)
 
-        steps.extend([
-            ("imputation", NumericalImputation()),
-            ("variance_threshold", VarianceThreshold()),
-            ("rescaling", rescaling_components.RescalingChoice(default_dataset_properties)),
-            ])
+        steps.extend(
+            [
+                ("imputation", NumericalImputation()),
+                ("variance_threshold", VarianceThreshold()),
+                (
+                    "rescaling",
+                    rescaling_components.RescalingChoice(default_dataset_properties),
+                ),
+            ]
+        )
 
         return steps
 

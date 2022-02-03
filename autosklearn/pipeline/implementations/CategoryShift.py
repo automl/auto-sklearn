@@ -1,12 +1,11 @@
 import numpy as np
 from scipy import sparse
-from sklearn.utils import check_array
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.utils import check_array
 
 
 class CategoryShift(BaseEstimator, TransformerMixin):
-    """ Add 3 to every category.
-    """
+    """Add 3 to every category."""
 
     def __init__(self, random_state=None):
         self.random_state = random_state
@@ -15,14 +14,16 @@ class CategoryShift(BaseEstimator, TransformerMixin):
         X_data = X.data if sparse.issparse(X) else X
 
         # Check if data is numeric and positive
-        if X_data.dtype.kind not in set('buif') or np.nanmin(X_data) < 0:
-            raise ValueError('Categories should be non-negative numbers. '
-                             'NOTE: floats will be casted to integers.')
+        if X_data.dtype.kind not in set("buif") or np.nanmin(X_data) < 0:
+            raise ValueError(
+                "Categories should be non-negative numbers. "
+                "NOTE: floats will be casted to integers."
+            )
 
         # Use check_array to make sure we are using the right kind of sparse array
         # Notice that we cannot convert the array to integer right now. That would get
         # rid of the np.nans and we need them later on for the imputation.
-        X = check_array(X, accept_sparse='csc', force_all_finite=False, copy=True)
+        X = check_array(X, accept_sparse="csc", force_all_finite=False, copy=True)
         return X
 
     def fit(self, X, y=None):

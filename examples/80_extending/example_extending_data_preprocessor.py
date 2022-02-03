@@ -21,9 +21,8 @@ from sklearn.model_selection import train_test_split
 # Create NoPreprocessing component for auto-sklearn
 # =================================================
 class NoPreprocessing(AutoSklearnPreprocessingAlgorithm):
-
     def __init__(self, **kwargs):
-        """ This preprocessors does not change the data """
+        """This preprocessors does not change the data"""
         # Some internal checks makes sure parameters are set
         for key, val in kwargs.items():
             setattr(self, key, val)
@@ -37,16 +36,16 @@ class NoPreprocessing(AutoSklearnPreprocessingAlgorithm):
     @staticmethod
     def get_properties(dataset_properties=None):
         return {
-            'shortname': 'NoPreprocessing',
-            'name': 'NoPreprocessing',
-            'handles_regression': True,
-            'handles_classification': True,
-            'handles_multiclass': True,
-            'handles_multilabel': True,
-            'handles_multioutput': True,
-            'is_deterministic': True,
-            'input': (SPARSE, DENSE, UNSIGNED_DATA),
-            'output': (INPUT,)
+            "shortname": "NoPreprocessing",
+            "name": "NoPreprocessing",
+            "handles_regression": True,
+            "handles_classification": True,
+            "handles_multiclass": True,
+            "handles_multilabel": True,
+            "handles_multioutput": True,
+            "is_deterministic": True,
+            "input": (SPARSE, DENSE, UNSIGNED_DATA),
+            "output": (INPUT,),
         }
 
     @staticmethod
@@ -70,13 +69,11 @@ X_train, X_test, y_train, y_test = train_test_split(X, y)
 
 clf = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
-    include={
-        'data_preprocessor': ['NoPreprocessing']
-    },
+    include={"data_preprocessor": ["NoPreprocessing"]},
     # Bellow two flags are provided to speed up calculations
     # Not recommended for a real implementation
     initial_configurations_via_metalearning=0,
-    smac_scenario_args={'runcount_limit': 5},
+    smac_scenario_args={"runcount_limit": 5},
 )
 clf.fit(X_train, y_train)
 

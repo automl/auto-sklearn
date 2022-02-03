@@ -1,7 +1,6 @@
 import sklearn.naive_bayes
 
-from autosklearn.pipeline.components.classification.gaussian_nb import \
-    GaussianNB
+from autosklearn.pipeline.components.classification.gaussian_nb import GaussianNB
 
 from .test_base import BaseClassificationComponentTest
 

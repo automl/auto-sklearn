@@ -1,7 +1,9 @@
 import numpy as np
 
-from autosklearn.pipeline.components.feature_preprocessing.no_preprocessing import NoPreprocessing
-from autosklearn.pipeline.util import _test_preprocessing, PreprocessingTestCase
+from autosklearn.pipeline.components.feature_preprocessing.no_preprocessing import (
+    NoPreprocessing,
+)
+from autosklearn.pipeline.util import PreprocessingTestCase, _test_preprocessing
 
 
 class NoneComponentTest(PreprocessingTestCase):

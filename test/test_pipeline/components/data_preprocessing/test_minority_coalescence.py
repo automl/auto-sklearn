@@ -1,23 +1,25 @@
 import unittest
-import numpy as np
 
+import numpy as np
 import scipy.sparse
 
-from autosklearn.pipeline.components.data_preprocessing.minority_coalescense\
-    .minority_coalescer import MinorityCoalescer
-from autosklearn.pipeline.components.data_preprocessing.minority_coalescense\
-    .no_coalescense import NoCoalescence
+from autosklearn.pipeline.components.data_preprocessing.minority_coalescense.minority_coalescer import (  # noqa: E501
+    MinorityCoalescer,
+)
+from autosklearn.pipeline.components.data_preprocessing.minority_coalescense.no_coalescense import (  # noqa: E501
+    NoCoalescence,
+)
 
 
 class MinorityCoalescerTest(unittest.TestCase):
-
     def test_data_type_consistency(self):
         X = np.random.randint(3, 6, (3, 4))
         Y = MinorityCoalescer().fit_transform(X)
         self.assertFalse(scipy.sparse.issparse(Y))
 
         X = scipy.sparse.csc_matrix(
-            ([3, 6, 4, 5], ([0, 1, 2, 1], [3, 2, 1, 0])), shape=(3, 4))
+            ([3, 6, 4, 5], ([0, 1, 2, 1], [3, 2, 1, 0])), shape=(3, 4)
+        )
         Y = MinorityCoalescer().fit_transform(X)
         self.assertTrue(scipy.sparse.issparse(Y))
 

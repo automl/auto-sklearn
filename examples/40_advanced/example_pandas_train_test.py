@@ -58,22 +58,19 @@ X, y = sklearn.datasets.fetch_openml(data_id=40981, return_X_y=True, as_frame=Fa
 # Targets for classification are also automatically encoded
 # If using fetch_openml, data is already properly encoded, below
 # is an example for user reference
-X = pd.DataFrame(
-    data=X,
-    columns=['A' + str(i) for i in range(1, 15)]
-)
-desired_boolean_columns = ['A1']
-desired_categorical_columns = ['A4', 'A5', 'A6', 'A8', 'A9', 'A11', 'A12']
-desired_numerical_columns = ['A2', 'A3', 'A7', 'A10', 'A13', 'A14']
+X = pd.DataFrame(data=X, columns=["A" + str(i) for i in range(1, 15)])
+desired_boolean_columns = ["A1"]
+desired_categorical_columns = ["A4", "A5", "A6", "A8", "A9", "A11", "A12"]
+desired_numerical_columns = ["A2", "A3", "A7", "A10", "A13", "A14"]
 for column in X.columns:
     if column in desired_boolean_columns:
-        X[column] = X[column].astype('bool')
+        X[column] = X[column].astype("bool")
     elif column in desired_categorical_columns:
-        X[column] = X[column].astype('category')
+        X[column] = X[column].astype("category")
     else:
         X[column] = pd.to_numeric(X[column])
 
-y = pd.DataFrame(y, dtype='category')
+y = pd.DataFrame(y, dtype="category")
 
 X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
     X, y, test_size=0.5, random_state=3
@@ -100,15 +97,15 @@ print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 ############################################################################
 # Plot the ensemble performance
 # ===================================
-# The *performance_over_time_* attribute returns a pandas dataframe, which can 
+# The *performance_over_time_* attribute returns a pandas dataframe, which can
 # be directly used for plotting
 
 poT = cls.performance_over_time_
 poT.plot(
-    x='Timestamp',
-    kind='line',
+    x="Timestamp",
+    kind="line",
     legend=True,
-    title='Auto-sklearn accuracy over time',
+    title="Auto-sklearn accuracy over time",
     grid=True,
 )
 plt.show()
