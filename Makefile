@@ -65,10 +65,14 @@ pre-commit:
 	$(PRECOMMIT) run --all-files
 
 format-black:
-	$(BLACK) autosklearn test examples
+	$(BLACK) autosklearn/.*
+	$(BLACK) test/.*
+	$(BLACK) examples/.*
 
 format-isort:
-	$(ISORT) autosklearn test
+	$(ISORT) autosklearn
+	$(ISORT) test
+
 
 format: format-black format-isort
 
