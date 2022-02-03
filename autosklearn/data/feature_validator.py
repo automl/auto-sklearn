@@ -124,9 +124,9 @@ class FeatureValidator(BaseEstimator):
                     ))
 
                 for ft in self.feat_type.values():
-                    if ft.lower() not in ['categorical', 'numerical']:
-                        raise ValueError('Only `Categorical` and `Numerical` are '
-                                         'valid feature types, you passed `%s`' % ft)
+                    if ft.lower() not in ['categorical', 'numerical', 'string']:
+                        raise ValueError('Only `Categorical`, `Numerical` and `String` are '
+                                         'valid feature types')
 
         if X_test is not None:
             self._check_data(X_test)
@@ -262,7 +262,7 @@ class FeatureValidator(BaseEstimator):
     ) -> Dict[Union[str, int], str]:
         """
         Returns a dictionary that maps pandas dataframe columns to a feature type.
-        This feature type can be categorical or numerical
+        This feature type can be categorical, numerical or string
 
         Parameters
         ----------
@@ -284,8 +284,9 @@ class FeatureValidator(BaseEstimator):
                 raise ValueError("Auto-sklearn does not yet support sparse pandas Series."
                                  f" Please convert {column} to a dense format.")
             elif X[column].dtype.name in ['category', 'bool']:
-
                 feat_type[column] = 'categorical'
+            elif X[column].dtype.name == "string":
+                feat_type[column] = 'string'
             # Move away from np.issubdtype as it causes
             # TypeError: data type not understood in certain pandas types
             elif not is_numeric_dtype(X[column]):
@@ -357,12 +358,6 @@ class FeatureValidator(BaseEstimator):
 
         # Store the dtypes and use in case of re-fit
         if len(self.dtypes) == 0:
-            # Categorical data is inferred as string. Convert to categorical.
-            # Warn the user about dtypes or request him to use a dataframe
-            for col in X_train.columns:
-                if X_train[col].dtype.name == 'string':
-                    X_train[col] = X_train[col].astype('category')
-
             self.dtypes = {col: X_train[col].dtype.name.lower() for col in X_train.columns}
         else:
             for col in X_train.columns:
