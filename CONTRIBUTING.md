@@ -276,6 +276,10 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     ```bash
     pre-commit install
     ```
+    * To run `pre-commit` manually:
+    ```bash
+    pre-commit run --al-files
+    ```
     *   The reason we use tools like `flake8`, `mypy`, `black`, `isort` and `pydocstyle` is to make sure that when we review code:
         *   There are no extra blank spaces and blank lines. (`flake8`, `black`)
         *   Lines don't end up too long. (`flake8`, `black`)
