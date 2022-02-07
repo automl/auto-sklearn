@@ -388,7 +388,7 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     # This will generate all documentation and check links
     make doc
     make linkcheck
-    # make examples, if you modified some examples
+    make examples  # mainly needed if you modified some examples
 
     # ... fix any issues
 
