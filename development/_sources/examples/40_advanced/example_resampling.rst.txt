@@ -138,7 +138,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score holdout:  0.9440559440559441
+    Accuracy score holdout:  0.958041958041958
 
 
 
@@ -186,7 +186,7 @@ Cross-validation
     /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
       self.algorithm_runs[metric].append(runs)
     Before re-fit
-    Accuracy score CV 0.965034965034965
+    Accuracy score CV 0.958041958041958
 
 
 
@@ -219,7 +219,7 @@ final ensemble on the whole dataset.
  .. code-block:: none
 
     After re-fit
-    Accuracy score CV 0.958041958041958
+    Accuracy score CV 0.951048951048951
 
 
 
@@ -280,10 +280,10 @@ to the use case at hand.
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.964789
-      Number of target algorithm runs: 24
-      Number of successful target algorithm runs: 23
+      Number of target algorithm runs: 25
+      Number of successful target algorithm runs: 25
       Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 1
+      Number of target algorithms that exceeded the time limit: 0
       Number of target algorithms that exceeded the memory limit: 0
 
 
@@ -345,7 +345,7 @@ splitting it on the first feature.
 
  .. code-block:: none
 
-    Accuracy score custom split 0.965034965034965
+    Accuracy score custom split 0.951048951048951
 
 
 
@@ -353,7 +353,7 @@ splitting it on the first feature.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 6 minutes  29.128 seconds)
+   **Total running time of the script:** ( 6 minutes  22.663 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_resampling.py:
