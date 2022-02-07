@@ -10,12 +10,12 @@ coverage:
   # https://docs.codecov.com/docs/commit-status
   status:
 
-    # We want our total main project to always remain above 87% coverage, a
+    # We want our total main project to always remain above 84% coverage, a
     # drop of 0.20% is allowed. It should fail if coverage couldn't be uploaded
     # of the CI fails otherwise
     project:
       default:
-        target: 87%
+        target: 84%
         threshold: 0.20%
         if_not_found: failure
         if_ci_failed: error
