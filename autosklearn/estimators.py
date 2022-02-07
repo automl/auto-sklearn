@@ -21,6 +21,9 @@ from autosklearn.pipeline.base import BasePipeline
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, AutoML
 from autosklearn.metrics import Scorer
 
+from sklearnex import patch_sklearn
+patch_sklearn()
+
 
 class AutoSklearnEstimator(BaseEstimator):
 
