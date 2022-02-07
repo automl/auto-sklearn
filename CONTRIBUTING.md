@@ -284,6 +284,7 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
         *   There are no extra blank spaces and blank lines. (`flake8`, `black`)
         *   Lines don't end up too long. (`flake8`, `black`)
         *   Code from multiple source keeps a similar appearance. (`black`)
+        *   Importing things is consistently ordered. (`isort`)
         *   Functions are type annotated and correct with static type checking. (`mypy`)
         * Function and classes have docstrings. (`pydocstyle`)
         If you are new to Python types, or stuck with how something should be 'typed', please feel free to push the pull request in the following steps and we should be able to help you out.
