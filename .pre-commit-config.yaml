@@ -9,12 +9,10 @@ repos:
       - id: isort
         name: isort imports autosklearn
         files: autosklearn/.*
-        args: [--check]
 
       - id: isort
         name: isort imports test
         files: test/.*
-        args: [--check]
 
   - repo: https://github.com/ambv/black
     rev: 22.1.0
@@ -22,17 +20,14 @@ repos:
       - id: black
         name: black formatter autosklearn
         files: autosklearn/.*
-        args: [--check]
 
       - id: black
         name: black formatter test
         files: test/.*
-        args: [--check]
 
       - id: black
         name: black formatter examples
         files: examples/.*
-        args: [--check]
 
   # This is disabled as most modules fail this
   - repo: https://github.com/pycqa/pydocstyle
