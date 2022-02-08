@@ -201,7 +201,7 @@ AutoSklearnClassifier(per_run_time_limit=30,
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score 0.958041958041958
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score 0.965034965034965
 ################################################################################
 Metric results
  rank_test_scores param_classifier:__choice__  mean_test_score  metric_balanced_accuracy  metric_precision  metric_recall  metric_f1  metric_custom_error
@@ -230,15 +230,19 @@ Metric results
                26               random_forest         0.929078                  0.923833          0.943820       0.943820   0.943820             0.070922
                20                    adaboost         0.957447                  0.950303          0.956044       0.977528   0.966667             0.042553
                 5                 extra_trees         0.971631                  0.965536          0.967033       0.988764   0.977778             0.028369
-               30                         mlp         0.631206                  0.500000          0.631206       1.000000   0.773913             0.368794
+               32                         mlp         0.631206                  0.500000          0.631206       1.000000   0.773913             0.368794
                26                 extra_trees         0.929078                  0.915838          0.924731       0.966292   0.945055             0.070922
                 1                         lda         0.985816                  0.980769          0.978022       1.000000   0.988889             0.014184
-               31                bernoulli_nb         0.390071                  0.516854          1.000000       0.033708   0.065217             0.609929
+               35                bernoulli_nb         0.390071                  0.516854          1.000000       0.033708   0.065217             0.609929
                26                         mlp         0.929078                  0.935825          0.975904       0.910112   0.941860             0.070922
                20                         lda         0.957447                  0.954300          0.966292       0.966292   0.966292             0.042553
+               30                 extra_trees         0.907801                  0.875000          0.872549       1.000000   0.931937             0.092199
+               34                         sgd         0.624113                  0.502377          0.632353       0.966292   0.764444             0.375887
+               31                         lda         0.879433                  0.868518          0.900000       0.910112   0.905028             0.120567
+               32                         qda         0.631206                  0.500000          0.631206       1.000000   0.773913             0.368794
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  57.934 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  1.413 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-calc-multiple-metrics-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_calc_multiple_metrics.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
