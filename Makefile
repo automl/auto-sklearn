@@ -108,15 +108,23 @@ examples:
 # Publish to testpypi
 # Will echo the commands to actually publish to be run to publish to actual PyPi
 # This is done to prevent accidental publishing but provide the same conveniences
-publish: clean-build build
+publish: clean build
 	$(PIP) install twine
 	$(PYTHON) -m twine upload --repository testpypi ${DIST}/*
 	@echo
-	@echo "Test with the following line:"
-	@echo "pip install --index-url https://test.pypi.org/simple/ auto-sklearn"
+	@echo "Test with the following:"
+	@echo "* Create a new virtual environment to install the uplaoded distribution into"
+	@echo "* Run the following:"
+	@echo
+	@echo "        pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ autosklearn"
+	@echo
+	@echo "* Run this to make sure it can import correctly, plus whatever else you'd like to test:"
+	@echo
+	@echo "        python -c 'import autosklearn'"
 	@echo
 	@echo "Once you have decided it works, publish to actual pypi with"
-	@echo "python -m twine upload dist/*"
+	@echo
+	@echo "    python -m twine upload dist/*"
 
 test:
 	$(PYTEST) test
