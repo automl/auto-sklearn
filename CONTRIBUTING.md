@@ -262,11 +262,11 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     ```
 
 *   Once you've made all your changes and all the tests pass successfully, we need to make sure that the code fits a certain format and that the [typing](https://docs.python.org/3/library/typing.html) is correct.
-    * Formatting and import sorting can helps keep things uniform across all coding styles. We use `black` and `isort` to do this for us. To automatically run these formatters across the code base, just run the following command:
+    * Formatting and import sorting can helps keep things uniform across all coding styles. We use [`black`](https://black.readthedocs.io/en/stable/) and [`isort`](https://isort.readthedocs.io/en/latest/) to do this for us. To automatically run these formatters across the code base, just run the following command:
     ```bash
     make format
     ```
-    * To then check for other issues with `mypy`, `flake8` and `pydocstyle`, run
+    * To then check for issues using [`black`](https://black.readthedocs.io/en/stable/), [`isort`](https://isort.readthedocs.io/en/latest/), [`mypy`](http://mypy-lang.org/), [`flake8`](https://flake8.pycqa.org/en/latest/) and [`pydocstyle`](http://www.pydocstyle.org/en/stable/), run
     ```bash
     make check
     ```
@@ -278,9 +278,9 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     ```
     * To run `pre-commit` manually:
     ```bash
-    pre-commit run --al-files
+    pre-commit run --all-files
     ```
-    *   The reason we use tools like `flake8`, `mypy`, `black`, `isort` and `pydocstyle` is to make sure that when we review code:
+    *   The reason we use tools like [`flake8`](https://flake8.pycqa.org/en/latest/), [`mypy`](http://mypy-lang.org/), [`black`](https://black.readthedocs.io/en/stable/), [`isort`](https://isort.readthedocs.io/en/latest/) and [`pydocstyle`](http://www.pydocstyle.org/en/stable/) is to make sure that when we review code:
         *   There are no extra blank spaces and blank lines. (`flake8`, `black`)
         *   Lines don't end up too long. (`flake8`, `black`)
         *   Code from multiple source keeps a similar appearance. (`black`)
