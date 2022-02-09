@@ -278,7 +278,7 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     ```
     * To run `pre-commit` manually:
     ```bash
-    pre-commit run --al-files
+    pre-commit run --all-files
     ```
     *   The reason we use tools like [`flake8`](https://flake8.pycqa.org/en/latest/), [`mypy`](http://mypy-lang.org/), [`black`](https://black.readthedocs.io/en/stable/), [`isort`](https://isort.readthedocs.io/en/latest/) and [`pydocstyle`](http://www.pydocstyle.org/en/stable/) is to make sure that when we review code:
         *   There are no extra blank spaces and blank lines. (`flake8`, `black`)
