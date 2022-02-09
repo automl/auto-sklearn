@@ -33,10 +33,10 @@ MYPY ?= mypy
 PRECOMMIT ?= pre-commit
 FLAKE8 ?= flake8
 
-DIR := ${CURDIR}
-DIST := ${CURDIR}/dist
-DOCDIR := ${DIR}/doc
-INDEX_HTML := file://${DOCDIR}/html/build/index.html
+DIR := "${CURDIR}"
+DIST := "${CURDIR}/dist""
+DOCDIR := "${DIR}/doc"
+INDEX_HTML := "file://${DOCDIR}/build/html/index.html"
 
 install-dev:
 	$(PIP) install -e ".[test,examples,docs]"
@@ -88,7 +88,7 @@ clean: clean-doc clean-build
 
 # Build a distribution in ./dist
 build:
-	$(PYTHON) setup.py bdist
+	$(PYTHON) setup.py sdist
 
 doc:
 	$(MAKE) -C ${DOCDIR} html-noexamples
