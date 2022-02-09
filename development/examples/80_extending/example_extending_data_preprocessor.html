@@ -205,9 +205,9 @@ to download the full example code or to run this example in your browser via Bin
 </div>
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>auto-sklearn results:
-  Dataset name: 989ca00b-8906-11ec-87d0-9b00e4bb682e
+  Dataset name: d2e9ca7e-89b3-11ec-8873-158ab5009e3d
   Metric: accuracy
-  Best validation score: 0.936170
+  Best validation score: 0.929078
   Number of target algorithm runs: 5
   Number of successful target algorithm runs: 4
   Number of crashed target algorithm runs: 1
@@ -224,52 +224,52 @@ to download the full example code or to run this example in your browser via Bin
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.9230769230769231
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.9370629370629371
 {   2: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f407c272c10&gt;,
-           &#39;cost&#39;: 0.06382978723404253,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f4074fa8ac0&gt;,
-           &#39;ensemble_weight&#39;: 0.08,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f407c272e80&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f25928cd070&gt;,
+           &#39;cost&#39;: 0.07092198581560283,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f259430a160&gt;,
+           &#39;ensemble_weight&#39;: 0.36,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2592a2edf0&gt;,
            &#39;model_id&#39;: 2,
            &#39;rank&#39;: 1,
            &#39;sklearn_classifier&#39;: RandomForestClassifier(max_features=5, n_estimators=512, n_jobs=1,
                        random_state=1, warm_start=True)},
     3: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f4074460c10&gt;,
-           &#39;cost&#39;: 0.11347517730496459,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f4076e830a0&gt;,
-           &#39;ensemble_weight&#39;: 0.02,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f4073965d60&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2593dd0280&gt;,
+           &#39;cost&#39;: 0.14184397163120566,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f2593e730a0&gt;,
+           &#39;ensemble_weight&#39;: 0.08,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f259330a880&gt;,
            &#39;model_id&#39;: 3,
-           &#39;rank&#39;: 2,
+           &#39;rank&#39;: 3,
            &#39;sklearn_classifier&#39;: AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=9),
                    learning_rate=1.077525751047041, n_estimators=208,
                    random_state=1)},
     4: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f4074cf5640&gt;,
-           &#39;cost&#39;: 0.375886524822695,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f4075223e20&gt;,
-           &#39;ensemble_weight&#39;: 0.84,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f407704b370&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2594313370&gt;,
+           &#39;cost&#39;: 0.36879432624113473,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f259832eb50&gt;,
+           &#39;ensemble_weight&#39;: 0.38,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2597c6a370&gt;,
            &#39;model_id&#39;: 4,
            &#39;rank&#39;: 4,
            &#39;sklearn_classifier&#39;: PassiveAggressiveClassifier(C=7.328568999403367e-05, max_iter=16,
                             random_state=1, tol=0.02258105767523384,
                             warm_start=True)},
     6: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f4076e26970&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2593e04f10&gt;,
            &#39;cost&#39;: 0.11347517730496459,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f4074460ac0&gt;,
-           &#39;ensemble_weight&#39;: 0.06,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f4074d5ca30&gt;,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f258e5d5f40&gt;,
+           &#39;ensemble_weight&#39;: 0.18,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f25938818e0&gt;,
            &#39;model_id&#39;: 6,
-           &#39;rank&#39;: 3,
+           &#39;rank&#39;: 2,
            &#39;sklearn_classifier&#39;: LinearDiscriminantAnalysis(shrinkage=&#39;auto&#39;, solver=&#39;lsqr&#39;,
                            tol=0.00010495766342828794)}}
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  29.244 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  25.044 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-extending-data-preprocessor-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_data_preprocessor.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>
