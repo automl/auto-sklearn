@@ -1,5 +1,8 @@
 # -*- encoding: utf-8 -*-
 import copy
+from logging import warning
+import distro
+import warnings
 import distro
 import io
 import json
@@ -1454,9 +1457,11 @@ class AutoML(BaseEstimator):
     def fit_ensemble(self, y, task=None, precision=32,
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
-        # AutoSklearn does not handle sparse y for now
-        if ensemble_size == 0:
+        #check for the case when ensemble_size is less than 0 
+        if not ensemble_size > 0:
             raise ValueError("ensemble_size must be greater than 0 for fit_ensemble") 
+            
+        # AutoSklearn does not handle sparse y for now
         y = convert_if_sparse(y)
         if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit']:
             raise ValueError('Cannot call fit_ensemble with resampling '
@@ -1906,9 +1911,16 @@ class AutoML(BaseEstimator):
 
         """
 
-        ensemble_dict = {}
+        ensemble_dict = {} 
+
+        #check for ensemble_size == 0 
         if self._ensemble_size == 0:
-            self._logger.warning('No models in the ensemble. Kindly check the ensemble size.')
+            warnings.warn("No models in the ensemble. Kindly check the ensemble size.")
+            return ensemble_dict
+
+        #check for condition when ensemble_size > 0 but there is no ensemble to load from
+        if self.ensemble_ is None:
+            warnings.warn('No ensemble found. Returning empty dictionary.')
             return ensemble_dict
 
         def has_key(rv, key):
