@@ -256,6 +256,7 @@ class AutoML(BaseEstimator):
 
         # The ensemble performance history through time
         self.ensemble_performance_history = []
+        self.fitted = False
 
         # Single core, local runs should use fork
         # to prevent the __main__ requirements in
@@ -971,8 +972,12 @@ class AutoML(BaseEstimator):
             self._logger.info("Finished loading models...")
 
         self._fit_cleanup()
+        self.fitted = True
 
         return self
+    
+    def __sklearn_is_fitted__(self)->bool:
+        return self.fitted
 
     def _fit_cleanup(self):
         self._logger.info("Closing the dask infrastructure")
@@ -1913,7 +1918,7 @@ class AutoML(BaseEstimator):
 
         ensemble_dict = {} 
         #check for condition whether autosklearn is fitted if not raise runtime error
-        if not self.fitted:
+        if not self.__sklearn_is_fitted__():
             raise RuntimeError('AutoSklearn has not been fitted')
 
 
