@@ -76,7 +76,7 @@ def test_fit(dask_client):
 
     del automl
 
-def test_ensemble_size_zero(self):
+def test_ensemble_size_zero():
     """ Test if automl.fit_ensemble raises error when ensemble_size == 0"""
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
     automl = autosklearn.automl.AutoML(
@@ -90,7 +90,7 @@ def test_ensemble_size_zero(self):
     with pytest.raises(ValueError):
         automl.fit_ensemble(Y_test, ensemble_size=0)
             
-def test_empty_dict_in_show_models(self):
+def test_empty_dict_in_show_models():
     """ Test if show_models() returns empty dictionary when ensemble_size == 0"""
     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
     automl = autosklearn.automl.AutoMLClassifier(
@@ -102,6 +102,19 @@ def test_empty_dict_in_show_models(self):
     )
     automl.fit(X_train, Y_train)
     assert automl.show_models() == {}
+   
+def test_fitted_models_in_show_models():
+    X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+    automl = autosklearn.automl.AutoMLClassifier(
+        seed=0,
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        metric=accuracy,
+        ensemble_size=0
+    )
+    with pytest.raises(RuntimeError, match="AutoSklearn has not been fitted"):
+        automl.show_models()
+
 
 def test_fit_roar(dask_client_single_worker):
     def get_roar_object_callback(
