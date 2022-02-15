@@ -47,6 +47,7 @@ class MetaBase(object):
         configurations = dict()
         for algorithm_id in self.configurations:
             configuration = self.configurations[algorithm_id]
+            # Todo this try function makes it difficult to debug metalearning
             try:
                 configurations[str(algorithm_id)] = \
                     (Configuration(configuration_space, values=configuration))
@@ -65,10 +66,12 @@ class MetaBase(object):
                 'Dataset %s already in meta-data. Removing occurence.', name.lower()
             )
             self.metafeatures.drop(name.lower(), inplace=True)
+        # Todo append will be removed from pandas
         self.metafeatures = self.metafeatures.append(metafeatures)
 
         runs = pd.Series([], name=name, dtype=float)
         for metric in self.algorithm_runs.keys():
+            # Todo append will be removed from pandas
             self.algorithm_runs[metric].append(runs)
 
     def get_runs(self, dataset_name, performance_measure=None):
