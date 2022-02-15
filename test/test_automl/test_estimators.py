@@ -1382,18 +1382,18 @@ def test_autosklearn_anneal(as_frame):
     so is a good testcase for unit-testing
     """
     X, y = sklearn.datasets.fetch_openml(data_id=2, return_X_y=True, as_frame=as_frame)
+    runcount_limit = 6
     automl = AutoSklearnClassifier(
         time_left_for_this_task=60,
         ensemble_size=0,
         delete_tmp_folder_after_terminate=False,
         initial_configurations_via_metalearning=0,
-        smac_scenario_args={"runcount_limit": 6},
+        smac_scenario_args={"runcount_limit": runcount_limit},
         resampling_strategy="holdout-iterative-fit",
     )
 
     if as_frame:
         # Let autosklearn calculate the feat types
-        print(X.dtypes)
         automl_fitted = automl.fit(X, y)
 
     else:
@@ -1408,6 +1408,8 @@ def test_autosklearn_anneal(as_frame):
         automl_fitted = automl.fit(X, y, feat_type=feat_type)
 
     assert automl is automl_fitted
+    # Allow for at most one crash among the six random configurations
+    assert automl.cv_results_["status"].count("Success") >= (runcount_limit - 1)
 
     automl_ensemble_fitted = automl.fit_ensemble(y, ensemble_size=5)
     assert automl is automl_ensemble_fitted
@@ -1415,9 +1417,9 @@ def test_autosklearn_anneal(as_frame):
     # We want to make sure we can learn from this data.
     # This is a test to make sure the data format (numpy/pandas)
     # can be used in a meaningful way -- not meant for generalization,
-    # hence we use the train dataset
+    # hence we use the train dataset and shoot for a high number!
     print(automl_fitted.score(X, y))
-    assert automl_fitted.score(X, y) > 0.75
+    assert automl_fitted.score(X, y) > 0.95
 
 
 @pytest.mark.parametrize(

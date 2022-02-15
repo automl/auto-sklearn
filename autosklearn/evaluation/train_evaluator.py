@@ -846,7 +846,7 @@ class TrainEvaluator(AbstractEvaluator):
         if model.estimator_supports_iterative_fit():
             Xt, fit_params = model.fit_transformer(
                 self.X_train.iloc[train_indices]
-                if hasattr(self.Y_train, "iloc")
+                if hasattr(self.X_train, "iloc")
                 else self.X_train[train_indices],
                 self.Y_train.iloc[train_indices]
                 if hasattr(self.Y_train, "iloc")
