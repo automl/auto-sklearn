@@ -16,7 +16,7 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
                           "col2": ["hello mars",
                                    "This is the second column"]}).astype({"col1": "string",
                                                                           "col2": "string"})
-        BOW_fitted = BOW(ngram_range=1, min_df_choice="min_df_absolute", min_df_absolute=0,
+        BOW_fitted = BOW(ngram_upper_bound=1, min_df_choice="min_df_absolute", min_df_absolute=0,
                          min_df_relative=0, random_state=1).fit(X.copy())
 
         Yt = BOW_fitted.preprocessor.vocabulary_
@@ -26,8 +26,9 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
 
         np.testing.assert_array_equal(Yt, Y)
 
-        BOW_fitted = BOW_distinct(ngram_range=1, min_df_choice="min_df_absolute", min_df_absolute=0,
-                                  min_df_relative=0, random_state=1).fit(X.copy())
+        BOW_fitted = BOW_distinct(ngram_upper_bound=1, min_df_choice="min_df_absolute",
+                                  min_df_absolute=0, min_df_relative=0,
+                                  random_state=1).fit(X.copy())
 
         for key in BOW_fitted.preprocessor:
             y = []
@@ -43,7 +44,7 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
                           "col2": ["hello mars",
                                    "this is the second column"]}).astype({"col1": "string",
                                                                           "col2": "string"})
-        X_t = BOW(ngram_range=1, min_df_choice="min_df_absolute", min_df_absolute=0,
+        X_t = BOW(ngram_upper_bound=1, min_df_choice="min_df_absolute", min_df_absolute=0,
                   min_df_relative=0, random_state=1).fit_transform(X.copy())
 
         # ['column', 'hello', 'is', 'mars', 'second', 'test', 'the', 'this', 'world']
@@ -51,7 +52,7 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
                       [1, 0, 2, 0, 1, 1, 1, 2, 0]])
         np.testing.assert_array_equal(X_t.toarray(), y)
 
-        X_t = BOW_distinct(ngram_range=1, min_df_choice="min_df_absolute", min_df_absolute=0,
+        X_t = BOW_distinct(ngram_upper_bound=1, min_df_choice="min_df_absolute", min_df_absolute=0,
                            min_df_relative=0, random_state=1).fit_transform(X.copy())
 
         # 'hello', 'is', 'test', 'this', 'world',
@@ -66,12 +67,12 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
                           "col2": ["test test",
                                    "test test"]}).astype({"col1": "string",
                                                           "col2": "string"})
-        X_t = BOW(ngram_range=1, min_df_choice="min_df_absolute", min_df_absolute=0,
+        X_t = BOW(ngram_upper_bound=1, min_df_choice="min_df_absolute", min_df_absolute=0,
                   min_df_relative=0, random_state=1).fit_transform(X.copy())
 
         self.assertEqual(X_t.shape, (2, 5))
 
-        X_t = BOW_distinct(ngram_range=1, min_df_choice="min_df_absolute", min_df_absolute=0,
+        X_t = BOW_distinct(ngram_upper_bound=1, min_df_choice="min_df_absolute", min_df_absolute=0,
                            min_df_relative=0, random_state=1).fit_transform(X.copy())
 
         self.assertEqual(X_t.shape, (2, 6))
@@ -84,12 +85,12 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
                                    "test test",
                                    "test"]}).astype({"col1": "string",
                                                      "col2": "string"})
-        X_t = BOW(ngram_range=1, min_df_choice="min_df_absolute", min_df_absolute=0,
+        X_t = BOW(ngram_upper_bound=1, min_df_choice="min_df_absolute", min_df_absolute=0,
                   min_df_relative=0, random_state=1).fit_transform(X.copy())
 
         self.assertEqual(X_t.shape, (3, 5))
 
-        X_t = BOW_distinct(ngram_range=1, min_df_choice="min_df_absolute", min_df_absolute=0,
+        X_t = BOW_distinct(ngram_upper_bound=1, min_df_choice="min_df_absolute", min_df_absolute=0,
                            min_df_relative=0, random_state=1).fit_transform(X.copy())
 
         self.assertEqual(X_t.shape, (3, 6))

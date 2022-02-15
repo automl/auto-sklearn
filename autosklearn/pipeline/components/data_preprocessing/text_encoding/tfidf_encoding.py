@@ -43,11 +43,11 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
             if self.min_df_choice == "min_df_absolute":
                 self.preprocessor = TfidfVectorizer(min_df=self.min_df_absolute,
                                                     use_idf=self.use_idf,
-                                                    ngram_upper_bound=(1, self.ngram_upper_bound))
+                                                    ngram_range=(1, self.ngram_upper_bound))
             elif self.min_df_choice == "min_df_relative":
                 self.preprocessor = TfidfVectorizer(min_df=self.min_df_relative,
                                                     use_idf=self.use_idf,
-                                                    ngram_upper_bound=(1, self.ngram_upper_bound))
+                                                    ngram_range=(1, self.ngram_upper_bound))
             else:
                 raise KeyError()
 

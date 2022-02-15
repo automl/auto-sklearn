@@ -41,10 +41,10 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
             # to a dictionary with features as keys)
             if self.min_df_choice == "min_df_absolute":
                 self.preprocessor = CountVectorizer(min_df=self.min_df_absolute,
-                                                    ngram_upper_bound=(1, self.ngram_upper_bound))
+                                                    ngram_range=(1, self.ngram_upper_bound))
             elif self.min_df_choice == "min_df_relative":
                 self.preprocessor = CountVectorizer(min_df=self.min_df_relative,
-                                                    ngram_upper_bound=(1, self.ngram_upper_bound))
+                                                    ngram_range=(1, self.ngram_upper_bound))
             else:
                 raise KeyError()
 
