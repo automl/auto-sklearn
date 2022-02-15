@@ -14,10 +14,10 @@ from autosklearn.automl_common.common.utils.backend import Backend, create
 def pytest_addoption(parser) -> None:
     """Add options to the pytest command."""
     parser.addoption(
-        '--sklearnex',
-        action='store_const',
+        "--sklearnex",
+        action="store_const",
         const=True,
-        help="Enable sklearnex injection to each test"
+        help="Enable sklearnex injection to each test",
     )
 
 
@@ -31,6 +31,7 @@ def sklearnex_enable(request: pytest.FixtureRequest) -> None:
     """
     if request.config.getoption("--sklearnex"):
         from sklearnex import patch_sklearn  # type: ignore
+
         patch_sklearn()
 
 

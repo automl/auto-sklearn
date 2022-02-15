@@ -9,6 +9,7 @@ from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
 from scipy.sparse import spmatrix
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.utils.multiclass import type_of_target
+from sklearnex import patch_sklearn
 from smac.runhistory.runhistory import RunInfo, RunValue
 from typing_extensions import Literal
 
@@ -21,7 +22,6 @@ from autosklearn.data.validation import (
 from autosklearn.metrics import Scorer
 from autosklearn.pipeline.base import BasePipeline
 
-from sklearnex import patch_sklearn
 patch_sklearn()
 
 
