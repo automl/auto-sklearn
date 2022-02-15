@@ -1393,6 +1393,7 @@ def test_autosklearn_anneal(as_frame):
 
     if as_frame:
         # Let autosklearn calculate the feat types
+        print(X.dtypes)
         automl_fitted = automl.fit(X, y)
 
     else:
@@ -1415,6 +1416,7 @@ def test_autosklearn_anneal(as_frame):
     # This is a test to make sure the data format (numpy/pandas)
     # can be used in a meaningful way -- not meant for generalization,
     # hence we use the train dataset
+    print(automl_fitted.score(X, y))
     assert automl_fitted.score(X, y) > 0.75
 
 
