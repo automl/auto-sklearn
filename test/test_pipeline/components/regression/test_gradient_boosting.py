@@ -1,7 +1,8 @@
 import sklearn.ensemble
 
-from autosklearn.pipeline.components.regression.gradient_boosting import \
-    GradientBoosting
+from autosklearn.pipeline.components.regression.gradient_boosting import (
+    GradientBoosting,
+)
 
 from .test_base import BaseRegressionComponentTest
 

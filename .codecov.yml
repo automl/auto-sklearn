@@ -1,42 +1,46 @@
 #see https://github.com/codecov/support/wiki/Codecov-Yaml
 codecov:
-  notify:
-    require_ci_to_pass: yes
+  require_ci_to_pass: yes
 
 coverage:
-  precision: 2  # 2 = xx.xx%, 0 = xx%
-  round: nearest # how coverage is rounded: down/up/nearest
-  range: 10...90 # custom range of coverage colors from red -> yellow -> green
+
+  # 2 = xx.xx%, 0 = xx%
+  precision: 2
+
+  # https://docs.codecov.com/docs/commit-status
   status:
-    # https://codecov.readme.io/v1.0/docs/commit-status
+
+    # We want our total main project to always remain above 84% coverage, a
+    # drop of 0.20% is allowed. It should fail if coverage couldn't be uploaded
+    # of the CI fails otherwise
     project:
       default:
-        against: auto
-        target: 70% # specify the target coverage for each commit status
-        threshold: 50% # allow this little decrease on project
-        # https://github.com/codecov/support/wiki/Filtering-Branches
-        # branches: master
+        target: 84%
+        threshold: 0.20%
+        if_not_found: failure
         if_ci_failed: error
-    # https://github.com/codecov/support/wiki/Patch-Status
+
+    # The code changed by a PR should have 90% coverage. This is different from the
+    # overall number shown above.
+    # This encourages small PR's as they are easier to test.
     patch:
       default:
-        against: auto
-        target: 30% # specify the target "X%" coverage to hit
-        threshold: 50% # allow this much decrease on patch
-    changes: false
+        target: 90%
+        if_not_found: failure
+        if_ci_failed: error
 
+# We upload additional information on branching with pytest-cov `--cov-branch`
+# This information can be used by codecov.com to increase analysis of code
 parsers:
   gcov:
     branch_detection:
       conditional: true
       loop: true
+      method: true
       macro: false
-      method: false
-  javascript:
-    enable_partials: false
+
 
 comment:
-  layout: header, diff
+  layout: diff, reach
+  behavior: default
   require_changes: false
-  behavior: default  # update if exists else create new
-  branches: *

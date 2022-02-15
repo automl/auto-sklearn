@@ -3,12 +3,12 @@ import shutil
 import time
 import unittest.mock
 
-from dask.distributed import Client, get_client
 import psutil
 import pytest
+from dask.distributed import Client, get_client
 
-from autosklearn.automl_common.common.utils.backend import create, Backend
 from autosklearn.automl import AutoML
+from autosklearn.automl_common.common.utils.backend import Backend, create
 
 
 def pytest_addoption(parser) -> None:
@@ -59,9 +59,11 @@ def automl_stub(request):
 def backend(request):
 
     test_dir = os.path.dirname(__file__)
-    tmp = os.path.join(test_dir, '.tmp__%s__%s' % (request.module.__name__, request.node.name))
+    tmp = os.path.join(
+        test_dir, ".tmp__%s__%s" % (request.module.__name__, request.node.name)
+    )
 
-    for dir in (tmp, ):
+    for dir in (tmp,):
         for i in range(10):
             if os.path.exists(dir):
                 try:
@@ -72,14 +74,12 @@ def backend(request):
 
     # Make sure the folders we wanna create do not already exist.
     backend = create(
-        temporary_directory=tmp,
-        output_directory=None,
-        prefix="auto-sklearn"
+        temporary_directory=tmp, output_directory=None, prefix="auto-sklearn"
     )
 
     def get_finalizer(tmp_dir):
         def session_run_at_end():
-            for dir in (tmp_dir, ):
+            for dir in (tmp_dir,):
                 for i in range(10):
                     if os.path.exists(dir):
                         try:
@@ -87,7 +87,9 @@ def backend(request):
                             break
                         except OSError:
                             time.sleep(1)
+
         return session_run_at_end
+
     request.addfinalizer(get_finalizer(tmp))
 
     return backend
@@ -95,7 +97,7 @@ def backend(request):
 
 @pytest.fixture(scope="function")
 def tmp_dir(request):
-    return _dir_fixture('tmp', request)
+    return _dir_fixture("tmp", request)
 
 
 def _dir_fixture(dir_type, request):
@@ -147,8 +149,10 @@ def dask_client(request):
             client.shutdown()
             client.close()
             del client
+
         return session_run_at_end
-    request.addfinalizer(get_finalizer(client.scheduler_info()['address']))
+
+    request.addfinalizer(get_finalizer(client.scheduler_info()["address"]))
 
     return client
 
@@ -172,8 +176,10 @@ def dask_client_single_worker(request):
             client.shutdown()
             client.close()
             del client
+
         return session_run_at_end
-    request.addfinalizer(get_finalizer(client.scheduler_info()['address']))
+
+    request.addfinalizer(get_finalizer(client.scheduler_info()["address"]))
 
     return client
 

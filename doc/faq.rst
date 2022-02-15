@@ -409,6 +409,12 @@ Configuring the Search Procedure
 
     Examples for using holdout and cross-validation can be found in :ref:`example <sphx_glr_examples_40_advanced_example_resampling.py>`
 
+    If using a custom resampling strategy with predefined splits, you may need to disable
+    the subsampling performed with particularly large datasets or if using a small ``memory_limit``.
+    Please see the manual section on :ref:`limits`
+    :class:`AutoSklearnClassifier(dataset_compression=...) <autosklearn.classification.AutoSklearnClassifier>`.
+    for more details.
+
 .. collapse:: <b>Can I use a custom metric</b>
 
     Examples for using a custom metric can be found in :ref:`example <sphx_glr_examples_40_advanced_example_metrics.py>`

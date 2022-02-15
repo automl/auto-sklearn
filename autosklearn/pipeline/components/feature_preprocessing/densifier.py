@@ -1,7 +1,7 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import SPARSE, UNSIGNED_DATA, DENSE, INPUT
+from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 
 
 class Densifier(AutoSklearnPreprocessingAlgorithm):
@@ -14,6 +14,7 @@ class Densifier(AutoSklearnPreprocessingAlgorithm):
 
     def transform(self, X):
         from scipy import sparse
+
         if sparse.issparse(X):
             return X.todense().getA()
         else:
@@ -21,16 +22,18 @@ class Densifier(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'RandomTreesEmbedding',
-                'name': 'Random Trees Embedding',
-                'handles_regression': True,
-                'handles_classification': True,
-                'handles_multiclass': True,
-                'handles_multilabel': True,
-                'handles_multioutput': True,
-                'is_deterministic': True,
-                'input': (SPARSE, UNSIGNED_DATA),
-                'output': (DENSE, INPUT)}
+        return {
+            "shortname": "RandomTreesEmbedding",
+            "name": "Random Trees Embedding",
+            "handles_regression": True,
+            "handles_classification": True,
+            "handles_multiclass": True,
+            "handles_multilabel": True,
+            "handles_multioutput": True,
+            "is_deterministic": True,
+            "input": (SPARSE, UNSIGNED_DATA),
+            "output": (DENSE, INPUT),
+        }
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

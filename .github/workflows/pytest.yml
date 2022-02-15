@@ -116,7 +116,7 @@ jobs:
         echo "::set-output name=BEFORE::$(git status --porcelain -b)"
 
     - name: Tests
-      timeout-minutes: 60
+      timeout-minutes: 120
       run: |
         export OPENBLAS_NUM_THREADS=1
         export OMP_NUM_THREADS=1

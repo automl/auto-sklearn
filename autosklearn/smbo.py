@@ -1,4 +1,6 @@
+import typing
 from typing import Dict, List, Optional
+
 import copy
 import json
 import logging
@@ -6,151 +8,191 @@ import multiprocessing
 import os
 import time
 import traceback
-import typing
 import warnings
 
 import dask.distributed
 import pynisher
-
+from smac.callbacks import IncorporateRunResultCallback
 from smac.facade.smac_ac_facade import SMAC4AC
-from smac.intensification.simple_intensifier import SimpleIntensifier
 from smac.intensification.intensification import Intensifier
+from smac.intensification.simple_intensifier import SimpleIntensifier
 from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
 from smac.scenario.scenario import Scenario
-from smac.tae.serial_runner import SerialRunner
 from smac.tae.dask_runner import DaskParallelRunner
-from smac.callbacks import IncorporateRunResultCallback
-
+from smac.tae.serial_runner import SerialRunner
 
 import autosklearn.metalearning
-from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
-    BINARY_CLASSIFICATION, TASK_TYPES_TO_STRING, CLASSIFICATION_TASKS, \
-    MULTICLASS_CLASSIFICATION, REGRESSION, MULTIOUTPUT_REGRESSION
-from autosklearn.ensemble_builder import EnsembleBuilderManager
-from autosklearn.metalearning.mismbo import suggest_via_metalearning
+from autosklearn.constants import (
+    BINARY_CLASSIFICATION,
+    CLASSIFICATION_TASKS,
+    MULTICLASS_CLASSIFICATION,
+    MULTILABEL_CLASSIFICATION,
+    MULTIOUTPUT_REGRESSION,
+    REGRESSION,
+    TASK_TYPES_TO_STRING,
+)
 from autosklearn.data.abstract_data_manager import AbstractDataManager
+from autosklearn.ensemble_builder import EnsembleBuilderManager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
+from autosklearn.metalearning.metafeatures.metafeatures import (
+    calculate_all_metafeatures_encoded_labels,
+    calculate_all_metafeatures_with_labels,
+)
+from autosklearn.metalearning.metalearning.meta_base import MetaBase
+from autosklearn.metalearning.mismbo import suggest_via_metalearning
 from autosklearn.util.logging_ import get_named_client_logger
 from autosklearn.util.parallel import preload_modules
-from autosklearn.metalearning.metalearning.meta_base import MetaBase
-from autosklearn.metalearning.metafeatures.metafeatures import \
-    calculate_all_metafeatures_with_labels, calculate_all_metafeatures_encoded_labels
 
 EXCLUDE_META_FEATURES_CLASSIFICATION = {
-    'Landmark1NN',
-    'LandmarkDecisionNodeLearner',
-    'LandmarkDecisionTree',
-    'LandmarkLDA',
-    'LandmarkNaiveBayes',
-    'LandmarkRandomNodeLearner',
-    'PCAFractionOfComponentsFor95PercentVariance',
-    'PCAKurtosisFirstPC',
-    'PCASkewnessFirstPC',
-    'PCA',
+    "Landmark1NN",
+    "LandmarkDecisionNodeLearner",
+    "LandmarkDecisionTree",
+    "LandmarkLDA",
+    "LandmarkNaiveBayes",
+    "LandmarkRandomNodeLearner",
+    "PCAFractionOfComponentsFor95PercentVariance",
+    "PCAKurtosisFirstPC",
+    "PCASkewnessFirstPC",
+    "PCA",
 }
 
 EXCLUDE_META_FEATURES_REGRESSION = {
-    'Landmark1NN',
-    'LandmarkDecisionNodeLearner',
-    'LandmarkDecisionTree',
-    'LandmarkLDA',
-    'LandmarkNaiveBayes',
-    'PCAFractionOfComponentsFor95PercentVariance',
-    'PCAKurtosisFirstPC',
-    'PCASkewnessFirstPC',
-    'NumberOfClasses',
-    'ClassOccurences',
-    'ClassProbabilityMin',
-    'ClassProbabilityMax',
-    'ClassProbabilityMean',
-    'ClassProbabilitySTD',
-    'ClassEntropy',
-    'LandmarkRandomNodeLearner',
-    'PCA',
+    "Landmark1NN",
+    "LandmarkDecisionNodeLearner",
+    "LandmarkDecisionTree",
+    "LandmarkLDA",
+    "LandmarkNaiveBayes",
+    "PCAFractionOfComponentsFor95PercentVariance",
+    "PCAKurtosisFirstPC",
+    "PCASkewnessFirstPC",
+    "NumberOfClasses",
+    "ClassOccurences",
+    "ClassProbabilityMin",
+    "ClassProbabilityMax",
+    "ClassProbabilityMean",
+    "ClassProbabilitySTD",
+    "ClassEntropy",
+    "LandmarkRandomNodeLearner",
+    "PCA",
 }
 
 
 def get_send_warnings_to_logger(logger):
     def _send_warnings_to_log(message, category, filename, lineno, file, line):
-        logger.debug('%s:%s: %s:%s', filename, lineno, category.__name__, message)
+        logger.debug("%s:%s: %s:%s", filename, lineno, category.__name__, message)
+
     return _send_warnings_to_log
 
 
 # metalearning helpers
-def _calculate_metafeatures(data_feat_type, data_info_task, basename,
-                            x_train, y_train, watcher, logger_):
+def _calculate_metafeatures(
+    data_feat_type, data_info_task, basename, x_train, y_train, watcher, logger_
+):
     with warnings.catch_warnings():
         warnings.showwarning = get_send_warnings_to_logger(logger_)
 
         # == Calculate metafeatures
-        task_name = 'CalculateMetafeatures'
+        task_name = "CalculateMetafeatures"
         watcher.start_task(task_name)
 
-        categorical = {col: True if feat_type.lower() == 'categorical' else False
-                       for col, feat_type in data_feat_type.items()}
+        categorical = {
+            col: True if feat_type.lower() == "categorical" else False
+            for col, feat_type in data_feat_type.items()
+        }
 
-        EXCLUDE_META_FEATURES = EXCLUDE_META_FEATURES_CLASSIFICATION \
-            if data_info_task in CLASSIFICATION_TASKS else EXCLUDE_META_FEATURES_REGRESSION
+        EXCLUDE_META_FEATURES = (
+            EXCLUDE_META_FEATURES_CLASSIFICATION
+            if data_info_task in CLASSIFICATION_TASKS
+            else EXCLUDE_META_FEATURES_REGRESSION
+        )
 
-        if data_info_task in [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION,
-                              MULTILABEL_CLASSIFICATION, REGRESSION,
-                              MULTIOUTPUT_REGRESSION]:
-            logger_.info('Start calculating metafeatures for %s', basename)
+        if data_info_task in [
+            MULTICLASS_CLASSIFICATION,
+            BINARY_CLASSIFICATION,
+            MULTILABEL_CLASSIFICATION,
+            REGRESSION,
+            MULTIOUTPUT_REGRESSION,
+        ]:
+            logger_.info("Start calculating metafeatures for %s", basename)
             result = calculate_all_metafeatures_with_labels(
-                x_train, y_train, categorical=categorical,
+                x_train,
+                y_train,
+                categorical=categorical,
                 dataset_name=basename,
-                dont_calculate=EXCLUDE_META_FEATURES, logger=logger_)
+                dont_calculate=EXCLUDE_META_FEATURES,
+                logger=logger_,
+            )
             for key in list(result.metafeature_values.keys()):
-                if result.metafeature_values[key].type_ != 'METAFEATURE':
+                if result.metafeature_values[key].type_ != "METAFEATURE":
                     del result.metafeature_values[key]
 
         else:
             result = None
-            logger_.info('Metafeatures not calculated')
+            logger_.info("Metafeatures not calculated")
         watcher.stop_task(task_name)
         logger_.info(
-            'Calculating Metafeatures (categorical attributes) took %5.2f',
-            watcher.wall_elapsed(task_name))
+            "Calculating Metafeatures (categorical attributes) took %5.2f",
+            watcher.wall_elapsed(task_name),
+        )
         return result
 
 
-def _calculate_metafeatures_encoded(data_feat_type, basename, x_train, y_train, watcher,
-                                    task, logger_):
+def _calculate_metafeatures_encoded(
+    data_feat_type, basename, x_train, y_train, watcher, task, logger_
+):
     with warnings.catch_warnings():
         warnings.showwarning = get_send_warnings_to_logger(logger_)
 
-        EXCLUDE_META_FEATURES = EXCLUDE_META_FEATURES_CLASSIFICATION \
-            if task in CLASSIFICATION_TASKS else EXCLUDE_META_FEATURES_REGRESSION
+        EXCLUDE_META_FEATURES = (
+            EXCLUDE_META_FEATURES_CLASSIFICATION
+            if task in CLASSIFICATION_TASKS
+            else EXCLUDE_META_FEATURES_REGRESSION
+        )
 
-        task_name = 'CalculateMetafeaturesEncoded'
+        task_name = "CalculateMetafeaturesEncoded"
         watcher.start_task(task_name)
-        categorical = {col: True if feat_type.lower() == 'categorical' else False
-                       for col, feat_type in data_feat_type.items()}
+        categorical = {
+            col: True if feat_type.lower() == "categorical" else False
+            for col, feat_type in data_feat_type.items()
+        }
 
         result = calculate_all_metafeatures_encoded_labels(
-            x_train, y_train, categorical=categorical,
-            dataset_name=basename, dont_calculate=EXCLUDE_META_FEATURES, logger=logger_)
+            x_train,
+            y_train,
+            categorical=categorical,
+            dataset_name=basename,
+            dont_calculate=EXCLUDE_META_FEATURES,
+            logger=logger_,
+        )
         for key in list(result.metafeature_values.keys()):
-            if result.metafeature_values[key].type_ != 'METAFEATURE':
+            if result.metafeature_values[key].type_ != "METAFEATURE":
                 del result.metafeature_values[key]
         watcher.stop_task(task_name)
         logger_.info(
-            'Calculating Metafeatures (encoded attributes) took %5.2fsec',
-            watcher.wall_elapsed(task_name))
+            "Calculating Metafeatures (encoded attributes) took %5.2fsec",
+            watcher.wall_elapsed(task_name),
+        )
         return result
 
 
-def _get_metalearning_configurations(meta_base, basename, metric,
-                                     configuration_space,
-                                     task,
-                                     initial_configurations_via_metalearning,
-                                     is_sparse,
-                                     watcher, logger):
-    task_name = 'InitialConfigurations'
+def _get_metalearning_configurations(
+    meta_base,
+    basename,
+    metric,
+    configuration_space,
+    task,
+    initial_configurations_via_metalearning,
+    is_sparse,
+    watcher,
+    logger,
+):
+    task_name = "InitialConfigurations"
     watcher.start_task(task_name)
     try:
         metalearning_configurations = suggest_via_metalearning(
-            meta_base, basename, metric,
+            meta_base,
+            basename,
+            metric,
             task,
             is_sparse == 1,
             initial_configurations_via_metalearning,
@@ -165,16 +207,21 @@ def _get_metalearning_configurations(meta_base, basename, metric,
     return metalearning_configurations
 
 
-def _print_debug_info_of_init_configuration(initial_configurations, basename,
-                                            time_for_task, logger, watcher):
-    logger.debug('Initial Configurations: (%d)' % len(initial_configurations))
+def _print_debug_info_of_init_configuration(
+    initial_configurations, basename, time_for_task, logger, watcher
+):
+    logger.debug("Initial Configurations: (%d)" % len(initial_configurations))
     for initial_configuration in initial_configurations:
         logger.debug(initial_configuration)
-    logger.debug('Looking for initial configurations took %5.2fsec',
-                 watcher.wall_elapsed('InitialConfigurations'))
+    logger.debug(
+        "Looking for initial configurations took %5.2fsec",
+        watcher.wall_elapsed("InitialConfigurations"),
+    )
     logger.info(
-        'Time left for %s after finding initial configurations: %5.2fsec',
-        basename, time_for_task - watcher.wall_elapsed(basename))
+        "Time left for %s after finding initial configurations: %5.2fsec",
+        basename,
+        time_for_task - watcher.wall_elapsed(basename),
+    )
 
 
 def get_smac_object(
@@ -186,7 +233,7 @@ def get_smac_object(
     n_jobs,
     dask_client,
 ):
-    if len(scenario_dict['instances']) > 1:
+    if len(scenario_dict["instances"]) > 1:
         intensifier = Intensifier
     else:
         intensifier = SimpleIntensifier
@@ -213,35 +260,37 @@ def get_smac_object(
 
 
 class AutoMLSMBO(object):
-
-    def __init__(self, config_space, dataset_name,
-                 backend,
-                 total_walltime_limit,
-                 func_eval_time_limit,
-                 memory_limit,
-                 metric,
-                 watcher,
-                 n_jobs,
-                 dask_client: dask.distributed.Client,
-                 port: int,
-                 start_num_run=1,
-                 data_memory_limit=None,
-                 num_metalearning_cfgs=25,
-                 config_file=None,
-                 seed=1,
-                 metadata_directory=None,
-                 resampling_strategy='holdout',
-                 resampling_strategy_args=None,
-                 include: Optional[Dict[str, List[str]]] = None,
-                 exclude: Optional[Dict[str, List[str]]] = None,
-                 disable_file_output=False,
-                 smac_scenario_args=None,
-                 get_smac_object_callback=None,
-                 scoring_functions=None,
-                 pynisher_context='spawn',
-                 ensemble_callback: typing.Optional[EnsembleBuilderManager] = None,
-                 trials_callback: typing.Optional[IncorporateRunResultCallback] = None
-                 ):
+    def __init__(
+        self,
+        config_space,
+        dataset_name,
+        backend,
+        total_walltime_limit,
+        func_eval_time_limit,
+        memory_limit,
+        metric,
+        watcher,
+        n_jobs,
+        dask_client: dask.distributed.Client,
+        port: int,
+        start_num_run=1,
+        data_memory_limit=None,
+        num_metalearning_cfgs=25,
+        config_file=None,
+        seed=1,
+        metadata_directory=None,
+        resampling_strategy="holdout",
+        resampling_strategy_args=None,
+        include: Optional[Dict[str, List[str]]] = None,
+        exclude: Optional[Dict[str, List[str]]] = None,
+        disable_file_output=False,
+        smac_scenario_args=None,
+        get_smac_object_callback=None,
+        scoring_functions=None,
+        pynisher_context="spawn",
+        ensemble_callback: typing.Optional[EnsembleBuilderManager] = None,
+        trials_callback: typing.Optional[IncorporateRunResultCallback] = None,
+    ):
         super(AutoMLSMBO, self).__init__()
         # data related
         self.dataset_name = dataset_name
@@ -289,7 +338,11 @@ class AutoMLSMBO(object):
         self.trials_callback = trials_callback
 
         dataset_name_ = "" if dataset_name is None else dataset_name
-        logger_name = '%s(%d):%s' % (self.__class__.__name__, self.seed, ":" + dataset_name_)
+        logger_name = "%s(%d):%s" % (
+            self.__class__.__name__,
+            self.seed,
+            ":" + dataset_name_,
+        )
         if port is None:
             self.logger = logging.getLogger(__name__)
         else:
@@ -308,7 +361,7 @@ class AutoMLSMBO(object):
         else:
             self.datamanager = self.backend.load_datamanager()
 
-        self.task = self.datamanager.info['task']
+        self.task = self.datamanager.info["task"]
 
     def collect_metalearning_suggestions(self, meta_base):
         metalearning_configurations = _get_metalearning_configurations(
@@ -317,16 +370,18 @@ class AutoMLSMBO(object):
             metric=self.metric,
             configuration_space=self.config_space,
             task=self.task,
-            is_sparse=self.datamanager.info['is_sparse'],
+            is_sparse=self.datamanager.info["is_sparse"],
             initial_configurations_via_metalearning=self.num_metalearning_cfgs,
             watcher=self.watcher,
-            logger=self.logger)
+            logger=self.logger,
+        )
         _print_debug_info_of_init_configuration(
             metalearning_configurations,
             self.dataset_name,
             self.total_walltime_limit,
             self.logger,
-            self.watcher)
+            self.watcher,
+        )
 
         return metalearning_configurations
 
@@ -336,23 +391,24 @@ class AutoMLSMBO(object):
         try:
             context = multiprocessing.get_context(self.pynisher_context)
             preload_modules(context)
-            safe_mf = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
-                                              wall_time_in_s=int(time_limit),
-                                              grace_period_in_s=30,
-                                              context=context,
-                                              logger=self.logger)(
-                _calculate_metafeatures)
+            safe_mf = pynisher.enforce_limits(
+                mem_in_mb=self.memory_limit,
+                wall_time_in_s=int(time_limit),
+                grace_period_in_s=30,
+                context=context,
+                logger=self.logger,
+            )(_calculate_metafeatures)
             res = safe_mf(
                 data_feat_type=self.datamanager.feat_type,
-                data_info_task=self.datamanager.info['task'],
-                x_train=self.datamanager.data['X_train'],
-                y_train=self.datamanager.data['Y_train'],
+                data_info_task=self.datamanager.info["task"],
+                x_train=self.datamanager.data["X_train"],
+                y_train=self.datamanager.data["Y_train"],
                 basename=self.dataset_name,
                 watcher=self.watcher,
-                logger_=self.logger
+                logger_=self.logger,
             )
         except Exception as e:
-            self.logger.error('Error getting metafeatures: %s', str(e))
+            self.logger.error("Error getting metafeatures: %s", str(e))
 
         return res
 
@@ -362,30 +418,30 @@ class AutoMLSMBO(object):
         try:
             context = multiprocessing.get_context(self.pynisher_context)
             preload_modules(context)
-            safe_mf = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
-                                              wall_time_in_s=int(time_limit),
-                                              grace_period_in_s=30,
-                                              context=context,
-                                              logger=self.logger)(
-                _calculate_metafeatures_encoded)
+            safe_mf = pynisher.enforce_limits(
+                mem_in_mb=self.memory_limit,
+                wall_time_in_s=int(time_limit),
+                grace_period_in_s=30,
+                context=context,
+                logger=self.logger,
+            )(_calculate_metafeatures_encoded)
             res = safe_mf(
                 data_feat_type=self.datamanager.feat_type,
-                task=self.datamanager.info['task'],
-                x_train=self.datamanager.data['X_train'],
-                y_train=self.datamanager.data['Y_train'],
+                task=self.datamanager.info["task"],
+                x_train=self.datamanager.data["X_train"],
+                y_train=self.datamanager.data["Y_train"],
                 basename=self.dataset_name,
                 watcher=self.watcher,
-                logger_=self.logger
+                logger_=self.logger,
             )
         except Exception as e:
-            self.logger.error('Error getting metafeatures (encoded) : %s',
-                              str(e))
+            self.logger.error("Error getting metafeatures (encoded) : %s", str(e))
 
         return res
 
     def run_smbo(self):
 
-        self.watcher.start_task('SMBO')
+        self.watcher.start_task("SMBO")
 
         # == first things first: load the datamanager
         self.reset_data_manager()
@@ -401,14 +457,14 @@ class AutoMLSMBO(object):
 
         metalearning_configurations = self.get_metalearning_suggestions()
 
-        if self.resampling_strategy in ['partial-cv',
-                                        'partial-cv-iterative-fit']:
-            num_folds = self.resampling_strategy_args['folds']
-            instances = [[json.dumps({'task_id': self.dataset_name,
-                                      'fold': fold_number})]
-                         for fold_number in range(num_folds)]
+        if self.resampling_strategy in ["partial-cv", "partial-cv-iterative-fit"]:
+            num_folds = self.resampling_strategy_args["folds"]
+            instances = [
+                [json.dumps({"task_id": self.dataset_name, "fold": fold_number})]
+                for fold_number in range(num_folds)
+            ]
         else:
-            instances = [[json.dumps({'task_id': self.dataset_name})]]
+            instances = [[json.dumps({"task_id": self.dataset_name})]]
 
         # TODO rebuild target algorithm to be it's own target algorithm
         # evaluator, which takes into account that a run can be killed prior
@@ -428,62 +484,64 @@ class AutoMLSMBO(object):
             scoring_functions=self.scoring_functions,
             port=self.port,
             pynisher_context=self.pynisher_context,
-            **self.resampling_strategy_args
+            **self.resampling_strategy_args,
         )
         ta = ExecuteTaFuncWithQueue
 
         startup_time = self.watcher.wall_elapsed(self.dataset_name)
         total_walltime_limit = self.total_walltime_limit - startup_time - 5
         scenario_dict = {
-            'abort_on_first_run_crash': False,
-            'save-results-instantly': True,
-            'cs': self.config_space,
-            'cutoff_time': self.func_eval_time_limit,
-            'deterministic': 'true',
-            'instances': instances,
-            'memory_limit': self.memory_limit,
-            'output-dir': self.backend.get_smac_output_directory(),
-            'run_obj': 'quality',
-            'wallclock_limit': total_walltime_limit,
-            'cost_for_crash': self.worst_possible_result,
+            "abort_on_first_run_crash": False,
+            "save-results-instantly": True,
+            "cs": self.config_space,
+            "cutoff_time": self.func_eval_time_limit,
+            "deterministic": "true",
+            "instances": instances,
+            "memory_limit": self.memory_limit,
+            "output-dir": self.backend.get_smac_output_directory(),
+            "run_obj": "quality",
+            "wallclock_limit": total_walltime_limit,
+            "cost_for_crash": self.worst_possible_result,
         }
         if self.smac_scenario_args is not None:
             for arg in [
-                'abort_on_first_run_crash',
-                'cs',
-                'deterministic',
-                'instances',
-                'output-dir',
-                'run_obj',
-                'shared-model',
-                'cost_for_crash',
-            ]:
-                if arg in self.smac_scenario_args:
-                    self.logger.warning('Cannot override scenario argument %s, '
-                                        'will ignore this.', arg)
-                    del self.smac_scenario_args[arg]
-            for arg in [
-                'cutoff_time',
-                'memory_limit',
-                'wallclock_limit',
+                "abort_on_first_run_crash",
+                "cs",
+                "deterministic",
+                "instances",
+                "output-dir",
+                "run_obj",
+                "shared-model",
+                "cost_for_crash",
             ]:
                 if arg in self.smac_scenario_args:
                     self.logger.warning(
-                        'Overriding scenario argument %s: %s with value %s',
+                        "Cannot override scenario argument %s, " "will ignore this.",
+                        arg,
+                    )
+                    del self.smac_scenario_args[arg]
+            for arg in [
+                "cutoff_time",
+                "memory_limit",
+                "wallclock_limit",
+            ]:
+                if arg in self.smac_scenario_args:
+                    self.logger.warning(
+                        "Overriding scenario argument %s: %s with value %s",
                         arg,
                         scenario_dict[arg],
-                        self.smac_scenario_args[arg]
+                        self.smac_scenario_args[arg],
                     )
             scenario_dict.update(self.smac_scenario_args)
 
         smac_args = {
-            'scenario_dict': scenario_dict,
-            'seed': seed,
-            'ta': ta,
-            'ta_kwargs': ta_kwargs,
-            'metalearning_configurations': metalearning_configurations,
-            'n_jobs': self.n_jobs,
-            'dask_client': self.dask_client,
+            "scenario_dict": scenario_dict,
+            "seed": seed,
+            "ta": ta,
+            "ta_kwargs": ta_kwargs,
+            "metalearning_configurations": metalearning_configurations,
+            "n_jobs": self.n_jobs,
+            "dask_client": self.dask_client,
         }
         if self.get_smac_object_callback is not None:
             smac = self.get_smac_object_callback(**smac_args)
@@ -516,25 +574,33 @@ class AutoMLSMBO(object):
             # If metadata directory is None, use default
             if self.metadata_directory is None:
                 metalearning_directory = os.path.dirname(
-                    autosklearn.metalearning.__file__)
+                    autosklearn.metalearning.__file__
+                )
                 # There is no multilabel data in OpenML
                 if self.task == MULTILABEL_CLASSIFICATION:
                     meta_task = BINARY_CLASSIFICATION
                 else:
                     meta_task = self.task
                 metadata_directory = os.path.join(
-                    metalearning_directory, 'files',
-                    '%s_%s_%s' % (self.metric, TASK_TYPES_TO_STRING[meta_task],
-                                  'sparse' if self.datamanager.info['is_sparse']
-                                  else 'dense'))
+                    metalearning_directory,
+                    "files",
+                    "%s_%s_%s"
+                    % (
+                        self.metric,
+                        TASK_TYPES_TO_STRING[meta_task],
+                        "sparse" if self.datamanager.info["is_sparse"] else "dense",
+                    ),
+                )
                 self.metadata_directory = metadata_directory
 
             # If metadata directory is specified by user,
             # then verify that it exists.
             else:
                 if not os.path.exists(self.metadata_directory):
-                    raise ValueError('The specified metadata directory \'%s\' '
-                                     'does not exist!' % self.metadata_directory)
+                    raise ValueError(
+                        "The specified metadata directory '%s' "
+                        "does not exist!" % self.metadata_directory
+                    )
 
                 else:
                     # There is no multilabel data in OpenML
@@ -545,51 +611,66 @@ class AutoMLSMBO(object):
 
                     metadata_directory = os.path.join(
                         self.metadata_directory,
-                        '%s_%s_%s' % (self.metric, TASK_TYPES_TO_STRING[meta_task],
-                                      'sparse' if self.datamanager.info['is_sparse']
-                                      else 'dense'))
+                        "%s_%s_%s"
+                        % (
+                            self.metric,
+                            TASK_TYPES_TO_STRING[meta_task],
+                            "sparse" if self.datamanager.info["is_sparse"] else "dense",
+                        ),
+                    )
                     # Check that the metadata directory has the correct
                     # subdirectory needed for this dataset.
-                    if os.path.basename(metadata_directory) not in \
-                            os.listdir(self.metadata_directory):
-                        raise ValueError('The specified metadata directory '
-                                         '\'%s\' does not have the correct '
-                                         'subdirectory \'%s\'' %
-                                         (self.metadata_directory,
-                                          os.path.basename(metadata_directory))
-                                         )
+                    if os.path.basename(metadata_directory) not in os.listdir(
+                        self.metadata_directory
+                    ):
+                        raise ValueError(
+                            "The specified metadata directory "
+                            "'%s' does not have the correct "
+                            "subdirectory '%s'"
+                            % (
+                                self.metadata_directory,
+                                os.path.basename(metadata_directory),
+                            )
+                        )
                 self.metadata_directory = metadata_directory
 
             if os.path.exists(self.metadata_directory):
 
-                self.logger.info('Metadata directory: %s',
-                                 self.metadata_directory)
-                meta_base = MetaBase(self.config_space, self.metadata_directory, self.logger)
+                self.logger.info("Metadata directory: %s", self.metadata_directory)
+                meta_base = MetaBase(
+                    self.config_space, self.metadata_directory, self.logger
+                )
 
-                metafeature_calculation_time_limit = int(
-                    self.total_walltime_limit / 4)
+                metafeature_calculation_time_limit = int(self.total_walltime_limit / 4)
                 metafeature_calculation_start_time = time.time()
                 meta_features = self._calculate_metafeatures_with_limits(
-                    metafeature_calculation_time_limit)
+                    metafeature_calculation_time_limit
+                )
                 metafeature_calculation_end_time = time.time()
-                metafeature_calculation_time_limit = \
-                    metafeature_calculation_time_limit - (
-                        metafeature_calculation_end_time -
-                        metafeature_calculation_start_time)
+                metafeature_calculation_time_limit = (
+                    metafeature_calculation_time_limit
+                    - (
+                        metafeature_calculation_end_time
+                        - metafeature_calculation_start_time
+                    )
+                )
 
                 if metafeature_calculation_time_limit < 1:
                     self.logger.warning(
-                        'Time limit for metafeature calculation less '
-                        'than 1 seconds (%f). Skipping calculation '
-                        'of metafeatures for encoded dataset.',
-                        metafeature_calculation_time_limit)
+                        "Time limit for metafeature calculation less "
+                        "than 1 seconds (%f). Skipping calculation "
+                        "of metafeatures for encoded dataset.",
+                        metafeature_calculation_time_limit,
+                    )
                     meta_features_encoded = None
                 else:
                     with warnings.catch_warnings():
                         warnings.showwarning = get_send_warnings_to_logger(self.logger)
-                    meta_features_encoded = \
+                    meta_features_encoded = (
                         self._calculate_metafeatures_encoded_with_limits(
-                            metafeature_calculation_time_limit)
+                            metafeature_calculation_time_limit
+                        )
+                    )
 
                 # In case there is a problem calculating the encoded meta-features
                 if meta_features is None:
@@ -598,26 +679,28 @@ class AutoMLSMBO(object):
                 else:
                     if meta_features_encoded is not None:
                         meta_features.metafeature_values.update(
-                            meta_features_encoded.metafeature_values)
+                            meta_features_encoded.metafeature_values
+                        )
 
                 if meta_features is not None:
                     meta_base.add_dataset(self.dataset_name, meta_features)
                     # Do mean imputation of the meta-features - should be done specific
                     # for each prediction model!
                     all_metafeatures = meta_base.get_metafeatures(
-                        features=list(meta_features.keys()))
-                    all_metafeatures.fillna(all_metafeatures.mean(),
-                                            inplace=True)
+                        features=list(meta_features.keys())
+                    )
+                    all_metafeatures.fillna(all_metafeatures.mean(), inplace=True)
 
                     with warnings.catch_warnings():
                         warnings.showwarning = get_send_warnings_to_logger(self.logger)
-                        metalearning_configurations = self.collect_metalearning_suggestions(
-                            meta_base)
+                        metalearning_configurations = (
+                            self.collect_metalearning_suggestions(meta_base)
+                        )
                     if metalearning_configurations is None:
                         metalearning_configurations = []
                     self.reset_data_manager()
 
-                    self.logger.info('%s', meta_features)
+                    self.logger.info("%s", meta_features)
 
                     # Convert meta-features into a dictionary because the scenario
                     # expects a dictionary
@@ -627,13 +710,15 @@ class AutoMLSMBO(object):
                     meta_features_list = []
                     for meta_feature_name in all_metafeatures.columns:
                         meta_features_list.append(
-                            meta_features[meta_feature_name].value)
+                            meta_features[meta_feature_name].value
+                        )
                     self.logger.info(list(meta_features_dict.keys()))
 
             else:
                 meta_features = None
-                self.logger.warning('Could not find meta-data directory %s' %
-                                    metadata_directory)
+                self.logger.warning(
+                    "Could not find meta-data directory %s" % metadata_directory
+                )
 
         else:
             meta_features = None

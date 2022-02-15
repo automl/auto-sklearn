@@ -1,4 +1,6 @@
 # -*- encoding: utf-8 -*-
+from typing import Any, Dict, Iterator, Optional, TextIO, Type, cast
+
 import logging
 import logging.config
 import logging.handlers
@@ -12,7 +14,6 @@ import struct
 import threading
 import warnings
 from contextlib import contextmanager
-from typing import Any, Dict, Iterator, Optional, TextIO, Type, cast
 
 import yaml
 
@@ -26,41 +27,43 @@ def setup_logger(
     # logging_config must be a dictionary object specifying the configuration
     # for the loggers to be used in auto-sklearn.
     if logging_config is None:
-        with open(os.path.join(os.path.dirname(__file__), 'logging.yaml'), 'r') as fh:
+        with open(os.path.join(os.path.dirname(__file__), "logging.yaml"), "r") as fh:
             logging_config = yaml.safe_load(fh)
 
     # Make sure we have a filename handler
-    if 'handlers' not in logging_config:
-        logging_config['handlers'] = {}
-    if 'file_handler' not in logging_config['handlers']:
-        logging_config['handlers']['file_handler'] = {
-            'class': 'logging.FileHandler',
-            'level': 'DEBUG',
-            'filename': 'autosklearn.log'
+    if "handlers" not in logging_config:
+        logging_config["handlers"] = {}
+    if "file_handler" not in logging_config["handlers"]:
+        logging_config["handlers"]["file_handler"] = {
+            "class": "logging.FileHandler",
+            "level": "DEBUG",
+            "filename": "autosklearn.log",
         }
-    if 'distributed_logfile' not in logging_config['handlers']:
+    if "distributed_logfile" not in logging_config["handlers"]:
         # We have to create a file handler
-        logging_config['handlers']['distributed_logfile'] = {
-            'class': 'logging.FileHandler',
-            'level': 'DEBUG',
-            'filename': 'distributed.log'
+        logging_config["handlers"]["distributed_logfile"] = {
+            "class": "logging.FileHandler",
+            "level": "DEBUG",
+            "filename": "distributed.log",
         }
 
     if filename is None:
-        filename = logging_config['handlers']['file_handler']['filename']
+        filename = logging_config["handlers"]["file_handler"]["filename"]
 
     if distributedlog_filename is None:
-        distributedlog_filename = logging_config['handlers']['distributed_logfile']['filename']
+        distributedlog_filename = logging_config["handlers"]["distributed_logfile"][
+            "filename"
+        ]
 
     # Make path absolute only if required
     # This is needed because this function might be called multiple times with the same
     # dict, and we don't want /path/path/<name>.log but rather just /path/<name>.log
-    if os.path.sep not in logging_config['handlers']['file_handler']['filename']:
-        logging_config['handlers']['file_handler']['filename'] = os.path.join(
+    if os.path.sep not in logging_config["handlers"]["file_handler"]["filename"]:
+        logging_config["handlers"]["file_handler"]["filename"] = os.path.join(
             output_dir, filename
         )
-    if os.path.sep not in logging_config['handlers']['distributed_logfile']['filename']:
-        logging_config['handlers']['distributed_logfile']['filename'] = os.path.join(
+    if os.path.sep not in logging_config["handlers"]["distributed_logfile"]["filename"]:
+        logging_config["handlers"]["distributed_logfile"]["filename"] = os.path.join(
             output_dir, distributedlog_filename
         )
     logging.config.dictConfig(logging_config)
@@ -70,13 +73,12 @@ def _create_logger(name: str) -> logging.Logger:
     return logging.getLogger(name)
 
 
-def get_logger(name: str) -> 'PickableLoggerAdapter':
+def get_logger(name: str) -> "PickableLoggerAdapter":
     logger = PickableLoggerAdapter(name)
     return logger
 
 
 class PickableLoggerAdapter(object):
-
     def __init__(self, name: str):
         self.name = name
         self.logger = _create_logger(name)
@@ -90,7 +92,7 @@ class PickableLoggerAdapter(object):
         Dictionary, representing the object state to be pickled. Ignores
         the self.logger field and only returns the logger name.
         """
-        return {'name': self.name}
+        return {"name": self.name}
 
     def __setstate__(self, state: Dict[str, Any]) -> None:
         """
@@ -102,7 +104,7 @@ class PickableLoggerAdapter(object):
         state - dictionary, containing the logger name.
 
         """
-        self.name = state['name']
+        self.name = state["name"]
         self.logger = _create_logger(self.name)
 
     def debug(self, msg: str, *args: Any, **kwargs: Any) -> None:
@@ -132,20 +134,16 @@ class PickableLoggerAdapter(object):
 
 def get_named_client_logger(
     name: str,
-    host: str = 'localhost',
+    host: str = "localhost",
     port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
-) -> 'PicklableClientLogger':
-    logger = PicklableClientLogger(
-        name=name,
-        host=host,
-        port=port
-    )
+) -> "PicklableClientLogger":
+    logger = PicklableClientLogger(name=name, host=host, port=port)
     return logger
 
 
 def _get_named_client_logger(
     name: str,
-    host: str = 'localhost',
+    host: str = "localhost",
     port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
 ) -> logging.Logger:
     """
@@ -176,7 +174,7 @@ def _get_named_client_logger(
     # We add client not only to identify that this is the client
     # communication part of the logger, but to make sure we have
     # a new singleton with the desired socket handlers
-    local_logger = _create_logger('Client-' + name)
+    local_logger = _create_logger("Client-" + name)
     local_logger.propagate = False
     local_logger.setLevel(logging.DEBUG)
 
@@ -184,8 +182,9 @@ def _get_named_client_logger(
         # Ignore mypy logging.handlers.SocketHandler has no attribute port
         # This is not the case clearly, yet MyPy assumes this is not the case
         # Even when using direct casting or getattr
-        ports = [getattr(handler, 'port', None
-                         ) for handler in local_logger.handlers]  # type: ignore[attr-defined]
+        ports = [
+            getattr(handler, "port", None) for handler in local_logger.handlers
+        ]  # type: ignore[attr-defined]
     except AttributeError:
         # We do not want to log twice but adding multiple times the same
         # handler. So we check to what ports we communicate to
@@ -201,16 +200,11 @@ def _get_named_client_logger(
 
 
 class PicklableClientLogger(PickableLoggerAdapter):
-
     def __init__(self, name: str, host: str, port: int):
         self.name = name
         self.host = host
         self.port = port
-        self.logger = _get_named_client_logger(
-            name=name,
-            host=host,
-            port=port
-        )
+        self.logger = _get_named_client_logger(name=name, host=host, port=port)
 
     def __getstate__(self) -> Dict[str, Any]:
         """
@@ -222,9 +216,9 @@ class PicklableClientLogger(PickableLoggerAdapter):
         the self.logger field and only returns the logger name.
         """
         return {
-            'name': self.name,
-            'host': self.host,
-            'port': self.port,
+            "name": self.name,
+            "host": self.host,
+            "port": self.port,
         }
 
     def __setstate__(self, state: Dict[str, Any]) -> None:
@@ -237,9 +231,9 @@ class PicklableClientLogger(PickableLoggerAdapter):
         state - dictionary, containing the logger name.
 
         """
-        self.name = state['name']
-        self.host = state['host']
-        self.port = state['port']
+        self.name = state["name"]
+        self.host = state["host"]
+        self.port = state["port"]
         self.logger = _get_named_client_logger(
             name=self.name,
             host=self.host,
@@ -264,7 +258,7 @@ class LogRecordStreamHandler(socketserver.StreamRequestHandler):
             chunk = self.connection.recv(4)  # type: ignore[attr-defined]
             if len(chunk) < 4:
                 break
-            slen = struct.unpack('>L', chunk)[0]
+            slen = struct.unpack(">L", chunk)[0]
             chunk = self.connection.recv(slen)  # type: ignore[attr-defined]
             while len(chunk) < slen:
                 chunk = chunk + self.connection.recv(slen - len(chunk))  # type: ignore[attr-defined]  # noqa: E501
@@ -301,9 +295,9 @@ def start_log_server(
     logging_config: Dict,
     output_dir: str,
 ) -> None:
-    setup_logger(filename=filename,
-                 logging_config=logging_config,
-                 output_dir=output_dir)
+    setup_logger(
+        filename=filename, logging_config=logging_config, output_dir=output_dir
+    )
 
     while True:
         # Loop until we find a valid port
@@ -334,7 +328,7 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
 
     def __init__(
         self,
-        host: str = 'localhost',
+        host: str = "localhost",
         port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
         handler: Type[LogRecordStreamHandler] = LogRecordStreamHandler,
         logname: Optional[str] = None,
@@ -347,9 +341,7 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
 
     def serve_until_stopped(self) -> None:
         while True:
-            rd, wr, ex = select.select([self.socket.fileno()],
-                                       [], [],
-                                       self.timeout)
+            rd, wr, ex = select.select([self.socket.fileno()], [], [], self.timeout)
             if rd:
                 self.handle_request()
             if self.event is not None and self.event.is_set():
@@ -358,7 +350,7 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
 
 @contextmanager
 def warnings_to(logger: Optional[PicklableClientLogger] = None) -> Iterator[None]:
-    """ A context manager to catch warnings and send them to the logger
+    """A context manager to catch warnings and send them to the logger
 
     If no logger is passed, warnings propogate as they normally would.
 
@@ -371,6 +363,7 @@ def warnings_to(logger: Optional[PicklableClientLogger] = None) -> Iterator[None
     if logger:
 
         with warnings.catch_warnings():
+
             def to_log(
                 logger: PicklableClientLogger,
                 message: str,
@@ -378,15 +371,16 @@ def warnings_to(logger: Optional[PicklableClientLogger] = None) -> Iterator[None
                 filename: str,
                 lineno: int,
                 file: Optional[TextIO] = None,
-                line: Optional[str] = None
+                line: Optional[str] = None,
             ) -> None:
                 logger.warning(f"{filename}:{lineno} {category.__name__}:{message}")
 
             # Mypy was complaining that logger didn't exist in `to_log` see here:
             # https://mypy.readthedocs.io/en/stable/common_issues.html#narrowing-and-inner-functions
             # we explicitly pass it in and have to force it's type with `cast`
-            warnings.showwarning = lambda *args: \
-                to_log(cast(PicklableClientLogger, logger), *args)
+            warnings.showwarning = lambda *args: to_log(
+                cast(PicklableClientLogger, logger), *args
+            )
 
             yield
     # Else do nothing, warnings go to wherever they would without this context

@@ -1,7 +1,6 @@
 import sklearn.gaussian_process
 
-from autosklearn.pipeline.components.regression.gaussian_process import \
-    GaussianProcess
+from autosklearn.pipeline.components.regression.gaussian_process import GaussianProcess
 
 from .test_base import BaseRegressionComponentTest
 

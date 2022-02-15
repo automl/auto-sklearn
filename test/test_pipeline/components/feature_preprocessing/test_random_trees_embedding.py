@@ -3,8 +3,9 @@ import unittest
 import numpy as np
 import scipy.sparse
 
-from autosklearn.pipeline.components.feature_preprocessing.random_trees_embedding import \
-    RandomTreesEmbedding
+from autosklearn.pipeline.components.feature_preprocessing.random_trees_embedding import (  # noqa: E501
+    RandomTreesEmbedding,
+)
 from autosklearn.pipeline.util import _test_preprocessing, get_dataset
 
 
@@ -26,10 +27,9 @@ class RandomTreesEmbeddingComponentTest(unittest.TestCase):
 
         configuration_space = RandomTreesEmbedding.get_hyperparameter_search_space()
         default = configuration_space.get_default_configuration()
-        preprocessor = RandomTreesEmbedding(random_state=1,
-                                            **{hp_name: default[hp_name] for
-                                               hp_name in
-                                               default})
+        preprocessor = RandomTreesEmbedding(
+            random_state=1, **{hp_name: default[hp_name] for hp_name in default}
+        )
         preprocessor.fit(X_train)
         Xt = preprocessor.transform(X_train)
 
@@ -40,10 +40,9 @@ class RandomTreesEmbeddingComponentTest(unittest.TestCase):
         X_train = X_train.astype(np.float64)
         configuration_space = RandomTreesEmbedding.get_hyperparameter_search_space()
         default = configuration_space.get_default_configuration()
-        preprocessor = RandomTreesEmbedding(random_state=1,
-                                            **{hp_name: default[hp_name] for
-                                               hp_name in
-                                               default})
+        preprocessor = RandomTreesEmbedding(
+            random_state=1, **{hp_name: default[hp_name] for hp_name in default}
+        )
         preprocessor.fit(X_train, Y_train)
         Xt = preprocessor.transform(X_train)
         self.assertEqual(Xt.dtype, np.float64)
