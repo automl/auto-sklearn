@@ -1912,6 +1912,10 @@ class AutoML(BaseEstimator):
         """
 
         ensemble_dict = {} 
+        #check for condition whether autosklearn is fitted if not raise runtime error
+        if not self.fitted:
+            raise RuntimeError('AutoSklearn has not been fitted')
+
 
         #check for ensemble_size == 0 
         if self._ensemble_size == 0:
