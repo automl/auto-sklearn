@@ -110,9 +110,6 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
             ) -> 'FeatTypeSplit':
 
         n_feats = X.shape[1]
-        categorical_features = []
-        numerical_features = []
-        text_features = []
         if self.feat_type is not None:
             # Make sure that we are not missing any column!
             expected = set(self.feat_type.keys())
