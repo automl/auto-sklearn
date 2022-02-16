@@ -1075,7 +1075,7 @@ class AutoML(BaseEstimator):
 
         return self
     
-    def __sklearn_is_fitted__(self)->bool:
+    def __sklearn_is_fitted__(self) -> bool:
         return self.fitted
 
     def _fit_cleanup(self):
