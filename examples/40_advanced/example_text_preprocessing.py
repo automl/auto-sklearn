@@ -62,7 +62,7 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     # set the time high enough text preprocessing can create many new features
     time_left_for_this_task=300,
     per_run_time_limit=30,
-    tmp_folder='/tmp/autosklearn_text_example_tmp_4',
+    tmp_folder='/tmp/autosklearn_text_example_tmp',
 )
 automl.fit(X_train, y_train, dataset_name='20_Newsgroups')
 

@@ -303,6 +303,7 @@ def test_pca_skewness_first_pc(sparse_data_transformed):
 
 def test_calculate_all_metafeatures(sparse_data):
     X, y, categorical = sparse_data
+    string = {key: False for key in categorical}
     mf = meta_features.calculate_all_metafeatures(
-        X, y, categorical, "2", logger=logging.getLogger('Meta'))
+        X, y, categorical, string, "2", logger=logging.getLogger('Meta'))
     assert 52 == len(mf.metafeature_values)

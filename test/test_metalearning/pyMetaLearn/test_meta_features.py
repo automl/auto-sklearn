@@ -395,8 +395,9 @@ def test_class_entropy(meta_train_data):
 
 def test_calculate_all_metafeatures(meta_train_data):
     X, y, categorical = meta_train_data
+    string = {key: False for key in categorical}
     mf = meta_features.calculate_all_metafeatures(
-        X, y, categorical, "2", logger=logging.getLogger('Meta'))
+        X, y, categorical, string, "2", logger=logging.getLogger('Meta'))
     assert 52 == len(mf.metafeature_values)
     assert mf.metafeature_values['NumberOfCategoricalFeatures'].value == 32
 
@@ -663,8 +664,9 @@ def test_calculate_all_metafeatures_multilabel(multilabel_train_data):
     meta_features.helper_functions.clear()
     X, y = multilabel_train_data
     categorical = {i: False for i in range(10)}
+    string = {i: False for i in range(10)}
     mf = meta_features.calculate_all_metafeatures(
-        X, y,  categorical, "Generated", logger=logging.getLogger('TestMeta'))
+        X, y,  categorical, string, "Generated", logger=logging.getLogger('TestMeta'))
     assert 52 == len(mf.metafeature_values)
 
 
@@ -677,8 +679,10 @@ def test_calculate_all_metafeatures_same_results_across_datatypes():
     X, y = fetch_openml(data_id=2, return_X_y=True, as_frame=True)
     categorical = {col: True if X[col].dtype.name == 'category' else False
                    for col in X.columns}
+    string = {col: True if X[col].dtype.name == 'string' else False
+              for col in X.columns}
     mf = meta_features.calculate_all_metafeatures(
-        X, y, categorical, "2", logger=logging.getLogger('Meta'))
+        X, y, categorical, string, "2", logger=logging.getLogger('Meta'))
     assert 52 == len(mf.metafeature_values)
     expected = {
         'PCASkewnessFirstPC': 0.41897660337677867,
@@ -739,8 +743,10 @@ def test_calculate_all_metafeatures_same_results_across_datatypes():
     X, y = fetch_openml(data_id=2, return_X_y=True, as_frame=False)
     categorical = {i: True if category else False
                    for i, category in enumerate(categorical.values())}
+    string = {i: True if category else False
+              for i, category in enumerate(string.values())}
     mf = meta_features.calculate_all_metafeatures(
-        X, y, categorical, "2", logger=logging.getLogger('Meta'))
+        X, y, categorical, string, "2", logger=logging.getLogger('Meta'))
     assert {k: mf[k].value for k in expected.keys()} == pytest.approx(expected)
 
     # The column-reorder of pandas and numpy array are different after

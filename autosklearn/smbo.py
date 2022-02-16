@@ -88,6 +88,8 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
 
         categorical = {col: True if feat_type.lower() == 'categorical' else False
                        for col, feat_type in data_feat_type.items()}
+        string = {col: True if feat_type.lower() == 'string' else False
+                  for col, feat_type in data_feat_type.items()}
 
         EXCLUDE_META_FEATURES = EXCLUDE_META_FEATURES_CLASSIFICATION \
             if data_info_task in CLASSIFICATION_TASKS else EXCLUDE_META_FEATURES_REGRESSION
@@ -97,7 +99,7 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
                               MULTIOUTPUT_REGRESSION]:
             logger_.info('Start calculating metafeatures for %s', basename)
             result = calculate_all_metafeatures_with_labels(
-                x_train, y_train, categorical=categorical,
+                x_train, y_train, categorical=categorical, string=string,
                 dataset_name=basename,
                 dont_calculate=EXCLUDE_META_FEATURES, logger=logger_)
             for key in list(result.metafeature_values.keys()):
@@ -126,9 +128,11 @@ def _calculate_metafeatures_encoded(data_feat_type, basename, x_train, y_train, 
         watcher.start_task(task_name)
         categorical = {col: True if feat_type.lower() == 'categorical' else False
                        for col, feat_type in data_feat_type.items()}
+        string = {col: True if feat_type.lower() == 'string' else False
+                  for col, feat_type in data_feat_type.items()}
 
         result = calculate_all_metafeatures_encoded_labels(
-            x_train, y_train, categorical=categorical,
+            x_train, y_train, categorical=categorical, string=string,
             dataset_name=basename, dont_calculate=EXCLUDE_META_FEATURES, logger=logger_)
         for key in list(result.metafeature_values.keys()):
             if result.metafeature_values[key].type_ != 'METAFEATURE':

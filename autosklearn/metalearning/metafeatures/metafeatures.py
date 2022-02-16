@@ -1027,7 +1027,7 @@ class PCASkewnessFirstPC(MetaFeature):
         return skewness[0]
 
 
-def calculate_all_metafeatures_encoded_labels(X, y, categorical, dataset_name, logger,
+def calculate_all_metafeatures_encoded_labels(X, y, categorical, string,  dataset_name, logger,
                                               calculate=None, dont_calculate=None):
     """
     Calculate only metafeatures for which a 1HotEncoded feature matrix is necessery.
@@ -1036,24 +1036,24 @@ def calculate_all_metafeatures_encoded_labels(X, y, categorical, dataset_name, l
     calculate = set()
     calculate.update(npy_metafeatures)
 
-    return calculate_all_metafeatures(X, y, categorical, dataset_name,
+    return calculate_all_metafeatures(X, y, categorical, string, dataset_name,
                                       calculate=calculate,
                                       dont_calculate=dont_calculate, logger=logger)
 
 
-def calculate_all_metafeatures_with_labels(X, y, categorical, dataset_name, logger,
+def calculate_all_metafeatures_with_labels(X, y, categorical, string, dataset_name, logger,
                                            calculate=None, dont_calculate=None):
     if dont_calculate is None:
         dont_calculate = set()
     else:
         dont_calculate = copy.deepcopy(dont_calculate)
     dont_calculate.update(npy_metafeatures)
-    return calculate_all_metafeatures(X, y, categorical, dataset_name,
+    return calculate_all_metafeatures(X, y, categorical, string, dataset_name,
                                       calculate=calculate,
                                       dont_calculate=dont_calculate, logger=logger)
 
 
-def calculate_all_metafeatures(X, y, categorical, dataset_name, logger,
+def calculate_all_metafeatures(X, y, categorical, string, dataset_name, logger,
                                calculate=None, dont_calculate=None, densify_threshold=1000):
 
     """Calculate all metafeatures."""
@@ -1083,13 +1083,15 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name, logger,
                 # sparse matrices because of wrong sparse format)
                 sparse = scipy.sparse.issparse(X)
 
-                feat_type = {key: 'categorical' if value else 'numerical'
-                             for key, value in categorical.items()}
-
-                # TODO make this more cohesive to the overall structure (quick bug fix)
-                if isinstance(X, pd.DataFrame):
-                    for key in X.select_dtypes(include="string").columns:
-                        feat_type[key] = "string"
+                assert categorical.keys() == string.keys()
+                feat_type = dict()
+                for key in categorical:
+                    if categorical[key]:
+                        feat_type[key] = 'categorical'
+                    elif string[key]:
+                        feat_type[key] = 'string'
+                    else:
+                        feat_type[key] = 'numerical'
 
                 DPP = FeatTypeSplit(
                     # The difference between feat_type and categorical, is that
