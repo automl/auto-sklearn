@@ -13,6 +13,7 @@ import tempfile
 import time
 import unittest.mock
 import uuid
+import warnings
 
 import dask
 import dask.distributed
@@ -302,6 +303,7 @@ class AutoML(BaseEstimator):
 
         # The ensemble performance history through time
         self.ensemble_performance_history = []
+        self.fitted = False
 
         # Single core, local runs should use fork
         # to prevent the __main__ requirements in
@@ -348,7 +350,7 @@ class AutoML(BaseEstimator):
                 processes=False,
                 threads_per_worker=1,
                 # We use the temporal directory to save the
-                # dask workers, because deleting workers
+                # dask workers, because deleting workers takes
                 # more time than deleting backend directories
                 # This prevent an error saying that the worker
                 # file was deleted, so the client could not close
@@ -562,7 +564,7 @@ class AutoML(BaseEstimator):
         #   "multiclass" be mean either REGRESSION or MULTICLASS_CLASSIFICATION,
         #   and so this is where the subclasses are used to determine which.
         #   However, this could also be deduced from the `is_classification`
-        #   paramaeter.
+        #   parameter.
         #
         #   In the future, there is little need for the subclasses of `AutoML`
         #   and no need for the `task` parameter. The extra functionality
@@ -1068,8 +1070,12 @@ class AutoML(BaseEstimator):
             self._logger.info("Finished loading models...")
 
         self._fit_cleanup()
+        self.fitted = True
 
         return self
+
+    def __sklearn_is_fitted__(self) -> bool:
+        return self.fitted
 
     def _fit_cleanup(self):
         self._logger.info("Closing the dask infrastructure")
@@ -1481,6 +1487,10 @@ class AutoML(BaseEstimator):
         ensemble_nbest=None,
         ensemble_size=None,
     ):
+        # check for the case when ensemble_size is less than 0
+        if not ensemble_size > 0:
+            raise ValueError("ensemble_size must be greater than 0 for fit_ensemble")
+
         # AutoSklearn does not handle sparse y for now
         y = convert_if_sparse(y)
 
@@ -1971,9 +1981,21 @@ class AutoML(BaseEstimator):
         -------
         Dict(int, Any) : dictionary of length = number of models in the ensemble
             A dictionary of models in the ensemble, where ``model_id`` is the key.
-
         """  # noqa: E501
         ensemble_dict = {}
+        # check for condition whether autosklearn is fitted if not raise runtime error
+        if not self.__sklearn_is_fitted__():
+            raise RuntimeError("AutoSklearn has not been fitted")
+
+        # check for ensemble_size == 0
+        if self._ensemble_size == 0:
+            warnings.warn("No models in the ensemble. Kindly check the ensemble size.")
+            return ensemble_dict
+
+        # check for condition when ensemble_size > 0 but there is no ensemble to load
+        if self.ensemble_ is None:
+            warnings.warn("No ensemble found. Returning empty dictionary.")
+            return ensemble_dict
 
         def has_key(rv, key):
             return rv.additional_info and key in rv.additional_info
