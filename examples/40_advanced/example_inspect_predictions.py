@@ -36,9 +36,9 @@ X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
     per_run_time_limit=30,
-    tmp_folder='/tmp/autosklearn_inspect_predictions_example_tmp',
+    tmp_folder="/tmp/autosklearn_inspect_predictions_example_tmp",
 )
-automl.fit(X_train, y_train, dataset_name='Run_or_walk_information')
+automl.fit(X_train, y_train, dataset_name="Run_or_walk_information")
 
 s = automl.score(X_train, y_train)
 print(f"Train score {s}")
@@ -61,16 +61,19 @@ print(f"Test score {s}")
 r = permutation_importance(automl, X_test, y_test, n_repeats=10, random_state=0)
 sort_idx = r.importances_mean.argsort()[::-1]
 
-plt.boxplot(r.importances[sort_idx].T,
-            labels=[dataset.feature_names[i] for i in sort_idx])
+plt.boxplot(
+    r.importances[sort_idx].T, labels=[dataset.feature_names[i] for i in sort_idx]
+)
 
 plt.xticks(rotation=90)
 plt.tight_layout()
 plt.show()
 
 for i in sort_idx[::-1]:
-    print(f"{dataset.feature_names[i]:10s}: {r.importances_mean[i]:.3f} +/- "
-          f"{r.importances_std[i]:.3f}")
+    print(
+        f"{dataset.feature_names[i]:10s}: {r.importances_mean[i]:.3f} +/- "
+        f"{r.importances_std[i]:.3f}"
+    )
 
 ############################################################################################
 # Create partial dependence (PD) and individual conditional expectation (ICE) plots - part 2
@@ -90,11 +93,14 @@ for i in sort_idx[::-1]:
 # combining ICE (thin lines) and PD (thick line)
 
 features = [1, 2]
-plot_partial_dependence(automl, dataset.data,
-                        features=features,
-                        grid_resolution=5,
-                        kind="both",
-                        feature_names=dataset.feature_names)
+plot_partial_dependence(
+    automl,
+    dataset.data,
+    features=features,
+    grid_resolution=5,
+    kind="both",
+    feature_names=dataset.feature_names,
+)
 plt.tight_layout()
 plt.show()
 
@@ -106,9 +112,12 @@ plt.show()
 # these features. Again, we'll look at acceleration_y and acceleration_z.
 
 features = [[1, 2]]
-plot_partial_dependence(automl, dataset.data,
-                        features=features,
-                        grid_resolution=5,
-                        feature_names=dataset.feature_names)
+plot_partial_dependence(
+    automl,
+    dataset.data,
+    features=features,
+    grid_resolution=5,
+    feature_names=dataset.feature_names,
+)
 plt.tight_layout()
 plt.show()

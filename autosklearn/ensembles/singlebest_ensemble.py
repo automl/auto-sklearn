@@ -1,8 +1,8 @@
-import os
 from typing import List, Tuple, Union
 
-import numpy as np
+import os
 
+import numpy as np
 from smac.runhistory.runhistory import RunHistory
 
 from autosklearn.automl_common.common.utils.backend import Backend
@@ -20,6 +20,7 @@ class SingleBest(AbstractEnsemble):
     object, to comply with the expected interface of an
     AbstractEnsemble.
     """
+
     def __init__(
         self,
         metric: Scorer,
@@ -38,12 +39,10 @@ class SingleBest(AbstractEnsemble):
         self.identifiers_ = self.get_identifiers_from_run_history()
 
     def get_identifiers_from_run_history(self) -> List[Tuple[int, int, float]]:
-        """
-        This method parses the run history, to identify
-        the best performing model
+        """Parses the run history, to identify the best performing model
 
-        It populates the identifiers attribute, which is used
-        by the backend to access the actual model
+        Populates the identifiers attribute, which is used by the backend to access
+        the actual model.
         """
         best_model_identifier = []
         best_model_score = self.metric._worst_possible_result
@@ -52,35 +51,38 @@ class SingleBest(AbstractEnsemble):
             run_value = self.run_history.data[run_key]
             score = self.metric._optimum - (self.metric._sign * run_value.cost)
 
-            if (score > best_model_score and self.metric._sign > 0) \
-                    or (score < best_model_score and self.metric._sign < 0):
+            if (score > best_model_score and self.metric._sign > 0) or (
+                score < best_model_score and self.metric._sign < 0
+            ):
 
                 # Make sure that the individual best model actually exists
                 model_dir = self.backend.get_numrun_directory(
                     self.seed,
-                    run_value.additional_info['num_run'],
+                    run_value.additional_info["num_run"],
                     run_key.budget,
                 )
                 model_file_name = self.backend.get_model_filename(
                     self.seed,
-                    run_value.additional_info['num_run'],
+                    run_value.additional_info["num_run"],
                     run_key.budget,
                 )
                 file_path = os.path.join(model_dir, model_file_name)
                 if not os.path.exists(file_path):
                     continue
 
-                best_model_identifier = [(
-                    self.seed,
-                    run_value.additional_info['num_run'],
-                    run_key.budget,
-                )]
+                best_model_identifier = [
+                    (
+                        self.seed,
+                        run_value.additional_info["num_run"],
+                        run_key.budget,
+                    )
+                ]
                 best_model_score = score
 
         if not best_model_identifier:
             raise ValueError(
-                "No valid model found in run history. This means smac was not able to fit"
-                " a valid model. Please check the log file for errors."
+                "No valid model found in run history. This means smac was not able to"
+                " fit a valid model. Please check the log file for errors."
             )
 
         return best_model_identifier
@@ -89,15 +91,25 @@ class SingleBest(AbstractEnsemble):
         return predictions[0]
 
     def __str__(self) -> str:
-        return 'Single Model Selection:\n\tMembers: %s' \
-               '\n\tWeights: %s\n\tIdentifiers: %s' % \
-               (self.indices_, self.weights_,
-                ' '.join([str(identifier) for idx, identifier in
-                          enumerate(self.identifiers_)
-                          if self.weights_[idx] > 0]))
+        return (
+            "Single Model Selection:\n\tMembers: %s"
+            "\n\tWeights: %s\n\tIdentifiers: %s"
+            % (
+                self.indices_,
+                self.weights_,
+                " ".join(
+                    [
+                        str(identifier)
+                        for idx, identifier in enumerate(self.identifiers_)
+                        if self.weights_[idx] > 0
+                    ]
+                ),
+            )
+        )
 
-    def get_models_with_weights(self, models: BasePipeline
-                                ) -> List[Tuple[float, BasePipeline]]:
+    def get_models_with_weights(
+        self, models: BasePipeline
+    ) -> List[Tuple[float, BasePipeline]]:
         output = []
         for i, weight in enumerate(self.weights_):
             if weight > 0.0:

@@ -17,8 +17,8 @@ def read_csv(fn, has_header=True, data_type=str):
     """
     data = list()
     header = None
-    with open(fn, 'r') as csvfile:
-        csv_reader = csv.reader(csvfile, delimiter=',', quotechar='|')
+    with open(fn, "r") as csvfile:
+        csv_reader = csv.reader(csvfile, delimiter=",", quotechar="|")
         for row in csv_reader:
             if header is None and has_header:
                 header = row
@@ -37,7 +37,7 @@ def fill_trajectory(performance_list, time_list):
     series = pd.concat(series_list, axis=1)
 
     # Fill missing performance values (NaNs) with last non-NaN value.
-    series = series.fillna(method='ffill')
+    series = series.fillna(method="ffill")
 
     # return the trajectories over seeds (series object)
     return series
@@ -52,10 +52,10 @@ def main():
     working_directory = "../log_output"
 
     # list of models
-    model_list = ['vanilla', 'ensemble', 'metalearning', 'meta_ensemble']
+    model_list = ["vanilla", "ensemble", "metalearning", "meta_ensemble"]
 
     # list of seeds
-    seed_dir = os.path.join(working_directory, 'vanilla')
+    seed_dir = os.path.join(working_directory, "vanilla")
     seed_list = [seed for seed in os.listdir(seed_dir)]
 
     # list of tasks
@@ -74,21 +74,23 @@ def main():
             for seed in seed_list:
                 # collect all csv files of different seeds for current model and
                 # current task.
-                if model in ['vanilla', 'ensemble']:
-                    csv_file = os.path.join(working_directory,
-                                            'vanilla',
-                                            seed,
-                                            task_id,
-                                            "score_{}.csv".format(model)
-                                            )
+                if model in ["vanilla", "ensemble"]:
+                    csv_file = os.path.join(
+                        working_directory,
+                        "vanilla",
+                        seed,
+                        task_id,
+                        "score_{}.csv".format(model),
+                    )
 
-                elif model in ['metalearning', 'meta_ensemble']:
-                    csv_file = os.path.join(working_directory,
-                                            'metalearning',
-                                            seed,
-                                            task_id,
-                                            "score_{}.csv".format(model),
-                                            )
+                elif model in ["metalearning", "meta_ensemble"]:
+                    csv_file = os.path.join(
+                        working_directory,
+                        "metalearning",
+                        seed,
+                        task_id,
+                        "score_{}.csv".format(model),
+                    )
                 csv_files.append(csv_file)
 
             performance_list = []
@@ -99,8 +101,9 @@ def main():
                 _, csv_data = read_csv(fl, has_header=True)
                 csv_data = np.array(csv_data)
                 # Replace too high values with args.maxsize
-                data = [min([sys.maxsize, float(i.strip())]) for i in
-                        csv_data[:, 2]]  # test trajectories are stored in third column
+                data = [
+                    min([sys.maxsize, float(i.strip())]) for i in csv_data[:, 2]
+                ]  # test trajectories are stored in third column
 
                 time_steps = [float(i.strip()) for i in csv_data[:, 0]]
                 assert time_steps[0] == 0
@@ -123,15 +126,16 @@ def main():
     n_tasks = len(task_list)
 
     for i in range(n_iter):
-        pick = np.random.choice(all_trajectories[0][0].shape[1],
-                                size=(len(model_list)))
+        pick = np.random.choice(all_trajectories[0][0].shape[1], size=(len(model_list)))
 
         for j in range(n_tasks):
             all_trajectories_tmp = pd.DataFrame(
-                {model_list[k]: at[j].iloc[:, pick[k]] for
-                 k, at in enumerate(all_trajectories)}
+                {
+                    model_list[k]: at[j].iloc[:, pick[k]]
+                    for k, at in enumerate(all_trajectories)
+                }
             )
-            all_trajectories_tmp = all_trajectories_tmp.fillna(method='ffill', axis=0)
+            all_trajectories_tmp = all_trajectories_tmp.fillna(method="ffill", axis=0)
             r_tmp = all_trajectories_tmp.rank(axis=1)
             all_rankings.append(r_tmp)
 
@@ -141,7 +145,7 @@ def main():
         for ranking in all_rankings:
             ranks_for_model.append(ranking.loc[:, model])
         ranks_for_model = pd.DataFrame(ranks_for_model)
-        ranks_for_model = ranks_for_model.fillna(method='ffill', axis=1)
+        ranks_for_model = ranks_for_model.fillna(method="ffill", axis=1)
         final_ranks.append(ranks_for_model.mean(skipna=True))
 
     # Step 3. Plot the average ranks over time.
@@ -155,8 +159,8 @@ def main():
         X_data.append(max_runtime)
         y_data.append(y)
         plt.plot(X_data, y_data, label=model)
-        plt.xlabel('time [sec]')
-        plt.ylabel('average rank')
+        plt.xlabel("time [sec]")
+        plt.ylabel("average rank")
         plt.legend()
     plt.savefig(saveto)
 

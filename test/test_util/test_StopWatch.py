@@ -22,8 +22,8 @@ class Test(unittest.TestCase):
         cpu_start = time.process_time()
         watch = StopWatch()
         for i in range(1, 1000):
-            watch.start_task('task_%d' % i)
-            watch.stop_task('task_%d' % i)
+            watch.start_task("task_%d" % i)
+            watch.stop_task("task_%d" % i)
         cpu_stop = time.process_time()
         stop = time.time()
         dur = stop - start
@@ -36,6 +36,6 @@ class Test(unittest.TestCase):
         self.assertLess(watch.cpu_sum(), 2 * watch.wall_sum())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

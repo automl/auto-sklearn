@@ -1,7 +1,7 @@
 import numpy as np
 
 from autosklearn.pipeline.components.feature_preprocessing.pca import PCA
-from autosklearn.pipeline.util import _test_preprocessing, PreprocessingTestCase
+from autosklearn.pipeline.util import PreprocessingTestCase, _test_preprocessing
 
 
 class PCAComponentTest(PreprocessingTestCase):
@@ -13,9 +13,9 @@ class PCAComponentTest(PreprocessingTestCase):
             self.assertFalse((transformation == original).all())
             transformations.append(transformation)
             if len(transformations) > 1:
-                np.testing.assert_allclose(transformations[-1],
-                                           transformations[-2], rtol=1e-4)
+                np.testing.assert_allclose(
+                    transformations[-1], transformations[-2], rtol=1e-4
+                )
 
     def test_preprocessing_dtype(self):
-        super(PCAComponentTest, self)._test_preprocessing_dtype(PCA,
-                                                                test_sparse=False)
+        super(PCAComponentTest, self)._test_preprocessing_dtype(PCA, test_sparse=False)

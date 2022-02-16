@@ -46,9 +46,7 @@ cls = autosklearn.classification.AutoSklearnClassifier(
     # We will limit the configuration space only to
     # have RandomForest as a valid model. We recommend enabling all
     # possible models to get a better performance.
-    include={
-        'classifier': ['random_forest']
-    },
+    include={"classifier": ["random_forest"]},
     delete_tmp_folder_after_terminate=False,
 )
 
@@ -60,17 +58,21 @@ cls = autosklearn.classification.AutoSklearnClassifier(
 # min_samples_split in the Random Forest. We recommend you to look into
 # how the ConfigSpace package works here:
 # https://automl.github.io/ConfigSpace/master/
-cs = cls.get_configuration_space(X, y, dataset_name='kr-vs-kp')
+cs = cls.get_configuration_space(X, y, dataset_name="kr-vs-kp")
 config = cs.sample_configuration()
-config._values['classifier:random_forest:min_samples_split'] = 11
+config._values["classifier:random_forest:min_samples_split"] = 11
 
 # Make sure that your changed configuration complies with the configuration space
 config.is_valid_configuration()
 
-pipeline, run_info, run_value = cls.fit_pipeline(X=X_train, y=y_train,
-                                                 dataset_name='kr-vs-kp',
-                                                 config=config,
-                                                 X_test=X_test, y_test=y_test)
+pipeline, run_info, run_value = cls.fit_pipeline(
+    X=X_train,
+    y=y_train,
+    dataset_name="kr-vs-kp",
+    config=config,
+    X_test=X_test,
+    y_test=y_test,
+)
 
 # This object complies with Scikit-Learn Pipeline API.
 # https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html
@@ -84,9 +86,9 @@ print(run_value)
 
 # We can make sure that our pipeline configuration was honored as follows
 print("Passed Configuration:", pipeline.config)
-print("Random Forest:", pipeline.named_steps['classifier'].choice.estimator)
+print("Random Forest:", pipeline.named_steps["classifier"].choice.estimator)
 
 # We can also search for new configurations using the fit() method
 # Any configurations found by Auto-Sklearn -- even the ones created using
 # fit_pipeline() are stored to disk and can be used for Ensemble Selection
-cs = cls.fit(X, y, dataset_name='kr-vs-kp')
+cs = cls.fit(X, y, dataset_name="kr-vs-kp")

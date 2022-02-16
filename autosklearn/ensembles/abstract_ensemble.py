@@ -15,7 +15,7 @@ class AbstractEnsemble(object):
         base_models_predictions: np.ndarray,
         true_targets: np.ndarray,
         model_identifiers: List[Tuple[int, int, float]],
-    ) -> 'AbstractEnsemble':
+    ) -> "AbstractEnsemble":
         """Fit an ensemble given predictions of base models and targets.
 
         Ensemble building maximizes performance (in contrast to
@@ -23,7 +23,8 @@ class AbstractEnsemble(object):
 
         Parameters
         ----------
-        base_models_predictions : array of shape = [n_base_models, n_data_points, n_targets]
+        base_models_predictions: np.ndarray
+            shape = (n_base_models, n_data_points, n_targets)
             n_targets is the number of classes in case of classification,
             n_targets is 0 or 1 in case of regression
 
@@ -40,12 +41,15 @@ class AbstractEnsemble(object):
         pass
 
     @abstractmethod
-    def predict(self, base_models_predictions: Union[np.ndarray, List[np.ndarray]]) -> np.ndarray:
+    def predict(
+        self, base_models_predictions: Union[np.ndarray, List[np.ndarray]]
+    ) -> np.ndarray:
         """Create ensemble predictions from the base model predictions.
 
         Parameters
         ----------
-        base_models_predictions : array of shape = [n_base_models, n_data_points, n_targets]
+        base_models_predictions : np.ndarray
+            shape = (n_base_models, n_data_points, n_targets)
             Same as in the fit method.
 
         Returns

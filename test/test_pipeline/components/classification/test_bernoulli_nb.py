@@ -1,7 +1,6 @@
 import sklearn.naive_bayes
 
-from autosklearn.pipeline.components.classification.bernoulli_nb import \
-    BernoulliNB
+from autosklearn.pipeline.components.classification.bernoulli_nb import BernoulliNB
 
 from .test_base import BaseClassificationComponentTest
 
