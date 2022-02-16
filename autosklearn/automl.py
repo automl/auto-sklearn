@@ -2,7 +2,6 @@
 from typing import Any, Dict, List, Mapping, Optional, Tuple, Union, cast
 
 import copy
-import distro
 import io
 import json
 import logging.handlers
@@ -1074,7 +1073,7 @@ class AutoML(BaseEstimator):
         self.fitted = True
 
         return self
-    
+
     def __sklearn_is_fitted__(self) -> bool:
         return self.fitted
 
@@ -1488,10 +1487,10 @@ class AutoML(BaseEstimator):
         ensemble_nbest=None,
         ensemble_size=None,
     ):
-        #check for the case when ensemble_size is less than 0 
+        # check for the case when ensemble_size is less than 0
         if not ensemble_size > 0:
             raise ValueError("ensemble_size must be greater than 0 for fit_ensemble")
-            
+
         # AutoSklearn does not handle sparse y for now
         y = convert_if_sparse(y)
 
@@ -1982,20 +1981,20 @@ class AutoML(BaseEstimator):
         -------
         Dict(int, Any) : dictionary of length = number of models in the ensemble
             A dictionary of models in the ensemble, where ``model_id`` is the key.
-        """   # noqa: E501
-        ensemble_dict = {} 
-        #check for condition whether autosklearn is fitted if not raise runtime error
+        """  # noqa: E501
+        ensemble_dict = {}
+        # check for condition whether autosklearn is fitted if not raise runtime error
         if not self.__sklearn_is_fitted__():
-            raise RuntimeError('AutoSklearn has not been fitted')
+            raise RuntimeError("AutoSklearn has not been fitted")
 
-        #check for ensemble_size == 0 
+        # check for ensemble_size == 0
         if self._ensemble_size == 0:
             warnings.warn("No models in the ensemble. Kindly check the ensemble size.")
             return ensemble_dict
 
-        #check for condition when ensemble_size > 0 but there is no ensemble to load from
+        # check for condition when ensemble_size > 0 but there is no ensemble to load
         if self.ensemble_ is None:
-            warnings.warn('No ensemble found. Returning empty dictionary.')
+            warnings.warn("No ensemble found. Returning empty dictionary.")
             return ensemble_dict
 
         def has_key(rv, key):
