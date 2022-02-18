@@ -9,6 +9,26 @@
 Releases
 ========
 
+Version 0.14.6
+==============
+
+* HOTFIX #1407: Catches keyword arguments in `SingleThreadedClient` so they don't get passed to it's executing `func`.
+
+Contributors v0.14.6
+********************
+* Eddie Bergman
+
+
+Version 0.14.5
+==============
+
+* HOTFIX: Release PyPi package with ``automl_common`` included
+
+Contributors v0.14.5
+********************
+* Eddie Bergman
+
+
 Version 0.14.3
 ==============
 

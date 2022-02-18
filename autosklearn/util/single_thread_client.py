@@ -1,4 +1,5 @@
 import typing
+from typing import Any
 
 from pathlib import Path
 
@@ -67,8 +68,24 @@ class SingleThreadedClient(dask.distributed.Client):
         func: typing.Callable,
         *args: typing.List,
         priority: int = 0,
-        **kwargs: typing.Dict,
+        key: Any = None,
+        workers: Any = None,
+        resources: Any = None,
+        retries: Any = None,
+        fifo_timeout: Any = "100 ms",
+        allow_other_workers: Any = False,
+        actor: Any = False,
+        actors: Any = False,
+        pure: Any = None,
+        **kwargs: Any,
     ) -> typing.Any:
+        """
+        Note
+        ----
+        The keyword arguments caught in `dask.distributed.Client` need to
+        be specified here so they don't get passed in as ``**kwargs`` to the
+        ``func``.
+        """
         return DummyFuture(func(*args, **kwargs))
 
     def close(self) -> None:
