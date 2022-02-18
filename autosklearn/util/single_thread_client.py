@@ -76,7 +76,7 @@ class SingleThreadedClient(dask.distributed.Client):
         actor: Any = False,
         actors: Any = False,
         pure: Any = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> typing.Any:
         """
         Note
