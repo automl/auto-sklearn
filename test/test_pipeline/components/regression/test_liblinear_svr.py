@@ -1,7 +1,7 @@
 import sklearn.svm
 
-from autosklearn.pipeline.components.regression.liblinear_svr import \
-    LibLinear_SVR
+from autosklearn.pipeline.components.regression.liblinear_svr import LibLinear_SVR
+
 from .test_base import BaseRegressionComponentTest
 
 

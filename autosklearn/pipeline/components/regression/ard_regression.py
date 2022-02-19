@@ -1,15 +1,27 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    UnParametrizedHyperparameter
+from ConfigSpace.hyperparameters import (
+    UniformFloatHyperparameter,
+    UnParametrizedHyperparameter,
+)
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
-from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS
+from autosklearn.pipeline.constants import DENSE, PREDICTIONS, UNSIGNED_DATA
 from autosklearn.util.common import check_for_bool
 
 
 class ARDRegression(AutoSklearnRegressionAlgorithm):
-    def __init__(self, n_iter, tol, alpha_1, alpha_2, lambda_1, lambda_2,
-                 threshold_lambda, fit_intercept, random_state=None):
+    def __init__(
+        self,
+        n_iter,
+        tol,
+        alpha_1,
+        alpha_2,
+        lambda_1,
+        lambda_2,
+        threshold_lambda,
+        fit_intercept,
+        random_state=None,
+    ):
         self.random_state = random_state
         self.estimator = None
 
@@ -46,7 +58,7 @@ class ARDRegression(AutoSklearnRegressionAlgorithm):
             fit_intercept=True,
             normalize=False,
             copy_X=False,
-            verbose=False
+            verbose=False,
         )
 
         if y.ndim == 2 and y.shape[1] == 1:
@@ -62,43 +74,71 @@ class ARDRegression(AutoSklearnRegressionAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'ARD',
-                'name': 'ARD Regression',
-                'handles_regression': True,
-                'handles_classification': False,
-                'handles_multiclass': False,
-                'handles_multilabel': False,
-                'handles_multioutput': False,
-                'prefers_data_normalized': True,
-                'is_deterministic': True,
-                'input': (DENSE, UNSIGNED_DATA),
-                'output': (PREDICTIONS,)}
+        return {
+            "shortname": "ARD",
+            "name": "ARD Regression",
+            "handles_regression": True,
+            "handles_classification": False,
+            "handles_multiclass": False,
+            "handles_multilabel": False,
+            "handles_multioutput": False,
+            "prefers_data_normalized": True,
+            "is_deterministic": True,
+            "input": (DENSE, UNSIGNED_DATA),
+            "output": (PREDICTIONS,),
+        }
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
         n_iter = UnParametrizedHyperparameter("n_iter", value=300)
-        tol = UniformFloatHyperparameter("tol", 10 ** -5, 10 ** -1,
-                                         default_value=10 ** -3, log=True)
-        alpha_1 = UniformFloatHyperparameter(name="alpha_1", lower=10 ** -10,
-                                             upper=10 ** -3, default_value=10 ** -6)
-        alpha_2 = UniformFloatHyperparameter(name="alpha_2", log=True,
-                                             lower=10 ** -10, upper=10 ** -3,
-                                             default_value=10 ** -6)
-        lambda_1 = UniformFloatHyperparameter(name="lambda_1", log=True,
-                                              lower=10 ** -10, upper=10 ** -3,
-                                              default_value=10 ** -6)
-        lambda_2 = UniformFloatHyperparameter(name="lambda_2", log=True,
-                                              lower=10 ** -10, upper=10 ** -3,
-                                              default_value=10 ** -6)
-        threshold_lambda = UniformFloatHyperparameter(name="threshold_lambda",
-                                                      log=True,
-                                                      lower=10 ** 3,
-                                                      upper=10 ** 5,
-                                                      default_value=10 ** 4)
+        tol = UniformFloatHyperparameter(
+            "tol", 10**-5, 10**-1, default_value=10**-3, log=True
+        )
+        alpha_1 = UniformFloatHyperparameter(
+            name="alpha_1", lower=10**-10, upper=10**-3, default_value=10**-6
+        )
+        alpha_2 = UniformFloatHyperparameter(
+            name="alpha_2",
+            log=True,
+            lower=10**-10,
+            upper=10**-3,
+            default_value=10**-6,
+        )
+        lambda_1 = UniformFloatHyperparameter(
+            name="lambda_1",
+            log=True,
+            lower=10**-10,
+            upper=10**-3,
+            default_value=10**-6,
+        )
+        lambda_2 = UniformFloatHyperparameter(
+            name="lambda_2",
+            log=True,
+            lower=10**-10,
+            upper=10**-3,
+            default_value=10**-6,
+        )
+        threshold_lambda = UniformFloatHyperparameter(
+            name="threshold_lambda",
+            log=True,
+            lower=10**3,
+            upper=10**5,
+            default_value=10**4,
+        )
         fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
 
-        cs.add_hyperparameters([n_iter, tol, alpha_1, alpha_2, lambda_1,
-                                lambda_2, threshold_lambda, fit_intercept])
+        cs.add_hyperparameters(
+            [
+                n_iter,
+                tol,
+                alpha_1,
+                alpha_2,
+                lambda_1,
+                lambda_2,
+                threshold_lambda,
+                fit_intercept,
+            ]
+        )
 
         return cs

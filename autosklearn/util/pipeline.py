@@ -1,29 +1,27 @@
 # -*- encoding: utf-8 -*-
 from typing import Any, Dict, List, Optional, Union
 
-from ConfigSpace.configuration_space import ConfigurationSpace
-
 import numpy as np
+from ConfigSpace.configuration_space import ConfigurationSpace
 
 from autosklearn.constants import (
     BINARY_CLASSIFICATION,
     MULTICLASS_CLASSIFICATION,
     MULTILABEL_CLASSIFICATION,
     MULTIOUTPUT_REGRESSION,
-    REGRESSION_TASKS
+    REGRESSION_TASKS,
 )
 from autosklearn.pipeline.classification import SimpleClassificationPipeline
 from autosklearn.pipeline.regression import SimpleRegressionPipeline
 
-
-__all__ = ['get_configuration_space']
+__all__ = ["get_configuration_space"]
 
 
 def get_configuration_space(
     info: Dict[str, Any],
     include: Optional[Dict[str, List[str]]] = None,
     exclude: Optional[Dict[str, List[str]]] = None,
-    random_state: Optional[Union[int, np.random.RandomState]] = None
+    random_state: Optional[Union[int, np.random.RandomState]] = None,
 ) -> ConfigurationSpace:
     """Get the configuration of a pipeline given some dataset info
 
@@ -46,17 +44,19 @@ def get_configuration_space(
     ConfigurationSpace
         The configuration space for the pipeline
     """
-    if info['task'] in REGRESSION_TASKS:
+    if info["task"] in REGRESSION_TASKS:
         return _get_regression_configuration_space(info, include, exclude, random_state)
     else:
-        return _get_classification_configuration_space(info, include, exclude, random_state)
+        return _get_classification_configuration_space(
+            info, include, exclude, random_state
+        )
 
 
 def _get_regression_configuration_space(
     info: Dict[str, Any],
     include: Optional[Dict[str, List[str]]],
     exclude: Optional[Dict[str, List[str]]],
-    random_state: Optional[Union[int, np.random.RandomState]] = None
+    random_state: Optional[Union[int, np.random.RandomState]] = None,
 ) -> ConfigurationSpace:
     """Get the configuration of a regression pipeline given some dataset info
 
@@ -79,25 +79,22 @@ def _get_regression_configuration_space(
     ConfigurationSpace
         The configuration space for the regression pipeline
     """
-    task_type = info['task']
+    task_type = info["task"]
     sparse = False
     multioutput = False
     if task_type == MULTIOUTPUT_REGRESSION:
         multioutput = True
 
-    if info['is_sparse'] == 1:
+    if info["is_sparse"] == 1:
         sparse = True
 
-    dataset_properties = {
-        'multioutput': multioutput,
-        'sparse': sparse
-    }
+    dataset_properties = {"multioutput": multioutput, "sparse": sparse}
 
     configuration_space = SimpleRegressionPipeline(
         dataset_properties=dataset_properties,
         include=include,
         exclude=exclude,
-        random_state=random_state
+        random_state=random_state,
     ).get_hyperparameter_search_space()
     return configuration_space
 
@@ -106,7 +103,7 @@ def _get_classification_configuration_space(
     info: Dict[str, Any],
     include: Optional[Dict[str, List[str]]],
     exclude: Optional[Dict[str, List[str]]],
-    random_state: Optional[Union[int, np.random.RandomState]] = None
+    random_state: Optional[Union[int, np.random.RandomState]] = None,
 ) -> ConfigurationSpace:
     """Get the configuration of a classification pipeline given some dataset info
 
@@ -129,7 +126,7 @@ def _get_classification_configuration_space(
     ConfigurationSpace
         The configuration space for the classification pipeline
     """
-    task_type = info['task']
+    task_type = info["task"]
 
     multilabel = False
     multiclass = False
@@ -142,18 +139,18 @@ def _get_classification_configuration_space(
     if task_type == BINARY_CLASSIFICATION:
         pass
 
-    if info['is_sparse'] == 1:
+    if info["is_sparse"] == 1:
         sparse = True
 
     dataset_properties = {
-        'multilabel': multilabel,
-        'multiclass': multiclass,
-        'sparse': sparse
+        "multilabel": multilabel,
+        "multiclass": multiclass,
+        "sparse": sparse,
     }
 
     return SimpleClassificationPipeline(
         dataset_properties=dataset_properties,
         include=include,
         exclude=exclude,
-        random_state=random_state
+        random_state=random_state,
     ).get_hyperparameter_search_space()

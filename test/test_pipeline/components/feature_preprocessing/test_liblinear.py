@@ -1,15 +1,22 @@
-from sklearn.linear_model import RidgeClassifier
-from autosklearn.pipeline.components.feature_preprocessing.liblinear_svc_preprocessor import \
-    LibLinear_Preprocessor
-from autosklearn.pipeline.util import _test_preprocessing, PreprocessingTestCase, \
-    get_dataset
 import sklearn.metrics
+from sklearn.linear_model import RidgeClassifier
 
-from test.test_pipeline.ignored_warnings import ignore_warnings, feature_preprocessing_warnings
+from autosklearn.pipeline.components.feature_preprocessing.liblinear_svc_preprocessor import (  # noqa: E501
+    LibLinear_Preprocessor,
+)
+from autosklearn.pipeline.util import (
+    PreprocessingTestCase,
+    _test_preprocessing,
+    get_dataset,
+)
+
+from test.test_pipeline.ignored_warnings import (
+    feature_preprocessing_warnings,
+    ignore_warnings,
+)
 
 
 class LiblinearComponentTest(PreprocessingTestCase):
-
     def test_default_configuration(self):
         with ignore_warnings(feature_preprocessing_warnings):
             transformation, original = _test_preprocessing(LibLinear_Preprocessor)
@@ -19,15 +26,21 @@ class LiblinearComponentTest(PreprocessingTestCase):
 
     def test_default_configuration_classify(self):
         for i in range(2):
-            X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
-                                                           make_sparse=False)
-            configuration_space = LibLinear_Preprocessor.get_hyperparameter_search_space()
+            X_train, Y_train, X_test, Y_test = get_dataset(
+                dataset="digits", make_sparse=False
+            )
+            configuration_space = (
+                LibLinear_Preprocessor.get_hyperparameter_search_space()
+            )
             default = configuration_space.get_default_configuration()
-            preprocessor = LibLinear_Preprocessor(random_state=1,
-                                                  **{hp_name: default[hp_name]
-                                                     for hp_name in
-                                                     default if default[
-                                                      hp_name] is not None})
+            preprocessor = LibLinear_Preprocessor(
+                random_state=1,
+                **{
+                    hp_name: default[hp_name]
+                    for hp_name in default
+                    if default[hp_name] is not None
+                },
+            )
 
             with ignore_warnings(feature_preprocessing_warnings):
                 preprocessor.fit(X_train, Y_train)

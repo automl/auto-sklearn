@@ -2,10 +2,10 @@ from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
+from ConfigSpace.configuration_space import Configuration
 
 from ..input import aslib_simple
 from ..metafeatures.metafeature import DatasetMetafeatures
-from ConfigSpace.configuration_space import Configuration
 
 
 class Run(object):
@@ -15,8 +15,11 @@ class Run(object):
         self.runtime = runtime
 
     def __repr__(self):
-        return "Run:\nresult: %3.3f\nruntime: %3.3f\n%s" % \
-               (self.result, self.runtime, str(self.configuration))
+        return "Run:\nresult: %3.3f\nruntime: %3.3f\n%s" % (
+            self.result,
+            self.runtime,
+            str(self.configuration),
+        )
 
 
 class Instance(object):
@@ -41,7 +44,9 @@ class MetaBase(object):
 
         aslib_reader = aslib_simple.AlgorithmSelectionProblem(self.aslib_directory)
         self.metafeatures = aslib_reader.metafeatures
-        self.algorithm_runs: OrderedDict[str, pd.DataFrame] = aslib_reader.algorithm_runs
+        self.algorithm_runs: OrderedDict[
+            str, pd.DataFrame
+        ] = aslib_reader.algorithm_runs
         self.configurations = aslib_reader.configurations
 
         configurations = dict()
@@ -49,8 +54,9 @@ class MetaBase(object):
             configuration = self.configurations[algorithm_id]
             # Todo this try function makes it difficult to debug metalearning
             try:
-                configurations[str(algorithm_id)] = \
-                    (Configuration(configuration_space, values=configuration))
+                configurations[str(algorithm_id)] = Configuration(
+                    configuration_space, values=configuration
+                )
             except (ValueError, KeyError) as e:
                 self.logger.debug("Error reading configurations: %s", e)
 
@@ -59,11 +65,13 @@ class MetaBase(object):
     def add_dataset(self, name, metafeatures):
         metafeatures.name = name
         if isinstance(metafeatures, DatasetMetafeatures):
-            data_ = {mf.name: mf.value for mf in metafeatures.metafeature_values.values()}
+            data_ = {
+                mf.name: mf.value for mf in metafeatures.metafeature_values.values()
+            }
             metafeatures = pd.Series(name=name, data=data_, dtype=np.float64)
         if name.lower() in self.metafeatures.index:
             self.logger.warning(
-                'Dataset %s already in meta-data. Removing occurence.', name.lower()
+                "Dataset %s already in meta-data. Removing occurence.", name.lower()
             )
             self.metafeatures.drop(name.lower(), inplace=True)
         # Todo append will be removed from pandas
@@ -100,8 +108,7 @@ class MetaBase(object):
         """This is inside an extra function for testing purpose"""
         # Load the task
 
-        self.logger.info("Going to use the following metafeature subset: %s",
-                         features)
+        self.logger.info("Going to use the following metafeature subset: %s", features)
         all_metafeatures = self.metafeatures
         all_metafeatures = all_metafeatures.loc[:, features]
 

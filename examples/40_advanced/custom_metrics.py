@@ -9,6 +9,7 @@ import numpy as np
 # Custom metrics definition
 # =========================
 
+
 def accuracy(solution, prediction):
     # custom function defining accuracy
     return np.mean(solution == prediction)
