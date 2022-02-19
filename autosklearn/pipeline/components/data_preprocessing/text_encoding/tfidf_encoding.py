@@ -17,14 +17,14 @@ from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
     def __init__(
         self,
-        ngram_range: int = 1,
+        ngram_upper_bound: int = 1,
         use_idf: bool = True,
         min_df_choice: str = "min_df_absolute",
         min_df_absolute: int = 0,
         min_df_relative: float = 0.01,
         random_state: Optional[Union[int, np.random.RandomState]] = None,
     ) -> None:
-        self.ngram_range = ngram_range
+        self.ngram_upper_bound = ngram_upper_bound
         self.random_state = random_state
         self.use_idf = use_idf
         self.min_df_choice = min_df_choice
@@ -50,14 +50,14 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
             self.preprocessor = TfidfVectorizer(
                 min_df=self.min_df_absolute,
                 use_idf=self.use_idf,
-                ngram_range=(1, self.ngram_range),
+                ngram_range=(1, self.ngram_upper_bound),
             )
 
         elif self.min_df_choice == "min_df_relative":
             self.preprocessor = TfidfVectorizer(
                 min_df=self.min_df_relative,
                 use_idf=self.use_idf,
-                ngram_range=(1, self.ngram_range),
+                ngram_range=(1, self.ngram_upper_bound),
             )
 
         else:
@@ -103,9 +103,8 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         cs = ConfigurationSpace()
-        hp_ngram_range = CSH.UniformIntegerHyperparameter(
-            name="ngram_range", lower=1, upper=3, default_value=1
-        )
+        hp_ngram_upper_bound = CSH.UniformIntegerHyperparameter(name="ngram_upper_bound", lower=1,
+                                                                upper=3, default_value=1)
         hp_use_idf = CSH.CategoricalHyperparameter("use_idf", choices=[False, True])
         hp_min_df_choice = CSH.CategoricalHyperparameter(
             "min_df_choice", choices=["min_df_absolute", "min_df_relative"]
@@ -118,7 +117,7 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
         )
         cs.add_hyperparameters(
             [
-                hp_ngram_range,
+                hp_ngram_upper_bound,
                 hp_use_idf,
                 hp_min_df_choice,
                 hp_min_df_absolute,

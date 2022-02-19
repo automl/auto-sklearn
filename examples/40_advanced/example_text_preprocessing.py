@@ -1,79 +1,86 @@
 # -*- encoding: utf-8 -*-
 """
-==================
-Text Preprocessing
-==================
-This example shows, how to use text features in *auto-sklearn*. *auto-sklearn* can automatically
-encode text features if they are provided as string type in a pandas dataframe.
+==============
+Text preprocessing
+==============
 
-For processing text features you need a pandas dataframe and set the desired
-text columns to string and the categorical columns to category.
+The following example shows how to fit a simple NLP problem with
+*auto-sklearn*.
 
-*auto-sklearn* text embedding creates a bag of words count.
+For deeper insights into the field of text preprocessing you can follow these links:
+    1. https://scikit-learn.org/stable/tutorial/text_analytics/working_with_text_data.html
+    2. https://machinelearningmastery.com/clean-text-machine-learning-python/
+
+
 """
+from pprint import pprint
+
+import pandas as pd
+from sklearn.datasets import fetch_20newsgroups
 import sklearn.metrics
-import sklearn.datasets
+
 import autosklearn.classification
 
 ############################################################################
 # Data Loading
 # ============
 
-X, y = sklearn.datasets.fetch_openml(data_id=40945, return_X_y=True)
+newsgroups_train = fetch_20newsgroups(subset='train')
+newsgroups_test = fetch_20newsgroups(subset='test')
 
-# by default, the columns which should be strings are not formatted as such
-print(f"{X.info()}\n")
+# load train data
+df_train = pd.DataFrame({"X": [], "y": []})
 
-# manually convert these to string columns
-X = X.astype(
-    {
-        "name": "string",
-        "ticket": "string",
-        "cabin": "string",
-        "boat": "string",
-        "home.dest": "string",
-    }
+for idx, (text, target) in enumerate(zip(newsgroups_train.data, newsgroups_train.target)):
+    df_train = pd.concat([df_train, pd.DataFrame({"X": text,
+                                                  "y": newsgroups_train.target_names[target]},
+                                                 index=[idx])])
+
+# explicitly label text column as string
+X_train = df_train.astype({"X": "string", "y": "category"})
+y_train = X_train.pop("y")
+
+# load test data
+df_test = pd.DataFrame({"X": [], "y": []})
+
+for idx, (text, target) in enumerate(zip(newsgroups_test.data, newsgroups_test.target)):
+    df_test = pd.concat([df_train, pd.DataFrame({"X": text,
+                                                 "y": newsgroups_train.target_names[int(target)]},
+                                                index=[idx])])
+
+# explicitly label text column as string
+X_test = df_test.astype({"X": "string", "y": "category"})
+y_test = X_test.pop("y")
+
+
+############################################################################
+# Build and fit a classifier
+# ==========================
+
+automl = autosklearn.classification.AutoSklearnClassifier(
+    # set the time high enough text preprocessing can create many new features
+    time_left_for_this_task=300,
+    per_run_time_limit=30,
+    tmp_folder='/tmp/autosklearn_text_example_tmp',
 )
+automl.fit(X_train, y_train, dataset_name='20_Newsgroups')
 
-# now *auto-sklearn* handles the string columns with its text feature preprocessing pipeline
+############################################################################
+# View the models found by auto-sklearn
+# =====================================
 
-X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
-    X, y, random_state=1
-)
+print(automl.leaderboard())
 
-cls = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=30,
-    # Bellow two flags are provided to speed up calculations
-    # Not recommended for a real implementation
-    initial_configurations_via_metalearning=0,
-    smac_scenario_args={"runcount_limit": 1},
-)
+############################################################################
+# Print the final ensemble constructed by auto-sklearn
+# ====================================================
 
-cls.fit(X_train, y_train, X_test, y_test)
+pprint(automl.show_models(), indent=4)
 
-predictions = cls.predict(X_test)
-print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+###########################################################################
+# Get the Score of the final ensemble
+# ===================================
 
+predictions = automl.predict(X_test)
+print("Accuracy score:", sklearn.metrics.accuracy_score(y_test, predictions))
 
-X, y = sklearn.datasets.fetch_openml(data_id=40945, return_X_y=True, as_frame=True)
-X = X.select_dtypes(exclude=["object"])
-
-X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
-    X, y, random_state=1
-)
-
-cls = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=30,
-    # Bellow two flags are provided to speed up calculations
-    # Not recommended for a real implementation
-    initial_configurations_via_metalearning=0,
-    smac_scenario_args={"runcount_limit": 1},
-)
-
-cls.fit(X_train, y_train, X_test, y_test)
-
-predictions = cls.predict(X_test)
-print(
-    "Accuracy score without text preprocessing",
-    sklearn.metrics.accuracy_score(y_test, predictions),
-)

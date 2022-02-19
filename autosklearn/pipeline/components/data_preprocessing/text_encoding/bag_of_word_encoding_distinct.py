@@ -16,13 +16,13 @@ from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
     def __init__(
         self,
-        ngram_range: int = 1,
+        ngram_upper_bound: int = 1,
         min_df_choice: str = "min_df_absolute",
         min_df_absolute: int = 0,
         min_df_relative: float = 0.01,
         random_state: Optional[Union[int, np.random.RandomState]] = None,
     ) -> None:
-        self.ngram_range = ngram_range
+        self.ngram_upper_bound = ngram_upper_bound
         self.random_state = random_state
         self.min_df_choice = min_df_choice
         self.min_df_absolute = min_df_absolute
@@ -39,9 +39,9 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
                 self.preprocessor = {}
 
                 for feature in X.columns:
-                    vectorizer = CountVectorizer(
-                        min_df=self.min_df_absolute, ngram_range=(1, self.ngram_range)
-                    ).fit(X[feature])
+                    vectorizer = CountVectorizer(min_df=self.min_df_absolute,
+                                                 ngram_range=(1, self.ngram_upper_bound)).fit(
+                        X[feature])
                     self.preprocessor[feature] = vectorizer
 
             elif self.min_df_choice == "min_df_relative":
@@ -49,9 +49,9 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
                 self.preprocessor = {}
 
                 for feature in X.columns:
-                    vectorizer = CountVectorizer(
-                        min_df=self.min_df_relative, ngram_range=(1, self.ngram_range)
-                    ).fit(X[feature])
+                    vectorizer = CountVectorizer(min_df=self.min_df_relative,
+                                                 ngram_range=(1, self.ngram_upper_bound)).fit(
+                        X[feature])
                     self.preprocessor[feature] = vectorizer
             else:
                 raise KeyError()
@@ -102,33 +102,30 @@ class BagOfWordEncoder(AutoSklearnPreprocessingAlgorithm):
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         cs = ConfigurationSpace()
-        hp_ngram_range = CSH.UniformIntegerHyperparameter(
-            name="ngram_range", lower=1, upper=3, default_value=1
-        )
-        hp_min_df_choice_bow = CSH.CategoricalHyperparameter(
-            "min_df_choice", choices=["min_df_absolute", "min_df_relative"]
-        )
-        hp_min_df_absolute_bow = CSH.UniformIntegerHyperparameter(
-            name="min_df_absolute", lower=0, upper=10, default_value=0
-        )
-        hp_min_df_relative_bow = CSH.UniformFloatHyperparameter(
-            name="min_df_relative", lower=0.01, upper=1.0, default_value=0.01, log=True
-        )
+        hp_ngram_upper_bound = CSH.UniformIntegerHyperparameter(name="ngram_upper_bound", lower=1,
+                                                                upper=3, default_value=1)
+        hp_min_df_choice_bow = CSH.CategoricalHyperparameter("min_df_choice",
+                                                             choices=["min_df_absolute",
+                                                                      "min_df_relative"])
+        hp_min_df_absolute_bow = CSH.UniformIntegerHyperparameter(name="min_df_absolute", lower=0,
+                                                                  upper=10,
+                                                                  default_value=0)
+        hp_min_df_relative_bow = CSH.UniformFloatHyperparameter(name="min_df_relative", lower=0.01,
+                                                                upper=1.0,
+                                                                default_value=0.01, log=True)
         cs.add_hyperparameters(
             [
-                hp_ngram_range,
+                hp_ngram_upper_bound,
                 hp_min_df_choice_bow,
                 hp_min_df_absolute_bow,
                 hp_min_df_relative_bow,
             ]
         )
 
-        cond_min_df_absolute_bow = EqualsCondition(
-            hp_min_df_absolute_bow, hp_min_df_choice_bow, "min_df_absolute"
-        )
-        cond_min_df_relative_bow = EqualsCondition(
-            hp_min_df_relative_bow, hp_min_df_choice_bow, "min_df_relative"
-        )
+        cond_min_df_absolute_bow = EqualsCondition(hp_min_df_absolute_bow, hp_min_df_choice_bow,
+                                                   "min_df_absolute")
+        cond_min_df_relative_bow = EqualsCondition(hp_min_df_relative_bow, hp_min_df_choice_bow,
+                                                   "min_df_relative")
         cs.add_conditions([cond_min_df_absolute_bow, cond_min_df_relative_bow])
 
         # maybe add bigrams ...
