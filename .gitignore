@@ -1,6 +1,6 @@
 # Documentation
-docs/build/*
-docs/examples
+doc/build/*
+doc/examples
 
 *.py[cod]
 

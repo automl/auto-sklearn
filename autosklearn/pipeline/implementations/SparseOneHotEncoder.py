@@ -43,8 +43,7 @@ class SparseOneHotEncoder(BaseEstimator, TransformerMixin):
     def _check_X(self, X):
         if not sparse.issparse(X):
             raise TypeError("SparseOneHotEncoder requires X to be sparse")
-        X = check_array(X, accept_sparse='csc', force_all_finite=False,
-                        dtype=np.int32)
+        X = check_array(X, accept_sparse="csc", force_all_finite=False, dtype=np.int32)
         if X.min() < 0:
             raise ValueError("X needs to contain only non-negative integers.")
 
@@ -63,15 +62,17 @@ class SparseOneHotEncoder(BaseEstimator, TransformerMixin):
         row_indices = X.indices
         column_indices = []
         for i in range(len(X.indptr) - 1):
-            nbr = X.indptr[i+1] - X.indptr[i]
+            nbr = X.indptr[i + 1] - X.indptr[i]
             column_indices_ = [indices[i]] * nbr
-            column_indices_ += X.data[X.indptr[i]:X.indptr[i+1]]
+            column_indices_ += X.data[X.indptr[i] : X.indptr[i + 1]]
             column_indices.extend(column_indices_)
         data = np.ones(X.data.size)
 
-        out = sparse.coo_matrix((data, (row_indices, column_indices)),
-                                shape=(n_samples, indices[-1]),
-                                dtype=np.int32).tocsc()
+        out = sparse.coo_matrix(
+            (data, (row_indices, column_indices)),
+            shape=(n_samples, indices[-1]),
+            dtype=np.int32,
+        ).tocsc()
 
         mask = np.array(out.sum(axis=0)).ravel() != 0
         active_features = np.where(mask)[0]
@@ -85,9 +86,10 @@ class SparseOneHotEncoder(BaseEstimator, TransformerMixin):
         n_samples, n_features = X.shape
         indices = self.feature_indices_
         if n_features != indices.shape[0] - 1:
-            raise ValueError("X has different shape than during fitting."
-                             " Expected %d, got %d."
-                             % (indices.shape[0] - 1, n_features))
+            raise ValueError(
+                "X has different shape than during fitting."
+                " Expected %d, got %d." % (indices.shape[0] - 1, n_features)
+            )
 
         n_values_check = X.max(axis=0).toarray().flatten() + 1
 
@@ -99,7 +101,7 @@ class SparseOneHotEncoder(BaseEstimator, TransformerMixin):
             for i, n_value_check in enumerate(n_values_check):
                 if (n_value_check - 1) >= self.n_values_[i]:
                     indptr_start = X.indptr[i]
-                    indptr_end = X.indptr[i+1]
+                    indptr_end = X.indptr[i + 1]
                     zeros_mask = X.data[indptr_start:indptr_end] >= self.n_values_[i]
                     X.data[indptr_start:indptr_end][zeros_mask] = 0
 
@@ -108,13 +110,15 @@ class SparseOneHotEncoder(BaseEstimator, TransformerMixin):
         for i in range(len(X.indptr) - 1):
             nbr = X.indptr[i + 1] - X.indptr[i]
             column_indices_ = [indices[i]] * nbr
-            column_indices_ += X.data[X.indptr[i]:X.indptr[i + 1]]
+            column_indices_ += X.data[X.indptr[i] : X.indptr[i + 1]]
             column_indices.extend(column_indices_)
         data = np.ones(X.data.size)
 
-        out = sparse.coo_matrix((data, (row_indices, column_indices)),
-                                shape=(n_samples, indices[-1]),
-                                dtype=np.int32).tocsc()
+        out = sparse.coo_matrix(
+            (data, (row_indices, column_indices)),
+            shape=(n_samples, indices[-1]),
+            dtype=np.int32,
+        ).tocsc()
 
         out = out[:, self.active_features_]
         return out.tocsr()

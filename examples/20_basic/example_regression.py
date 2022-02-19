@@ -21,8 +21,9 @@ import matplotlib.pyplot as plt
 
 X, y = sklearn.datasets.load_diabetes(return_X_y=True)
 
-X_train, X_test, y_train, y_test = \
-    sklearn.model_selection.train_test_split(X, y, random_state=1)
+X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+    X, y, random_state=1
+)
 
 ###########################
 # Build and fit a regressor
@@ -31,9 +32,9 @@ X_train, X_test, y_train, y_test = \
 automl = autosklearn.regression.AutoSklearnRegressor(
     time_left_for_this_task=120,
     per_run_time_limit=30,
-    tmp_folder='/tmp/autosklearn_regression_example_tmp',
+    tmp_folder="/tmp/autosklearn_regression_example_tmp",
 )
-automl.fit(X_train, y_train, dataset_name='diabetes')
+automl.fit(X_train, y_train, dataset_name="diabetes")
 
 ############################################################################
 # View the models found by auto-sklearn
@@ -69,12 +70,12 @@ print("Test R2 score:", sklearn.metrics.r2_score(y_test, test_predictions))
 # than the true value), points above the diagonal were underestimated (predicted value is lower than
 # the true value).
 
-plt.scatter(train_predictions, y_train, label="Train samples", c='#d95f02')
-plt.scatter(test_predictions, y_test, label="Test samples", c='#7570b3')
+plt.scatter(train_predictions, y_train, label="Train samples", c="#d95f02")
+plt.scatter(test_predictions, y_test, label="Test samples", c="#7570b3")
 plt.xlabel("Predicted value")
 plt.ylabel("True value")
 plt.legend()
-plt.plot([30, 400], [30, 400], c='k', zorder=0)
+plt.plot([30, 400], [30, 400], c="k", zorder=0)
 plt.xlim([30, 400])
 plt.ylim([30, 400])
 plt.tight_layout()

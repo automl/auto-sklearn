@@ -4,7 +4,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 
 class MinorityCoalescer(BaseEstimator, TransformerMixin):
-    """ Group together categories which occurence is less than a specified
+    """Group together categories which occurence is less than a specified
     minimum fraction. Coalesced categories get index of one.
     """
 
@@ -31,7 +31,8 @@ class MinorityCoalescer(BaseEstimator, TransformerMixin):
                 indptr_start = X.indptr[column]
                 indptr_end = X.indptr[column + 1]
                 unique, counts = np.unique(
-                    X.data[indptr_start:indptr_end], return_counts=True)
+                    X.data[indptr_start:indptr_end], return_counts=True
+                )
                 colsize = indptr_end - indptr_start
             else:
                 unique, counts = np.unique(X[:, column], return_counts=True)
@@ -61,11 +62,15 @@ class MinorityCoalescer(BaseEstimator, TransformerMixin):
                         indptr_start = X.indptr[column]
                         indptr_end = X.indptr[column + 1]
                         X.data[indptr_start:indptr_end][
-                            X.data[indptr_start:indptr_end] == unique_value] = 1
+                            X.data[indptr_start:indptr_end] == unique_value
+                        ] = 1
             else:
                 unique = np.unique(X[:, column])
-                unique_values = [unique_value for unique_value in unique
-                                 if unique_value not in self.do_not_coalesce_[column]]
+                unique_values = [
+                    unique_value
+                    for unique_value in unique
+                    if unique_value not in self.do_not_coalesce_[column]
+                ]
                 mask = np.isin(X[:, column], unique_values)
                 X[mask, column] = 1
         return X

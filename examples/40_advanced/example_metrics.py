@@ -51,8 +51,9 @@ def error_wk(solution, prediction, extra_argument):
 # ============
 
 X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-X_train, X_test, y_train, y_test = \
-    sklearn.model_selection.train_test_split(X, y, random_state=1)
+X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+    X, y, random_state=1
+)
 
 ############################################################################
 # Print a list of available metrics
@@ -68,7 +69,7 @@ print("\t*" + "\n\t*".join(autosklearn.metrics.REGRESSION_METRICS))
 # First example: Use predefined accuracy metric
 # =============================================
 
-print("#"*80)
+print("#" * 80)
 print("Use predefined accuracy metric")
 cls = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=60,
@@ -87,7 +88,7 @@ print(f"Accuracy score {score:.3f} using {metric_name}")
 # Second example: Use own accuracy metric
 # =======================================
 
-print("#"*80)
+print("#" * 80)
 print("Use self defined accuracy metric")
 accuracy_scorer = autosklearn.metrics.make_scorer(
     name="accu",
@@ -114,15 +115,15 @@ print(f"Accuracy score {score:.3f} using {metric_name:s}")
 # Third example: Use own error metric
 # ===================================
 
-print("#"*80)
+print("#" * 80)
 print("Use self defined error metric")
 error_rate = autosklearn.metrics.make_scorer(
-    name='error',
+    name="error",
     score_func=error,
     optimum=0,
     greater_is_better=False,
     needs_proba=False,
-    needs_threshold=False
+    needs_threshold=False,
 )
 cls = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=60,
@@ -141,7 +142,7 @@ print(f"Error score {score:.3f} using {metric_name:s}")
 # Fourth example: Use own accuracy metric with additional argument
 # ================================================================
 
-print("#"*80)
+print("#" * 80)
 print("Use self defined accuracy with additional argument")
 accuracy_scorer = autosklearn.metrics.make_scorer(
     name="accu_add",
@@ -153,10 +154,7 @@ accuracy_scorer = autosklearn.metrics.make_scorer(
     extra_argument=None,
 )
 cls = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=60,
-    per_run_time_limit=30,
-    seed=1,
-    metric=accuracy_scorer
+    time_left_for_this_task=60, per_run_time_limit=30, seed=1, metric=accuracy_scorer
 )
 cls.fit(X_train, y_train)
 
@@ -169,7 +167,7 @@ print(f"Accuracy score {score:.3f} using {metric_name:s}")
 # Fifth example: Use own accuracy metric with additional argument
 # ===============================================================
 
-print("#"*80)
+print("#" * 80)
 print("Use self defined error with additional argument")
 error_rate = autosklearn.metrics.make_scorer(
     name="error_add",

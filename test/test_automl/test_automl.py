@@ -1,10 +1,11 @@
 # -*- encoding: utf-8 -*-
+from typing import Dict, List, Union
+
+import glob
 import itertools
 import os
 import pickle
-import sys
 import time
-import glob
 import unittest
 import unittest.mock
 import warnings
@@ -12,51 +13,61 @@ import warnings
 import numpy as np
 import pandas as pd
 import pytest
-from scipy.sparse import csr_matrix
 import sklearn.datasets
-from sklearn.ensemble import VotingRegressor, VotingClassifier
-from smac.scenario.scenario import Scenario
+from scipy.sparse import csr_matrix, spmatrix
+from sklearn.ensemble import VotingClassifier, VotingRegressor
 from smac.facade.roar_facade import ROAR
-
-from autosklearn.automl import AutoML, AutoMLClassifier, AutoMLRegressor, _model_predict
-from autosklearn.data.validation import InputValidator
-import autosklearn.automl
-from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.metrics import (
-    accuracy, log_loss, balanced_accuracy, default_metric_for_task
-)
-from autosklearn.evaluation.abstract_evaluator import MyDummyClassifier, MyDummyRegressor
-from autosklearn.util.logging_ import PickableLoggerAdapter
-import autosklearn.pipeline.util as putil
-from autosklearn.constants import (
-    MULTICLASS_CLASSIFICATION,
-    BINARY_CLASSIFICATION,
-    MULTILABEL_CLASSIFICATION,
-    REGRESSION,
-    MULTIOUTPUT_REGRESSION,
-    CLASSIFICATION_TASKS,
-    REGRESSION_TASKS,
-)
+from smac.scenario.scenario import Scenario
 from smac.tae import StatusType
 
-sys.path.append(os.path.dirname(__file__))
-from automl_utils import print_debug_information, count_succeses, AutoMLLogParser, includes_all_scores, includes_train_scores, performance_over_time_is_plausible  # noqa (E402: module level import not at top of file)
+import autosklearn.automl
+import autosklearn.pipeline.util as putil
+from autosklearn.automl import AutoML, AutoMLClassifier, AutoMLRegressor, _model_predict
+from autosklearn.constants import (
+    BINARY_CLASSIFICATION,
+    CLASSIFICATION_TASKS,
+    MULTICLASS_CLASSIFICATION,
+    MULTILABEL_CLASSIFICATION,
+    MULTIOUTPUT_REGRESSION,
+    REGRESSION,
+)
+from autosklearn.data.validation import InputValidator
+from autosklearn.data.xy_data_manager import XYDataManager
+from autosklearn.evaluation.abstract_evaluator import (
+    MyDummyClassifier,
+    MyDummyRegressor,
+)
+from autosklearn.metrics import (
+    accuracy,
+    balanced_accuracy,
+    default_metric_for_task,
+    log_loss,
+)
+from autosklearn.util.data import default_dataset_compression_arg
+from autosklearn.util.logging_ import PickableLoggerAdapter
+
+from test.test_automl.automl_utils import (
+    AutoMLLogParser,
+    count_succeses,
+    includes_train_scores,
+    performance_over_time_is_plausible,
+    print_debug_information,
+)
 
 
 class AutoMLStub(AutoML):
-    def __init__(self):
-        self.__class__ = AutoML
+    def __init__(self, classifier: bool = False):
         self._task = None
         self._dask_client = None
         self._is_dask_client_internally_created = False
+        self._classifier = classifier
 
     def __del__(self):
         pass
 
 
 def test_fit(dask_client):
-
-    X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+    X_train, Y_train, X_test, Y_test = putil.get_dataset("iris")
     automl = autosklearn.automl.AutoML(
         seed=0,
         time_left_for_this_task=30,
@@ -77,15 +88,51 @@ def test_fit(dask_client):
     del automl
 
 
+def test_ensemble_size_zero():
+    """Test if automl.fit_ensemble raises error when ensemble_size == 0"""
+    X_train, Y_train, X_test, Y_test = putil.get_dataset("iris")
+    automl = autosklearn.automl.AutoML(
+        seed=0,
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        metric=accuracy,
+        ensemble_size=0,
+    )
+    automl.fit(X_train, Y_train, task=MULTICLASS_CLASSIFICATION)
+    with pytest.raises(ValueError):
+        automl.fit_ensemble(Y_test, ensemble_size=0)
+
+
+def test_empty_dict_in_show_models():
+    """Test if show_models() returns empty dictionary when ensemble_size == 0"""
+    X_train, Y_train, X_test, Y_test = putil.get_dataset("iris")
+    automl = autosklearn.automl.AutoMLClassifier(
+        seed=0,
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        metric=accuracy,
+        ensemble_size=0,
+    )
+    automl.fit(X_train, Y_train)
+    assert automl.show_models() == {}
+
+
+def test_fitted_models_in_show_models():
+    X_train, Y_train, X_test, Y_test = putil.get_dataset("iris")
+    automl = autosklearn.automl.AutoMLClassifier(
+        seed=0,
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        metric=accuracy,
+        ensemble_size=0,
+    )
+    with pytest.raises(RuntimeError, match="AutoSklearn has not been fitted"):
+        automl.show_models()
+
+
 def test_fit_roar(dask_client_single_worker):
     def get_roar_object_callback(
-            scenario_dict,
-            seed,
-            ta,
-            ta_kwargs,
-            dask_client,
-            n_jobs,
-            **kwargs
+        scenario_dict, seed, ta, ta_kwargs, dask_client, n_jobs, **kwargs
     ):
         """Random online adaptive racing.
 
@@ -100,7 +147,7 @@ def test_fit_roar(dask_client_single_worker):
             n_jobs=n_jobs,
         )
 
-    X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+    X_train, Y_train, X_test, Y_test = putil.get_dataset("iris")
     automl = autosklearn.automl.AutoML(
         time_left_for_this_task=30,
         per_run_time_limit=5,
@@ -125,8 +172,7 @@ def test_refit_shuffle_on_fail(dask_client):
 
     failing_model = unittest.mock.Mock()
     failing_model.fit.side_effect = [ValueError(), ValueError(), None]
-    failing_model.fit_transformer.side_effect = [
-        ValueError(), ValueError(), (None, {})]
+    failing_model.fit_transformer.side_effect = [ValueError(), ValueError(), (None, {})]
     failing_model.get_max_iter.return_value = 100
 
     auto = AutoML(30, 5, dask_client=dask_client)
@@ -134,7 +180,7 @@ def test_refit_shuffle_on_fail(dask_client):
     ensemble_mock.get_selected_model_identifiers.return_value = [(1, 1, 50.0)]
     auto.ensemble_ = ensemble_mock
     auto.InputValidator = InputValidator()
-    for budget_type in [None, 'iterations']:
+    for budget_type in [None, "iterations"]:
         auto._budget_type = budget_type
 
         auto.models_ = {(1, 1, 50.0): failing_model}
@@ -152,12 +198,11 @@ def test_refit_shuffle_on_fail(dask_client):
 
 
 def test_only_loads_ensemble_models(automl_stub):
-
     def side_effect(ids, *args, **kwargs):
         return models if ids is identifiers else {}
 
     # Add a resampling strategy as this is required by load_models
-    automl_stub._resampling_strategy = 'holdout'
+    automl_stub._resampling_strategy = "holdout"
     identifiers = [(1, 2), (3, 4)]
 
     models = [42]
@@ -170,7 +215,7 @@ def test_only_loads_ensemble_models(automl_stub):
     assert models == automl_stub.models_
     assert automl_stub.cv_models_ is None
 
-    automl_stub._resampling_strategy = 'cv'
+    automl_stub._resampling_strategy = "cv"
 
     models = [42]
     automl_stub._backend.load_cv_models_by_identifiers.side_effect = side_effect
@@ -191,7 +236,7 @@ def test_check_for_models_if_no_ensemble(automl_stub):
 def test_raises_if_no_models(automl_stub):
     automl_stub._backend.load_ensemble.return_value = None
     automl_stub._backend.list_all_models.return_value = []
-    automl_stub._resampling_strategy = 'holdout'
+    automl_stub._resampling_strategy = "holdout"
 
     automl_stub._disable_evaluator_output = False
     with pytest.raises(ValueError):
@@ -204,7 +249,7 @@ def test_raises_if_no_models(automl_stub):
 def test_delete_non_candidate_models(dask_client):
 
     seed = 555
-    X, Y, _, _ = putil.get_dataset('iris')
+    X, Y, _, _ = putil.get_dataset("iris")
     automl = autosklearn.automl.AutoML(
         delete_tmp_folder_after_terminate=False,
         time_left_for_this_task=60,
@@ -212,11 +257,8 @@ def test_delete_non_candidate_models(dask_client):
         ensemble_nbest=3,
         seed=seed,
         initial_configurations_via_metalearning=0,
-        resampling_strategy='holdout',
-        include={
-            'classifier': ['sgd'],
-            'feature_preprocessor': ['no_preprocessing']
-        },
+        resampling_strategy="holdout",
+        include={"classifier": ["sgd"], "feature_preprocessor": ["no_preprocessing"]},
         metric=accuracy,
         dask_client=dask_client,
         # Force model to be deleted. That is, from 50 which is the
@@ -228,23 +270,31 @@ def test_delete_non_candidate_models(dask_client):
 
     # Assert at least one model file has been deleted and that there were no
     # deletion errors
-    log_file_path = glob.glob(os.path.join(
-        automl._backend.temporary_directory, 'AutoML(' + str(seed) + '):*.log'))
+    log_file_path = glob.glob(
+        os.path.join(
+            automl._backend.temporary_directory, "AutoML(" + str(seed) + "):*.log"
+        )
+    )
     with open(log_file_path[0]) as log_file:
         log_content = log_file.read()
-        assert 'Deleted files of non-candidate model' in log_content, log_content
-        assert 'Failed to delete files of non-candidate model' not in log_content, log_content
-        assert 'Failed to lock model' not in log_content, log_content
+        assert "Deleted files of non-candidate model" in log_content, log_content
+        assert (
+            "Failed to delete files of non-candidate model" not in log_content
+        ), log_content
+        assert "Failed to lock model" not in log_content, log_content
 
     # Assert that the files of the models used by the ensemble weren't deleted
     model_files = automl._backend.list_all_models(seed=seed)
     model_files_idx = set()
     for m_file in model_files:
         # Extract the model identifiers from the filename
-        m_file = os.path.split(m_file)[1].replace('.model', '').split('.', 2)
+        m_file = os.path.split(m_file)[1].replace(".model", "").split(".", 2)
         model_files_idx.add((int(m_file[0]), int(m_file[1]), float(m_file[2])))
     ensemble_members_idx = set(automl.ensemble_.identifiers_)
-    assert ensemble_members_idx.issubset(model_files_idx), (ensemble_members_idx, model_files_idx)
+    assert ensemble_members_idx.issubset(model_files_idx), (
+        ensemble_members_idx,
+        model_files_idx,
+    )
 
     del automl
 
@@ -256,17 +306,23 @@ def test_binary_score_and_include(dask_client):
     """
 
     data = sklearn.datasets.make_classification(
-        n_samples=400, n_features=10, n_redundant=1, n_informative=3,
-        n_repeated=1, n_clusters_per_class=2, random_state=1)
+        n_samples=400,
+        n_features=10,
+        n_redundant=1,
+        n_informative=3,
+        n_repeated=1,
+        n_clusters_per_class=2,
+        random_state=1,
+    )
     X_train = data[0][:200]
     Y_train = data[1][:200]
     X_test = data[0][200:]
     Y_test = data[1][200:]
 
     automl = autosklearn.automl.AutoML(
-        20, 5,
-        include={'classifier': ['sgd'],
-                 'feature_preprocessor': ['no_preprocessing']},
+        20,
+        5,
+        include={"classifier": ["sgd"], "feature_preprocessor": ["no_preprocessing"]},
         metric=accuracy,
         dask_client=dask_client,
     )
@@ -285,10 +341,11 @@ def test_binary_score_and_include(dask_client):
 
 def test_automl_outputs(dask_client):
 
-    X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-    name = 'iris'
+    X_train, Y_train, X_test, Y_test = putil.get_dataset("iris")
+    name = "iris"
     auto = autosklearn.automl.AutoML(
-        30, 5,
+        30,
+        5,
         initial_configurations_via_metalearning=0,
         seed=100,
         metric=accuracy,
@@ -306,59 +363,70 @@ def test_automl_outputs(dask_client):
     )
 
     data_manager_file = os.path.join(
-        auto._backend.temporary_directory,
-        '.auto-sklearn',
-        'datamanager.pkl'
+        auto._backend.temporary_directory, ".auto-sklearn", "datamanager.pkl"
     )
 
     # pickled data manager (without one hot encoding!)
-    with open(data_manager_file, 'rb') as fh:
+    with open(data_manager_file, "rb") as fh:
         D = pickle.load(fh)
-        assert np.allclose(D.data['X_train'], X_train)
+        assert np.allclose(D.data["X_train"], X_train)
 
     # Check that all directories are there
     fixture = [
-        'true_targets_ensemble.npy',
-        'start_time_100',
-        'datamanager.pkl',
-        'ensemble_read_preds.pkl',
-        'ensemble_read_losses.pkl',
-        'runs',
-        'ensembles',
-        'ensemble_history.json',
+        "true_targets_ensemble.npy",
+        "start_time_100",
+        "datamanager.pkl",
+        "ensemble_read_preds.pkl",
+        "ensemble_read_losses.pkl",
+        "runs",
+        "ensembles",
+        "ensemble_history.json",
     ]
-    assert (
-        sorted(os.listdir(os.path.join(auto._backend.temporary_directory,
-                                       '.auto-sklearn')))
-        == sorted(fixture)
-    )
+    assert sorted(
+        os.listdir(os.path.join(auto._backend.temporary_directory, ".auto-sklearn"))
+    ) == sorted(fixture)
 
     # At least one ensemble, one validation, one test prediction and one
     # model and one ensemble
-    fixture = glob.glob(os.path.join(
-        auto._backend.temporary_directory,
-        '.auto-sklearn', 'runs', '*', 'predictions_ensemble*npy',
-    ))
+    fixture = glob.glob(
+        os.path.join(
+            auto._backend.temporary_directory,
+            ".auto-sklearn",
+            "runs",
+            "*",
+            "predictions_ensemble*npy",
+        )
+    )
     assert len(fixture) > 0
 
-    fixture = glob.glob(os.path.join(auto._backend.temporary_directory, '.auto-sklearn',
-                                     'runs', '*', '100.*.model'))
+    fixture = glob.glob(
+        os.path.join(
+            auto._backend.temporary_directory,
+            ".auto-sklearn",
+            "runs",
+            "*",
+            "100.*.model",
+        )
+    )
     assert len(fixture) > 0
 
-    fixture = os.listdir(os.path.join(auto._backend.temporary_directory,
-                                      '.auto-sklearn', 'ensembles'))
-    assert '100.0000000000.ensemble' in fixture
+    fixture = os.listdir(
+        os.path.join(auto._backend.temporary_directory, ".auto-sklearn", "ensembles")
+    )
+    assert "100.0000000000.ensemble" in fixture
 
     # Start time
-    start_time_file_path = os.path.join(auto._backend.temporary_directory,
-                                        '.auto-sklearn', "start_time_100")
-    with open(start_time_file_path, 'r') as fh:
+    start_time_file_path = os.path.join(
+        auto._backend.temporary_directory, ".auto-sklearn", "start_time_100"
+    )
+    with open(start_time_file_path, "r") as fh:
         start_time = float(fh.read())
     assert time.time() - start_time >= 10, print_debug_information(auto)
 
     # Then check that the logger matches the run expectation
-    logfile = glob.glob(os.path.join(
-           auto._backend.temporary_directory, 'AutoML*.log'))[0]
+    logfile = glob.glob(os.path.join(auto._backend.temporary_directory, "AutoML*.log"))[
+        0
+    ]
     parser = AutoMLLogParser(logfile)
 
     # The number of ensemble trajectories properly in log file
@@ -380,42 +448,61 @@ def test_automl_outputs(dask_client):
     # Dummy not in run history
     total_calls_to_pynisher_log = parser.count_tae_pynisher_calls() - 1
     total_returns_from_pynisher_log = parser.count_tae_pynisher_returns() - 1
-    total_elements_rh = len([run_value for run_value in auto.runhistory_.data.values(
-    ) if run_value.status == StatusType.RUNNING])
+    total_elements_rh = len(
+        [
+            run_value
+            for run_value in auto.runhistory_.data.values()
+            if run_value.status == StatusType.RUNNING
+        ]
+    )
 
     # Make sure we register all calls to pynisher
     # The less than or equal here is added as a WA as
     # https://github.com/automl/SMAC3/pull/712 is not yet integrated
-    assert total_elements_rh <= total_calls_to_pynisher_log, print_debug_information(auto)
+    assert total_elements_rh <= total_calls_to_pynisher_log, print_debug_information(
+        auto
+    )
 
     # Make sure we register all returns from pynisher
-    assert total_elements_rh <= total_returns_from_pynisher_log, print_debug_information(auto)
+    assert (
+        total_elements_rh <= total_returns_from_pynisher_log
+    ), print_debug_information(auto)
 
     # Lastly check that settings are print to logfile
-    ensemble_size = parser.get_automl_setting_from_log(auto._dataset_name, 'ensemble_size')
+    ensemble_size = parser.get_automl_setting_from_log(
+        auto._dataset_name, "ensemble_size"
+    )
     assert auto._ensemble_size == int(ensemble_size)
 
     del auto
 
 
-@pytest.mark.parametrize("datasets", [('breast_cancer', BINARY_CLASSIFICATION),
-                                      ('wine', MULTICLASS_CLASSIFICATION),
-                                      ('diabetes', REGRESSION)])
+@pytest.mark.parametrize(
+    "datasets",
+    [
+        ("breast_cancer", BINARY_CLASSIFICATION),
+        ("wine", MULTICLASS_CLASSIFICATION),
+        ("diabetes", REGRESSION),
+    ],
+)
 def test_do_dummy_prediction(dask_client, datasets):
 
     name, task = datasets
 
     X_train, Y_train, X_test, Y_test = putil.get_dataset(name)
     datamanager = XYDataManager(
-        X_train, Y_train,
-        X_test, Y_test,
+        X_train,
+        Y_train,
+        X_test,
+        Y_test,
         task=task,
         dataset_name=name,
-        feat_type={i: 'numerical' for i in range(X_train.shape[1])},
+        feat_type={i: "numerical" for i in range(X_train.shape[1])},
     )
 
     auto = autosklearn.automl.AutoML(
-        20, 5,
+        20,
+        5,
         initial_configurations_via_metalearning=25,
         metric=accuracy,
         dask_client=dask_client,
@@ -432,18 +519,18 @@ def test_do_dummy_prediction(dask_client, datasets):
     D = auto._backend.load_datamanager()
 
     # Check if data manager is correcly loaded
-    assert D.info['task'] == datamanager.info['task']
+    assert D.info["task"] == datamanager.info["task"]
     auto._do_dummy_prediction(D, 1)
 
     # Ensure that the dummy predictions are not in the current working
     # directory, but in the temporary directory.
-    unexpected_directory = os.path.join(os.getcwd(), '.auto-sklearn')
+    unexpected_directory = os.path.join(os.getcwd(), ".auto-sklearn")
     expected_directory = os.path.join(
         auto._backend.temporary_directory,
-        '.auto-sklearn',
-        'runs',
-        '1_1_0.0',
-        'predictions_ensemble_1_1_0.0.npy'
+        ".auto-sklearn",
+        "runs",
+        "1_1_0.0",
+        "predictions_ensemble_1_1_0.0.npy",
     )
     assert not os.path.exists(unexpected_directory)
     assert os.path.exists(expected_directory)
@@ -453,27 +540,30 @@ def test_do_dummy_prediction(dask_client, datasets):
     del auto
 
 
-@unittest.mock.patch('autosklearn.evaluation.ExecuteTaFuncWithQueue.run')
+@unittest.mock.patch("autosklearn.evaluation.ExecuteTaFuncWithQueue.run")
 def test_fail_if_dummy_prediction_fails(ta_run_mock, dask_client):
 
-    X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+    X_train, Y_train, X_test, Y_test = putil.get_dataset("iris")
     datamanager = XYDataManager(
-        X_train, Y_train,
-        X_test, Y_test,
+        X_train,
+        Y_train,
+        X_test,
+        Y_test,
         task=2,
-        feat_type={i: 'Numerical' for i in range(X_train.shape[1])},
-        dataset_name='iris',
+        feat_type={i: "Numerical" for i in range(X_train.shape[1])},
+        dataset_name="iris",
     )
 
     time_for_this_task = 30
     per_run_time = 10
-    auto = autosklearn.automl.AutoML(time_for_this_task,
-                                     per_run_time,
-                                     initial_configurations_via_metalearning=25,
-                                     metric=accuracy,
-                                     dask_client=dask_client,
-                                     delete_tmp_folder_after_terminate=False,
-                                     )
+    auto = autosklearn.automl.AutoML(
+        time_for_this_task,
+        per_run_time,
+        initial_configurations_via_metalearning=25,
+        metric=accuracy,
+        dask_client=dask_client,
+        delete_tmp_folder_after_terminate=False,
+    )
     auto._backend = auto._create_backend()
     auto._backend._make_internals_directory()
     auto._backend.save_datamanager(datamanager)
@@ -496,55 +586,55 @@ def test_fail_if_dummy_prediction_fails(ta_run_mock, dask_client):
         auto._do_dummy_prediction(datamanager, 1)
     except ValueError:
         raised = True
-    assert not raised, 'Exception raised'
+    assert not raised, "Exception raised"
 
     # Case 2. Check that if statustype returned by ta.run() != success,
     # the function raises error.
     ta_run_mock.return_value = StatusType.CRASHED, None, None, {}
     with pytest.raises(
         ValueError,
-        match='Dummy prediction failed with run state StatusType.CRASHED and additional output: {}.'  # noqa
+        match="Dummy prediction failed with run state StatusType.CRASHED and additional output: {}.",  # noqa
     ):
         auto._do_dummy_prediction(datamanager, 1)
 
     ta_run_mock.return_value = StatusType.ABORT, None, None, {}
     with pytest.raises(
         ValueError,
-        match='Dummy prediction failed with run state StatusType.ABORT '
-              'and additional output: {}.',
+        match="Dummy prediction failed with run state StatusType.ABORT "
+        "and additional output: {}.",
     ):
         auto._do_dummy_prediction(datamanager, 1)
     ta_run_mock.return_value = StatusType.TIMEOUT, None, None, {}
     with pytest.raises(
         ValueError,
-        match='Dummy prediction failed with run state StatusType.TIMEOUT '
-              'and additional output: {}.'
+        match="Dummy prediction failed with run state StatusType.TIMEOUT "
+        "and additional output: {}.",
     ):
         auto._do_dummy_prediction(datamanager, 1)
     ta_run_mock.return_value = StatusType.MEMOUT, None, None, {}
     with pytest.raises(
         ValueError,
-        match='Dummy prediction failed with run state StatusType.MEMOUT '
-              'and additional output: {}.',
+        match="Dummy prediction failed with run state StatusType.MEMOUT "
+        "and additional output: {}.",
     ):
         auto._do_dummy_prediction(datamanager, 1)
     ta_run_mock.return_value = StatusType.CAPPED, None, None, {}
     with pytest.raises(
         ValueError,
-        match='Dummy prediction failed with run state StatusType.CAPPED '
-              'and additional output: {}.'
+        match="Dummy prediction failed with run state StatusType.CAPPED "
+        "and additional output: {}.",
     ):
         auto._do_dummy_prediction(datamanager, 1)
 
-    ta_run_mock.return_value = StatusType.CRASHED, None, None, {'exitcode': -6}
+    ta_run_mock.return_value = StatusType.CRASHED, None, None, {"exitcode": -6}
     with pytest.raises(
         ValueError,
-        match='The error suggests that the provided memory limits were too tight.',
+        match="The error suggests that the provided memory limits are too tight.",
     ):
         auto._do_dummy_prediction(datamanager, 1)
 
 
-@unittest.mock.patch('autosklearn.smbo.AutoMLSMBO.run_smbo')
+@unittest.mock.patch("autosklearn.smbo.AutoMLSMBO.run_smbo")
 def test_exceptions_inside_log_in_smbo(smbo_run_mock, dask_client):
 
     # Below importing and shutdown is a workaround, to make sure
@@ -552,6 +642,7 @@ def test_exceptions_inside_log_in_smbo(smbo_run_mock, dask_client):
     # this test with multiple other test at the same time causes this
     # test to fail. This resets the singletons of the logging class
     import logging
+
     logging.shutdown()
 
     automl = autosklearn.automl.AutoML(
@@ -562,15 +653,15 @@ def test_exceptions_inside_log_in_smbo(smbo_run_mock, dask_client):
         delete_tmp_folder_after_terminate=False,
     )
 
-    dataset_name = 'test_exceptions_inside_log'
+    dataset_name = "test_exceptions_inside_log"
 
     # Create a custom exception to prevent other errors to slip in
     class MyException(Exception):
         pass
 
-    X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+    X_train, Y_train, X_test, Y_test = putil.get_dataset("iris")
     # The first call is on dummy predictor failure
-    message = str(np.random.randint(100)) + '_run_smbo'
+    message = str(np.random.randint(100)) + "_run_smbo"
     smbo_run_mock.side_effect = MyException(message)
 
     with pytest.raises(MyException):
@@ -582,10 +673,12 @@ def test_exceptions_inside_log_in_smbo(smbo_run_mock, dask_client):
         )
 
     # make sure that the logfile was created
-    logger_name = 'AutoML(%d):%s' % (1, dataset_name)
+    logger_name = "AutoML(%d):%s" % (1, dataset_name)
     logger = logging.getLogger(logger_name)
-    logfile = os.path.join(automl._backend.temporary_directory, logger_name + '.log')
-    assert os.path.exists(logfile), print_debug_information(automl) + str(automl._clean_logger())
+    logfile = os.path.join(automl._backend.temporary_directory, logger_name + ".log")
+    assert os.path.exists(logfile), print_debug_information(automl) + str(
+        automl._clean_logger()
+    )
 
     # Give some time for the error message to be printed in the
     # log file
@@ -603,19 +696,21 @@ def test_exceptions_inside_log_in_smbo(smbo_run_mock, dask_client):
     automl._clean_logger()
 
     if not found_message:
-        pytest.fail("Did not find {} in the log file {} for logger {}/{}/{}".format(
-            message,
-            print_debug_information(automl),
-            vars(automl._logger.logger),
-            vars(logger),
-            vars(logging.getLogger())
-        ))
+        pytest.fail(
+            "Did not find {} in the log file {} for logger {}/{}/{}".format(
+                message,
+                print_debug_information(automl),
+                vars(automl._logger.logger),
+                vars(logger),
+                vars(logging.getLogger()),
+            )
+        )
 
 
 @pytest.mark.parametrize("metric", [log_loss, balanced_accuracy])
 def test_load_best_individual_model(metric, dask_client):
 
-    X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+    X_train, Y_train, X_test, Y_test = putil.get_dataset("iris")
     automl = autosklearn.automl.AutoML(
         time_left_for_this_task=30,
         per_run_time_limit=5,
@@ -644,9 +739,9 @@ def test_load_best_individual_model(metric, dask_client):
     assert get_models_with_weights[0][0] == 1.0
 
     # Match a toy dataset
-    if metric.name == 'balanced_accuracy':
+    if metric.name == "balanced_accuracy":
         assert automl.score(X_test, Y_test) > 0.9
-    elif metric.name == 'log_loss':
+    elif metric.name == "log_loss":
         # Seen values in github actions of 0.6978304740364537
         assert automl.score(X_test, Y_test) < 0.7
     else:
@@ -666,87 +761,19 @@ def test_fail_if_feat_type_on_pandas_input(dask_client):
         dask_client=dask_client,
     )
 
-    X_train = pd.DataFrame({'a': [1, 1], 'c': [1, 2]})
+    X_train = pd.DataFrame({"a": [1, 1], "c": [1, 2]})
     y_train = [1, 0]
-    with pytest.raises(
-        ValueError,
-        match=""
-        "providing the option feat_type to the fit method is not supported when using a Dataframe"
-    ):
+    msg = (
+        "providing the option feat_type to the fit method is not supported"
+        " when using a Dataframe."
+    )
+    with pytest.raises(ValueError, match=msg):
         automl.fit(
-            X_train, y_train,
+            X_train,
+            y_train,
             task=BINARY_CLASSIFICATION,
-            feat_type={1: 'Categorical', 2: 'Numerical'},
+            feat_type={1: "Categorical", 2: "Numerical"},
         )
-
-
-@pytest.mark.parametrize(
-    'memory_limit,precision,task',
-    [
-        (memory_limit, precision, task)
-        for task in itertools.chain(CLASSIFICATION_TASKS, REGRESSION_TASKS)
-        for precision in (float, np.float32, np.float64, np.float128)
-        for memory_limit in (1, 100, None)
-    ]
-)
-def test_subsample_if_too_large(memory_limit, precision, task):
-    fixture = {
-        BINARY_CLASSIFICATION: {
-            1: {float: 1310, np.float32: 2621, np.float64: 1310, np.float128: 655},
-            100: {float: 12000, np.float32: 12000, np.float64: 12000, np.float128: 12000},
-            None: {float: 12000, np.float32: 12000, np.float64: 12000, np.float128: 12000},
-        },
-        MULTICLASS_CLASSIFICATION: {
-            1: {float: 204, np.float32: 409, np.float64: 204, np.float128: 102},
-            100: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
-            None: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
-        },
-        MULTILABEL_CLASSIFICATION: {
-            1: {float: 204, np.float32: 409, np.float64: 204, np.float128: 102},
-            100: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
-            None: {float: 1797, np.float32: 1797, np.float64: 1797, np.float128: 1797},
-        },
-        REGRESSION: {
-            1: {float: 655, np.float32: 1310, np.float64: 655, np.float128: 327},
-            100: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
-            None: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
-        },
-        MULTIOUTPUT_REGRESSION: {
-            1: {float: 655, np.float32: 1310, np.float64: 655, np.float128: 327},
-            100: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
-            None: {float: 5000, np.float32: 5000, np.float64: 5000, np.float128: 5000},
-        }
-    }
-    mock = unittest.mock.Mock()
-    if task == BINARY_CLASSIFICATION:
-        X, y = sklearn.datasets.make_hastie_10_2()
-    elif task == MULTICLASS_CLASSIFICATION:
-        X, y = sklearn.datasets.load_digits(return_X_y=True)
-    elif task == MULTILABEL_CLASSIFICATION:
-        X, y_ = sklearn.datasets.load_digits(return_X_y=True)
-        y = np.zeros((X.shape[0], 10))
-        for i, j in enumerate(y_):
-            y[i, j] = 1
-    elif task == REGRESSION:
-        X, y = sklearn.datasets.make_friedman1(n_samples=5000, n_features=20)
-    elif task == MULTIOUTPUT_REGRESSION:
-        X, y = sklearn.datasets.make_friedman1(n_samples=5000, n_features=20)
-        y = np.vstack((y, y)).transpose()
-    else:
-        raise ValueError(task)
-    X = X.astype(precision)
-
-    assert X.shape[0] == y.shape[0]
-
-    X_new, y_new = AutoML.subsample_if_too_large(X, y, mock, 1, memory_limit, task)
-    assert X_new.shape[0] == fixture[task][memory_limit][precision]
-    if memory_limit == 1:
-        if precision in (np.float128, np.float64, float):
-            assert mock.warning.call_count == 2
-        else:
-            assert mock.warning.call_count == 1
-    else:
-        assert mock.warning.call_count == 0
 
 
 def data_input_and_target_types():
@@ -754,7 +781,7 @@ def data_input_and_target_types():
 
     # Create valid inputs
     X_ndarray = np.random.random(size=(n_rows, 5))
-    X_ndarray[X_ndarray < .9] = 0
+    X_ndarray[X_ndarray < 0.9] = 0
 
     # Binary Classificaiton
     y_binary_ndarray = np.random.random(size=n_rows)
@@ -764,7 +791,9 @@ def data_input_and_target_types():
     # Multiclass classification
     y_multiclass_ndarray = np.random.random(size=n_rows)
     y_multiclass_ndarray[y_multiclass_ndarray > 0.66] = 2
-    y_multiclass_ndarray[(y_multiclass_ndarray <= 0.66) & (y_multiclass_ndarray >= 0.33)] = 1
+    y_multiclass_ndarray[
+        (y_multiclass_ndarray <= 0.66) & (y_multiclass_ndarray >= 0.33)
+    ] = 1
     y_multiclass_ndarray[y_multiclass_ndarray < 0.33] = 0
 
     # Multilabel classificaiton
@@ -857,11 +886,7 @@ def test_input_and_target_types(dask_client, X, y, X_test, y_test, task):
     # To save time fitting and only validate the inputs we only return
     # the configuration space
     automl.fit(
-        X=X,
-        y=y,
-        X_test=X_test,
-        y_test=y_test,
-        only_return_configuration_space=True
+        X=X, y=y, X_test=X_test, y_test=y_test, only_return_configuration_space=True
     )
     assert automl._task == task
     assert automl._metric.name == default_metric_for_task[task].name
@@ -869,21 +894,15 @@ def test_input_and_target_types(dask_client, X, y, X_test, y_test, task):
 
 def data_test_model_predict_outsputs_correct_shapes():
     datasets = sklearn.datasets
-    binary = datasets.make_classification(
-        n_samples=5, n_classes=2, random_state=0
-    )
+    binary = datasets.make_classification(n_samples=5, n_classes=2, random_state=0)
     multiclass = datasets.make_classification(
         n_samples=5, n_informative=3, n_classes=3, random_state=0
     )
     multilabel = datasets.make_multilabel_classification(
         n_samples=5, n_classes=3, random_state=0
     )
-    regression = datasets.make_regression(
-        n_samples=5, random_state=0
-    )
-    multioutput = datasets.make_regression(
-        n_samples=5, n_targets=3, random_state=0
-    )
+    regression = datasets.make_regression(n_samples=5, random_state=0)
+    multioutput = datasets.make_regression(n_samples=5, n_targets=3, random_state=0)
 
     # TODO issue 1169
     #   While testing output shapes, realised all models are wrapped to provide
@@ -909,17 +928,15 @@ def data_test_model_predict_outsputs_correct_shapes():
     # How cross validation models are currently grouped together
     def voting_classifier(X, y):
         classifiers = [
-            MyDummyClassifier(config=1, random_state=0).fit(X, y)
-            for _ in range(5)
+            MyDummyClassifier(config=1, random_state=0).fit(X, y) for _ in range(5)
         ]
-        vc = VotingClassifier(estimators=None, voting='soft')
+        vc = VotingClassifier(estimators=None, voting="soft")
         vc.estimators_ = classifiers
         return vc
 
     def voting_regressor(X, y):
         regressors = [
-            MyDummyRegressor(config=1, random_state=0).fit(X, y)
-            for _ in range(5)
+            MyDummyRegressor(config=1, random_state=0).fit(X, y) for _ in range(5)
         ]
         vr = VotingRegressor(estimators=None)
         vr.estimators_ = regressors
@@ -927,41 +944,41 @@ def data_test_model_predict_outsputs_correct_shapes():
 
     test_data = {
         BINARY_CLASSIFICATION: {
-            'models': [classifier(*binary), voting_classifier(*binary)],
-            'data': binary,
+            "models": [classifier(*binary), voting_classifier(*binary)],
+            "data": binary,
             # prob of false/true for the one class
-            'expected_output_shape': (len(binary[0]), 2)
+            "expected_output_shape": (len(binary[0]), 2),
         },
         MULTICLASS_CLASSIFICATION: {
-            'models': [classifier(*multiclass), voting_classifier(*multiclass)],
-            'data': multiclass,
+            "models": [classifier(*multiclass), voting_classifier(*multiclass)],
+            "data": multiclass,
             # prob of true for each possible class
-            'expected_output_shape': (len(multiclass[0]), 3)
+            "expected_output_shape": (len(multiclass[0]), 3),
         },
         MULTILABEL_CLASSIFICATION: {
-            'models': [classifier(*multilabel), voting_classifier(*multilabel)],
-            'data': multilabel,
+            "models": [classifier(*multilabel), voting_classifier(*multilabel)],
+            "data": multilabel,
             # probability of true for each binary label
-            'expected_output_shape': (len(multilabel[0]), 3)  # type: ignore
+            "expected_output_shape": (len(multilabel[0]), 3),  # type: ignore
         },
         REGRESSION: {
-            'models': [regressor(*regression), voting_regressor(*regression)],
-            'data': regression,
+            "models": [regressor(*regression), voting_regressor(*regression)],
+            "data": regression,
             # array of single outputs
-            'expected_output_shape': (len(regression[0]), )
+            "expected_output_shape": (len(regression[0]),),
         },
         MULTIOUTPUT_REGRESSION: {
-            'models': [regressor(*multioutput), voting_regressor(*multioutput)],
-            'data': multioutput,
+            "models": [regressor(*multioutput), voting_regressor(*multioutput)],
+            "data": multioutput,
             # array of vector otuputs
-            'expected_output_shape': (len(multioutput[0]), 3)
-        }
+            "expected_output_shape": (len(multioutput[0]), 3),
+        },
     }
 
     return itertools.chain.from_iterable(
         [
-            (model, cfg['data'], task, cfg['expected_output_shape'])
-            for model in cfg['models']
+            (model, cfg["data"], task, cfg["expected_output_shape"])
+            for model in cfg["models"]
         ]
         for task, cfg in test_data.items()
     )
@@ -969,7 +986,7 @@ def data_test_model_predict_outsputs_correct_shapes():
 
 @pytest.mark.parametrize(
     "model, data, task, expected_output_shape",
-    data_test_model_predict_outsputs_correct_shapes()
+    data_test_model_predict_outsputs_correct_shapes(),
 )
 def test_model_predict_outputs_correct_shapes(model, data, task, expected_output_shape):
     X, y = data
@@ -980,12 +997,12 @@ def test_model_predict_outputs_correct_shapes(model, data, task, expected_output
 def test_model_predict_outputs_warnings_to_logs():
     X = list(range(20))
     task = REGRESSION
-    logger = PickableLoggerAdapter('test_model_predict_correctly_outputs_warnings')
+    logger = PickableLoggerAdapter("test_model_predict_correctly_outputs_warnings")
     logger.warning = unittest.mock.Mock()
 
     class DummyModel:
         def predict(self, x):
-            warnings.warn('test warning', Warning)
+            warnings.warn("test warning", Warning)
             return x
 
     model = DummyModel()
@@ -1001,7 +1018,7 @@ def test_model_predict_outputs_to_stdout_if_no_logger():
 
     class DummyModel:
         def predict(self, x):
-            warnings.warn('test warning', Warning)
+            warnings.warn("test warning", Warning)
             return x
 
     model = DummyModel()
@@ -1012,37 +1029,204 @@ def test_model_predict_outputs_to_stdout_if_no_logger():
         assert len(w) == 1, "One warning sould have been emmited"
 
 
-@pytest.mark.parametrize("task, y", [
-    (BINARY_CLASSIFICATION, np.asarray(
-        9999 * [0] + 1 * [1]
-    )),
-    (MULTICLASS_CLASSIFICATION, np.asarray(
-        4999 * [1] + 4999 * [2] + 1 * [3] + 1 * [4]
-    )),
-    (MULTILABEL_CLASSIFICATION, np.asarray(
-        4999 * [[0, 1, 1]] + 4999 * [[1, 1, 0]] + 1 * [[1, 0, 1]] + 1 * [[0, 0, 0]]
-    ))
-])
-def test_subsample_classification_unique_labels_stay_in_training_set(task, y):
-    n_samples = 10000
-    X = np.random.random(size=(n_samples, 3))
-    memory_limit = 1  # Force subsampling
-    mock = unittest.mock.Mock()
+@pytest.mark.parametrize("dataset_compression", [False])
+def test_param_dataset_compression_false(dataset_compression: bool) -> None:
+    """
+    Parameters
+    ----------
+    dataset_compression: bool
+        The dataset_compression arg set as False
 
-    # Make sure our test assumptions are correct
-    assert len(y) == n_samples, "Ensure tests are correctly setup"
+    Expects
+    -------
+    * Should set the private attribute to None
+    """
+    auto = AutoMLRegressor(
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        dataset_compression=dataset_compression,
+    )
 
-    values, counts = np.unique(y, axis=0, return_counts=True)
-    unique_labels = [value for value, count in zip(values, counts) if count == 1]
-    assert len(unique_labels), "Ensure we have unique labels in the test"
+    assert auto._dataset_compression is None
 
-    _, y_sampled = AutoML.subsample_if_too_large(X, y,
-                                                 logger=mock,
-                                                 seed=1,
-                                                 memory_limit=memory_limit,
-                                                 task=task)
 
-    assert len(y_sampled) <= len(y), \
-        "Ensure sampling took place"
-    assert all(label in y_sampled for label in unique_labels), \
-        "All unique labels present in the return sampled set"
+@pytest.mark.parametrize("dataset_compression", [True])
+def test_construction_param_dataset_compression_true(dataset_compression: bool) -> None:
+    """
+    Parameters
+    ----------
+    dataset_compression: bool
+        The dataset_compression arg set as True
+
+    Expects
+    -------
+    * Should set the private attribute to the defaults
+    """
+    auto = AutoMLRegressor(
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        dataset_compression=dataset_compression,
+    )
+
+    assert auto._dataset_compression == default_dataset_compression_arg
+
+
+@pytest.mark.parametrize("dataset_compression", [{"memory_allocation": 0.2}])
+def test_construction_param_dataset_compression_valid_dict(
+    dataset_compression: Dict,
+) -> None:
+    """
+    Parameters
+    ----------
+    dataset_compression: Dict
+        The dataset_compression arg set partially specified
+
+    Expects
+    -------
+    * Should set the private attribute to the passed dataset_compression arg + defaults
+    """
+    auto = AutoMLRegressor(
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        dataset_compression=dataset_compression,
+    )
+
+    expected_memory_allocation = dataset_compression["memory_allocation"]
+    expected_methods = default_dataset_compression_arg["methods"]
+
+    assert auto._dataset_compression is not None
+    assert auto._dataset_compression["memory_allocation"] == expected_memory_allocation
+    assert auto._dataset_compression["methods"] == expected_methods
+
+
+@pytest.mark.parametrize(
+    "dataset_compression", [{"methods": ["precision", "subsample"]}]
+)
+@pytest.mark.parametrize("X", [np.ones((100, 10), dtype=int)])
+@pytest.mark.parametrize("y", [np.random.random((100,))])
+@unittest.mock.patch("autosklearn.automl.reduce_dataset_size_if_too_large")
+def test_fit_performs_dataset_compression_without_precision_with_int(
+    mock_reduce_dataset: unittest.mock.MagicMock,
+    dataset_compression: Dict,
+    X: np.ndarray,
+    y: np.ndarray,
+) -> None:
+    """We can't reduce the precision of ints as we do with floats. Suppose someone
+    was to pass a column with `max_int64` and `min_int64`, any reduction of bits will
+    cause this information to be lost and not simply reduce precision as it does with
+    floats.
+
+    Parameters
+    ----------
+    mock_reduce_dataset: MagicMock
+        A mock function to check the parameters that were passed in
+
+    dataset_compression: Dict
+        The dataset_compression arg with "precision" set in it
+
+    X: np.ndarray
+        An array of ints which we can't reduce precision of
+
+    y: np.ndarray
+        An array of floats as the regression target
+
+    Expects
+    -------
+    * Should call reduce_dataset_size_if_too_large
+    * "precision" should have been removed from the "methods" passed to the keyword
+        argument "operations" of `reduce_dataset_size_if_too_large`
+    """
+    # We just return the data
+    mock_reduce_dataset.return_value = X, y
+
+    auto = AutoMLRegressor(
+        time_left_for_this_task=30,  # not used but required
+        per_run_time_limit=5,  # not used but required
+        dataset_compression=dataset_compression,
+    )
+
+    # To prevent fitting anything we use `only_return_configuration_space`
+    auto.fit(X, y, only_return_configuration_space=True)
+
+    assert mock_reduce_dataset.call_count == 1
+
+    args, kwargs = mock_reduce_dataset.call_args
+    assert kwargs["operations"] == ["subsample"]
+
+
+@pytest.mark.parametrize("dataset_compression", [True])
+@pytest.mark.parametrize(
+    "X",
+    [
+        np.empty((10, 10)),
+        csr_matrix(np.identity(10)),
+        pytest.param(
+            np.empty((10, 10)).tolist(),
+            marks=pytest.mark.xfail(reason="Converted to dataframe by InputValidator"),
+        ),
+        pytest.param(
+            pd.DataFrame(np.empty((10, 10))),
+            marks=pytest.mark.xfail(
+                reason="No pandas support yet for dataset compression"
+            ),
+        ),
+    ],
+)
+@pytest.mark.parametrize(
+    "y",
+    [
+        np.random.random((10, 1)),
+        np.random.random((10, 1)).tolist(),
+        pytest.param(
+            pd.Series(np.random.random((10,))),
+            marks=pytest.mark.xfail(
+                reason="No pandas support yet for dataset compression"
+            ),
+        ),
+        pytest.param(
+            pd.DataFrame(np.random.random((10, 10))),
+            marks=pytest.mark.xfail(
+                reason="No pandas support yet for dataset compression"
+            ),
+        ),
+    ],
+)
+@unittest.mock.patch("autosklearn.automl.reduce_dataset_size_if_too_large")
+def test_fit_performs_dataset_compression(
+    mock_reduce_dataset: unittest.mock.MagicMock,
+    dataset_compression: bool,
+    X: Union[np.ndarray, spmatrix, List, pd.DataFrame],
+    y: Union[np.ndarray, List, pd.Series, pd.DataFrame],
+) -> None:
+    """
+    Parameters
+    ----------
+    mock_reduce_dataset: MagicMock
+        A mock function to view call count
+
+    dataset_compression: bool
+        Dataset compression set to True
+
+    X: Union[np.ndarray, spmatrix, List, pd.Dataframe]
+        Feature to reduce
+
+    y: Union[np.ndarray, List, pd.Series, pd.Dataframe]
+        Target to reduce (regression values)
+
+    Expects
+    -------
+    * Should call reduce_dataset_size_if_too_large
+    """
+    # We just return the data
+    mock_reduce_dataset.return_value = X, y
+
+    auto = AutoMLRegressor(
+        time_left_for_this_task=30,  # not used but required
+        per_run_time_limit=5,  # not used but required
+        dataset_compression=dataset_compression,
+    )
+
+    # To prevent fitting anything we use `only_return_configuration_space`
+    auto.fit(X, y, only_return_configuration_space=True)
+
+    assert mock_reduce_dataset.called

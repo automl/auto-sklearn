@@ -4,25 +4,27 @@ import arff
 from shutil import copyfile
 
 
-def remove_dataset_from_aslib_arff(input_file,
-                                   output_file,
-                                   id,
-                                   ):
+def remove_dataset_from_aslib_arff(
+    input_file,
+    output_file,
+    id,
+):
     with open(input_file) as fh:
         arff_object = arff.load(fh)
-    for i in range(len(arff_object['data']) - 1, -1, -1):
-        if str(arff_object['data'][i][0]) == str(id):
-            del arff_object['data'][i]
+    for i in range(len(arff_object["data"]) - 1, -1, -1):
+        if str(arff_object["data"][i][0]) == str(id):
+            del arff_object["data"][i]
 
     with open(output_file, "w") as fh:
         arff.dump(arff_object, fh)
     del arff_object
 
 
-def remove_dataset(metadata_directory,
-                   output_directory,
-                   id,
-                   ):
+def remove_dataset(
+    metadata_directory,
+    output_directory,
+    id,
+):
     metadata_sub_directories = os.listdir(metadata_directory)
 
     for metadata_sub_directory in metadata_sub_directories:
