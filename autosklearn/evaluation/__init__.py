@@ -131,6 +131,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         abort_on_first_run_crash: bool,
         port: int,
         pynisher_context: str,
+        multi_objectives: List[str],
         initial_num_run: int = 1,
         stats: Optional[Stats] = None,
         run_obj: str = "quality",
@@ -146,7 +147,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         ta: Optional[Callable] = None,
         **resampling_strategy_args: Any,
     ):
-
         if resampling_strategy == "holdout":
             eval_function = autosklearn.evaluation.train_evaluator.eval_holdout
         elif resampling_strategy == "holdout-iterative-fit":
