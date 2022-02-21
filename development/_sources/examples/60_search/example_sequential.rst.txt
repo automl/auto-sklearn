@@ -138,7 +138,7 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:1992: UserWarning: No models in the ensemble. Kindly check the ensemble size.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:1994: UserWarning: No models in the ensemble. Kindly check the ensemble size.
       warnings.warn("No models in the ensemble. Kindly check the ensemble size.")
     {}
 
@@ -172,8 +172,8 @@ Get the Score of the final ensemble
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.985816
-      Number of target algorithm runs: 37
-      Number of successful target algorithm runs: 37
+      Number of target algorithm runs: 39
+      Number of successful target algorithm runs: 39
       Number of crashed target algorithm runs: 0
       Number of target algorithms that exceeded the time limit: 0
       Number of target algorithms that exceeded the memory limit: 0
@@ -186,7 +186,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  58.344 seconds)
+   **Total running time of the script:** ( 1 minutes  57.339 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_sequential.py:

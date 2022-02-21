@@ -175,11 +175,11 @@ Build and fit a classifier
 
     /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:188: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
       warnings.warn(
-    2022-02-16 20:02:27,127 - Client-EnsembleBuilder - INFO - DummyFuture: ([{'Timestamp': Timestamp('2022-02-16 20:02:27.113668'), 'ensemble_optimization_score': 0.9886363636363636, 'ensemble_test_score': 0.9899874843554443}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2022.02.16-20.02.27 for iteration 0.
-    2022-02-16 20:02:30,584 - Client-EnsembleBuilder - INFO - DummyFuture: ([{'Timestamp': Timestamp('2022-02-16 20:02:30.569478'), 'ensemble_optimization_score': 0.9886363636363636, 'ensemble_test_score': 0.9899874843554443}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2022.02.16-20.02.30 for iteration 1.
+    2022-02-21 10:35:37,146 - Client-EnsembleBuilder - INFO - DummyFuture: ([{'Timestamp': Timestamp('2022-02-21 10:35:37.129361'), 'ensemble_optimization_score': 0.9886363636363636, 'ensemble_test_score': 0.9899874843554443}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2022.02.21-10.35.37 for iteration 0.
+    2022-02-21 10:35:41,747 - Client-EnsembleBuilder - INFO - DummyFuture: ([{'Timestamp': Timestamp('2022-02-21 10:35:41.727474'), 'ensemble_optimization_score': 0.9886363636363636, 'ensemble_test_score': 0.9899874843554443}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2022.02.21-10.35.41 for iteration 1.
     tmp_folder/.auto-sklearn
+    tmp_folder/AutoML(1):fad71d4b-9301-11ec-87b7-59c617413ee6.log
     tmp_folder/smac3-output
-    tmp_folder/AutoML(1):5b287dfe-8f63-11ec-8876-ffffbb2caa13.log
     tmp_folder/space.json
     tmp_folder/distributed.log
 
@@ -189,7 +189,7 @@ Build and fit a classifier
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  12.405 seconds)
+   **Total running time of the script:** ( 0 minutes  21.805 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_debug_logging.py:
