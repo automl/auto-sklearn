@@ -103,8 +103,9 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         cs = ConfigurationSpace()
-        hp_ngram_upper_bound = CSH.UniformIntegerHyperparameter(name="ngram_upper_bound", lower=1,
-                                                                upper=3, default_value=1)
+        hp_ngram_upper_bound = CSH.UniformIntegerHyperparameter(
+            name="ngram_upper_bound", lower=1, upper=3, default_value=1
+        )
         hp_use_idf = CSH.CategoricalHyperparameter("use_idf", choices=[False, True])
         hp_min_df_choice = CSH.CategoricalHyperparameter(
             "min_df_choice", choices=["min_df_absolute", "min_df_relative"]

@@ -25,16 +25,23 @@ import autosklearn.classification
 # Data Loading
 # ============
 
-newsgroups_train = fetch_20newsgroups(subset='train')
-newsgroups_test = fetch_20newsgroups(subset='test')
+newsgroups_train = fetch_20newsgroups(subset="train")
+newsgroups_test = fetch_20newsgroups(subset="test")
 
 # load train data
 df_train = pd.DataFrame({"X": [], "y": []})
 
-for idx, (text, target) in enumerate(zip(newsgroups_train.data, newsgroups_train.target)):
-    df_train = pd.concat([df_train, pd.DataFrame({"X": text,
-                                                  "y": newsgroups_train.target_names[target]},
-                                                 index=[idx])])
+for idx, (text, target) in enumerate(
+    zip(newsgroups_train.data, newsgroups_train.target)
+):
+    df_train = pd.concat(
+        [
+            df_train,
+            pd.DataFrame(
+                {"X": text, "y": newsgroups_train.target_names[target]}, index=[idx]
+            ),
+        ]
+    )
 
 # explicitly label text column as string
 X_train = df_train.astype({"X": "string", "y": "category"})
@@ -44,9 +51,15 @@ y_train = X_train.pop("y")
 df_test = pd.DataFrame({"X": [], "y": []})
 
 for idx, (text, target) in enumerate(zip(newsgroups_test.data, newsgroups_test.target)):
-    df_test = pd.concat([df_train, pd.DataFrame({"X": text,
-                                                 "y": newsgroups_train.target_names[int(target)]},
-                                                index=[idx])])
+    df_test = pd.concat(
+        [
+            df_train,
+            pd.DataFrame(
+                {"X": text, "y": newsgroups_train.target_names[int(target)]},
+                index=[idx],
+            ),
+        ]
+    )
 
 # explicitly label text column as string
 X_test = df_test.astype({"X": "string", "y": "category"})
@@ -61,9 +74,9 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     # set the time high enough text preprocessing can create many new features
     time_left_for_this_task=300,
     per_run_time_limit=30,
-    tmp_folder='/tmp/autosklearn_text_example_tmp',
+    tmp_folder="/tmp/autosklearn_text_example_tmp",
 )
-automl.fit(X_train, y_train, dataset_name='20_Newsgroups')
+automl.fit(X_train, y_train, dataset_name="20_Newsgroups")
 
 ############################################################################
 # View the models found by auto-sklearn
@@ -83,4 +96,3 @@ pprint(automl.show_models(), indent=4)
 
 predictions = automl.predict(X_test)
 print("Accuracy score:", sklearn.metrics.accuracy_score(y_test, predictions))
-
