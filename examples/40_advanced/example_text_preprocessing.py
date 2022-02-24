@@ -1,17 +1,15 @@
 # -*- encoding: utf-8 -*-
 """
-==============
+==================
 Text preprocessing
-==============
+==================
 
 The following example shows how to fit a simple NLP problem with
 *auto-sklearn*.
 
-For deeper insights into the field of text preprocessing you can follow these links:
+For an introduction to text preprocessing you can follow these links:
     1. https://scikit-learn.org/stable/tutorial/text_analytics/working_with_text_data.html
     2. https://machinelearningmastery.com/clean-text-machine-learning-python/
-
-
 """
 from pprint import pprint
 

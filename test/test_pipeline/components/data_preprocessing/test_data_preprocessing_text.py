@@ -2,10 +2,10 @@ import unittest
 
 import numpy as np
 import pandas as pd
-from autosklearn.pipeline.components.data_preprocessing.text_encoding.bag_of_word_encoding import (
+from autosklearn.pipeline.components.data_preprocessing.text_encoding.bag_of_word_encoding import (  # noqa: E501
     BagOfWordEncoder as BOW,
 )
-from autosklearn.pipeline.components.data_preprocessing.text_encoding.bag_of_word_encoding_distinct import (
+from autosklearn.pipeline.components.data_preprocessing.text_encoding.bag_of_word_encoding_distinct import (  # noqa: E501
     BagOfWordEncoder as BOW_distinct,
 )
 
