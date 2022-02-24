@@ -80,13 +80,13 @@ automl.fit(X_train, y_train, dataset_name="20_Newsgroups")
 # View the models found by auto-sklearn
 # =====================================
 
-print(automl.leaderboard())
+# print(automl.leaderboard())
 
 ############################################################################
 # Print the final ensemble constructed by auto-sklearn
 # ====================================================
 
-pprint(automl.show_models(), indent=4)
+# pprint(automl.show_models(), indent=4)
 
 ###########################################################################
 # Get the Score of the final ensemble
