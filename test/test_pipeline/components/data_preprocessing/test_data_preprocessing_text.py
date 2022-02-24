@@ -2,6 +2,7 @@ import unittest
 
 import numpy as np
 import pandas as pd
+
 from autosklearn.pipeline.components.data_preprocessing.text_encoding.bag_of_word_encoding import (  # noqa: E501
     BagOfWordEncoder as BOW,
 )
