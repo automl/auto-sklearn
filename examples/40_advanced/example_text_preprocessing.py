@@ -23,7 +23,7 @@ import autosklearn.classification
 # Data Loading
 # ============
 
-newsgroups_train = fetch_20newsgroups(subset="train")
+newsgroups_train = fetch_20newsgroups(subset="train", random_state=42, shuffle=True)
 newsgroups_test = fetch_20newsgroups(subset="test")
 
 # load train data
