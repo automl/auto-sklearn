@@ -79,6 +79,7 @@ automl.fit(X_train, y_train, dataset_name="20_Newsgroups")
 ############################################################################
 # View the models found by auto-sklearn
 # =====================================
+print(vars(automl.automl_.runhistory_))
 
 print(automl.leaderboard())
 
