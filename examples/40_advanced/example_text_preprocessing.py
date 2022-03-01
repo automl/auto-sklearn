@@ -22,67 +22,54 @@ import autosklearn.classification
 ############################################################################
 # Data Loading
 # ============
+cats = ["comp.sys.ibm.pc.hardware", "rec.sport.baseball"]
+X_train, y_train = fetch_20newsgroups(
+    subset="train",  # select train set
+    shuffle=True,  # shuffle the data set for unbiased validation results
+    random_state=42,  # set a random seed for reproducibility
+    categories=cats,  # select only 2 out of 20 labels
+    return_X_y=True,  # 20NG dataset consists of 2 columns X: the text data, y: the label
+)  # load this two columns separately as numpy array
 
-newsgroups_train = fetch_20newsgroups(subset="train", random_state=42, shuffle=True)
-newsgroups_test = fetch_20newsgroups(subset="test")
+X_test, y_test = fetch_20newsgroups(
+    subset="test",  # select test set for unbiased evaluation
+    categories=cats,  # select only 2 out of 20 labels
+    return_X_y=True,  # 20NG dataset consists of 2 columns X: the text data, y: the label
+)  # load this two columns separately as numpy array
 
-# load train data
-df_train = pd.DataFrame({"X": [], "y": []})
+############################################################################
+# Creating a pandas dataframe
+# ===========================
+# Both categorical and text features are often strings. Python Pandas stores python stings
+# in the generic `object` type. Please ensure that the correct
+# `dtype <https://pandas.pydata.org/docs/user_guide/basics.html#dtypes>` is applied to the correct
+# column.
 
-for idx, (text, target) in enumerate(
-    zip(newsgroups_train.data, newsgroups_train.target)
-):
-    df_train = pd.concat(
-        [
-            df_train,
-            pd.DataFrame(
-                {"X": text, "y": newsgroups_train.target_names[target]}, index=[idx]
-            ),
-        ]
-    )
+# create a pandas dataframe for training labeling the "Text" column as sting
+X_train = pd.DataFrame({"Text": pd.Series(X_train, dtype="string")})
 
-# explicitly label text column as string
-X_train = df_train.astype({"X": "string", "y": "category"})
-
-# show all 20 labels
-print(list(newsgroups_train.target_names))
-
-# reduce the example to only 5 labels
-five_newsgroups_labels = list(newsgroups_train.target_names)[:5]
-
-X_train = X_train[~X_train["y"].isin(five_newsgroups_labels)]
-y_train = X_train.pop("y")
-
-# load test data
-df_test = pd.DataFrame({"X": [], "y": []})
-
-for idx, (text, target) in enumerate(zip(newsgroups_test.data, newsgroups_test.target)):
-    df_test = pd.concat(
-        [
-            df_train,
-            pd.DataFrame(
-                {"X": text, "y": newsgroups_train.target_names[int(target)]},
-                index=[idx],
-            ),
-        ]
-    )
-
-# explicitly label text column as string
-X_test = df_test.astype({"X": "string", "y": "category"})
-X_test = X_test[~X_test["y"].isin(five_newsgroups_labels)]
-y_test = X_test.pop("y")
+# create a pandas dataframe for testing labeling the "Text" column as sting
+X_test = pd.DataFrame({"Text": pd.Series(X_test, dtype="string")})
 
 ############################################################################
 # Build and fit a classifier
 # ==========================
 
+# create an autosklearn Classifier or Regressor depending on your task at hand.
 automl = autosklearn.classification.AutoSklearnClassifier(
-    # set the time high enough text preprocessing can create many new features
-    time_left_for_this_task=300,
-    per_run_time_limit=30,
+    time_left_for_this_task=60,  # absolute time limit for fitting the ensemble
+    per_run_time_limit=30,  # time limit for single models (ensures seeing a variety of models)
     tmp_folder="/tmp/autosklearn_text_example_tmp",
 )
-automl.fit(X_train, y_train, dataset_name="20_Newsgroups")
+
+automl.fit(  # fit our model to the training data
+    X=X_train,  # passing training data (encoded as pandas dataframe)
+    y=y_train,  # passing training labels
+    # ('array like' object: pandas Series, numpy array, python list etc.)
+    # mapping form X --> y is given by the index ensure that the index of X and y
+    # match each other
+    dataset_name="20_Newsgroups",
+)
 
 ############################################################################
 # View the models found by auto-sklearn
@@ -100,5 +87,7 @@ pprint(automl.show_models(), indent=4)
 # Get the Score of the final ensemble
 # ===================================
 
+# get predictions for formerly unseen data. Ensure that the data has the same format as the training
+# data (this also applies to the column names of the pandas dataframe)
 predictions = automl.predict(X_test)
 print("Accuracy score:", sklearn.metrics.accuracy_score(y_test, predictions))
