@@ -42,7 +42,7 @@ X_test, y_test = fetch_20newsgroups(
 # ===========================
 # Both categorical and text features are often strings. Python Pandas stores python stings
 # in the generic `object` type. Please ensure that the correct
-# `dtype <https://pandas.pydata.org/docs/user_guide/basics.html#dtypes>` is applied to the correct
+# `dtype <https://pandas.pydata.org/docs/user_guide/basics.html#dtypes>`_ is applied to the correct
 # column.
 
 # create a pandas dataframe for training labeling the "Text" column as sting
@@ -57,19 +57,12 @@ X_test = pd.DataFrame({"Text": pd.Series(X_test, dtype="string")})
 
 # create an autosklearn Classifier or Regressor depending on your task at hand.
 automl = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=60,  # absolute time limit for fitting the ensemble
-    per_run_time_limit=30,  # time limit for single models (ensures seeing a variety of models)
+    time_left_for_this_task=60,
+    per_run_time_limit=30,
     tmp_folder="/tmp/autosklearn_text_example_tmp",
 )
 
-automl.fit(  # fit our model to the training data
-    X=X_train,  # passing training data (encoded as pandas dataframe)
-    y=y_train,  # passing training labels
-    # ('array like' object: pandas Series, numpy array, python list etc.)
-    # mapping form X --> y is given by the index ensure that the index of X and y
-    # match each other
-    dataset_name="20_Newsgroups",
-)
+automl.fit(X_train, y_train, dataset_name="20_Newsgroups")  # fit the automl model
 
 ############################################################################
 # View the models found by auto-sklearn
@@ -87,7 +80,5 @@ pprint(automl.show_models(), indent=4)
 # Get the Score of the final ensemble
 # ===================================
 
-# get predictions for formerly unseen data. Ensure that the data has the same format as the training
-# data (this also applies to the column names of the pandas dataframe).
 predictions = automl.predict(X_test)
 print("Accuracy score:", sklearn.metrics.accuracy_score(y_test, predictions))
