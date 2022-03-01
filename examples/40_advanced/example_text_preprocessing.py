@@ -88,6 +88,6 @@ pprint(automl.show_models(), indent=4)
 # ===================================
 
 # get predictions for formerly unseen data. Ensure that the data has the same format as the training
-# data (this also applies to the column names of the pandas dataframe)
+# data (this also applies to the column names of the pandas dataframe).
 predictions = automl.predict(X_test)
 print("Accuracy score:", sklearn.metrics.accuracy_score(y_test, predictions))
