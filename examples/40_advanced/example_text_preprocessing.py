@@ -14,8 +14,8 @@ For an introduction to text preprocessing you can follow these links:
 from pprint import pprint
 
 import pandas as pd
-from sklearn.datasets import fetch_20newsgroups
 import sklearn.metrics
+from sklearn.datasets import fetch_20newsgroups
 
 import autosklearn.classification
 
@@ -43,6 +43,14 @@ for idx, (text, target) in enumerate(
 
 # explicitly label text column as string
 X_train = df_train.astype({"X": "string", "y": "category"})
+
+# show all 20 labels
+print(list(newsgroups_train.target_names))
+
+# reduce the example to only 5 labels
+five_newsgroups_labels = list(newsgroups_train.target_names)[:5]
+
+X_train = X_train[~X_train["y"].isin(five_newsgroups_labels)]
 y_train = X_train.pop("y")
 
 # load test data
@@ -61,8 +69,8 @@ for idx, (text, target) in enumerate(zip(newsgroups_test.data, newsgroups_test.t
 
 # explicitly label text column as string
 X_test = df_test.astype({"X": "string", "y": "category"})
+X_test = X_test[~X_test["y"].isin(five_newsgroups_labels)]
 y_test = X_test.pop("y")
-
 
 ############################################################################
 # Build and fit a classifier
@@ -79,7 +87,6 @@ automl.fit(X_train, y_train, dataset_name="20_Newsgroups")
 ############################################################################
 # View the models found by auto-sklearn
 # =====================================
-print(vars(automl.automl_.runhistory_))
 
 print(automl.leaderboard())
 
