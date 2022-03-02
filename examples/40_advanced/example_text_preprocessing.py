@@ -1,79 +1,84 @@
 # -*- encoding: utf-8 -*-
 """
 ==================
-Text Preprocessing
+Text preprocessing
 ==================
-This example shows, how to use text features in *auto-sklearn*. *auto-sklearn* can automatically
-encode text features if they are provided as string type in a pandas dataframe.
 
-For processing text features you need a pandas dataframe and set the desired
-text columns to string and the categorical columns to category.
+The following example shows how to fit a simple NLP problem with
+*auto-sklearn*.
 
-*auto-sklearn* text embedding creates a bag of words count.
+For an introduction to text preprocessing you can follow these links:
+    1. https://scikit-learn.org/stable/tutorial/text_analytics/working_with_text_data.html
+    2. https://machinelearningmastery.com/clean-text-machine-learning-python/
 """
+from pprint import pprint
+
+import pandas as pd
 import sklearn.metrics
-import sklearn.datasets
+from sklearn.datasets import fetch_20newsgroups
+
 import autosklearn.classification
 
 ############################################################################
 # Data Loading
 # ============
+cats = ["comp.sys.ibm.pc.hardware", "rec.sport.baseball"]
+X_train, y_train = fetch_20newsgroups(
+    subset="train",  # select train set
+    shuffle=True,  # shuffle the data set for unbiased validation results
+    random_state=42,  # set a random seed for reproducibility
+    categories=cats,  # select only 2 out of 20 labels
+    return_X_y=True,  # 20NG dataset consists of 2 columns X: the text data, y: the label
+)  # load this two columns separately as numpy array
 
-X, y = sklearn.datasets.fetch_openml(data_id=40945, return_X_y=True)
+X_test, y_test = fetch_20newsgroups(
+    subset="test",  # select test set for unbiased evaluation
+    categories=cats,  # select only 2 out of 20 labels
+    return_X_y=True,  # 20NG dataset consists of 2 columns X: the text data, y: the label
+)  # load this two columns separately as numpy array
 
-# by default, the columns which should be strings are not formatted as such
-print(f"{X.info()}\n")
+############################################################################
+# Creating a pandas dataframe
+# ===========================
+# Both categorical and text features are often strings. Python Pandas stores python stings
+# in the generic `object` type. Please ensure that the correct
+# `dtype <https://pandas.pydata.org/docs/user_guide/basics.html#dtypes>`_ is applied to the correct
+# column.
 
-# manually convert these to string columns
-X = X.astype(
-    {
-        "name": "string",
-        "ticket": "string",
-        "cabin": "string",
-        "boat": "string",
-        "home.dest": "string",
-    }
+# create a pandas dataframe for training labeling the "Text" column as sting
+X_train = pd.DataFrame({"Text": pd.Series(X_train, dtype="string")})
+
+# create a pandas dataframe for testing labeling the "Text" column as sting
+X_test = pd.DataFrame({"Text": pd.Series(X_test, dtype="string")})
+
+############################################################################
+# Build and fit a classifier
+# ==========================
+
+# create an autosklearn Classifier or Regressor depending on your task at hand.
+automl = autosklearn.classification.AutoSklearnClassifier(
+    time_left_for_this_task=60,
+    per_run_time_limit=30,
+    tmp_folder="/tmp/autosklearn_text_example_tmp",
 )
 
-# now *auto-sklearn* handles the string columns with its text feature preprocessing pipeline
+automl.fit(X_train, y_train, dataset_name="20_Newsgroups")  # fit the automl model
 
-X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
-    X, y, random_state=1
-)
+############################################################################
+# View the models found by auto-sklearn
+# =====================================
 
-cls = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=30,
-    # Bellow two flags are provided to speed up calculations
-    # Not recommended for a real implementation
-    initial_configurations_via_metalearning=0,
-    smac_scenario_args={"runcount_limit": 1},
-)
+print(automl.leaderboard())
 
-cls.fit(X_train, y_train, X_test, y_test)
+############################################################################
+# Print the final ensemble constructed by auto-sklearn
+# ====================================================
 
-predictions = cls.predict(X_test)
-print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+pprint(automl.show_models(), indent=4)
 
+###########################################################################
+# Get the Score of the final ensemble
+# ===================================
 
-X, y = sklearn.datasets.fetch_openml(data_id=40945, return_X_y=True, as_frame=True)
-X = X.select_dtypes(exclude=["object"])
-
-X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
-    X, y, random_state=1
-)
-
-cls = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=30,
-    # Bellow two flags are provided to speed up calculations
-    # Not recommended for a real implementation
-    initial_configurations_via_metalearning=0,
-    smac_scenario_args={"runcount_limit": 1},
-)
-
-cls.fit(X_train, y_train, X_test, y_test)
-
-predictions = cls.predict(X_test)
-print(
-    "Accuracy score without text preprocessing",
-    sklearn.metrics.accuracy_score(y_test, predictions),
-)
+predictions = automl.predict(X_test)
+print("Accuracy score:", sklearn.metrics.accuracy_score(y_test, predictions))
