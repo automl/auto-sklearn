@@ -21,11 +21,11 @@
             "data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max": 0.7668727846319956,
             "data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min": 0.28633349214759163,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "f1500cd": {
             "balancing:strategy": "weighting",
@@ -48,11 +48,11 @@
             "data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction": 0.0013138596672908974,
             "classifier:gradient_boosting:n_iter_no_change": 13,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "3e1a332": {
             "balancing:strategy": "weighting",
@@ -73,11 +73,11 @@
             "data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles": 1062,
             "data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution": "uniform",
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "7500838": {
             "balancing:strategy": "weighting",
@@ -101,11 +101,11 @@
             "data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution": "uniform",
             "classifier:gradient_boosting:n_iter_no_change": 11,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "dd3a0e8": {
             "balancing:strategy": "weighting",
@@ -127,11 +127,11 @@
             "classifier:gradient_boosting:tol": 1e-07,
             "data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction": 0.002589355496626201,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "13d94b3": {
             "balancing:strategy": "weighting",
@@ -158,11 +158,11 @@
             "data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction": 0.05217337165303994,
             "classifier:mlp:validation_fraction": 0.1,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "78a0240": {
             "balancing:strategy": "weighting",
@@ -183,11 +183,11 @@
             "classifier:extra_trees:min_weight_fraction_leaf": 0.0,
             "data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction": 0.0036912148544896695,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "4dffb08": {
             "balancing:strategy": "weighting",
@@ -208,11 +208,11 @@
             "classifier:sgd:eta0": 2.0514805804594057e-06,
             "classifier:sgd:l1_ratio": 7.163773086996508e-09,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "43a743f": {
             "balancing:strategy": "none",
@@ -236,11 +236,11 @@
             "data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution": "normal",
             "classifier:gradient_boosting:n_iter_no_change": 3,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "4d5e802": {
             "balancing:strategy": "weighting",
@@ -263,11 +263,11 @@
             "classifier:sgd:eta0": 9.309855728417528e-05,
             "classifier:sgd:l1_ratio": 0.6620356750678396,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "9b6c297": {
             "balancing:strategy": "weighting",
@@ -290,11 +290,11 @@
             "data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max": 0.7972710156738574,
             "data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min": 0.2243563424345074,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "5886349": {
             "balancing:strategy": "weighting",
@@ -317,11 +317,11 @@
             "classifier:gradient_boosting:n_iter_no_change": 1,
             "classifier:gradient_boosting:validation_fraction": 0.16202792486532844,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "5c6b775": {
             "balancing:strategy": "weighting",
@@ -346,11 +346,11 @@
             "classifier:gradient_boosting:n_iter_no_change": 5,
             "classifier:gradient_boosting:validation_fraction": 0.10823188437286345,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "87cff92": {
             "balancing:strategy": "none",
@@ -373,11 +373,11 @@
             "data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max": 0.7300216362356305,
             "data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min": 0.23992030699419034,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "05cb256": {
             "balancing:strategy": "none",
@@ -406,11 +406,11 @@
             "data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution": "normal",
             "classifier:mlp:validation_fraction": 0.1,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "4e50c99": {
             "balancing:strategy": "weighting",
@@ -433,11 +433,11 @@
             "data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max": 0.7478194148240691,
             "data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min": 0.09486350397967545,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "73611bf": {
             "balancing:strategy": "weighting",
@@ -460,11 +460,11 @@
             "data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction": 0.047507672861535975,
             "classifier:gradient_boosting:n_iter_no_change": 11,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "a885804": {
             "balancing:strategy": "weighting",
@@ -485,11 +485,11 @@
             "classifier:extra_trees:min_weight_fraction_leaf": 0.0,
             "data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction": 0.0016446890106470516,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "44e2072": {
             "balancing:strategy": "weighting",
@@ -510,11 +510,11 @@
             "data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles": 1528,
             "data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution": "normal",
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "4b79861": {
             "balancing:strategy": "none",
@@ -537,11 +537,11 @@
             "data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction": 0.0001253687001786426,
             "classifier:gradient_boosting:n_iter_no_change": 4,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "79812c6": {
             "balancing:strategy": "weighting",
@@ -564,11 +564,11 @@
             "data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles": 999,
             "data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution": "normal",
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "8e0e269": {
             "balancing:strategy": "weighting",
@@ -591,11 +591,11 @@
             "classifier:gradient_boosting:n_iter_no_change": 3,
             "classifier:gradient_boosting:validation_fraction": 0.14053446064492747,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "66c3cf8": {
             "balancing:strategy": "weighting",
@@ -616,11 +616,11 @@
             "classifier:extra_trees:min_weight_fraction_leaf": 0.0,
             "data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction": 0.00017390212311709855,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "bff26f9": {
             "balancing:strategy": "weighting",
@@ -639,11 +639,11 @@
             "classifier:sgd:tol": 0.0005655131678222187,
             "classifier:sgd:eta0": 0.00022254320651933049,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "ce012ed": {
             "balancing:strategy": "weighting",
@@ -659,11 +659,11 @@
             "classifier:passive_aggressive:loss": "squared_hinge",
             "classifier:passive_aggressive:tol": 0.009455868366528827,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "d2d2039": {
             "balancing:strategy": "weighting",
@@ -686,11 +686,11 @@
             "classifier:gradient_boosting:n_iter_no_change": 19,
             "classifier:gradient_boosting:validation_fraction": 0.29656195578950684,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "eac6b8e": {
             "balancing:strategy": "weighting",
@@ -711,11 +711,11 @@
             "data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles": 1987,
             "data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution": "uniform",
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "a31129f": {
             "balancing:strategy": "none",
@@ -741,11 +741,11 @@
             "classifier:mlp:tol": 0.0001,
             "data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction": 0.014794967781387955,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "da90184": {
             "balancing:strategy": "weighting",
@@ -767,11 +767,11 @@
             "classifier:gradient_boosting:tol": 1e-07,
             "classifier:gradient_boosting:n_iter_no_change": 11,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "85bfdfa": {
             "balancing:strategy": "weighting",
@@ -792,11 +792,11 @@
             "data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles": 1194,
             "data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution": "normal",
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "d4abc34": {
             "balancing:strategy": "weighting",
@@ -823,11 +823,11 @@
             "data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max": 0.748076585259295,
             "data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min": 0.23337355967199702,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         },
         "acb3733": {
             "balancing:strategy": "weighting",
@@ -851,11 +851,11 @@
             "classifier:gradient_boosting:n_iter_no_change": 1,
             "classifier:gradient_boosting:validation_fraction": 0.2938721928434415,
             "data_preprocessor:__choice__": "feature_type",
-            "data_preprocessor:feature_type:text_transformer:feature_reduction:n_components": 100,
             "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "bag_of_word_encoding",
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute": 1,
             "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice": "min_df_absolute",
-            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1
+            "data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound": 1,
+            "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100
         }
     },
     "cutoffs": [

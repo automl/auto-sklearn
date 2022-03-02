@@ -10,7 +10,7 @@ from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorit
 from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 
 
-class FeatureReduction(AutoSklearnPreprocessingAlgorithm):
+class TextFeatureReduction(AutoSklearnPreprocessingAlgorithm):
     """
     Reduces the features created by a bag of words encoding
     """
@@ -25,7 +25,7 @@ class FeatureReduction(AutoSklearnPreprocessingAlgorithm):
 
     def fit(
         self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
-    ) -> "FeatureReduction":
+    ) -> "TextFeatureReduction":
         if X.shape[1] > self.n_components:
             self.preprocessor = TruncatedSVD(
                 n_components=self.n_components, random_state=self.random_state
