@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Text Preprocessing &#8212; AutoSklearn 0.14.6 documentation</title>
+    <title>Text preprocessing &#8212; AutoSklearn 0.14.6 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
@@ -106,8 +106,13 @@
   <div class="row">
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
-<li><a class="reference internal" href="#">Text Preprocessing</a><ul>
+<li><a class="reference internal" href="#">Text preprocessing</a><ul>
 <li><a class="reference internal" href="#data-loading">Data Loading</a></li>
+<li><a class="reference internal" href="#creating-a-pandas-dataframe">Creating a pandas dataframe</a></li>
+<li><a class="reference internal" href="#build-and-fit-a-classifier">Build and fit a classifier</a></li>
+<li><a class="reference internal" href="#view-the-models-found-by-auto-sklearn">View the models found by auto-sklearn</a></li>
+<li><a class="reference internal" href="#print-the-final-ensemble-constructed-by-auto-sklearn">Print the final ensemble constructed by auto-sklearn</a></li>
+<li><a class="reference internal" href="#get-the-score-of-the-final-ensemble">Get the Score of the final ensemble</a></li>
 </ul>
 </li>
 </ul>
@@ -122,111 +127,219 @@
 to download the full example code or to run this example in your browser via Binder</p>
 </div>
 <div class="sphx-glr-example-title section" id="text-preprocessing">
-<span id="sphx-glr-examples-40-advanced-example-text-preprocessing-py"></span><h1>Text Preprocessing<a class="headerlink" href="#text-preprocessing" title="Permalink to this headline">¶</a></h1>
-<p>This example shows, how to use text features in <em>auto-sklearn</em>. <em>auto-sklearn</em> can automatically
-encode text features if they are provided as string type in a pandas dataframe.</p>
-<p>For processing text features you need a pandas dataframe and set the desired
-text columns to string and the categorical columns to category.</p>
-<p><em>auto-sklearn</em> text embedding creates a bag of words count.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sklearn.metrics</span>
-<span class="kn">import</span> <span class="nn">sklearn.datasets</span>
+<span id="sphx-glr-examples-40-advanced-example-text-preprocessing-py"></span><h1>Text preprocessing<a class="headerlink" href="#text-preprocessing" title="Permalink to this headline">¶</a></h1>
+<p>The following example shows how to fit a simple NLP problem with
+<em>auto-sklearn</em>.</p>
+<dl class="simple">
+<dt>For an introduction to text preprocessing you can follow these links:</dt><dd><ol class="arabic simple">
+<li><p><a class="reference external" href="https://scikit-learn.org/stable/tutorial/text_analytics/working_with_text_data.html">https://scikit-learn.org/stable/tutorial/text_analytics/working_with_text_data.html</a></p></li>
+<li><p><a class="reference external" href="https://machinelearningmastery.com/clean-text-machine-learning-python/">https://machinelearningmastery.com/clean-text-machine-learning-python/</a></p></li>
+</ol>
+</dd>
+</dl>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">sklearn.metrics</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
+
 <span class="kn">import</span> <span class="nn">autosklearn.classification</span>
 </pre></div>
 </div>
 <div class="section" id="data-loading">
 <h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">fetch_openml</span><span class="p">(</span><span class="n">data_id</span><span class="o">=</span><span class="mi">40945</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cats</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;comp.sys.ibm.pc.hardware&quot;</span><span class="p">,</span> <span class="s2">&quot;rec.sport.baseball&quot;</span><span class="p">]</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span>
+    <span class="n">subset</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>  <span class="c1"># select train set</span>
+    <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># shuffle the data set for unbiased validation results</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>  <span class="c1"># set a random seed for reproducibility</span>
+    <span class="n">categories</span><span class="o">=</span><span class="n">cats</span><span class="p">,</span>  <span class="c1"># select only 2 out of 20 labels</span>
+    <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># 20NG dataset consists of 2 columns X: the text data, y: the label</span>
+<span class="p">)</span>  <span class="c1"># load this two columns separately as numpy array</span>
 
-<span class="c1"># by default, the columns which should be strings are not formatted as such</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">info</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span>
+    <span class="n">subset</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>  <span class="c1"># select test set for unbiased evaluation</span>
+    <span class="n">categories</span><span class="o">=</span><span class="n">cats</span><span class="p">,</span>  <span class="c1"># select only 2 out of 20 labels</span>
+    <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># 20NG dataset consists of 2 columns X: the text data, y: the label</span>
+<span class="p">)</span>  <span class="c1"># load this two columns separately as numpy array</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-a-pandas-dataframe">
+<h2>Creating a pandas dataframe<a class="headerlink" href="#creating-a-pandas-dataframe" title="Permalink to this headline">¶</a></h2>
+<p>Both categorical and text features are often strings. Python Pandas stores python stings
+in the generic <cite>object</cite> type. Please ensure that the correct
+<a class="reference external" href="https://pandas.pydata.org/docs/user_guide/basics.html#dtypes">dtype</a> is applied to the correct
+column.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># create a pandas dataframe for training labeling the &quot;Text&quot; column as sting</span>
+<span class="n">X_train</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;Text&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;string&quot;</span><span class="p">)})</span>
 
-<span class="c1"># manually convert these to string columns</span>
-<span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
-    <span class="p">{</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ticket&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;cabin&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;boat&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;home.dest&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
-    <span class="p">}</span>
+<span class="c1"># create a pandas dataframe for testing labeling the &quot;Text&quot; column as sting</span>
+<span class="n">X_test</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;Text&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;string&quot;</span><span class="p">)})</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="build-and-fit-a-classifier">
+<h2>Build and fit a classifier<a class="headerlink" href="#build-and-fit-a-classifier" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># create an autosklearn Classifier or Regressor depending on your task at hand.</span>
+<span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+    <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">tmp_folder</span><span class="o">=</span><span class="s2">&quot;/tmp/autosklearn_text_example_tmp&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="c1"># now *auto-sklearn* handles the string columns with its text feature preprocessing pipeline</span>
-
-<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span>
-    <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span>
-<span class="p">)</span>
-
-<span class="bp">cls</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
-    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-    <span class="c1"># Bellow two flags are provided to speed up calculations</span>
-    <span class="c1"># Not recommended for a real implementation</span>
-    <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-    <span class="n">smac_scenario_args</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;runcount_limit&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-<span class="p">)</span>
-
-<span class="bp">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-
-<span class="n">predictions</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
-
-
-<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">fetch_openml</span><span class="p">(</span><span class="n">data_id</span><span class="o">=</span><span class="mi">40945</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">exclude</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">])</span>
-
-<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span>
-    <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span>
-<span class="p">)</span>
-
-<span class="bp">cls</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
-    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-    <span class="c1"># Bellow two flags are provided to speed up calculations</span>
-    <span class="c1"># Not recommended for a real implementation</span>
-    <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-    <span class="n">smac_scenario_args</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;runcount_limit&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-<span class="p">)</span>
-
-<span class="bp">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-
-<span class="n">predictions</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span>
-    <span class="s2">&quot;Accuracy score without text preprocessing&quot;</span><span class="p">,</span>
-    <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">),</span>
-<span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;20_Newsgroups&quot;</span><span class="p">)</span>  <span class="c1"># fit the automl model</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;class &#39;pandas.core.frame.DataFrame&#39;&gt;
-RangeIndex: 1309 entries, 0 to 1308
-Data columns (total 13 columns):
- #   Column     Non-Null Count  Dtype
----  ------     --------------  -----
- 0   pclass     1309 non-null   float64
- 1   name       1309 non-null   object
- 2   sex        1309 non-null   category
- 3   age        1046 non-null   float64
- 4   sibsp      1309 non-null   float64
- 5   parch      1309 non-null   float64
- 6   ticket     1309 non-null   object
- 7   fare       1308 non-null   float64
- 8   cabin      295 non-null    object
- 9   embarked   1307 non-null   category
- 10  boat       486 non-null    object
- 11  body       121 non-null    float64
- 12  home.dest  745 non-null    object
-dtypes: category(2), float64(6), object(5)
-memory usage: 115.4+ KB
-None
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:76: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.metafeatures = self.metafeatures.append(metafeatures)
+/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.algorithm_runs[metric].append(runs)
 
-/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:188: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
-  warnings.warn(
-Accuracy score 0.5945121951219512
-/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:188: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
-  warnings.warn(
-Accuracy score without text preprocessing 0.7835365853658537
+AutoSklearnClassifier(per_run_time_limit=30, time_left_for_this_task=60,
+                      tmp_folder=&#39;/tmp/autosklearn_text_example_tmp&#39;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  23.900 seconds)</p>
+</div>
+<div class="section" id="view-the-models-found-by-auto-sklearn">
+<h2>View the models found by auto-sklearn<a class="headerlink" href="#view-the-models-found-by-auto-sklearn" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">leaderboard</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight                 type      cost  duration
+model_id
+5            1             0.10                  mlp  0.048469  3.050176
+9            2             0.02                  mlp  0.056122  4.448798
+10           3             0.34   passive_aggressive  0.071429  2.677122
+12           4             0.10                  lda  0.084184  2.746390
+2            5             0.04        random_forest  0.091837  5.257831
+3            6             0.04                  mlp  0.137755  4.822150
+6            7             0.04                  qda  0.147959  2.860378
+11           8             0.06  k_nearest_neighbors  0.168367  2.657526
+8            9             0.26           libsvm_svc  0.278061  2.947316
+</pre></div>
+</div>
+</div>
+<div class="section" id="print-the-final-ensemble-constructed-by-auto-sklearn">
+<h2>Print the final ensemble constructed by auto-sklearn<a class="headerlink" href="#print-the-final-ensemble-constructed-by-auto-sklearn" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pprint</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   2: {   &#39;balancing&#39;: Balancing(random_state=1),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7d37d130&gt;,
+           &#39;cost&#39;: 0.09183673469387754,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf7fab0670&gt;,
+           &#39;ensemble_weight&#39;: 0.04,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf7d8e3f40&gt;,
+           &#39;model_id&#39;: 2,
+           &#39;rank&#39;: 5,
+           &#39;sklearn_classifier&#39;: RandomForestClassifier(max_features=10, n_estimators=512, n_jobs=1,
+                       random_state=1, warm_start=True)},
+    3: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7d4a3520&gt;,
+           &#39;cost&#39;: 0.1377551020408163,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf7f90d970&gt;,
+           &#39;ensemble_weight&#39;: 0.04,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf7d4b3e50&gt;,
+           &#39;model_id&#39;: 3,
+           &#39;rank&#39;: 6,
+           &#39;sklearn_classifier&#39;: MLPClassifier(activation=&#39;tanh&#39;, alpha=1.103855734598575e-05, beta_1=0.999,
+              beta_2=0.9, early_stopping=True,
+              hidden_layer_sizes=(229, 229, 229),
+              learning_rate_init=0.00014375616988222174, max_iter=32,
+              n_iter_no_change=32, random_state=1, verbose=0, warm_start=True)},
+    5: {   &#39;balancing&#39;: Balancing(random_state=1),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7fd1b2e0&gt;,
+           &#39;cost&#39;: 0.04846938775510201,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf7fc97a30&gt;,
+           &#39;ensemble_weight&#39;: 0.1,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf7fd1b670&gt;,
+           &#39;model_id&#39;: 5,
+           &#39;rank&#39;: 1,
+           &#39;sklearn_classifier&#39;: MLPClassifier(activation=&#39;tanh&#39;, alpha=0.05476322473700896, beta_1=0.999,
+              beta_2=0.9, early_stopping=True, hidden_layer_sizes=(136,),
+              learning_rate_init=0.012698439797907473, max_iter=32,
+              n_iter_no_change=32, random_state=1, verbose=0, warm_start=True)},
+    6: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7d3ca4c0&gt;,
+           &#39;cost&#39;: 0.14795918367346939,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf7fc3e0d0&gt;,
+           &#39;ensemble_weight&#39;: 0.04,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf7d3ca3d0&gt;,
+           &#39;model_id&#39;: 6,
+           &#39;rank&#39;: 7,
+           &#39;sklearn_classifier&#39;: QuadraticDiscriminantAnalysis(reg_param=0.585497512341966)},
+    8: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7f4a9700&gt;,
+           &#39;cost&#39;: 0.27806122448979587,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf7d37ddc0&gt;,
+           &#39;ensemble_weight&#39;: 0.26,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf7f4a95b0&gt;,
+           &#39;model_id&#39;: 8,
+           &#39;rank&#39;: 9,
+           &#39;sklearn_classifier&#39;: SVC(C=0.20435138760822585, cache_size=1822.046875, class_weight=&#39;balanced&#39;,
+    gamma=7.373654384480026e-05, max_iter=-1.0, random_state=1,
+    tol=4.6066870756479984e-05)},
+    9: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7f90dd90&gt;,
+           &#39;cost&#39;: 0.056122448979591844,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf82497790&gt;,
+           &#39;ensemble_weight&#39;: 0.02,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf86a81d90&gt;,
+           &#39;model_id&#39;: 9,
+           &#39;rank&#39;: 2,
+           &#39;sklearn_classifier&#39;: MLPClassifier(activation=&#39;tanh&#39;, alpha=1.0207902638359607e-07, beta_1=0.999,
+              beta_2=0.9, hidden_layer_sizes=(229,),
+              learning_rate_init=0.0005867144594731152, max_iter=64,
+              n_iter_no_change=32, random_state=1, validation_fraction=0.0,
+              verbose=0, warm_start=True)},
+    10: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7fa72ee0&gt;,
+            &#39;cost&#39;: 0.0714285714285714,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf800d7550&gt;,
+            &#39;ensemble_weight&#39;: 0.34,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf80050760&gt;,
+            &#39;model_id&#39;: 10,
+            &#39;rank&#39;: 3,
+            &#39;sklearn_classifier&#39;: PassiveAggressiveClassifier(C=0.14833233294431605, average=True,
+                            loss=&#39;squared_hinge&#39;, max_iter=128, random_state=1,
+                            tol=0.00016482166646253793, warm_start=True)},
+    11: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7dc254f0&gt;,
+            &#39;cost&#39;: 0.16836734693877553,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf7f38d7f0&gt;,
+            &#39;ensemble_weight&#39;: 0.06,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf7dc252b0&gt;,
+            &#39;model_id&#39;: 11,
+            &#39;rank&#39;: 8,
+            &#39;sklearn_classifier&#39;: KNeighborsClassifier(n_neighbors=3, p=1, weights=&#39;distance&#39;)},
+    12: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7d365730&gt;,
+            &#39;cost&#39;: 0.08418367346938771,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf801a3c10&gt;,
+            &#39;ensemble_weight&#39;: 0.1,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf7d3655e0&gt;,
+            &#39;model_id&#39;: 12,
+            &#39;rank&#39;: 4,
+            &#39;sklearn_classifier&#39;: LinearDiscriminantAnalysis(shrinkage=0.3306135150299744, solver=&#39;lsqr&#39;,
+                           tol=0.0007215763283486354)}}
+</pre></div>
+</div>
+</div>
+<div class="section" id="get-the-score-of-the-final-ensemble">
+<h2>Get the Score of the final ensemble<a class="headerlink" href="#get-the-score-of-the-final-ensemble" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score:&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score: 0.9645120405576679
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  8.335 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-text-preprocessing-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_text_preprocessing.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>

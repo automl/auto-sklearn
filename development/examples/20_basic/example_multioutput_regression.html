@@ -170,9 +170,9 @@ to download the full example code or to run this example in your browser via Bin
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight              type          cost  duration
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight              type          cost   duration
 model_id
-4            1              1.0  gaussian_process  2.918683e-08  2.948896
+21           1              1.0  gaussian_process  3.496517e-09  12.271946
 </pre></div>
 </div>
 </div>
@@ -182,15 +182,15 @@ model_id
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   4: {   &#39;cost&#39;: 2.9186827177341e-08,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f4be3e66070&gt;,
-           &#39;ensemble_weight&#39;: 1.0,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f4be50f5e80&gt;,
-           &#39;model_id&#39;: 4,
-           &#39;rank&#39;: 1,
-           &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f4be50f5ee0&gt;,
-           &#39;sklearn_regressor&#39;: GaussianProcessRegressor(alpha=3.388513090075372e-08,
-                         kernel=RBF(length_scale=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]),
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   21: {   &#39;cost&#39;: 3.4965165207623272e-09,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf83b4ecd0&gt;,
+            &#39;ensemble_weight&#39;: 1.0,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf86a89970&gt;,
+            &#39;model_id&#39;: 21,
+            &#39;rank&#39;: 1,
+            &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fbf83b58220&gt;,
+            &#39;sklearn_regressor&#39;: GaussianProcessRegressor(alpha=7.667599309325044e-11,
+                         kernel=RBF(length_scale=[1, 1, 1, 1, 1]),
                          n_restarts_optimizer=10, normalize_y=True,
                          random_state=1)}}
 </pre></div>
@@ -203,7 +203,7 @@ model_id
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.9999999786364273
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.9999999991057485
 </pre></div>
 </div>
 </div>
@@ -231,15 +231,15 @@ model_id
     data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute, Type: UniformInteger, Range: [0, 10], Default: 0
     data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice, Type: Categorical, Choices: {min_df_absolute, min_df_relative}, Default: min_df_absolute
     data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_relative, Type: UniformFloat, Range: [0.01, 1.0], Default: 0.01, on log-scale
-    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_range, Type: UniformInteger, Range: [1, 3], Default: 1
+    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound, Type: UniformInteger, Range: [1, 3], Default: 1
     data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_absolute, Type: UniformInteger, Range: [0, 10], Default: 0
     data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice, Type: Categorical, Choices: {min_df_absolute, min_df_relative}, Default: min_df_absolute
     data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_relative, Type: UniformFloat, Range: [0.01, 1.0], Default: 0.01, on log-scale
-    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_range, Type: UniformInteger, Range: [1, 3], Default: 1
+    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound, Type: UniformInteger, Range: [1, 3], Default: 1
     data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_absolute, Type: UniformInteger, Range: [0, 10], Default: 0
     data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice, Type: Categorical, Choices: {min_df_absolute, min_df_relative}, Default: min_df_absolute
     data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_relative, Type: UniformFloat, Range: [0.01, 1.0], Default: 0.01, on log-scale
-    data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_range, Type: UniformInteger, Range: [1, 3], Default: 1
+    data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_upper_bound, Type: UniformInteger, Range: [1, 3], Default: 1
     data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf, Type: Categorical, Choices: {False, True}, Default: False
     feature_preprocessor:__choice__, Type: Categorical, Choices: {extra_trees_preproc_for_regression, fast_ica, feature_agglomeration, kernel_pca, kitchen_sinks, no_preprocessing, nystroem_sampler, pca, polynomial, random_trees_embedding}, Default: no_preprocessing
     feature_preprocessor:extra_trees_preproc_for_regression:bootstrap, Type: Categorical, Choices: {True, False}, Default: False
@@ -331,15 +331,15 @@ model_id
     data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute | data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice == &#39;min_df_absolute&#39;
     data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == &#39;bag_of_word_encoding&#39;
     data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_relative | data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice == &#39;min_df_relative&#39;
-    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_range | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == &#39;bag_of_word_encoding&#39;
+    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == &#39;bag_of_word_encoding&#39;
     data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_absolute | data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice == &#39;min_df_absolute&#39;
     data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == &#39;bag_of_word_encoding_distinct&#39;
     data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_relative | data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice == &#39;min_df_relative&#39;
-    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_range | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == &#39;bag_of_word_encoding_distinct&#39;
+    data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == &#39;bag_of_word_encoding_distinct&#39;
     data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_absolute | data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice == &#39;min_df_absolute&#39;
     data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == &#39;tfidf_encoding&#39;
     data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_relative | data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice == &#39;min_df_relative&#39;
-    data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_range | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == &#39;tfidf_encoding&#39;
+    data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_upper_bound | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == &#39;tfidf_encoding&#39;
     data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == &#39;tfidf_encoding&#39;
     feature_preprocessor:extra_trees_preproc_for_regression:bootstrap | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_regression&#39;
     feature_preprocessor:extra_trees_preproc_for_regression:criterion | feature_preprocessor:__choice__ == &#39;extra_trees_preproc_for_regression&#39;
@@ -434,7 +434,7 @@ model_id
     (Forbidden: regressor:__choice__ == &#39;random_forest&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  59.901 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  56.016 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-20-basic-example-multioutput-regression-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/20_basic/example_multioutput_regression.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo.svg" width="150px" /></a>

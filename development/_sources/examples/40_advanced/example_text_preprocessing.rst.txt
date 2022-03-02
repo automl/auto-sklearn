@@ -19,22 +19,26 @@
 
 
 ==================
-Text Preprocessing
+Text preprocessing
 ==================
-This example shows, how to use text features in *auto-sklearn*. *auto-sklearn* can automatically
-encode text features if they are provided as string type in a pandas dataframe.
 
-For processing text features you need a pandas dataframe and set the desired
-text columns to string and the categorical columns to category.
+The following example shows how to fit a simple NLP problem with
+*auto-sklearn*.
 
-*auto-sklearn* text embedding creates a bag of words count.
+For an introduction to text preprocessing you can follow these links:
+    1. https://scikit-learn.org/stable/tutorial/text_analytics/working_with_text_data.html
+    2. https://machinelearningmastery.com/clean-text-machine-learning-python/
 
-.. GENERATED FROM PYTHON SOURCE LINES 14-18
+.. GENERATED FROM PYTHON SOURCE LINES 14-22
 
 .. code-block:: default
 
+    from pprint import pprint
+
+    import pandas as pd
     import sklearn.metrics
-    import sklearn.datasets
+    from sklearn.datasets import fetch_20newsgroups
+
     import autosklearn.classification
 
 
@@ -44,74 +48,83 @@ text columns to string and the categorical columns to category.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 19-21
+.. GENERATED FROM PYTHON SOURCE LINES 23-25
 
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 21-80
+.. GENERATED FROM PYTHON SOURCE LINES 25-40
+
+.. code-block:: default
+
+    cats = ["comp.sys.ibm.pc.hardware", "rec.sport.baseball"]
+    X_train, y_train = fetch_20newsgroups(
+        subset="train",  # select train set
+        shuffle=True,  # shuffle the data set for unbiased validation results
+        random_state=42,  # set a random seed for reproducibility
+        categories=cats,  # select only 2 out of 20 labels
+        return_X_y=True,  # 20NG dataset consists of 2 columns X: the text data, y: the label
+    )  # load this two columns separately as numpy array
+
+    X_test, y_test = fetch_20newsgroups(
+        subset="test",  # select test set for unbiased evaluation
+        categories=cats,  # select only 2 out of 20 labels
+        return_X_y=True,  # 20NG dataset consists of 2 columns X: the text data, y: the label
+    )  # load this two columns separately as numpy array
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 41-47
+
+Creating a pandas dataframe
+===========================
+Both categorical and text features are often strings. Python Pandas stores python stings
+in the generic `object` type. Please ensure that the correct
+`dtype <https://pandas.pydata.org/docs/user_guide/basics.html#dtypes>`_ is applied to the correct
+column.
+
+.. GENERATED FROM PYTHON SOURCE LINES 47-54
 
 .. code-block:: default
 
 
-    X, y = sklearn.datasets.fetch_openml(data_id=40945, return_X_y=True)
+    # create a pandas dataframe for training labeling the "Text" column as sting
+    X_train = pd.DataFrame({"Text": pd.Series(X_train, dtype="string")})
 
-    # by default, the columns which should be strings are not formatted as such
-    print(f"{X.info()}\n")
+    # create a pandas dataframe for testing labeling the "Text" column as sting
+    X_test = pd.DataFrame({"Text": pd.Series(X_test, dtype="string")})
 
-    # manually convert these to string columns
-    X = X.astype(
-        {
-            "name": "string",
-            "ticket": "string",
-            "cabin": "string",
-            "boat": "string",
-            "home.dest": "string",
-        }
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 55-57
+
+Build and fit a classifier
+==========================
+
+.. GENERATED FROM PYTHON SOURCE LINES 57-67
+
+.. code-block:: default
+
+
+    # create an autosklearn Classifier or Regressor depending on your task at hand.
+    automl = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=60,
+        per_run_time_limit=30,
+        tmp_folder="/tmp/autosklearn_text_example_tmp",
     )
 
-    # now *auto-sklearn* handles the string columns with its text feature preprocessing pipeline
+    automl.fit(X_train, y_train, dataset_name="20_Newsgroups")  # fit the automl model
 
-    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
-        X, y, random_state=1
-    )
-
-    cls = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=30,
-        # Bellow two flags are provided to speed up calculations
-        # Not recommended for a real implementation
-        initial_configurations_via_metalearning=0,
-        smac_scenario_args={"runcount_limit": 1},
-    )
-
-    cls.fit(X_train, y_train, X_test, y_test)
-
-    predictions = cls.predict(X_test)
-    print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
-
-
-    X, y = sklearn.datasets.fetch_openml(data_id=40945, return_X_y=True, as_frame=True)
-    X = X.select_dtypes(exclude=["object"])
-
-    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
-        X, y, random_state=1
-    )
-
-    cls = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=30,
-        # Bellow two flags are provided to speed up calculations
-        # Not recommended for a real implementation
-        initial_configurations_via_metalearning=0,
-        smac_scenario_args={"runcount_limit": 1},
-    )
-
-    cls.fit(X_train, y_train, X_test, y_test)
-
-    predictions = cls.predict(X_test)
-    print(
-        "Accuracy score without text preprocessing",
-        sklearn.metrics.accuracy_score(y_test, predictions),
-    )
 
 
 
@@ -122,34 +135,200 @@ Data Loading
 
  .. code-block:: none
 
-    <class 'pandas.core.frame.DataFrame'>
-    RangeIndex: 1309 entries, 0 to 1308
-    Data columns (total 13 columns):
-     #   Column     Non-Null Count  Dtype   
-    ---  ------     --------------  -----   
-     0   pclass     1309 non-null   float64 
-     1   name       1309 non-null   object  
-     2   sex        1309 non-null   category
-     3   age        1046 non-null   float64 
-     4   sibsp      1309 non-null   float64 
-     5   parch      1309 non-null   float64 
-     6   ticket     1309 non-null   object  
-     7   fare       1308 non-null   float64 
-     8   cabin      295 non-null    object  
-     9   embarked   1307 non-null   category
-     10  boat       486 non-null    object  
-     11  body       121 non-null    float64 
-     12  home.dest  745 non-null    object  
-    dtypes: category(2), float64(6), object(5)
-    memory usage: 115.4+ KB
-    None
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:76: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+      self.metafeatures = self.metafeatures.append(metafeatures)
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+      self.algorithm_runs[metric].append(runs)
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:188: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
-      warnings.warn(
-    Accuracy score 0.5945121951219512
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:188: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
-      warnings.warn(
-    Accuracy score without text preprocessing 0.7835365853658537
+    AutoSklearnClassifier(per_run_time_limit=30, time_left_for_this_task=60,
+                          tmp_folder='/tmp/autosklearn_text_example_tmp')
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 68-70
+
+View the models found by auto-sklearn
+=====================================
+
+.. GENERATED FROM PYTHON SOURCE LINES 70-73
+
+.. code-block:: default
+
+
+    print(automl.leaderboard())
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+              rank  ensemble_weight                 type      cost  duration
+    model_id                                                                
+    5            1             0.10                  mlp  0.048469  3.050176
+    9            2             0.02                  mlp  0.056122  4.448798
+    10           3             0.34   passive_aggressive  0.071429  2.677122
+    12           4             0.10                  lda  0.084184  2.746390
+    2            5             0.04        random_forest  0.091837  5.257831
+    3            6             0.04                  mlp  0.137755  4.822150
+    6            7             0.04                  qda  0.147959  2.860378
+    11           8             0.06  k_nearest_neighbors  0.168367  2.657526
+    8            9             0.26           libsvm_svc  0.278061  2.947316
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 74-76
+
+Print the final ensemble constructed by auto-sklearn
+====================================================
+
+.. GENERATED FROM PYTHON SOURCE LINES 76-79
+
+.. code-block:: default
+
+
+    pprint(automl.show_models(), indent=4)
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    {   2: {   'balancing': Balancing(random_state=1),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7d37d130>,
+               'cost': 0.09183673469387754,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf7fab0670>,
+               'ensemble_weight': 0.04,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf7d8e3f40>,
+               'model_id': 2,
+               'rank': 5,
+               'sklearn_classifier': RandomForestClassifier(max_features=10, n_estimators=512, n_jobs=1,
+                           random_state=1, warm_start=True)},
+        3: {   'balancing': Balancing(random_state=1, strategy='weighting'),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7d4a3520>,
+               'cost': 0.1377551020408163,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf7f90d970>,
+               'ensemble_weight': 0.04,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf7d4b3e50>,
+               'model_id': 3,
+               'rank': 6,
+               'sklearn_classifier': MLPClassifier(activation='tanh', alpha=1.103855734598575e-05, beta_1=0.999,
+                  beta_2=0.9, early_stopping=True,
+                  hidden_layer_sizes=(229, 229, 229),
+                  learning_rate_init=0.00014375616988222174, max_iter=32,
+                  n_iter_no_change=32, random_state=1, verbose=0, warm_start=True)},
+        5: {   'balancing': Balancing(random_state=1),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7fd1b2e0>,
+               'cost': 0.04846938775510201,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf7fc97a30>,
+               'ensemble_weight': 0.1,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf7fd1b670>,
+               'model_id': 5,
+               'rank': 1,
+               'sklearn_classifier': MLPClassifier(activation='tanh', alpha=0.05476322473700896, beta_1=0.999,
+                  beta_2=0.9, early_stopping=True, hidden_layer_sizes=(136,),
+                  learning_rate_init=0.012698439797907473, max_iter=32,
+                  n_iter_no_change=32, random_state=1, verbose=0, warm_start=True)},
+        6: {   'balancing': Balancing(random_state=1, strategy='weighting'),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7d3ca4c0>,
+               'cost': 0.14795918367346939,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf7fc3e0d0>,
+               'ensemble_weight': 0.04,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf7d3ca3d0>,
+               'model_id': 6,
+               'rank': 7,
+               'sklearn_classifier': QuadraticDiscriminantAnalysis(reg_param=0.585497512341966)},
+        8: {   'balancing': Balancing(random_state=1, strategy='weighting'),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7f4a9700>,
+               'cost': 0.27806122448979587,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf7d37ddc0>,
+               'ensemble_weight': 0.26,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf7f4a95b0>,
+               'model_id': 8,
+               'rank': 9,
+               'sklearn_classifier': SVC(C=0.20435138760822585, cache_size=1822.046875, class_weight='balanced',
+        gamma=7.373654384480026e-05, max_iter=-1.0, random_state=1,
+        tol=4.6066870756479984e-05)},
+        9: {   'balancing': Balancing(random_state=1, strategy='weighting'),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7f90dd90>,
+               'cost': 0.056122448979591844,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf82497790>,
+               'ensemble_weight': 0.02,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf86a81d90>,
+               'model_id': 9,
+               'rank': 2,
+               'sklearn_classifier': MLPClassifier(activation='tanh', alpha=1.0207902638359607e-07, beta_1=0.999,
+                  beta_2=0.9, hidden_layer_sizes=(229,),
+                  learning_rate_init=0.0005867144594731152, max_iter=64,
+                  n_iter_no_change=32, random_state=1, validation_fraction=0.0,
+                  verbose=0, warm_start=True)},
+        10: {   'balancing': Balancing(random_state=1, strategy='weighting'),
+                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7fa72ee0>,
+                'cost': 0.0714285714285714,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf800d7550>,
+                'ensemble_weight': 0.34,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf80050760>,
+                'model_id': 10,
+                'rank': 3,
+                'sklearn_classifier': PassiveAggressiveClassifier(C=0.14833233294431605, average=True,
+                                loss='squared_hinge', max_iter=128, random_state=1,
+                                tol=0.00016482166646253793, warm_start=True)},
+        11: {   'balancing': Balancing(random_state=1, strategy='weighting'),
+                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7dc254f0>,
+                'cost': 0.16836734693877553,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf7f38d7f0>,
+                'ensemble_weight': 0.06,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf7dc252b0>,
+                'model_id': 11,
+                'rank': 8,
+                'sklearn_classifier': KNeighborsClassifier(n_neighbors=3, p=1, weights='distance')},
+        12: {   'balancing': Balancing(random_state=1, strategy='weighting'),
+                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7d365730>,
+                'cost': 0.08418367346938771,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf801a3c10>,
+                'ensemble_weight': 0.1,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf7d3655e0>,
+                'model_id': 12,
+                'rank': 4,
+                'sklearn_classifier': LinearDiscriminantAnalysis(shrinkage=0.3306135150299744, solver='lsqr',
+                               tol=0.0007215763283486354)}}
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 80-82
+
+Get the Score of the final ensemble
+===================================
+
+.. GENERATED FROM PYTHON SOURCE LINES 82-85
+
+.. code-block:: default
+
+
+    predictions = automl.predict(X_test)
+    print("Accuracy score:", sklearn.metrics.accuracy_score(y_test, predictions))
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Accuracy score: 0.9645120405576679
 
 
 
@@ -157,7 +336,7 @@ Data Loading
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  23.900 seconds)
+   **Total running time of the script:** ( 1 minutes  8.335 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_text_preprocessing.py:

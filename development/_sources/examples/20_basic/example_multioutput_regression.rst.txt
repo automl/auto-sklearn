@@ -123,9 +123,9 @@ View the models found by auto-sklearn
 
  .. code-block:: none
 
-              rank  ensemble_weight              type          cost  duration
-    model_id                                                                 
-    4            1              1.0  gaussian_process  2.918683e-08  2.948896
+              rank  ensemble_weight              type          cost   duration
+    model_id                                                                  
+    21           1              1.0  gaussian_process  3.496517e-09  12.271946
 
 
 
@@ -152,15 +152,15 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    {   4: {   'cost': 2.9186827177341e-08,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f4be3e66070>,
-               'ensemble_weight': 1.0,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f4be50f5e80>,
-               'model_id': 4,
-               'rank': 1,
-               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f4be50f5ee0>,
-               'sklearn_regressor': GaussianProcessRegressor(alpha=3.388513090075372e-08,
-                             kernel=RBF(length_scale=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]),
+    {   21: {   'cost': 3.4965165207623272e-09,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf83b4ecd0>,
+                'ensemble_weight': 1.0,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf86a89970>,
+                'model_id': 21,
+                'rank': 1,
+                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fbf83b58220>,
+                'sklearn_regressor': GaussianProcessRegressor(alpha=7.667599309325044e-11,
+                             kernel=RBF(length_scale=[1, 1, 1, 1, 1]),
                              n_restarts_optimizer=10, normalize_y=True,
                              random_state=1)}}
 
@@ -190,7 +190,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.9999999786364273
+    R2 score: 0.9999999991057485
 
 
 
@@ -234,15 +234,15 @@ Get the configuration space
         data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute, Type: UniformInteger, Range: [0, 10], Default: 0
         data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice, Type: Categorical, Choices: {min_df_absolute, min_df_relative}, Default: min_df_absolute
         data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_relative, Type: UniformFloat, Range: [0.01, 1.0], Default: 0.01, on log-scale
-        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_range, Type: UniformInteger, Range: [1, 3], Default: 1
+        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound, Type: UniformInteger, Range: [1, 3], Default: 1
         data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_absolute, Type: UniformInteger, Range: [0, 10], Default: 0
         data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice, Type: Categorical, Choices: {min_df_absolute, min_df_relative}, Default: min_df_absolute
         data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_relative, Type: UniformFloat, Range: [0.01, 1.0], Default: 0.01, on log-scale
-        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_range, Type: UniformInteger, Range: [1, 3], Default: 1
+        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound, Type: UniformInteger, Range: [1, 3], Default: 1
         data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_absolute, Type: UniformInteger, Range: [0, 10], Default: 0
         data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice, Type: Categorical, Choices: {min_df_absolute, min_df_relative}, Default: min_df_absolute
         data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_relative, Type: UniformFloat, Range: [0.01, 1.0], Default: 0.01, on log-scale
-        data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_range, Type: UniformInteger, Range: [1, 3], Default: 1
+        data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_upper_bound, Type: UniformInteger, Range: [1, 3], Default: 1
         data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf, Type: Categorical, Choices: {False, True}, Default: False
         feature_preprocessor:__choice__, Type: Categorical, Choices: {extra_trees_preproc_for_regression, fast_ica, feature_agglomeration, kernel_pca, kitchen_sinks, no_preprocessing, nystroem_sampler, pca, polynomial, random_trees_embedding}, Default: no_preprocessing
         feature_preprocessor:extra_trees_preproc_for_regression:bootstrap, Type: Categorical, Choices: {True, False}, Default: False
@@ -334,15 +334,15 @@ Get the configuration space
         data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute | data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice == 'min_df_absolute'
         data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == 'bag_of_word_encoding'
         data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_relative | data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice == 'min_df_relative'
-        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_range | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == 'bag_of_word_encoding'
+        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == 'bag_of_word_encoding'
         data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_absolute | data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice == 'min_df_absolute'
         data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == 'bag_of_word_encoding_distinct'
         data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_relative | data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice == 'min_df_relative'
-        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_range | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == 'bag_of_word_encoding_distinct'
+        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == 'bag_of_word_encoding_distinct'
         data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_absolute | data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice == 'min_df_absolute'
         data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == 'tfidf_encoding'
         data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_relative | data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice == 'min_df_relative'
-        data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_range | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == 'tfidf_encoding'
+        data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_upper_bound | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == 'tfidf_encoding'
         data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == 'tfidf_encoding'
         feature_preprocessor:extra_trees_preproc_for_regression:bootstrap | feature_preprocessor:__choice__ == 'extra_trees_preproc_for_regression'
         feature_preprocessor:extra_trees_preproc_for_regression:criterion | feature_preprocessor:__choice__ == 'extra_trees_preproc_for_regression'
@@ -443,7 +443,7 @@ Get the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  59.901 seconds)
+   **Total running time of the script:** ( 1 minutes  56.016 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multioutput_regression.py:
