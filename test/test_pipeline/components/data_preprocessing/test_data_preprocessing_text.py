@@ -20,7 +20,7 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
             }
         ).astype({"col1": "string", "col2": "string"})
         BOW_fitted = BOW(
-            ngram_range=1,
+            ngram_upper_bound=1,
             min_df_choice="min_df_absolute",
             min_df_absolute=0,
             min_df_relative=0,
@@ -46,7 +46,7 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
         np.testing.assert_array_equal(Yt, Y)
 
         BOW_fitted = BOW_distinct(
-            ngram_range=1,
+            ngram_upper_bound=1,
             min_df_choice="min_df_absolute",
             min_df_absolute=0,
             min_df_relative=0,
@@ -69,7 +69,7 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
             }
         ).astype({"col1": "string", "col2": "string"})
         X_t = BOW(
-            ngram_range=1,
+            ngram_upper_bound=1,
             min_df_choice="min_df_absolute",
             min_df_absolute=0,
             min_df_relative=0,
@@ -81,7 +81,7 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
         np.testing.assert_array_equal(X_t.toarray(), y)
 
         X_t = BOW_distinct(
-            ngram_range=1,
+            ngram_upper_bound=1,
             min_df_choice="min_df_absolute",
             min_df_absolute=0,
             min_df_relative=0,
@@ -103,7 +103,7 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
             }
         ).astype({"col1": "string", "col2": "string"})
         X_t = BOW(
-            ngram_range=1,
+            ngram_upper_bound=1,
             min_df_choice="min_df_absolute",
             min_df_absolute=0,
             min_df_relative=0,
@@ -113,7 +113,7 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
         self.assertEqual(X_t.shape, (2, 5))
 
         X_t = BOW_distinct(
-            ngram_range=1,
+            ngram_upper_bound=1,
             min_df_choice="min_df_absolute",
             min_df_absolute=0,
             min_df_relative=0,
@@ -130,7 +130,7 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
             }
         ).astype({"col1": "string", "col2": "string"})
         X_t = BOW(
-            ngram_range=1,
+            ngram_upper_bound=1,
             min_df_choice="min_df_absolute",
             min_df_absolute=0,
             min_df_relative=0,
@@ -140,7 +140,7 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
         self.assertEqual(X_t.shape, (3, 5))
 
         X_t = BOW_distinct(
-            ngram_range=1,
+            ngram_upper_bound=1,
             min_df_choice="min_df_absolute",
             min_df_absolute=0,
             min_df_relative=0,
