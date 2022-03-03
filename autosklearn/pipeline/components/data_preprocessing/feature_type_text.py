@@ -5,11 +5,11 @@ from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
 from sklearn.base import BaseEstimator
 
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, BasePipeline
-from autosklearn.pipeline.components.data_preprocessing.feature_reduction.truncated_svd import (  # noqa: 501
-    FeatureReduction,
-)
 from autosklearn.pipeline.components.data_preprocessing.text_encoding import (
     BagOfWordChoice,
+)
+from autosklearn.pipeline.components.data_preprocessing.text_feature_reduction.truncated_svd import (  # noqa: 501
+    TextFeatureReduction,
 )
 from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 
@@ -126,7 +126,10 @@ class TextPreprocessingPipeline(BasePipeline):
                         default_dataset_properties, random_state=self.random_state
                     ),
                 ),
-                ("feature_reduction", FeatureReduction(random_state=self.random_state)),
+                (
+                    "text_feature_reduction",
+                    TextFeatureReduction(random_state=self.random_state),
+                ),
             ]
         )
         return steps
