@@ -325,7 +325,7 @@ class FeatureValidator(BaseEstimator):
                 else:
                     raise ValueError(
                         "Input Column {} has unsupported dtype {}. "
-                        "Supported column types are categorical/bool/numerical/string dtypes. "
+                        "Supported column types are categorical/bool/numerical/string dtypes. "  # noqa: E501
                         "Make sure your data is formatted in a correct way, "
                         "before feeding it to Auto-Sklearn.".format(
                             column,
