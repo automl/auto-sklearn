@@ -123,9 +123,9 @@ View the models found by auto-sklearn
 
  .. code-block:: none
 
-              rank  ensemble_weight              type          cost   duration
-    model_id                                                                  
-    21           1              1.0  gaussian_process  3.496517e-09  12.271946
+              rank  ensemble_weight              type      cost  duration
+    model_id                                                             
+    17           1              1.0  gaussian_process  0.000635  2.055573
 
 
 
@@ -152,14 +152,14 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    {   21: {   'cost': 3.4965165207623272e-09,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf83b4ecd0>,
+    {   17: {   'cost': 0.0006351259927256381,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fccc4f581c0>,
                 'ensemble_weight': 1.0,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf86a89970>,
-                'model_id': 21,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fccc5243100>,
+                'model_id': 17,
                 'rank': 1,
-                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fbf83b58220>,
-                'sklearn_regressor': GaussianProcessRegressor(alpha=7.667599309325044e-11,
+                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fccc9b3a4f0>,
+                'sklearn_regressor': GaussianProcessRegressor(alpha=0.01360809010989745,
                              kernel=RBF(length_scale=[1, 1, 1, 1, 1]),
                              n_restarts_optimizer=10, normalize_y=True,
                              random_state=1)}}
@@ -190,7 +190,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.9999999991057485
+    R2 score: 0.9994868491377081
 
 
 
@@ -229,7 +229,6 @@ Get the configuration space
         data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution, Type: Categorical, Choices: {normal, uniform}, Default: normal
         data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max, Type: UniformFloat, Range: [0.7, 0.999], Default: 0.75
         data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min, Type: UniformFloat, Range: [0.001, 0.3], Default: 0.25
-        data_preprocessor:feature_type:text_transformer:feature_reduction:n_components, Type: UniformInteger, Range: [1, 10000], Default: 100, on log-scale
         data_preprocessor:feature_type:text_transformer:text_encoding:__choice__, Type: Categorical, Choices: {bag_of_word_encoding, bag_of_word_encoding_distinct, tfidf_encoding}, Default: bag_of_word_encoding
         data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute, Type: UniformInteger, Range: [0, 10], Default: 0
         data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice, Type: Categorical, Choices: {min_df_absolute, min_df_relative}, Default: min_df_absolute
@@ -244,6 +243,7 @@ Get the configuration space
         data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_relative, Type: UniformFloat, Range: [0.01, 1.0], Default: 0.01, on log-scale
         data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_upper_bound, Type: UniformInteger, Range: [1, 3], Default: 1
         data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf, Type: Categorical, Choices: {False, True}, Default: False
+        data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components, Type: UniformInteger, Range: [1, 10000], Default: 100, on log-scale
         feature_preprocessor:__choice__, Type: Categorical, Choices: {extra_trees_preproc_for_regression, fast_ica, feature_agglomeration, kernel_pca, kitchen_sinks, no_preprocessing, nystroem_sampler, pca, polynomial, random_trees_embedding}, Default: no_preprocessing
         feature_preprocessor:extra_trees_preproc_for_regression:bootstrap, Type: Categorical, Choices: {True, False}, Default: False
         feature_preprocessor:extra_trees_preproc_for_regression:criterion, Type: Categorical, Choices: {mse, friedman_mse, mae}, Default: mse
@@ -329,7 +329,6 @@ Get the configuration space
         data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == 'quantile_transformer'
         data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == 'robust_scaler'
         data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == 'robust_scaler'
-        data_preprocessor:feature_type:text_transformer:feature_reduction:n_components | data_preprocessor:__choice__ == 'feature_type'
         data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ | data_preprocessor:__choice__ == 'feature_type'
         data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute | data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice == 'min_df_absolute'
         data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == 'bag_of_word_encoding'
@@ -344,6 +343,7 @@ Get the configuration space
         data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_relative | data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice == 'min_df_relative'
         data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_upper_bound | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == 'tfidf_encoding'
         data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == 'tfidf_encoding'
+        data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components | data_preprocessor:__choice__ == 'feature_type'
         feature_preprocessor:extra_trees_preproc_for_regression:bootstrap | feature_preprocessor:__choice__ == 'extra_trees_preproc_for_regression'
         feature_preprocessor:extra_trees_preproc_for_regression:criterion | feature_preprocessor:__choice__ == 'extra_trees_preproc_for_regression'
         feature_preprocessor:extra_trees_preproc_for_regression:max_depth | feature_preprocessor:__choice__ == 'extra_trees_preproc_for_regression'
@@ -443,7 +443,7 @@ Get the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  56.016 seconds)
+   **Total running time of the script:** ( 2 minutes  3.311 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multioutput_regression.py:

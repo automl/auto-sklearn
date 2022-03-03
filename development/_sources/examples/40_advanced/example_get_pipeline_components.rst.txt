@@ -137,7 +137,7 @@ Predict using the model
 
  .. code-block:: none
 
-    Accuracy score:0.9370629370629371
+    Accuracy score:0.9440559440559441
 
 
 
@@ -179,32 +179,32 @@ model is stored in the ``'estimators'`` list in the dict, along with the
  .. code-block:: none
 
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7fc81580>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fccc0474ac0>,
                'cost': 0.07801418439716312,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf86a6b760>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fccc26ca880>,
                'ensemble_weight': 0.04,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf7fc815e0>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fccc0474b20>,
                'model_id': 2,
                'rank': 5,
                'sklearn_classifier': RandomForestClassifier(max_features=5, n_estimators=512, n_jobs=1,
                            random_state=1, warm_start=True)},
         3: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7ebb4b80>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fccc0a99d00>,
                'cost': 0.07092198581560283,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf99f48eb0>,
-               'ensemble_weight': 0.06,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf7ebb40a0>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fccc5f0efd0>,
+               'ensemble_weight': 0.16,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fccc0a99ac0>,
                'model_id': 3,
                'rank': 4,
                'sklearn_classifier': RandomForestClassifier(max_features=1, min_samples_leaf=2, min_samples_split=20,
                            n_estimators=512, n_jobs=1, random_state=1,
                            warm_start=True)},
         4: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7f46b8e0>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fccc03ed700>,
                'cost': 0.028368794326241176,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf7bced490>,
-               'ensemble_weight': 0.24,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf99f48f70>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fccc0b8d3a0>,
+               'ensemble_weight': 0.18,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fccc2601400>,
                'model_id': 4,
                'rank': 1,
                'sklearn_classifier': MLPClassifier(activation='tanh', alpha=1.103855734598575e-05, beta_1=0.999,
@@ -212,46 +212,45 @@ model is stored in the ``'estimators'`` list in the dict, along with the
                   hidden_layer_sizes=(229, 229, 229),
                   learning_rate_init=0.00014375616988222174, max_iter=32,
                   n_iter_no_change=32, random_state=1, verbose=0, warm_start=True)},
+        5: {   'balancing': Balancing(random_state=1, strategy='weighting'),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fccc29290d0>,
+               'cost': 0.1063829787234043,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fccc078a3d0>,
+               'ensemble_weight': 0.02,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fccc1736cd0>,
+               'model_id': 5,
+               'rank': 6,
+               'sklearn_classifier': KNeighborsClassifier(n_neighbors=4, weights='distance')},
         6: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf8011cac0>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fccc4f584c0>,
                'cost': 0.11347517730496459,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf7dd010a0>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fccc095f6d0>,
                'ensemble_weight': 0.1,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf824977f0>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fccbfe13ac0>,
                'model_id': 6,
                'rank': 7,
-               'sklearn_classifier': SVC(C=100.5905006626969, cache_size=1792.5026041666667,
-        coef0=0.08087614244138486, gamma=0.011333066835975528, kernel='poly',
-        max_iter=-1.0, random_state=1, tol=0.012391313886912093)},
+               'sklearn_classifier': SVC(C=100.5905006626969, cache_size=1762.21875, coef0=0.08087614244138486,
+        gamma=0.011333066835975528, kernel='poly', max_iter=-1.0, random_state=1,
+        tol=0.012391313886912093)},
         7: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7f4e5b80>,
-               'cost': 0.028368794326241176,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf7bced0d0>,
-               'ensemble_weight': 0.32,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf7f4e5640>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fccc0316a30>,
+               'cost': 0.03546099290780147,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fccc0b8d5e0>,
+               'ensemble_weight': 0.28,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fccc03164f0>,
                'model_id': 7,
                'rank': 2,
                'sklearn_classifier': LinearSVC(C=10.369811497206404, class_weight='balanced', dual=False,
               intercept_scaling=1.0, random_state=1, tol=0.0015130257264171173)},
         8: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf7fa722e0>,
-               'cost': 0.099290780141844,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf7f90db80>,
-               'ensemble_weight': 0.06,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf7e9051f0>,
-               'model_id': 8,
-               'rank': 6,
-               'sklearn_classifier': LinearDiscriminantAnalysis(shrinkage=0.6586859208621497, solver='lsqr',
-                               tol=0.0009163498625960834)},
-        9: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbf80081430>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fccc29f28b0>,
                'cost': 0.04255319148936165,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbf86abf0d0>,
-               'ensemble_weight': 0.18,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbf80081280>,
-               'model_id': 9,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fccc9b36e20>,
+               'ensemble_weight': 0.22,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fccc29f2640>,
+               'model_id': 8,
                'rank': 3,
-               'sklearn_classifier': QuadraticDiscriminantAnalysis(reg_param=0.04035645497808893)}}
+               'sklearn_classifier': LinearDiscriminantAnalysis(tol=0.010552900863349885)}}
 
 
 
@@ -321,7 +320,7 @@ runhistory.runhistory.html#smac.runhistory.runhistory.RunHistory>`_.
 
  .. code-block:: none
 
-    <smac.runhistory.runhistory.RunHistory object at 0x7fbf7fabfbb0>
+    <smac.runhistory.runhistory.RunHistory object at 0x7fccbfbe2a30>
 
 
 
@@ -378,31 +377,31 @@ Let's iterative over all entries
 
     #########
     RunKey(config_id=1, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.07801418439716312, time=2.192732095718384, status=<StatusType.SUCCESS: 1>, starttime=1646214681.294051, endtime=1646214683.511115, additional_info={'duration': 2.0673282146453857, 'num_run': 2, 'train_loss': 0.0, 'configuration_origin': 'Initial design'})
+    RunValue(cost=0.07801418439716312, time=2.02372670173645, status=<StatusType.SUCCESS: 1>, starttime=1646312705.383869, endtime=1646312707.4281168, additional_info={'duration': 1.9291691780090332, 'num_run': 2, 'train_loss': 0.0, 'configuration_origin': 'Initial design'})
     #########
     RunKey(config_id=2, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.07092198581560283, time=1.943786859512329, status=<StatusType.SUCCESS: 1>, starttime=1646214683.585221, endtime=1646214685.5581932, additional_info={'duration': 1.8158631324768066, 'num_run': 3, 'train_loss': 0.06315789473684208, 'configuration_origin': 'Initial design'})
+    RunValue(cost=0.07092198581560283, time=1.8177213668823242, status=<StatusType.SUCCESS: 1>, starttime=1646312707.4895985, endtime=1646312709.3294382, additional_info={'duration': 1.7215559482574463, 'num_run': 3, 'train_loss': 0.06315789473684208, 'configuration_origin': 'Initial design'})
     #########
     RunKey(config_id=3, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.028368794326241176, time=1.9911901950836182, status=<StatusType.SUCCESS: 1>, starttime=1646214685.6880057, endtime=1646214687.7060144, additional_info={'duration': 1.8962757587432861, 'num_run': 4, 'train_loss': 0.04210526315789476, 'configuration_origin': 'Initial design'})
+    RunValue(cost=0.028368794326241176, time=1.8226006031036377, status=<StatusType.SUCCESS: 1>, starttime=1646312709.4358618, endtime=1646312711.2806704, additional_info={'duration': 1.7552556991577148, 'num_run': 4, 'train_loss': 0.04210526315789476, 'configuration_origin': 'Initial design'})
     #########
     RunKey(config_id=4, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.1063829787234043, time=1.0168886184692383, status=<StatusType.SUCCESS: 1>, starttime=1646214687.8514278, endtime=1646214688.8927488, additional_info={'duration': 0.9284582138061523, 'num_run': 5, 'train_loss': 0.0, 'configuration_origin': 'Initial design'})
+    RunValue(cost=0.1063829787234043, time=0.8597655296325684, status=<StatusType.SUCCESS: 1>, starttime=1646312711.418272, endtime=1646312712.2999582, additional_info={'duration': 0.7930433750152588, 'num_run': 5, 'train_loss': 0.0, 'configuration_origin': 'Initial design'})
     #########
     RunKey(config_id=5, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.11347517730496459, time=0.845081090927124, status=<StatusType.SUCCESS: 1>, starttime=1646214689.0646117, endtime=1646214689.9382558, additional_info={'duration': 0.7569999694824219, 'num_run': 6, 'train_loss': 0.09122807017543855, 'configuration_origin': 'Initial design'})
+    RunValue(cost=0.11347517730496459, time=0.7147548198699951, status=<StatusType.SUCCESS: 1>, starttime=1646312712.4536586, endtime=1646312713.1886683, additional_info={'duration': 0.6462123394012451, 'num_run': 6, 'train_loss': 0.09122807017543855, 'configuration_origin': 'Initial design'})
     #########
     RunKey(config_id=6, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.028368794326241176, time=1.0978055000305176, status=<StatusType.SUCCESS: 1>, starttime=1646214693.3199108, endtime=1646214694.4436302, additional_info={'duration': 0.998680830001831, 'num_run': 7, 'train_loss': 0.028070175438596467, 'configuration_origin': 'Random Search (sorted)'})
+    RunValue(cost=0.03546099290780147, time=0.9724717140197754, status=<StatusType.SUCCESS: 1>, starttime=1646312716.0619025, endtime=1646312717.0569067, additional_info={'duration': 0.898979663848877, 'num_run': 7, 'train_loss': 0.007017543859649145, 'configuration_origin': 'Random Search (sorted)'})
     #########
     RunKey(config_id=7, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.099290780141844, time=1.0014088153839111, status=<StatusType.SUCCESS: 1>, starttime=1646214694.672217, endtime=1646214695.699917, additional_info={'duration': 0.9135749340057373, 'num_run': 8, 'train_loss': 0.10526315789473684, 'configuration_origin': 'Random Search'})
+    RunValue(cost=0.04255319148936165, time=1.0296573638916016, status=<StatusType.SUCCESS: 1>, starttime=1646312717.2709982, endtime=1646312718.3237958, additional_info={'duration': 0.9560370445251465, 'num_run': 8, 'train_loss': 0.06666666666666665, 'configuration_origin': 'Random Search'})
     #########
     RunKey(config_id=8, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.04255319148936165, time=0.9033880233764648, status=<StatusType.SUCCESS: 1>, starttime=1646214695.9609106, endtime=1646214696.890811, additional_info={'duration': 0.8154199123382568, 'num_run': 9, 'train_loss': 0.05964912280701751, 'configuration_origin': 'Random Search'})
+    RunValue(cost=0.05673758865248224, time=0.749800443649292, status=<StatusType.SUCCESS: 1>, starttime=1646312718.5574684, endtime=1646312719.3295844, additional_info={'duration': 0.6791532039642334, 'num_run': 9, 'train_loss': 0.06315789473684208, 'configuration_origin': 'Random Search'})
     #########
     RunKey(config_id=9, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=1.0, time=0.0, status=<StatusType.STOP: 8>, starttime=1646214700.869933, endtime=1646214700.8699331, additional_info={})
+    RunValue(cost=1.0, time=0.0, status=<StatusType.STOP: 8>, starttime=1646312722.7830963, endtime=1646312722.7830966, additional_info={})
 
 
 
@@ -497,11 +496,11 @@ and the configuration can be looked up in the run history as well:
       'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01,
       'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean',
       'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize',
-      'data_preprocessor:feature_type:text_transformer:feature_reduction:n_components': 100,
       'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding',
       'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 0,
       'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute',
       'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1,
+      'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 100,
       'feature_preprocessor:__choice__': 'pca',
       'feature_preprocessor:pca:keep_variance': 0.9999,
       'feature_preprocessor:pca:whiten': 'False',
@@ -547,11 +546,11 @@ The ``run_value`` contains all output from running the configuration:
  .. code-block:: none
 
     Cost: 0.07801418439716312
-    Time: 2.192732095718384
+    Time: 2.02372670173645
     Status: StatusType.SUCCESS
-    Additional information: {'duration': 2.0673282146453857, 'num_run': 2, 'train_loss': 0.0, 'configuration_origin': 'Initial design'}
-    Start time: 1646214681.294051
-    End time 1646214683.511115
+    Additional information: {'duration': 1.9291691780090332, 'num_run': 2, 'train_loss': 0.0, 'configuration_origin': 'Initial design'}
+    Start time: 1646312705.383869
+    End time 1646312707.4281168
 
 
 
@@ -624,11 +623,11 @@ for the entry with the lowest loss:
       'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'quantile_transformer',
       'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 180,
       'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'uniform',
-      'data_preprocessor:feature_type:text_transformer:feature_reduction:n_components': 100,
       'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding',
       'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 1,
       'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute',
       'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1,
+      'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 100,
       'feature_preprocessor:__choice__': 'pca',
       'feature_preprocessor:pca:keep_variance': 0.7895711479212801,
       'feature_preprocessor:pca:whiten': 'True',
@@ -666,14 +665,14 @@ model_selection.GridSearchCV.html>`_.
  .. code-block:: none
 
     {'mean_test_score': array([0.92198582, 0.92907801, 0.97163121, 0.89361702, 0.88652482,
-           0.97163121, 0.90070922, 0.95744681]), 'mean_fit_time': array([2.1927321 , 1.94378686, 1.9911902 , 1.01688862, 0.84508109,
-           1.0978055 , 1.00140882, 0.90338802]), 'params': [{'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'data_preprocessor:feature_type:text_transformer:feature_reduction:n_components': 100, 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'feature_preprocessor:pca:keep_variance': 0.9999, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 0}, {'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.9331254454871041, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 2, 'classifier:random_forest:min_samples_split': 20, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'none', 'data_preprocessor:feature_type:text_transformer:feature_reduction:n_components': 100, 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'feature_preprocessor:pca:keep_variance': 0.9967857433838874, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.005069923784737444, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 1}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'mlp', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:mlp:activation': 'tanh', 'classifier:mlp:alpha': 1.103855734598575e-05, 'classifier:mlp:batch_size': 'auto', 'classifier:mlp:beta_1': 0.9, 'classifier:mlp:beta_2': 0.999, 'classifier:mlp:early_stopping': 'valid', 'classifier:mlp:epsilon': 1e-08, 'classifier:mlp:hidden_layer_depth': 3, 'classifier:mlp:learning_rate_init': 0.00014375616988222174, 'classifier:mlp:n_iter_no_change': 32, 'classifier:mlp:num_nodes_per_layer': 229, 'classifier:mlp:shuffle': 'True', 'classifier:mlp:solver': 'adam', 'classifier:mlp:tol': 0.0001, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'data_preprocessor:feature_type:text_transformer:feature_reduction:n_components': 100, 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'feature_preprocessor:pca:keep_variance': 0.7895711479212801, 'feature_preprocessor:pca:whiten': 'True', 'classifier:mlp:validation_fraction': 0.1, 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.002766772136115771, 'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 180, 'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'uniform', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 1}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'k_nearest_neighbors', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:k_nearest_neighbors:n_neighbors': 4, 'classifier:k_nearest_neighbors:p': 2, 'classifier:k_nearest_neighbors:weights': 'distance', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'normalize', 'data_preprocessor:feature_type:text_transformer:feature_reduction:n_components': 100, 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'feature_preprocessor:pca:keep_variance': 0.8047274080856589, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.008015420020402715, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 1}, {'balancing:strategy': 'none', 'classifier:__choice__': 'libsvm_svc', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:libsvm_svc:C': 100.5905006626969, 'classifier:libsvm_svc:gamma': 0.011333066835975528, 'classifier:libsvm_svc:kernel': 'poly', 'classifier:libsvm_svc:max_iter': -1, 'classifier:libsvm_svc:shrinking': 'True', 'classifier:libsvm_svc:tol': 0.012391313886912093, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'minmax', 'data_preprocessor:feature_type:text_transformer:feature_reduction:n_components': 100, 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'feature_preprocessor:pca:keep_variance': 0.9290439925152777, 'feature_preprocessor:pca:whiten': 'False', 'classifier:libsvm_svc:coef0': 0.08087614244138486, 'classifier:libsvm_svc:degree': 3, 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.010000000000000004, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 1}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'liblinear_svc', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:liblinear_svc:C': 10.369811497206404, 'classifier:liblinear_svc:dual': 'False', 'classifier:liblinear_svc:fit_intercept': 'True', 'classifier:liblinear_svc:intercept_scaling': 1, 'classifier:liblinear_svc:loss': 'squared_hinge', 'classifier:liblinear_svc:multi_class': 'ovr', 'classifier:liblinear_svc:penalty': 'l2', 'classifier:liblinear_svc:tol': 0.0015130257264171173, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'power_transformer', 'data_preprocessor:feature_type:text_transformer:feature_reduction:n_components': 13, 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'tfidf_encoding', 'feature_preprocessor:pca:keep_variance': 0.7774566169105908, 'feature_preprocessor:pca:whiten': 'True', 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice': 'min_df_relative', 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf': True, 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_relative': 0.12974155932912546}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'lda', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:lda:shrinkage': 'manual', 'classifier:lda:tol': 0.0009163498625960834, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'data_preprocessor:feature_type:text_transformer:feature_reduction:n_components': 284, 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding_distinct', 'feature_preprocessor:pca:keep_variance': 0.9595635959938627, 'feature_preprocessor:pca:whiten': 'True', 'classifier:lda:shrinkage_factor': 0.6586859208621497, 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.00012369958749092219, 'data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max': 0.9347732570321393, 'data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min': 0.023566206395585425, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_absolute': 0}, {'balancing:strategy': 'none', 'classifier:__choice__': 'qda', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:qda:reg_param': 0.04035645497808893, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'power_transformer', 'data_preprocessor:feature_type:text_transformer:feature_reduction:n_components': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding_distinct', 'feature_preprocessor:pca:keep_variance': 0.6043239839074068, 'feature_preprocessor:pca:whiten': 'True', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0002892719221253627, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice': 'min_df_relative', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound': 2, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_relative': 0.024311604755873333}], 'rank_test_scores': array([5, 4, 1, 7, 8, 1, 6, 3]), 'status': ['Success', 'Success', 'Success', 'Success', 'Success', 'Success', 'Success', 'Success'], 'budgets': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'param_balancing:strategy': masked_array(data=['none', 'none', 'weighting', 'weighting', 'none',
+           0.96453901, 0.95744681, 0.94326241]), 'mean_fit_time': array([2.0237267 , 1.81772137, 1.8226006 , 0.85976553, 0.71475482,
+           0.97247171, 1.02965736, 0.74980044]), 'params': [{'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 100, 'feature_preprocessor:pca:keep_variance': 0.9999, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 0}, {'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.9331254454871041, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 2, 'classifier:random_forest:min_samples_split': 20, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'none', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 100, 'feature_preprocessor:pca:keep_variance': 0.9967857433838874, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.005069923784737444, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 1}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'mlp', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:mlp:activation': 'tanh', 'classifier:mlp:alpha': 1.103855734598575e-05, 'classifier:mlp:batch_size': 'auto', 'classifier:mlp:beta_1': 0.9, 'classifier:mlp:beta_2': 0.999, 'classifier:mlp:early_stopping': 'valid', 'classifier:mlp:epsilon': 1e-08, 'classifier:mlp:hidden_layer_depth': 3, 'classifier:mlp:learning_rate_init': 0.00014375616988222174, 'classifier:mlp:n_iter_no_change': 32, 'classifier:mlp:num_nodes_per_layer': 229, 'classifier:mlp:shuffle': 'True', 'classifier:mlp:solver': 'adam', 'classifier:mlp:tol': 0.0001, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 100, 'feature_preprocessor:pca:keep_variance': 0.7895711479212801, 'feature_preprocessor:pca:whiten': 'True', 'classifier:mlp:validation_fraction': 0.1, 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.002766772136115771, 'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 180, 'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'uniform', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 1}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'k_nearest_neighbors', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:k_nearest_neighbors:n_neighbors': 4, 'classifier:k_nearest_neighbors:p': 2, 'classifier:k_nearest_neighbors:weights': 'distance', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'normalize', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 100, 'feature_preprocessor:pca:keep_variance': 0.8047274080856589, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.008015420020402715, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 1}, {'balancing:strategy': 'none', 'classifier:__choice__': 'libsvm_svc', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:libsvm_svc:C': 100.5905006626969, 'classifier:libsvm_svc:gamma': 0.011333066835975528, 'classifier:libsvm_svc:kernel': 'poly', 'classifier:libsvm_svc:max_iter': -1, 'classifier:libsvm_svc:shrinking': 'True', 'classifier:libsvm_svc:tol': 0.012391313886912093, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'minmax', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 100, 'feature_preprocessor:pca:keep_variance': 0.9290439925152777, 'feature_preprocessor:pca:whiten': 'False', 'classifier:libsvm_svc:coef0': 0.08087614244138486, 'classifier:libsvm_svc:degree': 3, 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.010000000000000004, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 1}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'liblinear_svc', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:liblinear_svc:C': 10.369811497206404, 'classifier:liblinear_svc:dual': 'False', 'classifier:liblinear_svc:fit_intercept': 'True', 'classifier:liblinear_svc:intercept_scaling': 1, 'classifier:liblinear_svc:loss': 'squared_hinge', 'classifier:liblinear_svc:multi_class': 'ovr', 'classifier:liblinear_svc:penalty': 'l2', 'classifier:liblinear_svc:tol': 0.0015130257264171173, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'power_transformer', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding_distinct', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 137, 'feature_preprocessor:pca:keep_variance': 0.9677965620214456, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice': 'min_df_relative', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_relative': 0.08656832316003299}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'lda', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:lda:shrinkage': 'None', 'classifier:lda:tol': 0.010552900863349885, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 2, 'feature_preprocessor:pca:keep_variance': 0.5940439727806581, 'feature_preprocessor:pca:whiten': 'True', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0006032458390939325, 'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 1660, 'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'normal', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_relative', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_relative': 0.36019594124973353}, {'balancing:strategy': 'none', 'classifier:__choice__': 'decision_tree', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:decision_tree:criterion': 'gini', 'classifier:decision_tree:max_depth_factor': 0.09679641236056158, 'classifier:decision_tree:max_features': 1.0, 'classifier:decision_tree:max_leaf_nodes': 'None', 'classifier:decision_tree:min_impurity_decrease': 0.0, 'classifier:decision_tree:min_samples_leaf': 12, 'classifier:decision_tree:min_samples_split': 10, 'classifier:decision_tree:min_weight_fraction_leaf': 0.0, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'median', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'tfidf_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 15, 'feature_preprocessor:pca:keep_variance': 0.9889862560610739, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.016731911468974747, 'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 373, 'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'uniform', 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice': 'min_df_relative', 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_upper_bound': 2, 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf': False, 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_relative': 0.0969631806397533}], 'rank_test_scores': array([6, 5, 1, 7, 8, 2, 3, 4]), 'status': ['Success', 'Success', 'Success', 'Success', 'Success', 'Success', 'Success', 'Success'], 'budgets': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'param_balancing:strategy': masked_array(data=['none', 'none', 'weighting', 'weighting', 'none',
                        'weighting', 'weighting', 'none'],
                  mask=[False, False, False, False, False, False, False, False],
            fill_value='N/A',
                 dtype='<U9'), 'param_classifier:__choice__': masked_array(data=['random_forest', 'random_forest', 'mlp',
                        'k_nearest_neighbors', 'libsvm_svc', 'liblinear_svc',
-                       'lda', 'qda'],
+                       'lda', 'decision_tree'],
                  mask=[False, False, False, False, False, False, False, False],
            fill_value='N/A',
                 dtype='<U19'), 'param_data_preprocessor:__choice__': masked_array(data=['feature_type', 'feature_type', 'feature_type',
@@ -702,31 +701,25 @@ model_selection.GridSearchCV.html>`_.
                 dtype=float64), 'param_classifier:bernoulli_nb:fit_prior': masked_array(data=[--, --, --, --, --, --, --, --],
                  mask=[ True,  True,  True,  True,  True,  True,  True,  True],
            fill_value=1e+20,
-                dtype=float64), 'param_classifier:decision_tree:criterion': masked_array(data=[--, --, --, --, --, --, --, --],
-                 mask=[ True,  True,  True,  True,  True,  True,  True,  True],
-           fill_value=1e+20,
-                dtype=float64), 'param_classifier:decision_tree:max_depth_factor': masked_array(data=[--, --, --, --, --, --, --, --],
-                 mask=[ True,  True,  True,  True,  True,  True,  True,  True],
-           fill_value=1e+20,
-                dtype=float64), 'param_classifier:decision_tree:max_features': masked_array(data=[--, --, --, --, --, --, --, --],
-                 mask=[ True,  True,  True,  True,  True,  True,  True,  True],
-           fill_value=1e+20,
-                dtype=float64), 'param_classifier:decision_tree:max_leaf_nodes': masked_array(data=[--, --, --, --, --, --, --, --],
-                 mask=[ True,  True,  True,  True,  True,  True,  True,  True],
-           fill_value=1e+20,
-                dtype=float64), 'param_classifier:decision_tree:min_impurity_decrease': masked_array(data=[--, --, --, --, --, --, --, --],
-                 mask=[ True,  True,  True,  True,  True,  True,  True,  True],
-           fill_value=1e+20,
-                dtype=float64), 'param_classifier:decision_tree:min_samples_leaf': masked_array(data=[--, --, --, --, --, --, --, --],
-                 mask=[ True,  True,  True,  True,  True,  True,  True,  True],
-           fill_value=1e+20,
-                dtype=float64), 'param_classifier:decision_tree:min_samples_split': masked_array(data=[--, --, --, --, --, --, --, --],
-                 mask=[ True,  True,  True,  True,  True,  True,  True,  True],
-           fill_value=1e+20,
-                dtype=float64), 'param_classifier:decision_tree:min_weight_fraction_leaf': masked_array(data=[--, --, --, --, --, --, --, --],
-                 mask=[ True,  True,  True,  True,  True,  True,  True,  True],
-           fill_value=1e+20,
-                dtype=float64), 'param_classifier:extra_trees:bootstrap': masked_array(data=[--, --, --, --, --, --, --, --],
+                dtype=float64), 'param_classifier:decision_tree:criterion': masked_array(data=[--, --, --, --, --, --, --, 'gini'],
+                 mask=[ True,  True,  True,  True,  True,  True,  True, False],
+           fill_value='N/A',
+                dtype='<U32'), 'param_classifier:decision_tree:max_depth_factor': masked_array(data=[--, --, --, --, --, --, --, 0.09679641236056158],
+                 mask=[ True,  True,  True,  True,  True,  True,  True, False],
+           fill_value=1e+20), 'param_classifier:decision_tree:max_features': masked_array(data=[--, --, --, --, --, --, --, 1.0],
+                 mask=[ True,  True,  True,  True,  True,  True,  True, False],
+           fill_value=1e+20), 'param_classifier:decision_tree:max_leaf_nodes': masked_array(data=[--, --, --, --, --, --, --, 'None'],
+                 mask=[ True,  True,  True,  True,  True,  True,  True, False],
+           fill_value='N/A',
+                dtype='<U32'), 'param_classifier:decision_tree:min_impurity_decrease': masked_array(data=[--, --, --, --, --, --, --, 0.0],
+                 mask=[ True,  True,  True,  True,  True,  True,  True, False],
+           fill_value=1e+20), 'param_classifier:decision_tree:min_samples_leaf': masked_array(data=[--, --, --, --, --, --, --, 12.0],
+                 mask=[ True,  True,  True,  True,  True,  True,  True, False],
+           fill_value=1e+20), 'param_classifier:decision_tree:min_samples_split': masked_array(data=[--, --, --, --, --, --, --, 10.0],
+                 mask=[ True,  True,  True,  True,  True,  True,  True, False],
+           fill_value=1e+20), 'param_classifier:decision_tree:min_weight_fraction_leaf': masked_array(data=[--, --, --, --, --, --, --, 0.0],
+                 mask=[ True,  True,  True,  True,  True,  True,  True, False],
+           fill_value=1e+20), 'param_classifier:extra_trees:bootstrap': masked_array(data=[--, --, --, --, --, --, --, --],
                  mask=[ True,  True,  True,  True,  True,  True,  True,  True],
            fill_value=1e+20,
                 dtype=float64), 'param_classifier:extra_trees:criterion': masked_array(data=[--, --, --, --, --, --, --, --],
@@ -790,10 +783,10 @@ model_selection.GridSearchCV.html>`_.
            fill_value=1e+20), 'param_classifier:k_nearest_neighbors:weights': masked_array(data=[--, --, --, 'distance', --, --, --, --],
                  mask=[ True,  True,  True, False,  True,  True,  True,  True],
            fill_value='N/A',
-                dtype='<U32'), 'param_classifier:lda:shrinkage': masked_array(data=[--, --, --, --, --, --, 'manual', --],
+                dtype='<U32'), 'param_classifier:lda:shrinkage': masked_array(data=[--, --, --, --, --, --, 'None', --],
                  mask=[ True,  True,  True,  True,  True,  True, False,  True],
            fill_value='N/A',
-                dtype='<U32'), 'param_classifier:lda:tol': masked_array(data=[--, --, --, --, --, --, 0.0009163498625960834, --],
+                dtype='<U32'), 'param_classifier:lda:tol': masked_array(data=[--, --, --, --, --, --, 0.010552900863349885, --],
                  mask=[ True,  True,  True,  True,  True,  True, False,  True],
            fill_value=1e+20), 'param_classifier:liblinear_svc:C': masked_array(data=[--, --, --, --, --, 10.369811497206404, --, --],
                  mask=[ True,  True,  True,  True,  True, False,  True,  True],
@@ -878,9 +871,10 @@ model_selection.GridSearchCV.html>`_.
                 dtype=float64), 'param_classifier:passive_aggressive:tol': masked_array(data=[--, --, --, --, --, --, --, --],
                  mask=[ True,  True,  True,  True,  True,  True,  True,  True],
            fill_value=1e+20,
-                dtype=float64), 'param_classifier:qda:reg_param': masked_array(data=[--, --, --, --, --, --, --, 0.04035645497808893],
-                 mask=[ True,  True,  True,  True,  True,  True,  True, False],
-           fill_value=1e+20), 'param_classifier:random_forest:bootstrap': masked_array(data=['True', 'True', --, --, --, --, --, --],
+                dtype=float64), 'param_classifier:qda:reg_param': masked_array(data=[--, --, --, --, --, --, --, --],
+                 mask=[ True,  True,  True,  True,  True,  True,  True,  True],
+           fill_value=1e+20,
+                dtype=float64), 'param_classifier:random_forest:bootstrap': masked_array(data=['True', 'True', --, --, --, --, --, --],
                  mask=[False, False,  True,  True,  True,  True,  True,  True],
            fill_value='N/A',
                 dtype='<U32'), 'param_classifier:random_forest:criterion': masked_array(data=['gini', 'gini', --, --, --, --, --, --],
@@ -925,7 +919,7 @@ model_selection.GridSearchCV.html>`_.
            fill_value=1e+20,
                 dtype=float64), 'param_data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': masked_array(data=['one_hot_encoding', 'no_encoding', 'no_encoding',
                        'no_encoding', 'one_hot_encoding', 'no_encoding',
-                       'one_hot_encoding', 'no_encoding'],
+                       'one_hot_encoding', 'encoding'],
                  mask=[False, False, False, False, False, False, False, False],
            fill_value='N/A',
                 dtype='<U16'), 'param_data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': masked_array(data=['minority_coalescer', 'minority_coalescer',
@@ -935,30 +929,30 @@ model_selection.GridSearchCV.html>`_.
                  mask=[False, False, False, False, False, False, False, False],
            fill_value='N/A',
                 dtype='<U18'), 'param_data_preprocessor:feature_type:numerical_transformer:imputation:strategy': masked_array(data=['mean', 'mean', 'most_frequent', 'mean', 'mean',
-                       'mean', 'mean', 'mean'],
+                       'mean', 'most_frequent', 'median'],
                  mask=[False, False, False, False, False, False, False, False],
            fill_value='N/A',
                 dtype='<U13'), 'param_data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': masked_array(data=['standardize', 'none', 'quantile_transformer',
                        'normalize', 'minmax', 'power_transformer',
-                       'robust_scaler', 'power_transformer'],
+                       'quantile_transformer', 'quantile_transformer'],
                  mask=[False, False, False, False, False, False, False, False],
            fill_value='N/A',
-                dtype='<U20'), 'param_data_preprocessor:feature_type:text_transformer:feature_reduction:n_components': masked_array(data=[100, 100, 100, 100, 100, 13, 284, 1],
-                 mask=[False, False, False, False, False, False, False, False],
-           fill_value=999999), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': masked_array(data=['bag_of_word_encoding', 'bag_of_word_encoding',
+                dtype='<U20'), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': masked_array(data=['bag_of_word_encoding', 'bag_of_word_encoding',
                        'bag_of_word_encoding', 'bag_of_word_encoding',
-                       'bag_of_word_encoding', 'tfidf_encoding',
+                       'bag_of_word_encoding',
                        'bag_of_word_encoding_distinct',
-                       'bag_of_word_encoding_distinct'],
+                       'bag_of_word_encoding', 'tfidf_encoding'],
                  mask=[False, False, False, False, False, False, False, False],
            fill_value='N/A',
-                dtype='<U29'), 'param_feature_preprocessor:pca:keep_variance': masked_array(data=[0.9999, 0.9967857433838874, 0.7895711479212801,
-                       0.8047274080856589, 0.9290439925152777,
-                       0.7774566169105908, 0.9595635959938627,
-                       0.6043239839074068],
+                dtype='<U29'), 'param_data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': masked_array(data=[100, 100, 100, 100, 100, 137, 2, 15],
                  mask=[False, False, False, False, False, False, False, False],
-           fill_value=1e+20), 'param_feature_preprocessor:pca:whiten': masked_array(data=['False', 'False', 'True', 'False', 'False', 'True',
-                       'True', 'True'],
+           fill_value=999999), 'param_feature_preprocessor:pca:keep_variance': masked_array(data=[0.9999, 0.9967857433838874, 0.7895711479212801,
+                       0.8047274080856589, 0.9290439925152777,
+                       0.9677965620214456, 0.5940439727806581,
+                       0.9889862560610739],
+                 mask=[False, False, False, False, False, False, False, False],
+           fill_value=1e+20), 'param_feature_preprocessor:pca:whiten': masked_array(data=['False', 'False', 'True', 'False', 'False', 'False',
+                       'True', 'False'],
                  mask=[False, False, False, False, False, False, False, False],
            fill_value='N/A',
                 dtype='<U5'), 'param_classifier:gradient_boosting:n_iter_no_change': masked_array(data=[--, --, --, --, --, --, --, --],
@@ -967,9 +961,10 @@ model_selection.GridSearchCV.html>`_.
                 dtype=float64), 'param_classifier:gradient_boosting:validation_fraction': masked_array(data=[--, --, --, --, --, --, --, --],
                  mask=[ True,  True,  True,  True,  True,  True,  True,  True],
            fill_value=1e+20,
-                dtype=float64), 'param_classifier:lda:shrinkage_factor': masked_array(data=[--, --, --, --, --, --, 0.6586859208621497, --],
-                 mask=[ True,  True,  True,  True,  True,  True, False,  True],
-           fill_value=1e+20), 'param_classifier:libsvm_svc:coef0': masked_array(data=[--, --, --, --, 0.08087614244138486, --, --, --],
+                dtype=float64), 'param_classifier:lda:shrinkage_factor': masked_array(data=[--, --, --, --, --, --, --, --],
+                 mask=[ True,  True,  True,  True,  True,  True,  True,  True],
+           fill_value=1e+20,
+                dtype=float64), 'param_classifier:libsvm_svc:coef0': masked_array(data=[--, --, --, --, 0.08087614244138486, --, --, --],
                  mask=[ True,  True,  True,  True, False,  True,  True,  True],
            fill_value=1e+20), 'param_classifier:libsvm_svc:degree': masked_array(data=[--, --, --, --, 3.0, --, --, --],
                  mask=[ True,  True,  True,  True, False,  True,  True,  True],
@@ -989,51 +984,52 @@ model_selection.GridSearchCV.html>`_.
            fill_value=1e+20,
                 dtype=float64), 'param_data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': masked_array(data=[0.01, 0.005069923784737444, 0.002766772136115771,
                        0.008015420020402715, 0.010000000000000004, --,
-                       0.00012369958749092219, 0.0002892719221253627],
+                       0.0006032458390939325, 0.016731911468974747],
                  mask=[False, False, False, False, False,  True, False, False],
-           fill_value=1e+20), 'param_data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles': masked_array(data=[--, --, 180.0, --, --, --, --, --],
-                 mask=[ True,  True, False,  True,  True,  True,  True,  True],
-           fill_value=1e+20), 'param_data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution': masked_array(data=[--, --, 'uniform', --, --, --, --, --],
-                 mask=[ True,  True, False,  True,  True,  True,  True,  True],
+           fill_value=1e+20), 'param_data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles': masked_array(data=[--, --, 180.0, --, --, --, 1660.0, 373.0],
+                 mask=[ True,  True, False,  True,  True,  True, False, False],
+           fill_value=1e+20), 'param_data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution': masked_array(data=[--, --, 'uniform', --, --, --, 'normal', 'uniform'],
+                 mask=[ True,  True, False,  True,  True,  True, False, False],
            fill_value='N/A',
-                dtype='<U32'), 'param_data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max': masked_array(data=[--, --, --, --, --, --, 0.9347732570321393, --],
-                 mask=[ True,  True,  True,  True,  True,  True, False,  True],
-           fill_value=1e+20), 'param_data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min': masked_array(data=[--, --, --, --, --, --, 0.023566206395585425, --],
-                 mask=[ True,  True,  True,  True,  True,  True, False,  True],
-           fill_value=1e+20), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': masked_array(data=['min_df_absolute', 'min_df_absolute',
-                       'min_df_absolute', 'min_df_absolute',
-                       'min_df_absolute', --, --, --],
-                 mask=[False, False, False, False, False,  True,  True,  True],
-           fill_value='N/A',
-                dtype='<U32'), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': masked_array(data=[1.0, 1.0, 1.0, 1.0, 1.0, --, --, --],
-                 mask=[False, False, False, False, False,  True,  True,  True],
-           fill_value=1e+20), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice': masked_array(data=[--, --, --, --, --, --, 'min_df_absolute',
-                       'min_df_relative'],
-                 mask=[ True,  True,  True,  True,  True,  True, False, False],
-           fill_value='N/A',
-                dtype='<U32'), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound': masked_array(data=[--, --, --, --, --, --, 1.0, 2.0],
-                 mask=[ True,  True,  True,  True,  True,  True, False, False],
-           fill_value=1e+20), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice': masked_array(data=[--, --, --, --, --, 'min_df_relative', --, --],
-                 mask=[ True,  True,  True,  True,  True, False,  True,  True],
-           fill_value='N/A',
-                dtype='<U32'), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_upper_bound': masked_array(data=[--, --, --, --, --, 1.0, --, --],
-                 mask=[ True,  True,  True,  True,  True, False,  True,  True],
-           fill_value=1e+20), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf': masked_array(data=[--, --, --, --, --, 1.0, --, --],
-                 mask=[ True,  True,  True,  True,  True, False,  True,  True],
-           fill_value=1e+20), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': masked_array(data=[0.0, 1.0, 1.0, 1.0, 1.0, --, --, --],
-                 mask=[False, False, False, False, False,  True,  True,  True],
-           fill_value=1e+20), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_relative': masked_array(data=[--, --, --, --, --, --, --, --],
+                dtype='<U32'), 'param_data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max': masked_array(data=[--, --, --, --, --, --, --, --],
                  mask=[ True,  True,  True,  True,  True,  True,  True,  True],
            fill_value=1e+20,
-                dtype=float64), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_absolute': masked_array(data=[--, --, --, --, --, --, 0.0, --],
-                 mask=[ True,  True,  True,  True,  True,  True, False,  True],
-           fill_value=1e+20), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_relative': masked_array(data=[--, --, --, --, --, --, --, 0.024311604755873333],
+                dtype=float64), 'param_data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min': masked_array(data=[--, --, --, --, --, --, --, --],
+                 mask=[ True,  True,  True,  True,  True,  True,  True,  True],
+           fill_value=1e+20,
+                dtype=float64), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': masked_array(data=['min_df_absolute', 'min_df_absolute',
+                       'min_df_absolute', 'min_df_absolute',
+                       'min_df_absolute', --, 'min_df_relative', --],
+                 mask=[False, False, False, False, False,  True, False,  True],
+           fill_value='N/A',
+                dtype='<U32'), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': masked_array(data=[1.0, 1.0, 1.0, 1.0, 1.0, --, 1.0, --],
+                 mask=[False, False, False, False, False,  True, False,  True],
+           fill_value=1e+20), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice': masked_array(data=[--, --, --, --, --, 'min_df_relative', --, --],
+                 mask=[ True,  True,  True,  True,  True, False,  True,  True],
+           fill_value='N/A',
+                dtype='<U32'), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound': masked_array(data=[--, --, --, --, --, 1.0, --, --],
+                 mask=[ True,  True,  True,  True,  True, False,  True,  True],
+           fill_value=1e+20), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice': masked_array(data=[--, --, --, --, --, --, --, 'min_df_relative'],
                  mask=[ True,  True,  True,  True,  True,  True,  True, False],
+           fill_value='N/A',
+                dtype='<U32'), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_upper_bound': masked_array(data=[--, --, --, --, --, --, --, 2.0],
+                 mask=[ True,  True,  True,  True,  True,  True,  True, False],
+           fill_value=1e+20), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf': masked_array(data=[--, --, --, --, --, --, --, 0.0],
+                 mask=[ True,  True,  True,  True,  True,  True,  True, False],
+           fill_value=1e+20), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': masked_array(data=[0.0, 1.0, 1.0, 1.0, 1.0, --, --, --],
+                 mask=[False, False, False, False, False,  True,  True,  True],
+           fill_value=1e+20), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_relative': masked_array(data=[--, --, --, --, --, --, 0.36019594124973353, --],
+                 mask=[ True,  True,  True,  True,  True,  True, False,  True],
+           fill_value=1e+20), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_absolute': masked_array(data=[--, --, --, --, --, --, --, --],
+                 mask=[ True,  True,  True,  True,  True,  True,  True,  True],
+           fill_value=1e+20,
+                dtype=float64), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_relative': masked_array(data=[--, --, --, --, --, 0.08656832316003299, --, --],
+                 mask=[ True,  True,  True,  True,  True, False,  True,  True],
            fill_value=1e+20), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_absolute': masked_array(data=[--, --, --, --, --, --, --, --],
                  mask=[ True,  True,  True,  True,  True,  True,  True,  True],
            fill_value=1e+20,
-                dtype=float64), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_relative': masked_array(data=[--, --, --, --, --, 0.12974155932912546, --, --],
-                 mask=[ True,  True,  True,  True,  True, False,  True,  True],
+                dtype=float64), 'param_data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_relative': masked_array(data=[--, --, --, --, --, --, --, 0.0969631806397533],
+                 mask=[ True,  True,  True,  True,  True,  True,  True, False],
            fill_value=1e+20)}
 
 
@@ -1074,20 +1070,21 @@ The explained variance ratio per stage
 
  .. code-block:: none
 
-    The 0th pipeline has a explained variance of [0.44685232 0.17122959 0.1085501  0.07063243]
-    The 1th pipeline has a explained variance of [0.45954164 0.18010277 0.09814953 0.06334655]
-    The 2th pipeline has a explained variance of [0.44685232 0.17122959]
-    The 3th pipeline has a explained variance of [0.49503611 0.16649281 0.09111888 0.07213284 0.04865917 0.03208923
+    The 0th pipeline has a explained variance of [0.44685232 0.17122959 0.1085501  0.07063243 0.06437417 0.03986668
+     0.02462169 0.01589975 0.01257378 0.00948519 0.00858029]
+    The 1th pipeline has a explained variance of [0.46038401 0.16124884]
+    The 2th pipeline has a explained variance of [0.45954164 0.18010277 0.09814953 0.06334655]
+    The 3th pipeline has a explained variance of [0.98080571 0.01684553]
+    The 4th pipeline has a explained variance of [0.49503611 0.16649281 0.09111888 0.07213284 0.04865917 0.03208923
      0.01851537 0.01223987]
-    The 4th pipeline has a explained variance of [0.98080571 0.01684553]
-    The 5th pipeline has a explained variance of [0.7351491  0.12152617 0.0681006  0.03581372]
-    The 6th pipeline has a explained variance of [4.32956881e-01 1.79057296e-01 1.11737571e-01 6.80724345e-02
+    The 5th pipeline has a explained variance of [4.32956881e-01 1.79057296e-01 1.11737571e-01 6.80724345e-02
      5.94611519e-02 3.70629898e-02 2.38430977e-02 1.49326086e-02
      1.37641366e-02 1.13704890e-02 1.03737258e-02 8.74116751e-03
      7.57629717e-03 4.86528503e-03 3.32225143e-03 2.55773043e-03
      2.20759805e-03 1.88675402e-03 1.36245140e-03 1.03409213e-03
      8.39749085e-04 7.91287172e-04 6.75655689e-04 5.42961621e-04
      5.02641737e-04 2.07827509e-04 1.74597367e-04]
+    The 6th pipeline has a explained variance of [0.76699224 0.17152095]
 
 
 
@@ -1095,7 +1092,7 @@ The explained variance ratio per stage
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  28.790 seconds)
+   **Total running time of the script:** ( 0 minutes  24.409 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_get_pipeline_components.py:
