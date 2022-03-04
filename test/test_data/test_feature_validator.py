@@ -6,7 +6,6 @@ import sklearn.model_selection
 from autosklearn.data.feature_validator import FeatureValidator
 from pandas.api.types import is_categorical_dtype, is_numeric_dtype, is_string_dtype
 from scipy import sparse
-import warnings
 
 
 # Fixtures to be used in this class. By default all elements have 100 datapoints
