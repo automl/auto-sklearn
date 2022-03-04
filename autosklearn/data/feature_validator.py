@@ -308,9 +308,9 @@ class FeatureValidator(BaseEstimator):
                     warnings.warn(
                         f"Input Column {column} has generic type object. "
                         f"Autosklearn will treat this column as string. "
-                        f"Please ensure that this setting is suitable for your task."
+                        f"Please ensure that this setting is suitable for your task.",
+                        UserWarning
                     )
-                    X[column] = X[column].astype("string")
                     feat_type[column] = "string"
                 elif pd.core.dtypes.common.is_datetime_or_timedelta_dtype(
                     X[column].dtype
@@ -325,7 +325,7 @@ class FeatureValidator(BaseEstimator):
                 else:
                     raise ValueError(
                         "Input Column {} has unsupported dtype {}. "
-                        "Supported column types are categorical/bool/numerical/string dtypes. "  # noqa: E501
+                        "Supported column types are categorical/bool/numerical dtypes. "
                         "Make sure your data is formatted in a correct way, "
                         "before feeding it to Auto-Sklearn.".format(
                             column,
