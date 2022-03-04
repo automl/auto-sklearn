@@ -3,9 +3,10 @@ import pandas as pd
 import pytest
 import sklearn.datasets
 import sklearn.model_selection
-from autosklearn.data.feature_validator import FeatureValidator
 from pandas.api.types import is_categorical_dtype, is_numeric_dtype, is_string_dtype
 from scipy import sparse
+
+from autosklearn.data.feature_validator import FeatureValidator
 
 
 # Fixtures to be used in this class. By default all elements have 100 datapoints
@@ -532,17 +533,20 @@ def test_object_columns():
             "dummy_array": [array] * 4,
             "dummy_string": [dummy_stirng] * 4,
             "type_mix_column": [dummy_stirng, dummy_object, array, lst],
-            "cat_column": ["a", "b", "a", "b"]
+            "cat_column": ["a", "b", "a", "b"],
         }
     )
     df["cat_column"] = df["cat_column"].astype("category")
 
-    with pytest.warns(UserWarning, match=r'Input Column dummy_object has '
-                                         r'generic type object. '
-                                         r'Autosklearn will treat '
-                                         r'this column as string. '
-                                         r'Please ensure that this setting '
-                                         r'is suitable for your task.'):
+    with pytest.warns(
+        UserWarning,
+        match=r"Input Column dummy_object has "
+        r"generic type object. "
+        r"Autosklearn will treat "
+        r"this column as string. "
+        r"Please ensure that this setting "
+        r"is suitable for your task.",
+    ):
         validator = FeatureValidator()
         feat_type = validator.get_feat_type_from_columns(df)
 
@@ -552,7 +556,7 @@ def test_object_columns():
         "dummy_array": "string",
         "dummy_string": "string",
         "type_mix_column": "string",
-        "cat_column": "categorical"
+        "cat_column": "categorical",
     }
 
     assert feat_type == column_types

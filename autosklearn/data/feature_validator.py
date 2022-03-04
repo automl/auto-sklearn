@@ -309,7 +309,7 @@ class FeatureValidator(BaseEstimator):
                         f"Input Column {column} has generic type object. "
                         f"Autosklearn will treat this column as string. "
                         f"Please ensure that this setting is suitable for your task.",
-                        UserWarning
+                        UserWarning,
                     )
                     feat_type[column] = "string"
                 elif pd.core.dtypes.common.is_datetime_or_timedelta_dtype(
