@@ -6,7 +6,7 @@ Testing
 * marker - ``pytest.mark.todo``` to mark a test which xfails as it's todo
 * fixtures - All fixtures in "test/fixtures" are known in every test file
 """
-from typing import Iterator, List, Optional
+from typing import Any, Iterator, List, Optional
 
 import re
 from pathlib import Path
@@ -76,4 +76,39 @@ def pytest_sessionfinish(session: Session, exitstatus: ExitCode) -> None:
         print(child, child.cmdline())
 
 
+Config = Any  # Can't find import?
+
+
+def pytest_collection_modifyitems(
+    session: Session,
+    config: Config,
+    items: List[Item],
+) -> None:
+    """Modifys the colelction of tests that are captured"""
+    if config.getoption("--fast-only"):
+        skip_slow = pytest.mark.skip(reason="Test is marked as slow")
+        for item in items:
+            if "slow" in item.keywords:
+                item.add_marker(skip_slow)
+
+
 pytest_plugins = fixture_modules()
+
+
+Parser = Any  # Can't find import?
+
+
+def pytest_addoption(parser: Parser) -> None:
+    """
+
+    Parameters
+    ----------
+    parser : Parser
+        The parser to add options to
+    """
+    parser.addoption(
+        "--fast-only",
+        action="store_true",
+        default=False,
+        help="Disable tests marked as slow",
+    )
