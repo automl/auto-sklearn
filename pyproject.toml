@@ -147,6 +147,7 @@ module = [
     "setuptools.*",
     "pkg_resources.*",
     "yaml.*",
+    "psutil.*"
 ]
 ignore_missing_imports = true
 

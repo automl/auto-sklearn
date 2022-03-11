@@ -1,3 +1,4 @@
+from typing
 import os
 import shutil
 import time
@@ -34,7 +35,6 @@ def automl_stub(request):
 
 @pytest.fixture(scope="function")
 def backend(request):
-
     test_dir = os.path.dirname(__file__)
     tmp = os.path.join(
         test_dir, ".tmp__%s__%s" % (request.module.__name__, request.node.name)
@@ -165,3 +165,55 @@ def pytest_sessionfinish(session, exitstatus):
     proc = psutil.Process()
     for child in proc.children(recursive=True):
         print(child, child.cmdline())
+
+
+def walk(path: Path, include: Optional[str] = None) -> Iterator[Path]:
+    """Yeilds all files, iterating over directory
+
+    Parameters
+    ----------
+    path: Path
+        The root path to walk from
+
+    include: Optional[str] = None
+        Include only directories which match this string
+
+    Returns
+    -------
+    Iterator[Path]
+        All file paths that could be found from this walk
+    """
+    for p in path.iterdir():
+        if p.is_dir():
+            if include is None or re.match(include, p.name):
+                yield from walk(p, include)
+        else:
+            yield p.resolve()
+
+
+def is_fixture(path: Path) -> bool:
+    """Whether a path is a fixture"""
+    return path.name.endswith("fixtures.py")
+
+
+def as_module(path: Path) -> str:
+    """Convert a path to a module as seen from here"""
+    root = here.parent.parent
+    parts = path.relative_to(root).parts
+    return ".".join(parts).replace(".py", "")
+
+
+def fixture_modules() -> List[str]:
+    """Get all fixture modules"""
+    fixtures_folder = here.parent / "fixtures"
+    return [
+        as_module(path) for path in walk(fixtures_folder) if path.name.endswith(".py")
+    ]
+
+pytest_plugins += fixture_modules()
+
+def pytest_runtest_setup(item: Item) -> None:
+    """Run before each test"""
+    todos = [mark for mark in item.iter_markers(name="todo")]
+    if todos:
+        pytest.xfail(f"Test needs to be implemented, {item.location}")
