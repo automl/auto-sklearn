@@ -1,30 +1,36 @@
-from typing
+from typing import Iterator, List, Optional
+
 import os
+import re
 import shutil
 import time
 import unittest.mock
+from pathlib import Path
 
 import psutil
 import pytest
 from dask.distributed import Client, get_client
+from pytest import FixtureRequest, Item, Session, ExitCode
 
 from autosklearn.automl import AutoML
 from autosklearn.automl_common.common.utils.backend import Backend, create
 
+HERE = Path(__file__)
+
 
 class AutoMLStub(AutoML):
-    def __init__(self):
+    def __init__(self) -> None:
         self.__class__ = AutoML
         self._task = None
         self._dask_client = None
         self._is_dask_client_internally_created = False
 
-    def __del__(self):
+    def __del__(self) -> None:
         pass
 
 
 @pytest.fixture(scope="function")
-def automl_stub(request):
+def automl_stub(request: FixtureRequest) -> AutoMLStub:
     automl = AutoMLStub()
     automl._seed = 42
     automl._backend = unittest.mock.Mock(spec=Backend)
@@ -34,7 +40,7 @@ def automl_stub(request):
 
 
 @pytest.fixture(scope="function")
-def backend(request):
+def backend(request: FixtureRequest) -> Backend:
     test_dir = os.path.dirname(__file__)
     tmp = os.path.join(
         test_dir, ".tmp__%s__%s" % (request.module.__name__, request.node.name)
@@ -73,11 +79,11 @@ def backend(request):
 
 
 @pytest.fixture(scope="function")
-def tmp_dir(request):
+def tmp_dir(request: FixtureRequest) -> str:
     return _dir_fixture("tmp", request)
 
 
-def _dir_fixture(dir_type, request):
+def _dir_fixture(dir_type: str, request: FixtureRequest) -> str:
     test_dir = os.path.dirname(__file__)
 
     dirname = f".{dir_type}__{request.module.__name__}__{request.node.name}"
@@ -109,7 +115,7 @@ def _dir_fixture(dir_type, request):
 
 
 @pytest.fixture(scope="function")
-def dask_client(request):
+def dask_client(request: FixtureRequest) -> Client:
     """
     Create a dask client with two workers.
 
@@ -135,7 +141,7 @@ def dask_client(request):
 
 
 @pytest.fixture(scope="function")
-def dask_client_single_worker(request):
+def dask_client_single_worker(request: FixtureRequest) -> Client:
     """
     Same as above, but only with a single worker.
 
@@ -160,11 +166,6 @@ def dask_client_single_worker(request):
 
     return client
 
-
-def pytest_sessionfinish(session, exitstatus):
-    proc = psutil.Process()
-    for child in proc.children(recursive=True):
-        print(child, child.cmdline())
 
 
 def walk(path: Path, include: Optional[str] = None) -> Iterator[Path]:
@@ -198,22 +199,30 @@ def is_fixture(path: Path) -> bool:
 
 def as_module(path: Path) -> str:
     """Convert a path to a module as seen from here"""
-    root = here.parent.parent
+    root = HERE.parent.parent
     parts = path.relative_to(root).parts
     return ".".join(parts).replace(".py", "")
 
 
 def fixture_modules() -> List[str]:
     """Get all fixture modules"""
-    fixtures_folder = here.parent / "fixtures"
+    fixtures_folder = HERE.parent / "fixtures"
     return [
         as_module(path) for path in walk(fixtures_folder) if path.name.endswith(".py")
     ]
 
-pytest_plugins += fixture_modules()
+
+pytest_plugins = fixture_modules()
+
 
 def pytest_runtest_setup(item: Item) -> None:
     """Run before each test"""
     todos = [mark for mark in item.iter_markers(name="todo")]
     if todos:
         pytest.xfail(f"Test needs to be implemented, {item.location}")
+
+
+def pytest_sessionfinish(session: Session, exitstatus: ExitCode) -> None:
+    proc = psutil.Process()
+    for child in proc.children(recursive=True):
+        print(child, child.cmdline())
