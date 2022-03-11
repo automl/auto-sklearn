@@ -55,17 +55,6 @@ from test.test_automl.automl_utils import (
 )
 
 
-class AutoMLStub(AutoML):
-    def __init__(self, classifier: bool = False):
-        self._task = None
-        self._dask_client = None
-        self._is_dask_client_internally_created = False
-        self._classifier = classifier
-
-    def __del__(self):
-        pass
-
-
 def test_fit(dask_client):
     X_train, Y_train, X_test, Y_test = putil.get_dataset("iris")
     automl = autosklearn.automl.AutoML(
