@@ -1,4 +1,4 @@
-from typing import Iterator, List, Optional
+from typing import Any, Iterator, List, Optional, Callable
 
 import os
 import re
@@ -10,7 +10,7 @@ from pathlib import Path
 import psutil
 import pytest
 from dask.distributed import Client, get_client
-from pytest import FixtureRequest, Item, Session, ExitCode
+from pytest import ExitCode, FixtureRequest, Item, Session
 
 from autosklearn.automl import AutoML
 from autosklearn.automl_common.common.utils.backend import Backend, create
@@ -60,8 +60,8 @@ def backend(request: FixtureRequest) -> Backend:
         temporary_directory=tmp, output_directory=None, prefix="auto-sklearn"
     )
 
-    def get_finalizer(tmp_dir):
-        def session_run_at_end():
+    def get_finalizer(tmp_dir: str) -> Callable:
+        def session_run_at_end() -> None:
             for dir in (tmp_dir,):
                 for i in range(10):
                     if os.path.exists(dir):
@@ -97,8 +97,8 @@ def _dir_fixture(dir_type: str, request: FixtureRequest) -> str:
             except OSError:
                 pass
 
-    def get_finalizer(dir):
-        def session_run_at_end():
+    def get_finalizer(dir: str) -> Callable:
+        def session_run_at_end() -> None:
             for i in range(10):
                 if os.path.exists(dir):
                     try:
@@ -125,8 +125,8 @@ def dask_client(request: FixtureRequest) -> Client:
     client = Client(n_workers=2, threads_per_worker=1, processes=False)
     print("Started Dask client={}\n".format(client))
 
-    def get_finalizer(address):
-        def session_run_at_end():
+    def get_finalizer(address: Any) -> Callable:
+        def session_run_at_end() -> None:
             client = get_client(address)
             print("Closed Dask client={}\n".format(client))
             client.shutdown()
@@ -152,8 +152,8 @@ def dask_client_single_worker(request: FixtureRequest) -> Client:
     client = Client(n_workers=1, threads_per_worker=1, processes=False)
     print("Started Dask client={}\n".format(client))
 
-    def get_finalizer(address):
-        def session_run_at_end():
+    def get_finalizer(address: Any) -> Callable:
+        def session_run_at_end() -> None:
             client = get_client(address)
             print("Closed Dask client={}\n".format(client))
             client.shutdown()
@@ -165,7 +165,6 @@ def dask_client_single_worker(request: FixtureRequest) -> Client:
     request.addfinalizer(get_finalizer(client.scheduler_info()["address"]))
 
     return client
-
 
 
 def walk(path: Path, include: Optional[str] = None) -> Iterator[Path]:
