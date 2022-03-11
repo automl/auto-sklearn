@@ -114,59 +114,6 @@ def _dir_fixture(dir_type: str, request: FixtureRequest) -> str:
     return dir
 
 
-@pytest.fixture(scope="function")
-def dask_client(request: FixtureRequest) -> Client:
-    """
-    Create a dask client with two workers.
-
-    Workers are in subprocesses to not create deadlocks with the pynisher and logging.
-    """
-
-    client = Client(n_workers=2, threads_per_worker=1, processes=False)
-    print("Started Dask client={}\n".format(client))
-
-    def get_finalizer(address: Any) -> Callable:
-        def session_run_at_end() -> None:
-            client = get_client(address)
-            print("Closed Dask client={}\n".format(client))
-            client.shutdown()
-            client.close()
-            del client
-
-        return session_run_at_end
-
-    request.addfinalizer(get_finalizer(client.scheduler_info()["address"]))
-
-    return client
-
-
-@pytest.fixture(scope="function")
-def dask_client_single_worker(request: FixtureRequest) -> Client:
-    """
-    Same as above, but only with a single worker.
-
-    Using this might cause deadlocks with the pynisher and the logging module. However,
-    it is used very rarely to avoid this issue as much as possible.
-    """
-
-    client = Client(n_workers=1, threads_per_worker=1, processes=False)
-    print("Started Dask client={}\n".format(client))
-
-    def get_finalizer(address: Any) -> Callable:
-        def session_run_at_end() -> None:
-            client = get_client(address)
-            print("Closed Dask client={}\n".format(client))
-            client.shutdown()
-            client.close()
-            del client
-
-        return session_run_at_end
-
-    request.addfinalizer(get_finalizer(client.scheduler_info()["address"]))
-
-    return client
-
-
 def walk(path: Path, include: Optional[str] = None) -> Iterator[Path]:
     """Yeilds all files, iterating over directory
 
