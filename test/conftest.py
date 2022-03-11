@@ -13,11 +13,9 @@ from pathlib import Path
 
 import psutil
 import pytest
-from pytest import ExitCode, FixtureRequest, Item, Session
-
+from pytest import ExitCode, Item, Session
 
 HERE = Path(__file__)
-
 
 
 def walk(path: Path, include: Optional[str] = None) -> Iterator[Path]:
@@ -72,6 +70,7 @@ def pytest_runtest_setup(item: Item) -> None:
 
 
 def pytest_sessionfinish(session: Session, exitstatus: ExitCode) -> None:
+    """Clean up any chil processes"""
     proc = psutil.Process()
     for child in proc.children(recursive=True):
         print(child, child.cmdline())
