@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional, Tuple, Union, cast
 
 import logging
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -304,16 +305,13 @@ class FeatureValidator(BaseEstimator):
             # TypeError: data type not understood in certain pandas types
             elif not is_numeric_dtype(X[column]):
                 if X[column].dtype.name == "object":
-                    raise ValueError(
-                        f"Input Column {column} has invalid type object. "
-                        "Cast it to a valid dtype before using it in Auto-Sklearn. "
-                        "Valid types are numerical, categorical or boolean. "
-                        "You can cast it to a valid dtype using "
-                        "pandas.Series.astype ."
-                        "If working with string objects, the following "
-                        "tutorial illustrates how to work with text data: "
-                        "https://scikit-learn.org/stable/tutorial/text_analytics/working_with_text_data.html"  # noqa: E501
+                    warnings.warn(
+                        f"Input Column {column} has generic type object. "
+                        f"Autosklearn will treat this column as string. "
+                        f"Please ensure that this setting is suitable for your task.",
+                        UserWarning,
                     )
+                    feat_type[column] = "string"
                 elif pd.core.dtypes.common.is_datetime_or_timedelta_dtype(
                     X[column].dtype
                 ):

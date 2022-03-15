@@ -383,7 +383,6 @@ def test_no_new_category_after_fit():
 def test_featurevalidator_new_data_after_fit(
     openml_id, train_data_type, test_data_type
 ):
-
     # List is currently not supported as infer_objects
     # cast list objects to type objects
     if train_data_type == "list" or test_data_type == "list":
@@ -436,7 +435,6 @@ def test_featurevalidator_new_data_after_fit(
     ),
 )
 def test_list_to_dataframe(openml_id):
-
     X_pandas, y_pandas = sklearn.datasets.fetch_openml(
         data_id=openml_id, return_X_y=True, as_frame=True
     )
@@ -509,3 +507,56 @@ def test_unsupported_dataframe_sparse():
         ValueError, match=r"Auto-sklearn does not yet support sparse pandas"
     ):
         validator.fit(df)
+
+
+def test_object_columns():
+    class Dummy:
+        def __init__(self, x):
+            self.x = x
+
+        def __call__(self):
+            print(self.x)
+
+        def dummy_func(self):
+            for i in range(100):
+                print("do something 100 times")
+
+    dummy_object = Dummy(1)
+    lst = [1, 2, 3]
+    array = np.array([1, 2, 3])
+    dummy_stirng = "dummy string"
+
+    df = pd.DataFrame(
+        {
+            "dummy_object": [dummy_object] * 4,
+            "dummy_lst": [lst] * 4,
+            "dummy_array": [array] * 4,
+            "dummy_string": [dummy_stirng] * 4,
+            "type_mix_column": [dummy_stirng, dummy_object, array, lst],
+            "cat_column": ["a", "b", "a", "b"],
+        }
+    )
+    df["cat_column"] = df["cat_column"].astype("category")
+
+    with pytest.warns(
+        UserWarning,
+        match=r"Input Column dummy_object has "
+        r"generic type object. "
+        r"Autosklearn will treat "
+        r"this column as string. "
+        r"Please ensure that this setting "
+        r"is suitable for your task.",
+    ):
+        validator = FeatureValidator()
+        feat_type = validator.get_feat_type_from_columns(df)
+
+    column_types = {
+        "dummy_object": "string",
+        "dummy_lst": "string",
+        "dummy_array": "string",
+        "dummy_string": "string",
+        "type_mix_column": "string",
+        "cat_column": "categorical",
+    }
+
+    assert feat_type == column_types
