@@ -322,10 +322,10 @@ class AutoSklearnEstimator(BaseEstimator):
                     Subsampling takes into account classification labels and stratifies
                     accordingly. We guarantee that at least one occurrence of each
                     label is included in the sampled set.
-        
+
         allow_string_features: bool = True
             Allows to disable the textpreprocssing used by autosklearn. On default the
-            textpreprocessing is enabled.  
+            textpreprocessing is enabled.
 
         Attributes
         ----------

@@ -306,8 +306,10 @@ class FeatureValidator(BaseEstimator):
                     feat_type[column] = "string"
                 else:
                     feat_type[column] = "categorical"
-                    warnings.warn(f"you disabled text encoding column {column} will be encoded as "
-                                  f"category")
+                    warnings.warn(
+                        f"you disabled text encoding column {column} will be encoded as "
+                        f"category"
+                    )
             # Move away from np.issubdtype as it causes
             # TypeError: data type not understood in certain pandas types
             elif not is_numeric_dtype(X[column]):
@@ -324,7 +326,8 @@ class FeatureValidator(BaseEstimator):
                         feat_type[column] = "categorical"
                         warnings.warn(
                             f"you disabled text encoding column {column} will be encoded as "
-                            f"category")
+                            f"category"
+                        )
                 elif pd.core.dtypes.common.is_datetime_or_timedelta_dtype(
                     X[column].dtype
                 ):
