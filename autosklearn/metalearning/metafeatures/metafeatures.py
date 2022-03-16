@@ -5,16 +5,14 @@ import numpy as np
 import pandas as pd
 import scipy.sparse
 import scipy.stats
+from autosklearn.pipeline.components.data_preprocessing.feature_type import (
+    FeatTypeSplit,
+)
 from scipy.linalg import LinAlgError
-
 # TODO use balanced accuracy!
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.utils import check_array
 from sklearn.utils.multiclass import type_of_target
-
-from autosklearn.pipeline.components.data_preprocessing.feature_type import (
-    FeatTypeSplit,
-)
 
 from .metafeature import DatasetMetafeatures, HelperFunction, MetaFeature
 
@@ -200,7 +198,7 @@ class NumberOfInstancesWithMissingValues(MetaFeature):
         missing = helper_functions.get_value("MissingValues")
         new_missing = missing.tocsr()
         num_missing = [
-            np.sum(new_missing.data[new_missing.indptr[i] : new_missing.indptr[i + 1]])
+            np.sum(new_missing.data[new_missing.indptr[i]: new_missing.indptr[i + 1]])
             for i in range(new_missing.shape[0])
         ]
 
@@ -229,7 +227,7 @@ class NumberOfFeaturesWithMissingValues(MetaFeature):
         missing = helper_functions.get_value("MissingValues")
         new_missing = missing.tocsc()
         num_missing = [
-            np.sum(new_missing.data[new_missing.indptr[i] : new_missing.indptr[i + 1]])
+            np.sum(new_missing.data[new_missing.indptr[i]: new_missing.indptr[i + 1]])
             for i in range(missing.shape[1])
         ]
 
@@ -1110,7 +1108,6 @@ def calculate_all_metafeatures(
     dont_calculate=None,
     densify_threshold=1000,
 ):
-
     """Calculate all metafeatures."""
     helper_functions.clear()
     metafeatures.clear()
@@ -1138,20 +1135,17 @@ def calculate_all_metafeatures(
                 # sparse matrices because of wrong sparse format)
                 sparse = scipy.sparse.issparse(X)
 
-                feat_type = {
-                    key: "categorical" if value else "numerical"
-                    for key, value in encoded.items()
-                }
-
-                # TODO make this more cohesive to the overall structure (quick bug fix)
+                feat_type = dict()
+                column_types = ["categorical", "numerical", "string"]
                 if isinstance(X, pd.DataFrame):
-                    for key in X.select_dtypes(include="string").columns:
-                        feat_type[key] = "string"
+                    for key in X.select_dtypes(include=column_types).columns:
+                        feat_type[key] = X[key].dtype
 
                 DPP = FeatTypeSplit(
                     feat_type=feat_type,
                     force_sparse_output=True,
                 )
+
                 X_transformed = DPP.fit_transform(X)
                 encoded_transformed = {
                     i: False for i in range(X_transformed.shape[1])
