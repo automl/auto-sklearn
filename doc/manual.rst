@@ -341,7 +341,7 @@ Other
 
     In order to obtain *vanilla auto-sklearn* as used in `Efficient and Robust Automated Machine Learning
     <https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine -learning>`_
-    set ``ensemble_size=1`` and ``initial_configurations_via_metalearning=0``:
+    set ``ensemble_size=1``, ``initial_configurations_via_metalearning=0`` and ``allow_string_features=False``:
 
     .. code:: python
 
