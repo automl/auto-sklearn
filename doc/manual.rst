@@ -312,7 +312,7 @@ Other
       encodes the data using `sklearn.feature_extraction.text.CountVectorizer <https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html>`_
     * If your data contains categorical values (in the features or targets), ensure that you explicitly label them as categorical.
       data labeled as categorical is encoded by using a `sklearn.preprocessing.LabelEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_
-      for unidimensional data and a `sklearn.preprocessing.OrdinalEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html>`_ for multidimensional data.
+      for unidimensional data and a `sklearn.preprodcessing.OrdinalEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html>`_ for multidimensional data.
     * For further details on how to properly encode your data, you can check the Pandas Example
       `Working with categorical data <https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html>`_). If you are working with time series, it is recommended that you follow this approach
       `Working with time data <https://stats.stackexchange.com/questions/311494/>`_.
