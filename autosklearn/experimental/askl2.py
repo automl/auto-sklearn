@@ -206,6 +206,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
         dataset_compression: Union[bool, Mapping[str, Any]] = True,
+        allow_string_features: bool = True,
     ):
 
         """
@@ -363,6 +364,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             metric=metric,
             scoring_functions=scoring_functions,
             load_models=load_models,
+            allow_string_features=allow_string_features,
         )
 
     def fit(

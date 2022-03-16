@@ -51,6 +51,7 @@ class AutoSklearnEstimator(BaseEstimator):
         load_models: bool = True,
         get_trials_callback=None,
         dataset_compression: Union[bool, Mapping[str, Any]] = True,
+        allow_string_features: bool = True,
     ):
         """
         Parameters
@@ -322,6 +323,10 @@ class AutoSklearnEstimator(BaseEstimator):
                     accordingly. We guarantee that at least one occurrence of each
                     label is included in the sampled set.
 
+        allow_string_features: bool = True
+            Whether autosklearn should process string features. By default the
+            textpreprocessing is enabled.
+
         Attributes
         ----------
         cv_results_ : dict of numpy (masked) ndarrays
@@ -367,6 +372,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.load_models = load_models
         self.get_trials_callback = get_trials_callback
         self.dataset_compression = dataset_compression
+        self.allow_string_features = allow_string_features
 
         self.automl_ = None  # type: Optional[AutoML]
 
@@ -415,6 +421,7 @@ class AutoSklearnEstimator(BaseEstimator):
             scoring_functions=self.scoring_functions,
             get_trials_callback=self.get_trials_callback,
             dataset_compression=self.dataset_compression,
+            allow_string_features=self.allow_string_features,
         )
 
         return automl
