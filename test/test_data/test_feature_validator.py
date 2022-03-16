@@ -561,13 +561,14 @@ def test_object_columns():
 
     assert feat_type == column_types
 
+
 def test_allow_string_feature():
     df = pd.DataFrame({"Text": ["Hello", "how are you?"]})
     with pytest.warns(
         UserWarning,
         match=r"Input Column Text has generic type object. "
-              r"Autosklearn will treat this column as string. "
-              r"Please ensure that this setting is suitable for your task.",
+        r"Autosklearn will treat this column as string. "
+        r"Please ensure that this setting is suitable for your task.",
     ):
         validator = FeatureValidator(allow_string_features=False)
         feat_type = validator.get_feat_type_from_columns(df)
@@ -578,8 +579,7 @@ def test_allow_string_feature():
     df["Text"] = df["Text"].astype("string")
     with pytest.warns(
         UserWarning,
-        match=r"you disabled text encoding column Text will be "
-              r"encoded as category",
+        match=r"you disabled text encoding column Text will be " r"encoded as category",
     ):
         validator = FeatureValidator(allow_string_features=False)
         feat_type = validator.get_feat_type_from_columns(df)
