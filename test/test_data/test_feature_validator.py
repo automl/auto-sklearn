@@ -524,15 +524,15 @@ def test_object_columns():
     dummy_object = Dummy(1)
     lst = [1, 2, 3]
     array = np.array([1, 2, 3])
-    dummy_stirng = "dummy string"
+    dummy_string = "dummy string"
 
     df = pd.DataFrame(
         {
             "dummy_object": [dummy_object] * 4,
             "dummy_lst": [lst] * 4,
             "dummy_array": [array] * 4,
-            "dummy_string": [dummy_stirng] * 4,
-            "type_mix_column": [dummy_stirng, dummy_object, array, lst],
+            "dummy_string": [dummy_string] * 4,
+            "type_mix_column": [dummy_string, dummy_object, array, lst],
             "cat_column": ["a", "b", "a", "b"],
         }
     )
@@ -559,4 +559,30 @@ def test_object_columns():
         "cat_column": "categorical",
     }
 
+    assert feat_type == column_types
+
+def test_allow_string_feature():
+    df = pd.DataFrame({"Text": ["Hello", "how are you?"]})
+    with pytest.warns(
+        UserWarning,
+        match=r"Input Column Text has generic type object. "
+              r"Autosklearn will treat this column as string. "
+              r"Please ensure that this setting is suitable for your task.",
+    ):
+        validator = FeatureValidator(allow_string_features=False)
+        feat_type = validator.get_feat_type_from_columns(df)
+
+    column_types = {"Text": "categorical"}
+    assert feat_type == column_types
+
+    df["Text"] = df["Text"].astype("string")
+    with pytest.warns(
+        UserWarning,
+        match=r"you disabled text encoding column Text will be "
+              r"encoded as category",
+    ):
+        validator = FeatureValidator(allow_string_features=False)
+        feat_type = validator.get_feat_type_from_columns(df)
+
+    column_types = {"Text": "categorical"}
     assert feat_type == column_types
