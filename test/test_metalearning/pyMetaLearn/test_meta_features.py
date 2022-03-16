@@ -280,7 +280,7 @@ def test_number_of_numeric_features(meta_train_data):
 
 def test_number_of_categorical_features(meta_train_data):
     X, y, categorical = meta_train_data
-    mf = meta_features.metafeatures["NumberOfCategoricalFeatures"](
+    mf = meta_features.metafeatures["NumberOfEncodedFeatures"](
         X, y, logging.getLogger("Meta"), categorical
     )
     assert mf.value == 32
@@ -529,7 +529,7 @@ def test_calculate_all_metafeatures(meta_train_data):
         X, y, categorical, "2", logger=logging.getLogger("Meta")
     )
     assert 52 == len(mf.metafeature_values)
-    assert mf.metafeature_values["NumberOfCategoricalFeatures"].value == 32
+    assert mf.metafeature_values["NumberOfEncodedFeatures"].value == 32
 
 
 def test_kurtosisses(meta_train_data_transformed):
@@ -892,7 +892,7 @@ def test_calculate_all_metafeatures_same_results_across_datatypes():
         "DatasetRatio": 0.042316258351893093,
         "RatioNominalToNumerical": 5.333333333333333,
         "RatioNumericalToNominal": 0.1875,
-        "NumberOfCategoricalFeatures": 32,
+        "NumberOfEncodedFeatures": 32,
         "NumberOfNumericFeatures": 6,
         "NumberOfMissingValues": 22175.0,
         "NumberOfFeaturesWithMissingValues": 29.0,

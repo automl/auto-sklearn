@@ -95,9 +95,9 @@ def _calculate_metafeatures(
         task_name = "CalculateMetafeatures"
         watcher.start_task(task_name)
 
-        categorical = {
-            col: True if feat_type.lower() == "categorical" else False
-            for col, feat_type in data_feat_type.items()
+        encoded = {
+            col: True if feat_type.lower() in ["categorical", "string"]
+            else False for col, feat_type in data_feat_type.items()
         }
 
         EXCLUDE_META_FEATURES = (
@@ -117,7 +117,7 @@ def _calculate_metafeatures(
             result = calculate_all_metafeatures_with_labels(
                 x_train,
                 y_train,
-                categorical=categorical,
+                encoded=encoded,
                 dataset_name=basename,
                 dont_calculate=EXCLUDE_META_FEATURES,
                 logger=logger_,
@@ -131,7 +131,7 @@ def _calculate_metafeatures(
             logger_.info("Metafeatures not calculated")
         watcher.stop_task(task_name)
         logger_.info(
-            "Calculating Metafeatures (categorical attributes) took %5.2f",
+            "Calculating Metafeatures (encoded attributes) took %5.2f",
             watcher.wall_elapsed(task_name),
         )
         return result
@@ -151,15 +151,15 @@ def _calculate_metafeatures_encoded(
 
         task_name = "CalculateMetafeaturesEncoded"
         watcher.start_task(task_name)
-        categorical = {
-            col: True if feat_type.lower() == "categorical" else False
-            for col, feat_type in data_feat_type.items()
+        encoded = {
+            col: True if feat_type.lower() in ["categorical", "string"]
+            else False for col, feat_type in data_feat_type.items()
         }
 
         result = calculate_all_metafeatures_encoded_labels(
             x_train,
             y_train,
-            categorical=categorical,
+            encoded=encoded,
             dataset_name=basename,
             dont_calculate=EXCLUDE_META_FEATURES,
             logger=logger_,
