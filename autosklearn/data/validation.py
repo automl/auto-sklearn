@@ -80,6 +80,7 @@ class InputValidator(BaseEstimator):
         feat_type: Optional[List[str]] = None,
         is_classification: bool = False,
         logger_port: Optional[int] = None,
+        allow_string_features: bool = True,
     ) -> None:
         self.feat_type = feat_type
         self.is_classification = is_classification
@@ -92,8 +93,11 @@ class InputValidator(BaseEstimator):
         else:
             self.logger = logging.getLogger("Validation")
 
+        self.allow_string_features = allow_string_features
         self.feature_validator = FeatureValidator(
-            feat_type=self.feat_type, logger=self.logger
+            feat_type=self.feat_type,
+            logger=self.logger,
+            allow_string_features=self.allow_string_features,
         )
         self.target_validator = TargetValidator(
             is_classification=self.is_classification, logger=self.logger

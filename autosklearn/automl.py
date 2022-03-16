@@ -210,6 +210,7 @@ class AutoML(BaseEstimator):
         scoring_functions=None,
         get_trials_callback=None,
         dataset_compression: Union[bool, Mapping[str, Any]] = True,
+        allow_string_features: bool = True,
     ):
         super(AutoML, self).__init__()
         self.configuration_space = None
@@ -281,6 +282,7 @@ class AutoML(BaseEstimator):
             self._dataset_compression = validate_dataset_compression_arg(
                 dataset_compression, memory_limit=self._memory_limit
             )
+        self.allow_string_features = allow_string_features
 
         self._datamanager = None
         self._dataset_name = None
@@ -687,6 +689,7 @@ class AutoML(BaseEstimator):
             is_classification=is_classification,
             feat_type=feat_type,
             logger_port=self._logger_port,
+            allow_string_features=self.allow_string_features,
         )
         self.InputValidator.fit(X_train=X, y_train=y, X_test=X_test, y_test=y_test)
         X, y = self.InputValidator.transform(X, y)
