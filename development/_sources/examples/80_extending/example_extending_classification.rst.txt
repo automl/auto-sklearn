@@ -277,42 +277,42 @@ Print test accuracy and statistics
 
  .. code-block:: none
 
-    accuracy:  0.9790209790209791
+    accuracy:  0.972027972027972
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f14bf1391f0>,
-               'cost': 0.049645390070921946,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f14baa88670>,
-               'ensemble_weight': 0.26,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f14bf139d90>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc2bd1ca0d0>,
+               'cost': 0.021276595744680882,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc2c259ea00>,
+               'ensemble_weight': 0.24,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc2bd1caca0>,
                'model_id': 2,
                'rank': 1,
                'sklearn_classifier': MLPClassifier(hidden_layer_sizes=(32,), random_state=1)},
         4: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f14ba90ac10>,
-               'cost': 0.049645390070921946,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f14baf1ecd0>,
-               'ensemble_weight': 0.36,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f14ba8d3ac0>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc2bccdd4f0>,
+               'cost': 0.04255319148936165,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc2bda8a9d0>,
+               'ensemble_weight': 0.28,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc2bcf7a4f0>,
                'model_id': 4,
                'rank': 2,
                'sklearn_classifier': MLPClassifier(alpha=0.9370622711515105, hidden_layer_sizes=(179, 179),
                   random_state=1, solver='lbfgs')},
         5: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f14b8cba880>,
-               'cost': 0.36170212765957444,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f14bc885f70>,
-               'ensemble_weight': 0.2,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f14b8cba1f0>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc2c0d32bb0>,
+               'cost': 0.3829787234042553,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc2c157d430>,
+               'ensemble_weight': 0.24,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc2c0d32520>,
                'model_id': 5,
                'rank': 4,
                'sklearn_classifier': MLPClassifier(activation='logistic', alpha=0.6554997385843834,
                   hidden_layer_sizes=(158, 158, 158), random_state=1, solver='sgd')},
         6: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f14b7f51160>,
-               'cost': 0.07801418439716312,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f14baf1e280>,
-               'ensemble_weight': 0.18,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f14b7f51b80>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc2c2374af0>,
+               'cost': 0.06382978723404253,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc2bda8ab50>,
+               'ensemble_weight': 0.24,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc2c259f520>,
                'model_id': 6,
                'rank': 3,
                'sklearn_classifier': MLPClassifier(activation='logistic', alpha=0.6724692077492787,
@@ -324,7 +324,7 @@ Print test accuracy and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  15.202 seconds)
+   **Total running time of the script:** ( 0 minutes  16.581 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_classification.py:
