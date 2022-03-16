@@ -318,6 +318,7 @@ Other
       `Working with time data <https://stats.stackexchange.com/questions/311494/>`_.
     * If you prefer not using the string option at all you can disable this option. In this case
       objects, strings and categorical columns are encoded as categorical.
+
     .. code:: python
 
         import autosklearn.classification
