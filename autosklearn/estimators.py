@@ -324,7 +324,7 @@ class AutoSklearnEstimator(BaseEstimator):
                     label is included in the sampled set.
 
         allow_string_features: bool = True
-            Allows to disable the textpreprocssing used by autosklearn. On default the
+            Whether autosklearn should process string features. By default the
             textpreprocessing is enabled.
 
         Attributes
