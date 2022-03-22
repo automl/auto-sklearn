@@ -42,6 +42,7 @@ from autosklearn.metalearning.metalearning.meta_base import MetaBase
 from autosklearn.metalearning.mismbo import suggest_via_metalearning
 from autosklearn.util.logging_ import get_named_client_logger
 from autosklearn.util.parallel import preload_modules
+from autosklearn.util.stopwatch import StopWatch
 
 EXCLUDE_META_FEATURES_CLASSIFICATION = {
     "Landmark1NN",
@@ -183,46 +184,45 @@ def _get_metalearning_configurations(
     task,
     initial_configurations_via_metalearning,
     is_sparse,
-    watcher,
     logger,
 ):
-    task_name = "InitialConfigurations"
-    watcher.start_task(task_name)
-    try:
-        metalearning_configurations = suggest_via_metalearning(
-            meta_base,
-            basename,
-            metric,
-            task,
-            is_sparse == 1,
-            initial_configurations_via_metalearning,
-            logger=logger,
-        )
-    except Exception as e:
-        logger.error("Error getting metalearning configurations!")
-        logger.error(str(e))
-        logger.error(traceback.format_exc())
-        metalearning_configurations = []
-    watcher.stop_task(task_name)
-    return metalearning_configurations
+    with StopWatch().time("InitialConfigurations"):
+        try:
+            metalearning_configurations = suggest_via_metalearning(
+                meta_base,
+                basename,
+                metric,
+                task,
+                is_sparse == 1,
+                initial_configurations_via_metalearning,
+                logger=logger,
+            )
+        except Exception as e:
+            logger.error("Error getting metalearning configurations!")
+            logger.error(str(e))
+            logger.error(traceback.format_exc())
+            metalearning_configurations = []
+
+        return metalearning_configurations
 
 
 def _print_debug_info_of_init_configuration(
-    initial_configurations, basename, time_for_task, logger, watcher
-):
-    logger.debug("Initial Configurations: (%d)" % len(initial_configurations))
+    initial_configurations,
+    basename,
+    time_for_task,
+    logger,
+    watcher,
+) -> None:
+
+    logger.debug(f"Initial Configurations: {len(initial_configurations)}")
     for initial_configuration in initial_configurations:
         logger.debug(initial_configuration)
-    logger.debug(
-        "Looking for initial configurations took %5.2fsec",
-        watcher.wall_elapsed("InitialConfigurations"),
-    )
-    logger.info(
-        "Time left for %s after finding initial configurations: %5.2fsec",
-        basename,
-        time_for_task - watcher.wall_elapsed(basename),
-    )
 
+    time_spent = watcher["InitialConfigurations"].wall_elapsed()
+    logger.debug(f"Looking for initial configs took {time_spent:5.2f}sec")
+
+    time_left = time_for_task - watcher[basename].wall_elapsed()
+    logger.info(f"Time for {basename} after finding initial configs: {time_left:5.2f}s")
 
 def get_smac_object(
     scenario_dict,
@@ -269,7 +269,7 @@ class AutoMLSMBO(object):
         func_eval_time_limit,
         memory_limit,
         metric,
-        watcher,
+        watcher: StopWatch,
         n_jobs,
         dask_client: dask.distributed.Client,
         port: int,
