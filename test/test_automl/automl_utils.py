@@ -63,7 +63,7 @@ def print_debug_information(automl):
 
 
 def _includes(scores, all_scores):
-    return all(s in all_scores for s in scores) and len(scores) == len(all_scores)
+    return all(s in scores for s in all_scores) and len(scores) == len(all_scores)
 
 
 def count_succeses(cv_results):
