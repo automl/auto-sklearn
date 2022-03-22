@@ -13,8 +13,7 @@ from autosklearn.util.stopwatch import StopWatch
 
 
 @pytest.mark.parametrize("context", ["fork", "forkserver"])
-def test_smbo_metalearning_configurations(backend, context, dask_client):
-
+def test_smbo_metalearning_configurations(backend, context, dask_client) -> None:
     # Get the inputs to the optimizer
     X_train, Y_train, X_test, Y_test = putil.get_dataset("iris")
     config_space = AutoML(
@@ -28,7 +27,7 @@ def test_smbo_metalearning_configurations(backend, context, dask_client):
         task=BINARY_CLASSIFICATION,
         only_return_configuration_space=True,
     )
-    watcher = StopWatch()
+    stopwatch = StopWatch()
 
     # Create an optimizer
     smbo = AutoMLSMBO(
@@ -39,7 +38,7 @@ def test_smbo_metalearning_configurations(backend, context, dask_client):
         func_eval_time_limit=5,
         memory_limit=4096,
         metric=autosklearn.metrics.accuracy,
-        watcher=watcher,
+        stopwatch=stopwatch,
         n_jobs=1,
         dask_client=dask_client,
         port=logging.handlers.DEFAULT_TCP_LOGGING_PORT,

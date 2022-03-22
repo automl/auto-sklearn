@@ -1,11 +1,11 @@
-"""A singleton StopWatch"""
-from __future__ import annotations
 from typing import Iterator, Mapping, Optional, Tuple
 
 import sys
 import time
 from contextlib import contextmanager
 from itertools import repeat
+
+from typing_extensions import Literal
 
 
 class TimingTask:
@@ -108,6 +108,45 @@ class StopWatch(Mapping[str, TimingTask]):
         tasks = self.tasks.values()
         return sum([t.wall_duration for t in tasks if t.wall_duration is not None])
 
+    def time_since(self, name: str, phase: Literal["start", "end"] = "start") -> float:
+        """The wall clock time since a task either began or ended
+
+        Parameters
+        ----------
+        name : str
+            The name of the task
+
+        phase : Literal["start", "end"] = "start"
+            From which phase you want to know the time elapsed since
+
+        Returns
+        -------
+        float
+            The time elapsed
+
+        Raises
+        ------
+        ValueError
+            * If the task hasn't been registered
+            * If using "start" and the task never started
+            * If using "end" and the task never started
+        """
+        if name not in self.tasks:
+            raise ValueError(f"Task not listed in {self.tasks}")
+
+        task = self.tasks[name]
+        if phase == "start":
+            event_time = task.wall_start
+        elif phase == "end":
+            event_time = task.wall_end
+        else:
+            raise NotImplementedError()
+
+        if event_time is None:
+            raise ValueError(f"Task {task} has no time for {phase}")
+
+        return time.time() - event_time
+
     def wall_elapsed(self, name: str) -> float:
         """Get the currently elapsed wall time for a task"""
         if name not in self.tasks:
@@ -137,7 +176,7 @@ class StopWatch(Mapping[str, TimingTask]):
             return time.time() - task.cpu_start
 
     @contextmanager
-    def time(self, name: str) -> Iterator[None]:
+    def time(self, name: str) -> Iterator[TimingTask]:
         """Start timing a task
 
         Parameters
@@ -145,10 +184,11 @@ class StopWatch(Mapping[str, TimingTask]):
         name : str
             The name of the task to measure
         """
-        self.tasks[name] = TimingTask(name)
-        self.tasks[name].start()
-        yield
-        self.tasks[name].stop()
+        task = TimingTask(name)
+        self.tasks[name] = task
+        task.start()
+        yield task
+        task.stop()
 
     def __str__(self) -> str:
         headers = [

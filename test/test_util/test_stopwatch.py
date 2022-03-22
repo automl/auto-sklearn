@@ -4,7 +4,6 @@ from autosklearn.util.stopwatch import StopWatch
 
 
 def test_stopwatch_overhead() -> None:
-    # Wall Overhead
     wall_start = time.time()
     cpu_start = time.process_time()
 

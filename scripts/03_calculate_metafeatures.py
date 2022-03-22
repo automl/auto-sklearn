@@ -33,7 +33,7 @@ logger = logging.getLogger("03_calculate_metafeatures")
 
 def calculate_metafeatures(task_id):
     X_train, y_train, X_test, y_test, cat, task_type, dataset_name = load_task(task_id)
-    watch = StopWatch()
+    stopwatch = StopWatch()
 
     if task_type == "classification":
         if len(np.unique(y_train)) == 2:
@@ -50,7 +50,7 @@ def calculate_metafeatures(task_id):
         data_info_task=task_type,
         basename=dataset_name,
         logger_=logger,
-        watcher=watch,
+        stopwatch=stopwatch,
     )
 
     _metafeatures_encoded_labels = _calculate_metafeatures_encoded(
@@ -60,7 +60,7 @@ def calculate_metafeatures(task_id):
         task=task_type,
         basename=dataset_name,
         logger_=logger,
-        watcher=watch,
+        stopwatch=stopwatch,
     )
 
     mf = _metafeatures_labels

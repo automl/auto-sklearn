@@ -451,14 +451,6 @@ class AutoML(BaseEstimator):
             del self.stop_logging_server
 
     @staticmethod
-    def _start_task(watcher, task_name):
-        watcher.start_task(task_name)
-
-    @staticmethod
-    def _stop_task(watcher, task_name):
-        watcher.stop_task(task_name)
-
-    @staticmethod
     def _print_load_time(basename, time_left_for_this_task, time_for_load_data, logger):
 
         time_left_after_reading = max(0, time_left_for_this_task - time_for_load_data)
@@ -759,7 +751,7 @@ class AutoML(BaseEstimator):
             self._is_dask_client_internally_created = False
 
         self._dataset_name = dataset_name
-        self._stopwatch.start_task(self._dataset_name)
+        self._stopwatch.start(self._dataset_name)
 
         # Take the feature types from the validator
         self._feat_type = self.InputValidator.feature_validator.feat_type
@@ -851,31 +843,22 @@ class AutoML(BaseEstimator):
             )
         self._logger.debug("Done printing available components")
 
-        datamanager = XYDataManager(
-            X,
-            y,
-            X_test=X_test,
-            y_test=y_test,
-            task=self._task,
-            feat_type=self._feat_type,
-            dataset_name=dataset_name,
-        )
-
-        self._backend._make_internals_directory()
-        self._label_num = datamanager.info["label_num"]
-
         # == Pickle the data manager to speed up loading
-        self._backend.save_datamanager(datamanager)
-
-        time_for_load_data = self._stopwatch.wall_elapsed(self._dataset_name)
-
-        if self._debug_mode:
-            self._print_load_time(
-                self._dataset_name,
-                self._time_for_task,
-                time_for_load_data,
-                self._logger,
+        with self._stopwatch.time("Save Datamanager"):
+            datamanager = XYDataManager(
+                X,
+                y,
+                X_test=X_test,
+                y_test=y_test,
+                task=self._task,
+                feat_type=self._feat_type,
+                dataset_name=dataset_name,
             )
+
+            self._backend._make_internals_directory()
+            self._label_num = datamanager.info["label_num"]
+
+            self._backend.save_datamanager(datamanager)
 
         # = Create a searchspace
         # Do this before One Hot Encoding to make sure that it creates a
@@ -884,69 +867,71 @@ class AutoML(BaseEstimator):
         #  densifier and truncatedSVD would probably lead to a MemoryError,
         # like this we can't use some of the preprocessing methods in case
         # the data became sparse)
-        self.configuration_space, configspace_path = self._create_search_space(
-            self._backend.temporary_directory,
-            self._backend,
-            datamanager,
-            include=self._include,
-            exclude=self._exclude,
-        )
+        with self._stopwatch.time("Create Search space"):
+            self.configuration_space, configspace_path = self._create_search_space(
+                self._backend.temporary_directory,
+                self._backend,
+                datamanager,
+                include=self._include,
+                exclude=self._exclude,
+            )
+
         if only_return_configuration_space:
             self._fit_cleanup()
             return self.configuration_space
 
         # == Perform dummy predictions
         # Dummy prediction always have num_run set to 1
-        self.num_run += self._do_dummy_prediction(datamanager, num_run=1)
+        with self._stopwatch.time("Dummy predictions"):
+            self.num_run += self._do_dummy_prediction(datamanager, num_run=1)
 
         # == RUN ensemble builder
         # Do this before calculating the meta-features to make sure that the
         # dummy predictions are actually included in the ensemble even if
         # calculating the meta-features takes very long
-        ensemble_task_name = "runEnsemble"
-        self._stopwatch.start_task(ensemble_task_name)
-        elapsed_time = self._stopwatch.wall_elapsed(self._dataset_name)
-        time_left_for_ensembles = max(0, self._time_for_task - elapsed_time)
-        proc_ensemble = None
-        if time_left_for_ensembles <= 0:
-            # Fit only raises error when ensemble_size is not zero but
-            # time_left_for_ensembles is zero.
-            if self._ensemble_size > 0:
-                raise ValueError(
-                    "Not starting ensemble builder because there "
-                    "is no time left. Try increasing the value "
-                    "of time_left_for_this_task."
+        with self._stopwatch.time("Run Ensemble Builder"):
+
+            elapsed_time = self._stopwatch.time_since(self._dataset_name)
+
+            time_left_for_ensembles = max(0, self._time_for_task - elapsed_time)
+            proc_ensemble = None
+            if time_left_for_ensembles <= 0:
+                # Fit only raises error when ensemble_size is not zero but
+                # time_left_for_ensembles is zero.
+                if self._ensemble_size > 0:
+                    raise ValueError(
+                        "Not starting ensemble builder because there "
+                        "is no time left. Try increasing the value "
+                        "of time_left_for_this_task."
+                    )
+            elif self._ensemble_size <= 0:
+                self._logger.info(
+                    "Not starting ensemble builder because " "ensemble size is <= 0."
                 )
-        elif self._ensemble_size <= 0:
-            self._logger.info(
-                "Not starting ensemble builder because " "ensemble size is <= 0."
-            )
-        else:
-            self._logger.info(
-                "Start Ensemble with %5.2fsec time left" % time_left_for_ensembles
-            )
+            else:
+                self._logger.info(
+                    "Start Ensemble with %5.2fsec time left" % time_left_for_ensembles
+                )
 
-            proc_ensemble = EnsembleBuilderManager(
-                start_time=time.time(),
-                time_left_for_ensembles=time_left_for_ensembles,
-                backend=copy.deepcopy(self._backend),
-                dataset_name=dataset_name,
-                task=self._task,
-                metric=self._metric,
-                ensemble_size=self._ensemble_size,
-                ensemble_nbest=self._ensemble_nbest,
-                max_models_on_disc=self._max_models_on_disc,
-                seed=self._seed,
-                precision=self.precision,
-                max_iterations=None,
-                read_at_most=np.inf,
-                ensemble_memory_limit=self._memory_limit,
-                random_state=self._seed,
-                logger_port=self._logger_port,
-                pynisher_context=self._multiprocessing_context,
-            )
-
-        self._stopwatch.stop_task(ensemble_task_name)
+                proc_ensemble = EnsembleBuilderManager(
+                    start_time=time.time(),
+                    time_left_for_ensembles=time_left_for_ensembles,
+                    backend=copy.deepcopy(self._backend),
+                    dataset_name=dataset_name,
+                    task=self._task,
+                    metric=self._metric,
+                    ensemble_size=self._ensemble_size,
+                    ensemble_nbest=self._ensemble_nbest,
+                    max_models_on_disc=self._max_models_on_disc,
+                    seed=self._seed,
+                    precision=self.precision,
+                    max_iterations=None,
+                    read_at_most=np.inf,
+                    ensemble_memory_limit=self._memory_limit,
+                    random_state=self._seed,
+                    logger_port=self._logger_port,
+                    pynisher_context=self._multiprocessing_context,
+                )
 
         # kill the datamanager as it will be re-loaded anyways from sub processes
         try:
@@ -955,92 +940,91 @@ class AutoML(BaseEstimator):
             pass
 
         # => RUN SMAC
-        smac_task_name = "runSMAC"
-        self._stopwatch.start_task(smac_task_name)
-        elapsed_time = self._stopwatch.wall_elapsed(self._dataset_name)
-        time_left_for_smac = max(0, self._time_for_task - elapsed_time)
+        with self._stopwatch.time("Run SMAC"):
+            elapsed_time = self._stopwatch.time_since(self._dataset_name)
+            time_left = self._time_for_task - elapsed_time
 
-        if self._logger:
-            self._logger.info("Start SMAC with %5.2fsec time left" % time_left_for_smac)
-        if time_left_for_smac <= 0:
-            self._logger.warning("Not starting SMAC because there is no time " "left.")
-            _proc_smac = None
-            self._budget_type = None
-        else:
-            if (
-                self._per_run_time_limit is None
-                or self._per_run_time_limit > time_left_for_smac
-            ):
-                self._logger.warning(
-                    "Time limit for a single run is higher than total time "
-                    "limit. Capping the limit for a single run to the total "
-                    "time given to SMAC (%f)" % time_left_for_smac
-                )
-                per_run_time_limit = time_left_for_smac
+            if self._logger:
+                self._logger.info("Start SMAC with %5.2fsec time left" % time_left)
+            if time_left <= 0:
+                self._logger.warning("Not starting SMAC because there is no time left.")
+                _proc_smac = None
+                self._budget_type = None
             else:
-                per_run_time_limit = self._per_run_time_limit
-
-            # Make sure that at least 2 models are created for the ensemble process
-            num_models = time_left_for_smac // per_run_time_limit
-            if num_models < 2:
-                per_run_time_limit = time_left_for_smac // 2
-                self._logger.warning(
-                    "Capping the per_run_time_limit to {} to have "
-                    "time for a least 2 models in each process.".format(
-                        per_run_time_limit
+                if (
+                    self._per_run_time_limit is None
+                    or self._per_run_time_limit > time_left
+                ):
+                    self._logger.warning(
+                        "Time limit for a single run is higher than total time "
+                        "limit. Capping the limit for a single run to the total "
+                        "time given to SMAC (%f)" % time_left
                     )
+                    per_run_time_limit = time_left
+                else:
+                    per_run_time_limit = self._per_run_time_limit
+
+                # Make sure that at least 2 models are created for the ensemble process
+                num_models = time_left // per_run_time_limit
+                if num_models < 2:
+                    per_run_time_limit = time_left // 2
+                    self._logger.warning(
+                        "Capping the per_run_time_limit to {} to have "
+                        "time for a least 2 models in each process.".format(
+                            per_run_time_limit
+                        )
+                    )
+
+                _proc_smac = AutoMLSMBO(
+                    config_space=self.configuration_space,
+                    dataset_name=self._dataset_name,
+                    backend=self._backend,
+                    total_walltime_limit=time_left,
+                    func_eval_time_limit=per_run_time_limit,
+                    memory_limit=self._memory_limit,
+                    data_memory_limit=self._data_memory_limit,
+                    stopwatch=self._stopwatch,
+                    n_jobs=self._n_jobs,
+                    dask_client=self._dask_client,
+                    start_num_run=self.num_run,
+                    num_metalearning_cfgs=self._initial_configurations_via_metalearning,
+                    config_file=configspace_path,
+                    seed=self._seed,
+                    metadata_directory=self._metadata_directory,
+                    metric=self._metric,
+                    resampling_strategy=self._resampling_strategy,
+                    resampling_strategy_args=self._resampling_strategy_arguments,
+                    include=self._include,
+                    exclude=self._exclude,
+                    disable_file_output=self._disable_evaluator_output,
+                    get_smac_object_callback=self._get_smac_object_callback,
+                    smac_scenario_args=self._smac_scenario_args,
+                    scoring_functions=self._scoring_functions,
+                    port=self._logger_port,
+                    pynisher_context=self._multiprocessing_context,
+                    ensemble_callback=proc_ensemble,
+                    trials_callback=self._get_trials_callback,
                 )
 
-            _proc_smac = AutoMLSMBO(
-                config_space=self.configuration_space,
-                dataset_name=self._dataset_name,
-                backend=self._backend,
-                total_walltime_limit=time_left_for_smac,
-                func_eval_time_limit=per_run_time_limit,
-                memory_limit=self._memory_limit,
-                data_memory_limit=self._data_memory_limit,
-                watcher=self._stopwatch,
-                n_jobs=self._n_jobs,
-                dask_client=self._dask_client,
-                start_num_run=self.num_run,
-                num_metalearning_cfgs=self._initial_configurations_via_metalearning,
-                config_file=configspace_path,
-                seed=self._seed,
-                metadata_directory=self._metadata_directory,
-                metric=self._metric,
-                resampling_strategy=self._resampling_strategy,
-                resampling_strategy_args=self._resampling_strategy_arguments,
-                include=self._include,
-                exclude=self._exclude,
-                disable_file_output=self._disable_evaluator_output,
-                get_smac_object_callback=self._get_smac_object_callback,
-                smac_scenario_args=self._smac_scenario_args,
-                scoring_functions=self._scoring_functions,
-                port=self._logger_port,
-                pynisher_context=self._multiprocessing_context,
-                ensemble_callback=proc_ensemble,
-                trials_callback=self._get_trials_callback,
-            )
-
-            try:
-                (
-                    self.runhistory_,
-                    self.trajectory_,
-                    self._budget_type,
-                ) = _proc_smac.run_smbo()
-                trajectory_filename = os.path.join(
-                    self._backend.get_smac_output_directory_for_run(self._seed),
-                    "trajectory.json",
-                )
-                saveable_trajectory = [
-                    list(entry[:2]) + [entry[2].get_dictionary()] + list(entry[3:])
-                    for entry in self.trajectory_
-                ]
-                with open(trajectory_filename, "w") as fh:
-                    json.dump(saveable_trajectory, fh)
-            except Exception as e:
-                self._logger.exception(e)
-                raise
+                try:
+                    (
+                        self.runhistory_,
+                        self.trajectory_,
+                        self._budget_type,
+                    ) = _proc_smac.run_smbo()
+                    trajectory_filename = os.path.join(
+                        self._backend.get_smac_output_directory_for_run(self._seed),
+                        "trajectory.json",
+                    )
+                    saveable_trajectory = [
+                        list(entry[:2]) + [entry[2].get_dictionary()] + list(entry[3:])
+                        for entry in self.trajectory_
+                    ]
+                    with open(trajectory_filename, "w") as fh:
+                        json.dump(saveable_trajectory, fh)
+                except Exception as e:
+                    self._logger.exception(e)
+                    raise
 
         self._logger.info("Starting shutdown...")
         # Wait until the ensemble process is finished to avoid shutting down
@@ -2088,9 +2072,6 @@ class AutoML(BaseEstimator):
         include: Optional[Dict[str, List[str]]] = None,
         exclude: Optional[Dict[str, List[str]]] = None,
     ):
-        task_name = "CreateConfigSpace"
-
-        self._stopwatch.start_task(task_name)
         configspace_path = os.path.join(tmp_dir, "space.json")
         configuration_space = pipeline.get_configuration_space(
             datamanager.info,
@@ -2101,9 +2082,10 @@ class AutoML(BaseEstimator):
             datamanager, configuration_space
         )
         backend.write_txt_file(
-            configspace_path, cs_json.write(configuration_space), "Configuration space"
+            configspace_path,
+            cs_json.write(configuration_space),
+            "Configuration space",
         )
-        self._stopwatch.stop_task(task_name)
 
         return configuration_space, configspace_path
 
