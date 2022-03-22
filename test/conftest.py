@@ -1,10 +1,75 @@
 """
 Testing
 =======
+The following are some features, guidelines and functionality for testing which makes
+updating, adding and refactoring tests easier, especially as features and functionality
+changes.
 
-**Features**
-* marker - ``pytest.mark.todo``` to mark a test which xfails as it's todo
-* fixtures - All fixtures in "test/fixtures" are known in every test file
+**Marks**
+* todo - ``pytest.mark.todo``` to mark a test which xfails as it's todo
+* slow - ``pytest.mark.slow``` to mark a test which is skipped if `pytest --fast`
+
+**Documenting Tests**
+To ease in understanding of tests, what is being tested and what's expected of the test,
+each test should be documented with what it's parameters/fixtures are as well as what
+the test expects to happen, regardless of the tests implemntation.
+
+    Expects
+    -------
+    * Something should raise a ValueError when called with X as X is not handled by the
+      validator Y.
+
+**Test same module across files**
+When a module has many complicated avenues to be tested, create a folder and split the
+tests according to each avenue. See `test/test_automl` for example as the `automl.py`
+module is quite complicated to test and all tests in a single file become difficult to
+follow and change.
+
+**pytest_cases**
+Using pytest_cases, we seperate a `case`, something that defines the state of the
+object, from the actual `test`, which tests properties of these cases.
+
+A complicated example can be seen at `test/test_automl/cases.py` where we have
+autoML instances that are classifier/regressor, fitted or not, with cv or holdout,
+or fitted with no ensemble. TODO: Easier example.
+
+Docs: https://smarie.github.io/python-pytest-cases/
+
+**Caching**
+Uses pytest's cache functionality for long training models so they can be shared between
+tests and between different test runs. This is primarly used with `cases` so that tests
+requiring the same kind of expensive case and used cached values.
+
+Use `pytest --cache-clear` to clear the cahce
+
+See `test/test_automl/cases.py` for example of how the fixtures from
+`test/fixtures/caching.py` can be used to cache objects between tests.
+
+**Fixtures**
+All fixtures in "test/fixtures" are known in every test file. We try to make use
+of fixture `factories` which can be used to construct objects in complicated ways,
+removing these complications from the tests themselves, importantly, keeping tests
+short. A convention we use is to prefix them with `make`, for example,
+`make_something`. This is useful for making data, e.g. `test/fixtures/data::make_data`
+
+..code:: python
+
+    # Example of fixture factory
+    @fixture
+    def make_something():
+        def _make(...args):
+            # ... complicated setup
+            # ... more complications
+            # ... make some sub objects which are complicated
+            return something
+
+        return _make
+
+    @parametrize("arg1", ['a', 'b', 'c'])
+    def test_something_does_x(arg1, make_something):
+        something = make_something(arg1, ...)
+        result = something.run()
+        assert something == expected
 """
 from typing import Any, Iterator, List, Optional
 
