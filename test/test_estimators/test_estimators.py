@@ -300,6 +300,7 @@ def test_performance_over_time_no_ensemble(tmp_dir):
         per_run_time_limit=5,
         tmp_folder=os.path.join(tmp_dir, "backend"),
         seed=1,
+        ensemble_size=0,
         initial_configurations_via_metalearning=0,
     )
 
