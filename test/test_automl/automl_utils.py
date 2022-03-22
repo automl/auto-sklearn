@@ -62,7 +62,6 @@ def print_debug_information(automl):
     return os.linesep.join(content)
 
 
-
 def count_succeses(cv_results):
     return np.sum(
         [
