@@ -1,5 +1,6 @@
 from typing import Callable, Union
 
+import os
 from pathlib import Path
 
 from autosklearn.automl_common.common.utils.backend import Backend, create
@@ -71,4 +72,5 @@ def backend(tmp_dir: str, make_backend: Callable) -> Backend:
     Backend
         A backend object
     """
-    return make_backend(path=tmp_dir)
+    backend_path = os.path.join(tmp_dir, "backend")
+    return make_backend(path=backend_path)

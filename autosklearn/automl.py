@@ -1042,7 +1042,7 @@ class AutoML(BaseEstimator):
     def __sklearn_is_fitted__(self) -> bool:
         return self.fitted
 
-    def _fit_cleanup(self):
+    def _fit_cleanup(self) -> None:
         self._logger.info("Closing the dask infrastructure")
         self._close_dask_client()
         self._logger.info("Finished closing the dask infrastructure")
@@ -1387,7 +1387,7 @@ class AutoML(BaseEstimator):
         ):
             raise NotImplementedError(
                 "Predict is currently not implemented for resampling "
-                "strategy %s, please call refit()." % self._resampling_strategy
+                f"strategy {self._resampling_strategy}, please call refit()."
             )
 
         if self.models_ is None or len(self.models_) == 0 or self.ensemble_ is None:
@@ -1462,18 +1462,25 @@ class AutoML(BaseEstimator):
 
     def fit_ensemble(
         self,
-        y,
-        task=None,
-        precision=32,
-        dataset_name=None,
-        ensemble_nbest=None,
-        ensemble_size=None,
+        y: SUPPORTED_TARGET_TYPES,
+        task: Optional[int] = None,
+        precision: Literal[16, 32, 64] = 32,
+        dataset_name: Optional[str] = None,
+        ensemble_nbest: Optional[int] = None,
+        ensemble_size: Optional[int] = None,
     ):
         check_is_fitted(self)
 
         # check for the case when ensemble_size is less than 0
-        if not ensemble_size > 0:
-            raise ValueError("ensemble_size must be greater than 0 for fit_ensemble")
+        if ensemble_size is not None and ensemble_size <= 0:
+            raise ValueError("`ensemble_size` must be >= 0 for `fit_ensemble`")
+
+        if ensemble_size is None and (
+            self._ensemble_size is None or self._ensemble_size <= 0
+        ):
+            raise ValueError(
+                "Please pass `ensemble_size` to `fit_ensemble` if not setting in init"
+            )
 
         # AutoSklearn does not handle sparse y for now
         y = convert_if_sparse(y)
@@ -1527,6 +1534,7 @@ class AutoML(BaseEstimator):
                 "line output for error messages."
             )
         self.ensemble_performance_history, _, _, _, _ = result
+        self._ensemble_size = ensemble_size
 
         self._load_models()
         self._close_dask_client()
