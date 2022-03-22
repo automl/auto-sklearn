@@ -62,9 +62,6 @@ def print_debug_information(automl):
     return os.linesep.join(content)
 
 
-def _includes(scores, all_scores):
-    return all(s in scores for s in all_scores) and len(scores) == len(all_scores)
-
 
 def count_succeses(cv_results):
     return np.sum(
@@ -75,7 +72,7 @@ def count_succeses(cv_results):
     )
 
 
-def includes_all_scores(scores):
+def includes_all_scores(scores) -> bool:
     all_scores = (
         scores_dict["train_single"]
         + scores_dict["test_single"]
@@ -83,24 +80,24 @@ def includes_all_scores(scores):
         + scores_dict["test_ensamble"]
         + ["Timestamp"]
     )
-    return _includes(scores, all_scores)
+    return set(scores) == set(all_scores)
 
 
-def include_single_scores(scores):
+def include_single_scores(scores) -> bool:
     all_scores = (
         scores_dict["train_single"] + scores_dict["test_single"] + ["Timestamp"]
     )
-    return _includes(scores, all_scores)
+    return set(scores) == set(all_scores)
 
 
-def includes_train_scores(scores):
+def includes_train_scores(scores) -> bool:
     all_scores = (
         scores_dict["train_single"] + scores_dict["train_ensamble"] + ["Timestamp"]
     )
-    return _includes(scores, all_scores)
+    return set(scores) == set(all_scores)
 
 
-def performance_over_time_is_plausible(poT):
+def performance_over_time_is_plausible(poT) -> bool:
     if len(poT) < 1:
         return False
     if len(poT.drop(columns=["Timestamp"]).dropna()) < 1:
