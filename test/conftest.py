@@ -9,13 +9,19 @@ Testing
 from typing import Any, Iterator, List, Optional
 
 import re
+import signal
 from pathlib import Path
 
 import psutil
+
 import pytest
 from pytest import ExitCode, Item, Session
 
+DEFAULT_SEED = 0
+
+
 HERE = Path(__file__)
+AUTOSKLEARN_CACHE_NAME = "autosklearn"
 
 
 def walk(path: Path, include: Optional[str] = None) -> Iterator[Path]:
@@ -64,16 +70,38 @@ def fixture_modules() -> List[str]:
 
 def pytest_runtest_setup(item: Item) -> None:
     """Run before each test"""
-    todos = [mark for mark in item.iter_markers(name="todo")]
+    todos = [marker for marker in item.iter_markers(name="todo")]
     if todos:
         pytest.xfail(f"Test needs to be implemented, {item.location}")
 
 
+def pytest_sessionstart(session: Session) -> None:
+    """Called after the ``Session`` object has been created and before performing collection
+    and entering the run test loop.
+
+    Parameters
+    ----------
+    session : Session
+        The pytest session object
+    """
+    return
+
+
 def pytest_sessionfinish(session: Session, exitstatus: ExitCode) -> None:
-    """Clean up any chil processes"""
+    """Clean up any child processes"""
     proc = psutil.Process()
+    kill_signal = signal.SIGTERM
     for child in proc.children(recursive=True):
-        print(child, child.cmdline())
+
+        # https://stackoverflow.com/questions/57336095/access-verbosity-level-in-a-pytest-helper-function
+        if session.config.getoption("verbose") > 0:
+            print(child, child.cmdline())
+
+        # https://psutil.readthedocs.io/en/latest/#kill-process-tree
+        try:
+            child.send_signal(kill_signal)
+        except psutil.NoSuchProcess:
+            pass
 
 
 Config = Any  # Can't find import?
@@ -85,11 +113,18 @@ def pytest_collection_modifyitems(
     items: List[Item],
 ) -> None:
     """Modifys the colelction of tests that are captured"""
-    if config.getoption("--fast-only"):
-        skip_slow = pytest.mark.skip(reason="Test is marked as slow")
-        for item in items:
-            if "slow" in item.keywords:
-                item.add_marker(skip_slow)
+    if config.getoption("--fast"):
+        skip = pytest.mark.skip(reason="Test marked `slow` and `--fast` arg used")
+
+        slow_items = [item for item in items if "slow" in item.keywords]
+        for item in slow_items:
+            item.add_marker(skip)
+
+
+def pytest_configure(config: Config) -> None:
+    """Used to register marks"""
+    config.addinivalue_line("markers", "todo: Mark test as todo")
+    config.addinivalue_line("markers", "slow: Mark test as slow")
 
 
 pytest_plugins = fixture_modules()
@@ -107,7 +142,7 @@ def pytest_addoption(parser: Parser) -> None:
         The parser to add options to
     """
     parser.addoption(
-        "--fast-only",
+        "--fast",
         action="store_true",
         default=False,
         help="Disable tests marked as slow",

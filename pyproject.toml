@@ -28,9 +28,19 @@ py_version = "37"
 profile = "black" # Play nicely with black
 src_paths = ["autosklearn", "test"]
 known_types = ["typing", "abc"] # We put these in their own section TYPES
+known_testlibs = ["unittest", "pytest", "pytest_cases"] # Put test libs in their own section
 known_first_party = ["autosklearn"] # Say that autosklearn is FIRSTPARTY
 known_test = ["test"] # Say that test.* is TEST
-sections = ["FUTURE", "TYPES", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "TEST", "LOCALFOLDER"] # section ordering
+sections = [
+    "FUTURE",
+    "TYPES",
+    "STDLIB",
+    "THIRDPARTY",
+    "FIRSTPARTY",
+    "TESTLIBS",
+    "TEST",
+    "LOCALFOLDER"
+] # section ordering
 multi_line_output = 3 # https://pycqa.github.io/isort/docs/configuration/multi_line_output_modes.html
 
 [tool.pydocstyle]
@@ -151,3 +161,6 @@ module = [
 ]
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = ["test.*"]
+disallow_untyped_decorators = false # Test decorators are not properly typed

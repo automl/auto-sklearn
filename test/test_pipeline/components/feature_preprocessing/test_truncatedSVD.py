@@ -1,5 +1,3 @@
-import unittest
-
 import sklearn.metrics
 from sklearn.linear_model import RidgeClassifier
 
@@ -11,6 +9,8 @@ from autosklearn.pipeline.util import (
     _test_preprocessing,
     get_dataset,
 )
+
+import unittest
 
 
 class TruncatedSVDComponentTest(PreprocessingTestCase):

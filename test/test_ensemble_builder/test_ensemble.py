@@ -3,12 +3,10 @@ import pickle
 import shutil
 import sys
 import time
-import unittest.mock
 
 import dask.distributed
 import numpy as np
 import pandas as pd
-import pytest
 from smac.runhistory.runhistory import RunHistory, RunKey, RunValue
 
 from autosklearn.constants import BINARY_CLASSIFICATION, MULTILABEL_CLASSIFICATION
@@ -21,6 +19,9 @@ from autosklearn.ensemble_builder import (
 )
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.metrics import accuracy, log_loss, roc_auc
+
+import pytest
+import unittest.mock
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)

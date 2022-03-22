@@ -1,11 +1,11 @@
-import unittest
-
 import numpy as np
 
 from autosklearn.pipeline.components.feature_preprocessing.select_percentile_regression import (  # noqa: E501
     SelectPercentileRegression,
 )
 from autosklearn.pipeline.util import _test_preprocessing, get_dataset
+
+import unittest
 
 
 class SelectPercentileRegressionTest(unittest.TestCase):

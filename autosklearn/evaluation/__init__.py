@@ -324,6 +324,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         if not (instance_specific is None or instance_specific == "0"):
             raise ValueError(instance_specific)
+
         init_params = {"instance": instance}
         if self.init_params is not None:
             init_params.update(self.init_params)
@@ -542,6 +543,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         else:
             origin = getattr(config, "origin", "UNKNOWN")
             config_id = config.config_id
+
         additional_run_info["configuration_origin"] = origin
 
         runtime = float(obj.wall_clock_time)

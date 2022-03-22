@@ -1,7 +1,8 @@
-import unittest
 from collections import OrderedDict
 
 from autosklearn.metalearning.optimizers import optimizer_base
+
+import unittest
 
 
 class OptimizerBaseTest(unittest.TestCase):

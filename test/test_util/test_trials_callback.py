@@ -1,6 +1,5 @@
 import os
 import tempfile
-import unittest
 
 import pandas as pd
 from smac.callbacks import IncorporateRunResultCallback
@@ -10,6 +9,8 @@ from smac.tae.base import StatusType
 
 import autosklearn.pipeline.util as putil
 from autosklearn.classification import AutoSklearnClassifier
+
+import unittest
 
 
 class AutoMLTrialsCallBack(IncorporateRunResultCallback):

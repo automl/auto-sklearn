@@ -8,16 +8,12 @@ import itertools
 import os
 import pickle
 import re
-import sys
 import tempfile
-import unittest
-import unittest.mock
 
 import joblib
 import numpy as np
 import numpy.ma as npma
 import pandas as pd
-import pytest
 import sklearn
 import sklearn.datasets
 import sklearn.dummy
@@ -42,8 +38,11 @@ from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 from autosklearn.metrics import accuracy, f1_macro, mean_squared_error, r2
 from autosklearn.smbo import get_smac_object
 
-sys.path.append(os.path.dirname(__file__))
-from automl_utils import (  # noqa (E402: module level import not at top of file)
+import pytest
+import unittest
+import unittest.mock
+
+from test.test_automl.automl_utils import (
     count_succeses,
     include_single_scores,
     includes_all_scores,
@@ -77,7 +76,7 @@ def test_fit_n_jobs(tmp_dir):
         delete_tmp_folder_after_terminate=False,
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
         seed=1,
         initial_configurations_via_metalearning=0,
         ensemble_size=5,
@@ -300,7 +299,7 @@ def test_performance_over_time_no_ensemble(tmp_dir):
     cls = AutoSklearnClassifier(
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
         seed=1,
         initial_configurations_via_metalearning=0,
         ensemble_size=0,
@@ -321,7 +320,7 @@ def test_cv_results(tmp_dir):
     cls = AutoSklearnClassifier(
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
         seed=1,
         initial_configurations_via_metalearning=0,
         ensemble_size=0,
@@ -416,7 +415,10 @@ def test_leaderboard(
 
     X_train, Y_train, _, _ = putil.get_dataset(dataset_name)
     model = estimator_type(
-        time_left_for_this_task=30, per_run_time_limit=5, tmp_folder=tmp_dir, seed=1
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
+        seed=1,
     )
 
     model.fit(X_train, Y_train)
@@ -552,7 +554,7 @@ def test_show_models_with_holdout(
     automl = estimator(
         time_left_for_this_task=60,
         per_run_time_limit=5,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
         resampling_strategy=resampling_strategy,
         dask_client=dask_client,
     )
@@ -627,7 +629,7 @@ def test_show_models_with_cv(
     automl = estimator(
         time_left_for_this_task=120,
         per_run_time_limit=5,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
         resampling_strategy=resampling_strategy,
         dask_client=dask_client,
     )
@@ -764,7 +766,7 @@ def test_can_pickle_classifier(tmp_dir, dask_client):
         time_left_for_this_task=30,
         delete_tmp_folder_after_terminate=False,
         per_run_time_limit=5,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
         dask_client=dask_client,
     )
 
@@ -810,7 +812,7 @@ def test_multilabel(tmp_dir, dask_client):
     automl = AutoSklearnClassifier(
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
         dask_client=dask_client,
     )
 
@@ -836,7 +838,7 @@ def test_binary(tmp_dir, dask_client):
         time_left_for_this_task=40,
         delete_tmp_folder_after_terminate=False,
         per_run_time_limit=10,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
         dask_client=dask_client,
     )
 
@@ -878,7 +880,7 @@ def test_classification_pandas_support(tmp_dir, dask_client):
         exclude={"classifier": ["libsvm_svc"]},
         dask_client=dask_client,
         seed=5,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
     )
 
     automl.fit(X, y)
@@ -905,7 +907,7 @@ def test_regression(tmp_dir, dask_client):
     automl = AutoSklearnRegressor(
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
         dask_client=dask_client,
     )
 
@@ -938,7 +940,7 @@ def test_cv_regression(tmp_dir, dask_client):
         time_left_for_this_task=60,
         per_run_time_limit=10,
         resampling_strategy="cv",
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
         dask_client=dask_client,
     )
 
@@ -967,7 +969,7 @@ def test_regression_pandas_support(tmp_dir, dask_client):
         time_left_for_this_task=40,
         per_run_time_limit=5,
         dask_client=dask_client,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
     )
 
     # Make sure we error out because y is not encoded
@@ -1283,7 +1285,6 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
 def test_pass_categorical_and_numeric_columns_to_pipeline(
     dask_client, data_type, include_categorical
 ):
-
     # Prepare the training data
     X, y = sklearn.datasets.make_classification(random_state=0)
     X = cast(np.ndarray, X)

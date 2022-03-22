@@ -1,11 +1,12 @@
 import logging
 import os
-import unittest
 
 import pandas as pd
 
 import autosklearn.pipeline.classification
 from autosklearn.metalearning.metalearning.meta_base import MetaBase
+
+import unittest
 
 
 class MetaBaseTest(unittest.TestCase):

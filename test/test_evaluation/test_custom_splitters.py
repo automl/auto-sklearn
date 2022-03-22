@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 
 from autosklearn.constants import (
     BINARY_CLASSIFICATION,
@@ -7,6 +6,8 @@ from autosklearn.constants import (
     MULTILABEL_CLASSIFICATION,
 )
 from autosklearn.evaluation.splitter import CustomStratifiedShuffleSplit
+
+import pytest
 
 
 @pytest.mark.parametrize(

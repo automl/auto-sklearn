@@ -16,7 +16,6 @@ scores_dict = {
 
 
 def print_debug_information(automl):
-
     # In case it is called with estimator,
     # Get the automl object
     if hasattr(automl, "automl_"):
@@ -64,9 +63,7 @@ def print_debug_information(automl):
 
 
 def _includes(scores, all_scores):
-    return all(score in all_scores for score in scores) and len(scores) == len(
-        all_scores
-    )
+    return all(s in all_scores for s in scores) and len(scores) == len(all_scores)
 
 
 def count_succeses(cv_results):

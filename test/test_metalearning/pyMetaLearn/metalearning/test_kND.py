@@ -1,11 +1,12 @@
 import logging
-import unittest
 
 import numpy as np
 import pandas as pd
 
 from autosklearn.metalearning.metalearning.kNearestDatasets.kND import KNearestDatasets
 from autosklearn.metalearning.metalearning.metrics.misc import get_random_metric
+
+import unittest
 
 
 class kNDTest(unittest.TestCase):

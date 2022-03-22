@@ -1,9 +1,9 @@
-import unittest
-
 import numpy as np
 import scipy.sparse
 
 from autosklearn.pipeline.implementations.MinorityCoalescer import MinorityCoalescer
+
+import unittest
 
 
 class MinorityCoalescerTest(unittest.TestCase):

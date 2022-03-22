@@ -2,9 +2,9 @@ from typing import Callable, Union
 
 from pathlib import Path
 
-from pytest import fixture
-
 from autosklearn.automl_common.common.utils.backend import Backend, create
+
+from pytest import fixture
 
 
 # TODO Update to return path once everything can use a path
@@ -21,8 +21,6 @@ def tmp_dir(tmp_path: Path) -> str:
     str
         The directory as a str
     """
-    assert not tmp_path.exists(), "In the fixture `tmp_dir` for debugging purposes"
-    tmp_path.mkdir()
     return str(tmp_path)
 
 

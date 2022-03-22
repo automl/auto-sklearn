@@ -1,8 +1,8 @@
-import unittest
-
 import numpy as np
 
 from autosklearn.pipeline.implementations.util import softmax
+
+import unittest
 
 
 class UtilTest(unittest.TestCase):

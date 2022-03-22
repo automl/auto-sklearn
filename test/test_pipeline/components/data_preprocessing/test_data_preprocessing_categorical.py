@@ -1,12 +1,12 @@
-import unittest
-
 import numpy as np
-import pytest
 from scipy import sparse
 
 from autosklearn.pipeline.components.data_preprocessing.feature_type_categorical import (  # noqa: E501
     CategoricalPreprocessingPipeline,
 )
+
+import pytest
+import unittest
 
 
 class CategoricalPreprocessingPipelineTest(unittest.TestCase):

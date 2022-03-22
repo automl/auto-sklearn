@@ -1,14 +1,15 @@
-import unittest
 import warnings
 
 import numpy as np
-import pytest
 import sklearn.metrics
 from smac.utils.constants import MAXINT
 
 import autosklearn.metrics
 from autosklearn.constants import BINARY_CLASSIFICATION, REGRESSION
 from autosklearn.metrics import calculate_loss, calculate_metric, calculate_score
+
+import pytest
+import unittest
 
 
 class TestScorer(unittest.TestCase):
