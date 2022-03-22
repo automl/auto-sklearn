@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional, Tuple, Union, cast
 
 import logging
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -41,9 +42,11 @@ class FeatureValidator(BaseEstimator):
         self,
         feat_type: Optional[List[str]] = None,
         logger: Optional[PickableLoggerAdapter] = None,
+        allow_string_features: bool = True,
     ) -> None:
         # If a dataframe was provided, we populate
-        # this attribute with a mapping from column to {numerical | categorical}
+        # this attribute with a mapping from column to
+        # {numerical | categorical | string}
         self.feat_type: Optional[Dict[Union[str, int], str]] = None
         if feat_type is not None:
             if isinstance(feat_type, dict):
@@ -51,7 +54,7 @@ class FeatureValidator(BaseEstimator):
             elif not isinstance(feat_type, List):
                 raise ValueError(
                     "Auto-Sklearn expects a list of categorical/"
-                    "numerical feature types, yet a"
+                    "numerical/string feature types, yet a"
                     " {} was provided".format(type(feat_type))
                 )
             else:
@@ -67,6 +70,7 @@ class FeatureValidator(BaseEstimator):
         self.logger = logger if logger is not None else logging.getLogger(__name__)
 
         self._is_fitted = False
+        self.allow_string_features = allow_string_features
 
     def fit(
         self,
@@ -299,21 +303,32 @@ class FeatureValidator(BaseEstimator):
             elif X[column].dtype.name in ["category", "bool"]:
                 feat_type[column] = "categorical"
             elif X[column].dtype.name == "string":
-                feat_type[column] = "string"
+                if self.allow_string_features:
+                    feat_type[column] = "string"
+                else:
+                    feat_type[column] = "categorical"
+                    warnings.warn(
+                        f"you disabled text encoding column {column} will be "
+                        f"encoded as category"
+                    )
             # Move away from np.issubdtype as it causes
             # TypeError: data type not understood in certain pandas types
             elif not is_numeric_dtype(X[column]):
                 if X[column].dtype.name == "object":
-                    raise ValueError(
-                        f"Input Column {column} has invalid type object. "
-                        "Cast it to a valid dtype before using it in Auto-Sklearn. "
-                        "Valid types are numerical, categorical or boolean. "
-                        "You can cast it to a valid dtype using "
-                        "pandas.Series.astype ."
-                        "If working with string objects, the following "
-                        "tutorial illustrates how to work with text data: "
-                        "https://scikit-learn.org/stable/tutorial/text_analytics/working_with_text_data.html"  # noqa: E501
+                    warnings.warn(
+                        f"Input Column {column} has generic type object. "
+                        f"Autosklearn will treat this column as string. "
+                        f"Please ensure that this setting is suitable for your task.",
+                        UserWarning,
                     )
+                    if self.allow_string_features:
+                        feat_type[column] = "string"
+                    else:
+                        feat_type[column] = "categorical"
+                        warnings.warn(
+                            f"you disabled text encoding column {column} will be"
+                            f"encoded as category"
+                        )
                 elif pd.core.dtypes.common.is_datetime_or_timedelta_dtype(
                     X[column].dtype
                 ):

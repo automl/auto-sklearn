@@ -214,6 +214,7 @@ class AutoML(BaseEstimator):
         scoring_functions: Optional[list[Scorer]] = None,
         get_trials_callback: Optional[IncorporateRunResultCallback] = None,
         dataset_compression: bool | Mapping[str, Any] = True,
+        allow_string_features: bool = True,
     ):
         super().__init__()
 
@@ -259,6 +260,7 @@ class AutoML(BaseEstimator):
         self._smac_scenario_args = smac_scenario_args
         self.logging_config = logging_config
         self.precision = precision
+        self.allow_string_features = allow_string_features
         self._initial_configurations_via_metalearning = (
             initial_configurations_via_metalearning
         )
@@ -656,6 +658,7 @@ class AutoML(BaseEstimator):
             is_classification=is_classification,
             feat_type=feat_type,
             logger_port=self._logger_port,
+            allow_string_features=self.allow_string_features,
         )
         self.InputValidator.fit(X_train=X, y_train=y, X_test=X_test, y_test=y_test)
         X, y = self.InputValidator.transform(X, y)
@@ -727,6 +730,8 @@ class AutoML(BaseEstimator):
 
         # Take the feature types from the validator
         self._feat_type = self.InputValidator.feature_validator.feat_type
+
+        self._log_fit_setup()
 
         datamanager = XYDataManager(
             X=X,
