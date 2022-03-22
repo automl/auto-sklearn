@@ -14,6 +14,19 @@ To ease in understanding of tests, what is being tested and what's expected of t
 each test should be documented with what it's parameters/fixtures are as well as what
 the test expects to happen, regardless of the tests implemntation.
 
+    Parameters
+    ----------
+    param1: Type
+        ...
+
+    param2: Type
+        ...
+
+    Fixtures
+    --------
+    make_something: Callable[..., Something]
+        Factory to make Something
+
     Expects
     -------
     * Something should raise a ValueError when called with X as X is not handled by the
