@@ -1,7 +1,6 @@
 import functools
 import tempfile
 import traceback
-import unittest
 
 import numpy as np
 import sklearn.datasets
@@ -33,6 +32,8 @@ from autosklearn.metrics import (
 )
 from autosklearn.pipeline.util import get_dataset
 from autosklearn.util.data import convert_to_bin
+
+import unittest
 
 SCORER_LIST = [
     accuracy,

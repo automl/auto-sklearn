@@ -1,8 +1,9 @@
 # -*- encoding: utf-8 -*-
 import os
-import unittest
 
 from autosklearn.util.common import check_pid
+
+import unittest
 
 
 class TestUtilsCommon(unittest.TestCase):

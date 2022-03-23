@@ -1,11 +1,12 @@
 import numpy as np
 import pandas as pd
-import pytest
 import sklearn.datasets
 import sklearn.model_selection
 from scipy import sparse
 
 from autosklearn.data.validation import InputValidator
+
+import pytest
 
 
 @pytest.mark.parametrize("openmlid", [2, 40975, 40984])

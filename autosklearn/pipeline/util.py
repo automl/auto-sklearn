@@ -2,13 +2,14 @@ import importlib
 import inspect
 import os
 import pkgutil
-import unittest
 
 import numpy as np
 import scipy.sparse
 import sklearn
 import sklearn.base
 import sklearn.datasets
+
+import unittest
 
 
 def find_sklearn_classes(class_):

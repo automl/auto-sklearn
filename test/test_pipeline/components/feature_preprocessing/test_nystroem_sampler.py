@@ -1,5 +1,3 @@
-import unittest
-
 import numpy as np
 import sklearn.preprocessing
 
@@ -7,6 +5,8 @@ from autosklearn.pipeline.components.feature_preprocessing.nystroem_sampler impo
     Nystroem,
 )
 from autosklearn.pipeline.util import _test_preprocessing, get_dataset
+
+import unittest
 
 
 class NystroemComponentTest(unittest.TestCase):

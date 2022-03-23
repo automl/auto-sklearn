@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import pytest
 import sklearn.datasets
 import sklearn.model_selection
 from pandas.api.types import is_bool_dtype, is_numeric_dtype
@@ -8,6 +7,8 @@ from scipy import sparse
 from sklearn.utils.multiclass import type_of_target
 
 from autosklearn.data.target_validator import TargetValidator
+
+import pytest
 
 
 # Fixtures to be used in this class. By default all elements have 100 datapoints

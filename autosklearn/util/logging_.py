@@ -1,4 +1,7 @@
-# -*- encoding: utf-8 -*-
+"""
+For accessing a logger, please default to using
+`get_named_client_logger(name, host, port)`
+"""
 from typing import Any, Dict, Iterator, Optional, TextIO, Type, cast
 
 import logging
@@ -78,7 +81,7 @@ def get_logger(name: str) -> "PickableLoggerAdapter":
     return logger
 
 
-class PickableLoggerAdapter(object):
+class PickableLoggerAdapter:
     def __init__(self, name: str):
         self.name = name
         self.logger = _create_logger(name)

@@ -1,5 +1,3 @@
-import unittest
-
 import numpy as np
 from scipy import sparse
 
@@ -10,6 +8,8 @@ from autosklearn.pipeline.components.data_preprocessing.categorical_encoding.one
     OneHotEncoder,
 )
 from autosklearn.pipeline.util import _test_preprocessing
+
+import unittest
 
 
 def create_X(instances=1000, n_feats=10, categs_per_feat=5, seed=0):

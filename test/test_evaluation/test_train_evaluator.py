@@ -7,8 +7,6 @@ import queue
 import shutil
 import sys
 import tempfile
-import unittest
-import unittest.mock
 
 import numpy as np
 import sklearn.model_selection
@@ -52,6 +50,9 @@ from autosklearn.evaluation.train_evaluator import (
 from autosklearn.evaluation.util import read_queue
 from autosklearn.metrics import accuracy, f1_macro, r2
 from autosklearn.util.pipeline import get_configuration_space
+
+import unittest
+import unittest.mock
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)

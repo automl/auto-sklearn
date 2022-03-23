@@ -1,9 +1,9 @@
-import unittest
-
 from autosklearn.pipeline.components.feature_preprocessing.kitchen_sinks import (
     RandomKitchenSinks,
 )
 from autosklearn.pipeline.util import PreprocessingTestCase, _test_preprocessing
+
+import unittest
 
 
 class KitchenSinkComponent(PreprocessingTestCase):

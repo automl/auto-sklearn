@@ -1,9 +1,9 @@
-import unittest
-
 import numpy as np
 import scipy.sparse
 
 from autosklearn.pipeline.implementations.CategoryShift import CategoryShift
+
+import unittest
 
 
 class CategoryShiftTest(unittest.TestCase):

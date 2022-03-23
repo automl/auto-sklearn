@@ -1,10 +1,10 @@
-import unittest
-
 import numpy as np
 import sklearn.datasets
 
 from autosklearn.pipeline.components.data_preprocessing.rescaling import RescalingChoice
 from autosklearn.pipeline.util import get_dataset
+
+import unittest
 
 
 class ScalingComponentTest(unittest.TestCase):

@@ -1,5 +1,3 @@
-import unittest
-
 import numpy as np
 import scipy.sparse
 import sklearn.datasets
@@ -11,6 +9,8 @@ from sklearn.tree import DecisionTreeClassifier
 
 from autosklearn.pipeline.implementations.CategoryShift import CategoryShift
 from autosklearn.pipeline.implementations.SparseOneHotEncoder import SparseOneHotEncoder
+
+import unittest
 
 sparse1 = scipy.sparse.csc_matrix(
     ([3, 2, 1, 1, 2, 3], ((1, 4, 5, 2, 3, 5), (0, 0, 0, 1, 1, 1))), shape=(6, 2)

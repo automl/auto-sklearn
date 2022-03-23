@@ -1,6 +1,5 @@
 import logging.handlers
 
-import pytest
 from ConfigSpace.configuration_space import Configuration
 
 import autosklearn.metrics
@@ -10,6 +9,8 @@ from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.stopwatch import StopWatch
+
+import pytest
 
 
 @pytest.mark.parametrize("context", ["fork", "forkserver"])
