@@ -2,8 +2,6 @@ import copy
 import itertools
 import resource
 import tempfile
-import unittest
-import unittest.mock
 
 import numpy as np
 import sklearn.datasets
@@ -33,6 +31,9 @@ from autosklearn.pipeline.constants import (
 )
 from autosklearn.pipeline.regression import SimpleRegressionPipeline
 from autosklearn.pipeline.util import get_dataset
+
+import unittest
+import unittest.mock
 
 from test.test_pipeline.ignored_warnings import ignore_warnings, regressor_warnings
 

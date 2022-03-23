@@ -1,7 +1,5 @@
 from typing import Dict, Optional
 
-import unittest
-
 import numpy as np
 import sklearn.metrics
 
@@ -11,6 +9,8 @@ from autosklearn.pipeline.util import (
     _test_classifier_iterative_fit,
     _test_classifier_predict_proba,
 )
+
+import unittest
 
 from test.test_pipeline.ignored_warnings import classifier_warnings, ignore_warnings
 

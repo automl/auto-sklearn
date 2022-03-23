@@ -1,6 +1,5 @@
 import logging
 import os
-import unittest
 
 import numpy as np
 import pandas as pd
@@ -9,6 +8,8 @@ from ConfigSpace.configuration_space import Configuration
 import autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner as metalearner  # noqa: E501
 import autosklearn.pipeline.classification
 from autosklearn.metalearning.metalearning.meta_base import MetaBase
+
+import unittest
 
 logging.basicConfig()
 

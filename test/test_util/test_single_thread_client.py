@@ -1,8 +1,9 @@
 import dask.distributed
-import pytest
 from distributed.utils_test import inc
 
 from autosklearn.util.single_thread_client import SingleThreadedClient
+
+import pytest
 
 
 def test_single_thread_client_like_dask_client():

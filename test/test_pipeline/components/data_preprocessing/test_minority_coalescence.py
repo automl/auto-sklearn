@@ -1,5 +1,3 @@
-import unittest
-
 import numpy as np
 import scipy.sparse
 
@@ -9,6 +7,8 @@ from autosklearn.pipeline.components.data_preprocessing.minority_coalescense.min
 from autosklearn.pipeline.components.data_preprocessing.minority_coalescense.no_coalescense import (  # noqa: E501
     NoCoalescence,
 )
+
+import unittest
 
 
 class MinorityCoalescerTest(unittest.TestCase):

@@ -5,7 +5,6 @@ from itertools import chain
 
 import numpy as np
 import pandas as pd
-import pytest
 import sklearn.datasets
 from scipy.sparse import csr_matrix, spmatrix
 
@@ -27,6 +26,8 @@ from autosklearn.util.data import (
     supported_precision_reductions,
     validate_dataset_compression_arg,
 )
+
+import pytest
 
 parametrize = pytest.mark.parametrize
 

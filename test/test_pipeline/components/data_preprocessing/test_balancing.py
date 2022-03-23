@@ -1,7 +1,6 @@
 __author__ = "feurerm"
 
 import copy
-import unittest
 
 import numpy as np
 import sklearn.datasets
@@ -32,6 +31,8 @@ from autosklearn.pipeline.components.feature_preprocessing.extra_trees_preproc_f
 from autosklearn.pipeline.components.feature_preprocessing.liblinear_svc_preprocessor import (  # noqa: E501
     LibLinear_Preprocessor,
 )
+
+import unittest
 
 
 class BalancingComponentTest(unittest.TestCase):

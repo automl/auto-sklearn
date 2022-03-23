@@ -1,4 +1,3 @@
-import unittest
 from collections import OrderedDict
 
 import numpy
@@ -18,6 +17,8 @@ from autosklearn.pipeline.components.feature_preprocessing.random_trees_embeddin
 from autosklearn.pipeline.components.feature_preprocessing.truncatedSVD import (
     TruncatedSVD,
 )
+
+import unittest
 
 
 class TestCreateClassificationSearchspace(unittest.TestCase):

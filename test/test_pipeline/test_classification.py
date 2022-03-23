@@ -5,8 +5,6 @@ import itertools
 import os
 import resource
 import tempfile
-import unittest
-import unittest.mock
 
 import numpy as np
 import sklearn.datasets
@@ -39,6 +37,9 @@ from autosklearn.pipeline.constants import (
     UNSIGNED_DATA,
 )
 from autosklearn.pipeline.util import get_dataset
+
+import unittest
+import unittest.mock
 
 from test.test_pipeline.ignored_warnings import classifier_warnings, ignore_warnings
 

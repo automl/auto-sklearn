@@ -1,6 +1,4 @@
 # -*- encoding: utf-8 -*-
-import unittest
-
 from sklearn.datasets import load_breast_cancer
 
 from autosklearn.classification import AutoSklearnClassifier
@@ -9,6 +7,8 @@ from autosklearn.metalearning.mismbo import suggest_via_metalearning
 from autosklearn.pipeline.util import get_dataset
 from autosklearn.smbo import _calculate_metafeatures, _calculate_metafeatures_encoded
 from autosklearn.util.pipeline import get_configuration_space
+
+import unittest
 
 
 class MetafeatureValueDummy(object):

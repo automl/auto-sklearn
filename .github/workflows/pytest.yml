@@ -137,6 +137,8 @@ jobs:
     - name: Check for files left behind by test
       if: ${{ always() }}
       run: |
+        # Deleting `.pytest_chache` as it's used during testing and not deleted
+        rm -rf ".pytest_cache"
         before="${{ steps.status-before.outputs.BEFORE }}"
         after="$(git status --porcelain -b)"
         if [[ "$before" != "$after" ]]; then

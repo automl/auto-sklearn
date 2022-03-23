@@ -1,5 +1,3 @@
-import unittest
-
 import numpy as np
 import scipy.sparse
 
@@ -7,6 +5,8 @@ from autosklearn.pipeline.components.feature_preprocessing.random_trees_embeddin
     RandomTreesEmbedding,
 )
 from autosklearn.pipeline.util import _test_preprocessing, get_dataset
+
+import unittest
 
 
 class RandomTreesEmbeddingComponentTest(unittest.TestCase):

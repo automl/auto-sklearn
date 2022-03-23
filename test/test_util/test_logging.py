@@ -2,11 +2,12 @@ import logging
 import logging.config
 import os
 import tempfile
-import unittest
 
 import yaml
 
 from autosklearn.util import logging_
+
+import unittest
 
 
 class LoggingTest(unittest.TestCase):

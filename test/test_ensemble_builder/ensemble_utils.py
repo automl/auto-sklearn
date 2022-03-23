@@ -1,7 +1,5 @@
 import os
 import shutil
-import unittest
-import unittest.mock
 
 import numpy as np
 
@@ -10,6 +8,9 @@ from autosklearn.automl_common.common.ensemble_building.abstract_ensemble import
 )
 from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.metrics import make_scorer
+
+import unittest
+import unittest.mock
 
 
 def scorer_function(a, b):

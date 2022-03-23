@@ -35,6 +35,7 @@ extras_reqs = {
         "pytest-cov",
         "pytest-xdist",
         "pytest-timeout",
+        "pytest-cases",
         "mypy",
         "isort",
         "black",

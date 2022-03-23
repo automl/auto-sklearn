@@ -4,12 +4,13 @@ import random
 import shutil
 import socket
 import subprocess
-import unittest
 
 import arff
 import numpy as np
 
 from autosklearn.metrics import CLASSIFICATION_METRICS, REGRESSION_METRICS
+
+import unittest
 
 
 class TestMetadataGeneration(unittest.TestCase):

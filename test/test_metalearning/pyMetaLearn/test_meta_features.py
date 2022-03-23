@@ -1,12 +1,10 @@
 import logging
 import os
 import tempfile
-import unittest
 
 import arff
 import numpy as np
 import pandas as pd
-import pytest
 from joblib import Memory
 from sklearn.datasets import fetch_openml, make_multilabel_classification
 
@@ -15,6 +13,9 @@ from autosklearn.metalearning.metafeatures.metafeature import MetaFeatureValue
 from autosklearn.pipeline.components.data_preprocessing.feature_type import (
     FeatTypeSplit,
 )
+
+import pytest
+import unittest
 
 
 @pytest.fixture(scope="class", params=("pandas", "numpy"))
