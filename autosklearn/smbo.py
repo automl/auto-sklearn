@@ -370,7 +370,8 @@ class AutoMLSMBO(object):
 
         self.logger.debug(f"{task.name} took {task.wall_duration:5.2f}sec")
 
-        time_left = self.time_for_task - self.stopwatch.time_since(self.dataset_name)
+        time_since_start = self.stopwatch.time_since(self.dataset_name)
+        time_left = self.total_walltime_limit - time_since_start
         self.logger.info(f"Time left for {task.name}: {time_left:5.2f}s")
 
         return metalearning_configurations
