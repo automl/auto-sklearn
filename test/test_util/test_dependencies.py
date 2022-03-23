@@ -1,6 +1,4 @@
 import re
-import unittest
-from unittest.mock import Mock, patch
 
 import numpy as np
 import pkg_resources
@@ -10,6 +8,9 @@ from autosklearn.util.dependencies import (
     MissingPackageError,
     verify_packages,
 )
+
+import unittest
+from unittest.mock import Mock, patch
 
 
 @patch("pkg_resources.get_distribution")

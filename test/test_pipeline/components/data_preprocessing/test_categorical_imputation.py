@@ -1,11 +1,12 @@
 import numpy as np
 import pandas as pd
-import pytest
 from scipy import sparse
 
 from autosklearn.pipeline.components.data_preprocessing.imputation.categorical_imputation import (  # noqa: E501
     CategoricalImputation,
 )
+
+import pytest
 
 
 @pytest.fixture

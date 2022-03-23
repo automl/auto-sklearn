@@ -1,11 +1,12 @@
 import os
 import sys
-import unittest
 
 from autosklearn.pipeline.components.base import (
     AutoSklearnClassificationAlgorithm,
     find_components,
 )
+
+import unittest
 
 this_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(this_dir)

@@ -30,9 +30,6 @@ from autosklearn.pipeline.implementations.util import (
 )
 from autosklearn.util.logging_ import PicklableClientLogger, get_named_client_logger
 
-__all__ = ["AbstractEvaluator"]
-
-
 # General TYPE definitions for numpy
 TYPE_ADDITIONAL_INFO = Dict[str, Union[int, float, str, Dict, List, Tuple]]
 
@@ -49,9 +46,10 @@ class MyDummyClassifier(DummyClassifier):
     ):
         self.config = config
         if config == 1:
-            super(MyDummyClassifier, self).__init__(strategy="uniform")
+            super().__init__(strategy="uniform")
         else:
-            super(MyDummyClassifier, self).__init__(strategy="most_frequent")
+            super().__init__(strategy="most_frequent")
+
         self.random_state = random_state
         self.init_params = init_params
         self.dataset_properties = dataset_properties
@@ -59,8 +57,11 @@ class MyDummyClassifier(DummyClassifier):
         self.exclude = exclude
 
     def pre_transform(
-        self, X: np.ndarray, y: np.ndarray, fit_params: Optional[Dict[str, Any]] = None
-    ) -> Tuple[np.ndarray, Dict[str, Any]]:  # pylint: disable=R0201
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        fit_params: Optional[Dict[str, Any]] = None,
+    ) -> Tuple[np.ndarray, Dict[str, Any]]:
         if fit_params is None:
             fit_params = {}
         return X, fit_params
@@ -76,22 +77,23 @@ class MyDummyClassifier(DummyClassifier):
         )
 
     def fit_estimator(
-        self, X: np.ndarray, y: np.ndarray, fit_params: Optional[Dict[str, Any]] = None
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        fit_params: Optional[Dict[str, Any]] = None,
     ) -> DummyClassifier:
         return self.fit(X, y)
 
     def predict_proba(self, X: np.ndarray, batch_size: int = 1000) -> np.ndarray:
         new_X = np.ones((X.shape[0], 1))
-        probas = super(MyDummyClassifier, self).predict_proba(new_X)
+        probas = super().predict_proba(new_X)
         probas = convert_multioutput_multiclass_to_multilabel(probas).astype(np.float32)
         return probas
 
-    def estimator_supports_iterative_fit(self) -> bool:  # pylint: disable=R0201
+    def estimator_supports_iterative_fit(self) -> bool:
         return False
 
-    def get_additional_run_info(
-        self,
-    ) -> Optional[TYPE_ADDITIONAL_INFO]:  # pylint: disable=R0201
+    def get_additional_run_info(self) -> Optional[TYPE_ADDITIONAL_INFO]:
         return None
 
 
@@ -107,9 +109,9 @@ class MyDummyRegressor(DummyRegressor):
     ):
         self.config = config
         if config == 1:
-            super(MyDummyRegressor, self).__init__(strategy="mean")
+            super().__init__(strategy="mean")
         else:
-            super(MyDummyRegressor, self).__init__(strategy="median")
+            super().__init__(strategy="median")
         self.random_state = random_state
         self.init_params = init_params
         self.dataset_properties = dataset_properties
@@ -117,8 +119,11 @@ class MyDummyRegressor(DummyRegressor):
         self.exclude = exclude
 
     def pre_transform(
-        self, X: np.ndarray, y: np.ndarray, fit_params: Optional[Dict[str, Any]] = None
-    ) -> Tuple[np.ndarray, Dict[str, Any]]:  # pylint: disable=R0201
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        fit_params: Optional[Dict[str, Any]] = None,
+    ) -> Tuple[np.ndarray, Dict[str, Any]]:
         if fit_params is None:
             fit_params = {}
         return X, fit_params
@@ -129,25 +134,24 @@ class MyDummyRegressor(DummyRegressor):
         y: np.ndarray,
         sample_weight: Optional[Union[np.ndarray, List]] = None,
     ) -> DummyRegressor:
-        return super(MyDummyRegressor, self).fit(
-            np.ones((X.shape[0], 1)), y, sample_weight=sample_weight
-        )
+        return super().fit(np.ones((X.shape[0], 1)), y, sample_weight=sample_weight)
 
     def fit_estimator(
-        self, X: np.ndarray, y: np.ndarray, fit_params: Optional[Dict[str, Any]] = None
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        fit_params: Optional[Dict[str, Any]] = None,
     ) -> DummyRegressor:
         return self.fit(X, y)
 
     def predict(self, X: np.ndarray, batch_size: int = 1000) -> np.ndarray:
         new_X = np.ones((X.shape[0], 1))
-        return super(MyDummyRegressor, self).predict(new_X).astype(np.float32)
+        return super().predict(new_X).astype(np.float32)
 
-    def estimator_supports_iterative_fit(self) -> bool:  # pylint: disable=R0201
+    def estimator_supports_iterative_fit(self) -> bool:
         return False
 
-    def get_additional_run_info(
-        self,
-    ) -> Optional[TYPE_ADDITIONAL_INFO]:  # pylint: disable=R0201
+    def get_additional_run_info(self) -> Optional[TYPE_ADDITIONAL_INFO]:
         return None
 
 

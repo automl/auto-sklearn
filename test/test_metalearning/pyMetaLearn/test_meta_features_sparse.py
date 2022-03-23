@@ -3,7 +3,6 @@ import os
 
 import arff
 import numpy as np
-import pytest
 from scipy import sparse
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
@@ -12,6 +11,8 @@ import autosklearn.metalearning.metafeatures.metafeatures as meta_features
 from autosklearn.pipeline.components.data_preprocessing.feature_type import (
     FeatTypeSplit,
 )
+
+import pytest
 
 
 @pytest.fixture

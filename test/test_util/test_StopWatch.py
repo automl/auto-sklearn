@@ -6,10 +6,11 @@
 
 """
 import time
-import unittest
-import unittest.mock
 
 from autosklearn.util.stopwatch import StopWatch
+
+import unittest
+import unittest.mock
 
 
 class Test(unittest.TestCase):

@@ -1,15 +1,15 @@
 from typing import Container, Type
 
-import unittest
-
 import numpy as np
-import pytest
 import sklearn.metrics
 
 from autosklearn.pipeline.components.regression import RegressorChoice, _regressors
 from autosklearn.pipeline.components.regression.libsvm_svr import LibSVM_SVR
 from autosklearn.pipeline.constants import SPARSE
 from autosklearn.pipeline.util import _test_regressor, _test_regressor_iterative_fit
+
+import pytest
+import unittest
 
 from test.test_pipeline.ignored_warnings import ignore_warnings, regressor_warnings
 

@@ -4,8 +4,6 @@ import os
 import shutil
 import sys
 import time
-import unittest
-import unittest.mock
 
 import numpy as np
 import pynisher
@@ -16,6 +14,9 @@ from smac.utils.constants import MAXINT
 
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.metrics import accuracy, log_loss
+
+import unittest
+import unittest.mock
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)

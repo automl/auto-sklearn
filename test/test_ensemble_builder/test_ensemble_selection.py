@@ -1,9 +1,10 @@
 import numpy as np
-import pytest
 
 from autosklearn.constants import BINARY_CLASSIFICATION, REGRESSION
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.metrics import accuracy, root_mean_squared_error
+
+import pytest
 
 
 def testEnsembleSelection():

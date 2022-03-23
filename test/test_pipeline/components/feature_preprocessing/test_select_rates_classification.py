@@ -1,5 +1,3 @@
-import unittest
-
 import numpy as np
 import scipy.sparse
 import sklearn.preprocessing
@@ -8,6 +6,8 @@ from autosklearn.pipeline.components.feature_preprocessing.select_rates_classifi
     SelectClassificationRates,
 )
 from autosklearn.pipeline.util import _test_preprocessing, get_dataset
+
+import unittest
 
 
 class SelectClassificationRatesComponentTest(unittest.TestCase):

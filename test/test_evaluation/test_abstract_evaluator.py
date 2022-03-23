@@ -4,8 +4,6 @@ import os
 import shutil
 import sys
 import tempfile
-import unittest
-import unittest.mock
 
 import numpy as np
 import sklearn.dummy
@@ -15,6 +13,9 @@ from autosklearn.automl_common.common.utils.backend import Backend, BackendConte
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 from autosklearn.metrics import accuracy
 from autosklearn.pipeline.components.base import _addons
+
+import unittest
+import unittest.mock
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)

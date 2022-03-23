@@ -1,12 +1,12 @@
-import unittest
-import unittest.mock
-
 import ConfigSpace.configuration_space
 
 import autosklearn.pipeline.base
 import autosklearn.pipeline.components.base
 import autosklearn.pipeline.components.classification as classification
 import autosklearn.pipeline.components.feature_preprocessing as feature_preprocessing
+
+import unittest
+import unittest.mock
 
 
 class BasePipelineMock(autosklearn.pipeline.base.BasePipeline):

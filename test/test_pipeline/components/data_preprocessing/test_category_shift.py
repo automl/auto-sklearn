@@ -1,11 +1,11 @@
-import unittest
-
 import numpy as np
 import scipy.sparse
 
 from autosklearn.pipeline.components.data_preprocessing.category_shift.category_shift import (  # noqa: E501
     CategoryShift,
 )
+
+import unittest
 
 
 class CategoryShiftTest(unittest.TestCase):

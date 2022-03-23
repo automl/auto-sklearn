@@ -1,9 +1,10 @@
 # -*- encoding: utf-8 -*-
 import builtins
-import unittest
-import unittest.mock
 
 from autosklearn.automl_common.common.utils.backend import Backend
+
+import unittest
+import unittest.mock
 
 
 class BackendModelsTest(unittest.TestCase):

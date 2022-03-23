@@ -5,6 +5,7 @@ extend-exclude =
     venv
     .venv
     build
+    autosklearn/automl_common
 extend-ignore =
     # No whitespace before ':' in [x : y]
     E203

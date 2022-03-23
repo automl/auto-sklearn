@@ -8,16 +8,12 @@ import itertools
 import os
 import pickle
 import re
-import sys
 import tempfile
-import unittest
-import unittest.mock
 
 import joblib
 import numpy as np
 import numpy.ma as npma
 import pandas as pd
-import pytest
 import sklearn
 import sklearn.datasets
 import sklearn.dummy
@@ -42,8 +38,11 @@ from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 from autosklearn.metrics import accuracy, f1_macro, mean_squared_error, r2
 from autosklearn.smbo import get_smac_object
 
-sys.path.append(os.path.dirname(__file__))
-from automl_utils import (  # noqa (E402: module level import not at top of file)
+import pytest
+import unittest
+import unittest.mock
+
+from test.test_automl.automl_utils import (
     count_succeses,
     include_single_scores,
     includes_all_scores,
@@ -54,7 +53,6 @@ from automl_utils import (  # noqa (E402: module level import not at top of file
 
 
 def test_fit_n_jobs(tmp_dir):
-
     X_train, Y_train, X_test, Y_test = putil.get_dataset("breast_cancer")
 
     # test parallel Classifier to predict classes, not only indices
@@ -77,7 +75,7 @@ def test_fit_n_jobs(tmp_dir):
         delete_tmp_folder_after_terminate=False,
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
         seed=1,
         initial_configurations_via_metalearning=0,
         ensemble_size=5,
@@ -147,18 +145,18 @@ def test_feat_type_wrong_arguments():
     X = np.zeros((100, 100))
     y = np.zeros((100,))
 
-    cls = AutoSklearnClassifier(ensemble_size=0)
+    cls = AutoSklearnClassifier()
     expected_msg = r".*feat_type does not have same number of "
     "variables as X has features. 1 vs 100.*"
     with pytest.raises(ValueError, match=expected_msg):
         cls.fit(X=X, y=y, feat_type=[True])
 
-    cls = AutoSklearnClassifier(ensemble_size=0)
+    cls = AutoSklearnClassifier()
     expected_msg = r".*feat_type must only contain strings.*"
     with pytest.raises(ValueError, match=expected_msg):
         cls.fit(X=X, y=y, feat_type=[True] * 100)
 
-    cls = AutoSklearnClassifier(ensemble_size=0)
+    cls = AutoSklearnClassifier()
     expected_msg = r".*Only `Categorical`, `Numerical` and `String` are"
     "valid feature types, you passed `Car`.*"
     with pytest.raises(ValueError, match=expected_msg):
@@ -206,7 +204,7 @@ def test_type_of_target(mock_estimator):
         ]
     )
 
-    cls = AutoSklearnClassifier(ensemble_size=0)
+    cls = AutoSklearnClassifier()
     cls.automl_ = unittest.mock.Mock()
     cls.automl_.InputValidator = unittest.mock.Mock()
     cls.automl_.InputValidator.target_validator = unittest.mock.Mock()
@@ -248,7 +246,7 @@ def test_type_of_target(mock_estimator):
         )
 
     # Test that regressor raises error for illegal target types.
-    reg = AutoSklearnRegressor(ensemble_size=0)
+    reg = AutoSklearnRegressor()
     # Illegal target types for regression: multilabel-indicator
     # multiclass-multioutput
     expected_msg = r".*Regression with data of type"
@@ -300,10 +298,10 @@ def test_performance_over_time_no_ensemble(tmp_dir):
     cls = AutoSklearnClassifier(
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
         seed=1,
-        initial_configurations_via_metalearning=0,
         ensemble_size=0,
+        initial_configurations_via_metalearning=0,
     )
 
     cls.fit(X_train, Y_train, X_test, Y_test)
@@ -321,10 +319,9 @@ def test_cv_results(tmp_dir):
     cls = AutoSklearnClassifier(
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
         seed=1,
         initial_configurations_via_metalearning=0,
-        ensemble_size=0,
         scoring_functions=[autosklearn.metrics.precision, autosklearn.metrics.roc_auc],
     )
 
@@ -416,7 +413,10 @@ def test_leaderboard(
 
     X_train, Y_train, _, _ = putil.get_dataset(dataset_name)
     model = estimator_type(
-        time_left_for_this_task=30, per_run_time_limit=5, tmp_folder=tmp_dir, seed=1
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
+        seed=1,
     )
 
     model.fit(X_train, Y_train)
@@ -552,7 +552,7 @@ def test_show_models_with_holdout(
     automl = estimator(
         time_left_for_this_task=60,
         per_run_time_limit=5,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
         resampling_strategy=resampling_strategy,
         dask_client=dask_client,
     )
@@ -627,7 +627,7 @@ def test_show_models_with_cv(
     automl = estimator(
         time_left_for_this_task=120,
         per_run_time_limit=5,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
         resampling_strategy=resampling_strategy,
         dask_client=dask_client,
     )
@@ -684,7 +684,7 @@ def test_show_models_with_cv(
 @unittest.mock.patch("autosklearn.estimators.AutoSklearnEstimator.build_automl")
 def test_fit_n_jobs_negative(build_automl_patch):
     n_cores = cpu_count()
-    cls = AutoSklearnEstimator(n_jobs=-1, ensemble_size=0)
+    cls = AutoSklearnEstimator(n_jobs=-1)
     cls.fit()
     assert cls._n_jobs == n_cores
 
@@ -764,7 +764,7 @@ def test_can_pickle_classifier(tmp_dir, dask_client):
         time_left_for_this_task=30,
         delete_tmp_folder_after_terminate=False,
         per_run_time_limit=5,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
         dask_client=dask_client,
     )
 
@@ -810,7 +810,7 @@ def test_multilabel(tmp_dir, dask_client):
     automl = AutoSklearnClassifier(
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
         dask_client=dask_client,
     )
 
@@ -836,7 +836,7 @@ def test_binary(tmp_dir, dask_client):
         time_left_for_this_task=40,
         delete_tmp_folder_after_terminate=False,
         per_run_time_limit=10,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
         dask_client=dask_client,
     )
 
@@ -878,7 +878,7 @@ def test_classification_pandas_support(tmp_dir, dask_client):
         exclude={"classifier": ["libsvm_svc"]},
         dask_client=dask_client,
         seed=5,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
     )
 
     automl.fit(X, y)
@@ -905,7 +905,7 @@ def test_regression(tmp_dir, dask_client):
     automl = AutoSklearnRegressor(
         time_left_for_this_task=30,
         per_run_time_limit=5,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
         dask_client=dask_client,
     )
 
@@ -938,7 +938,7 @@ def test_cv_regression(tmp_dir, dask_client):
         time_left_for_this_task=60,
         per_run_time_limit=10,
         resampling_strategy="cv",
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
         dask_client=dask_client,
     )
 
@@ -967,7 +967,7 @@ def test_regression_pandas_support(tmp_dir, dask_client):
         time_left_for_this_task=40,
         per_run_time_limit=5,
         dask_client=dask_client,
-        tmp_folder=tmp_dir,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
     )
 
     # Make sure we error out because y is not encoded
@@ -987,8 +987,7 @@ def test_regression_pandas_support(tmp_dir, dask_client):
 
 
 def test_autosklearn_classification_methods_returns_self(dask_client):
-    """
-    Currently this method only tests that the methods of AutoSklearnClassifier
+    """Currently this method only tests that the methods of AutoSklearnClassifier
     is able to fit using fit(), fit_ensemble() and refit()
     """
     X_train, y_train, X_test, y_test = putil.get_dataset("iris")
@@ -996,7 +995,6 @@ def test_autosklearn_classification_methods_returns_self(dask_client):
         time_left_for_this_task=60,
         delete_tmp_folder_after_terminate=False,
         per_run_time_limit=10,
-        ensemble_size=0,
         dask_client=dask_client,
         exclude={"feature_preprocessor": ["fast_ica"]},
     )
@@ -1022,7 +1020,6 @@ def test_autosklearn_regression_methods_returns_self(dask_client):
         delete_tmp_folder_after_terminate=False,
         per_run_time_limit=5,
         dask_client=dask_client,
-        ensemble_size=0,
     )
 
     automl_fitted = automl.fit(X_train, y_train)
@@ -1039,7 +1036,6 @@ def test_autosklearn2_classification_methods_returns_self(dask_client):
     X_train, y_train, X_test, y_test = putil.get_dataset("iris")
     automl = AutoSklearn2Classifier(
         time_left_for_this_task=60,
-        ensemble_size=0,
         delete_tmp_folder_after_terminate=False,
         dask_client=dask_client,
     )
@@ -1069,7 +1065,6 @@ def test_autosklearn2_classification_methods_returns_self_sparse(dask_client):
     )
     automl = AutoSklearn2Classifier(
         time_left_for_this_task=60,
-        ensemble_size=0,
         delete_tmp_folder_after_terminate=False,
         dask_client=dask_client,
     )
@@ -1201,7 +1196,6 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
         # Time left for task plays no role
         # only per run time limit
         per_run_time_limit=30,
-        ensemble_size=0,
         dask_client=dask_client,
         include=include,
         seed=seed,
@@ -1283,7 +1277,6 @@ def test_fit_pipeline(dask_client, task_type, resampling_strategy, disable_file_
 def test_pass_categorical_and_numeric_columns_to_pipeline(
     dask_client, data_type, include_categorical
 ):
-
     # Prepare the training data
     X, y = sklearn.datasets.make_classification(random_state=0)
     X = cast(np.ndarray, X)
@@ -1319,7 +1312,6 @@ def test_pass_categorical_and_numeric_columns_to_pipeline(
         delete_tmp_folder_after_terminate=False,
         time_left_for_this_task=120,
         per_run_time_limit=30,
-        ensemble_size=0,
         seed=0,
         dask_client=dask_client,
         include={"classifier": ["random_forest"]},
@@ -1384,7 +1376,6 @@ def test_autosklearn_anneal(as_frame):
     X, y = sklearn.datasets.fetch_openml(data_id=2, return_X_y=True, as_frame=as_frame)
     automl = AutoSklearnClassifier(
         time_left_for_this_task=60,
-        ensemble_size=0,
         delete_tmp_folder_after_terminate=False,
         initial_configurations_via_metalearning=0,
         smac_scenario_args={"runcount_limit": 6},
