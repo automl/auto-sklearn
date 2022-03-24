@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Iterator, Mapping, Optional, Tuple
 
 import sys
@@ -108,7 +110,13 @@ class StopWatch(Mapping[str, TimingTask]):
         tasks = self.tasks.values()
         return sum([t.wall_duration for t in tasks if t.wall_duration is not None])
 
-    def time_since(self, name: str, phase: Literal["start", "end"] = "start") -> float:
+    def time_since(
+        self,
+        name: str,
+        phase: Literal["start", "end"] = "start",
+        default: float = 0.0,
+        raises: bool = False,
+    ) -> float:
         """The wall clock time since a task either began or ended
 
         Parameters
@@ -119,6 +127,12 @@ class StopWatch(Mapping[str, TimingTask]):
         phase : Literal["start", "end"] = "start"
             From which phase you want to know the time elapsed since
 
+        default: float = 0.0
+            If None (default) then an error is raised if an answer can't be given.
+
+        raises: bool = False
+            Whether the method should raise if it can't find a valid time
+
         Returns
         -------
         float
@@ -127,14 +141,19 @@ class StopWatch(Mapping[str, TimingTask]):
         Raises
         ------
         ValueError
-            * If the task hasn't been registered
-            * If using "start" and the task never started
-            * If using "end" and the task never started
+            If no default is specified and
+            * the task has not been registered
+            * the "start" and the task never started
+            * the "end" and the task never started
         """
-        if name not in self.tasks:
-            raise ValueError(f"Task not listed in {list(self.tasks.keys())}")
+        task = self.tasks.get(name, None)
 
-        task = self.tasks[name]
+        if task is None:
+            if raises:
+                raise ValueError(f"Task not listed in {list(self.tasks.keys())}")
+            else:
+                return default
+
         if phase == "start":
             event_time = task.wall_start
         elif phase == "end":
@@ -143,7 +162,10 @@ class StopWatch(Mapping[str, TimingTask]):
             raise NotImplementedError()
 
         if event_time is None:
-            raise ValueError(f"Task {task} has no time for {phase}")
+            if raises:
+                raise ValueError(f"Task {task} has no time for {phase}")
+            else:
+                return default
 
         return time.time() - event_time
 
