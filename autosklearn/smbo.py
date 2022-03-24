@@ -96,8 +96,8 @@ def _calculate_metafeatures(
         watcher.start_task(task_name)
 
         categorical = {
-            col: True if feat_type.lower() == "categorical" else False
-            for col, feat_type in data_feat_type.items()
+            col: True if feat_type.lower() in {"categorical", "string"} else
+            False for col, feat_type in data_feat_type.items()
         }
 
         EXCLUDE_META_FEATURES = (
@@ -152,8 +152,8 @@ def _calculate_metafeatures_encoded(
         task_name = "CalculateMetafeaturesEncoded"
         watcher.start_task(task_name)
         categorical = {
-            col: True if feat_type.lower() == "categorical" else False
-            for col, feat_type in data_feat_type.items()
+            col: True if feat_type.lower() in {"categorical", "string"} else
+            False for col, feat_type in data_feat_type.items()
         }
 
         result = calculate_all_metafeatures_encoded_labels(
