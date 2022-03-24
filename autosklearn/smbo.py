@@ -245,7 +245,7 @@ def get_smac_object(
     )
 
 
-class AutoMLSMBO(object):
+class AutoMLSMBO:
     def __init__(
         self,
         config_space,
@@ -370,7 +370,7 @@ class AutoMLSMBO(object):
 
         self.logger.debug(f"{task.name} took {task.wall_duration:5.2f}sec")
 
-        time_since_start = self.stopwatch.time_since(self.dataset_name)
+        time_since_start = self.stopwatch.time_since(self.dataset_name, "start")
         time_left = self.total_walltime_limit - time_since_start
         self.logger.info(f"Time left for {task.name}: {time_left:5.2f}s")
 
@@ -479,8 +479,9 @@ class AutoMLSMBO(object):
         )
         ta = ExecuteTaFuncWithQueue
 
-        startup_time = self.stopwatch.wall_elapsed(self.dataset_name)
+        startup_time = self.stopwatch.time_since(self.dataset_name, "start")
         total_walltime_limit = self.total_walltime_limit - startup_time - 5
+
         scenario_dict = {
             "abort_on_first_run_crash": False,
             "save-results-instantly": True,

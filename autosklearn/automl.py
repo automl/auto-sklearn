@@ -762,7 +762,7 @@ class AutoML(BaseEstimator):
         # calculating the meta-features takes very long
         with self._stopwatch.time("Run Ensemble Builder"):
 
-            elapsed_time = self._stopwatch.time_since(self._dataset_name)
+            elapsed_time = self._stopwatch.time_since(self._dataset_name, "start")
 
             time_left_for_ensembles = max(0, self._time_for_task - elapsed_time)
             proc_ensemble = None
@@ -812,7 +812,7 @@ class AutoML(BaseEstimator):
 
         # => RUN SMAC
         with self._stopwatch.time("Run SMAC"):
-            elapsed_time = self._stopwatch.time_since(self._dataset_name)
+            elapsed_time = self._stopwatch.time_since(self._dataset_name, "start")
             time_left = self._time_for_task - elapsed_time
 
             if self._logger:
