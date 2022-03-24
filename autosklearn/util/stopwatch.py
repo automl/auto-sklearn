@@ -132,7 +132,7 @@ class StopWatch(Mapping[str, TimingTask]):
             * If using "end" and the task never started
         """
         if name not in self.tasks:
-            raise ValueError(f"Task not listed in {self.tasks}")
+            raise ValueError(f"Task not listed in {list(self.tasks.keys())}")
 
         task = self.tasks[name]
         if phase == "start":
