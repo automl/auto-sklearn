@@ -102,7 +102,7 @@ def _calculate_metafeatures(
         with stopwatch.time("Calculate meta-features") as task_timer:
 
             categorical = {
-                col: True if feat_type.lower() == "categorical" else False
+                col: True if feat_type.lower() in {"categorical", "string"} else False
                 for col, feat_type in data_feat_type.items()
             }
 
@@ -160,7 +160,7 @@ def _calculate_metafeatures_encoded(
 
         with stopwatch.time("Calculate meta-features encoded") as task_timer:
             categorical = {
-                col: True if feat_type.lower() == "categorical" else False
+                col: True if feat_type.lower() in {"categorical", "string"} else False
                 for col, feat_type in data_feat_type.items()
             }
 
