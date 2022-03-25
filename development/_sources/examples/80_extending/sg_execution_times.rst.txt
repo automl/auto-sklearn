@@ -5,16 +5,16 @@
 
 Computation times
 =================
-**01:23.190** total execution time for **examples_80_extending** files:
+**01:34.547** total execution time for **examples_80_extending** files:
 
 +-----------------------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_80_extending_example_extending_preprocessor.py` (``example_extending_preprocessor.py``)                         | 00:24.655 | 0.0 MB |
+| :ref:`sphx_glr_examples_80_extending_example_extending_preprocessor.py` (``example_extending_preprocessor.py``)                         | 00:25.255 | 0.0 MB |
 +-----------------------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_80_extending_example_extending_classification.py` (``example_extending_classification.py``)                     | 00:19.744 | 0.0 MB |
+| :ref:`sphx_glr_examples_80_extending_example_extending_data_preprocessor.py` (``example_extending_data_preprocessor.py``)               | 00:23.742 | 0.0 MB |
 +-----------------------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_80_extending_example_extending_data_preprocessor.py` (``example_extending_data_preprocessor.py``)               | 00:16.227 | 0.0 MB |
+| :ref:`sphx_glr_examples_80_extending_example_extending_classification.py` (``example_extending_classification.py``)                     | 00:22.421 | 0.0 MB |
 +-----------------------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_80_extending_example_extending_regression.py` (``example_extending_regression.py``)                             | 00:12.433 | 0.0 MB |
+| :ref:`sphx_glr_examples_80_extending_example_extending_regression.py` (``example_extending_regression.py``)                             | 00:15.951 | 0.0 MB |
 +-----------------------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_80_extending_example_restrict_number_of_hyperparameters.py` (``example_restrict_number_of_hyperparameters.py``) | 00:10.130 | 0.0 MB |
+| :ref:`sphx_glr_examples_80_extending_example_restrict_number_of_hyperparameters.py` (``example_restrict_number_of_hyperparameters.py``) | 00:07.178 | 0.0 MB |
 +-----------------------------------------------------------------------------------------------------------------------------------------+-----------+--------+

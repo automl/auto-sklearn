@@ -123,9 +123,10 @@ View the models found by auto-sklearn
 
  .. code-block:: none
 
-              rank  ensemble_weight              type      cost  duration
-    model_id                                                             
-    27           1              1.0  gaussian_process  0.000002  2.038782
+              rank  ensemble_weight           type      cost  duration
+    model_id                                                          
+    2            1             0.78  random_forest  0.149816  2.794618
+    4            2             0.22    extra_trees  0.235404  1.533007
 
 
 
@@ -152,17 +153,25 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    {   27: {   'cost': 2.176448331447922e-06,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f31211e3040>,
-                'ensemble_weight': 1.0,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f311c692be0>,
-                'model_id': 27,
-                'rank': 1,
-                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f311e027100>,
-                'sklearn_regressor': GaussianProcessRegressor(alpha=7.997907649685645e-08,
-                             kernel=RBF(length_scale=[1, 1, 1, 1, 1]),
-                             n_restarts_optimizer=10, normalize_y=True,
-                             random_state=1)}}
+    {   2: {   'cost': 0.1498160524879183,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7feacc14f160>,
+               'ensemble_weight': 0.78,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7feacab5de50>,
+               'model_id': 2,
+               'rank': 1,
+               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7feacb4303d0>,
+               'sklearn_regressor': RandomForestRegressor(max_features=1.0, n_estimators=512, n_jobs=1,
+                          random_state=1, warm_start=True)},
+        4: {   'cost': 0.23540356158434472,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7feacc14f1c0>,
+               'ensemble_weight': 0.22,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7feacc029df0>,
+               'model_id': 4,
+               'rank': 2,
+               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7feacc0298e0>,
+               'sklearn_regressor': ExtraTreesRegressor(criterion='friedman_mse', max_features=0.5144630032500372,
+                        min_samples_leaf=2, min_samples_split=12, n_estimators=512,
+                        n_jobs=1, random_state=1, warm_start=True)}}
 
 
 
@@ -190,7 +199,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.999993626989227
+    R2 score: 0.8648985757178936
 
 
 
@@ -443,7 +452,7 @@ Get the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  55.722 seconds)
+   **Total running time of the script:** ( 2 minutes  1.790 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multioutput_regression.py:
