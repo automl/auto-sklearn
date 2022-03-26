@@ -1,4 +1,5 @@
-from typing import Callable, Union
+from typing import Callable, Union, Optional
+from distutils.dir_util import copy_tree
 
 import os
 from pathlib import Path
@@ -6,6 +7,9 @@ from pathlib import Path
 from autosklearn.automl_common.common.utils.backend import Backend, create
 
 from pytest import fixture
+
+HERE = Path(__file__).parent.resolve()
+DATAPATH = HERE.parent / "data"
 
 
 # TODO Update to return path once everything can use a path
@@ -34,21 +38,32 @@ def make_backend() -> Callable[..., Backend]:
     path: Union[str, Path]
         The path to place the backend at
 
+    template: Optional[Path] = None
+        Setup with a pre-existing layout if not None
+
     Returns
     -------
     Backend
         The created backend object
     """
     # TODO redo once things use paths
-    def _make(path: Union[str, Path]) -> Backend:
+    def _make(
+        path: Union[str, Path],
+        template: Optional[Path] = None,
+    ) -> Backend:
         _path = Path(path) if not isinstance(path, Path) else path
-        assert not _path.exists()
+        assert not _path.exists(), "Try passing path / 'backend'"
 
         backend = create(
             temporary_directory=str(_path),
             output_directory=None,
             prefix="auto-sklearn",
         )
+
+        if template is not None:
+            assert template.exists()
+            dest = Path(backend.temporary_directory)
+            copy_tree(str(template), str(dest))
 
         return backend
 

@@ -41,7 +41,6 @@ def astype(
 @fixture
 def make_sklearn_dataset() -> Callable:
     """
-
     Parameters
     ----------
     name : str = "iris"
@@ -62,6 +61,12 @@ def make_sklearn_dataset() -> Callable:
     make_binary : bool = False
         Whether to force the data into being binary
 
+    task: Optional[int] = None
+        The task of the data, required for the datamanager
+
+    feat_type: Optional[Dict | str] = None
+        The features types for the data if making a XYDataManager
+
     as_datamanager: bool = False
         Wether to return the information as an XYDataManager
 
@@ -77,9 +82,9 @@ def make_sklearn_dataset() -> Callable:
         train_size_maximum: int = 150,
         make_multilabel: bool = False,
         make_binary: bool = False,
-        as_datamanager: bool = False,
         task: Optional[int] = None,
         feat_type: Optional[Dict | str] = None,
+        as_datamanager: bool = False,
     ) -> Any:
         X, y, Xt, yt = get_dataset(
             dataset=name,
@@ -93,6 +98,7 @@ def make_sklearn_dataset() -> Callable:
         if not as_datamanager:
             return (X, y, Xt, yt)
         else:
+
             assert task is not None and feat_type is not None
             if isinstance(feat_type, str):
                 feat_type = {i: feat_type for i in range(X.shape[1])}
