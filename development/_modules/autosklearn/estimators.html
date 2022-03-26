@@ -1050,6 +1050,25 @@
         <span class="c1">#      tied together by ordering, might be better to store as tuple</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">ensemble_</span><span class="o">.</span><span class="n">weights_</span><span class="p">):</span>
             <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">model_id</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">ensemble_</span><span class="o">.</span><span class="n">identifiers_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="c1"># We had issues where the model&#39;s in the ensembles are not in the runhistory</span>
+            <span class="c1"># collected. I have no clue why this is but to prevent failures, we fill</span>
+            <span class="c1"># the values with NaN</span>
+            <span class="k">if</span> <span class="n">model_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model_runs</span><span class="p">:</span>
+                <span class="n">model_runs</span><span class="p">[</span><span class="n">model_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;model_id&quot;</span><span class="p">:</span> <span class="n">model_id</span><span class="p">,</span>
+                    <span class="s2">&quot;seed&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span>
+                    <span class="s2">&quot;budget&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span>
+                    <span class="s2">&quot;duration&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span>
+                    <span class="s2">&quot;config_id&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span>
+                    <span class="s2">&quot;start_time&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span>
+                    <span class="s2">&quot;end_time&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span>
+                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span>
+                    <span class="s2">&quot;cost&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span>
+                    <span class="s2">&quot;train_loss&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span>
+                    <span class="s2">&quot;config_origin&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span>
+                <span class="p">}</span>
+
             <span class="n">model_runs</span><span class="p">[</span><span class="n">model_id</span><span class="p">][</span><span class="s2">&quot;ensemble_weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">weight</span>
 
         <span class="c1"># Filter out non-ensemble members if needed, else fill in a default</span>
