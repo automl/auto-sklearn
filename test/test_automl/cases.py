@@ -160,7 +160,7 @@ def case_regressor_fitted_cv(
     X, y, Xt, yt = make_sklearn_dataset(name=dataset)
 
     model = make_automl_regressor(
-        time_left_for_this_task=60,
+        time_left_for_this_task=60,  # Give some extra time for cv
         per_run_time_limit=10,
         temporary_directory=cache.path("backend"),
         delete_tmp_folder_after_terminate=False,
