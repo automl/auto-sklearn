@@ -1,7 +1,7 @@
+from __future__ import annotations
+
 import os
 import pickle
-import shutil
-import sys
 import time
 
 import dask.distributed
@@ -9,6 +9,10 @@ import numpy as np
 import pandas as pd
 from smac.runhistory.runhistory import RunHistory, RunKey, RunValue
 
+from autosklearn.automl_common.common.ensemble_building.abstract_ensemble import (
+    AbstractEnsemble,
+)
+from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import BINARY_CLASSIFICATION, MULTILABEL_CLASSIFICATION
 from autosklearn.ensemble_builder import (
     Y_ENSEMBLE,
@@ -18,105 +22,28 @@ from autosklearn.ensemble_builder import (
     EnsembleBuilderManager,
 )
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
-from autosklearn.metrics import accuracy, log_loss, roc_auc
+from autosklearn.metrics import Scorer, accuracy, log_loss, make_scorer, roc_auc
 
-import pytest
-import unittest.mock
+from pytest_cases import fixture, parametrize, parametrize_with_cases
+from unittest.mock import Mock, patch
 
-this_directory = os.path.dirname(__file__)
-sys.path.append(this_directory)
-from ensemble_utils import (  # noqa (E402: module level import not   at top of file)
-    BackendMock,
-    EnsembleBuilderMemMock,
-    MockMetric,
-    compare_read_preds,
-)
+import test.test_ensemble_builder.cases as cases
+from test.conftest import DEFAULT_SEED
 
 
-@pytest.fixture(scope="function")
-def ensemble_backend(request):
-    test_id = "%s_%s" % (request.module.__name__, request.node.name)
-    test_dir = os.path.join(this_directory, test_id)
-
-    try:
-        shutil.rmtree(test_dir)
-    except:  # noqa E722
-        pass
-
-    # Make sure the folders we wanna create do not already exist.
-    backend = BackendMock(test_dir)
-
-    def get_finalizer(ensemble_backend):
-        def session_run_at_end():
-            try:
-                shutil.rmtree(test_dir)
-            except:  # noqa E722
-                pass
-
-        return session_run_at_end
-
-    request.addfinalizer(get_finalizer(backend))
-
-    return backend
-
-
-@pytest.fixture(scope="function")
-def ensemble_run_history(request):
-
-    run_history = RunHistory()
-    run_history._add(
-        RunKey(
-            config_id=3, instance_id='{"task_id": "breast_cancer"}', seed=1, budget=3.0
-        ),
-        RunValue(
-            cost=0.11347517730496459,
-            time=0.21858787536621094,
-            status=None,
-            starttime=time.time(),
-            endtime=time.time(),
-            additional_info={
-                "duration": 0.20323538780212402,
-                "num_run": 3,
-                "configuration_origin": "Random Search",
-            },
-        ),
-        status=None,
-        origin=None,
-    )
-    run_history._add(
-        RunKey(
-            config_id=6, instance_id='{"task_id": "breast_cancer"}', seed=1, budget=6.0
-        ),
-        RunValue(
-            cost=2 * 0.11347517730496459,
-            time=2 * 0.21858787536621094,
-            status=None,
-            starttime=time.time(),
-            endtime=time.time(),
-            additional_info={
-                "duration": 0.20323538780212402,
-                "num_run": 6,
-                "configuration_origin": "Random Search",
-            },
-        ),
-        status=None,
-        origin=None,
-    )
-    return run_history
-
-
-def testRead(ensemble_backend):
-
+@parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
+def test_read(ensemble_backend: Backend) -> None:
     ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
         dataset_name="TEST",
         task_type=BINARY_CLASSIFICATION,
         metric=roc_auc,
-        seed=0,  # important to find the test files
+        seed=DEFAULT_SEED,  # important to find the test files
     )
 
     success = ensbuilder.compute_loss_per_model()
-    assert success, str(ensbuilder.read_preds)
+    assert success, f"read_preds = {str(ensbuilder.read_preds)}"
+
     assert len(ensbuilder.read_preds) == 3, ensbuilder.read_preds.keys()
     assert len(ensbuilder.read_losses) == 3, ensbuilder.read_losses.keys()
 
@@ -133,8 +60,8 @@ def testRead(ensemble_backend):
     assert ensbuilder.read_losses[filename]["ens_loss"] == 0.0
 
 
-@pytest.mark.parametrize(
-    "ensemble_nbest,max_models_on_disc,exp",
+@parametrize(
+    "ensemble_nbest, max_models_on_disc, expected",
     (
         (1, None, 1),
         (1.0, None, 2),
@@ -144,13 +71,41 @@ def testRead(ensemble_backend):
         (2, 1, 1),
     ),
 )
-def testNBest(ensemble_backend, ensemble_nbest, max_models_on_disc, exp):
+@parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
+def test_nbest(
+    ensemble_backend: Backend,
+    ensemble_nbest: int | float,
+    max_models_on_disc: int | None,
+    expected: int,
+) -> None:
+    """
+    Parameters
+    ----------
+    ensemble_backend: Backend
+        The backend to use. In this case, we specifically rely on the `setup_3_models`
+        setup.
+
+    ensemble_nbest: int | float
+        The parameter to use for consider the n best, int being absolute and float being
+        fraction.
+
+    max_models_on_disc: int | None
+        The maximum amount of models to keep on disk
+
+    expected: int
+        The number of keys expected to be selected
+
+    Expects
+    -------
+    * get_n_best_preds should contain 2 keys
+    * The first key should be model 0_2_0_0
+    """
     ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
         dataset_name="TEST",
         task_type=BINARY_CLASSIFICATION,
         metric=roc_auc,
-        seed=0,  # important to find the test files
+        seed=DEFAULT_SEED,  # important to find the test files
         ensemble_nbest=ensemble_nbest,
         max_models_on_disc=max_models_on_disc,
     )
@@ -158,7 +113,7 @@ def testNBest(ensemble_backend, ensemble_nbest, max_models_on_disc, exp):
     ensbuilder.compute_loss_per_model()
     sel_keys = ensbuilder.get_n_best_preds()
 
-    assert len(sel_keys) == exp
+    assert len(sel_keys) == expected
 
     fixture = os.path.join(
         ensemble_backend.temporary_directory,
@@ -167,8 +122,8 @@ def testNBest(ensemble_backend, ensemble_nbest, max_models_on_disc, exp):
     assert sel_keys[0] == fixture
 
 
-@pytest.mark.parametrize(
-    "test_case,exp",
+@parametrize(
+    "max_models_on_disc, expected",
     [
         # If None, no reduction
         (None, 2),
@@ -185,26 +140,47 @@ def testNBest(ensemble_backend, ensemble_nbest, max_models_on_disc, exp):
         (9999.0, 2),
     ],
 )
-def testMaxModelsOnDisc(ensemble_backend, test_case, exp):
-    ensemble_nbest = 4
+@parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
+def test_max_models_on_disc(
+    ensemble_backend: Backend,
+    max_models_on_disc: int | float,
+    expected: int,
+) -> None:
+    """
+    Parameters
+    ----------
+    ensemble_backend : Backend
+        The backend to use, relies on setup_3_models
+
+    max_models_on_disc : int | float
+        The max_models_on_disc param to use
+
+    expected : int
+        The expected number of selected models
+
+    Expects
+    -------
+    * The number of selected models should be as expected
+    """
     ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
         dataset_name="TEST",
         task_type=BINARY_CLASSIFICATION,
         metric=roc_auc,
         seed=0,  # important to find the test files
-        ensemble_nbest=ensemble_nbest,
-        max_models_on_disc=test_case,
+        ensemble_nbest=4,
+        max_models_on_disc=max_models_on_disc,
     )
 
-    with unittest.mock.patch("os.path.getsize") as mock:
+    with patch("os.path.getsize") as mock:
         mock.return_value = 100 * 1024 * 1024
         ensbuilder.compute_loss_per_model()
         sel_keys = ensbuilder.get_n_best_preds()
-        assert len(sel_keys) == exp, test_case
+        assert len(sel_keys) == expected
 
 
-def testMaxModelsOnDisc2(ensemble_backend):
+@parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
+def test_max_models_on_disc_2(ensemble_backend: Backend) -> None:
     # Test for Extreme scenarios
     # Make sure that the best predictions are kept
     ensbuilder = EnsembleBuilder(
@@ -212,40 +188,103 @@ def testMaxModelsOnDisc2(ensemble_backend):
         dataset_name="TEST",
         task_type=BINARY_CLASSIFICATION,
         metric=roc_auc,
-        seed=0,  # important to find the test files
+        seed=DEFAULT_SEED,  # important to find the test files
         ensemble_nbest=50,
         max_models_on_disc=10000.0,
     )
     ensbuilder.read_preds = {}
-    for i in range(50):
-        ensbuilder.read_losses["pred" + str(i)] = {
-            "ens_loss": -i * 10,
-            "num_run": i,
+
+    for n in range(50):
+        loss = 10 * -n
+        ensbuilder.read_losses["pred" + str(n)] = {
+            "ens_loss": loss,
+            "num_run": n,
             "loaded": 1,
-            "seed": 1,
-            "disc_space_cost_mb": 50 * i,
+            "seed": 0,
+            "disc_space_cost_mb": 50 * n,
         }
-        ensbuilder.read_preds["pred" + str(i)] = {Y_ENSEMBLE: True}
+        ensbuilder.read_preds["pred" + str(n)] = {Y_ENSEMBLE: True}
+
     sel_keys = ensbuilder.get_n_best_preds()
     assert ["pred49", "pred48", "pred47"] == sel_keys
 
-    # Make sure at least one model is kept alive
-    ensbuilder.max_models_on_disc = 0.0
-    sel_keys = ensbuilder.get_n_best_preds()
-    assert ["pred49"] == sel_keys
 
+@parametrize("n_models", [50, 10, 2, 1])
+@parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
+def test_max_models_on_disc_preserves_always_preserves_at_least_one_model(
+    n_models: int,
+    ensemble_backend: Backend,
+) -> None:
+    """
+    Parameters
+    ----------
+    n_models : int
 
-@pytest.mark.parametrize(
-    "performance_range_threshold,exp",
-    ((0.0, 4), (0.1, 4), (0.3, 3), (0.5, 2), (0.6, 2), (0.8, 1), (1.0, 1), (1, 1)),
-)
-def testPerformanceRangeThreshold(ensemble_backend, performance_range_threshold, exp):
+    ensemble_backend : Backend
+
+    """
     ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
         dataset_name="TEST",
         task_type=BINARY_CLASSIFICATION,
         metric=roc_auc,
-        seed=0,  # important to find the test files
+        seed=DEFAULT_SEED,  # important to find the test files
+        ensemble_nbest=50,
+        max_models_on_disc=0.0,
+    )
+
+    read_losses = {
+        f"pred{n}": {
+            "ens_loss": 10 * -n,
+            "num_run": n + 1,
+            "loaded": 1,
+            "seed": 0,
+            "disc_space_cost_mb": 50 * n,
+        }
+        for n in range(n_models)
+    }
+    best_model = min(read_losses, key=lambda m: read_losses[m]["ens_loss"])
+
+    ensbuilder.read_losses = read_losses
+    ensbuilder.read_preds = {f"pred{n}": {Y_ENSEMBLE: True} for n in range(n_models)}
+
+    sel_keys = ensbuilder.get_n_best_preds()
+    assert [best_model] == sel_keys
+
+
+@parametrize(
+    "performance_range_threshold, expected_selected",
+    ((0.0, 4), (0.1, 4), (0.3, 3), (0.5, 2), (0.6, 2), (0.8, 1), (1.0, 1)),
+)
+@parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
+def test_performance_range_threshold(
+    ensemble_backend: Backend,
+    performance_range_threshold: float,
+    expected_selected: int,
+) -> None:
+    """
+    Parameters
+    ----------
+    ensemble_backend : Backend
+        The backend to use
+
+    performance_range_threshold : float
+        THe performance range threshold to use
+
+    expected_selected : int
+        The number of selected models for there to be
+
+    Expects
+    -------
+    * Expects the given amount of models to be selected given a performance range
+    threshold.
+    """
+    ensbuilder = EnsembleBuilder(
+        backend=ensemble_backend,
+        dataset_name="TEST",
+        task_type=BINARY_CLASSIFICATION,
+        metric=roc_auc,
+        seed=DEFAULT_SEED,  # important to find the test files
         ensemble_nbest=100,
         performance_range_threshold=performance_range_threshold,
     )
@@ -257,16 +296,16 @@ def testPerformanceRangeThreshold(ensemble_backend, performance_range_threshold,
         "E": {"ens_loss": -5, "num_run": 5, "loaded": -1, "seed": 1},
     }
     ensbuilder.read_preds = {
-        key: {key_2: True for key_2 in (Y_ENSEMBLE, Y_VALID, Y_TEST)}
-        for key in ensbuilder.read_losses
+        name: {preds_key: True for preds_key in (Y_ENSEMBLE, Y_VALID, Y_TEST)}
+        for name in ensbuilder.read_losses
     }
+
     sel_keys = ensbuilder.get_n_best_preds()
+    assert len(sel_keys) == expected_selected
 
-    assert len(sel_keys) == exp
 
-
-@pytest.mark.parametrize(
-    "performance_range_threshold,ensemble_nbest,exp",
+@parametrize(
+    "performance_range_threshold, ensemble_nbest, expected_selected",
     (
         (0.0, 1, 1),
         (0.0, 1.0, 4),
@@ -278,15 +317,33 @@ def testPerformanceRangeThreshold(ensemble_backend, performance_range_threshold,
         (1, 1.0, 1),
     ),
 )
-def testPerformanceRangeThresholdMaxBest(
-    ensemble_backend, performance_range_threshold, ensemble_nbest, exp
-):
+@parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
+def test_performance_range_threshold_with_ensemble_nbest(
+    ensemble_backend: Backend,
+    performance_range_threshold: float,
+    ensemble_nbest: int | float,
+    expected_selected: int,
+) -> None:
+    """
+    Parameters
+    ----------
+    ensemble_backend : Backend
+    performance_range_threshold : float
+    ensemble_nbest : int | float
+    expected_selected : int
+        The number of models expected to be selected
+
+    Expects
+    -------
+    * Given the setup of params for test_performance_range_threshold and ensemble_nbest,
+    the expected number of models should be selected.
+    """
     ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
         dataset_name="TEST",
         task_type=BINARY_CLASSIFICATION,
         metric=roc_auc,
-        seed=0,  # important to find the test files
+        seed=DEFAULT_SEED,  # important to find the test files
         ensemble_nbest=ensemble_nbest,
         performance_range_threshold=performance_range_threshold,
         max_models_on_disc=None,
@@ -299,22 +356,22 @@ def testPerformanceRangeThresholdMaxBest(
         "E": {"ens_loss": -5, "num_run": 5, "loaded": -1, "seed": 1},
     }
     ensbuilder.read_preds = {
-        key: {key_2: True for key_2 in (Y_ENSEMBLE, Y_VALID, Y_TEST)}
-        for key in ensbuilder.read_losses
+        name: {pred_name: True for pred_name in (Y_ENSEMBLE, Y_VALID, Y_TEST)}
+        for name in ensbuilder.read_losses
     }
     sel_keys = ensbuilder.get_n_best_preds()
 
-    assert len(sel_keys) == exp
+    assert len(sel_keys) == expected_selected
 
 
-def testFallBackNBest(ensemble_backend):
-
+@parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
+def test_fall_back_nbest(ensemble_backend: Backend) -> None:
     ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
         dataset_name="TEST",
         task_type=BINARY_CLASSIFICATION,
         metric=roc_auc,
-        seed=0,  # important to find the test files
+        seed=DEFAULT_SEED,  # important to find the test files
         ensemble_nbest=1,
     )
 
@@ -324,96 +381,99 @@ def testFallBackNBest(ensemble_backend):
     print(ensbuilder.read_losses.keys())
     print(ensemble_backend.temporary_directory)
 
-    filename = os.path.join(
-        ensemble_backend.temporary_directory,
-        ".auto-sklearn/runs/0_2_0.0/predictions_ensemble_0_2_0.0.npy",
-    )
-    ensbuilder.read_losses[filename]["ens_loss"] = -1
-
-    filename = os.path.join(
-        ensemble_backend.temporary_directory,
-        ".auto-sklearn/runs/0_3_100.0/predictions_ensemble_0_3_100.0.npy",
-    )
-    ensbuilder.read_losses[filename]["ens_loss"] = -1
-
-    filename = os.path.join(
-        ensemble_backend.temporary_directory,
-        ".auto-sklearn/runs/0_1_0.0/predictions_ensemble_0_1_0.0.npy",
-    )
-    ensbuilder.read_losses[filename]["ens_loss"] = -1
+    for model in ["0_1_0.0", "0_2_0.0", "0_3_100.0"]:
+        filename = os.path.join(
+            ensemble_backend.temporary_directory,
+            f".auto-sklearn/runs/{model}/predictions_ensemble_{model}.npy",
+        )
+        ensbuilder.read_losses[filename]["ens_loss"] = -1
 
     sel_keys = ensbuilder.get_n_best_preds()
 
+    best_model = "0_1_0.0"
     fixture = os.path.join(
         ensemble_backend.temporary_directory,
-        ".auto-sklearn/runs/0_1_0.0/predictions_ensemble_0_1_0.0.npy",
+        f".auto-sklearn/runs/{best_model}/predictions_ensemble_{best_model}.npy",
     )
+
     assert len(sel_keys) == 1
     assert sel_keys[0] == fixture
 
 
-def testGetValidTestPreds(ensemble_backend):
-
+@parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
+def test_get_valid_test_preds(ensemble_backend: Backend) -> None:
+    """
+    Parameters
+    ----------
+    ensemble_backend : Backend
+        The ensemble backend to use with the setup_3_models setup
+    """
     ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
         dataset_name="TEST",
         task_type=BINARY_CLASSIFICATION,
         metric=roc_auc,
-        seed=0,  # important to find the test files
+        seed=DEFAULT_SEED,  # important to find the test files
         ensemble_nbest=1,
     )
 
-    ensbuilder.compute_loss_per_model()
+    # There are 3 models in the setup
+    # * Run 1 is the dummy run
+    # * Run 2 and Run 3 share the same predictions
+    # -> Run 2 is selected with ensemble_nbest = 1
+    paths = [
+        os.path.join(
+            ensemble_backend.temporary_directory,
+            f".auto-sklearn/runs/{model}/predictions_ensemble_{model}.npy",
+        )
+        for model in ["0_1_0.0", "0_2_0.0", "0_3_100.0"]
+    ]
 
-    # d1 is a dummt prediction. d2 and d3 have the same prediction with
-    # different name. num_run=2 is selected when doing sorted()
-    d1 = os.path.join(
-        ensemble_backend.temporary_directory,
-        ".auto-sklearn/runs/0_1_0.0/predictions_ensemble_0_1_0.0.npy",
-    )
-    d2 = os.path.join(
-        ensemble_backend.temporary_directory,
-        ".auto-sklearn/runs/0_2_0.0/predictions_ensemble_0_2_0.0.npy",
-    )
-    d3 = os.path.join(
-        ensemble_backend.temporary_directory,
-        ".auto-sklearn/runs/0_3_100.0/predictions_ensemble_0_3_100.0.npy",
-    )
+    ensbuilder.compute_loss_per_model()
 
     sel_keys = ensbuilder.get_n_best_preds()
     assert len(sel_keys) == 1
+
     ensbuilder.get_valid_test_preds(selected_keys=sel_keys)
 
-    # Number of read files should be three and
-    # predictions_ensemble_0_4_0.0.npy must not be in there
-    assert len(ensbuilder.read_preds) == 3
-    assert (
-        os.path.join(
-            ensemble_backend.temporary_directory,
-            ".auto-sklearn/runs/0_4_0.0/predictions_ensemble_0_4_0.0.npy",
-        )
-        not in ensbuilder.read_preds
-    )
+    # Number of read files should be three and contain those of the models in the setup
+    assert set(ensbuilder.read_preds.keys()) == set(paths)
+
+    selected = sel_keys
+    non_selected = set(paths) - set(sel_keys)
 
     # not selected --> should still be None
-    assert ensbuilder.read_preds[d1][Y_VALID] is None
-    assert ensbuilder.read_preds[d1][Y_TEST] is None
-    assert ensbuilder.read_preds[d3][Y_VALID] is None
-    assert ensbuilder.read_preds[d3][Y_TEST] is None
+    for key in non_selected:
+        assert ensbuilder.read_preds[key][Y_VALID] is None
+        assert ensbuilder.read_preds[key][Y_TEST] is None
 
     # selected --> read valid and test predictions
-    assert ensbuilder.read_preds[d2][Y_VALID] is not None
-    assert ensbuilder.read_preds[d2][Y_TEST] is not None
+    for key in selected:
+        assert ensbuilder.read_preds[key][Y_VALID] is not None
+        assert ensbuilder.read_preds[key][Y_TEST] is not None
 
 
-def testEntireEnsembleBuilder(ensemble_backend):
+@parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
+def test_ensemble_builder_predictions(ensemble_backend: Backend) -> None:
+    """
+    Parameters
+    ----------
+    ensemble_backend : Backend
+        The ensemble backend to use with the setup_3_models setup
 
+    Expects
+    -------
+    * The validation and test sets should both have equal predictions for them?
+    * Since model 0_2_0.0 has predictions exactly equal to the targets, it should
+      recieve full weight and that the predictions should be identical to that models
+      predictions
+    """
     ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
         dataset_name="TEST",
         task_type=BINARY_CLASSIFICATION,
         metric=roc_auc,
-        seed=0,  # important to find the test files
+        seed=DEFAULT_SEED,  # important to find the test files
         ensemble_nbest=2,
     )
     ensbuilder.SAVE2DISC = False
@@ -463,14 +523,14 @@ def testEntireEnsembleBuilder(ensemble_backend):
     np.testing.assert_array_almost_equal(y_valid, y_valid_d2)
 
 
-def test_main(ensemble_backend):
-
+@parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
+def test_main(ensemble_backend: Backend) -> None:
     ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
         dataset_name="TEST",
-        task_type=MULTILABEL_CLASSIFICATION,  # Multilabel Classification
+        task_type=BINARY_CLASSIFICATION,
         metric=roc_auc,
-        seed=0,  # important to find the test files
+        seed=DEFAULT_SEED,  # important to find the test files
         ensemble_nbest=2,
         max_models_on_disc=None,
     )
@@ -512,14 +572,15 @@ def test_main(ensemble_backend):
     ), os.listdir(ensemble_backend.internals_directory)
 
 
-def test_run_end_at(ensemble_backend):
-    with unittest.mock.patch("pynisher.enforce_limits") as pynisher_mock:
+@parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
+def test_run_end_at(ensemble_backend: Backend) -> None:
+    with patch("pynisher.enforce_limits") as pynisher_mock:
         ensbuilder = EnsembleBuilder(
             backend=ensemble_backend,
             dataset_name="TEST",
-            task_type=MULTILABEL_CLASSIFICATION,  # Multilabel Classification
+            task_type=BINARY_CLASSIFICATION,
             metric=roc_auc,
-            seed=0,  # important to find the test files
+            seed=DEFAULT_SEED,  # important to find the test files
             ensemble_nbest=2,
             max_models_on_disc=None,
         )
@@ -528,24 +589,41 @@ def test_run_end_at(ensemble_backend):
         current_time = time.time()
 
         ensbuilder.run(
-            end_at=current_time + 10, iteration=1, pynisher_context="forkserver"
+            end_at=current_time + 10,
+            iteration=1,
+            pynisher_context="forkserver",
         )
         # 4 seconds left because: 10 seconds - 5 seconds overhead - little overhead
         # but then rounded to an integer
-        assert pynisher_mock.call_args_list[0][1]["wall_time_in_s"], 4
+        assert pynisher_mock.call_args_list[0][1]["wall_time_in_s"] == 4
 
 
-def testLimit(ensemble_backend):
+@parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
+def test_limit(ensemble_backend: Backend) -> None:
+    class EnsembleBuilderMemMock(EnsembleBuilder):
+        def fit_ensemble(self, selected_keys):
+            return True
+
+        def predict(
+            self,
+            set_: str,
+            ensemble: AbstractEnsemble,
+            selected_keys: list,
+            n_preds: int,
+            index_run: int,
+        ):
+            np.ones([10000000, 1000000])
+
     ensbuilder = EnsembleBuilderMemMock(
         backend=ensemble_backend,
         dataset_name="TEST",
         task_type=BINARY_CLASSIFICATION,
         metric=roc_auc,
-        seed=0,  # important to find the test files
+        seed=DEFAULT_SEED,  # important to find the test files
         ensemble_nbest=10,
-        # small to trigger MemoryException
-        memory_limit=100,
+        memory_limit=10,  # small to trigger MemoryException
     )
+
     ensbuilder.SAVE2DISC = False
 
     read_losses_file = os.path.join(
@@ -555,28 +633,25 @@ def testLimit(ensemble_backend):
         ensemble_backend.internals_directory, "ensemble_read_preds.pkl"
     )
 
-    def mtime_mock(filename):
+    def mtime_mock(filename: str) -> float:
         mtimes = {
-            "predictions_ensemble_0_1_0.0.npy": 0,
+            "predictions_ensemble_0_1_0.0.npy": 0.0,
             "predictions_valid_0_1_0.0.npy": 0.1,
             "predictions_test_0_1_0.0.npy": 0.2,
-            "predictions_ensemble_0_2_0.0.npy": 1,
+            "predictions_ensemble_0_2_0.0.npy": 1.0,
             "predictions_valid_0_2_0.0.npy": 1.1,
             "predictions_test_0_2_0.0.npy": 1.2,
-            "predictions_ensemble_0_3_100.0.npy": 2,
+            "predictions_ensemble_0_3_100.0.npy": 2.0,
             "predictions_valid_0_3_100.0.npy": 2.1,
             "predictions_test_0_3_100.0.npy": 2.2,
         }
         return mtimes[os.path.split(filename)[1]]
 
-    with unittest.mock.patch(
-        "logging.getLogger"
-    ) as get_logger_mock, unittest.mock.patch(
-        "logging.config.dictConfig"
-    ) as _, unittest.mock.patch(
+    with patch("logging.getLogger") as get_logger_mock, patch(
         "os.path.getmtime"
-    ) as mtime:
-        logger_mock = unittest.mock.Mock()
+    ) as mtime, patch("logging.config.dictConfig"):
+
+        logger_mock = Mock()
         logger_mock.handlers = []
         get_logger_mock.return_value = logger_mock
         mtime.side_effect = mtime_mock
@@ -584,11 +659,14 @@ def testLimit(ensemble_backend):
         ensbuilder.run(time_left=1000, iteration=0, pynisher_context="fork")
         assert os.path.exists(read_losses_file)
         assert not os.path.exists(read_preds_file)
+        print(logger_mock.warning.call_args_list)
         assert logger_mock.warning.call_count == 1
+
         ensbuilder.run(time_left=1000, iteration=0, pynisher_context="fork")
         assert os.path.exists(read_losses_file)
         assert not os.path.exists(read_preds_file)
         assert logger_mock.warning.call_count == 2
+
         ensbuilder.run(time_left=1000, iteration=0, pynisher_context="fork")
         assert os.path.exists(read_losses_file)
         assert not os.path.exists(read_preds_file)
@@ -623,7 +701,8 @@ def testLimit(ensemble_backend):
             )
 
 
-def test_read_pickle_read_preds(ensemble_backend):
+@parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
+def test_read_pickle_read_preds(ensemble_backend: Backend) -> None:
     """
     This procedure test that we save the read predictions before
     destroying the ensemble builder and that we are able to read
@@ -632,9 +711,9 @@ def test_read_pickle_read_preds(ensemble_backend):
     ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
         dataset_name="TEST",
-        task_type=MULTILABEL_CLASSIFICATION,  # Multilabel Classification
+        task_type=BINARY_CLASSIFICATION,
         metric=roc_auc,
-        seed=0,  # important to find the test files
+        seed=DEFAULT_SEED,  # important to find the test files
         ensemble_nbest=2,
         max_models_on_disc=None,
     )
@@ -652,7 +731,24 @@ def test_read_pickle_read_preds(ensemble_backend):
     with (open(ensemble_memory_file, "rb")) as memory:
         read_preds, last_hash = pickle.load(memory)
 
-    compare_read_preds(read_preds, ensbuilder.read_preds)
+    def assert_equal_read_preds(a: dict, b: dict) -> None:
+        """
+        * Keys are check to be the same at each depth
+        * Any ndarray as check for equality with numpy
+        * Everything else is checked with regular equality
+        """
+        # Both arrays should have the same splits
+        assert set(a.keys()) == set(b.keys())
+
+        for k in a.keys():
+            if isinstance(a[k], dict):
+                assert_equal_read_preds(a[k], b[k])
+            elif isinstance(a[k], np.ndarray):
+                np.testing.assert_array_equal(a[k], b[k])
+            else:
+                assert a[k] == b[k], f"Key: {k}"
+
+    assert_equal_read_preds(read_preds, ensbuilder.read_preds)
     assert last_hash == ensbuilder.last_hash
 
     ensemble_memory_file = os.path.join(
@@ -664,7 +760,7 @@ def test_read_pickle_read_preds(ensemble_backend):
     with (open(ensemble_memory_file, "rb")) as memory:
         read_losses = pickle.load(memory)
 
-    compare_read_preds(read_losses, ensbuilder.read_losses)
+    assert_equal_read_preds(read_losses, ensbuilder.read_losses)
 
     # Then create a new instance, which should automatically read this file
     ensbuilder2 = EnsembleBuilder(
@@ -676,16 +772,59 @@ def test_read_pickle_read_preds(ensemble_backend):
         ensemble_nbest=2,
         max_models_on_disc=None,
     )
-    compare_read_preds(ensbuilder2.read_preds, ensbuilder.read_preds)
-    compare_read_preds(ensbuilder2.read_losses, ensbuilder.read_losses)
+    assert_equal_read_preds(ensbuilder2.read_preds, ensbuilder.read_preds)
+    assert_equal_read_preds(ensbuilder2.read_losses, ensbuilder.read_losses)
     assert ensbuilder2.last_hash == ensbuilder.last_hash
 
 
-@pytest.mark.parametrize("metric", [log_loss, accuracy])
-@unittest.mock.patch("os.path.exists")
+@patch("os.path.exists")
+@parametrize("metric", [log_loss, accuracy])
+@parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
 def test_get_identifiers_from_run_history(
-    exists, metric, ensemble_run_history, ensemble_backend
-):
+    exists: Mock,
+    metric: Scorer,
+    ensemble_backend: Backend,
+) -> None:
+    run_history = RunHistory()
+    run_history._add(
+        RunKey(
+            config_id=3, instance_id='{"task_id": "breast_cancer"}', seed=1, budget=3.0
+        ),
+        RunValue(
+            cost=0.11347517730496459,
+            time=0.21858787536621094,
+            status=None,
+            starttime=time.time(),
+            endtime=time.time(),
+            additional_info={
+                "duration": 0.20323538780212402,
+                "num_run": 3,
+                "configuration_origin": "Random Search",
+            },
+        ),
+        status=None,
+        origin=None,
+    )
+    run_history._add(
+        RunKey(
+            config_id=6, instance_id='{"task_id": "breast_cancer"}', seed=1, budget=6.0
+        ),
+        RunValue(
+            cost=2 * 0.11347517730496459,
+            time=2 * 0.21858787536621094,
+            status=None,
+            starttime=time.time(),
+            endtime=time.time(),
+            additional_info={
+                "duration": 0.20323538780212402,
+                "num_run": 6,
+                "configuration_origin": "Random Search",
+            },
+        ),
+        status=None,
+        origin=None,
+    )
+    return run_history
     exists.return_value = True
     ensemble = SingleBest(
         metric=log_loss,
@@ -704,14 +843,20 @@ def test_get_identifiers_from_run_history(
     assert budget == 3.0
 
 
-def test_ensemble_builder_process_realrun(dask_client_single_worker, ensemble_backend):
+@parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
+def test_ensemble_builder_process_realrun(
+    dask_client_single_worker: dask.distributed.Client,
+    ensemble_backend: Backend,
+) -> None:
+    mock_metric = make_scorer("mock", lambda x, y: 0.9)
+
     manager = EnsembleBuilderManager(
         start_time=time.time(),
         time_left_for_ensembles=1000,
         backend=ensemble_backend,
         dataset_name="Test",
         task=BINARY_CLASSIFICATION,
-        metric=MockMetric,
+        metric=mock_metric,
         ensemble_size=50,
         ensemble_nbest=10,
         max_models_on_disc=None,
@@ -736,15 +881,15 @@ def test_ensemble_builder_process_realrun(dask_client_single_worker, ensemble_ba
     assert history[0]["ensemble_test_score"] == 0.9
 
 
+@parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
 def test_ensemble_builder_nbest_remembered(
-    ensemble_backend,
-    dask_client_single_worker,
-):
+    ensemble_backend: Backend,
+    dask_client_single_worker: dask.distributed.Client,
+) -> None:
     """
     Makes sure ensemble builder returns the size of the ensemble that pynisher allowed
     This way, we can remember it and not waste more time trying big ensemble sizes
     """
-
     manager = EnsembleBuilderManager(
         start_time=time.time(),
         time_left_for_ensembles=1000,

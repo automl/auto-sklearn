@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+from __future__ import annotations
 from typing import List, Optional, Tuple, Union
 
 import glob
@@ -52,13 +52,13 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         metric: Scorer,
         ensemble_size: int,
         ensemble_nbest: int,
-        max_models_on_disc: Union[float, int],
         seed: int,
         precision: int,
         max_iterations: Optional[int],
         read_at_most: int,
         ensemble_memory_limit: Optional[int],
         random_state: Union[int, np.random.RandomState],
+        max_models_on_disc: Optional[float | int] = 100,
         logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
         pynisher_context: str = "fork",
     ):
@@ -95,7 +95,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
             Both wrt to validation predictions
             If performance_range_threshold > 0, might return less models
 
-        max_models_on_disc: int
+        max_models_on_disc: Optional[int | float] = 100
            Defines the maximum number of models that are kept in the disc.
 
            If int, it must be greater or equal than 1, and dictates the max
@@ -287,7 +287,6 @@ def fit_and_return_ensemble(
     metric: Scorer,
     ensemble_size: int,
     ensemble_nbest: int,
-    max_models_on_disc: Union[float, int],
     seed: int,
     precision: int,
     read_at_most: int,
@@ -295,6 +294,7 @@ def fit_and_return_ensemble(
     iteration: int,
     return_predictions: bool,
     pynisher_context: str,
+    max_models_on_disc: Optional[Union[float, int]] = 100,
     logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
     unit_test: bool = False,
     memory_limit: Optional[int] = None,
@@ -334,7 +334,7 @@ def fit_and_return_ensemble(
             Both wrt to validation predictions
             If performance_range_threshold > 0, might return less models
 
-        max_models_on_disc: int
+        max_models_on_disc: Optional[int | float] = 100
            Defines the maximum number of models that are kept in the disc.
 
            If int, it must be greater or equal than 1, and dictates the max number of
@@ -422,7 +422,7 @@ class EnsembleBuilder(object):
         metric: Scorer,
         ensemble_size: int = 10,
         ensemble_nbest: Union[int, float] = 100,
-        max_models_on_disc: int = 100,
+        max_models_on_disc: Optional[int | float] = 100,
         performance_range_threshold: float = 0,
         seed: int = 1,
         precision: int = 32,
@@ -452,7 +452,7 @@ class EnsembleBuilder(object):
             if float: consider only this fraction of the best models
             Both with respect to the validation predictions
             If performance_range_threshold > 0, might return less models
-        max_models_on_disc: int = 100
+        max_models_on_disc: Optional[int | float] = 100
            Defines the maximum number of models that are kept in the disc.
            If int, it must be greater or equal than 1, and dictates the max number of
            models to keep.
@@ -486,7 +486,6 @@ class EnsembleBuilder(object):
             way to make unittest.mock work through the pynisher with all spawn contexts.
             If you know a better solution, please let us know by opening an issue.
         """
-
         super(EnsembleBuilder, self).__init__()
 
         self.backend = backend  # communication with filesystem
@@ -904,10 +903,20 @@ class EnsembleBuilder(object):
         # get the megabytes
         return round(this_model_cost / math.pow(1024, 2), 2)
 
-    def compute_loss_per_model(self):
-        """
-        Compute the loss of the predictions on ensemble building data set;
+    def compute_loss_per_model(self) -> bool:
+        """Compute the loss of the predictions on ensemble building data set;
         populates self.read_preds and self.read_losses
+
+        Side-effects
+        ------------
+        * Populates
+            - `self.y_ens_files` all the ensemble predictions it could find for runs
+            - `self.read_losses` with the new losses it calculated
+
+        Returns
+        -------
+        bool
+            Whether it successfully computed losses
         """
 
         self.logger.debug("Read ensemble data set predictions")
@@ -1234,6 +1243,7 @@ class EnsembleBuilder(object):
         self, selected_keys: List[str]
     ) -> Tuple[List[str], List[str]]:
         """Get valid and test predictions from disc and store them in self.read_preds
+
         Parameters
         ---------
         selected_keys: list
