@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from typing import Any, Callable, Tuple
+
 import os
 import pickle
 import time
+from pathlib import Path
 
 import dask.distributed
 import numpy as np
@@ -13,7 +16,7 @@ from autosklearn.automl_common.common.ensemble_building.abstract_ensemble import
     AbstractEnsemble,
 )
 from autosklearn.automl_common.common.utils.backend import Backend
-from autosklearn.constants import BINARY_CLASSIFICATION, MULTILABEL_CLASSIFICATION
+from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.ensemble_builder import (
     Y_ENSEMBLE,
     Y_TEST,
@@ -24,10 +27,11 @@ from autosklearn.ensemble_builder import (
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.metrics import Scorer, accuracy, log_loss, make_scorer, roc_auc
 
-from pytest_cases import fixture, parametrize, parametrize_with_cases
+from pytest_cases import parametrize, parametrize_with_cases
 from unittest.mock import Mock, patch
 
 import test.test_ensemble_builder.cases as cases
+from test.fixtures.logging import MockLogger
 from test.conftest import DEFAULT_SEED
 
 
@@ -115,11 +119,11 @@ def test_nbest(
 
     assert len(sel_keys) == expected
 
-    fixture = os.path.join(
+    expected = os.path.join(
         ensemble_backend.temporary_directory,
         ".auto-sklearn/runs/0_2_0.0/predictions_ensemble_0_2_0.0.npy",
     )
-    assert sel_keys[0] == fixture
+    assert sel_keys[0] == expected
 
 
 @parametrize(
@@ -391,13 +395,13 @@ def test_fall_back_nbest(ensemble_backend: Backend) -> None:
     sel_keys = ensbuilder.get_n_best_preds()
 
     best_model = "0_1_0.0"
-    fixture = os.path.join(
+    expected = os.path.join(
         ensemble_backend.temporary_directory,
         f".auto-sklearn/runs/{best_model}/predictions_ensemble_{best_model}.npy",
     )
 
     assert len(sel_keys) == 1
-    assert sel_keys[0] == fixture
+    assert sel_keys[0] == expected
 
 
 @parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
@@ -525,31 +529,54 @@ def test_ensemble_builder_predictions(ensemble_backend: Backend) -> None:
 
 @parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
 def test_main(ensemble_backend: Backend) -> None:
+    """
+    Parameters
+    ----------
+    ensemble_backend : Backend
+        The ensemble_backend to use, this test relies on this specific case
+
+    Expects
+    -------
+    * There should be "read_preds" and "read_losses" saved to file
+    * There should be 3 model reads
+    * There should be a hash for the preds read in
+    * The true targets should have been read in
+    * The length of the history returned by run should be the same as the iterations
+      performed.
+    * The run history should contain "optimization", "val" and "test" scores, each being
+      the same at 1.0 due to the setup of "setup_3_models".
+    """
+    iters = 1
+
     ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
         dataset_name="TEST",
         task_type=BINARY_CLASSIFICATION,
         metric=roc_auc,
         seed=DEFAULT_SEED,  # important to find the test files
-        ensemble_nbest=2,
-        max_models_on_disc=None,
     )
-    ensbuilder.SAVE2DISC = False
 
     run_history, ensemble_nbest, _, _, _ = ensbuilder.main(
         time_left=np.inf,
-        iteration=1,
+        iteration=iters,
         return_predictions=False,
     )
 
+    internals_dir = Path(ensemble_backend.internals_directory)
+    read_preds_path = (internals_dir / "ensemble_read_preds.pkl")
+    read_losses_path = (internals_dir / "ensemble_read_losses.pkl")
+
+    assert read_preds_path.exists(), list(internals_dir.iterdir())
+    assert read_losses_path.exists(), list(internals_dir.iterdir())
+
+    # There should be three preds read
     assert len(ensbuilder.read_preds) == 3
     assert ensbuilder.last_hash is not None
     assert ensbuilder.y_true_ensemble is not None
 
-    # Make sure the run history is ok
-
-    # We expect at least 1 element to be in the ensemble
-    assert len(run_history) > 0
+    # We expect as many iterations as the iters param
+    assert len(run_history) == iters
+    hist_item = run_history[0]
 
     # As the data loader loads the same val/train/test
     # we expect 1.0 as score and all keys available
@@ -559,154 +586,167 @@ def test_main(ensemble_backend: Backend) -> None:
         "ensemble_optimization_score": 1.0,
     }
 
-    # Make sure that expected performance is a subset of the run history
-    assert all(item in run_history[0].items() for item in expected_performance.items())
-    assert "Timestamp" in run_history[0]
-    assert isinstance(run_history[0]["Timestamp"], pd.Timestamp)
-
-    assert os.path.exists(
-        os.path.join(ensemble_backend.internals_directory, "ensemble_read_preds.pkl")
-    ), os.listdir(ensemble_backend.internals_directory)
-    assert os.path.exists(
-        os.path.join(ensemble_backend.internals_directory, "ensemble_read_losses.pkl")
-    ), os.listdir(ensemble_backend.internals_directory)
+    assert all(key in hist_item for key in expected_performance)
+    assert all(hist_item[key] == score for key, score in expected_performance.items())
+    assert "Timestamp" in hist_item
 
 
+@parametrize("time_buffer", [1, 5])
+@parametrize("duration", [10, 20])
 @parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
-def test_run_end_at(ensemble_backend: Backend) -> None:
+def test_run_end_at(ensemble_backend: Backend, time_buffer: int, duration: int) -> None:
+    """
+    Parameters
+    ----------
+    ensemble_backend : Backend
+        The backend to use
+
+    time_buffer: int
+        How much time buffer to give to the ensemble builder
+
+    duration: int
+        How long to run the ensemble builder for
+
+    Expects
+    -------
+    * The limits enforced by pynisher should account for the time_buffer and duration
+      to run for + a little bit of overhead that gets rounded to a second.
+    """
     with patch("pynisher.enforce_limits") as pynisher_mock:
         ensbuilder = EnsembleBuilder(
             backend=ensemble_backend,
             dataset_name="TEST",
             task_type=BINARY_CLASSIFICATION,
             metric=roc_auc,
-            seed=DEFAULT_SEED,  # important to find the test files
-            ensemble_nbest=2,
-            max_models_on_disc=None,
         )
-        ensbuilder.SAVE2DISC = False
-
-        current_time = time.time()
 
         ensbuilder.run(
-            end_at=current_time + 10,
+            end_at=time.time() + duration,
             iteration=1,
+            time_buffer=time_buffer,
             pynisher_context="forkserver",
         )
-        # 4 seconds left because: 10 seconds - 5 seconds overhead - little overhead
-        # but then rounded to an integer
-        assert pynisher_mock.call_args_list[0][1]["wall_time_in_s"] == 4
+
+        # The 1 comes from the small overhead in conjuction with rounding down
+        expected = duration - time_buffer - 1
+        assert pynisher_mock.call_args_list[0][1]["wall_time_in_s"] == expected
 
 
 @parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
-def test_limit(ensemble_backend: Backend) -> None:
-    class EnsembleBuilderMemMock(EnsembleBuilder):
-        def fit_ensemble(self, selected_keys):
-            return True
+def test_limit(
+    ensemble_backend: Backend,
+    mock_logger: MockLogger,
+) -> None:
+    """
 
-        def predict(
-            self,
-            set_: str,
-            ensemble: AbstractEnsemble,
-            selected_keys: list,
-            n_preds: int,
-            index_run: int,
-        ):
-            np.ones([10000000, 1000000])
+    Parameters
+    ----------
+    ensemble_backend : Backend
+        The backend setup to use
 
-    ensbuilder = EnsembleBuilderMemMock(
+    Fixtures
+    --------
+    mock_logger: MockLogger
+        A logger to inject into the EnsembleBuilder for tracking calls
+
+    Expects
+    -------
+    * Running from (ensemble_nbest, read_at_most) = (10, 5) where a memory exception
+      occurs in each run, we expect ensemble_nbest to be halved continuously until
+      it reaches 0, at which point read_at_most is reduced directly to 1.
+    """
+    expected_states = [(10, 5), (5, 5), (2, 5), (1, 5), (0, 1)]
+
+    starting_state = expected_states[0]
+    intermediate_states = expected_states[1:-1]
+    final_state = expected_states[-1]
+
+    starting_nbest, starting_read_at_most = starting_state
+
+    ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
         dataset_name="TEST",
         task_type=BINARY_CLASSIFICATION,
         metric=roc_auc,
         seed=DEFAULT_SEED,  # important to find the test files
-        ensemble_nbest=10,
-        memory_limit=10,  # small to trigger MemoryException
+        ensemble_nbest=starting_nbest,
+        read_at_most=starting_read_at_most,
+        memory_limit=1,
     )
 
+    ensbuilder.predict = Mock(side_effect=MemoryError)  # Force a memory error
+    ensbuilder.logger = mock_logger  # Mock its logger
     ensbuilder.SAVE2DISC = False
 
-    read_losses_file = os.path.join(
-        ensemble_backend.internals_directory, "ensemble_read_losses.pkl"
-    )
-    read_preds_file = os.path.join(
-        ensemble_backend.internals_directory, "ensemble_read_preds.pkl"
-    )
+    internal_dir = Path(ensemble_backend.internals_directory)
+    read_losses_file = internal_dir / "ensemble_read_losses.pkl"
+    read_preds_file = internal_dir / "ensemble_read_preds.pkl"
 
     def mtime_mock(filename: str) -> float:
+        """TODO, not really sure why we have to force these"""
+        path = Path(filename)
         mtimes = {
+            # At second 0
             "predictions_ensemble_0_1_0.0.npy": 0.0,
             "predictions_valid_0_1_0.0.npy": 0.1,
             "predictions_test_0_1_0.0.npy": 0.2,
+            # At second 1
             "predictions_ensemble_0_2_0.0.npy": 1.0,
             "predictions_valid_0_2_0.0.npy": 1.1,
             "predictions_test_0_2_0.0.npy": 1.2,
+            # At second 2
             "predictions_ensemble_0_3_100.0.npy": 2.0,
             "predictions_valid_0_3_100.0.npy": 2.1,
             "predictions_test_0_3_100.0.npy": 2.2,
         }
-        return mtimes[os.path.split(filename)[1]]
+        return mtimes[path.name]
 
-    with patch("logging.getLogger") as get_logger_mock, patch(
-        "os.path.getmtime"
-    ) as mtime, patch("logging.config.dictConfig"):
-
-        logger_mock = Mock()
-        logger_mock.handlers = []
-        get_logger_mock.return_value = logger_mock
+    with patch("os.path.getmtime") as mtime:
         mtime.side_effect = mtime_mock
 
+        starting_state = (starting_nbest, starting_read_at_most)
+        assert (ensbuilder.ensemble_nbest, ensbuilder.read_at_most) == starting_state
+
+        intermediate_states = [(5, 5), (2, 5), (1, 5), (0, 1)]
+        for i, exp_state in enumerate(intermediate_states, start=1):
+            ensbuilder.run(time_left=1000, iteration=0, pynisher_context="fork")
+
+            assert read_losses_file.exists()
+            assert not read_preds_file.exists()
+
+            assert mock_logger.warning.call_count == i
+
+            assert (ensbuilder.ensemble_nbest, ensbuilder.read_at_most) == exp_state
+
+        # At this point, when we've reached (ensemble_nbest, read_at_most) = (0, 1),
+        # we can still run the ensbulder but it should just raise an error and not
+        # change it's internal state
         ensbuilder.run(time_left=1000, iteration=0, pynisher_context="fork")
-        assert os.path.exists(read_losses_file)
-        assert not os.path.exists(read_preds_file)
-        print(logger_mock.warning.call_args_list)
-        assert logger_mock.warning.call_count == 1
 
-        ensbuilder.run(time_left=1000, iteration=0, pynisher_context="fork")
-        assert os.path.exists(read_losses_file)
-        assert not os.path.exists(read_preds_file)
-        assert logger_mock.warning.call_count == 2
+        assert read_losses_file.exists()
+        assert not read_preds_file.exists()
 
-        ensbuilder.run(time_left=1000, iteration=0, pynisher_context="fork")
-        assert os.path.exists(read_losses_file)
-        assert not os.path.exists(read_preds_file)
-        assert logger_mock.warning.call_count == 3
+        assert (ensbuilder.ensemble_nbest, ensbuilder.read_at_most) == final_state
 
-        # it should try to reduce ensemble_nbest until it also failed at 2
-        assert ensbuilder.ensemble_nbest == 1
+        assert mock_logger.warning.call_count == len(intermediate_states)
+        assert mock_logger.error.call_count == 1, mock_logger.error.call_args_list
 
-        ensbuilder.run(time_left=1000, iteration=0, pynisher_context="fork")
-        assert os.path.exists(read_losses_file)
-        assert not os.path.exists(read_preds_file)
-        assert logger_mock.warning.call_count == 4
-
-        # it should next reduce the number of models to read at most
-        assert ensbuilder.read_at_most == 1
-
-        # And then it still runs, but basically won't do anything any more except for
-        # raising error messages via the logger
-        ensbuilder.run(time_left=1000, iteration=0, pynisher_context="fork")
-        assert os.path.exists(read_losses_file)
-        assert not os.path.exists(read_preds_file)
-        assert logger_mock.warning.call_count == 4
-
-        # In the previous assert, reduction is tried until failure
-        # So that means we should have more than 1 memoryerror message
-        assert logger_mock.error.call_count >= 1, "{}".format(
-            logger_mock.error.call_args_list
-        )
-        for i in range(len(logger_mock.error.call_args_list)):
-            assert "Memory Exception -- Unable to further reduce" in str(
-                logger_mock.error.call_args_list[i]
-            )
+        for call_arg in mock_logger.error.call_args_list:
+            assert "Memory Exception -- Unable to further reduce" in str(call_arg)
 
 
 @parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
 def test_read_pickle_read_preds(ensemble_backend: Backend) -> None:
     """
-    This procedure test that we save the read predictions before
-    destroying the ensemble builder and that we are able to read
-    them safely after
+    Parameters
+    ----------
+    ensemble_backend : Backend
+        THe ensemble backend to use
+
+    Expects
+    -------
+    * The read_losses and read_preds should be cached between creation of
+      the EnsembleBuilder.
     """
     ensbuilder = EnsembleBuilder(
         backend=ensemble_backend,
@@ -722,13 +762,14 @@ def test_read_pickle_read_preds(ensemble_backend: Backend) -> None:
     ensbuilder.main(time_left=np.inf, iteration=1, return_predictions=False)
 
     # Check that the memory was created
-    ensemble_memory_file = os.path.join(
-        ensemble_backend.internals_directory, "ensemble_read_preds.pkl"
-    )
-    assert os.path.exists(ensemble_memory_file)
+    internal_dir = Path(ensemble_backend.internals_directory)
+    losses_file = internal_dir / "ensemble_read_losses.pkl"
+    memory_file = internal_dir / "ensemble_read_preds.pkl"
+
+    assert memory_file.exists()
 
     # Make sure we pickle the correct read preads and hash
-    with (open(ensemble_memory_file, "rb")) as memory:
+    with memory_file.open("rb") as memory:
         read_preds, last_hash = pickle.load(memory)
 
     def assert_equal_read_preds(a: dict, b: dict) -> None:
@@ -751,13 +792,10 @@ def test_read_pickle_read_preds(ensemble_backend: Backend) -> None:
     assert_equal_read_preds(read_preds, ensbuilder.read_preds)
     assert last_hash == ensbuilder.last_hash
 
-    ensemble_memory_file = os.path.join(
-        ensemble_backend.internals_directory, "ensemble_read_losses.pkl"
-    )
-    assert os.path.exists(ensemble_memory_file)
+    assert losses_file.exists()
 
     # Make sure we pickle the correct read scores
-    with (open(ensemble_memory_file, "rb")) as memory:
+    with losses_file.open("rb") as memory:
         read_losses = pickle.load(memory)
 
     assert_equal_read_preds(read_losses, ensbuilder.read_losses)
@@ -766,7 +804,7 @@ def test_read_pickle_read_preds(ensemble_backend: Backend) -> None:
     ensbuilder2 = EnsembleBuilder(
         backend=ensemble_backend,
         dataset_name="TEST",
-        task_type=MULTILABEL_CLASSIFICATION,  # Multilabel Classification
+        task_type=BINARY_CLASSIFICATION,
         metric=roc_auc,
         seed=0,  # important to find the test files
         ensemble_nbest=2,
@@ -777,78 +815,34 @@ def test_read_pickle_read_preds(ensemble_backend: Backend) -> None:
     assert ensbuilder2.last_hash == ensbuilder.last_hash
 
 
-@patch("os.path.exists")
-@parametrize("metric", [log_loss, accuracy])
-@parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
-def test_get_identifiers_from_run_history(
-    exists: Mock,
-    metric: Scorer,
-    ensemble_backend: Backend,
-) -> None:
-    run_history = RunHistory()
-    run_history._add(
-        RunKey(
-            config_id=3, instance_id='{"task_id": "breast_cancer"}', seed=1, budget=3.0
-        ),
-        RunValue(
-            cost=0.11347517730496459,
-            time=0.21858787536621094,
-            status=None,
-            starttime=time.time(),
-            endtime=time.time(),
-            additional_info={
-                "duration": 0.20323538780212402,
-                "num_run": 3,
-                "configuration_origin": "Random Search",
-            },
-        ),
-        status=None,
-        origin=None,
-    )
-    run_history._add(
-        RunKey(
-            config_id=6, instance_id='{"task_id": "breast_cancer"}', seed=1, budget=6.0
-        ),
-        RunValue(
-            cost=2 * 0.11347517730496459,
-            time=2 * 0.21858787536621094,
-            status=None,
-            starttime=time.time(),
-            endtime=time.time(),
-            additional_info={
-                "duration": 0.20323538780212402,
-                "num_run": 6,
-                "configuration_origin": "Random Search",
-            },
-        ),
-        status=None,
-        origin=None,
-    )
-    return run_history
-    exists.return_value = True
-    ensemble = SingleBest(
-        metric=log_loss,
-        seed=1,
-        run_history=ensemble_run_history,
-        backend=ensemble_backend,
-    )
-
-    # Just one model
-    assert len(ensemble.identifiers_) == 1
-
-    # That model must be the best
-    seed, num_run, budget = ensemble.identifiers_[0]
-    assert num_run == 3
-    assert seed == 1
-    assert budget == 3.0
-
-
 @parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
 def test_ensemble_builder_process_realrun(
-    dask_client_single_worker: dask.distributed.Client,
     ensemble_backend: Backend,
+    make_dask_client: Callable[..., [dask.distributed.Client]],
 ) -> None:
+    """
+
+    Parameters
+    ----------
+    ensemble_backend : Backend
+        The backend to use, doesn't really matter which kind
+
+    Fixtures
+    --------
+    make_dask_client : Callable[..., [dask.distributed.Client]]
+
+    Expects
+    -------
+    * With 1 iteration, the history should only be of length one
+    * The expected ensmble score keys for "optimization", "valid" and "test" should
+      be in the one history item.
+    * The "Timestamp" key should be in the history item
+    * With a metric that always returns 0.9, each ensemble score should be 0.9 in the
+      history item
+    """
+    dask_client = make_dask_client(n_workers=1)
     mock_metric = make_scorer("mock", lambda x, y: 0.9)
+    iterations = 1
 
     manager = EnsembleBuilderManager(
         start_time=time.time(),
@@ -860,42 +854,68 @@ def test_ensemble_builder_process_realrun(
         ensemble_size=50,
         ensemble_nbest=10,
         max_models_on_disc=None,
-        seed=0,
+        seed=DEFAULT_SEED,
         precision=32,
-        max_iterations=1,
+        max_iterations=iterations,
         read_at_most=np.inf,
         ensemble_memory_limit=None,
         random_state=0,
     )
-    manager.build_ensemble(dask_client_single_worker)
+    manager.build_ensemble(dask_client)
     future = manager.futures.pop()
     dask.distributed.wait([future])  # wait for the ensemble process to finish
+
     result = future.result()
     history, _, _, _, _ = result
 
-    assert "ensemble_optimization_score" in history[0]
-    assert history[0]["ensemble_optimization_score"] == 0.9
-    assert "ensemble_val_score" in history[0]
-    assert history[0]["ensemble_val_score"] == 0.9
-    assert "ensemble_test_score" in history[0]
-    assert history[0]["ensemble_test_score"] == 0.9
+    assert len(history) == iterations
+
+    hist_item = history[0]
+
+    expected_scores = {
+        f"ensemble_{key}_score": 0.9 for key in ["optimization", "val", "test"]
+    }
+
+    assert "Timestamp" in hist_item
+    assert all(key in hist_item for key in expected_scores)
+    assert all(hist_item[key] == expected_scores[key] for key in expected_scores)
 
 
 @parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
 def test_ensemble_builder_nbest_remembered(
     ensemble_backend: Backend,
-    dask_client_single_worker: dask.distributed.Client,
+    make_dask_client: Callable[..., [dask.distributed.Client]],
 ) -> None:
     """
-    Makes sure ensemble builder returns the size of the ensemble that pynisher allowed
-    This way, we can remember it and not waste more time trying big ensemble sizes
+    Parameters
+    ----------
+    ensemble_backend: Backend
+        The backend to use, relies on the 3 setup models
+
+    Fixtures
+    --------
+    make_dask_client: (...) -> Client
+        Make a dask client
+
+    Expects
+    -------
+    * The read_preds file should not be created
+    * The ensemble_nbest should be remembered and reduced between runs
+    TODO Note sure why there would be a reduction and how these numbers were made
+
+    Last Note
+    ---------
+    "Makes sure ensemble builder returns the size of the ensemble that pynisher allowed
+    This way, we can remember it and not waste more time trying big ensemble sizes"
     """
+    dask_client = make_dask_client(n_workers=1)
+
     manager = EnsembleBuilderManager(
         start_time=time.time(),
         time_left_for_ensembles=1000,
         backend=ensemble_backend,
         dataset_name="Test",
-        task=MULTILABEL_CLASSIFICATION,
+        task=BINARY_CLASSIFICATION,
         metric=roc_auc,
         ensemble_size=50,
         ensemble_nbest=10,
@@ -908,18 +928,19 @@ def test_ensemble_builder_nbest_remembered(
         max_iterations=None,
     )
 
-    manager.build_ensemble(dask_client_single_worker, unit_test=True)
+    filepath = Path(ensemble_backend.internals_directory) / "ensemble_read_preds.pkl"
+
+    manager.build_ensemble(dask_client, unit_test=True)
     future = manager.futures[0]
     dask.distributed.wait([future])  # wait for the ensemble process to finish
+
     assert future.result() == ([], 5, None, None, None)
-    file_path = os.path.join(
-        ensemble_backend.internals_directory, "ensemble_read_preds.pkl"
-    )
-    assert not os.path.exists(file_path)
 
-    manager.build_ensemble(dask_client_single_worker, unit_test=True)
+    assert not filepath.exists()
 
+    manager.build_ensemble(dask_client, unit_test=True)
     future = manager.futures[0]
     dask.distributed.wait([future])  # wait for the ensemble process to finish
-    assert not os.path.exists(file_path)
+
+    assert not filepath.exists()
     assert future.result() == ([], 2, None, None, None)

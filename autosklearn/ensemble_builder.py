@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from typing import List, Optional, Tuple, Union
 
 import glob
@@ -120,7 +121,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         precision: [16,32,64,128]
             precision of floats to read the predictions
 
-        memory_limit: Optional[int]
+        ensemble_memory_limit: Optional[int]
             memory limit in mb. If ``None``, no memory limit is enforced.
 
         read_at_most: int
@@ -182,7 +183,9 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         self.build_ensemble(smbo.tae_runner.client)
 
     def build_ensemble(
-        self, dask_client: dask.distributed.Client, unit_test: bool = False
+        self,
+        dask_client: dask.distributed.Client,
+        unit_test: bool = False,
     ) -> None:
 
         # The second criteria is elapsed time
@@ -629,10 +632,11 @@ class EnsembleBuilder(object):
         elif time_left is not None and end_at is not None:
             raise ValueError("Cannot provide both time_left and end_at.")
 
-        self.logger = get_named_client_logger(
-            name="EnsembleBuilder",
-            port=self.logger_port,
-        )
+        if not self.logger:
+            self.logger = get_named_client_logger(
+                name="EnsembleBuilder",
+                port=self.logger_port,
+            )
 
         process_start_time = time.time()
         while True:
