@@ -191,58 +191,73 @@ class EnsembleBuilder:
         # we save the state of this dictionary to memory
         # and read it if available
 
-        # {
-        #   "file_name": {
-        #       Y_ENSEMBLE: np.ndarray
-        #       Y_VALID: np.ndarray
-        #       Y_TEST: np.ndarray
-        #   }
-        # }
-        cached_preds, last_hash = self.cached_preds
-        self.read_preds: dict[str, dict[int, np.ndarray]] = cached_preds
-        self.last_hash: str | None = last_hash
+        self._run_predictions = None
+        self._last_hash = None
+        self._run_info = None
 
-        # {
-        #   "file name": {
-        #       "ens_loss": float
-        #       "mtime_ens": str,
-        #       "mtime_valid": str,
-        #       "mtime_test": str,
-        #       "seed": int,
-        #       "num_run": int,
-        #   }
-        # }
-        self.read_losses: dict[str, dict[str, Any]] = self.cached_losses
+        # TODO remove
+        prior_predictions, last_hash = self.run_predictions
+        self.read_preds = prior_predictions
+        self.last_hash = last_hash
+        self.read_losses = self.run_info
 
     @property
-    def cached_preds_path(self) -> Path:
+    def run_predictions_path(self) -> Path:
         """Path to the cached predictions we store between runs"""
         return Path(self.backend.internals_directory) / "ensemble_read_preds.pkl"
 
     @property
-    def cached_losses_path(self) -> Path:
+    def run_info_path(self) -> Path:
         """Path to the cached losses we store between runs"""
         return Path(self.backend.internals_directory) / "ensemble_read_losses.pkl"
 
     @property
-    def cached_preds(self) -> Tuple[dict, str]:
-        """"""
-        if self.cached_preds_path.exists():
-            with self.cached_preds_path.open("rb") as memory:
-                preds, last_hash = pickle.load(memory)
-                return (preds, last_hash)
-        else:
-            return ({}, None)
+    def run_predictions(self) -> Tuple[dict, str]:
+        """Get the cached predictions from previous runs
+        {
+            "file_name": {
+                Y_ENSEMBLE: np.ndarray
+                Y_VALID: np.ndarray
+                Y_TEST: np.ndarray
+            }
+        }
+        """
+        if self._run_predictions is None:
+            if self.run_predictions_path.exists():
+                with self.run_predictions_path.open("rb") as memory:
+                    preds, last_hash = pickle.load(memory)
+
+                self._run_predictions = preds
+                self._last_hash = last_hash
+            else:
+                self._run_predictions = {}
+                self._last_hash = ""
+
+        return (self._run_predictions, self._last_hash)
 
     @property
-    def cached_losses(self) -> dict[str, dict[int, np.ndarray]]:
-        """"""
-        if self.cached_losses_path.exists():
-            with self.cached_preds_path.open("rb") as memory:
-                losses = pickle.load(memory)
-                return losses
-        else:
-            return {}
+    def run_info(self) -> dict[str, dict[int, np.ndarray]]:
+        """Get the cached information from previous runs
+        {
+            "file name": {
+                "ens_loss": float
+                "mtime_ens": str,
+                "mtime_valid": str,
+                "mtime_test": str,
+                "seed": int,
+                "num_run": int,
+            }
+        }
+        """
+        if self._run_info is None:
+            if self.run_info_path.exists():
+                with self.run_info.open("rb") as memory:
+                    info = pickle.load(memory)
+                self._run_info = info
+            else:
+                self._run_info = {}
+
+        return self._run_info
 
     def run(
         self,
@@ -253,9 +268,9 @@ class EnsembleBuilder:
         time_buffer=5,
         return_predictions: bool = False,
     ):
-
         if time_left is None and end_at is None:
             raise ValueError("Must provide either time_left or end_at.")
+
         elif time_left is not None and end_at is not None:
             raise ValueError("Cannot provide both time_left and end_at.")
 
@@ -298,7 +313,7 @@ class EnsembleBuilder:
                 # ATTENTION: main will start from scratch;
                 # all data structures are empty again
                 try:
-                    self.cached_preds_path.unlink()
+                    self.run_predictions_path.unlink()
                 except:  # noqa E722
                     pass
 
@@ -340,7 +355,6 @@ class EnsembleBuilder:
         return [], self.ensemble_nbest, None, None, None
 
     def main(self, time_left, iteration, return_predictions):
-
         # Pynisher jobs inside dask 'forget'
         # the logger configuration. So we have to set it up
         # accordingly
@@ -455,9 +469,10 @@ class EnsembleBuilder:
         if self.max_resident_models is not None:
             self._delete_excess_models(selected_keys=candidate_models)
 
-        # Save the read losses status for the next iteration
-        with open(self.cached_losses_path, "wb") as memory:
-            pickle.dump(self.read_losses, memory)
+        # Save the read losses status for the next iteration, we should do this
+        # before doing predictions as this is a likely place of memory issues
+        with self.run_info_path.open("wb") as f:
+            pickle.dump(self.read_losses, f)
 
         if ensemble is not None:
             train_pred = self.predict(
@@ -490,8 +505,9 @@ class EnsembleBuilder:
 
         # The loaded predictions and hash can only be saved after the ensemble has been
         # built, because the hash is computed during the construction of the ensemble
-        with self.cached_preds_path.open("wb") as memory:
-            pickle.dump((self.read_preds, self.last_hash), memory)
+        with self.run_predictions_path.open("wb") as f:
+            item = (self.read_preds, self.last_hash)
+            pickle.dump(item, f)
 
         if return_predictions:
             return (
@@ -545,7 +561,6 @@ class EnsembleBuilder:
         bool
             Whether it successfully computed losses
         """
-
         self.logger.debug("Read ensemble data set predictions")
 
         if self.y_true_ensemble is None:
@@ -1130,12 +1145,14 @@ class EnsembleBuilder:
                 train_pred = np.vstack(
                     ((1 - train_pred).reshape((1, -1)), train_pred.reshape((1, -1)))
                 ).transpose()
+
             if valid_pred is not None and (
                 len(valid_pred.shape) == 1 or valid_pred.shape[1] == 1
             ):
                 valid_pred = np.vstack(
                     ((1 - valid_pred).reshape((1, -1)), valid_pred.reshape((1, -1)))
                 ).transpose()
+
             if test_pred is not None and (
                 len(test_pred.shape) == 1 or test_pred.shape[1] == 1
             ):
