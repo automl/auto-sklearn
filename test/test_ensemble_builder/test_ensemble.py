@@ -28,69 +28,6 @@ import test.test_ensemble_builder.cases as cases
 from test.conftest import DEFAULT_SEED
 from test.fixtures.logging import MockLogger
 
-
-@parametrize(
-    "ensemble_nbest, max_models_on_disc, expected",
-    (
-        (1, None, 1),
-        (1.0, None, 2),
-        (0.1, None, 1),
-        (0.9, None, 1),
-        (1, 2, 1),
-        (2, 1, 1),
-    ),
-)
-@parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
-def test_nbest(
-    ensemble_backend: Backend,
-    ensemble_nbest: int | float,
-    max_models_on_disc: int | None,
-    expected: int,
-) -> None:
-    """
-    Parameters
-    ----------
-    ensemble_backend: Backend
-        The backend to use. In this case, we specifically rely on the `setup_3_models`
-        setup.
-
-    ensemble_nbest: int | float
-        The parameter to use for consider the n best, int being absolute and float being
-        fraction.
-
-    max_models_on_disc: int | None
-        The maximum amount of models to keep on disk
-
-    expected: int
-        The number of keys expected to be selected
-
-    Expects
-    -------
-    * get_n_best_preds should contain 2 keys
-    * The first key should be model 0_2_0_0
-    """
-    ensbuilder = EnsembleBuilder(
-        backend=ensemble_backend,
-        dataset_name="TEST",
-        task_type=BINARY_CLASSIFICATION,
-        metric=roc_auc,
-        seed=DEFAULT_SEED,  # important to find the test files
-        ensemble_nbest=ensemble_nbest,
-        max_models_on_disc=max_models_on_disc,
-    )
-
-    ensbuilder.compute_loss_per_model()
-    sel_keys = ensbuilder.get_n_best_preds()
-
-    assert len(sel_keys) == expected
-
-    expected_sel = os.path.join(
-        ensemble_backend.temporary_directory,
-        ".auto-sklearn/runs/0_2_0.0/predictions_ensemble_0_2_0.0.npy",
-    )
-    assert sel_keys[0] == expected_sel
-
-
 @parametrize(
     "max_models_on_disc, expected",
     [

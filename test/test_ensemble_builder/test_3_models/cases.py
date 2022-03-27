@@ -44,6 +44,10 @@ The models are empty files.
 # Datamanager
 The datamanager contains the iris dataset as the above numbers are made up with no
 real corresponding models so the data from the datamanager can not be faked so easily.
+
+# Extra Notes
+The extra `predictions_test_0_2_0.0.np` are required to make `test_max_models_on_disc`
+pass as it factors into the memory estimation. Should probably fix that.
 """
 
 from typing import Callable
