@@ -11,7 +11,7 @@ from pytest_cases import case, parametrize_with_cases
 import test.test_automl.cases as cases
 
 
-@case
+@case(tags=["real"])
 @parametrize_with_cases("automl", cases=cases, has_tag="fitted")
 def case_fitted_automl(
     tmp_path: Path,
