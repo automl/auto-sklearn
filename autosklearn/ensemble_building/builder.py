@@ -945,98 +945,46 @@ class EnsembleBuilder:
         success_keys_test = []
 
         for k in selected_keys:
-            valid_fn = glob.glob(
-                os.path.join(
-                    glob.escape(self.backend.get_runs_directory()),
-                    "%d_%d_%s"
-                    % (
-                        self.run_info[k]["seed"],
-                        self.run_info[k]["num_run"],
-                        self.run_info[k]["budget"],
-                    ),
-                    "predictions_valid_%d_%d_%s.npy*"
-                    % (
-                        self.run_info[k]["seed"],
-                        self.run_info[k]["num_run"],
-                        self.run_info[k]["budget"],
-                    ),
-                )
-            )
-            valid_fn = [
-                vfn
-                for vfn in valid_fn
-                if vfn.endswith(".npy") or vfn.endswith(".npy.gz")
-            ]
-            test_fn = glob.glob(
-                os.path.join(
-                    glob.escape(self.backend.get_runs_directory()),
-                    "%d_%d_%s"
-                    % (
-                        self.run_info[k]["seed"],
-                        self.run_info[k]["num_run"],
-                        self.run_info[k]["budget"],
-                    ),
-                    "predictions_test_%d_%d_%s.npy*"
-                    % (
-                        self.run_info[k]["seed"],
-                        self.run_info[k]["num_run"],
-                        self.run_info[k]["budget"],
-                    ),
-                )
-            )
-            test_fn = [
-                tfn
-                for tfn in test_fn
-                if tfn.endswith(".npy") or tfn.endswith(".npy.gz")
-            ]
+            info = self.run_info[k]
+            seed, num_run, budget = (info["seed"], info["num_run"], info["budget"])
 
-            if len(valid_fn) == 0:
-                # self.logger.debug("Not found validation prediction file "
-                #                   "(although ensemble predictions available): "
-                #                   "%s" % valid_fn)
-                pass
-            else:
-                valid_fn = valid_fn[0]
+            rundir = Path(self.backend.get_numrun_directory(seed, num_run, budget))
+            valid_fn = rundir / f"predictions_valid_{seed}_{num_run}_{budget}.npy"
+            test_fn = rundir / f"predictions_test_{seed}_{num_run}_{budget}.npy"
+
+            if valid_fn.exists():
                 if (
-                    self.run_info[k]["mtime_valid"] == os.path.getmtime(valid_fn)
+                    self.run_info[k]["mtime_valid"] == valid_fn.stat().st_mtime
                     and k in self.run_predictions
                     and self.run_predictions[k][Y_VALID] is not None
                 ):
                     success_keys_valid.append(k)
                     continue
-                try:
-                    y_valid = self._predictions_from(valid_fn)
-                    self.run_predictions[k][Y_VALID] = y_valid
-                    success_keys_valid.append(k)
-                    self.run_info[k]["mtime_valid"] = os.path.getmtime(valid_fn)
-                except Exception:
-                    self.logger.warning(
-                        "Error loading %s: %s", valid_fn, traceback.format_exc()
-                    )
+                else:
+                    try:
+                        y_valid = self._predictions_from(valid_fn)
+                        self.run_predictions[k][Y_VALID] = y_valid
+                        success_keys_valid.append(k)
+                        self.run_info[k]["mtime_valid"] = valid_fn.stat().st_mtime
+                    except Exception:
+                        self.logger.warning(f"Err {valid_fn}:{traceback.format_exc()}")
 
-            if len(test_fn) == 0:
-                # self.logger.debug("Not found test prediction file (although "
-                #                   "ensemble predictions available):%s" %
-                #                   test_fn)
-                pass
-            else:
-                test_fn = test_fn[0]
+            if test_fn.exists():
                 if (
-                    self.run_info[k]["mtime_test"] == os.path.getmtime(test_fn)
+                    self.run_info[k]["mtime_test"] == test_fn.stat().st_mtime
                     and k in self.run_predictions
                     and self.run_predictions[k][Y_TEST] is not None
                 ):
                     success_keys_test.append(k)
-                    continue
-                try:
-                    y_test = self._predictions_from(test_fn)
-                    self.run_predictions[k][Y_TEST] = y_test
-                    success_keys_test.append(k)
-                    self.run_info[k]["mtime_test"] = os.path.getmtime(test_fn)
-                except Exception:
-                    self.logger.warning(
-                        "Error loading %s: %s", test_fn, traceback.format_exc()
-                    )
+                else:
+
+                    try:
+                        y_test = self._predictions_from(test_fn)
+                        self.run_predictions[k][Y_TEST] = y_test
+                        success_keys_test.append(k)
+                        self.run_info[k]["mtime_test"] = os.path.getmtime(test_fn)
+                    except Exception:
+                        self.logger.warning(f"Err {test_fn}:{traceback.format_exc()}")
 
         return success_keys_valid, success_keys_test
 
@@ -1064,6 +1012,7 @@ class EnsembleBuilder:
         ]
 
         # check hash if ensemble training data changed
+        # TODO could we just use the size, and the last row?
         current_hash = "".join(
             [
                 str(zlib.adler32(predictions_train[i].data.tobytes()))
@@ -1073,10 +1022,8 @@ class EnsembleBuilder:
         if self.last_hash == current_hash:
             self.logger.debug(
                 "No new model predictions selected -- skip ensemble building "
-                "-- current performance: %f",
-                self.validation_performance_,
+                f"-- current performance: {self.validation_performance_}",
             )
-
             return None
 
         self._last_hash = current_hash
@@ -1089,34 +1036,26 @@ class EnsembleBuilder:
         )
 
         try:
-            self.logger.debug(
-                "Fitting the ensemble on %d models.",
-                len(predictions_train),
-            )
+            self.logger.debug(f"Fitting ensemble on {len(predictions_train)} models")
+
             start_time = time.time()
             ensemble.fit(predictions_train, self.y_true_ensemble, include_num_runs)
-            end_time = time.time()
-            self.logger.debug(
-                "Fitting the ensemble took %.2f seconds.",
-                end_time - start_time,
-            )
-            self.logger.info(ensemble)
-            self.validation_performance_ = min(
-                self.validation_performance_,
-                ensemble.get_validation_performance(),
-            )
 
-        except ValueError:
-            self.logger.error("Caught ValueError: %s", traceback.format_exc())
-            return None
-        except IndexError:
-            self.logger.error("Caught IndexError: %s" + traceback.format_exc())
-            return None
+            duration = time.time() - start_time
+
+            self.logger.debug(f"Fitting the ensemble took {duration} seconds.")
+            self.logger.info(ensemble)
+
+            ens_perf = ensemble.get_validation_performance()
+            self.validation_performance_ = min(self.validation_performance_, ens_perf)
+
+        except Exception as e:
+            self.logger.error(f"Caught error {e}: {traceback.format_exc()}")
+            ensemble = None
         finally:
             # Explicitly free memory
             del predictions_train
-
-        return ensemble
+            return ensemble
 
     def predict(
         self,
