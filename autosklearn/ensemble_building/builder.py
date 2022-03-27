@@ -582,32 +582,6 @@ class EnsembleBuilder:
         else:
             return self.ensemble_history, self.ensemble_nbest, None, None, None
 
-    def get_disk_consumption(self, pred_path):
-        """
-        gets the cost of a model being on disc
-        """
-
-        match = self.model_fn_re.search(pred_path)
-        if not match:
-            raise ValueError("Invalid path format %s" % pred_path)
-        _seed = int(match.group(1))
-        _num_run = int(match.group(2))
-        _budget = float(match.group(3))
-
-        stored_files_for_run = os.listdir(
-            self.backend.get_numrun_directory(_seed, _num_run, _budget)
-        )
-        stored_files_for_run = [
-            os.path.join(
-                self.backend.get_numrun_directory(_seed, _num_run, _budget), file_name
-            )
-            for file_name in stored_files_for_run
-        ]
-        this_model_cost = sum([os.path.getsize(path) for path in stored_files_for_run])
-
-        # get the megabytes
-        return round(this_model_cost / math.pow(1024, 2), 2)
-
     def compute_loss_per_model(self) -> bool:
         """Compute the loss of the predictions on ensemble building data set;
         populates self.run_predictions and self.run_info
