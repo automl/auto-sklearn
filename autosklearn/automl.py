@@ -61,7 +61,7 @@ from autosklearn.data.validation import (
     convert_if_sparse,
 )
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.ensemble_builder import EnsembleBuilderManager
+from autosklearn.ensemble_building import EnsembleBuilderManager
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings

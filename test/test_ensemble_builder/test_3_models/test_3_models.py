@@ -7,7 +7,7 @@ import numpy as np
 
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import BINARY_CLASSIFICATION
-from autosklearn.ensemble_builder import Y_TEST, Y_VALID, EnsembleBuilder
+from autosklearn.ensemble_building.builder import Y_TEST, Y_VALID, EnsembleBuilder
 from autosklearn.metrics import roc_auc
 
 from pytest_cases import parametrize, parametrize_with_cases
@@ -275,7 +275,6 @@ def test_ensemble_builder_predictions(ensemble_backend: Backend) -> None:
         seed=DEFAULT_SEED,  # important to find the test files
         ensemble_nbest=2,
     )
-    ensbuilder.SAVE2DISC = False
 
     ensbuilder.compute_loss_per_model()
 

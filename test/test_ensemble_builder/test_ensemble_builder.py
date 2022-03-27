@@ -8,7 +8,12 @@ from pathlib import Path
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.ensemble_builder import Y_ENSEMBLE, Y_TEST, Y_VALID, EnsembleBuilder
+from autosklearn.ensemble_building.builder import (
+    Y_ENSEMBLE,
+    Y_TEST,
+    Y_VALID,
+    EnsembleBuilder,
+)
 from autosklearn.metrics import roc_auc
 
 from pytest_cases import fixture, parametrize

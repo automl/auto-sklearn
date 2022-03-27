@@ -28,7 +28,7 @@ import autosklearn.estimators  # noqa F401
 import autosklearn.pipeline.util as putil
 from autosklearn.automl import AutoMLClassifier
 from autosklearn.data.validation import InputValidator
-from autosklearn.ensemble_builder import MODEL_FN_RE
+from autosklearn.ensemble_building.builder import MODEL_FN_RE
 from autosklearn.estimators import (
     AutoSklearnClassifier,
     AutoSklearnEstimator,
