@@ -29,6 +29,7 @@ from autosklearn.metrics import Scorer, calculate_loss, calculate_score
 from autosklearn.util.disk import sizeof
 from autosklearn.util.logging_ import get_named_client_logger
 from autosklearn.util.parallel import preload_modules
+from autosklearn.util.functional import intersection
 
 Y_ENSEMBLE = 0
 Y_VALID = 1
@@ -467,16 +468,14 @@ class EnsembleBuilder:
             selected_keys=candidate_models
         )
 
-        # If valid/test predictions loaded, then reduce candidate models to this set
-        if (
-            len(n_sel_test) != 0
-            and len(n_sel_valid) != 0
-            and len(set(n_sel_valid).intersection(set(n_sel_test))) == 0
-        ):
-            # Both n_sel_* have entries, but there is no overlap, this is critical
-            self.logger.error(
-                "n_sel_valid and n_sel_test are not empty, but do not overlap"
-            )
+        # Get a set representation of them as we will begin doing intersections
+        candidates_set = set(candidate_models)
+        valid_set = set(n_sel_valid)
+        test_set = set(n_sel_test)
+
+        # Both n_sel_* have entries, but there is no overlap, this is critical
+        if len(test_set) > 0 and len(valid_set) > 0 and len(valid_set & test_set) == 0:
+            self.logger.error("n_sel_valid and n_sel_test not empty but do not overlap")
             if return_predictions:
                 return (
                     self.ensemble_history,
@@ -488,31 +487,29 @@ class EnsembleBuilder:
             else:
                 return self.ensemble_history, self.ensemble_nbest, None, None, None
 
+        # If valid/test predictions loaded, then reduce candidate models to this set
         # If any of n_sel_* is not empty and overlaps with candidate_models,
         # then ensure candidate_models AND n_sel_test are sorted the same
-        candidate_models_set = set(candidate_models)
-        if candidate_models_set.intersection(n_sel_valid).intersection(n_sel_test):
-            candidate_models = sorted(
-                list(
-                    candidate_models_set.intersection(n_sel_valid).intersection(
-                        n_sel_test
-                    )
-                )
-            )
+        candidates_set = set(candidate_models)
+        valid_set = set(n_sel_valid)
+        test_set = set(n_sel_test)
+
+        intersect = intersection(candidates_set, valid_set, test_set)
+        if len(intersect) > 0:
+            candidate_models = sorted(list(intersect))
             n_sel_test = candidate_models
             n_sel_valid = candidate_models
-        elif candidate_models_set.intersection(n_sel_valid):
-            candidate_models = sorted(
-                list(candidate_models_set.intersection(n_sel_valid))
-            )
+
+        elif len(candidates_set & valid_set) > 0:
+            candidate_models = sorted(list(candidates_set & valid_set))
             n_sel_valid = candidate_models
-        elif candidate_models_set.intersection(n_sel_test):
-            candidate_models = sorted(
-                list(candidate_models_set.intersection(n_sel_test))
-            )
+
+        elif len(candidates_set & n_sel_test) > 0:
+            candidate_models = sorted(list(candidates_set & test_set))
             n_sel_test = candidate_models
+
+        # This has to be the case
         else:
-            # This has to be the case
             n_sel_test = []
             n_sel_valid = []
 
