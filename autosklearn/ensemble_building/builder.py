@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, List, Optional, Tuple
+from typing import Any, Tuple
 
 from pathlib import Path
 import glob
@@ -882,8 +882,8 @@ class EnsembleBuilder:
         return sorted_keys[:ensemble_n_best]
 
     def get_valid_test_preds(
-        self, selected_keys: List[str]
-    ) -> Tuple[List[str], List[str]]:
+        self, selected_keys: list[str]
+    ) -> Tuple[list[str], list[str]]:
         """Get valid and test predictions from disc and store them in self.read_preds
 
         Parameters
@@ -1217,7 +1217,7 @@ class EnsembleBuilder:
         )
         return sorted_keys
 
-    def _delete_excess_models(self, selected_keys: List[str]):
+    def _delete_excess_models(self, selected_keys: list[str]):
         """
         Deletes models excess models on disc. self.max_models_on_disc
         defines the upper limit on how many models to keep.
