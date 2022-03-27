@@ -2,13 +2,9 @@ from __future__ import annotations
 
 from typing import Callable
 
-import os
-import pickle
 import time
 from pathlib import Path
 
-import dask.distributed
-import numpy as np
 
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import BINARY_CLASSIFICATION
@@ -18,16 +14,13 @@ from autosklearn.ensemble_builder import (
     Y_TEST,
     Y_VALID,
     EnsembleBuilder,
-    EnsembleBuilderManager,
 )
-from autosklearn.metrics import make_scorer, roc_auc
+from autosklearn.metrics import roc_auc
 
-from pytest_cases import fixture, parametrize, parametrize_with_cases
-from unittest.mock import Mock, patch
+from pytest_cases import fixture, parametrize
+from unittest.mock import patch
 
-import test.test_ensemble_builder.cases as cases
 from test.conftest import DEFAULT_SEED
-from test.fixtures.logging import MockLogger
 
 
 @fixture

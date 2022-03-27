@@ -14,6 +14,7 @@ Tags:
     {fitted} - If the automl case has been fitted
     {cv, holdout} - Whether explicitly cv or holdout was used
     {no_ensemble} - Fit with no ensemble size
+    {cached} - If the resulting case is then cached
 """
 from typing import Callable, Tuple
 
@@ -53,7 +54,7 @@ def case_regressor(
 # ###################################
 # The following are fitted and cached
 # ###################################
-@case(tags=["classifier", "fitted", "holdout"])
+@case(tags=["classifier", "fitted", "holdout", "cached"])
 @parametrize("dataset", ["iris"])
 def case_classifier_fitted_holdout(
     automl_cache: Callable[[str], AutoMLCache],
@@ -83,7 +84,7 @@ def case_classifier_fitted_holdout(
     return model
 
 
-@case(tags=["classifier", "fitted", "cv"])
+@case(tags=["classifier", "fitted", "cv", "cached"])
 @parametrize("dataset", ["iris"])
 def case_classifier_fitted_cv(
     automl_cache: Callable[[str], AutoMLCache],
@@ -111,7 +112,7 @@ def case_classifier_fitted_cv(
     return model
 
 
-@case(tags=["regressor", "fitted", "holdout"])
+@case(tags=["regressor", "fitted", "holdout", "cached"])
 @parametrize("dataset", ["boston"])
 def case_regressor_fitted_holdout(
     automl_cache: Callable[[str], AutoMLCache],
@@ -139,7 +140,7 @@ def case_regressor_fitted_holdout(
     return model
 
 
-@case(tags=["regressor", "fitted", "cv"])
+@case(tags=["regressor", "fitted", "cv", "cached"])
 @parametrize("dataset", ["boston"])
 def case_regressor_fitted_cv(
     automl_cache: Callable[[str], AutoMLCache],
@@ -168,7 +169,7 @@ def case_regressor_fitted_cv(
     return model
 
 
-@case(tags=["classifier", "fitted", "no_ensemble"])
+@case(tags=["classifier", "fitted", "no_ensemble", "cached"])
 @parametrize("dataset", ["iris"])
 def case_classifier_fitted_no_ensemble(
     automl_cache: Callable[[str], AutoMLCache],
