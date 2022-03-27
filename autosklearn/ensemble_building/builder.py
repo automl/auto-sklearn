@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
+from pathlib import Path
 import glob
 import gzip
 import logging.handlers
@@ -38,6 +39,9 @@ MODEL_FN_RE = r"_([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*)\.npy"
 
 
 class EnsembleBuilder:
+
+    model_fn_re = re.compile(MODEL_FN_RE)
+
     def __init__(
         self,
         backend: Backend,
@@ -132,106 +136,113 @@ class EnsembleBuilder:
         if max_models_on_disc is not None and max_models_on_disc < 0:
             raise ValueError("max_models_on_disc must be positive or None")
 
-        self.backend = backend
-        self.dataset_name = dataset_name
-        self.task_type = task_type
-        self.metric = metric
-        self.ensemble_size = ensemble_size
-        self.performance_range_threshold = performance_range_threshold
-        self.ensemble_nbest = ensemble_nbest
-        self.max_models_on_disc = max_models_on_disc
         self.seed = seed
+        self.metric = metric
+        self.backend = backend
         self.precision = precision
+        self.task_type = task_type
         self.memory_limit = memory_limit
         self.read_at_most = read_at_most
         self.random_state = random_state
+        self.dataset_name = dataset_name
+        self.ensemble_size = ensemble_size
+        self.ensemble_nbest = ensemble_nbest
+        self.max_models_on_disc = max_models_on_disc
+        self.performance_range_threshold = performance_range_threshold
 
         # max_resident_models keeps the maximum number of models in disc
         self.max_resident_models: int | None = None
+
+        # The starting time of the procedure
+        self.start_time = 0
+
+        # Hash of the last ensemble training data to identify it
+        self.last_hash = None
+
+        # The cached values of the true targets for the ensemble
+        self.y_true_ensemble: int | None = None
+
+        # Track the ensemble performance
+        self.ensemble_history = []
 
         # Setup the logger
         self.logger = get_named_client_logger(name="EnsembleBuilder", port=logger_port)
         self.logger_port = logger_port
 
-        if ensemble_nbest == 1:
-            self.logger.debug(
-                f"Behaviour dep. on int/float: {ensemble_nbest}:{type(ensemble_nbest)}"
-            )
-
-        self.start_time = 0
-        self.model_fn_re = re.compile(MODEL_FN_RE)
-        self.last_hash = None  # hash of ensemble training data
-        self.y_true_ensemble = None
-
-        # already read prediction files
-        # {"file name": {
-        #    "ens_loss": float
-        #    "mtime_ens": str,
-        #    "mtime_valid": str,
-        #    "mtime_test": str,
-        #    "seed": int,
-        #    "num_run": int,
-        # }}
-        self.read_losses = {}
-        # {"file_name": {
-        #    Y_ENSEMBLE: np.ndarray
-        #    Y_VALID: np.ndarray
-        #    Y_TEST: np.ndarray
-        #    }
-        # }
-        self.read_preds = {}
-
-        # Depending on the dataset dimensions,
-        # regenerating every iteration, the predictions
-        # losses for self.read_preds
-        # is too computationally expensive
-        # As the ensemble builder is stateless
-        # (every time the ensemble builder gets resources
-        # from dask, it builds this object from scratch)
-        # we save the state of this dictionary to memory
-        # and read it if available
-        self.ensemble_memory_file = os.path.join(
-            self.backend.internals_directory, "ensemble_read_preds.pkl"
-        )
-        if os.path.exists(self.ensemble_memory_file):
-            try:
-                with (open(self.ensemble_memory_file, "rb")) as memory:
-                    self.read_preds, self.last_hash = pickle.load(memory)
-            except Exception as e:
-                self.logger.warning(
-                    "Could not load the previous iterations of ensemble_builder"
-                    " predictions. This might impact the quality of the run."
-                    f" Exception={e} {traceback.format_exc()}"
-                )
-        self.ensemble_loss_file = os.path.join(
-            self.backend.internals_directory, "ensemble_read_losses.pkl"
-        )
-        if os.path.exists(self.ensemble_loss_file):
-            try:
-                with (open(self.ensemble_loss_file, "rb")) as memory:
-                    self.read_losses = pickle.load(memory)
-            except Exception as e:
-                self.logger.warning(
-                    "Could not load the previous iterations of ensemble_builder losses."
-                    "This might impact the quality of the run. Exception={} {}".format(
-                        e,
-                        traceback.format_exc(),
-                    )
-                )
-
-        # hidden feature which can be activated via an environment variable.
-        # This keeps all models and predictions which have ever been a candidate.
-        # This is necessary to post-hoc compute the whole ensemble building trajectory.
-        self._has_been_candidate = set()
-
+        # Keep running knowledge of its validation performance
         self.validation_performance_ = np.inf
 
-        # Track the ensemble performance
+        # Data we may need
         datamanager = self.backend.load_datamanager()
         self.y_valid = datamanager.data.get("Y_valid")
         self.y_test = datamanager.data.get("Y_test")
-        del datamanager
-        self.ensemble_history = []
+
+        # Log the behaviour
+        if ensemble_nbest == 1:
+            t = type(ensemble_nbest)
+            self.logger.debug(f"Using behaviour when {t} for {ensemble_nbest}:{t}")
+
+        # Read in previous state if any exists
+        #
+        # Depending on the dataset dimensions, regenerating every iteration, the
+        # predictions losses for self.read_preds is too computationally expensive
+        # As the ensemble builder is stateless (every time the ensemble builder gets
+        # resources from dask, it builds this object from scratch)
+        # we save the state of this dictionary to memory
+        # and read it if available
+
+        # {
+        #   "file_name": {
+        #       Y_ENSEMBLE: np.ndarray
+        #       Y_VALID: np.ndarray
+        #       Y_TEST: np.ndarray
+        #   }
+        # }
+        cached_preds, last_hash = self.cached_preds
+        self.read_preds: dict[str, dict[int, np.ndarray]] = cached_preds
+        self.last_hash: str | None = last_hash
+
+        # {
+        #   "file name": {
+        #       "ens_loss": float
+        #       "mtime_ens": str,
+        #       "mtime_valid": str,
+        #       "mtime_test": str,
+        #       "seed": int,
+        #       "num_run": int,
+        #   }
+        # }
+        self.read_losses: dict[str, dict[str, Any]] = self.cached_losses
+
+    @property
+    def cached_preds_path(self) -> Path:
+        """Path to the cached predictions we store between runs"""
+        return Path(self.backend.internals_directory) / "ensemble_read_preds.pkl"
+
+    @property
+    def cached_losses_path(self) -> Path:
+        """Path to the cached losses we store between runs"""
+        return Path(self.backend.internals_directory) / "ensemble_read_losses.pkl"
+
+    @property
+    def cached_preds(self) -> Tuple[dict, str]:
+        """"""
+        if self.cached_preds_path.exists():
+            with self.cached_preds_path.open("rb") as memory:
+                preds, last_hash = pickle.load(memory)
+                return (preds, last_hash)
+        else:
+            return ({}, None)
+
+    @property
+    def cached_losses(self) -> dict[str, dict[int, np.ndarray]]:
+        """"""
+        if self.cached_losses_path.exists():
+            with self.cached_preds_path.open("rb") as memory:
+                losses = pickle.load(memory)
+                return losses
+        else:
+            return {}
 
     def run(
         self,
@@ -287,7 +298,7 @@ class EnsembleBuilder:
                 # ATTENTION: main will start from scratch;
                 # all data structures are empty again
                 try:
-                    os.remove(self.ensemble_memory_file)
+                    self.cached_preds_path.unlink()
                 except:  # noqa E722
                     pass
 
@@ -431,10 +442,6 @@ class EnsembleBuilder:
             n_sel_test = []
             n_sel_valid = []
 
-        if os.environ.get("ENSEMBLE_KEEP_ALL_CANDIDATES"):
-            for candidate in candidate_models:
-                self._has_been_candidate.add(candidate)
-
         # train ensemble
         ensemble = self.fit_ensemble(selected_keys=candidate_models)
 
@@ -449,7 +456,7 @@ class EnsembleBuilder:
             self._delete_excess_models(selected_keys=candidate_models)
 
         # Save the read losses status for the next iteration
-        with open(self.ensemble_loss_file, "wb") as memory:
+        with open(self.cached_losses_path, "wb") as memory:
             pickle.dump(self.read_losses, memory)
 
         if ensemble is not None:
@@ -483,7 +490,7 @@ class EnsembleBuilder:
 
         # The loaded predictions and hash can only be saved after the ensemble has been
         # built, because the hash is computed during the construction of the ensemble
-        with open(self.ensemble_memory_file, "wb") as memory:
+        with self.cached_preds_path.open("wb") as memory:
             pickle.dump((self.read_preds, self.last_hash), memory)
 
         if return_predictions:
@@ -1207,9 +1214,6 @@ class EnsembleBuilder:
 
             # Do not delete candidates
             if pred_path in selected_keys:
-                continue
-
-            if pred_path in self._has_been_candidate:
                 continue
 
             match = self.model_fn_re.search(pred_path)
