@@ -39,7 +39,16 @@ def _create_automl(
         "per_run_time_limit": 5,
         "seed": DEFAULT_SEED,
         "n_jobs": 2,
+        "ensemble_size": 10,
+        "ensemble_nbest": 10,
+        "max_models_on_disc": 10,
+        "initial_configurations_via_metalearning": 5,
     }
+
+    # If a temp directory was explicitly passed, don't delete it automatically
+    # Normally the `tmp_path` fixutre will delete it anyways
+    if "temporary_directory" in kwargs:
+        test_defaults["delete_tmp_folder_after_terminate"] = False
 
     opts: Dict[str, Any] = {**test_defaults, **kwargs}
 

@@ -24,9 +24,33 @@ from autosklearn.metrics import make_scorer, roc_auc
 from pytest_cases import parametrize, parametrize_with_cases
 from unittest.mock import Mock, patch
 
-import test.test_ensemble_builder.cases as cases
+import test.test_ensemble_builder.test_3_models.cases as cases
 from test.conftest import DEFAULT_SEED
 from test.fixtures.logging import MockLogger
+
+
+@parametrize_with_cases("ensemble_backend", cases=cases, has_tag=["setup_3_models"])
+def test_read(ensemble_backend: Backend) -> None:
+    ensbuilder = EnsembleBuilder(
+        backend=ensemble_backend,
+        dataset_name="TEST",
+        task_type=BINARY_CLASSIFICATION,
+        metric=roc_auc,
+        seed=DEFAULT_SEED,  # important to find the test files
+    )
+
+    success = ensbuilder.compute_loss_per_model()
+    assert success, f"read_preds = {str(ensbuilder.read_preds)}"
+
+    assert len(ensbuilder.read_preds) == 3, ensbuilder.read_preds.keys()
+    assert len(ensbuilder.read_losses) == 3, ensbuilder.read_losses.keys()
+
+    runsdir = Path(ensemble_backend.get_runs_directory())
+    preds_1 = runsdir / "predictions_ensemble_0_1_0.0.npy"
+    preds_2 = runsdir / "predictions_ensemble_0_2_0.0.npy"
+
+    assert ensbuilder.read_losses[str(preds_1)]["ens_loss"] == 0.5
+    assert ensbuilder.read_losses[str(preds_2)]["ens_loss"] == 0.0
 
 
 @parametrize(

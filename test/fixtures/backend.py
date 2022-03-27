@@ -1,7 +1,9 @@
-from typing import Callable, Union, Optional
-from distutils.dir_util import copy_tree
+from __future__ import annotations
+
+from typing import Callable, Optional, Union
 
 import os
+from distutils.dir_util import copy_tree
 from pathlib import Path
 
 from autosklearn.automl_common.common.utils.backend import Backend, create
@@ -49,7 +51,7 @@ def make_backend() -> Callable[..., Backend]:
     # TODO redo once things use paths
     def _make(
         path: Union[str, Path],
-        template: Optional[Path] = None,
+        template: Optional[Path | Backend] = None,
     ) -> Backend:
         _path = Path(path) if not isinstance(path, Path) else path
         assert not _path.exists(), "Try passing path / 'backend'"
@@ -61,9 +63,15 @@ def make_backend() -> Callable[..., Backend]:
         )
 
         if template is not None:
-            assert template.exists()
-            dest = Path(backend.temporary_directory)
-            copy_tree(str(template), str(dest))
+            if isinstance(template, Backend):
+                template = Path(template.temporary_directory)
+
+            if isinstance(template, Path):
+                assert template.exists()
+                dest = Path(backend.temporary_directory)
+                copy_tree(str(template), str(dest))
+            else:
+                raise NotImplementedError(template)
 
         return backend
 
