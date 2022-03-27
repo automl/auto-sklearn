@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Tuple
 
 import glob
 import gzip
 import logging.handlers
-import math
 import multiprocessing
 import numbers
 import os
@@ -28,9 +27,9 @@ from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.metrics import Scorer, calculate_loss, calculate_score
+from autosklearn.util.disk import sizeof
 from autosklearn.util.logging_ import get_named_client_logger
 from autosklearn.util.parallel import preload_modules
-from autosklearn.util.disk import sizeof
 
 Y_ENSEMBLE = 0
 Y_VALID = 1
@@ -731,17 +730,19 @@ class EnsembleBuilder:
         )
         return True
 
-    def get_n_best_preds(self):
-        """
-        get best n predictions (i.e., keys of self.run_info)
-        according to the loss on the "ensemble set"
-        n: self.ensemble_nbest
+    def get_n_best_preds(self) -> list[str]:
+        """Get best n predictions according to the loss on the "ensemble set"
 
         Side effects:
-            ->Define the n-best models to use in ensemble
-            ->Only the best models are loaded
-            ->Any model that is not best is candidate to deletion
-              if max models in disc is exceeded.
+        * Define the n-best models to use in ensemble
+        * Only the best models are loaded
+        * Any model that is not best is deletable if max models in disc is exceeded.
+
+        Returns
+        -------
+        list[str]
+            Returns the paths of the selected models which are used as keys in
+            `run_predictions` and `run_info`
         """
         # Sort by loss - smaller is better!
         sorted_keys = list(
@@ -925,20 +926,21 @@ class EnsembleBuilder:
         return sorted_keys[:ensemble_n_best]
 
     def get_valid_test_preds(
-        self, selected_keys: list[str]
+        self,
+        selected_keys: list[str],
     ) -> Tuple[list[str], list[str]]:
-        """Get valid and test predictions from disc and store them in self.run_predictions
+        """Get valid and test predictions from disc and store in self.run_predictions
 
         Parameters
-        ---------
+        ----------
         selected_keys: list
             list of selected keys of self.run_predictions
 
         Return
         ------
-        success_keys:
-            all keys in selected keys for which we could read the valid and
-            test predictions
+        keys_valid: list[str], keys_test: list[str]
+            All keys in selected keys for which we could read the valid and test
+            predictions.
         """
         success_keys_valid = []
         success_keys_test = []
@@ -1039,17 +1041,18 @@ class EnsembleBuilder:
 
         return success_keys_valid, success_keys_test
 
-    def fit_ensemble(self, selected_keys: list):
-        """
+    def fit_ensemble(self, selected_keys: list[str]) -> EnsembleSelection:
+        """TODO
+
         Parameters
-        ---------
-        selected_keys: list
-            list of selected keys of self.run_info
+        ----------
+        selected_keys: list[str]
+            List of selected keys of self.run_info
 
         Returns
         -------
         ensemble: EnsembleSelection
-            trained Ensemble
+            The trained ensemble
         """
         predictions_train = [self.run_predictions[k][Y_ENSEMBLE] for k in selected_keys]
         include_num_runs = [
@@ -1123,26 +1126,31 @@ class EnsembleBuilder:
         selected_keys: list,
         n_preds: int,
         index_run: int,
-    ):
+    ) -> np.ndarray | None:
         """Save preditions on ensemble, validation and test data on disc
 
         Parameters
         ----------
-        set_: ["valid","test"]
-            data split name
+        set_: "valid" | "test" | str
+            The data split name, returns preds for y_ensemble if not "valid" or "test"
+
         ensemble: EnsembleSelection
-            trained Ensemble
-        selected_keys: list
-            list of selected keys of self.run_info
+            The trained Ensemble
+
+        selected_keys: list[str]
+            List of selected keys of self.run_info
+
         n_preds: int
-            number of prediction models used for ensemble building
-            same number of predictions on valid and test are necessary
+            Number of prediction models used for ensemble building same number of
+            predictions on valid and test are necessary
+
         index_run: int
             n-th time that ensemble predictions are written to disc
 
         Return
         ------
-        y: np.ndarray
+        np.ndarray | None
+            Returns the predictions if it can, else None
         """
         self.logger.debug("Predicting the %s set with the ensemble!", set_)
 
@@ -1169,20 +1177,26 @@ class EnsembleBuilder:
             )
             return None
 
-    def _add_ensemble_trajectory(self, train_pred, valid_pred, test_pred):
+    def _add_ensemble_trajectory(
+        self,
+        train_pred: np.ndarray,
+        valid_pred: np.ndarray | None,
+        test_pred: np.ndarray | None,
+    ) -> None:
         """
         Records a snapshot of how the performance look at a given training
         time.
 
         Parameters
         ----------
-        ensemble: EnsembleSelection
-            The ensemble selection object to record
-        valid_pred: np.ndarray
-            The predictions on the validation set using ensemble
-        test_pred: np.ndarray
-            The predictions on the test set using ensemble
+        train_pred: np.ndarray
+            The training predictions
 
+        valid_pred: np.ndarray | None
+            The predictions on the validation set using ensemble
+
+        test_pred: np.ndarray | None
+            The predictions on the test set using ensemble
         """
         if self.task_type == BINARY_CLASSIFICATION:
             if len(train_pred.shape) == 1 or train_pred.shape[1] == 1:
@@ -1237,7 +1251,7 @@ class EnsembleBuilder:
 
         self.ensemble_history.append(performance_stamp)
 
-    def _delete_excess_models(self, selected_keys: list[str]):
+    def _delete_excess_models(self, selected_keys: list[str]) -> None:
         """
         Deletes models excess models on disc. self.max_models_on_disc
         defines the upper limit on how many models to keep.
@@ -1276,8 +1290,7 @@ class EnsembleBuilder:
                     e,
                 )
 
-    def _read_np_fn(self, path):
-
+    def _read_np_fn(self, path: str) -> np.ndarray:
         # Support for string precision
         if isinstance(self.precision, str):
             precision = int(self.precision)
