@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional, Tuple, Union
+from typing import Any, Optional, Tuple, Union
 
 import logging.handlers
 import time
@@ -277,11 +277,11 @@ def fit_and_return_ensemble(
     memory_limit: Optional[int] = None,
     random_state: Optional[Union[int, np.random.RandomState]] = None,
 ) -> Tuple[
-    List[Tuple[int, float, float, float]],
+    list[dict[str, Any]],
     int,
-    Optional[np.ndarray],
-    Optional[np.ndarray],
-    Optional[np.ndarray],
+    np.ndarray | None,
+    np.ndarray | None,
+    np.ndarray | None,
 ]:
     """
 

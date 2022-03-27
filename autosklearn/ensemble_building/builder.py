@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import glob
 import gzip
@@ -180,13 +180,13 @@ class EnsembleBuilder:
             self.logger.debug(f"Using behaviour when {t} for {ensemble_nbest}:{t}")
 
         # The cached set of run_predictions which could come from previous instances
-        self._run_predictions = None
+        self._run_predictions: dict[str, dict[int, np.ndarray]] | None = None
 
         # Hash of the last ensemble training data to identify it
-        self._last_hash = None
+        self._last_hash: str | None = None
 
         # The cached info of runs which could come from previous instances
-        self._run_info = None
+        self._run_info: dict[str, dict[str, Any]] | None = None
 
     @property
     def run_predictions_path(self) -> Path:
@@ -264,9 +264,43 @@ class EnsembleBuilder:
         pynisher_context: str,
         time_left: float | None = None,
         end_at: float | None = None,
-        time_buffer=5,
+        time_buffer: int = 5,
         return_predictions: bool = False,
-    ):
+    ) -> Tuple[
+        list[dict[str, Any]],
+        int,
+        np.ndarray | None,
+        np.ndarray | None,
+        np.ndarray | None,
+    ]:
+        """Run the ensemble building process
+
+        Parameters
+        ----------
+        iteration : int
+            What iteration to associate with this run
+
+        pynisher_context : str
+            The pynisher context to run in
+
+        time_left : float | None = None
+            How much time should be left for this run. Either this or `end_at` must
+            be provided.
+
+        end_at : float | None = Non
+            When this run should end. Either this or `time_left` must be provided.
+
+        time_buffer : int = 5
+            How much extra time to add as a buffer to this run. This means there is
+            always some amount of time to do something useful.
+
+        return_predictions : bool = False
+            Whether run should also return predictions
+
+        Returns
+        -------
+        (ensemble_history, nbest, train_preds, valid_preds, test_preds)
+        """
         if time_left is None and end_at is None:
             raise ValueError("Must provide either time_left or end_at.")
 
@@ -353,7 +387,35 @@ class EnsembleBuilder:
 
         return [], self.ensemble_nbest, None, None, None
 
-    def main(self, time_left, iteration, return_predictions):
+    def main(
+        self,
+        time_left: float,
+        iteration: int,
+        return_predictions: bool = False,
+    ) -> Tuple[
+        list[dict[str, Any]],
+        int,
+        np.ndarray | None,
+        np.ndarray | None,
+        np.ndarray | None,
+    ]:
+        """Run the main loop of ensemble building
+
+        Parameters
+        ----------
+        time_left : float
+            How much time is left for this run
+
+        iteration : int
+            The iteration of this run
+
+        return_predictions : bool = False
+            Whether to return predictions or not
+
+        Returns
+        -------
+        (ensemble_history, nbest, train_preds, valid_preds, test_preds)
+        """
         # Pynisher jobs inside dask 'forget'
         # the logger configuration. So we have to set it up
         # accordingly
@@ -1208,6 +1270,7 @@ class EnsembleBuilder:
         sorted_keys: list
         """
         # Sort by loss - smaller is better!
+        print(self.run_info)
         sorted_keys = list(
             sorted(
                 [(k, v["ens_loss"], v["num_run"]) for k, v in self.run_info.items()],
