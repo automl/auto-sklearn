@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-
 import os
 from pathlib import Path
 
@@ -8,11 +7,7 @@ import numpy as np
 
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import BINARY_CLASSIFICATION
-from autosklearn.ensemble_builder import (
-    Y_TEST,
-    Y_VALID,
-    EnsembleBuilder,
-)
+from autosklearn.ensemble_builder import Y_TEST, Y_VALID, EnsembleBuilder
 from autosklearn.metrics import roc_auc
 
 from pytest_cases import parametrize, parametrize_with_cases

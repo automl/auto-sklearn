@@ -5,16 +5,10 @@ from typing import Callable
 import time
 from pathlib import Path
 
-
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.ensemble_builder import (
-    Y_ENSEMBLE,
-    Y_TEST,
-    Y_VALID,
-    EnsembleBuilder,
-)
+from autosklearn.ensemble_builder import Y_ENSEMBLE, Y_TEST, Y_VALID, EnsembleBuilder
 from autosklearn.metrics import roc_auc
 
 from pytest_cases import fixture, parametrize
@@ -51,7 +45,7 @@ def test_max_models_on_disc_with_float_selects_expected_models(
     mem_largest_mult: int,
     n_expected: int,
     largest_is_best: bool,
-    dummy_backend: Backend
+    dummy_backend: Backend,
 ) -> None:
     """
     Parameters
@@ -149,8 +143,7 @@ def test_max_models_on_disc_with_float_selects_expected_models(
 
 @parametrize("n_models", [50, 10, 2, 1])
 def test_max_models_on_disc_float_always_preserves_best_model(
-    n_models: int,
-    dummy_backend: Backend
+    n_models: int, dummy_backend: Backend
 ) -> None:
     """
     Parameters
@@ -204,9 +197,7 @@ def test_max_models_on_disc_float_always_preserves_best_model(
     ((0.0, 4), (0.1, 4), (0.3, 3), (0.5, 2), (0.6, 2), (0.8, 1), (1.0, 1)),
 )
 def test_performance_range_threshold(
-    performance_range_threshold: float,
-    expected_selected: int,
-    dummy_backend: Backend
+    performance_range_threshold: float, expected_selected: int, dummy_backend: Backend
 ) -> None:
     """
     Parameters
