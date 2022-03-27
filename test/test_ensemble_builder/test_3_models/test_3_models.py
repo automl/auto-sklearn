@@ -29,19 +29,19 @@ def test_read(ensemble_backend: Backend) -> None:
     )
 
     success = ensbuilder.compute_loss_per_model()
-    assert success, f"read_preds = {str(ensbuilder.read_preds)}"
+    assert success, f"run_predictions = {str(ensbuilder.run_predictions)}"
 
-    assert len(ensbuilder.read_preds) == 3, ensbuilder.read_preds.keys()
-    assert len(ensbuilder.read_losses) == 3, ensbuilder.read_losses.keys()
+    assert len(ensbuilder.run_predictions) == 3, ensbuilder.run_predictions.keys()
+    assert len(ensbuilder.run_info) == 3, ensbuilder.run_info.keys()
 
     runsdir = Path(ensemble_backend.get_runs_directory())
     preds_1 = runsdir / "0_1_0.0" / "predictions_ensemble_0_1_0.0.npy"
     preds_2 = runsdir / "0_2_0.0" / "predictions_ensemble_0_2_0.0.npy"
     preds_3 = runsdir / "0_3_100.0" / "predictions_ensemble_0_3_100.0.npy"
 
-    assert ensbuilder.read_losses[str(preds_1)]["ens_loss"] == 0.5
-    assert ensbuilder.read_losses[str(preds_2)]["ens_loss"] == 0.0
-    assert ensbuilder.read_losses[str(preds_3)]["ens_loss"] == 0.0
+    assert ensbuilder.run_info[str(preds_1)]["ens_loss"] == 0.5
+    assert ensbuilder.run_info[str(preds_2)]["ens_loss"] == 0.0
+    assert ensbuilder.run_info[str(preds_3)]["ens_loss"] == 0.0
 
 
 @parametrize(
@@ -175,17 +175,13 @@ def test_fall_back_nbest(ensemble_backend: Backend) -> None:
     )
 
     ensbuilder.compute_loss_per_model()
-    print()
-    print(ensbuilder.read_preds.keys())
-    print(ensbuilder.read_losses.keys())
-    print(ensemble_backend.temporary_directory)
 
     for model in ["0_1_0.0", "0_2_0.0", "0_3_100.0"]:
         filename = os.path.join(
             ensemble_backend.temporary_directory,
             f".auto-sklearn/runs/{model}/predictions_ensemble_{model}.npy",
         )
-        ensbuilder.read_losses[filename]["ens_loss"] = -1
+        ensbuilder.run_info[filename]["ens_loss"] = -1
 
     sel_keys = ensbuilder.get_n_best_preds()
 
@@ -236,20 +232,20 @@ def test_get_valid_test_preds(ensemble_backend: Backend) -> None:
     ensbuilder.get_valid_test_preds(selected_keys=sel_keys)
 
     # Number of read files should be three and contain those of the models in the setup
-    assert set(ensbuilder.read_preds.keys()) == set(paths)
+    assert set(ensbuilder.run_predictions.keys()) == set(paths)
 
     selected = sel_keys
     non_selected = set(paths) - set(sel_keys)
 
     # not selected --> should still be None
     for key in non_selected:
-        assert ensbuilder.read_preds[key][Y_VALID] is None
-        assert ensbuilder.read_preds[key][Y_TEST] is None
+        assert ensbuilder.run_predictions[key][Y_VALID] is None
+        assert ensbuilder.run_predictions[key][Y_TEST] is None
 
     # selected --> read valid and test predictions
     for key in selected:
-        assert ensbuilder.read_preds[key][Y_VALID] is not None
-        assert ensbuilder.read_preds[key][Y_TEST] is not None
+        assert ensbuilder.run_predictions[key][Y_VALID] is not None
+        assert ensbuilder.run_predictions[key][Y_TEST] is not None
 
 
 @parametrize_with_cases("ensemble_backend", cases=cases)
@@ -317,7 +313,7 @@ def test_ensemble_builder_predictions(ensemble_backend: Backend) -> None:
     # since d2 provides perfect predictions
     # it should get a higher weight
     # so that y_valid should be exactly y_valid_d2
-    y_valid_d2 = ensbuilder.read_preds[d2][Y_VALID][:, 1]
+    y_valid_d2 = ensbuilder.run_predictions[d2][Y_VALID][:, 1]
     np.testing.assert_array_almost_equal(y_valid, y_valid_d2)
 
 
@@ -331,7 +327,7 @@ def test_main(ensemble_backend: Backend) -> None:
 
     Expects
     -------
-    * There should be "read_preds" and "read_losses" saved to file
+    * There should be "run_predictions" and "run_info" saved to file
     * There should be 3 model reads
     * There should be a hash for the preds read in
     * The true targets should have been read in
@@ -357,14 +353,12 @@ def test_main(ensemble_backend: Backend) -> None:
     )
 
     internals_dir = Path(ensemble_backend.internals_directory)
-    read_preds_path = internals_dir / "ensemble_read_preds.pkl"
-    read_losses_path = internals_dir / "ensemble_read_losses.pkl"
 
-    assert read_preds_path.exists(), list(internals_dir.iterdir())
-    assert read_losses_path.exists(), list(internals_dir.iterdir())
+    assert ensbuilder.run_predictions_path.exists(), list(internals_dir.iterdir())
+    assert ensbuilder.run_info_path.exists(), list(internals_dir.iterdir())
 
     # There should be three preds read
-    assert len(ensbuilder.read_preds) == 3
+    assert len(ensbuilder.run_predictions) == 3
     assert ensbuilder.last_hash is not None
     assert ensbuilder.y_true_ensemble is not None
 
@@ -431,10 +425,6 @@ def test_limit(
     ensbuilder.predict = Mock(side_effect=MemoryError)  # type: ignore
     ensbuilder.logger = mock_logger  # Mock its logger
 
-    internal_dir = Path(ensemble_backend.internals_directory)
-    read_losses_file = internal_dir / "ensemble_read_losses.pkl"
-    read_preds_file = internal_dir / "ensemble_read_preds.pkl"
-
     def mtime_mock(filename: str) -> float:
         """TODO, not really sure why we have to force these"""
         path = Path(filename)
@@ -464,8 +454,8 @@ def test_limit(
         for i, exp_state in enumerate(intermediate_states, start=1):
             ensbuilder.run(time_left=1000, iteration=0, pynisher_context="fork")
 
-            assert read_losses_file.exists()
-            assert not read_preds_file.exists()
+            assert ensbuilder.run_info_path.exists()
+            assert not ensbuilder.run_predictions_path.exists()
 
             assert mock_logger.warning.call_count == i  # type: ignore
 
@@ -476,8 +466,8 @@ def test_limit(
         # change it's internal state
         ensbuilder.run(time_left=1000, iteration=0, pynisher_context="fork")
 
-        assert read_losses_file.exists()
-        assert not read_preds_file.exists()
+        assert ensbuilder.run_info_path.exists()
+        assert not ensbuilder.run_predictions_path.exists()
 
         assert (ensbuilder.ensemble_nbest, ensbuilder.read_at_most) == final_state
 

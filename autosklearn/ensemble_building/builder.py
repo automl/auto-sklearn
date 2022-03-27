@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Any, Tuple
 
-from pathlib import Path
 import glob
 import gzip
 import logging.handlers
@@ -16,6 +15,7 @@ import shutil
 import time
 import traceback
 import zlib
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -115,7 +115,7 @@ class EnsembleBuilder:
         precision: int [16 | 32 | 64 | 128] = 32
             precision of floats to read the predictions
 
-        memory_limit: Optional[int] = 1024
+        memory_limit: int | None = 1024
             memory limit in mb. If ``None``, no memory limit is enforced.
 
         read_at_most: int = 5
@@ -156,9 +156,6 @@ class EnsembleBuilder:
         # The starting time of the procedure
         self.start_time = 0
 
-        # Hash of the last ensemble training data to identify it
-        self.last_hash = None
-
         # The cached values of the true targets for the ensemble
         self.y_true_ensemble: int | None = None
 
@@ -182,24 +179,14 @@ class EnsembleBuilder:
             t = type(ensemble_nbest)
             self.logger.debug(f"Using behaviour when {t} for {ensemble_nbest}:{t}")
 
-        # Read in previous state if any exists
-        #
-        # Depending on the dataset dimensions, regenerating every iteration, the
-        # predictions losses for self.read_preds is too computationally expensive
-        # As the ensemble builder is stateless (every time the ensemble builder gets
-        # resources from dask, it builds this object from scratch)
-        # we save the state of this dictionary to memory
-        # and read it if available
-
+        # The cached set of run_predictions which could come from previous instances
         self._run_predictions = None
-        self._last_hash = None
-        self._run_info = None
 
-        # TODO remove
-        prior_predictions, last_hash = self.run_predictions
-        self.read_preds = prior_predictions
-        self.last_hash = last_hash
-        self.read_losses = self.run_info
+        # Hash of the last ensemble training data to identify it
+        self._last_hash = None
+
+        # The cached info of runs which could come from previous instances
+        self._run_info = None
 
     @property
     def run_predictions_path(self) -> Path:
@@ -212,7 +199,7 @@ class EnsembleBuilder:
         return Path(self.backend.internals_directory) / "ensemble_read_losses.pkl"
 
     @property
-    def run_predictions(self) -> Tuple[dict, str]:
+    def run_predictions(self) -> dict[str, dict[int, np.ndarray]]:
         """Get the cached predictions from previous runs
         {
             "file_name": {
@@ -223,20 +210,32 @@ class EnsembleBuilder:
         }
         """
         if self._run_predictions is None:
-            if self.run_predictions_path.exists():
-                with self.run_predictions_path.open("rb") as memory:
-                    preds, last_hash = pickle.load(memory)
+            self._run_predictions = {}
+            self._last_hash = ""
 
-                self._run_predictions = preds
-                self._last_hash = last_hash
-            else:
-                self._run_predictions = {}
-                self._last_hash = ""
+            path = self.run_predictions_path
+            if path.exists():
+                with path.open("rb") as memory:
+                    self._run_predictions, self._last_hash = pickle.load(memory)
 
-        return (self._run_predictions, self._last_hash)
+        return self._run_predictions
 
     @property
-    def run_info(self) -> dict[str, dict[int, np.ndarray]]:
+    def last_hash(self) -> str:
+        """Get the last hash associated with the run predictions"""
+        if self._last_hash is None:
+            self._run_predictions = {}
+            self._last_hash = ""
+
+            path = self.run_predictions_path
+            if path.exists():
+                with path.open("rb") as memory:
+                    self._run_predictions, self._last_hash = pickle.load(memory)
+
+        return self._last_hash
+
+    @property
+    def run_info(self) -> dict[str, dict[str, Any]]:
         """Get the cached information from previous runs
         {
             "file name": {
@@ -250,12 +249,12 @@ class EnsembleBuilder:
         }
         """
         if self._run_info is None:
-            if self.run_info_path.exists():
-                with self.run_info.open("rb") as memory:
-                    info = pickle.load(memory)
-                self._run_info = info
-            else:
-                self._run_info = {}
+            self._run_info = {}
+
+            path = self.run_info_path
+            if path.exists():
+                with path.open("rb") as memory:
+                    self._run_info = pickle.load(memory)
 
         return self._run_info
 
@@ -263,8 +262,8 @@ class EnsembleBuilder:
         self,
         iteration: int,
         pynisher_context: str,
-        time_left: Optional[float] = None,
-        end_at: Optional[float] = None,
+        time_left: float | None = None,
+        end_at: float | None = None,
         time_buffer=5,
         return_predictions: bool = False,
     ):
@@ -373,7 +372,7 @@ class EnsembleBuilder:
             time_left - used_time,
         )
 
-        # populates self.read_preds and self.read_losses
+        # populates self.run_predictions and self.run_info
         if not self.compute_loss_per_model():
             if return_predictions:
                 return (
@@ -401,7 +400,7 @@ class EnsembleBuilder:
             else:
                 return self.ensemble_history, self.ensemble_nbest, None, None, None
 
-        # populates predictions in self.read_preds
+        # populates predictions in self.run_predictions
         # reduces selected models if file reading failed
         n_sel_valid, n_sel_test = self.get_valid_test_preds(
             selected_keys=candidate_models
@@ -472,7 +471,7 @@ class EnsembleBuilder:
         # Save the read losses status for the next iteration, we should do this
         # before doing predictions as this is a likely place of memory issues
         with self.run_info_path.open("wb") as f:
-            pickle.dump(self.read_losses, f)
+            pickle.dump(self.run_info, f)
 
         if ensemble is not None:
             train_pred = self.predict(
@@ -506,7 +505,7 @@ class EnsembleBuilder:
         # The loaded predictions and hash can only be saved after the ensemble has been
         # built, because the hash is computed during the construction of the ensemble
         with self.run_predictions_path.open("wb") as f:
-            item = (self.read_preds, self.last_hash)
+            item = (self.run_predictions, self.last_hash)
             pickle.dump(item, f)
 
         if return_predictions:
@@ -548,13 +547,13 @@ class EnsembleBuilder:
 
     def compute_loss_per_model(self) -> bool:
         """Compute the loss of the predictions on ensemble building data set;
-        populates self.read_preds and self.read_losses
+        populates self.run_predictions and self.run_info
 
         Side-effects
         ------------
         * Populates
             - `self.y_ens_files` all the ensemble predictions it could find for runs
-            - `self.read_losses` with the new losses it calculated
+            - `self.run_info` with the new losses it calculated
 
         Returns
         -------
@@ -619,8 +618,8 @@ class EnsembleBuilder:
                 )
                 continue
 
-            if not self.read_losses.get(y_ens_fn):
-                self.read_losses[y_ens_fn] = {
+            if not self.run_info.get(y_ens_fn):
+                self.run_info[y_ens_fn] = {
                     "ens_loss": np.inf,
                     "mtime_ens": 0,
                     "mtime_valid": 0,
@@ -636,14 +635,14 @@ class EnsembleBuilder:
                     # 3 - deleted from disk due to space constraints
                     "loaded": 0,
                 }
-            if not self.read_preds.get(y_ens_fn):
-                self.read_preds[y_ens_fn] = {
+            if not self.run_predictions.get(y_ens_fn):
+                self.run_predictions[y_ens_fn] = {
                     Y_ENSEMBLE: None,
                     Y_VALID: None,
                     Y_TEST: None,
                 }
 
-            if self.read_losses[y_ens_fn]["mtime_ens"] == mtime:
+            if self.run_info[y_ens_fn]["mtime_ens"] == mtime:
                 # same time stamp; nothing changed;
                 continue
 
@@ -658,24 +657,24 @@ class EnsembleBuilder:
                     scoring_functions=None,
                 )
 
-                if np.isfinite(self.read_losses[y_ens_fn]["ens_loss"]):
+                if np.isfinite(self.run_info[y_ens_fn]["ens_loss"]):
                     self.logger.debug(
                         "Changing ensemble loss for file %s from %f to %f "
                         "because file modification time changed? %f - %f",
                         y_ens_fn,
-                        self.read_losses[y_ens_fn]["ens_loss"],
+                        self.run_info[y_ens_fn]["ens_loss"],
                         loss,
-                        self.read_losses[y_ens_fn]["mtime_ens"],
+                        self.run_info[y_ens_fn]["mtime_ens"],
                         os.path.getmtime(y_ens_fn),
                     )
 
-                self.read_losses[y_ens_fn]["ens_loss"] = loss
+                self.run_info[y_ens_fn]["ens_loss"] = loss
 
                 # It is not needed to create the object here
                 # To save memory, we just compute the loss.
-                self.read_losses[y_ens_fn]["mtime_ens"] = os.path.getmtime(y_ens_fn)
-                self.read_losses[y_ens_fn]["loaded"] = 2
-                self.read_losses[y_ens_fn][
+                self.run_info[y_ens_fn]["mtime_ens"] = os.path.getmtime(y_ens_fn)
+                self.run_info[y_ens_fn]["loaded"] = 2
+                self.run_info[y_ens_fn][
                     "disc_space_cost_mb"
                 ] = self.get_disk_consumption(y_ens_fn)
 
@@ -687,18 +686,18 @@ class EnsembleBuilder:
                     y_ens_fn,
                     traceback.format_exc(),
                 )
-                self.read_losses[y_ens_fn]["ens_loss"] = np.inf
+                self.run_info[y_ens_fn]["ens_loss"] = np.inf
 
         self.logger.debug(
             "Done reading %d new prediction files. Loaded %d predictions in " "total.",
             n_read_files,
-            np.sum([pred["loaded"] > 0 for pred in self.read_losses.values()]),
+            np.sum([pred["loaded"] > 0 for pred in self.run_info.values()]),
         )
         return True
 
     def get_n_best_preds(self):
         """
-        get best n predictions (i.e., keys of self.read_losses)
+        get best n predictions (i.e., keys of self.run_info)
         according to the loss on the "ensemble set"
         n: self.ensemble_nbest
 
@@ -742,7 +741,7 @@ class EnsembleBuilder:
                 )
             sorted_keys = [
                 (k, v["ens_loss"], v["num_run"])
-                for k, v in self.read_losses.items()
+                for k, v in self.run_info.items()
                 if v["seed"] == self.seed and v["num_run"] == 1
             ]
         # reload predictions if losses changed over time and a model is
@@ -776,7 +775,7 @@ class EnsembleBuilder:
                         v["ens_loss"],
                         v["disc_space_cost_mb"],
                     ]
-                    for v in self.read_losses.values()
+                    for v in self.run_info.values()
                     if v["disc_space_cost_mb"] is not None
                 ]
                 max_consumption = max(c[1] for c in consumption)
@@ -854,42 +853,43 @@ class EnsembleBuilder:
 
         # remove loaded predictions for non-winning models
         for k in sorted_keys[ensemble_n_best:]:
-            if k in self.read_preds:
-                self.read_preds[k][Y_ENSEMBLE] = None
-                self.read_preds[k][Y_VALID] = None
-                self.read_preds[k][Y_TEST] = None
-            if self.read_losses[k]["loaded"] == 1:
+            if k in self.run_predictions:
+                self.run_predictions[k][Y_ENSEMBLE] = None
+                self.run_predictions[k][Y_VALID] = None
+                self.run_predictions[k][Y_TEST] = None
+            if self.run_info[k]["loaded"] == 1:
                 self.logger.debug(
                     "Dropping model %s (%d,%d) with loss %f.",
                     k,
-                    self.read_losses[k]["seed"],
-                    self.read_losses[k]["num_run"],
-                    self.read_losses[k]["ens_loss"],
+                    self.run_info[k]["seed"],
+                    self.run_info[k]["num_run"],
+                    self.run_info[k]["ens_loss"],
                 )
-                self.read_losses[k]["loaded"] = 2
+                self.run_info[k]["loaded"] = 2
 
         # Load the predictions for the winning
         for k in sorted_keys[:ensemble_n_best]:
             if (
-                k not in self.read_preds or self.read_preds[k][Y_ENSEMBLE] is None
-            ) and self.read_losses[k]["loaded"] != 3:
-                self.read_preds[k][Y_ENSEMBLE] = self._read_np_fn(k)
+                k not in self.run_predictions
+                or self.run_predictions[k][Y_ENSEMBLE] is None
+            ) and self.run_info[k]["loaded"] != 3:
+                self.run_predictions[k][Y_ENSEMBLE] = self._read_np_fn(k)
                 # No need to load valid and test here because they are loaded
                 #  only if the model ends up in the ensemble
-                self.read_losses[k]["loaded"] = 1
+                self.run_info[k]["loaded"] = 1
 
-        # return keys of self.read_losses with lowest losses
+        # return keys of self.run_info with lowest losses
         return sorted_keys[:ensemble_n_best]
 
     def get_valid_test_preds(
         self, selected_keys: list[str]
     ) -> Tuple[list[str], list[str]]:
-        """Get valid and test predictions from disc and store them in self.read_preds
+        """Get valid and test predictions from disc and store them in self.run_predictions
 
         Parameters
         ---------
         selected_keys: list
-            list of selected keys of self.read_preds
+            list of selected keys of self.run_predictions
 
         Return
         ------
@@ -906,15 +906,15 @@ class EnsembleBuilder:
                     glob.escape(self.backend.get_runs_directory()),
                     "%d_%d_%s"
                     % (
-                        self.read_losses[k]["seed"],
-                        self.read_losses[k]["num_run"],
-                        self.read_losses[k]["budget"],
+                        self.run_info[k]["seed"],
+                        self.run_info[k]["num_run"],
+                        self.run_info[k]["budget"],
                     ),
                     "predictions_valid_%d_%d_%s.npy*"
                     % (
-                        self.read_losses[k]["seed"],
-                        self.read_losses[k]["num_run"],
-                        self.read_losses[k]["budget"],
+                        self.run_info[k]["seed"],
+                        self.run_info[k]["num_run"],
+                        self.run_info[k]["budget"],
                     ),
                 )
             )
@@ -928,15 +928,15 @@ class EnsembleBuilder:
                     glob.escape(self.backend.get_runs_directory()),
                     "%d_%d_%s"
                     % (
-                        self.read_losses[k]["seed"],
-                        self.read_losses[k]["num_run"],
-                        self.read_losses[k]["budget"],
+                        self.run_info[k]["seed"],
+                        self.run_info[k]["num_run"],
+                        self.run_info[k]["budget"],
                     ),
                     "predictions_test_%d_%d_%s.npy*"
                     % (
-                        self.read_losses[k]["seed"],
-                        self.read_losses[k]["num_run"],
-                        self.read_losses[k]["budget"],
+                        self.run_info[k]["seed"],
+                        self.run_info[k]["num_run"],
+                        self.run_info[k]["budget"],
                     ),
                 )
             )
@@ -954,17 +954,17 @@ class EnsembleBuilder:
             else:
                 valid_fn = valid_fn[0]
                 if (
-                    self.read_losses[k]["mtime_valid"] == os.path.getmtime(valid_fn)
-                    and k in self.read_preds
-                    and self.read_preds[k][Y_VALID] is not None
+                    self.run_info[k]["mtime_valid"] == os.path.getmtime(valid_fn)
+                    and k in self.run_predictions
+                    and self.run_predictions[k][Y_VALID] is not None
                 ):
                     success_keys_valid.append(k)
                     continue
                 try:
                     y_valid = self._read_np_fn(valid_fn)
-                    self.read_preds[k][Y_VALID] = y_valid
+                    self.run_predictions[k][Y_VALID] = y_valid
                     success_keys_valid.append(k)
-                    self.read_losses[k]["mtime_valid"] = os.path.getmtime(valid_fn)
+                    self.run_info[k]["mtime_valid"] = os.path.getmtime(valid_fn)
                 except Exception:
                     self.logger.warning(
                         "Error loading %s: %s", valid_fn, traceback.format_exc()
@@ -978,17 +978,17 @@ class EnsembleBuilder:
             else:
                 test_fn = test_fn[0]
                 if (
-                    self.read_losses[k]["mtime_test"] == os.path.getmtime(test_fn)
-                    and k in self.read_preds
-                    and self.read_preds[k][Y_TEST] is not None
+                    self.run_info[k]["mtime_test"] == os.path.getmtime(test_fn)
+                    and k in self.run_predictions
+                    and self.run_predictions[k][Y_TEST] is not None
                 ):
                     success_keys_test.append(k)
                     continue
                 try:
                     y_test = self._read_np_fn(test_fn)
-                    self.read_preds[k][Y_TEST] = y_test
+                    self.run_predictions[k][Y_TEST] = y_test
                     success_keys_test.append(k)
-                    self.read_losses[k]["mtime_test"] = os.path.getmtime(test_fn)
+                    self.run_info[k]["mtime_test"] = os.path.getmtime(test_fn)
                 except Exception:
                     self.logger.warning(
                         "Error loading %s: %s", test_fn, traceback.format_exc()
@@ -1001,19 +1001,19 @@ class EnsembleBuilder:
         Parameters
         ---------
         selected_keys: list
-            list of selected keys of self.read_losses
+            list of selected keys of self.run_info
 
         Returns
         -------
         ensemble: EnsembleSelection
             trained Ensemble
         """
-        predictions_train = [self.read_preds[k][Y_ENSEMBLE] for k in selected_keys]
+        predictions_train = [self.run_predictions[k][Y_ENSEMBLE] for k in selected_keys]
         include_num_runs = [
             (
-                self.read_losses[k]["seed"],
-                self.read_losses[k]["num_run"],
-                self.read_losses[k]["budget"],
+                self.run_info[k]["seed"],
+                self.run_info[k]["num_run"],
+                self.run_info[k]["budget"],
             )
             for k in selected_keys
         ]
@@ -1033,7 +1033,8 @@ class EnsembleBuilder:
             )
 
             return None
-        self.last_hash = current_hash
+
+        self._last_hash = current_hash
 
         ensemble = EnsembleSelection(
             ensemble_size=self.ensemble_size,
@@ -1089,7 +1090,7 @@ class EnsembleBuilder:
         ensemble: EnsembleSelection
             trained Ensemble
         selected_keys: list
-            list of selected keys of self.read_losses
+            list of selected keys of self.run_info
         n_preds: int
             number of prediction models used for ensemble building
             same number of predictions on valid and test are necessary
@@ -1108,7 +1109,7 @@ class EnsembleBuilder:
             pred_set = Y_TEST
         else:
             pred_set = Y_ENSEMBLE
-        predictions = [self.read_preds[k][pred_set] for k in selected_keys]
+        predictions = [self.run_predictions[k][pred_set] for k in selected_keys]
 
         if n_preds == len(predictions):
             y = ensemble.predict(predictions)
@@ -1196,7 +1197,7 @@ class EnsembleBuilder:
     def _get_list_of_sorted_preds(self):
         """
         Returns a list of sorted predictions in descending order
-        Losses are taken from self.read_losses.
+        Losses are taken from self.run_info.
 
         Parameters
         ----------
@@ -1209,7 +1210,7 @@ class EnsembleBuilder:
         # Sort by loss - smaller is better!
         sorted_keys = list(
             sorted(
-                [(k, v["ens_loss"], v["num_run"]) for k, v in self.read_losses.items()],
+                [(k, v["ens_loss"], v["num_run"]) for k, v in self.run_info.items()],
                 # Sort by loss as priority 1 and then by num_run on a ascending order
                 # We want small num_run first
                 key=lambda x: (x[1], x[2]),
@@ -1223,9 +1224,7 @@ class EnsembleBuilder:
         defines the upper limit on how many models to keep.
         Any additional model with a worst loss than the top
         self.max_models_on_disc is deleted.
-
         """
-
         # Loop through the files currently in the directory
         for pred_path in self.y_ens_files:
 
@@ -1247,9 +1246,9 @@ class EnsembleBuilder:
                 os.rename(numrun_dir, numrun_dir + ".old")
                 shutil.rmtree(numrun_dir + ".old")
                 self.logger.info("Deleted files of non-candidate model %s", pred_path)
-                self.read_losses[pred_path]["disc_space_cost_mb"] = None
-                self.read_losses[pred_path]["loaded"] = 3
-                self.read_losses[pred_path]["ens_loss"] = np.inf
+                self.run_info[pred_path]["disc_space_cost_mb"] = None
+                self.run_info[pred_path]["loaded"] = 3
+                self.run_info[pred_path]["ens_loss"] = np.inf
             except Exception as e:
                 self.logger.error(
                     "Failed to delete files of non-candidate model %s due"
