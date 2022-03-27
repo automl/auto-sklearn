@@ -1,4 +1,6 @@
-from typing import Optional, Iterable, Set, TypeVar
+from __future__ import annotations
+
+from typing import Optional, TypeVar, Iterable
 
 from functools import reduce
 import numpy as np
@@ -57,18 +59,26 @@ def normalize(x: np.ndarray, axis: Optional[int] = None) -> np.ndarray:
     return x / x.sum(axis=axis, keepdims=True)
 
 
-def intersection(items: Iterable[Iterable[T]]) -> Set[T]:
+def intersection(*items: Iterable[T]) -> set[T]:
     """Does an intersection over all collection of items
+
+    ..code:: python
+
+        ans = intersection(["a", "b", "c"], "ab", ("b", "c"))
+
+        items = [(1, 2, 3), (2, 3), (4, 5)]
+        ans = intesection(*items)
+
     Parameters
     ----------
-    items : Iterable[Iterable[T]]
+    *items : Iterable[T]
         A list of lists
+
     Returns
     -------
     Set[T]
         The intersection of all items
     """
-    items = list(items)
     if len(items) == 0:
         return set()
 
