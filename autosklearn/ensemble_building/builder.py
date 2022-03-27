@@ -743,8 +743,15 @@ class EnsembleBuilder:
             ->Any model that is not best is candidate to deletion
               if max models in disc is exceeded.
         """
-
-        sorted_keys = self._get_list_of_sorted_preds()
+        # Sort by loss - smaller is better!
+        sorted_keys = list(
+            sorted(
+                [(k, v["ens_loss"], v["num_run"]) for k, v in self.run_info.items()],
+                # Sort by loss as priority 1 and then by num_run on a ascending order
+                # We want small num_run first
+                key=lambda x: (x[1], x[2]),
+            )
+        )
 
         # number of models available
         num_keys = len(sorted_keys)
@@ -1229,30 +1236,6 @@ class EnsembleBuilder:
             )
 
         self.ensemble_history.append(performance_stamp)
-
-    def _get_list_of_sorted_preds(self):
-        """
-        Returns a list of sorted predictions in descending order
-        Losses are taken from self.run_info.
-
-        Parameters
-        ----------
-        None
-
-        Return
-        ------
-        sorted_keys: list
-        """
-        # Sort by loss - smaller is better!
-        sorted_keys = list(
-            sorted(
-                [(k, v["ens_loss"], v["num_run"]) for k, v in self.run_info.items()],
-                # Sort by loss as priority 1 and then by num_run on a ascending order
-                # We want small num_run first
-                key=lambda x: (x[1], x[2]),
-            )
-        )
-        return sorted_keys
 
     def _delete_excess_models(self, selected_keys: list[str]):
         """
