@@ -1,6 +1,9 @@
-from typing import Optional
+from typing import Optional, Iterable, Set, TypeVar
 
+from functools import reduce
 import numpy as np
+
+T = TypeVar("T")
 
 
 def normalize(x: np.ndarray, axis: Optional[int] = None) -> np.ndarray:
@@ -52,3 +55,21 @@ def normalize(x: np.ndarray, axis: Optional[int] = None) -> np.ndarray:
         The normalized array
     """
     return x / x.sum(axis=axis, keepdims=True)
+
+
+def intersection(items: Iterable[Iterable[T]]) -> Set[T]:
+    """Does an intersection over all collection of items
+    Parameters
+    ----------
+    items : Iterable[Iterable[T]]
+        A list of lists
+    Returns
+    -------
+    Set[T]
+        The intersection of all items
+    """
+    items = list(items)
+    if len(items) == 0:
+        return set()
+
+    return set(reduce(lambda s1, s2: set(s1) & set(s2), items, items[0]))
