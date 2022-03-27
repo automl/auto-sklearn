@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Any, Tuple
 
 import glob
-import gzip
 import logging.handlers
 import multiprocessing
 import numbers
@@ -684,7 +683,7 @@ class EnsembleBuilder:
 
             # actually read the predictions and compute their respective loss
             try:
-                y_ensemble = self._read_np_fn(y_ens_fn)
+                y_ensemble = self._predictions_from(y_ens_fn)
                 loss = calculate_loss(
                     solution=self.y_true_ensemble,
                     prediction=y_ensemble,
@@ -917,7 +916,7 @@ class EnsembleBuilder:
                 k not in self.run_predictions
                 or self.run_predictions[k][Y_ENSEMBLE] is None
             ) and self.run_info[k]["loaded"] != 3:
-                self.run_predictions[k][Y_ENSEMBLE] = self._read_np_fn(k)
+                self.run_predictions[k][Y_ENSEMBLE] = self._predictions_from(k)
                 # No need to load valid and test here because they are loaded
                 #  only if the model ends up in the ensemble
                 self.run_info[k]["loaded"] = 1
@@ -1006,7 +1005,7 @@ class EnsembleBuilder:
                     success_keys_valid.append(k)
                     continue
                 try:
-                    y_valid = self._read_np_fn(valid_fn)
+                    y_valid = self._predictions_from(valid_fn)
                     self.run_predictions[k][Y_VALID] = y_valid
                     success_keys_valid.append(k)
                     self.run_info[k]["mtime_valid"] = os.path.getmtime(valid_fn)
@@ -1030,7 +1029,7 @@ class EnsembleBuilder:
                     success_keys_test.append(k)
                     continue
                 try:
-                    y_test = self._read_np_fn(test_fn)
+                    y_test = self._predictions_from(test_fn)
                     self.run_predictions[k][Y_TEST] = y_test
                     success_keys_test.append(k)
                     self.run_info[k]["mtime_test"] = os.path.getmtime(test_fn)
@@ -1290,27 +1289,21 @@ class EnsembleBuilder:
                     e,
                 )
 
-    def _read_np_fn(self, path: str) -> np.ndarray:
-        # Support for string precision
-        if isinstance(self.precision, str):
-            precision = int(self.precision)
-            self.logger.warning("Interpreted str-precision as {}".format(precision))
-        else:
-            precision = self.precision
+    def _predictions_from(self, path: str | Path) -> np.ndarray:
+        if isinstance(path, str):
+            path = Path(path)
 
-        if path.endswith("gz"):
-            open_method = gzip.open
-        elif path.endswith("npy"):
-            open_method = open
-        else:
-            raise ValueError("Unknown filetype %s" % path)
-        with open_method(path, "rb") as fp:
-            if precision == 16:
-                predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float16)
-            elif precision == 32:
-                predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float32)
-            elif precision == 64:
-                predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float64)
-            else:
-                predictions = np.load(fp, allow_pickle=True)
-            return predictions
+        precision = self.precision
+
+        with path.open("rb") as f:
+            predictions = np.load(f)
+
+        dtypes = {
+            16: np.float16,
+            32: np.float32,
+            64: np.float64,
+        }
+        dtype = dtypes.get(precision, predictions.dtype)
+        predictions = predictions.astype(dtype=dtype, copy=False)
+
+        return predictions
