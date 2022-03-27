@@ -414,12 +414,12 @@ class EnsembleBuilder:
         task_type: int,
         metric: Scorer,
         ensemble_size: int = 10,
-        ensemble_nbest: Union[int, float] = 100,
-        max_models_on_disc: Optional[int | float] = 100,
+        ensemble_nbest: int | float = 100,
+        max_models_on_disc: int | float | None = 100,
         performance_range_threshold: float = 0,
         seed: int = 1,
         precision: int = 32,
-        memory_limit: Optional[int] = 1024,
+        memory_limit: int | None = 1024,
         read_at_most: int = 5,
         logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
         random_state: int | np.random.RandomState | None = None,
@@ -492,62 +492,45 @@ class EnsembleBuilder:
         random_state: int | RandomState | None = None
             An int or RandomState object used for generating the ensemble.
         """
-        super(EnsembleBuilder, self).__init__()
+        if isinstance(ensemble_nbest, int) and ensemble_nbest < 1:
+            raise ValueError(f"int ensemble_nbest ({ensemble_nbest}) must be (>1)")
 
-        self.backend = backend  # communication with filesystem
+        if isinstance(ensemble_nbest, float) and not (0 <= ensemble_nbest <= 1):
+            raise ValueError(f"float ensemble_nbest ({ensemble_nbest}) not in (0,1)")
+
+        if max_models_on_disc is not None and max_models_on_disc < 0:
+            raise ValueError("max_models_on_disc must be positive or None")
+
+        self.backend = backend
         self.dataset_name = dataset_name
         self.task_type = task_type
         self.metric = metric
         self.ensemble_size = ensemble_size
         self.performance_range_threshold = performance_range_threshold
-
-        if isinstance(ensemble_nbest, numbers.Integral) and ensemble_nbest < 1:
-            raise ValueError(
-                "Integer ensemble_nbest has to be larger 1: %s" % ensemble_nbest
-            )
-        elif not isinstance(ensemble_nbest, numbers.Integral):
-            if ensemble_nbest < 0 or ensemble_nbest > 1:
-                raise ValueError(
-                    "Float ensemble_nbest best has to be >= 0 and <= 1: %s"
-                    % ensemble_nbest
-                )
-
         self.ensemble_nbest = ensemble_nbest
-
-        # max_models_on_disc can be a float, in such case we need to
-        # remember the user specified Megabytes and translate this to
-        # max number of ensemble models. max_resident_models keeps the
-        # maximum number of models in disc
-        if max_models_on_disc is not None and max_models_on_disc < 0:
-            raise ValueError("max_models_on_disc has to be a positive number or None")
         self.max_models_on_disc = max_models_on_disc
-        self.max_resident_models = None
-
         self.seed = seed
         self.precision = precision
         self.memory_limit = memory_limit
         self.read_at_most = read_at_most
         self.random_state = random_state
 
+        # max_resident_models keeps the maximum number of models in disc
+        self.max_resident_models: int | None = None
+
         # Setup the logger
+        self.logger = get_named_client_logger(name="EnsembleBuilder", port=logger_port)
         self.logger_port = logger_port
-        self.logger = get_named_client_logger(
-            name="EnsembleBuilder",
-            port=self.logger_port,
-        )
 
         if ensemble_nbest == 1:
             self.logger.debug(
-                "Behaviour depends on int/float: %s, %s (ensemble_nbest, type)"
-                % (ensemble_nbest, type(ensemble_nbest))
+                f"Behaviour dep. on int/float: {ensemble_nbest}:{type(ensemble_nbest)}"
             )
 
         self.start_time = 0
         self.model_fn_re = re.compile(MODEL_FN_RE)
-
         self.last_hash = None  # hash of ensemble training data
         self.y_true_ensemble = None
-        self.SAVE2DISC = True
 
         # already read prediction files
         # {"file name": {
@@ -825,7 +808,7 @@ class EnsembleBuilder:
         ensemble = self.fit_ensemble(selected_keys=candidate_models)
 
         # Save the ensemble for later use in the main auto-sklearn module!
-        if ensemble is not None and self.SAVE2DISC:
+        if ensemble is not None:
             self.backend.save_ensemble(ensemble, iteration, self.seed)
 
         # Delete files of non-candidate models - can only be done after fitting the
