@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import math
 
 sizes = {
     "B": 0,
@@ -11,7 +12,7 @@ sizes = {
 }
 
 
-def sizeof(path: Path | str, unit: str = "B") -> int:
+def sizeof(path: Path | str, unit: str = "B") -> float:
     """Get the size of some path object
 
     Parameters
@@ -24,7 +25,7 @@ def sizeof(path: Path | str, unit: str = "B") -> int:
 
     Returns
     -------
-    int
+    float
         The size of the folder/file in the given units
     """
     if unit not in sizes:
@@ -39,4 +40,4 @@ def sizeof(path: Path | str, unit: str = "B") -> int:
         size = sum(f.stat().st_size for f in path.glob("**/*") if f.is_file())
 
     power = sizes[unit]
-    return round(size / (1024**power))
+    return size / math.pow(1024, power)

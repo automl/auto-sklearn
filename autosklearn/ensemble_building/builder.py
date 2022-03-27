@@ -30,6 +30,7 @@ from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.metrics import Scorer, calculate_loss, calculate_score
 from autosklearn.util.logging_ import get_named_client_logger
 from autosklearn.util.parallel import preload_modules
+from autosklearn.util.disk import sizeof
 
 Y_ENSEMBLE = 0
 Y_VALID = 1
@@ -736,9 +737,8 @@ class EnsembleBuilder:
                 # To save memory, we just compute the loss.
                 self.run_info[y_ens_fn]["mtime_ens"] = os.path.getmtime(y_ens_fn)
                 self.run_info[y_ens_fn]["loaded"] = 2
-                self.run_info[y_ens_fn][
-                    "disc_space_cost_mb"
-                ] = self.get_disk_consumption(y_ens_fn)
+                mem_usage = round(sizeof(y_ens_fn, unit="MB"), 2)
+                self.run_info[y_ens_fn]["disc_space_cost_mb"] = mem_usage
 
                 n_read_files += 1
 
@@ -1270,7 +1270,6 @@ class EnsembleBuilder:
         sorted_keys: list
         """
         # Sort by loss - smaller is better!
-        print(self.run_info)
         sorted_keys = list(
             sorted(
                 [(k, v["ens_loss"], v["num_run"]) for k, v in self.run_info.items()],

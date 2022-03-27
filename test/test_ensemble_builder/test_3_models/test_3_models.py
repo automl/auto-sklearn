@@ -115,10 +115,10 @@ def test_nbest(
         (4, 2),
         (1, 1),
         # If Float, translate float to # models.
-        # below, mock of each file is 100 Mb and 4 files .model and .npy (test/val/pred)
-        # per run (except for run3, there they are 5). Now, it takes 500MB for run 3 and
-        # another 500 MB of slack because we keep as much space as the largest model
-        # available as slack
+        # We mock so sizeof will return 500MB, this means that 500MB is required per run
+        # and we also need the 500MB extra as slack room. This means we can't fit 2
+        # models in 1499MB but we can in 1500MB. We also don't include the dummy
+        # model which explains why even with 9999MB, we still only have 2
         (1499.0, 1),
         (1500.0, 2),
         (9999.0, 2),
@@ -156,10 +156,13 @@ def test_max_models_on_disc(
         max_models_on_disc=max_models_on_disc,
     )
 
-    with patch("os.path.getsize") as mock:
-        mock.return_value = 100 * 1024 * 1024
+    with patch("autosklearn.ensemble_building.builder.sizeof") as mock:
+        mock.return_value = 500
+
         ensbuilder.compute_loss_per_model()
         sel_keys = ensbuilder.get_n_best_preds()
+        assert mock.called
+        print(mock.call_args_list)
         assert len(sel_keys) == expected
 
 
