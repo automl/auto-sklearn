@@ -38,6 +38,26 @@ Y_TEST = 2
 MODEL_FN_RE = r"_([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*)\.npy"
 
 
+@dataclass
+class RunInfo:
+    """Dataclass for storing information about a run"""
+
+    seed: int
+    id: int
+    budget: float
+    loss: float = np.inf
+    mtime_ens: float = 0
+    mtime_test: float = 0
+    mtime_valid: float = 0
+    disk_cost: float | None = None
+    loaded: int = 0
+    # Lazy keys so far:
+    # 0 - not loaded
+    # 1 - loaded and in memory
+    # 2 - loaded but dropped again
+    # 3 - deleted from disk due to space constraints
+
+
 class EnsembleBuilder:
 
     model_fn_re = re.compile(MODEL_FN_RE)
