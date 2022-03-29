@@ -15,6 +15,7 @@ from autosklearn.ensemble_building.builder import (
     Y_TEST,
     Y_VALID,
     EnsembleBuilder,
+    Run,
 )
 from autosklearn.metrics import roc_auc
 
@@ -95,28 +96,31 @@ def test_max_models_on_disc_with_float_selects_expected_models(
     """
 
     # These are arranged so the last one is best, with the lose loss
-    run_info = [
-        {
-            "ens_loss": 10 * -n,
-            "num_run": n,
-            "loaded": 1,
-            "seed": DEFAULT_SEED,
-            "disc_space_cost_mb": mem_model,
-        }
+    runs = [
+        Run(
+            seed=DEFAULT_SEED,
+            num_run=n,
+            budget=0.0,
+            loss=10 * -n,
+            loaded=1,
+            mem_usage=mem_model,
+            ens_file=f"pred{n}",
+        )
         for n in range(1, n_models + 1)
     ]
 
     mem_largest = mem_model * mem_largest_mult
     if largest_is_best:
-        run_info[-1]["disc_space_cost_mb"] = mem_largest
+        runs[-1].mem_usage = mem_largest
     else:
-        run_info[0]["disc_space_cost_mb"] = mem_largest
+        runs[0].mem_usage = mem_largest
 
-    nbest = sorted(run_info, key=lambda item: item["ens_loss"])[:n_expected]
-    mem_for_nbest = sum(item["disc_space_cost_mb"] for item in nbest)
+    nbest = sorted(runs, key=lambda run: run.loss)[:n_expected]
+    mem_for_nbest = sum(run.mem_usage for run in nbest)
 
     slack = mem_largest  # Slack introduced is the size of the largest model
-    max_models_on_disc = float(mem_for_nbest + slack)
+    max_models_on_disc = float(mem_for_nbest + slack)  # type: ignore
+    print(max_models_on_disc)
 
     ensbuilder = EnsembleBuilder(
         backend=dummy_backend,
@@ -129,16 +133,7 @@ def test_max_models_on_disc_with_float_selects_expected_models(
     )
 
     # Enter the models, with each model being progressibly better
-    ensbuilder._run_info = {
-        f"pred{i}": v for i, v in enumerate(run_info, start=1)
-    }
-
-    # Make the last model twice as large
-    if largest_is_best:
-        ensbuilder.run_info[f"pred{n_models}"]["disc_space_cost_mb"] = mem_largest
-    else:
-        ensbuilder.run_info["pred1"]["disc_space_cost_mb"] = mem_largest
-
+    ensbuilder._runs = {f"pred{i}": run for i, run in enumerate(runs, start=1)}
     ensbuilder._run_predictions = {
         f"pred{n}": {Y_ENSEMBLE: np.array([1])} for n in range(1, n_models + 1)
     }
@@ -153,7 +148,8 @@ def test_max_models_on_disc_with_float_selects_expected_models(
 
 @parametrize("n_models", [50, 10, 2, 1])
 def test_max_models_on_disc_float_always_preserves_best_model(
-    n_models: int, dummy_backend: Backend
+    n_models: int,
+    dummy_backend: Backend,
 ) -> None:
     """
     Parameters
@@ -183,25 +179,27 @@ def test_max_models_on_disc_float_always_preserves_best_model(
         memory_limit=None,
     )
 
-    run_info = {
-        f"pred{n}": {
-            "ens_loss": 10 * -n,
-            "num_run": n + 1,
-            "loaded": 1,
-            "seed": DEFAULT_SEED,
-            "disc_space_cost_mb": 50 * n,
-        }
+    runs = [
+        Run(
+            seed=DEFAULT_SEED,
+            num_run=n + 1,
+            budget=0.0,
+            loss=10 * -n,
+            loaded=1,
+            mem_usage=50 * n,
+            ens_file=f"pred{n+1}",
+        )
         for n in range(n_models)
-    }
-    best_model = min(run_info, key=lambda m: run_info[m]["ens_loss"])
+    ]
+    best_model = min(runs, key=lambda run: run.loss)
 
-    ensbuilder._run_info = run_info
+    ensbuilder._runs = {run.ens_file: run for run in runs}
     ensbuilder._run_predictions = {
-        f"pred{n}": {Y_ENSEMBLE: np.array([1])} for n in range(n_models)
+        f"pred{n}": {Y_ENSEMBLE: np.array([1])} for n in range(1, n_models + 1)
     }
 
     sel_keys = ensbuilder.get_n_best_preds()
-    assert [best_model] == sel_keys
+    assert [best_model.ens_file] == sel_keys
 
 
 @parametrize(
@@ -209,7 +207,9 @@ def test_max_models_on_disc_float_always_preserves_best_model(
     ((0.0, 4), (0.1, 4), (0.3, 3), (0.5, 2), (0.6, 2), (0.8, 1), (1.0, 1)),
 )
 def test_performance_range_threshold(
-    performance_range_threshold: float, expected_selected: int, dummy_backend: Backend
+    performance_range_threshold: float,
+    expected_selected: int,
+    dummy_backend: Backend,
 ) -> None:
     """
     Parameters
@@ -238,16 +238,17 @@ def test_performance_range_threshold(
         seed=DEFAULT_SEED,
         performance_range_threshold=performance_range_threshold,
     )
-    ensbuilder._run_info = {
-        "A": {"ens_loss": -1, "num_run": 1, "loaded": -1, "seed": DEFAULT_SEED},
-        "B": {"ens_loss": -2, "num_run": 2, "loaded": -1, "seed": DEFAULT_SEED},
-        "C": {"ens_loss": -3, "num_run": 3, "loaded": -1, "seed": DEFAULT_SEED},
-        "D": {"ens_loss": -4, "num_run": 4, "loaded": -1, "seed": DEFAULT_SEED},
-        "E": {"ens_loss": -5, "num_run": 5, "loaded": -1, "seed": DEFAULT_SEED},
+
+    ensbuilder._runs = {
+        "A": Run(seed=DEFAULT_SEED, num_run=1, loss=-1, loaded=-1, ens_file=""),
+        "B": Run(seed=DEFAULT_SEED, num_run=2, loss=-2, loaded=-1, ens_file=""),
+        "C": Run(seed=DEFAULT_SEED, num_run=3, loss=-3, loaded=-1, ens_file=""),
+        "D": Run(seed=DEFAULT_SEED, num_run=4, loss=-4, loaded=-1, ens_file=""),
+        "E": Run(seed=DEFAULT_SEED, num_run=5, loss=-5, loaded=-1, ens_file=""),
     }
     ensbuilder._run_predictions = {
         name: {preds_key: np.array([1]) for preds_key in (Y_ENSEMBLE, Y_VALID, Y_TEST)}
-        for name in ensbuilder._run_info
+        for name in ensbuilder._runs
     }
 
     sel_keys = ensbuilder.get_n_best_preds()
@@ -301,16 +302,16 @@ def test_performance_range_threshold_with_ensemble_nbest(
         performance_range_threshold=performance_range_threshold,
         max_models_on_disc=None,
     )
-    ensbuilder._run_info = {
-        "A": {"ens_loss": -1, "num_run": 1, "loaded": -1, "seed": DEFAULT_SEED},
-        "B": {"ens_loss": -2, "num_run": 2, "loaded": -1, "seed": DEFAULT_SEED},
-        "C": {"ens_loss": -3, "num_run": 3, "loaded": -1, "seed": DEFAULT_SEED},
-        "D": {"ens_loss": -4, "num_run": 4, "loaded": -1, "seed": DEFAULT_SEED},
-        "E": {"ens_loss": -5, "num_run": 5, "loaded": -1, "seed": DEFAULT_SEED},
+    ensbuilder._runs = {
+        "A": Run(seed=DEFAULT_SEED, num_run=1, loss=-1, loaded=-1, ens_file=""),
+        "B": Run(seed=DEFAULT_SEED, num_run=2, loss=-2, loaded=-1, ens_file=""),
+        "C": Run(seed=DEFAULT_SEED, num_run=3, loss=-3, loaded=-1, ens_file=""),
+        "D": Run(seed=DEFAULT_SEED, num_run=4, loss=-4, loaded=-1, ens_file=""),
+        "E": Run(seed=DEFAULT_SEED, num_run=5, loss=-5, loaded=-1, ens_file=""),
     }
     ensbuilder._run_predictions = {
         name: {pred_name: np.array([1]) for pred_name in (Y_ENSEMBLE, Y_VALID, Y_TEST)}
-        for name in ensbuilder._run_info
+        for name in ensbuilder._runs
     }
     sel_keys = ensbuilder.get_n_best_preds()
 

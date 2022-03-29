@@ -32,16 +32,16 @@ def test_read(ensemble_backend: Backend) -> None:
     assert success, f"run_predictions = {str(ensbuilder.run_predictions)}"
 
     assert len(ensbuilder.run_predictions) == 3, ensbuilder.run_predictions.keys()
-    assert len(ensbuilder.run_info) == 3, ensbuilder.run_info.keys()
+    assert len(ensbuilder.runs) == 3, ensbuilder.runs
 
     runsdir = Path(ensemble_backend.get_runs_directory())
     preds_1 = runsdir / "0_1_0.0" / "predictions_ensemble_0_1_0.0.npy"
     preds_2 = runsdir / "0_2_0.0" / "predictions_ensemble_0_2_0.0.npy"
     preds_3 = runsdir / "0_3_100.0" / "predictions_ensemble_0_3_100.0.npy"
 
-    assert ensbuilder.run_info[str(preds_1)]["ens_loss"] == 0.5
-    assert ensbuilder.run_info[str(preds_2)]["ens_loss"] == 0.0
-    assert ensbuilder.run_info[str(preds_3)]["ens_loss"] == 0.0
+    assert ensbuilder.runs[str(preds_1)].loss == 0.5
+    assert ensbuilder.runs[str(preds_2)].loss == 0.0
+    assert ensbuilder.runs[str(preds_3)].loss == 0.0
 
 
 @parametrize(
@@ -184,7 +184,7 @@ def test_fall_back_nbest(ensemble_backend: Backend) -> None:
             ensemble_backend.temporary_directory,
             f".auto-sklearn/runs/{model}/predictions_ensemble_{model}.npy",
         )
-        ensbuilder.run_info[filename]["ens_loss"] = -1
+        ensbuilder.runs[filename].loss = -1
 
     sel_keys = ensbuilder.get_n_best_preds()
 
@@ -330,7 +330,7 @@ def test_main(ensemble_backend: Backend) -> None:
 
     Expects
     -------
-    * There should be "run_predictions" and "run_info" saved to file
+    * There should be "run_predictions" and "runs" saved to file
     * There should be 3 model reads
     * There should be a hash for the preds read in
     * The true targets should have been read in
@@ -358,7 +358,7 @@ def test_main(ensemble_backend: Backend) -> None:
     internals_dir = Path(ensemble_backend.internals_directory)
 
     assert ensbuilder.run_predictions_path.exists(), list(internals_dir.iterdir())
-    assert ensbuilder.run_info_path.exists(), list(internals_dir.iterdir())
+    assert ensbuilder.runs_path.exists(), list(internals_dir.iterdir())
 
     # There should be three preds read
     assert len(ensbuilder.run_predictions) == 3
@@ -457,7 +457,7 @@ def test_limit(
         for i, exp_state in enumerate(intermediate_states, start=1):
             ensbuilder.run(time_left=1000, iteration=0, pynisher_context="fork")
 
-            assert ensbuilder.run_info_path.exists()
+            assert ensbuilder.runs_path.exists()
             assert not ensbuilder.run_predictions_path.exists()
 
             assert mock_logger.warning.call_count == i  # type: ignore
@@ -469,7 +469,7 @@ def test_limit(
         # change it's internal state
         ensbuilder.run(time_left=1000, iteration=0, pynisher_context="fork")
 
-        assert ensbuilder.run_info_path.exists()
+        assert ensbuilder.runs_path.exists()
         assert not ensbuilder.run_predictions_path.exists()
 
         assert (ensbuilder.ensemble_nbest, ensbuilder.read_at_most) == final_state
