@@ -39,7 +39,7 @@ MODEL_FN_RE = r"_([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*)\.npy"
 
 
 @dataclass
-class RunInfo:
+class Run:
     """Dataclass for storing information about a run"""
 
     seed: int
