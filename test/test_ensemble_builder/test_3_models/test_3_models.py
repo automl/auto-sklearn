@@ -28,8 +28,10 @@ def test_read(ensemble_backend: Backend) -> None:
         seed=DEFAULT_SEED,  # important to find the test files
     )
 
-    success = ensbuilder.compute_loss_per_model()
-    assert success, f"run_predictions = {str(ensbuilder.run_predictions)}"
+    targets = ensbuilder.y_ensemble
+    assert targets is not None
+
+    ensbuilder.compute_loss_per_model(targets)
 
     assert len(ensbuilder.run_predictions) == 3, ensbuilder.run_predictions.keys()
     assert len(ensbuilder.runs) == 3, ensbuilder.runs
@@ -94,7 +96,10 @@ def test_nbest(
         max_models_on_disc=max_models_on_disc,
     )
 
-    ensbuilder.compute_loss_per_model()
+    targets = ensbuilder.y_ensemble
+    assert targets is not None
+
+    ensbuilder.compute_loss_per_model(targets)
     sel_keys = ensbuilder.get_n_best_preds()
 
     assert len(sel_keys) == expected
@@ -159,7 +164,11 @@ def test_max_models_on_disc(
     with patch("autosklearn.ensemble_building.builder.sizeof") as mock:
         mock.return_value = 500
 
-        ensbuilder.compute_loss_per_model()
+        targets = ensbuilder.y_ensemble
+        assert targets is not None
+
+        ensbuilder.compute_loss_per_model(targets)
+
         sel_keys = ensbuilder.get_n_best_preds()
         assert mock.called
         print(mock.call_args_list)
@@ -177,7 +186,10 @@ def test_fall_back_nbest(ensemble_backend: Backend) -> None:
         ensemble_nbest=1,
     )
 
-    ensbuilder.compute_loss_per_model()
+    targets = ensbuilder.y_ensemble
+    assert targets is not None
+
+    ensbuilder.compute_loss_per_model(targets)
 
     for model in ["0_1_0.0", "0_2_0.0", "0_3_100.0"]:
         filename = os.path.join(
@@ -227,7 +239,10 @@ def test_get_valid_test_preds(ensemble_backend: Backend) -> None:
         for model in ["0_1_0.0", "0_2_0.0", "0_3_100.0"]
     ]
 
-    ensbuilder.compute_loss_per_model()
+    targets = ensbuilder.y_ensemble
+    assert targets is not None
+
+    ensbuilder.compute_loss_per_model(targets)
 
     sel_keys = ensbuilder.get_n_best_preds()
     assert len(sel_keys) == 1
@@ -275,7 +290,10 @@ def test_ensemble_builder_predictions(ensemble_backend: Backend) -> None:
         ensemble_nbest=2,
     )
 
-    ensbuilder.compute_loss_per_model()
+    targets = ensbuilder.y_ensemble
+    assert targets is not None
+
+    ensbuilder.compute_loss_per_model(targets)
 
     d2 = os.path.join(
         ensemble_backend.temporary_directory,
@@ -286,6 +304,8 @@ def test_ensemble_builder_predictions(ensemble_backend: Backend) -> None:
     assert len(sel_keys) > 0
 
     ensemble = ensbuilder.fit_ensemble(selected_keys=sel_keys)
+
+    assert ensemble is not None
     print(ensemble, sel_keys)
 
     n_sel_valid, n_sel_test = ensbuilder.get_valid_test_preds(selected_keys=sel_keys)
@@ -311,6 +331,8 @@ def test_ensemble_builder_predictions(ensemble_backend: Backend) -> None:
 
     # predictions for valid and test are the same
     # --> should results in the same predictions
+    assert y_valid is not None
+    assert y_test is not None
     np.testing.assert_array_almost_equal(y_valid, y_test)
 
     # since d2 provides perfect predictions
@@ -363,7 +385,7 @@ def test_main(ensemble_backend: Backend) -> None:
     # There should be three preds read
     assert len(ensbuilder.run_predictions) == 3
     assert ensbuilder.last_hash is not None
-    assert ensbuilder.y_true_ensemble is not None
+    assert ensbuilder.y_ensemble is not None
 
     # We expect as many iterations as the iters param
     assert len(run_history) == iters

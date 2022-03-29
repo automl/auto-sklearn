@@ -174,6 +174,15 @@ class EnsembleBuilder:
         if max_models_on_disc is not None and max_models_on_disc < 0:
             raise ValueError("max_models_on_disc must be positive or None")
 
+        # Setup the logger
+        self.logger = get_named_client_logger(name="EnsembleBuilder", port=logger_port)
+        self.logger_port = logger_port
+
+        # Log the behaviour
+        if ensemble_nbest == 1:
+            t = type(ensemble_nbest)
+            self.logger.debug(f"Using behaviour when {t} for {ensemble_nbest}:{t}")
+
         self.seed = seed
         self.metric = metric
         self.backend = backend
@@ -194,36 +203,23 @@ class EnsembleBuilder:
         # The starting time of the procedure
         self.start_time = 0
 
-        # The cached values of the true targets for the ensemble
-        self.y_true_ensemble: int | None = None
-
         # Track the ensemble performance
         self.ensemble_history = []
-
-        # Setup the logger
-        self.logger = get_named_client_logger(name="EnsembleBuilder", port=logger_port)
-        self.logger_port = logger_port
 
         # Keep running knowledge of its validation performance
         self.validation_performance_ = np.inf
 
         # Data we may need
         datamanager = self.backend.load_datamanager()
-        self.y_valid = datamanager.data.get("Y_valid")
-        self.y_test = datamanager.data.get("Y_test")
+        self.y_valid: np.ndarray | None = datamanager.data.get("Y_valid", None)
+        self.y_test: np.ndarray | None = datamanager.data.get("Y_test", None)
+        self._y_ensemble: np.ndarray | None = None
 
-        # Log the behaviour
-        if ensemble_nbest == 1:
-            t = type(ensemble_nbest)
-            self.logger.debug(f"Using behaviour when {t} for {ensemble_nbest}:{t}")
-
-        # The cached set of run_predictions which could come from previous instances
+        # Cached items, loaded by properties
+        # Check the corresponing properties for descriptions
+        self._run_prediction_paths: list[str] | None = None
         self._run_predictions: dict[str, dict[int, np.ndarray]] | None = None
-
-        # Hash of the last ensemble training data to identify it
         self._last_hash: str | None = None
-
-        # The cached info of runs which could come from previous instances
         self._runs: dict[str, Run] | None = None
 
     @property
@@ -283,6 +279,49 @@ class EnsembleBuilder:
                     self._runs = pickle.load(memory)
 
         return self._runs
+
+    @property
+    def run_ensemble_prediction_paths(self) -> list[str]:
+        """Get the all available predictions paths that the ensemble builder can use
+
+        Returns
+        -------
+        list[str]
+            The list of paths
+        """
+        if self._run_prediction_paths is None:
+            pred_path = os.path.join(
+                glob.escape(self.backend.get_runs_directory()),
+                "%d_*_*" % self.seed,
+                "predictions_ensemble_%s_*_*.npy*" % self.seed,
+            )
+            y_ens_files = glob.glob(pred_path)
+            y_ens_files = [
+                y_ens_file
+                for y_ens_file in y_ens_files
+                if y_ens_file.endswith(".npy") or y_ens_file.endswith(".npy.gz")
+            ]
+            self._run_prediction_paths = y_ens_files
+
+        return self._run_prediction_paths
+
+    @property
+    def y_ensemble(self) -> np.ndarray | None:
+        """The ensemble targets used for training the ensemble
+
+        It will attempt to load and cache them in memory but
+        return None if it can't.
+
+        Returns
+        -------
+        np.ndarray | None
+            The ensemble targets, if they can be loaded
+        """
+        if self._y_ensemble is None:
+            if os.path.exists(self.backend._get_targets_ensemble_filename()):
+                self._y_ensemble = self.backend.load_targets_ensemble()
+
+        return self._y_ensemble
 
     def run(
         self,
@@ -460,8 +499,14 @@ class EnsembleBuilder:
             time_left - used_time,
         )
 
-        # populates self.run_predictions and self.runs
-        if not self.compute_loss_per_model():
+        # No predictions found, exit early
+        if len(self.run_ensemble_prediction_paths) == 0:
+            self.logger.debug("Found no predictions on ensemble data set")
+            return self.ensemble_history, self.ensemble_nbest, None, None, None
+
+        # Can't load data, exit early
+        if not os.path.exists(self.backend._get_targets_ensemble_filename()):
+            self.logger.debug(f"No targets for ensemble: {traceback.format_exc()}")
             if return_predictions:
                 return (
                     self.ensemble_history,
@@ -472,6 +517,8 @@ class EnsembleBuilder:
                 )
             else:
                 return self.ensemble_history, self.ensemble_nbest, None, None, None
+
+        self.compute_loss_per_model(targets=self.y_ensemble)
 
         # Only the models with the n_best predictions are candidates
         # to be in the ensemble
@@ -603,55 +650,29 @@ class EnsembleBuilder:
         else:
             return self.ensemble_history, self.ensemble_nbest, None, None, None
 
-    def compute_loss_per_model(self) -> bool:
+    def compute_loss_per_model(
+        self,
+        targets: np.ndarray,
+    ) -> None:
         """Compute the loss of the predictions on ensemble building data set;
         populates self.run_predictions and self.runs
 
         Side-effects
         ------------
         * Populates
-            - `self.y_ens_files` all the ensemble predictions it could find for runs
             - `self.runs` with the new losses it calculated
 
-        Returns
-        -------
-        bool
-            Whether it successfully computed losses
+        Parameters
+        ----------
+        targets: np.ndarray
+            The targets for which to calculate the losses on.
+            Typically the ensemble_targts.
         """
         self.logger.debug("Read ensemble data set predictions")
 
-        if self.y_true_ensemble is None:
-            try:
-                self.y_true_ensemble = self.backend.load_targets_ensemble()
-            except FileNotFoundError:
-                self.logger.debug(
-                    "Could not find true targets on ensemble data set: %s",
-                    traceback.format_exc(),
-                )
-                return False
-
-        pred_path = os.path.join(
-            glob.escape(self.backend.get_runs_directory()),
-            "%d_*_*" % self.seed,
-            "predictions_ensemble_%s_*_*.npy*" % self.seed,
-        )
-        y_ens_files = glob.glob(pred_path)
-        y_ens_files = [
-            y_ens_file
-            for y_ens_file in y_ens_files
-            if y_ens_file.endswith(".npy") or y_ens_file.endswith(".npy.gz")
-        ]
-        self.y_ens_files = y_ens_files
-        # no validation predictions so far -- no files
-        if len(self.y_ens_files) == 0:
-            self.logger.debug(
-                "Found no prediction files on ensemble data set:" " %s" % pred_path
-            )
-            return False
-
         # First sort files chronologically
         to_read = []
-        for y_ens_fn in self.y_ens_files:
+        for y_ens_fn in self.run_ensemble_prediction_paths:
             match = self.model_fn_re.search(y_ens_fn)
             _seed = int(match.group(1))
             _num_run = int(match.group(2))
@@ -702,7 +723,7 @@ class EnsembleBuilder:
             try:
                 y_ensemble = self._predictions_from(y_ens_fn)
                 loss = calculate_loss(
-                    solution=self.y_true_ensemble,
+                    solution=targets,
                     prediction=y_ensemble,
                     task_type=self.task_type,
                     metric=self.metric,
@@ -735,7 +756,6 @@ class EnsembleBuilder:
             f"Done reading {n_read_files} new prediction files."
             f"Loaded {n_files_read} predictions in total."
         )
-        return True
 
     def get_n_best_preds(self) -> list[str]:
         """Get best n predictions according to the loss on the "ensemble set"
@@ -1043,7 +1063,9 @@ class EnsembleBuilder:
             self.logger.debug(f"Fitting ensemble on {len(predictions_train)} models")
 
             start_time = time.time()
-            ensemble.fit(predictions_train, self.y_true_ensemble, include_num_runs)
+
+            # TODO y_ensemble can be None here
+            ensemble.fit(predictions_train, self.y_ensemble, include_num_runs)
 
             duration = time.time() - start_time
 
@@ -1160,10 +1182,11 @@ class EnsembleBuilder:
                     ((1 - test_pred).reshape((1, -1)), test_pred.reshape((1, -1)))
                 ).transpose()
 
+        # TODO y_ensemble can be None here
         performance_stamp = {
             "Timestamp": pd.Timestamp.now(),
             "ensemble_optimization_score": calculate_score(
-                solution=self.y_true_ensemble,
+                solution=self.y_ensemble,
                 prediction=train_pred,
                 task_type=self.task_type,
                 metric=self.metric,
@@ -1199,9 +1222,14 @@ class EnsembleBuilder:
         defines the upper limit on how many models to keep.
         Any additional model with a worst loss than the top
         self.max_models_on_disc is deleted.
+
+        Parameters
+        ----------
+        selected_keys: list[str]
+            TODO
         """
         # Loop through the files currently in the directory
-        for pred_path in self.y_ens_files:
+        for pred_path in self.run_ensemble_prediction_paths:
 
             # Do not delete candidates
             if pred_path in selected_keys:
