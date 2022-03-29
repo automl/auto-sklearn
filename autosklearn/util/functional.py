@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Optional, TypeVar, Iterable
+from typing import Iterable, Optional, TypeVar
 
 from functools import reduce
+
 import numpy as np
 
 T = TypeVar("T")
