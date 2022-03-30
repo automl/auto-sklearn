@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Tuple
+from typing import Any
 
 import glob
 import logging.handlers
@@ -331,7 +331,7 @@ class EnsembleBuilder:
         end_at: float | None = None,
         time_buffer: int = 5,
         return_predictions: bool = False,
-    ) -> Tuple[
+    ) -> tuple[
         list[dict[str, Any]],
         int,
         np.ndarray | None,
@@ -457,7 +457,7 @@ class EnsembleBuilder:
         time_left: float,
         iteration: int,
         return_predictions: bool = False,
-    ) -> Tuple[
+    ) -> tuple[
         list[dict[str, Any]],
         int,
         np.ndarray | None,
@@ -952,7 +952,7 @@ class EnsembleBuilder:
     def get_valid_test_preds(
         self,
         selected_keys: list[str],
-    ) -> Tuple[list[str], list[str]]:
+    ) -> tuple[list[str], list[str]]:
         """Get valid and test predictions from disc and store in self.run_predictions
 
         Parameters
