@@ -326,7 +326,7 @@ class EnsembleBuilder:
     def run(
         self,
         iteration: int,
-        pynisher_context: str,
+        pynisher_context: str | None = None,
         time_left: float | None = None,
         end_at: float | None = None,
         time_buffer: int = 5,
@@ -345,8 +345,9 @@ class EnsembleBuilder:
         iteration : int
             What iteration to associate with this run
 
-        pynisher_context : str
-            The pynisher context to run in
+        pynisher_context : str | None = None
+            The pynisher context to run in. If None, defaults to
+            multiprocessing.get_context(None)
 
         time_left : float | None = None
             How much time should be left for this run. Either this or `end_at` must
@@ -394,6 +395,7 @@ class EnsembleBuilder:
             wall_time_in_s = int(time_left - time_buffer)
             if wall_time_in_s < 1:
                 break
+
             context = multiprocessing.get_context(pynisher_context)
             preload_modules(context)
 
