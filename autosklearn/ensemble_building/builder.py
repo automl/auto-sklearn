@@ -38,6 +38,9 @@ Y_VALID = 1
 Y_TEST = 2
 
 
+RunID = tuple[int, int, float]
+
+
 @dataclass
 class Run:
     """Dataclass for storing information about a run"""
@@ -50,9 +53,7 @@ class Run:
     loss: float = np.inf
     _mem_usage: int | None = None
     # The recorded time of ensemble/test/valid predictions modified
-    recorded_mtime_ensemble: float = 0
-    recorded_mtime_test: float = 0
-    recorded_mtime_valid: float = 0
+    recorded_mtimes: dict[str, float] = 0
     # Lazy keys so far:
     # 0 - not loaded
     # 1 - loaded and in memory
@@ -62,8 +63,11 @@ class Run:
 
     @property
     def mem_usage(self) -> float:
+        """The memory usage of this run based on it's directory"""
         if self._mem_usage is None:
             self._mem_usage = round(sizeof(self.dir, unit="MB"), 2)
+
+        return self._mem_usage
 
     def is_dummy(self) -> bool:
         """Whether this run is a dummy run or not"""
@@ -71,20 +75,16 @@ class Run:
 
     def was_modified(self, kind: Literal["ensemble", "valid", "test"]) -> bool:
         """Query for when the ens file was last modified"""
-        # I didn't like the idea of putting this into a dict, feel free to change
-        if kind == "ensemble":
-            mtime = self.recorded_mtime_ensemble
-        elif kind == "valid":
-            mtime = self.recorded_mtime_valid
-        elif kind == "test":
-            mtime == self.recorded_mtime_test
-        else:
-            raise NotImplementedError()
+        if self.recorded_mtimes is None:
+            raise RuntimeError("No times were recorded, use `record_modified_times`")
 
-        if mtime == 0:
+        if kind not in self.recorded_mtimes:
             raise ValueError(f"Run has no recorded time for {kind}: {self}")
 
-        return self.pred_path(kind).stat().st_mtime == mtime
+        recorded = self.recorded_mtimes[kind]
+        last = self.pred_path(kind).stat().st_mtime
+
+        return recorded == last
 
     def pred_path(self, kind: Literal["ensemble", "valid", "test"]) -> Path:
         """Get the path to certain predictions"""
@@ -92,15 +92,14 @@ class Run:
         return self.dir / fname
 
     def record_modified_times(self) -> None:
-        self.recorded_mtime_ensemble = self.pred_path("ensemble").stat().st_mtime
-        self.recorded_mtime_valid = self.pred_path("valid").stat().st_mtime
-        self.recorded_mtime_test = self.pred_path("test").stat().st_mtime
-
-
-        return self._mem_usage
+        """Records the last time each prediction file type was modified, if it exists"""
+        for kind in ["ensemble", "valid", "test"]:
+            path = self.pred_path(kind)
+            if path.exists():
+                self.recorded_mtimes[kind] = path.stat().st_mtime()
 
     @property
-    def id(self) -> tuple[int, int, float]:
+    def id(self) -> RunID:
         """Get the three components of it's id"""
         return self.seed, self.num_run, self.budget
 
@@ -121,7 +120,7 @@ class Run:
         Run
             The run object generated from the directory
         """
-        name = path.name
+        name = dir.name
         seed, num_run, budget = name.split('_')
         return Run(seed=seed, num_run=num_run, budget=budget, dir=dir)
 
@@ -323,28 +322,20 @@ class EnsembleBuilder:
             self._runs = {}
 
             # First read in all the runs on disk
-            rundir = Path(self.backend.get_runs_directory())
-            runs_dirs = list(rundir.iterdir())
-            pred_path = os.path.join(
-                glob.escape(self.backend.get_runs_directory()),
-                "%d_*_*" % self.seed,
-                "predictions_ensemble_%s_*_*.npy*" % self.seed,
-            )
-            y_ens_files = glob.glob(pred_path)
-            y_ens_files = [
-                y_ens_file
-                for y_ens_file in y_ens_files
-                if y_ens_file.endswith(".npy") or y_ens_file.endswith(".npy.gz")
-            ]
-            self._run_prediction_paths = y_ens_files
+            runs_dir = Path(self.backend.get_runs_directory())
+            all_runs = [Run.from_dir(dir) for dir in runs_dir.iterdir()]
 
-        return self._run_prediction_paths
-
-
-            # Next, get the info about runs from last read
+            # Next, get the info about runs from last read, if any
+            loaded_runs: dict[str, Run] = {}
             if self.runs_path.exists():
                 with self.runs_path.open("rb") as memory:
-                    previous_info = pickle.load(memory)
+                    loaded_runs = pickle.load(memory)
+
+            # Update 
+            for run in all_runs:
+                if run.id not in loaded_runs:
+                    pass
+
 
         return self._runs
 
