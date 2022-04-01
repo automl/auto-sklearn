@@ -560,13 +560,6 @@ class EnsembleBuilder:
             else:
                 return self.ensemble_history, self.ensemble_nbest, None, None, None
 
-        # If valid/test predictions loaded, then reduce candidate models to this set
-        # If any of n_sel_* is not empty and overlaps with candidate_models,
-        # then ensure candidate_models AND n_sel_test are sorted the same
-        candidates_set = set(candidate_models)
-        valid_set = set(n_sel_valid)
-        test_set = set(n_sel_test)
-
         intersect = intersection(candidates_set, valid_set, test_set)
         if len(intersect) > 0:
             candidate_models = sorted(list(intersect))
@@ -577,7 +570,7 @@ class EnsembleBuilder:
             candidate_models = sorted(list(candidates_set & valid_set))
             n_sel_valid = candidate_models
 
-        elif len(candidates_set & n_sel_test) > 0:
+        elif len(candidates_set & test_set) > 0:
             candidate_models = sorted(list(candidates_set & test_set))
             n_sel_test = candidate_models
 
