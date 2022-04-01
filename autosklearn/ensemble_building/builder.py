@@ -19,6 +19,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pynisher
+from typing_extensions import Literal
 
 from autosklearn.automl_common.common.ensemble_building.abstract_ensemble import (  # noqa: E501
     AbstractEnsemble,
@@ -36,8 +37,6 @@ Y_ENSEMBLE = 0
 Y_VALID = 1
 Y_TEST = 2
 
-MODEL_FN_RE = r"_([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*)\.npy"
-
 
 @dataclass
 class Run:
@@ -46,26 +45,53 @@ class Run:
     seed: int
     num_run: int
     ens_file: str
+    dir: Path
     budget: float = 0.0
     loss: float = np.inf
-    mtime_ens: float = 0
-    mtime_test: float = 0
-    mtime_valid: float = 0
-    mem_usage: int | None = None
-    loaded: int = 0
+    _mem_usage: int | None = None
+    # The recorded time of ensemble/test/valid predictions modified
+    recorded_mtime_ensemble: float = 0
+    recorded_mtime_test: float = 0
+    recorded_mtime_valid: float = 0
     # Lazy keys so far:
     # 0 - not loaded
     # 1 - loaded and in memory
     # 2 - loaded but dropped again
     # 3 - deleted from disk due to space constraints
+    loaded: int = 0
 
     def is_dummy(self) -> bool:
         """Whether this run is a dummy run or not"""
         return self.num_run == 1
 
-    def last_modified(self) -> float:
+    def was_modified(self, kind: Literal["ensemble", "valid", "test"]) -> bool:
         """Query for when the ens file was last modified"""
-        return self.ens_file.stat().st_mtime
+        # I didn't like the idea of putting this into a dict, feel free to change
+        if kind == "ensemble":
+            mtime = self.recorded_mtime_ensemble
+        elif kind == "valid":
+            mtime = self.recorded_mtime_valid
+        elif kind == "test":
+            mtime == self.recorded_mtime_test
+        else:
+            raise NotImplementedError()
+
+        if mtime == 0:
+            raise ValueError(f"Run has no recorded time for {kind}: {self}")
+
+        return self.pred_path(kind).stat().st_mtime == mtime
+
+    def pred_path(self, kind: Literal["ensemble", "valid", "test"]) -> Path:
+        """Get the path to certain predictions"""
+        fname = f"predictions_{kind}_{self.seed}_{self.num_run}_{self.budget}.npy"
+        return self.dir / fname
+
+    @property
+    def mem_usage(self) -> float:
+        if self._mem_usage is None:
+            self._mem_usage = round(sizeof(self.dir, unit="MB"), 2)
+
+        return self._mem_usage
 
     @property
     def id(self) -> tuple[int, int, float]:
@@ -75,10 +101,26 @@ class Run:
     def __str__(self) -> str:
         return f"{self.seed}_{self.num_run}_{self.budget}"
 
+    @staticmethod
+    def from_dir(dir: Path) -> Run:
+        """Creates a Run from a path point to the directory of a run
+
+        Parameters
+        ----------
+        dir: Path
+            Expects something like /path/to/{seed}_{numrun}_budget
+
+        Returns
+        -------
+        Run
+            The run object generated from the directory
+        """
+        name = path.name
+        seed, num_run, budget = name.split('_')
+        return Run(seed=seed, num_run=num_run, budget=budget, dir=dir)
+
 
 class EnsembleBuilder:
-
-    model_fn_re = re.compile(MODEL_FN_RE)
 
     def __init__(
         self,
@@ -274,22 +316,9 @@ class EnsembleBuilder:
         if self._runs is None:
             self._runs = {}
 
-            if self.runs_path.exists():
-                with self.runs_path.open("rb") as memory:
-                    self._runs = pickle.load(memory)
-
-        return self._runs
-
-    @property
-    def run_ensemble_prediction_paths(self) -> list[str]:
-        """Get the all available predictions paths that the ensemble builder can use
-
-        Returns
-        -------
-        list[str]
-            The list of paths
-        """
-        if self._run_prediction_paths is None:
+            # First read in all the runs on disk
+            rundir = Path(self.backend.get_runs_directory())
+            runs_dirs = list(rundir.iterdir())
             pred_path = os.path.join(
                 glob.escape(self.backend.get_runs_directory()),
                 "%d_*_*" % self.seed,
@@ -304,6 +333,14 @@ class EnsembleBuilder:
             self._run_prediction_paths = y_ens_files
 
         return self._run_prediction_paths
+
+
+            # Next, get the info about runs from last read
+            if self.runs_path.exists():
+                with self.runs_path.open("rb") as memory:
+                    previous_info = pickle.load(memory)
+
+        return self._runs
 
     @property
     def y_ensemble(self) -> np.ndarray | None:
@@ -495,11 +532,8 @@ class EnsembleBuilder:
         train_pred, valid_pred, test_pred = None, None, None
 
         used_time = time.time() - self.start_time
-        self.logger.debug(
-            "Starting iteration %d, time left: %f",
-            iteration,
-            time_left - used_time,
-        )
+        left_for_iter = time_left - used_time
+        self.logger.debug(f"Starting iteration {iteration}, time left: {left_for_iter}")
 
         # No predictions found, exit early
         if len(self.run_ensemble_prediction_paths) == 0:
@@ -509,16 +543,7 @@ class EnsembleBuilder:
         # Can't load data, exit early
         if not os.path.exists(self.backend._get_targets_ensemble_filename()):
             self.logger.debug(f"No targets for ensemble: {traceback.format_exc()}")
-            if return_predictions:
-                return (
-                    self.ensemble_history,
-                    self.ensemble_nbest,
-                    train_pred,
-                    valid_pred,
-                    test_pred,
-                )
-            else:
-                return self.ensemble_history, self.ensemble_nbest, None, None, None
+            return self.ensemble_history, self.ensemble_nbest, None, None, None
 
         self.compute_loss_per_model(targets=self.y_ensemble)
 
@@ -645,10 +670,7 @@ class EnsembleBuilder:
         else:
             return self.ensemble_history, self.ensemble_nbest, None, None, None
 
-    def compute_loss_per_model(
-        self,
-        targets: np.ndarray,
-    ) -> None:
+    def compute_loss_per_model(self, targets: np.ndarray) -> None:
         """Compute the loss of the predictions on ensemble building data set;
         populates self.run_predictions and self.runs
 
@@ -667,44 +689,44 @@ class EnsembleBuilder:
 
         # First sort files chronologically
         to_read = []
-        for y_ens_fn in self.run_ensemble_prediction_paths:
-            match = self.model_fn_re.search(y_ens_fn)
+        for pred_path in self.run_ensemble_prediction_paths:
+            match = self.model_fn_re.search(pred_path)
             _seed = int(match.group(1))
             _num_run = int(match.group(2))
             _budget = float(match.group(3))
-            mtime = os.path.getmtime(y_ens_fn)
+            mtime = os.path.getmtime(pred_path)
 
-            to_read.append([y_ens_fn, match, _seed, _num_run, _budget, mtime])
+            to_read.append([pred_path, match, _seed, _num_run, _budget, mtime])
 
         n_read_files = 0
         # Now read file wrt to num_run
-        for y_ens_fn, match, _seed, _num_run, _budget, mtime in sorted(
+        for pred_path, match, _seed, _num_run, _budget, mtime in sorted(
             to_read, key=lambda x: x[5]
         ):
 
             # Break out if we've read more files than we should
-            if self.read_at_most and n_read_files >= self.read_at_most:
+            if self.read_at_most is not None and n_read_files >= self.read_at_most:
                 break
 
-            if not y_ens_fn.endswith(".npy"):
-                self.logger.warning(f"Error loading file (not .npy): {y_ens_fn}")
+            if not pred_path.endswith(".npy"):
+                self.logger.warning(f"Error loading file (not .npy): {pred_path}")
                 continue
 
             # Get the run, creating one if it doesn't exist
-            if y_ens_fn not in self.runs:
+            if pred_path not in self.runs:
                 run = Run(
                     seed=_seed,
                     num_run=_num_run,
                     budget=_budget,
-                    ens_file=y_ens_fn,
+                    ens_file=pred_path,
                 )
-                self.runs[y_ens_fn] = run
+                self.runs[pred_path] = run
             else:
-                run = self.runs[y_ens_fn]
+                run = self.runs[pred_path]
 
             # Put an entry in for the predictions if it doesn't exist
-            if y_ens_fn not in self.run_predictions:
-                self.run_predictions[y_ens_fn] = {
+            if pred_path not in self.run_predictions:
+                self.run_predictions[pred_path] = {
                     Y_ENSEMBLE: None,
                     Y_VALID: None,
                     Y_TEST: None,
@@ -716,7 +738,7 @@ class EnsembleBuilder:
 
             # actually read the predictions and compute their respective loss
             try:
-                y_ensemble = self._predictions_from(y_ens_fn)
+                y_ensemble = self._predictions_from(pred_path)
                 loss = calculate_loss(
                     solution=targets,
                     prediction=y_ensemble,
@@ -727,8 +749,8 @@ class EnsembleBuilder:
 
                 if np.isfinite(run.loss):
                     self.logger.debug(
-                        f"Changing ensemble loss for file {y_ens_fn} from {run.loss} to"
-                        f"{loss} because file modification time changed?"
+                        f"Changing ensemble loss for file {pred_path} from {run.loss}"
+                        f" to {loss} because file modification time changed?"
                         f"{run.mtime_ens} -> {run.last_modified()}"
                     )
 
@@ -736,14 +758,16 @@ class EnsembleBuilder:
 
                 # It is not needed to create the object here
                 # To save memory, we just compute the loss.
-                run.mtime_ens = os.path.getmtime(y_ens_fn)
+                run.mtime_ens = os.path.getmtime(pred_path)
                 run.loaded = 2
-                run.mem_usage = round(sizeof(y_ens_fn, unit="MB"), 2)
+                run.mem_usage = run.mem_usage()
 
                 n_read_files += 1
 
             except Exception:
-                self.logger.warning(f"Err loading {y_ens_fn}: {traceback.format_exc()}")
+                self.logger.warning(
+                    f"Err loading {pred_path}: {traceback.format_exc()}"
+                )
                 run.loss = np.inf
 
         n_files_read = sum([run.loaded > 0 for run in self.runs.values()])
@@ -1264,11 +1288,7 @@ class EnsembleBuilder:
             # predictions are being saved as pickled
             predictions = np.load(f, allow_pickle=True)
 
-        dtypes = {
-            16: np.float16,
-            32: np.float32,
-            64: np.float64,
-        }
+        dtypes = {16: np.float16, 32: np.float32, 64: np.float64}
         dtype = dtypes.get(precision, predictions.dtype)
         predictions = predictions.astype(dtype=dtype, copy=False)
 
