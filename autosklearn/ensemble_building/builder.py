@@ -2,13 +2,11 @@ from __future__ import annotations
 
 from typing import Any
 
-import glob
 import logging.handlers
 import multiprocessing
 import numbers
 import os
 import pickle
-import re
 import shutil
 import time
 import traceback
@@ -50,7 +48,7 @@ class Run:
     ens_file: str
     dir: Path
     budget: float = 0.0
-    loss: float = np.inf
+    loss: float | None = None
     _mem_usage: int | None = None
     # The recorded time of ensemble/test/valid predictions modified
     recorded_mtimes: dict[str, float] = 0
@@ -73,7 +71,7 @@ class Run:
         """Whether this run is a dummy run or not"""
         return self.num_run == 1
 
-    def was_modified(self, kind: Literal["ensemble", "valid", "test"]) -> bool:
+    def pred_modified(self, kind: Literal["ensemble", "valid", "test"]) -> bool:
         """Query for when the ens file was last modified"""
         if self.recorded_mtimes is None:
             raise RuntimeError("No times were recorded, use `record_modified_times`")
@@ -98,6 +96,40 @@ class Run:
             if path.exists():
                 self.recorded_mtimes[kind] = path.stat().st_mtime()
 
+    def predictions(
+        self,
+        kind: Literal["ensemble", "valid", "test"],
+        precisions: type | None = None
+    ) -> Path:
+        """Load the predictions for this run
+
+        Parameters
+        ----------
+        kind : Literal["ensemble", "valid", "test"]
+            The kind of predictions to load
+
+        precisions : type | None = None
+            What kind of precision reduction to apply
+
+        Returns
+        -------
+        np.ndarray
+            The loaded predictions
+        """
+        path = self.pred_path(kind)
+        precision = self.precision
+
+        with path.open("rb") as f:
+            # TODO: We should probably remove this requirement. I'm not sure why model
+            # predictions are being saved as pickled
+            predictions = np.load(f, allow_pickle=True)
+
+        dtypes = {16: np.float16, 32: np.float32, 64: np.float64}
+        dtype = dtypes.get(precision, predictions.dtype)
+        predictions = predictions.astype(dtype=dtype, copy=False)
+
+        return predictions
+
     @property
     def id(self) -> RunID:
         """Get the three components of it's id"""
@@ -121,12 +153,11 @@ class Run:
             The run object generated from the directory
         """
         name = dir.name
-        seed, num_run, budget = name.split('_')
+        seed, num_run, budget = name.split("_")
         return Run(seed=seed, num_run=num_run, budget=budget, dir=dir)
 
 
 class EnsembleBuilder:
-
     def __init__(
         self,
         backend: Backend,
@@ -316,26 +347,26 @@ class EnsembleBuilder:
         return self._last_hash
 
     @property
-    def runs(self) -> dict[str, Run]:
+    def runs(self) -> dict[RunID, Run]:
         """Get the cached information from previous runs"""
         if self._runs is None:
-            self._runs = {}
-
             # First read in all the runs on disk
             runs_dir = Path(self.backend.get_runs_directory())
             all_runs = [Run.from_dir(dir) for dir in runs_dir.iterdir()]
 
             # Next, get the info about runs from last read, if any
-            loaded_runs: dict[str, Run] = {}
+            loaded_runs: dict[RunID, Run] = {}
             if self.runs_path.exists():
                 with self.runs_path.open("rb") as memory:
                     loaded_runs = pickle.load(memory)
 
-            # Update 
+            # Update any run that was loaded but we didn't have previously
             for run in all_runs:
                 if run.id not in loaded_runs:
-                    pass
+                    run.record_modified_times()  # Record the times it was last modified
+                    loaded_runs[run.id] = run
 
+            self._runs = loaded_runs
 
         return self._runs
 
@@ -684,93 +715,64 @@ class EnsembleBuilder:
         """
         self.logger.debug("Read ensemble data set predictions")
 
-        # First sort files chronologically
-        to_read = []
-        for pred_path in self.run_ensemble_prediction_paths:
-            match = self.model_fn_re.search(pred_path)
-            _seed = int(match.group(1))
-            _num_run = int(match.group(2))
-            _budget = float(match.group(3))
-            mtime = os.path.getmtime(pred_path)
+        by_last_modified = lambda run: run.recorded_mtimes["ensemble"]
 
-            to_read.append([pred_path, match, _seed, _num_run, _budget, mtime])
-
+        # Now read file, sorted by when their ensemble predicitons were last modified
         n_read_files = 0
-        # Now read file wrt to num_run
-        for pred_path, match, _seed, _num_run, _budget, mtime in sorted(
-            to_read, key=lambda x: x[5]
-        ):
+        for run in sorted(self.runs.values(), key=by_last_modified):
 
             # Break out if we've read more files than we should
             if self.read_at_most is not None and n_read_files >= self.read_at_most:
                 break
 
-            if not pred_path.endswith(".npy"):
-                self.logger.warning(f"Error loading file (not .npy): {pred_path}")
+            if not run.pred_path("ensemble").exists():
+                self.logger.warning(f"No ensemble predictions for {run}")
                 continue
 
-            # Get the run, creating one if it doesn't exist
-            if pred_path not in self.runs:
-                run = Run(
-                    seed=_seed,
-                    num_run=_num_run,
-                    budget=_budget,
-                    ens_file=pred_path,
-                )
-                self.runs[pred_path] = run
-            else:
-                run = self.runs[pred_path]
-
             # Put an entry in for the predictions if it doesn't exist
-            if pred_path not in self.run_predictions:
-                self.run_predictions[pred_path] = {
+            if run.id not in self.run_predictions:
+                self.run_predictions[run.id] = {
                     Y_ENSEMBLE: None,
                     Y_VALID: None,
                     Y_TEST: None,
                 }
 
             # If the timestamp is the same, nothing's changed so we can move on
-            if run.mtime_ens == mtime:
+            if not run.pred_modified("ensemble"):
                 continue
 
-            # actually read the predictions and compute their respective loss
+            # Actually read the predictions and compute their respective loss
             try:
-                y_ensemble = self._predictions_from(pred_path)
+                ensemble_predictions = run.predictions("ensemble")
                 loss = calculate_loss(
                     solution=targets,
-                    prediction=y_ensemble,
+                    prediction=ensemble_predictions,
                     task_type=self.task_type,
                     metric=self.metric,
                     scoring_functions=None,
                 )
-
-                if np.isfinite(run.loss):
+            except Exception:
+                self.logger.error(
+                    f"Error ensemble predictions for {run}: {traceback.format_exc()}"
+                )
+                loss = np.inf
+            finally:
+                # This is not a case we should reach, when should there be a reason
+                # that the loss gets updated twice?
+                if run.loss is not None:
                     self.logger.debug(
-                        f"Changing ensemble loss for file {pred_path} from {run.loss}"
-                        f" to {loss} because file modification time changed?"
+                        f"Changing ensemble loss for {run} to {loss} because file."
+                        f"modification time changed?"
                         f"{run.mtime_ens} -> {run.last_modified()}"
                     )
-
                 run.loss = loss
-
-                # It is not needed to create the object here
-                # To save memory, we just compute the loss.
-                run.mtime_ens = os.path.getmtime(pred_path)
                 run.loaded = 2
-                run.mem_usage = run.mem_usage()
-
                 n_read_files += 1
 
-            except Exception:
-                self.logger.warning(
-                    f"Err loading {pred_path}: {traceback.format_exc()}"
-                )
-                run.loss = np.inf
-
-        n_files_read = sum([run.loaded > 0 for run in self.runs.values()])
+        n_read_total = sum([run.loaded > 0 for run in self.runs.values()])
         self.logger.debug(
             f"Done reading {n_read_files} new prediction files."
-            f"Loaded {n_files_read} predictions in total."
+            f"Loaded {n_read_total} predictions in total."
         )
 
     def get_n_best_preds(self) -> list[str]:
@@ -1274,19 +1276,3 @@ class EnsembleBuilder:
                     f" to error {e}",
                 )
 
-    def _predictions_from(self, path: str | Path) -> np.ndarray:
-        if isinstance(path, str):
-            path = Path(path)
-
-        precision = self.precision
-
-        with path.open("rb") as f:
-            # TODO: We should probably remove this requirement. I'm not sure why model
-            # predictions are being saved as pickled
-            predictions = np.load(f, allow_pickle=True)
-
-        dtypes = {16: np.float16, 32: np.float32, 64: np.float64}
-        dtype = dtypes.get(precision, predictions.dtype)
-        predictions = predictions.astype(dtype=dtype, copy=False)
-
-        return predictions
