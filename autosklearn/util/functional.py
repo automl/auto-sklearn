@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Iterable, Optional, TypeVar
+from typing import Callable, Iterable, Iterator, TypeVar
 
 from functools import reduce
 
@@ -9,7 +9,7 @@ import numpy as np
 T = TypeVar("T")
 
 
-def normalize(x: np.ndarray, axis: Optional[int] = None) -> np.ndarray:
+def normalize(x: np.ndarray, axis: int | None = None) -> np.ndarray:
     """Normalizes an array along an axis
 
     Note
@@ -84,3 +84,79 @@ def intersection(*items: Iterable[T]) -> set[T]:
         return set()
 
     return set(reduce(lambda s1, s2: set(s1) & set(s2), items, items[0]))
+
+
+def itersplit(lst: Iterable[T], func: Callable[[T], bool]) -> tuple[list[T], list[T]]:
+    """Split a list in two based on a predicate
+
+    Parameters
+    ----------
+    lst : Iterable[T]
+        The list to split
+
+    func : Callable[[T], bool]
+        The predicate to split it on
+
+    Returns
+    -------
+    (a: list[T], b: list[T])
+        Everything in a satisfies the func while nothing in b does
+    """
+    a = []
+    b = []
+    for x in lst:
+        if func(x):
+            a.append(x)
+        else:
+            b.append(x)
+
+    return a, b
+
+
+def bound(val: float, *, low: float, high: float) -> float:
+    """Bounds a value between a low and high
+
+    .. code:: python
+
+        x = bound(14, low=0, high=13.1)
+        # x == 13.1
+
+    Parameters
+    ----------
+    val : float
+        The value to bound
+
+    low : float
+        The low to bound against
+
+    high : float
+        The high to bound against
+
+    Returns
+    -------
+    float
+        The bounded value
+    """
+    return max(low, min(val, high))
+
+
+def findwhere(itr: Iterable[T], func: Callable[[T], bool], *, default: int = -1) -> int:
+    """Find the index of the next occurence where func is True.
+
+    Parameters
+    ----------
+    itr : Iterable[T]
+        The iterable to search over
+
+    func : Callable[[T], bool]
+        The function to use
+
+    default : int = -1
+        The default value to give if no value was found where func was True
+
+    Returns
+    -------
+    int
+        The index where func was True
+    """
+    return next((i for i, t in enumerate(itr) if func(t)), default)
