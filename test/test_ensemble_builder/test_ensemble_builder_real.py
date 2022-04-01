@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable
+from typing import Callable
 
 from pathlib import Path
 from shutil import rmtree
@@ -19,7 +19,7 @@ def case_ensemble_builder_with_real_runs(
     tmp_path: Path,
     automl: AutoML,
     make_backend: Callable[..., Backend],
-) -> tuple[Backend, dict[str, Any]]:
+) -> EnsembleBuilder:
     """Gives the backend for from the cached automl instance in `test_automl/cases.py`
 
     We do this by copying the backend produced from these cached automl runs to a new

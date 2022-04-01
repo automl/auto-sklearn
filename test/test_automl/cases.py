@@ -56,7 +56,7 @@ def case_regressor(
 # ###################################
 @case(tags=["classifier", "fitted", "holdout", "cached"])
 @parametrize("dataset", ["iris"])
-def case_classifier_fitted_holdout(
+def case_classifier_fitted_holdout_iterative(
     automl_cache: Callable[[str], AutoMLCache],
     dataset: str,
     make_automl_classifier: Callable[..., AutoMLClassifier],
