@@ -1268,7 +1268,9 @@ class EnsembleBuilder:
         precision = self.precision
 
         with path.open("rb") as f:
-            predictions = np.load(f)
+            # TODO: We should probably remove this requirement. I'm not sure why model
+            # predictions are being saved as pickled
+            predictions = np.load(f, allow_pickle=True)
 
         dtypes = {
             16: np.float16,

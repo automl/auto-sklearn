@@ -358,3 +358,41 @@ def test_run_end_at(dummy_backend: Backend, time_buffer: int, duration: int) -> 
         # The 1 comes from the small overhead in conjuction with rounding down
         expected = duration - time_buffer - 1
         assert pynisher_mock.call_args_list[0][1]["wall_time_in_s"] == expected
+
+
+def test_can_load_pickled_ndarray_of_dtype_object(dummy_backend: Backend) -> None:
+    """
+    Fixture
+    -------
+    dummy_backend: Backend
+        A backend with a datamanger so it will load
+
+    Expects
+    -------
+    * EnsembleBuilder should be able to load np.ndarray's that were saved as a pickled
+      object, which happens when the np.ndarray's are of dtype object.
+
+    """
+    # TODO Should probably remove this test
+    #
+    #   I'm not sure why the predictions are stored as pickled objects sometimes
+    #   but that's a security vunerability to users using auto-sklearn.
+    #
+    ensbuilder = EnsembleBuilder(
+        backend=dummy_backend,
+        dataset_name="TEST",
+        task_type=BINARY_CLASSIFICATION,
+        metric=roc_auc,
+    )
+
+    # By specifiyng dtype object, we force it into saving as a pickle
+    x = np.array([1, 2, 3, 4], dtype=object)
+
+    path = Path(dummy_backend.internals_directory) / "test.npy"
+    with path.open("wb") as f:
+        # This is the default value (allow_pickle=True) but we explicitly state it
+        np.save(f, x, allow_pickle=True)
+
+    loaded_x = ensbuilder._predictions_from(path)
+
+    np.testing.assert_equal(x, loaded_x)
