@@ -60,6 +60,11 @@ class Run:
     # 3 - deleted from disk due to space constraints
     loaded: int = 0
 
+    @property
+    def mem_usage(self) -> float:
+        if self._mem_usage is None:
+            self._mem_usage = round(sizeof(self.dir, unit="MB"), 2)
+
     def is_dummy(self) -> bool:
         """Whether this run is a dummy run or not"""
         return self.num_run == 1
@@ -86,10 +91,11 @@ class Run:
         fname = f"predictions_{kind}_{self.seed}_{self.num_run}_{self.budget}.npy"
         return self.dir / fname
 
-    @property
-    def mem_usage(self) -> float:
-        if self._mem_usage is None:
-            self._mem_usage = round(sizeof(self.dir, unit="MB"), 2)
+    def record_modified_times(self) -> None:
+        self.recorded_mtime_ensemble = self.pred_path("ensemble").stat().st_mtime
+        self.recorded_mtime_valid = self.pred_path("valid").stat().st_mtime
+        self.recorded_mtime_test = self.pred_path("test").stat().st_mtime
+
 
         return self._mem_usage
 
