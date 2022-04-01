@@ -821,10 +821,7 @@ class EnsembleBuilder:
         else:
             # Keep only at most ensemble_nbest
             keep_nbest = min(self.ensemble_nbest, len(sorted_keys))
-            self.logger.debug(
-                "Library Pruning: using for ensemble only "
-                " %d (out of %d) models" % (keep_nbest, len(sorted_keys))
-            )
+            self.logger.debug(f"Using {keep_nbest} of total {len(sorted_keys)} models")
 
         # If max_models_on_disc is None, do nothing
         # One can only read at most max_models_on_disc models
