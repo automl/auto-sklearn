@@ -11,7 +11,7 @@ import shutil
 import time
 import traceback
 import zlib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import numpy as np
@@ -99,7 +99,7 @@ class Run:
     def predictions(
         self,
         kind: Literal["ensemble", "valid", "test"],
-        precisions: type | None = None
+        precisions: type | None = None,
     ) -> Path:
         """Load the predictions for this run
 
@@ -154,7 +154,9 @@ class Run:
         """
         name = dir.name
         seed, num_run, budget = name.split("_")
-        return Run(seed=seed, num_run=num_run, budget=budget, dir=dir)
+        run = Run(seed=seed, num_run=num_run, budget=budget, dir=dir)
+        run.record_modified_times()
+        return run
 
 
 class EnsembleBuilder:
@@ -171,7 +173,7 @@ class EnsembleBuilder:
         seed: int = 1,
         precision: int = 32,
         memory_limit: int | None = 1024,
-        read_at_most: int = 5,
+        read_at_most: int | None = 5,
         logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
         random_state: int | np.random.RandomState | None = None,
     ):
@@ -234,7 +236,7 @@ class EnsembleBuilder:
         memory_limit: int | None = 1024
             memory limit in mb. If ``None``, no memory limit is enforced.
 
-        read_at_most: int = 5
+        read_at_most: int | None = 5
             read at most n new prediction files in each iteration
 
         logger_port: int = DEFAULT_TCP_LOGGING_PORT
@@ -251,6 +253,9 @@ class EnsembleBuilder:
 
         if max_models_on_disc is not None and max_models_on_disc < 0:
             raise ValueError("max_models_on_disc must be positive or None")
+
+        if read_at_most is not None and read_at_most < 1:
+            raise ValueError("Read at most must be greater than 1")
 
         # Setup the logger
         self.logger = get_named_client_logger(name="EnsembleBuilder", port=logger_port)
@@ -289,8 +294,8 @@ class EnsembleBuilder:
 
         # Data we may need
         datamanager = self.backend.load_datamanager()
-        self.y_valid: np.ndarray | None = datamanager.data.get("Y_valid", None)
-        self.y_test: np.ndarray | None = datamanager.data.get("Y_test", None)
+        self._y_valid: np.ndarray | None = datamanager.data.get("Y_valid", None)
+        self._y_test: np.ndarray | None = datamanager.data.get("Y_test", None)
         self._y_ensemble: np.ndarray | None = None
 
         # Cached items, loaded by properties
@@ -347,14 +352,14 @@ class EnsembleBuilder:
         return self._last_hash
 
     @property
-    def runs(self) -> dict[RunID, Run]:
+    def runs(self) -> list[Run]:
         """Get the cached information from previous runs"""
         if self._runs is None:
             # First read in all the runs on disk
             runs_dir = Path(self.backend.get_runs_directory())
             all_runs = [Run.from_dir(dir) for dir in runs_dir.iterdir()]
 
-            # Next, get the info about runs from last read, if any
+            # Next, get the info about runs from last EnsembleBulder run, if any
             loaded_runs: dict[RunID, Run] = {}
             if self.runs_path.exists():
                 with self.runs_path.open("rb") as memory:
@@ -363,15 +368,13 @@ class EnsembleBuilder:
             # Update any run that was loaded but we didn't have previously
             for run in all_runs:
                 if run.id not in loaded_runs:
-                    run.record_modified_times()  # Record the times it was last modified
                     loaded_runs[run.id] = run
 
             self._runs = loaded_runs
 
-        return self._runs
+        return list(self._runs.values())
 
-    @property
-    def y_ensemble(self) -> np.ndarray | None:
+    def targets(self, kind: Literal["ensemble", "valid", "test"]) -> np.ndarray | None:
         """The ensemble targets used for training the ensemble
 
         It will attempt to load and cache them in memory but
@@ -382,11 +385,19 @@ class EnsembleBuilder:
         np.ndarray | None
             The ensemble targets, if they can be loaded
         """
-        if self._y_ensemble is None:
+        if kind == "ensemble" and self._y_ensemble is None:
             if os.path.exists(self.backend._get_targets_ensemble_filename()):
                 self._y_ensemble = self.backend.load_targets_ensemble()
+            return self._y_ensemble
 
-        return self._y_ensemble
+        elif kind == "valid":
+            return self._y_valid
+
+        elif kind == "test":
+            return self._y_test
+
+        else:
+            raise NotImplementedError()
 
     def run(
         self,
@@ -548,9 +559,8 @@ class EnsembleBuilder:
         -------
         (ensemble_history, nbest, train_preds, valid_preds, test_preds)
         """
-        # Pynisher jobs inside dask 'forget'
-        # the logger configuration. So we have to set it up
-        # accordingly
+        # Pynisher jobs inside dask 'forget' the logger configuration.
+        # So we have to set it up accordingly
         self.logger = get_named_client_logger(
             name="EnsembleBuilder",
             port=self.logger_port,
@@ -563,17 +573,69 @@ class EnsembleBuilder:
         left_for_iter = time_left - used_time
         self.logger.debug(f"Starting iteration {iteration}, time left: {left_for_iter}")
 
-        # No predictions found, exit early
-        if len(self.run_ensemble_prediction_paths) == 0:
-            self.logger.debug("Found no predictions on ensemble data set")
-            return self.ensemble_history, self.ensemble_nbest, None, None, None
-
         # Can't load data, exit early
         if not os.path.exists(self.backend._get_targets_ensemble_filename()):
             self.logger.debug(f"No targets for ensemble: {traceback.format_exc()}")
             return self.ensemble_history, self.ensemble_nbest, None, None, None
 
-        self.compute_loss_per_model(targets=self.y_ensemble)
+        # Get our runs
+        runs = self.runs
+
+        # No runs found, exit early
+        if len(self.runs) == 0:
+            self.logger.debug("Found no predictions on ensemble data set")
+            return self.ensemble_history, self.ensemble_nbest, None, None, None
+
+        # We filter out all runs that don't have any predictions for the ensemble
+        has_predictions = []
+        for run in runs:
+            if run.pred_path("ensemble").exists():
+                has_predictions.append(run)
+            else:
+                self.logger.warning(f"No ensemble predictions for {run}")
+
+        runs = has_predictions
+
+        # Calculating losses
+        #
+        #   We need to calculate the loss of runs for which we have not done so yet.
+        #   To do so, we first find out which runs have a loss and have not had their
+        #   predictions modified, filtering them out.
+        #   We then compute the losses for the runs remaining, sorted by their
+        #   last-modified time, such that oldest are computed first. We only compute
+        #   a certain amount of these to ensure that we don't spend to much time
+        #   reading and computing losses.
+        #
+        # Filter runs that need their losses computed
+        runs_to_compute_loss = []
+        for run in runs:
+            if run.loss is None or run.loss == np.inf:
+                runs_to_compute_loss.append(run)
+
+            elif run.loss is not None and run.pred_modified("ensemble"):
+                self.logger.debug(f"{run.id} had its predictions modified?")
+                runs_to_compute_loss.append(run)
+
+        # Sort by last modified
+        by_last_modified = lambda r: r.record_mtimes["ensemble"]
+        runs_to_compute_loss = sorted(runs_to_compute_loss, key=by_last_modified)
+
+        # Limit them if needed
+        if self.read_at_most is not None:
+            runs_to_compute_loss = runs_to_compute_loss[: self.read_at_most]
+
+        # Calculate their losses
+        ensemble_targets = self.targets("ensemble")
+        for run in runs_to_compute_loss:
+            loss = self.run_loss(run, targets=ensemble_targets, kind="ensemble")
+            run.loaded = 2
+            run.loss = loss
+
+        n_read_total = sum(run.loaded > 0 for run in runs)
+        self.logger.debug(
+            f"Done reading {len(runs_to_compute_loss)} new prediction files."
+            f"Loaded {n_read_total} predictions in total."
+        )
 
         # Only the models with the n_best predictions are candidates
         # to be in the ensemble
@@ -698,82 +760,61 @@ class EnsembleBuilder:
         else:
             return self.ensemble_history, self.ensemble_nbest, None, None, None
 
-    def compute_loss_per_model(self, targets: np.ndarray) -> None:
-        """Compute the loss of the predictions on ensemble building data set;
-        populates self.run_predictions and self.runs
+    def run_loss(
+        self,
+        run: Run,
+        targets: np.ndarray,
+        kind: Literal["ensemble", "val", "test"] = "ensemble",
+    ) -> None:
+        """Compute the loss of a run on a given set of targets
 
-        Side-effects
-        ------------
-        * Populates
-            - `self.runs` with the new losses it calculated
+        NOTE
+        ----
+        Still has a side effect of populating self.read_preds
 
         Parameters
         ----------
+        run: Run
+            The run to calculate the loss of
+
         targets: np.ndarray
             The targets for which to calculate the losses on.
             Typically the ensemble_targts.
+
+        targets: np.ndarray
+            The targets to compare against
+
+        kind: "ensemble" | "val" | "test" = "ensemble"
+            What kind of predicitons to laod from the Runs
+
         """
-        self.logger.debug("Read ensemble data set predictions")
+        # Put an entry in for the predictions if it doesn't exist
+        if run.id not in self.run_predictions:
+            self.run_predictions[run.id] = {
+                Y_ENSEMBLE: None,
+                Y_VALID: None,
+                Y_TEST: None,
+            }
 
-        by_last_modified = lambda run: run.recorded_mtimes["ensemble"]
+        try:
+            run_predictions = run.predictions("ensemble")
+            loss = calculate_loss(
+                solution=targets,
+                prediction=run_predictions,
+                task_type=self.task_type,
+                metric=self.metric,
+                scoring_functions=None,
+            )
 
-        # Now read file, sorted by when their ensemble predicitons were last modified
-        n_read_files = 0
-        for run in sorted(self.runs.values(), key=by_last_modified):
+        except Exception:
+            self.logger.error(
+                f"Error {kind} predictions for {run}:" f" {traceback.format_exc()}"
+            )
+            loss = np.inf
 
-            # Break out if we've read more files than we should
-            if self.read_at_most is not None and n_read_files >= self.read_at_most:
-                break
-
-            if not run.pred_path("ensemble").exists():
-                self.logger.warning(f"No ensemble predictions for {run}")
-                continue
-
-            # Put an entry in for the predictions if it doesn't exist
-            if run.id not in self.run_predictions:
-                self.run_predictions[run.id] = {
-                    Y_ENSEMBLE: None,
-                    Y_VALID: None,
-                    Y_TEST: None,
-                }
-
-            # If the timestamp is the same, nothing's changed so we can move on
-            if not run.pred_modified("ensemble"):
-                continue
-
-            # Actually read the predictions and compute their respective loss
-            try:
-                ensemble_predictions = run.predictions("ensemble")
-                loss = calculate_loss(
-                    solution=targets,
-                    prediction=ensemble_predictions,
-                    task_type=self.task_type,
-                    metric=self.metric,
-                    scoring_functions=None,
-                )
-            except Exception:
-                self.logger.error(
-                    f"Error ensemble predictions for {run}: {traceback.format_exc()}"
-                )
-                loss = np.inf
-            finally:
-                # This is not a case we should reach, when should there be a reason
-                # that the loss gets updated twice?
-                if run.loss is not None:
-                    self.logger.debug(
-                        f"Changing ensemble loss for {run} to {loss} because file."
-                        f"modification time changed?"
-                        f"{run.mtime_ens} -> {run.last_modified()}"
-                    )
-                run.loss = loss
-                run.loaded = 2
-                n_read_files += 1
-
-        n_read_total = sum([run.loaded > 0 for run in self.runs.values()])
-        self.logger.debug(
-            f"Done reading {n_read_files} new prediction files."
-            f"Loaded {n_read_total} predictions in total."
-        )
+        finally:
+            run.loss = loss
+            run.loaded = 2
 
     def get_n_best_preds(self) -> list[str]:
         """Get best n predictions according to the loss on the "ensemble set"
@@ -1275,4 +1316,3 @@ class EnsembleBuilder:
                     f"Failed to delete files of non-candidate model {pred_path} due"
                     f" to error {e}",
                 )
-
