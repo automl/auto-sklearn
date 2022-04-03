@@ -12,6 +12,7 @@ import time
 import traceback
 import zlib
 from dataclasses import dataclass
+from functools import reduce
 from itertools import accumulate
 from pathlib import Path
 
@@ -616,6 +617,7 @@ class EnsembleBuilder:
 
             elif run.loss is not None and run.pred_modified("ensemble"):
                 self.logger.debug(f"{run.id} had its predictions modified?")
+                run.record_modified_times()  # re-mark modfied times
                 runs_to_compute_loss.append(run)
 
         # Sort by last modified
@@ -740,7 +742,7 @@ class EnsembleBuilder:
                         prediction=pred,
                         task_type=self.task_type,
                         metric=self.metric,
-                        scoring_functions=None
+                        scoring_functions=None,
                     )
                     performance_stamp[f"ensemble_{score_name}_score"] = score
 
@@ -999,22 +1001,14 @@ class EnsembleBuilder:
         ensemble: EnsembleSelection
             The trained ensemble
         """
-        predictions_train = [
-            run.predictions("ensemble", precision=self.precision)
-            for run in selected_runs
-        ]
-
         # List of (seed, num_run, budget)
         include_num_runs = [run.id for run in selected_runs]
 
-        # check hash if ensemble training data changed
-        # TODO could we just use the size, and the last row?
-        current_hash = "".join(
-            [
-                str(zlib.adler32(predictions_train[i].data.tobytes()))
-                for i in range(len(predictions_train))
-            ]
-        )
+        # Compute hash based on the run ids and when they were last modified
+        hash_components = [
+            hash(r.id, r.record_mtimes["ensemble"]) for r in selected_runs
+        ]
+        current_hash = reduce(lambda a, b: a ^ b, hash_components)
 
         if self.last_hash == current_hash:
             self.logger.debug(
@@ -1022,6 +1016,11 @@ class EnsembleBuilder:
                 f"-- current performance: {self.validation_performance_}",
             )
             return None
+
+        predictions_train = [
+            run.predictions("ensemble", precision=self.precision)
+            for run in selected_runs
+        ]
 
         self._last_hash = current_hash
 
@@ -1035,7 +1034,11 @@ class EnsembleBuilder:
         self.logger.debug(f"Fitting ensemble on {len(predictions_train)} models")
         start_time = time.time()
         try:
-            ensemble.fit(predictions_train, self.y_ensemble, include_num_runs)
+            ensemble.fit(
+                predictions=predictions_train,
+                labels=self.targets("ensemble"),
+                identifiers=include_num_runs,
+            )
         except Exception as e:
             self.logger.error(f"Caught error {e}: {traceback.format_exc()}")
             return None
