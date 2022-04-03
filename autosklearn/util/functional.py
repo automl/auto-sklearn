@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, Iterable, Iterator, TypeVar
+from typing import Callable, Iterable, Sequence, TypeVar
 
 from functools import reduce
 
@@ -160,3 +160,23 @@ def findwhere(itr: Iterable[T], func: Callable[[T], bool], *, default: int = -1)
         The index where func was True
     """
     return next((i for i, t in enumerate(itr) if func(t)), default)
+
+
+def value_split(
+    lst: Sequence[float],
+    *,
+    low: float | None = None,
+    high: float | None = None,
+    at: float = 0.5,
+    sort: bool = True,
+) -> tuple[list[float], list[float]]:
+    if sort:
+        lst = sorted(lst)
+
+    if low is None:
+        low = lst[0]
+
+    if high is None:
+        high = lst[-1]
+
+
