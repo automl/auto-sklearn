@@ -11,7 +11,7 @@ import shutil
 import time
 import traceback
 import zlib
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from itertools import accumulate
 from pathlib import Path
 
@@ -20,9 +20,6 @@ import pandas as pd
 import pynisher
 from typing_extensions import Literal
 
-from autosklearn.automl_common.common.ensemble_building.abstract_ensemble import (  # noqa: E501
-    AbstractEnsemble,
-)
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
@@ -137,6 +134,9 @@ class Run:
 
     def __str__(self) -> str:
         return f"{self.seed}_{self.num_run}_{self.budget}"
+
+    def __hash__(self) -> int:
+        return hash(self.id)
 
     @staticmethod
     def from_dir(dir: Path) -> Run:
@@ -641,75 +641,65 @@ class EnsembleBuilder:
 
         # Only the models with the n_best predictions are candidates
         # to be in the ensemble
-        candidate_models = self.get_nbest()
-        if not candidate_models:  # no candidates yet
-            if return_predictions:
-                return (
-                    self.ensemble_history,
-                    self.ensemble_nbest,
-                    train_pred,
-                    valid_pred,
-                    test_pred,
-                )
-            else:
-                return self.ensemble_history, self.ensemble_nbest, None, None, None
-
-        # populates predictions in self.run_predictions
-        # reduces selected models if file reading failed
-        n_sel_valid, n_sel_test = self.get_valid_test_preds(
-            selected_keys=candidate_models
-        )
+        candidates = self.get_nbest()
+        if len(candidates) == 0:
+            return self.ensemble_history, self.ensemble_nbest, None, None, None
 
         # Get a set representation of them as we will begin doing intersections
-        candidates_set = set(candidate_models)
-        valid_set = set(n_sel_valid)
-        test_set = set(n_sel_test)
+        # Not here that valid_set and test_set are both subsets of candidates_set
+        candidates_set = set(candidates)
+        valid_set = {r for r in candidates if r.pred_path("valid").exists()}
+        test_set = {r for r in candidates if r.pred_path("test").exists()}
 
-        # Both n_sel_* have entries, but there is no overlap, this is critical
-        if len(test_set) > 0 and len(valid_set) > 0 and len(valid_set & test_set) == 0:
-            self.logger.error("n_sel_valid and n_sel_test not empty but do not overlap")
-            if return_predictions:
-                return (
-                    self.ensemble_history,
-                    self.ensemble_nbest,
-                    train_pred,
-                    valid_pred,
-                    test_pred,
-                )
-            else:
-                return self.ensemble_history, self.ensemble_nbest, None, None, None
+        if len(valid_set & test_set) == 0 and len(test_set) > 0 and len(valid_set) > 0:
+            self.logger.error("valid_set and test_set not empty but do not overlap")
+            return self.ensemble_history, self.ensemble_nbest, None, None, None
 
+        # Find the intersect between the most groups and use that to fit the ensemble
         intersect = intersection(candidates_set, valid_set, test_set)
         if len(intersect) > 0:
-            candidate_models = sorted(list(intersect))
-            n_sel_test = candidate_models
-            n_sel_valid = candidate_models
+            candidate_models, valid_models, test_models = sorted(list(intersect))
 
         elif len(candidates_set & valid_set) > 0:
-            candidate_models = sorted(list(candidates_set & valid_set))
-            n_sel_valid = candidate_models
+            candidate_models, valid_models = sorted(list(candidates_set & valid_set))
+            test_models = []
 
         elif len(candidates_set & test_set) > 0:
-            candidate_models = sorted(list(candidates_set & test_set))
-            n_sel_test = candidate_models
+            candidate_models, test_models = sorted(list(candidates_set & test_set))
+            valid_models = []
 
         # This has to be the case
         else:
-            n_sel_test = []
-            n_sel_valid = []
+            test_models = []
+            valid_models = []
 
         # train ensemble
         ensemble = self.fit_ensemble(selected_keys=candidate_models)
 
         # Save the ensemble for later use in the main auto-sklearn module!
         if ensemble is not None:
+            self.logger.info(ensemble)
+
+            ens_perf = ensemble.get_validation_performance()
+            self.validation_performance_ = min(self.validation_performance_, ens_perf)
             self.backend.save_ensemble(ensemble, iteration, self.seed)
 
         # Delete files of non-candidate models - can only be done after fitting the
         # ensemble and saving it to disc so we do not accidentally delete models in
         # the previous ensemble
         if self.max_resident_models is not None:
-            self._delete_excess_models(selected_keys=candidate_models)
+            to_delete = set(runs) - set(candidate_models)
+            to_delete = {r for r in to_delete if not r.is_dummy()}
+            for run in to_delete:
+                try:
+                    shutil.rmtree(run.dir)
+                    self.logger.info(f"Deleted files for {run}")
+                except Exception as e:
+                    self.logger.error(f"Failed to delete files for {run}: \n{e}")
+                finally:
+                    run.mem_usage = None
+                    run.loaded = 3
+                    run.loss = np.inf
 
         # Save the read losses status for the next iteration, we should do this
         # before doing predictions as this is a likely place of memory issues
@@ -717,33 +707,42 @@ class EnsembleBuilder:
             pickle.dump(self.runs, f)
 
         if ensemble is not None:
-            train_pred = self.predict(
-                set_="train",
-                ensemble=ensemble,
-                selected_keys=candidate_models,
-                n_preds=len(candidate_models),
-                index_run=iteration,
-            )
-            # We can't use candidate_models here, as n_sel_* might be empty
-            valid_pred = self.predict(
-                set_="valid",
-                ensemble=ensemble,
-                selected_keys=n_sel_valid,
-                n_preds=len(candidate_models),
-                index_run=iteration,
-            )
-            # TODO if predictions fails, build the model again during the
-            #  next iteration!
-            test_pred = self.predict(
-                set_="test",
-                ensemble=ensemble,
-                selected_keys=n_sel_test,
-                n_preds=len(candidate_models),
-                index_run=iteration,
-            )
+            performance_stamp = {"Timestamp": pd.Timestamp.now()}
 
-            # Add a score to run history to see ensemble progress
-            self._add_ensemble_trajectory(train_pred, valid_pred, test_pred)
+            for kind, score_name, models in [
+                ("ensemble", "optimization", candidate_models),
+                ("valid", "val", valid_models),
+                ("test", "test", test_models),
+            ]:
+                if len(candidate_models) != len(models):
+                    self.logger.info(
+                        "Found inconsistent number of predictions and models"
+                        f" ({len(candidate_models)} vs {len(models)}) for subset {kind}"
+                    )
+                else:
+                    run_preds = [
+                        r.predictions(kind, precision=self.precision) for r in models
+                    ]
+                    pred = ensemble.predict(run_preds)
+
+                    # Pretty sure this whole step is uneeded but left over and afraid
+                    # to touch
+                    if self.task_type == BINARY_CLASSIFICATION:
+                        pred = pred[:, 1]
+
+                        if pred.ndim == 1 or pred.shape[1] == 1:
+                            pred = np.vstack(
+                                ((1 - pred).reshape((1, -1)), pred.reshape((1, -1)))
+                            ).transpose()
+
+                    score = calculate_score(
+                        solution=self.targets(kind),
+                        prediction=pred,
+                        task_type=self.task_type,
+                        metric=self.metric,
+                        scoring_functions=None
+                    )
+                    performance_stamp[f"ensemble_{score_name}_score"] = score
 
         # The loaded predictions and hash can only be saved after the ensemble has been
         # built, because the hash is computed during the construction of the ensemble
@@ -987,73 +986,7 @@ class EnsembleBuilder:
 
         return keep
 
-    def get_valid_test_preds(
-        self,
-        selected_keys: list[str],
-    ) -> tuple[list[str], list[str]]:
-        """Get valid and test predictions from disc and store in self.run_predictions
-
-        Parameters
-        ----------
-        selected_keys: list
-            list of selected keys of self.run_predictions
-
-        Return
-        ------
-        keys_valid: list[str], keys_test: list[str]
-            All keys in selected keys for which we could read the valid and test
-            predictions.
-        """
-        success_keys_valid = []
-        success_keys_test = []
-
-        for k in selected_keys:
-            run = self.runs[k]
-
-            rundir = Path(self.backend.get_numrun_directory(*run.id))
-
-            valid_fn = rundir / f"predictions_valid_{run}.npy"
-            test_fn = rundir / f"predictions_test_{run}.npy"
-
-            if valid_fn.exists():
-                if (
-                    run.mtime_valid == valid_fn.stat().st_mtime
-                    and k in self.run_predictions
-                    and self.run_predictions[k][Y_VALID] is not None
-                ):
-                    success_keys_valid.append(k)
-                    continue
-
-                else:
-                    try:
-                        y_valid = self._predictions_from(valid_fn)
-                        self.run_predictions[k][Y_VALID] = y_valid
-                        success_keys_valid.append(k)
-                        run.mtime_valid = valid_fn.stat().st_mtime
-
-                    except Exception:
-                        self.logger.warning(f"Err {valid_fn}:{traceback.format_exc()}")
-
-            if test_fn.exists():
-                if (
-                    run.mtime_test == test_fn.stat().st_mtime
-                    and k in self.run_predictions
-                    and self.run_predictions[k][Y_TEST] is not None
-                ):
-                    success_keys_test.append(k)
-
-                else:
-                    try:
-                        y_test = self._predictions_from(test_fn)
-                        self.run_predictions[k][Y_TEST] = y_test
-                        success_keys_test.append(k)
-                        run.mtime_test = os.path.getmtime(test_fn)
-                    except Exception:
-                        self.logger.warning(f"Err {test_fn}:{traceback.format_exc()}")
-
-        return success_keys_valid, success_keys_test
-
-    def fit_ensemble(self, selected_keys: list[str]) -> EnsembleSelection:
+    def fit_ensemble(self, selected_runs: list[Run]) -> EnsembleSelection:
         """TODO
 
         Parameters
@@ -1066,9 +999,10 @@ class EnsembleBuilder:
         ensemble: EnsembleSelection
             The trained ensemble
         """
-        predictions_train = [self.run_predictions[k][Y_ENSEMBLE] for k in selected_keys]
-
-        selected_runs = [self.runs[k] for k in selected_keys]
+        predictions_train = [
+            run.predictions("ensemble", precision=self.precision)
+            for run in selected_runs
+        ]
 
         # List of (seed, num_run, budget)
         include_num_runs = [run.id for run in selected_runs]
@@ -1081,6 +1015,7 @@ class EnsembleBuilder:
                 for i in range(len(predictions_train))
             ]
         )
+
         if self.last_hash == current_hash:
             self.logger.debug(
                 "No new model predictions selected -- skip ensemble building "
@@ -1097,204 +1032,15 @@ class EnsembleBuilder:
             random_state=self.random_state,
         )
 
+        self.logger.debug(f"Fitting ensemble on {len(predictions_train)} models")
+        start_time = time.time()
         try:
-            self.logger.debug(f"Fitting ensemble on {len(predictions_train)} models")
-
-            start_time = time.time()
-
-            # TODO y_ensemble can be None here
             ensemble.fit(predictions_train, self.y_ensemble, include_num_runs)
-
-            duration = time.time() - start_time
-
-            self.logger.debug(f"Fitting the ensemble took {duration} seconds.")
-            self.logger.info(ensemble)
-
-            ens_perf = ensemble.get_validation_performance()
-            self.validation_performance_ = min(self.validation_performance_, ens_perf)
-
         except Exception as e:
             self.logger.error(f"Caught error {e}: {traceback.format_exc()}")
-            ensemble = None
-        finally:
-            # Explicitly free memory
-            del predictions_train
-            return ensemble
-
-    def predict(
-        self,
-        set_: str,
-        ensemble: AbstractEnsemble,
-        selected_keys: list,
-        n_preds: int,
-        index_run: int,
-    ) -> np.ndarray | None:
-        """Save preditions on ensemble, validation and test data on disc
-
-        Parameters
-        ----------
-        set_: "valid" | "test" | str
-            The data split name, returns preds for y_ensemble if not "valid" or "test"
-
-        ensemble: EnsembleSelection
-            The trained Ensemble
-
-        selected_keys: list[str]
-            List of selected keys of self.runs
-
-        n_preds: int
-            Number of prediction models used for ensemble building same number of
-            predictions on valid and test are necessary
-
-        index_run: int
-            n-th time that ensemble predictions are written to disc
-
-        Return
-        ------
-        np.ndarray | None
-            Returns the predictions if it can, else None
-        """
-        self.logger.debug("Predicting the %s set with the ensemble!", set_)
-
-        if set_ == "valid":
-            pred_set = Y_VALID
-        elif set_ == "test":
-            pred_set = Y_TEST
-        else:
-            pred_set = Y_ENSEMBLE
-        predictions = [self.run_predictions[k][pred_set] for k in selected_keys]
-
-        if n_preds == len(predictions):
-            y = ensemble.predict(predictions)
-            if self.task_type == BINARY_CLASSIFICATION:
-                y = y[:, 1]
-            return y
-        else:
-            self.logger.info(
-                "Found inconsistent number of predictions and models (%d vs "
-                "%d) for subset %s",
-                len(predictions),
-                n_preds,
-                set_,
-            )
             return None
 
-    def _add_ensemble_trajectory(
-        self,
-        train_pred: np.ndarray,
-        valid_pred: np.ndarray | None,
-        test_pred: np.ndarray | None,
-    ) -> None:
-        """
-        Records a snapshot of how the performance look at a given training
-        time.
+        duration = time.time() - start_time
+        self.logger.debug(f"Fitting the ensemble took {duration} seconds.")
 
-        Parameters
-        ----------
-        train_pred: np.ndarray
-            The training predictions
-
-        valid_pred: np.ndarray | None
-            The predictions on the validation set using ensemble
-
-        test_pred: np.ndarray | None
-            The predictions on the test set using ensemble
-        """
-        if self.task_type == BINARY_CLASSIFICATION:
-            if len(train_pred.shape) == 1 or train_pred.shape[1] == 1:
-                train_pred = np.vstack(
-                    ((1 - train_pred).reshape((1, -1)), train_pred.reshape((1, -1)))
-                ).transpose()
-
-            if valid_pred is not None and (
-                len(valid_pred.shape) == 1 or valid_pred.shape[1] == 1
-            ):
-                valid_pred = np.vstack(
-                    ((1 - valid_pred).reshape((1, -1)), valid_pred.reshape((1, -1)))
-                ).transpose()
-
-            if test_pred is not None and (
-                len(test_pred.shape) == 1 or test_pred.shape[1] == 1
-            ):
-                test_pred = np.vstack(
-                    ((1 - test_pred).reshape((1, -1)), test_pred.reshape((1, -1)))
-                ).transpose()
-
-        # TODO y_ensemble can be None here
-        performance_stamp = {
-            "Timestamp": pd.Timestamp.now(),
-            "ensemble_optimization_score": calculate_score(
-                solution=self.y_ensemble,
-                prediction=train_pred,
-                task_type=self.task_type,
-                metric=self.metric,
-                scoring_functions=None,
-            ),
-        }
-        if valid_pred is not None:
-            # TODO: valid_pred are a legacy from competition manager
-            # and this if never happens. Re-evaluate Y_valid support
-            performance_stamp["ensemble_val_score"] = calculate_score(
-                solution=self.y_valid,
-                prediction=valid_pred,
-                task_type=self.task_type,
-                metric=self.metric,
-                scoring_functions=None,
-            )
-
-        # In case test_pred was provided
-        if test_pred is not None:
-            performance_stamp["ensemble_test_score"] = calculate_score(
-                solution=self.y_test,
-                prediction=test_pred,
-                task_type=self.task_type,
-                metric=self.metric,
-                scoring_functions=None,
-            )
-
-        self.ensemble_history.append(performance_stamp)
-
-    def _delete_excess_models(self, selected_keys: list[str]) -> None:
-        """
-        Deletes models excess models on disc. self.max_models_on_disc
-        defines the upper limit on how many models to keep.
-        Any additional model with a worst loss than the top
-        self.max_models_on_disc is deleted.
-
-        Parameters
-        ----------
-        selected_keys: list[str]
-            TODO
-        """
-        # Loop through the files currently in the directory
-        for pred_path in self.run_ensemble_prediction_paths:
-
-            # Do not delete candidates
-            if pred_path in selected_keys:
-                continue
-
-            match = self.model_fn_re.search(pred_path)
-            _seed = int(match.group(1))
-            _num_run = int(match.group(2))
-            _budget = float(match.group(3))
-
-            # Do not delete the dummy prediction
-            if _num_run == 1:
-                continue
-
-            numrun_dir = self.backend.get_numrun_directory(_seed, _num_run, _budget)
-            try:
-                os.rename(numrun_dir, numrun_dir + ".old")
-                shutil.rmtree(numrun_dir + ".old")
-
-                self.logger.info(f"Deleted files of non-candidate model {pred_path}")
-
-                self.runs[pred_path].disc_space_cost_mb = None
-                self.runs[pred_path].loaded = 3
-                self.runs[pred_path].loss = np.inf
-
-            except Exception as e:
-                self.logger.error(
-                    f"Failed to delete files of non-candidate model {pred_path} due"
-                    f" to error {e}",
-                )
+        return ensemble
