@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, Iterable, Sequence, TypeVar
+from typing import Callable, Iterable, Sequence, TypeVar, no_type_check
 
 from functools import reduce
 
@@ -157,26 +157,79 @@ def findwhere(itr: Iterable[T], func: Callable[[T], bool], *, default: int = -1)
     Returns
     -------
     int
-        The index where func was True
+        The first index where func was True
     """
     return next((i for i, t in enumerate(itr) if func(t)), default)
 
 
+@no_type_check
 def value_split(
-    lst: Sequence[float],
+    lst: Sequence[T],
     *,
+    key: Callable[[T], float] | None = None,
     low: float | None = None,
     high: float | None = None,
     at: float = 0.5,
     sort: bool = True,
-) -> tuple[list[float], list[float]]:
+) -> tuple[list[T], list[T]]:
+    """Split a list according to it's values.
+
+    ..code:: python
+
+        #     low            at = 0.75   high
+        # -----|----------------|---------|
+        # 0   20               80        100
+
+        x = np.linspace(0, 100, 21)
+        # [0, 5, 10, ..., 95, 100]
+
+        lower, higher = value_split(x, at=0.6, low=20)
+
+        print(lower, higher)
+        # [0, 5, 10, ..., 75] [80, ..., 100]
+
+    Parameters
+    ----------
+    lst : Sequence[T]
+        The list of items to split
+
+    key : Callable[[T], float] | None = None
+        An optional key to access the values by
+
+    low : float | None = None
+        The lowest value to consider, otherwise will use the minimum in lst
+
+    high : float | None = None
+        The highest value to consider, otherwise will use the maximum in lst
+
+    at : float = 0.5
+        At what perecentage to split at
+
+    sort : bool = True
+        Whether to sort the values, set to False if values are sorted before hand
+
+    Returns
+    -------
+    tuple[list[T], list[T]]
+        The lower and upper parts of the list based on the split
+    """
     if sort:
-        lst = sorted(lst)
+        lst = sorted(lst) if key is None else sorted(lst, key=key)
 
     if low is None:
-        low = lst[0]
+        low = lst[0] if key is None else key(lst[0])
 
     if high is None:
-        high = lst[-1]
+        high = lst[-1] if key is None else key(lst[-1])
 
+    # Convex combination of two points
+    pivot_value = (1 - at) * low + (at) * high
 
+    if key is None:
+        greater_than_pivot = (lambda x: x >= pivot_value)
+    else:
+        greater_than_pivot = (lambda x: key(x) >= pivot_value)
+
+    pivot_idx = findwhere(lst, greater_than_pivot, default=len(lst))
+
+    return lst[:pivot_idx], lst[pivot_idx:]
