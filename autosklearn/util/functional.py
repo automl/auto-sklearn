@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, Iterable, Sequence, TypeVar, no_type_check
+from typing import Callable, Iterable, TypeVar
 
 from functools import reduce
 

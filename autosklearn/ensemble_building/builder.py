@@ -23,13 +23,7 @@ from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.ensemble_building.run import Run, RunID
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.metrics import Scorer, calculate_loss, calculate_score
-from autosklearn.util.functional import (
-    bound,
-    cut,
-    findwhere,
-    intersection,
-    split,
-)
+from autosklearn.util.functional import bound, cut, findwhere, intersection, split
 from autosklearn.util.logging_ import get_named_client_logger
 from autosklearn.util.parallel import preload_modules
 
@@ -160,7 +154,7 @@ class EnsembleBuilder:
         self.start_time: float = 0.0
 
         # Track the ensemble performance
-        self.ensemble_history: list = []
+        self.ensemble_history: list[dict[str, Any]] = []
 
         # Keep running knowledge of its validation performance
         self.validation_performance_ = np.inf
@@ -236,13 +230,7 @@ class EnsembleBuilder:
         end_at: float | None = None,
         time_buffer: int = 5,
         return_predictions: bool = False,
-    ) -> tuple[
-        list[dict[str, Any]],
-        int | float,
-        np.ndarray | None,
-        np.ndarray | None,
-        np.ndarray | None,
-    ]:
+    ) -> tuple[list[dict[str, Any]], int | float]:
         """Run the ensemble building process
 
         Parameters
@@ -354,24 +342,18 @@ class EnsembleBuilder:
                         "Memory Exception -- restart with "
                         "less ensemble_nbest: %d" % self.ensemble_nbest
                     )
-                    return [], self.ensemble_nbest, None, None, None
+                    return [], self.ensemble_nbest
             else:
                 return safe_ensemble_script.result
 
-        return [], self.ensemble_nbest, None, None, None
+        return [], self.ensemble_nbest
 
     def main(
         self,
         time_left: float,
         iteration: int,
         return_predictions: bool = False,
-    ) -> tuple[
-        list[dict[str, Any]],
-        int | float,
-        np.ndarray | None,
-        np.ndarray | None,
-        np.ndarray | None,
-    ]:
+    ) -> tuple[list[dict[str, Any]], int | float]:
         """Run the main loop of ensemble building
 
         Parameters
@@ -387,7 +369,7 @@ class EnsembleBuilder:
 
         Returns
         -------
-        (ensemble_history, nbest, train_preds, valid_preds, test_preds)
+        (ensemble_history: list[dict[str, Any]], nbest: int | float)
         """
         # Pynisher jobs inside dask 'forget' the logger configuration.
         # So we have to set it up accordingly
@@ -397,7 +379,6 @@ class EnsembleBuilder:
         )
 
         self.start_time = time.time()
-        train_pred, valid_pred, test_pred = None, None, None
 
         used_time = time.time() - self.start_time
         left_for_iter = time_left - used_time
@@ -406,7 +387,7 @@ class EnsembleBuilder:
         # Can't load data, exit early
         if not os.path.exists(self.backend._get_targets_ensemble_filename()):
             self.logger.debug(f"No targets for ensemble: {traceback.format_exc()}")
-            return self.ensemble_history, self.ensemble_nbest, None, None, None
+            return self.ensemble_history, self.ensemble_nbest
 
         # Load in information from previous candidates and also runs
         available_runs = self.available_runs()
@@ -420,7 +401,7 @@ class EnsembleBuilder:
 
         if len(runs) == 0:
             self.logger.debug("Found no runs")
-            return self.ensemble_history, self.ensemble_nbest, None, None, None
+            return self.ensemble_history, self.ensemble_nbest
 
         # Calculate the loss for those that require it
         requires_update = self.requires_loss_update(runs, limit=self.read_at_most)
@@ -449,7 +430,7 @@ class EnsembleBuilder:
 
         if len(candidates) == 0:
             self.logger.debug("No viable candidates found for ensemble building")
-            return self.ensemble_history, self.ensemble_nbest, None, None, None
+            return self.ensemble_history, self.ensemble_nbest
 
         # Get a set representation of them as we will begin doing intersections
         # Not here that valid_set and test_set are both subsets of candidates_set
@@ -459,7 +440,7 @@ class EnsembleBuilder:
 
         if len(valid_set & test_set) == 0 and len(test_set) > 0 and len(valid_set) > 0:
             self.logger.error("valid_set and test_set not empty but do not overlap")
-            return self.ensemble_history, self.ensemble_nbest, None, None, None
+            return self.ensemble_history, self.ensemble_nbest
 
         # Find the intersect between the most groups and use that to fit the ensemble
         intersect = intersection(candidates_set, valid_set, test_set)
@@ -525,7 +506,7 @@ class EnsembleBuilder:
 
         if not any(different_candidates) or any(updated_candidates):
             self.logger.info("All ensemble candidates the same, no update required")
-            return self.ensemble_history, self.ensemble_nbest, None, None, None
+            return self.ensemble_history, self.ensemble_nbest
 
         targets = cast(np.ndarray, self.targets("ensemble"))  # Sure they exist
         ensemble = self.fit_ensemble(
@@ -586,16 +567,7 @@ class EnsembleBuilder:
                 performance_stamp[f"ensemble_{score_name}_score"] = score
                 self.ensemble_history.append(performance_stamp)
 
-        if return_predictions:
-            return (
-                self.ensemble_history,
-                self.ensemble_nbest,
-                train_pred,
-                valid_pred,
-                test_pred,
-            )
-        else:
-            return self.ensemble_history, self.ensemble_nbest, None, None, None
+        return self.ensemble_history, self.ensemble_nbest
 
     def requires_loss_update(self, runs: Sequence[Run], limit: int | None) -> list[Run]:
         """

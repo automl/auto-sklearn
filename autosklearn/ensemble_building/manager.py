@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import logging.handlers
 import time
@@ -130,10 +130,10 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         self.pynisher_context = pynisher_context
 
         # Store something similar to SMAC's runhistory
-        self.history = []
+        self.history: list[dict[str, Any]] = []
 
         # We only submit new ensembles when there is not an active ensemble job
-        self.futures = []
+        self.futures: list[dask.distributed.Future] = []
 
         # The last criteria is the number of iterations
         self.iteration = 0
@@ -147,7 +147,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         run_info: RunInfo,
         result: RunValue,
         time_left: float,
-    ):
+    ) -> None:
         """
         Returns
         -------
@@ -157,7 +157,8 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         """
         if result.status in (StatusType.STOP, StatusType.ABORT) or smbo._stop:
             return
-        self.build_ensemble(smbo.tae_runner.client)
+        client = getattr(smbo.tae_runner, "client")
+        self.build_ensemble(client)
 
     def build_ensemble(
         self,
@@ -267,7 +268,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
 def fit_and_return_ensemble(
     backend: Backend,
     dataset_name: str,
-    task_type: str,
+    task_type: int,
     metric: Scorer,
     ensemble_size: int,
     ensemble_nbest: int,
@@ -282,13 +283,7 @@ def fit_and_return_ensemble(
     logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
     memory_limit: Optional[int] = None,
     random_state: Optional[Union[int, np.random.RandomState]] = None,
-) -> Tuple[
-    list[dict[str, Any]],
-    int,
-    np.ndarray | None,
-    np.ndarray | None,
-    np.ndarray | None,
-]:
+) -> tuple[list[dict[str, Any]], int | float]:
     """
 
     A short function to fit and create an ensemble. It is just a wrapper to easily send
@@ -362,9 +357,8 @@ def fit_and_return_ensemble(
 
     Returns
     -------
-    List[Tuple[int, float, float, float]]
-        A list with the performance history of this ensemble, of the form
-        [(pandas_timestamp, train_performance, val_performance, test_performance)]
+    (ensemble_history: list[dict[str, Any]], nbest: int | float)
+        The ensemble history and the nbest chosen members
     """
     result = EnsembleBuilder(
         backend=backend,
