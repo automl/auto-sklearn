@@ -86,34 +86,92 @@ def intersection(*items: Iterable[T]) -> set[T]:
     return set(reduce(lambda s1, s2: set(s1) & set(s2), items, items[0]))
 
 
-def itersplit(lst: Iterable[T], func: Callable[[T], bool]) -> tuple[list[T], list[T]]:
-    """Split a list in two based on a predicate
+def cut(
+    lst: Iterable[T],
+    at: int | Callable[[T], bool],
+) -> tuple[list[T], list[T]]:
+    """Cut a list in two at a given index or predicate
 
     Parameters
     ----------
     lst : Iterable[T]
-        The list to split
+        An iterable of items
 
-    func : Callable[[T], bool]
+    at : int | Callable[[T], bool]
+        Where to split at, either an index or a predicate
+
+    Returns
+    -------
+    tuple[list[T], list[T]]
+        The split items
+    """
+    if isinstance(at, int):
+        lst = list(lst)
+        return lst[:at], lst[at:]
+    else:
+        a = []
+        itr = iter(lst)
+        for x in itr:
+            if not at(x):
+                a.append(x)
+                break
+
+        return a, [x] + list(itr)
+
+
+def split_by(
+    lst: Iterable[T],
+    by: Callable[[T], bool],
+    *,
+    split_at_first: bool = False,
+) -> tuple[list[T], list[T]]:
+    """Split a list in two based on a predicate.
+
+    Note
+    ----
+    First element can not contain None
+
+    Parameters
+    ----------
+    lst : Iterable[T]
+        The iterator to split
+
+    by : Callable[[T], bool]
         The predicate to split it on
+
+    split_at_first: bool = False
+        Whether to split at the first occurence of `func == True`
 
     Returns
     -------
     (a: list[T], b: list[T])
-        Everything in a satisfies the func while nothing in b does
+        a is where the func is True and b is where the func was False. If using
+        `split_at_first = True`, b contains everything after the first
+        False occurence.
     """
     a = []
     b = []
-    for x in lst:
-        if func(x):
-            a.append(x)
-        else:
-            b.append(x)
+    if split_at_first:
+        itr = iter(lst)
+        for x in itr:
+            if by(x):
+                a.append(x)
+            else:
+                break
 
-    return a, b
+        return a, list(itr)  # Convert remaining to list
+
+    else:
+        for x in lst:
+            if by(x):
+                a.append(x)
+            else:
+                b.append(x)
+
+        return a, b
 
 
-def bound(val: float, *, low: float, high: float) -> float:
+def bound(val: float, bounds: tuple[float, float]) -> float:
     """Bounds a value between a low and high
 
     .. code:: python
@@ -126,18 +184,15 @@ def bound(val: float, *, low: float, high: float) -> float:
     val : float
         The value to bound
 
-    low : float
-        The low to bound against
-
-    high : float
-        The high to bound against
+    bounds: tuple[foat, float]
+        The bounds to bound the value between (low, high)
 
     Returns
     -------
     float
         The bounded value
     """
-    return max(low, min(val, high))
+    return max(bounds[0], min(val, bounds[1]))
 
 
 def findwhere(itr: Iterable[T], func: Callable[[T], bool], *, default: int = -1) -> int:
@@ -172,13 +227,24 @@ def value_split(
     at: float = 0.5,
     sort: bool = True,
 ) -> tuple[list[T], list[T]]:
-    """Split a list according to it's values.
+    """Split a list according to it's values at a certain percentage.
+
+    Will attempt to sort the values unless specified that it should not `sort`.
+    The endpoints `low` and `high` are assumed to be the min and max of the sorted
+    `lst`.
+
+    The value used for splitting is calculated by
+
+        (1 - `at`) * low + `at` * high
 
     ..code:: python
 
-        #     low            at = 0.75   high
-        # -----|----------------|---------|
-        # 0   20               80        100
+        # min    low           at=0.75  high/max
+        #  |-----|----------------|---------|
+        #  0    20               80        100
+        #
+        #  [----------------------][++++++++]
+        #           split 1          split 2
 
         x = np.linspace(0, 100, 21)
         # [0, 5, 10, ..., 95, 100]
@@ -226,9 +292,9 @@ def value_split(
     pivot_value = (1 - at) * low + (at) * high
 
     if key is None:
-        greater_than_pivot = (lambda x: x >= pivot_value)
+        greater_than_pivot = lambda x: x >= pivot_value
     else:
-        greater_than_pivot = (lambda x: key(x) >= pivot_value)
+        greater_than_pivot = lambda x: key(x) >= pivot_value
 
     pivot_idx = findwhere(lst, greater_than_pivot, default=len(lst))
 
