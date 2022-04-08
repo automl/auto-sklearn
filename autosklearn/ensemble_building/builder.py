@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Sequence
+from typing import Any, Sequence, cast
 
 import logging.handlers
 import multiprocessing
@@ -863,17 +863,21 @@ class EnsembleBuilder:
         float
             The loss for the run
         """
+        targets = self.targets(kind)
+        if targets is None:
+            self.logger.error(f"No targets of {kind}")
+            return np.inf
+
         try:
             predictions = run.predictions(kind, precision=self.precision)
-            targets = self.targets(kind)
-            loss = calculate_loss(
+            loss: float = calculate_loss(  # type: ignore
                 solution=targets,
                 prediction=predictions,
                 task_type=self.task_type,
                 metric=self.metric,
             )
-        except Exception:
-            self.logger.error(f"Error getting loss for {run}: {traceback.format_exc()}")
+        except Exception as e:
+            self.logger.error(f"Error getting loss {run}:{e}{traceback.format_exc()}")
             loss = np.inf
         finally:
             return loss
