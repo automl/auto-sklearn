@@ -2,67 +2,14 @@ from __future__ import annotations
 
 from typing import Callable
 
-import math
 import pickle
 import time
-from pathlib import Path
 
 import numpy as np
 
-from autosklearn.ensemble_building.run import Run
+from autosklearn.ensemble_building import Run
 
-from pytest_cases import fixture, parametrize
-
-from test.conftest import DEFAULT_SEED
-
-
-@fixture
-def make_run(tmp_path: Path) -> Callable[..., Run]:
-    def _make(
-        id: int | None = 2,
-        seed: int = DEFAULT_SEED,
-        budget: float = 0.0,
-        loss: float | None = None,
-        model_size: int | None = None,
-        predictions: list[str] | dict[str, np.ndarray] | None = None,
-    ) -> Run:
-        model_id = f"{seed}_{id}_{budget}"
-        dir = tmp_path / model_id
-
-        if not dir.exists():
-            dir.mkdir()
-
-        # Populate if None
-        if predictions is None:
-            predictions = ["ensemble", "valid", "test"]
-
-        # Convert to dict
-        if isinstance(predictions, list):
-            dummy = np.asarray([[0]])
-            predictions = {kind: dummy for kind in predictions}
-
-        # Write them
-        if isinstance(predictions, dict):
-            for kind, val in predictions.items():
-                fname = f"predictions_{kind}_{seed}_{id}_{budget}.npy"
-                with (dir / fname).open("wb") as f:
-                    np.save(f, val)
-
-        run = Run(dir)
-
-        if loss is not None:
-            run.loss = loss
-
-        # MB
-        if model_size is not None:
-            n_bytes = int(model_size * math.pow(1024, 2))
-            model_path = dir / f"{seed}.{id}.{budget}.model"
-            with model_path.open("wb") as f:
-                f.write(bytearray(n_bytes))
-
-        return run
-
-    return _make
+from pytest_cases import parametrize
 
 
 def test_is_dummy(make_run: Callable[..., Run]) -> None:
@@ -99,7 +46,8 @@ def test_record_modified_times_with_was_modified(make_run: Callable[..., Run]) -
     Expects
     -------
     * Updating the recorded times should not trigger `was_modified`
-    * Should update the recorded times so `was_modified` will give False after being updated
+    * Should update the recorded times so `was_modified` will give False after being
+      updated
     """
     run = make_run()
     path = run.pred_path("ensemble")
@@ -137,9 +85,7 @@ def test_predictions_pickled(make_run: Callable[..., Run]) -> None:
     "precision, expected", [(16, np.float16), (32, np.float32), (64, np.float64)]
 )
 def test_predictions_precision(
-    make_run: Callable[..., Run],
-    precision: int,
-    expected: type
+    make_run: Callable[..., Run], precision: int, expected: type
 ) -> None:
     """
     Expects
