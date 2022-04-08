@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from typing import Any, Tuple
-from typing_extensions import Literal
 
 from pathlib import Path
 
 import numpy as np
+from typing_extensions import Literal
 
 from autosklearn.util.disk import sizeof
 

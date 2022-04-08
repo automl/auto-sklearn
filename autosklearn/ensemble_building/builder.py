@@ -20,12 +20,12 @@ from typing_extensions import Literal
 
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import BINARY_CLASSIFICATION
+from autosklearn.ensemble_building.run import Run, RunID
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.metrics import Scorer, calculate_loss, calculate_score
 from autosklearn.util.functional import bound, cut, intersection, split_by, value_split
 from autosklearn.util.logging_ import get_named_client_logger
 from autosklearn.util.parallel import preload_modules
-from autosklearn.ensemble_building.run import Run, RunID
 
 
 class EnsembleBuilder:
@@ -420,7 +420,7 @@ class EnsembleBuilder:
 
         # Decide if self.max_models_on_disk is an
         if isinstance(self.max_models_on_disc, int):
-            max_models_on_disk = self.max_models_on_disc,
+            max_models_on_disk = (self.max_models_on_disc,)
             memory_limit = None
         elif isinstance(self.max_models_on_disc, float):
             max_models_on_disk = None
@@ -435,7 +435,7 @@ class EnsembleBuilder:
             nbest=self.ensemble_nbest,
             max_models_on_disk=max_models_on_disk,
             memory_limit=memory_limit,
-            performance_range_threshold=self.performance_range_threshold
+            performance_range_threshold=self.performance_range_threshold,
         )
 
         if len(candidates) == 0:
@@ -489,9 +489,8 @@ class EnsembleBuilder:
         # fit the ensemble builder
         previous_candidate_ids = set(previous_candidates.keys())
         current_candidate_ids = set(run.id for run in candidate_models)
-        if (
-            len(previous_candidate_ids ^ current_candidate_ids) > 0
-            or any(run in candidate_models for run in requires_update)
+        if len(previous_candidate_ids ^ current_candidate_ids) > 0 or any(
+            run in candidate_models for run in requires_update
         ):
             ensemble = self.fit_ensemble(selected_keys=candidate_models)
             if ensemble is not None:
@@ -798,7 +797,7 @@ class EnsembleBuilder:
         metric: Scorer | None = None,
         precision: type | None = None,
         targets: np.ndarray | None = None,
-        random_state: int | np.random.RandomState | None = None
+        random_state: int | np.random.RandomState | None = None,
     ) -> EnsembleSelection:
         """TODO
 
@@ -830,8 +829,7 @@ class EnsembleBuilder:
         try:
             precision = precision if precision is not None else self.precision
             predictions_train = [
-                run.predictions("ensemble", precision=precision)
-                for run in runs
+                run.predictions("ensemble", precision=precision) for run in runs
             ]
 
             targets = targets if targets is not None else self.targets("ensemble")

@@ -163,7 +163,13 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         self,
         dask_client: dask.distributed.Client,
     ) -> None:
+        """Build the ensemble
 
+        Parameters
+        ----------
+        dask_client: dask.distributed.Client
+            The dask client to use
+        """
         # The second criteria is elapsed time
         elapsed_time = time.time() - self.start_time
 
