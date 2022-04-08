@@ -13,7 +13,7 @@ RunID = Tuple[int, int, float]
 
 
 class Run:
-    """Class for storing information about a run"""
+    """Class for storing information about a run used during ensemble building"""
 
     def __init__(self, path: Path) -> None:
         """Creates a Run from a path point to the directory of a run
