@@ -57,17 +57,14 @@ class Run:
         """Whether this run is a dummy run or not"""
         return self.num_run == 1
 
-    def pred_modified(self, kind: str) -> bool:
+    def was_modified(self) -> bool:
         """Query for when the ens file was last modified"""
-        if kind not in self.recorded_mtimes:
-            raise ValueError(f"Run has no recorded time for {kind}: {self}")
+        recorded = self.recorded_mtimes.get("ensemble")
+        last = self.pred_path().stat().st_mtime
+        print(recorded, last)
+        return recorded != last
 
-        recorded = self.recorded_mtimes[kind]
-        last = self.pred_path(kind).stat().st_mtime
-
-        return recorded == last
-
-    def pred_path(self, kind: str) -> Path:
+    def pred_path(self, kind: str = "ensemble") -> Path:
         """Get the path to certain predictions"""
         fname = f"predictions_{kind}_{self.seed}_{self.num_run}_{self.budget}.npy"
         return self.dir / fname
@@ -82,7 +79,7 @@ class Run:
 
     def predictions(
         self,
-        kind: str,
+        kind: str = "ensemble",
         precision: int | None = None,
     ) -> np.ndarray:
         """Load the predictions for this run
@@ -122,7 +119,11 @@ class Run:
         return predictions
 
     def unload_cache(self) -> None:
-        """Removes the cache from this object"""
+        """Removes the cache from this object
+
+        We could also enforce that nothing gets pickled to disk with __getstate__
+        but this is simpler and shows expliciyt behaviour in caller code.
+        """
         self._cache = {}
 
     @property

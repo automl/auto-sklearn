@@ -587,7 +587,7 @@ class EnsembleBuilder:
             if run.loss is None or run.loss == np.inf:
                 queue.append(run)
 
-            elif run.loss is not None and run.pred_modified("ensemble"):
+            elif run.loss is not None and run.was_modified():
                 self.logger.debug(f"{run.id} had its predictions modified?")
                 run.record_modified_times()  # re-mark modfied times
                 queue.append(run)
