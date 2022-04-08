@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Tuple
+from typing import Tuple
 
 from pathlib import Path
 
@@ -40,7 +40,7 @@ class Run:
         self._mem_usage: float | None = None
 
         # Items that will be delete when the run is saved back to file
-        self._cache: dict[str, Any] = {}
+        self._cache: dict[str, np.ndarray] = {}
 
         # The recorded time of ensemble/test/valid predictions modified
         self.recorded_mtimes: dict[str, float] = {}
@@ -85,7 +85,7 @@ class Run:
         self,
         kind: Literal["ensemble", "valid", "test"],
         precision: int | None = None,
-    ) -> Path:
+    ) -> np.ndarray:
         """Load the predictions for this run
 
         Parameters
