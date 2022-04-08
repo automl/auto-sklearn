@@ -5,7 +5,6 @@ from typing import Tuple
 from pathlib import Path
 
 import numpy as np
-from typing_extensions import Literal
 
 from autosklearn.util.disk import sizeof
 
@@ -58,7 +57,7 @@ class Run:
         """Whether this run is a dummy run or not"""
         return self.num_run == 1
 
-    def pred_modified(self, kind: Literal["ensemble", "valid", "test"]) -> bool:
+    def pred_modified(self, kind: str) -> bool:
         """Query for when the ens file was last modified"""
         if kind not in self.recorded_mtimes:
             raise ValueError(f"Run has no recorded time for {kind}: {self}")
@@ -68,7 +67,7 @@ class Run:
 
         return recorded == last
 
-    def pred_path(self, kind: Literal["ensemble", "valid", "test"]) -> Path:
+    def pred_path(self, kind: str) -> Path:
         """Get the path to certain predictions"""
         fname = f"predictions_{kind}_{self.seed}_{self.num_run}_{self.budget}.npy"
         return self.dir / fname
@@ -83,14 +82,14 @@ class Run:
 
     def predictions(
         self,
-        kind: Literal["ensemble", "valid", "test"],
+        kind: str,
         precision: int | None = None,
     ) -> np.ndarray:
         """Load the predictions for this run
 
         Parameters
         ----------
-        kind : Literal["ensemble", "valid", "test"]
+        kind : "ensemble" | "test" | "valid"
             The kind of predictions to load
 
         precisions : type | None = None

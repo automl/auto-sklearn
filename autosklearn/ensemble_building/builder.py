@@ -16,7 +16,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pynisher
-from typing_extensions import Literal
 
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import BINARY_CLASSIFICATION
@@ -195,7 +194,7 @@ class EnsembleBuilder:
         runs = [Run.from_dir(dir) for dir in runs_dir.iterdir()]
         return {run.id: run for run in runs}
 
-    def targets(self, kind: Literal["ensemble", "valid", "test"]) -> np.ndarray | None:
+    def targets(self, kind: str = "ensemble") -> np.ndarray | None:
         """The ensemble targets used for training the ensemble
 
         It will attempt to load and cache them in memory but
@@ -492,7 +491,9 @@ class EnsembleBuilder:
         if len(previous_candidate_ids ^ current_candidate_ids) > 0 or any(
             run in candidate_models for run in requires_update
         ):
-            ensemble = self.fit_ensemble(selected_keys=candidate_models)
+            ensemble = self.fit_ensemble(
+                runs=candidate_models
+            )
             if ensemble is not None:
                 self.logger.info(ensemble)
                 ens_perf = ensemble.get_validation_performance()
@@ -792,13 +793,14 @@ class EnsembleBuilder:
     def fit_ensemble(
         self,
         runs: list[Run],
+        targets: np.ndarray,
+        *,
         size: int | None = None,
         task: int | None = None,
         metric: Scorer | None = None,
-        precision: type | None = None,
-        targets: np.ndarray | None = None,
+        precision: int | None = None,
         random_state: int | np.random.RandomState | None = None,
-    ) -> EnsembleSelection:
+    ) -> EnsembleSelection | None:
         """TODO
 
         Parameters
@@ -816,6 +818,8 @@ class EnsembleBuilder:
         metric = metric if metric is not None else self.metric
         rs = random_state if random_state is not None else self.random_state
 
+        ensemble: EnsembleSelection | None
+
         ensemble = EnsembleSelection(
             ensemble_size=size,
             task_type=task,
@@ -832,7 +836,6 @@ class EnsembleBuilder:
                 run.predictions("ensemble", precision=precision) for run in runs
             ]
 
-            targets = targets if targets is not None else self.targets("ensemble")
             ensemble.fit(
                 predictions=predictions_train,
                 labels=targets,
@@ -849,7 +852,7 @@ class EnsembleBuilder:
     def loss(
         self,
         run: Run,
-        kind: Literal["ensemble", "valid", "test"] = "ensemble",
+        kind: str = "ensemble"
     ) -> float:
         """Calculate the loss for a list of runs
 
