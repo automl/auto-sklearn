@@ -19,10 +19,17 @@ import pynisher
 
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import BINARY_CLASSIFICATION
+from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.ensemble_building.run import Run, RunID
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.metrics import Scorer, calculate_loss, calculate_score
-from autosklearn.util.functional import bound, cut, intersection, split_by, value_split
+from autosklearn.util.functional import (
+    bound,
+    cut,
+    findwhere,
+    intersection,
+    split,
+)
 from autosklearn.util.logging_ import get_named_client_logger
 from autosklearn.util.parallel import preload_modules
 
@@ -91,7 +98,8 @@ class EnsembleBuilder:
 
             Keep only models that are better than:
 
-                dummy + (best - dummy) * performance_range_threshold
+                x = performance_range_threshold
+                x * dummy
 
             E.g dummy=2, best=4, thresh=0.5 --> only consider models with loss > 3
 
@@ -149,24 +157,25 @@ class EnsembleBuilder:
         self.performance_range_threshold = performance_range_threshold
 
         # The starting time of the procedure
-        self.start_time = 0
+        self.start_time: float = 0.0
 
         # Track the ensemble performance
-        self.ensemble_history = []
+        self.ensemble_history: list = []
 
         # Keep running knowledge of its validation performance
         self.validation_performance_ = np.inf
 
         # Data we may need
-        datamanager = self.backend.load_datamanager()
+        datamanager: XYDataManager = self.backend.load_datamanager()
         self._y_valid: np.ndarray | None = datamanager.data.get("Y_valid", None)
         self._y_test: np.ndarray | None = datamanager.data.get("Y_test", None)
         self._y_ensemble: np.ndarray | None = None
 
     @property
-    def runs_path(self) -> Path:
+    def previous_candidates_path(self) -> Path:
         """Path to the cached losses we store between runs"""
-        return Path(self.backend.internals_directory) / "ensemble_read_losses.pkl"
+        fname = "previous_ensemble_building_candidates.pkl"
+        return Path(self.backend.internals_directory) / fname
 
     def previous_candidates(self) -> dict[RunID, Run]:
         """Load any previous candidates that were saved from previous runs
@@ -176,8 +185,8 @@ class EnsembleBuilder:
         dict[RunID, Run]
             A dictionary from RunId's to the previous candidates
         """
-        if self.runs_path.exists():
-            with self.runs_path.open("rb") as f:
+        if self.previous_candidates_path.exists():
+            with self.previous_candidates_path.open("rb") as f:
                 return pickle.load(f)
         else:
             return {}
@@ -191,7 +200,7 @@ class EnsembleBuilder:
             A dictionary from RunId's to the available runs
         """
         runs_dir = Path(self.backend.get_runs_directory())
-        runs = [Run.from_dir(dir) for dir in runs_dir.iterdir()]
+        runs = [Run(path=dir) for dir in runs_dir.iterdir()]
         return {run.id: run for run in runs}
 
     def targets(self, kind: str = "ensemble") -> np.ndarray | None:
@@ -229,7 +238,7 @@ class EnsembleBuilder:
         return_predictions: bool = False,
     ) -> tuple[
         list[dict[str, Any]],
-        int,
+        int | float,
         np.ndarray | None,
         np.ndarray | None,
         np.ndarray | None,
@@ -282,6 +291,7 @@ class EnsembleBuilder:
                 time_elapsed = time.time() - process_start_time
                 time_left -= time_elapsed
             else:
+                assert end_at is not None
                 current_time = time.time()
                 if current_time > end_at:
                     break
@@ -309,7 +319,7 @@ class EnsembleBuilder:
                 # ATTENTION: main will start from scratch;
                 # all data structures are empty again
                 try:
-                    self.run_predictions_path.unlink()
+                    self.previous_candidates_path.unlink()
                 except:  # noqa E722
                     pass
 
@@ -357,7 +367,7 @@ class EnsembleBuilder:
         return_predictions: bool = False,
     ) -> tuple[
         list[dict[str, Any]],
-        int,
+        int | float,
         np.ndarray | None,
         np.ndarray | None,
         np.ndarray | None,
@@ -399,14 +409,14 @@ class EnsembleBuilder:
             return self.ensemble_history, self.ensemble_nbest, None, None, None
 
         # Load in information from previous candidates and also runs
-        runs = self.available_runs()
+        available_runs = self.available_runs()
 
         # Update runs with information of available previous candidates
         previous_candidates = self.previous_candidates()
-        runs.update(previous_candidates)
+        available_runs.update(previous_candidates)
 
         # We just need the values now, not the key value pairs {run.id: Run}
-        runs = list(runs.values())
+        runs = list(available_runs.values())
 
         if len(runs) == 0:
             self.logger.debug("Found no runs")
@@ -419,7 +429,7 @@ class EnsembleBuilder:
 
         # Decide if self.max_models_on_disk is an
         if isinstance(self.max_models_on_disc, int):
-            max_models_on_disk = (self.max_models_on_disc,)
+            max_models_on_disk = self.max_models_on_disc
             memory_limit = None
         elif isinstance(self.max_models_on_disc, float):
             max_models_on_disk = None
@@ -428,7 +438,7 @@ class EnsembleBuilder:
             max_models_on_disk = None
             memory_limit = None
 
-        candidates, discarded = self.candidates(
+        candidates, all_discarded = self.candidates(
             runs=runs,
             better_than_dummy=True,
             nbest=self.ensemble_nbest,
@@ -454,53 +464,45 @@ class EnsembleBuilder:
         # Find the intersect between the most groups and use that to fit the ensemble
         intersect = intersection(candidates_set, valid_set, test_set)
         if len(intersect) > 0:
-            candidate_models = sorted(list(intersect))
-            valid_models = candidate_models
-            test_models = candidate_models
+            candidates = list(intersect)
+            candidates = sorted(candidates, key=lambda r: r.id)
+
+            valid_models = candidates
+            test_models = candidates
 
         elif len(candidates_set & valid_set) > 0:
-            candidate_models = sorted(list(candidates_set & valid_set))
-            valid_models = candidate_models
+            intersect = candidates_set & valid_set
+            candidates, discarded = split(candidates, by=lambda r: r in intersect)
+            candidates = sorted(candidates, key=lambda r: r.id)
+
+            valid_models = candidates
             test_models = []
 
         elif len(candidates_set & test_set) > 0:
-            candidate_models = sorted(list(candidates_set & test_set))
-            valid_models = []
-            test_models = candidate_models
+            intersect = candidates_set & test_set
+            candidates, discarded = split(candidates, by=lambda r: r in intersect)
+            candidates = sorted(candidates, key=lambda r: r.id)
 
-        # This has to be the case
-        else:
-            candidate_models = sorted(list(candidates_set))
-            test_models = []
             valid_models = []
+            test_models = candidates
+
+        else:
+            candidates = sorted(candidates, key=lambda r: r.id)
+            discarded = []
+
+            valid_models = []
+            test_models = []
+
+        all_discarded.update(discarded)
 
         # To save on pickle and to allow for fresh predictions, unload the cache
         # before pickling
-        for run in candidate_models:
+        for run in candidates:
             run.unload_cache()
 
         # Save the candidates for the next round
-        with self.runs_path.open("wb") as f:
-            pickle.dump({run.id: run for run in candidate_models}, f)
-
-        # If there was any change from the previous run, either in terms of
-        # runs or one of those runs had its loss updated, then we need to
-        # fit the ensemble builder
-        previous_candidate_ids = set(previous_candidates.keys())
-        current_candidate_ids = set(run.id for run in candidate_models)
-        if len(previous_candidate_ids ^ current_candidate_ids) > 0 or any(
-            run in candidate_models for run in requires_update
-        ):
-            ensemble = self.fit_ensemble(
-                runs=candidate_models
-            )
-            if ensemble is not None:
-                self.logger.info(ensemble)
-                ens_perf = ensemble.get_validation_performance()
-                self.validation_performance_ = min(
-                    self.validation_performance_, ens_perf
-                )
-                self.backend.save_ensemble(ensemble, iteration, self.seed)
+        with self.previous_candidates_path.open("wb") as f:
+            pickle.dump({run.id: run for run in candidates}, f)
 
         # Delete files for models which were not considered candidates
         if len(discarded) > 0:
@@ -512,20 +514,50 @@ class EnsembleBuilder:
                     except Exception as e:
                         self.logger.error(f"Failed to delete files for {run}: \n{e}")
 
+        # If there was any change from the previous run, either in terms of
+        # runs or one of those runs had its loss updated, then we need to
+        # fit the ensemble builder
+        previous_candidate_ids = set(previous_candidates.keys())
+        current_candidate_ids = set(run.id for run in candidates)
+        different_candidates = previous_candidate_ids ^ current_candidate_ids
+
+        updated_candidates = iter(run in candidates for run in requires_update)
+
+        if not any(different_candidates) or any(updated_candidates):
+            self.logger.info("All ensemble candidates the same, no update required")
+            return self.ensemble_history, self.ensemble_nbest, None, None, None
+
+        targets = cast(np.ndarray, self.targets("ensemble"))  # Sure they exist
+        ensemble = self.fit_ensemble(
+            candidates,
+            targets=targets,
+            size=self.ensemble_size,
+            task=self.task_type,
+            metric=self.metric,
+            precision=self.precision,
+            random_state=self.random_state,
+        )
+
+        if ensemble is not None:
+            self.logger.info(str(ensemble))
+            ens_perf = ensemble.get_validation_performance()
+            self.validation_performance_ = min(self.validation_performance_, ens_perf)
+            self.backend.save_ensemble(ensemble, iteration, self.seed)  # type: ignore
+
         # Continue with evaluating the ensemble after making some space
         if ensemble is not None:
             performance_stamp = {"Timestamp": pd.Timestamp.now()}
 
             for kind, score_name, models in [
-                ("ensemble", "optimization", candidate_models),
+                ("ensemble", "optimization", candidates),
                 ("valid", "val", valid_models),
                 ("test", "test", test_models),
             ]:
                 if len(models) == 0:
                     continue
 
-                targets = self.targets(kind)
-                if targets is None:
+                pred_targets = self.targets(kind)
+                if pred_targets is None:
                     self.logger.warning(f"No ensemble targets for {kind}")
                     continue
 
@@ -545,13 +577,14 @@ class EnsembleBuilder:
                         ).transpose()
 
                 score = calculate_score(
-                    solution=targets,
+                    solution=pred_targets,
                     prediction=pred,
                     task_type=self.task_type,
                     metric=self.metric,
                     scoring_functions=None,
                 )
                 performance_stamp[f"ensemble_{score_name}_score"] = score
+                self.ensemble_history.append(performance_stamp)
 
         if return_predictions:
             return (
@@ -563,47 +596,6 @@ class EnsembleBuilder:
             )
         else:
             return self.ensemble_history, self.ensemble_nbest, None, None, None
-
-    def step_memory_split(
-        self,
-        runs: Sequence[Run],
-        limit: float,
-        sort: bool = True,
-    ) -> tuple[list[Run], list[Run]]:
-        """Split runs into
-
-        Parameters
-        ----------
-        runs : Sequence[Run]
-            The runs to consider
-
-        limit : float
-            The memory limit in MB
-
-        Returns
-        -------
-        (keep: list[Run], discarded: list[Run])
-        """
-        largest = max(runs, key=lambda r: r.mem_usage)
-        cutoff = limit - largest.mem_usage
-
-        # Sort by loss and num run
-        if sort:
-            runs = sorted(runs, lambda r: (r.loss, r.num_run))
-
-        runs_with_acc_mem = zip(runs, accumulate(run.mem_usage for run in runs))
-        candidates, discarded = cut(runs_with_acc_mem, at=lambda r: r[1] >= cutoff)
-
-        self.logger.warning(
-            f"Limiting num of models via `memory_limit` float"
-            f" memory_limit={limit}"
-            f" cutoff={cutoff}"
-            f" largest={largest.mem_usage}"
-            f" remaining={len(candidates)}"
-            f" discarded={len(discarded)}"
-        )
-
-        return candidates, discarded
 
     def requires_loss_update(self, runs: Sequence[Run], limit: int | None) -> list[Run]:
         """
@@ -642,7 +634,7 @@ class EnsembleBuilder:
         max_models_on_disk: int | None = None,
         memory_limit: float | None = None,
         performance_range_threshold: float | None = None,
-    ) -> tuple[list[run], list[run]]:
+    ) -> tuple[list[Run], set[Run]]:
         """Get a list of candidates from `runs`
 
         Applies a set of reductions in order of parameters to reach a set of final
@@ -679,28 +671,25 @@ class EnsembleBuilder:
 
         Returns
         -------
-        (candidates: list[Run], discarded: list[Run])
+        (candidates: list[Run], discarded: set[Run])
             A tuple of runs that are candidates and also those that didn't make it
         """
-        all_discarded: set[Run] = {}
+        all_discarded: set[Run] = set()
 
         # We filter out all runs that don't have any predictions for the ensemble
         has_predictions = lambda run: run.pred_path("ensemble").exists()
-        candidates, discarded = split_by(runs, by=has_predictions)
+        candidates, discarded = split(runs, by=has_predictions)
         all_discarded.update(discarded)
 
         if len(candidates) == 0:
             self.logger.debug("No runs with predictions on ensemble data set")
-            return candidates, discarded
+            return candidates, all_discarded
 
         if len(discarded) > 0:
-            self.logger.warn(f"Have no ensemble predictions for {discarded}")
+            self.logger.warning(f"Have no ensemble predictions for {discarded}")
 
         # Get all the ones that have a tangible loss
-        candidates, discarded = split_by(
-            candidates,
-            lambda r: r.loss is not None and r.loss < np.inf,
-        )
+        candidates, discarded = split(candidates, by=lambda r: r.loss < np.inf)
         all_discarded.update(discarded)
 
         if len(candidates) == 0:
@@ -708,7 +697,7 @@ class EnsembleBuilder:
             return candidates, all_discarded
 
         # Further split the candidates into those that are real and dummies
-        dummies, real = split_by(candidates, by=lambda r: r.is_dummy())
+        dummies, real = split(candidates, by=lambda r: r.is_dummy())
         dummies = sorted(dummies, key=lambda r: r.loss)
         dummy_cutoff = dummies[0].loss
 
@@ -717,14 +706,14 @@ class EnsembleBuilder:
             raise RuntimeError("Expected at least one dummy run")
 
         if len(real) == 0:
-            self.logger.warnings("No real runs, using dummies as candidates")
+            self.logger.warning("No real runs, using dummies as candidates")
             candidates = dummies
             return candidates, all_discarded
 
         if better_than_dummy:
             self.logger.debug(f"Using {dummy_cutoff} to filter candidates")
 
-            candidates, discarded = split_by(real, by=lambda r: r.loss < dummy_cutoff)
+            candidates, discarded = split(real, by=lambda r: r.loss < dummy_cutoff)
             all_discarded.update(discarded)
 
             # If there are no real candidates left, use the dummies
@@ -746,14 +735,16 @@ class EnsembleBuilder:
         else:
             nkeep = nbest
 
-        if nkeep is None and max_models_on_disk is not None:
-            nkeep = max_models_on_disk
-        elif nkeep is not None and max_models_on_disk < nkeep:
-            self.logger.warning(
-                f"Limiting {n_candidates} by `max_models_on_disk={max_models_on_disk}`"
-                f"instead of {nkeep} (set from `nbest={nbest}`)"
-            )
-            nkeep = max_models_on_disk
+        if max_models_on_disk is not None:
+            if nkeep is None:
+                nkeep = max_models_on_disk
+            elif max_models_on_disk < nkeep:
+                self.logger.warning(
+                    f"Limiting {n_candidates} by"
+                    f"`max_models_on_disk={max_models_on_disk}`"
+                    f"instead of {nkeep} (set from `nbest={nbest}`)"
+                )
+                nkeep = max_models_on_disk
         else:
             nkeep = nkeep
 
@@ -762,30 +753,39 @@ class EnsembleBuilder:
 
         # If we need to specify how many to keep, keep that many
         if nkeep is not None:
-            candidates, discarded = cut(candidates, at=nkeep)
+            candidates, discarded = cut(candidates, nkeep)
             all_discarded.update(discarded)
             self.logger.info(f"Discarding {len(discarded)}/{n_candidates} runs")
 
         # Choose which ones to discard if there's a memory limit
         if memory_limit is not None:
-            candidates, discarded = self.memory_split(
-                runs=candidates,
-                limit=memory_limit,
-                sort=False,  # Already sorted
+            largest = max(candidates, key=lambda r: r.mem_usage)
+            cutoff = memory_limit - largest.mem_usage
+
+            accumulated_mem_usage = accumulate(r.mem_usage for r in candidates)
+            cutpoint = findwhere(accumulated_mem_usage, lambda mem: mem >= cutoff)
+
+            candidates, discarded = cut(candidates, cutpoint)
+
+            self.logger.warning(
+                "Limiting num of models via `memory_limit` float"
+                f" memory_limit={memory_limit}"
+                f" cutoff={cutoff}"
+                f" largest={largest.mem_usage}"
+                f" remaining={len(candidates)}"
+                f" discarded={len(discarded)}"
             )
             all_discarded.update(discarded)
 
         if performance_range_threshold is not None:
-            high = dummies[0].loss
-            low = candidates[0].loss
-            candidates, discarded = value_split(
-                candidates,
-                high=high,
-                low=low,
-                at=performance_range_threshold,
-                key=lambda run: run.loss,
-                sort=False,  # Already sorted
-            )
+            x = performance_range_threshold
+            worst = dummies[0].loss
+            best = candidates[0].loss
+
+            cutoff = x * best + (1 - x) * worst
+
+            candidates, discarded = cut(candidates, where=lambda r: r.loss >= cutoff)
+
             all_discarded.update(discarded)
 
         return candidates, all_discarded
@@ -849,11 +849,7 @@ class EnsembleBuilder:
             self.logger.debug(f"Fitting the ensemble took {duration} seconds.")
             return ensemble
 
-    def loss(
-        self,
-        run: Run,
-        kind: str = "ensemble"
-    ) -> float:
+    def loss(self, run: Run, kind: str = "ensemble") -> float:
         """Calculate the loss for a list of runs
 
         Parameters

@@ -35,7 +35,7 @@ class Run:
         self.num_run = int(num_run)
         self.budget = float(budget)
 
-        self.loss: float | None = None
+        self.loss: float = np.inf
         self._mem_usage: float | None = None
 
         # Items that will be delete when the run is saved back to file

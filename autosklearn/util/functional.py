@@ -88,7 +88,7 @@ def intersection(*items: Iterable[T]) -> set[T]:
 
 def cut(
     lst: Iterable[T],
-    at: int | Callable[[T], bool],
+    where: int | Callable[[T], bool],
 ) -> tuple[list[T], list[T]]:
     """Cut a list in two at a given index or predicate
 
@@ -105,25 +105,23 @@ def cut(
     tuple[list[T], list[T]]
         The split items
     """
-    if isinstance(at, int):
+    if isinstance(where, int):
         lst = list(lst)
-        return lst[:at], lst[at:]
+        return lst[:where], lst[where:]
     else:
         a = []
         itr = iter(lst)
         for x in itr:
-            if not at(x):
+            if not where(x):
                 a.append(x)
                 break
 
         return a, [x] + list(itr)
 
 
-def split_by(
+def split(
     lst: Iterable[T],
     by: Callable[[T], bool],
-    *,
-    split_at_first: bool = False,
 ) -> tuple[list[T], list[T]]:
     """Split a list in two based on a predicate.
 
@@ -139,36 +137,20 @@ def split_by(
     by : Callable[[T], bool]
         The predicate to split it on
 
-    split_at_first: bool = False
-        Whether to split at the first occurence of `func == True`
-
     Returns
     -------
     (a: list[T], b: list[T])
-        a is where the func is True and b is where the func was False. If using
-        `split_at_first = True`, b contains everything after the first
-        False occurence.
+        a is where the func is True and b is where the func was False.
     """
     a = []
     b = []
-    if split_at_first:
-        itr = iter(lst)
-        for x in itr:
-            if by(x):
-                a.append(x)
-            else:
-                break
+    for x in lst:
+        if by(x):
+            a.append(x)
+        else:
+            b.append(x)
 
-        return a, list(itr)  # Convert remaining to list
-
-    else:
-        for x in lst:
-            if by(x):
-                a.append(x)
-            else:
-                b.append(x)
-
-        return a, b
+    return a, b
 
 
 def bound(val: float, bounds: tuple[float, float]) -> float:
@@ -215,87 +197,3 @@ def findwhere(itr: Iterable[T], func: Callable[[T], bool], *, default: int = -1)
         The first index where func was True
     """
     return next((i for i, t in enumerate(itr) if func(t)), default)
-
-
-@no_type_check
-def value_split(
-    lst: Sequence[T],
-    *,
-    key: Callable[[T], float] | None = None,
-    low: float | None = None,
-    high: float | None = None,
-    at: float = 0.5,
-    sort: bool = True,
-) -> tuple[list[T], list[T]]:
-    """Split a list according to it's values at a certain percentage.
-
-    Will attempt to sort the values unless specified that it should not `sort`.
-    The endpoints `low` and `high` are assumed to be the min and max of the sorted
-    `lst`.
-
-    The value used for splitting is calculated by
-
-        (1 - `at`) * low + `at` * high
-
-    ..code:: python
-
-        # min    low           at=0.75  high/max
-        #  |-----|----------------|---------|
-        #  0    20               80        100
-        #
-        #  [----------------------][++++++++]
-        #           split 1          split 2
-
-        x = np.linspace(0, 100, 21)
-        # [0, 5, 10, ..., 95, 100]
-
-        lower, higher = value_split(x, at=0.6, low=20)
-
-        print(lower, higher)
-        # [0, 5, 10, ..., 75] [80, ..., 100]
-
-    Parameters
-    ----------
-    lst : Sequence[T]
-        The list of items to split
-
-    key : Callable[[T], float] | None = None
-        An optional key to access the values by
-
-    low : float | None = None
-        The lowest value to consider, otherwise will use the minimum in lst
-
-    high : float | None = None
-        The highest value to consider, otherwise will use the maximum in lst
-
-    at : float = 0.5
-        At what perecentage to split at
-
-    sort : bool = True
-        Whether to sort the values, set to False if values are sorted before hand
-
-    Returns
-    -------
-    tuple[list[T], list[T]]
-        The lower and upper parts of the list based on the split
-    """
-    if sort:
-        lst = sorted(lst) if key is None else sorted(lst, key=key)
-
-    if low is None:
-        low = lst[0] if key is None else key(lst[0])
-
-    if high is None:
-        high = lst[-1] if key is None else key(lst[-1])
-
-    # Convex combination of two points
-    pivot_value = (1 - at) * low + (at) * high
-
-    if key is None:
-        greater_than_pivot = lambda x: x >= pivot_value
-    else:
-        greater_than_pivot = lambda x: key(x) >= pivot_value
-
-    pivot_idx = findwhere(lst, greater_than_pivot, default=len(lst))
-
-    return lst[:pivot_idx], lst[pivot_idx:]
