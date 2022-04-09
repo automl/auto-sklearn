@@ -147,8 +147,16 @@ class EnsembleBuilder:
         self.dataset_name = dataset_name
         self.ensemble_size = ensemble_size
         self.ensemble_nbest = ensemble_nbest
-        self.max_models_on_disc = max_models_on_disc
         self.performance_range_threshold = performance_range_threshold
+
+        # Decide if self.max_models_on_disk is a memory limit or model limit
+        self.max_models_on_disc: int | None = None
+        self.model_memory_limit: float | None = None
+
+        if isinstance(max_models_on_disc, int):
+            self.max_models_on_disk = self.max_models_on_disc
+        elif isinstance(self.max_models_on_disc, float):
+            self.model_memory_limit = self.max_models_on_disc
 
         # The starting time of the procedure
         self.start_time: float = 0.0
@@ -356,6 +364,14 @@ class EnsembleBuilder:
     ) -> tuple[list[dict[str, Any]], int | float]:
         """Run the main loop of ensemble building
 
+        The process is:
+        * Load all available runs + previous candidates (if any)
+        * Update the loss of those that require
+        * From these runs, get a list of candidates
+        * Save candidates
+        * Delete models that are not candidates
+        * Build an ensemble from the candidates if there are new candidates
+
         Parameters
         ----------
         time_left : float
@@ -408,23 +424,16 @@ class EnsembleBuilder:
         for run in requires_update:
             run.loss = self.loss(run, kind="ensemble")
 
-        # Decide if self.max_models_on_disk is an
-        if isinstance(self.max_models_on_disc, int):
-            max_models_on_disk = self.max_models_on_disc
-            memory_limit = None
-        elif isinstance(self.max_models_on_disc, float):
-            max_models_on_disk = None
-            memory_limit = self.max_models_on_disc
-        else:
-            max_models_on_disk = None
-            memory_limit = None
+        runs_keep, runs_delete = self.requires_deletion(
+            runs,
+            max_models=self.max_models_on_disk,
+            memory_limit=self.model_memory_limit,
+        )
 
         candidates, all_discarded = self.candidates(
-            runs=runs,
+            runs_keep,
             better_than_dummy=True,
             nbest=self.ensemble_nbest,
-            max_models_on_disk=max_models_on_disk,
-            memory_limit=memory_limit,
             performance_range_threshold=self.performance_range_threshold,
         )
 
@@ -486,8 +495,8 @@ class EnsembleBuilder:
             pickle.dump({run.id: run for run in candidates}, f)
 
         # Delete files for models which were not considered candidates
-        if len(discarded) > 0:
-            for run in discarded:
+        if any(runs_delete):
+            for run in runs_delete:
                 if not run.is_dummy():
                     try:
                         shutil.rmtree(run.dir)
@@ -603,8 +612,6 @@ class EnsembleBuilder:
         *,
         better_than_dummy: bool = False,
         nbest: int | float | None = None,
-        max_models_on_disk: int | None = None,
-        memory_limit: float | None = None,
         performance_range_threshold: float | None = None,
     ) -> tuple[list[Run], set[Run]]:
         """Get a list of candidates from `runs`
@@ -628,12 +635,7 @@ class EnsembleBuilder:
             The nbest models to select. If `int`, acts as an absolute limit.
             If `float`, acts as a percentage of available candidates.
 
-        max_models_on_disk : int | None
-            The maximum amount of models allowed on disk. If the number of candidates
-            exceed this limit after previous filters applied, this will further
-            reduce the candidates.
-
-        memory_limit : float | None
+        model_memory_limit : float | None
             A maximum memory limit in MB for the runs to occupy. If the candidates at
             this point exceed this limit, the best n candidates that fit into this limit
             will be chosen.
@@ -707,47 +709,13 @@ class EnsembleBuilder:
         else:
             nkeep = nbest
 
-        if max_models_on_disk is not None:
-            if nkeep is None:
-                nkeep = max_models_on_disk
-            elif max_models_on_disk < nkeep:
-                self.logger.warning(
-                    f"Limiting {n_candidates} by"
-                    f"`max_models_on_disk={max_models_on_disk}`"
-                    f"instead of {nkeep} (set from `nbest={nbest}`)"
-                )
-                nkeep = max_models_on_disk
-        else:
-            nkeep = nkeep
-
         # Sort the candidates so that they ordered by best loss, using num_run for tie
         candidates = sorted(candidates, key=lambda r: (r.loss, r.num_run))
 
-        # If we need to specify how many to keep, keep that many
         if nkeep is not None:
             candidates, discarded = cut(candidates, nkeep)
             all_discarded.update(discarded)
             self.logger.info(f"Discarding {len(discarded)}/{n_candidates} runs")
-
-        # Choose which ones to discard if there's a memory limit
-        if memory_limit is not None:
-            largest = max(candidates, key=lambda r: r.mem_usage)
-            cutoff = memory_limit - largest.mem_usage
-
-            accumulated_mem_usage = accumulate(r.mem_usage for r in candidates)
-            cutpoint = findwhere(accumulated_mem_usage, lambda mem: mem >= cutoff)
-
-            candidates, discarded = cut(candidates, cutpoint)
-
-            self.logger.warning(
-                "Limiting num of models via `memory_limit` float"
-                f" memory_limit={memory_limit}"
-                f" cutoff={cutoff}"
-                f" largest={largest.mem_usage}"
-                f" remaining={len(candidates)}"
-                f" discarded={len(discarded)}"
-            )
-            all_discarded.update(discarded)
 
         if performance_range_threshold is not None:
             x = performance_range_threshold
@@ -759,6 +727,11 @@ class EnsembleBuilder:
             candidates, discarded = cut(candidates, where=lambda r: r.loss >= cutoff)
 
             all_discarded.update(discarded)
+
+        # Ensure there's always at least one candidate
+        if not any(candidates):
+            sorted_discarded = sorted(all_discarded, key=lambda r: r.loss)
+            candidates, all_discarded = sorted_discarded[:1], set(sorted_discarded[1:])
 
         return candidates, all_discarded
 
@@ -820,6 +793,66 @@ class EnsembleBuilder:
             duration = time.time() - start_time
             self.logger.debug(f"Fitting the ensemble took {duration} seconds.")
             return ensemble
+
+    def requires_deletion(
+        self,
+        runs: Sequence[Run],
+        *,
+        max_models: int | None = None,
+        memory_limit: float | None = None,
+    ) -> tuple[list[Run], set[Run]]:
+        """Cut a list of runs into those to keep and those to delete
+
+        If neither params are specified, this method should do nothing.
+
+        Parameters
+        ----------
+        runs : Sequence[Run]
+            The runs to check
+
+        max_models : int | None = None
+            The maximum amount of models to have on disk. Leave `None` for no effect
+
+        memory_limit : float | None = None
+            The memory limit in MB, leave `None` for no effect
+
+        Returns
+        -------
+        (keep: list[Run], delete: set[Run])
+            The list of runs to keep and those to delete
+        """
+        if memory_limit is None and max_models is None:
+            return list(runs), set()
+
+        # Start with keep all runs and deleteing None
+        keep = sorted(runs, key=lambda r: (r.loss, r.num_run))
+        delete: set[Run] = set()
+
+        if max_models is not None and max_models > len(runs):
+            keep, to_delete = cut(keep, max_models)
+            delete.update(to_delete)
+
+        if memory_limit is not None:
+            largest = max(runs, key=lambda r: r.mem_usage)
+            cutoff = memory_limit - largest.mem_usage
+
+            accumulated_mem_usage = accumulate(r.mem_usage for r in runs)
+
+            cutpoint = findwhere(accumulated_mem_usage, lambda mem: mem >= cutoff)
+            keep, to_delete = cut(keep, cutpoint)
+
+            if any(to_delete):
+                self.logger.warning(
+                    "Limiting num of models via `memory_limit`"
+                    f" memory_limit={memory_limit}"
+                    f" cutoff={cutoff}"
+                    f" largest={largest.mem_usage}"
+                    f" remaining={len(keep)}"
+                    f" discarded={len(to_delete)}"
+                )
+                delete.update(to_delete)
+
+        return keep, delete
 
     def loss(self, run: Run, kind: str = "ensemble") -> float:
         """Calculate the loss for a list of runs
