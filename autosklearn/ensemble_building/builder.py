@@ -23,7 +23,7 @@ from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.ensemble_building.run import Run, RunID
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.metrics import Scorer, calculate_loss, calculate_score
-from autosklearn.util.functional import bound, cut, findwhere, intersection, split
+from autosklearn.util.functional import cut, findwhere, split
 from autosklearn.util.logging_ import get_named_client_logger
 from autosklearn.util.parallel import preload_modules
 
@@ -428,66 +428,78 @@ class EnsembleBuilder:
             run.record_modified_times()  # So we don't count as modified next time
             run.loss = self.loss(run, kind="ensemble")
 
-        runs_keep, runs_to_delete = self.requires_deletion(
-            runs,
-            max_models=self.max_models_on_disk,
-            memory_limit=self.model_memory_limit,
-        )
+        # Get the dummy and real runs
+        dummies, candidates = split(runs, by=lambda r: r.is_dummy())
 
-        candidates, all_discarded = self.candidates(
-            runs_keep,
-            better_than_dummy=True,
-            nbest=self.ensemble_nbest,
-            performance_range_threshold=self.performance_range_threshold,
-        )
+        # We see if we need to delete any of the real runs before we waste compute
+        # on evaluating their candidacy for ensemble building
+        if any(candidates):
+            candidates, to_delete = self.requires_deletion(
+                candidates,
+                max_models=self.max_models_on_disk,
+                memory_limit=self.model_memory_limit,
+            )
 
-        if len(candidates) == 0:
-            self.logger.debug("No viable candidates found for ensemble building")
-            return self.ensemble_history, self.ensemble_nbest
+            # If there are no candidates left, we just keep the best one
+            if not any(candidates):
+                best = sorted(to_delete, key=lambda r: (r.loss, r.num_run))[0]
+                candidates = [best]
+                to_delete.remove(best)
+
+            self.delete_runs(to_delete)
+
+        # If there are any candidates, perform candidates selection
+        if any(candidates):
+            candidates, to_delete = self.candidate_selection(
+                runs=candidates,
+                dummies=dummies,
+                better_than_dummy=True,
+                nbest=self.ensemble_nbest,
+                performance_range_threshold=self.performance_range_threshold,
+            )
+            self.delete_runs(to_delete)
+        else:
+            candidates = dummies
+            self.logger.warning("No real runs to build ensemble from")
 
         # Get a set representation of them as we will begin doing intersections
         # Not here that valid_set and test_set are both subsets of candidates_set
+        # ... then find intersect and use that to fit the ensemble
         candidates_set = set(candidates)
-        valid_set = {r for r in candidates if r.pred_path("valid").exists()}
-        test_set = {r for r in candidates if r.pred_path("test").exists()}
+        valid_subset = {r for r in candidates if r.pred_path("valid").exists()}
+        test_subset = {r for r in candidates if r.pred_path("test").exists()}
 
-        if len(valid_set & test_set) == 0 and len(test_set) > 0 and len(valid_set) > 0:
+        intersect = valid_subset & test_subset
+        if len(intersect) == 0 and len(test_subset) > 0 and len(valid_subset) > 0:
             self.logger.error("valid_set and test_set not empty but do not overlap")
             return self.ensemble_history, self.ensemble_nbest
 
-        # Find the intersect between the most groups and use that to fit the ensemble
-        intersect = intersection(candidates_set, valid_set, test_set)
+        # Try to use the runs which have the most kinds of preds, otherwise just use all
         if len(intersect) > 0:
-            candidates = list(intersect)
-            candidates = sorted(candidates, key=lambda r: r.id)
-
+            candidates = sorted(intersect, key=lambda r: r.id)
             valid_models = candidates
             test_models = candidates
 
-        elif len(candidates_set & valid_set) > 0:
-            intersect = candidates_set & valid_set
-            candidates, discarded = split(candidates, by=lambda r: r in intersect)
-            candidates = sorted(candidates, key=lambda r: r.id)
+            self.delete_runs(candidates_set - intersect)
 
+        elif len(valid_subset) > 0:
+            candidates = sorted(valid_subset, key=lambda r: r.id)
             valid_models = candidates
             test_models = []
 
-        elif len(candidates_set & test_set) > 0:
-            intersect = candidates_set & test_set
-            candidates, discarded = split(candidates, by=lambda r: r in intersect)
-            candidates = sorted(candidates, key=lambda r: r.id)
+            self.delete_runs(candidates_set - valid_subset)
 
+        elif len(test_subset) > 0:
+            candidates = sorted(test_subset, key=lambda r: r.id)
             valid_models = []
             test_models = candidates
+
+            self.delete_runs(candidates_set - test_subset)
 
         else:
-            candidates = sorted(candidates, key=lambda r: r.id)
-            discarded = []
-
+            candidates = sorted(candidates_set, key=lambda r: r.id)
             valid_models = []
             test_models = []
-
-        all_discarded.update(discarded)
 
         # To save on pickle and to allow for fresh predictions, unload the cache
         # before pickling
@@ -498,20 +510,16 @@ class EnsembleBuilder:
         with self.previous_candidates_path.open("wb") as f:
             pickle.dump({run.id: run for run in candidates}, f)
 
-        # Delete files for models which were not considered candidates
-        if any(runs_to_delete):
-            self.delete_runs(runs_to_delete)
-
         # If there was any change from the previous run, either in terms of
         # runs or one of those runs had its loss updated, then we need to
         # fit the ensemble builder
-        previous_candidate_ids = set(previous_candidates.keys())
+        previous_candidate_ids = set(previous_candidates)
         current_candidate_ids = set(run.id for run in candidates)
-        different_candidates = previous_candidate_ids ^ current_candidate_ids
+        difference = previous_candidate_ids ^ current_candidate_ids
 
         updated_candidates = iter(run in candidates for run in requires_update)
 
-        if not any(different_candidates) or any(updated_candidates):
+        if not any(difference) or any(updated_candidates):
             self.logger.info("All ensemble candidates the same, no update required")
             return self.ensemble_history, self.ensemble_nbest
 
@@ -603,25 +611,29 @@ class EnsembleBuilder:
 
         return queue
 
-    def candidates(
+    def candidate_selection(
         self,
         runs: Sequence[Run],
+        dummies: Run | list[Run],
         *,
         better_than_dummy: bool = False,
         nbest: int | float | None = None,
         performance_range_threshold: float | None = None,
     ) -> tuple[list[Run], set[Run]]:
-        """Get a list of candidates from `runs`
+        """Get a list of candidates from `runs`, garuanteeing at least one
 
         Applies a set of reductions in order of parameters to reach a set of final
         candidates.
 
-        Expects at least one `dummy` run in `runs`.
+        Expects at least one `dummies` run.
 
         Parameters
         ----------
         runs : Sequence[Run]
             The runs to evaluate candidates from.
+
+        dummies: Run | Sequence[Run]
+            The dummy run to base from
 
         better_than_dummy: bool = False
             Whether the run must be better than the best dummy run to be a candidate.
@@ -645,45 +657,40 @@ class EnsembleBuilder:
         (candidates: list[Run], discarded: set[Run])
             A tuple of runs that are candidates and also those that didn't make it
         """
+        if isinstance(dummies, Run):
+            dummies = [dummies]
+
+        assert len(dummies) > 0 and len(runs) > 0, "At least 1 real run and dummy run"
+
         all_discarded: set[Run] = set()
 
         # We filter out all runs that don't have any predictions for the ensemble
-        has_predictions = lambda run: run.pred_path("ensemble").exists()
-        candidates, discarded = split(runs, by=has_predictions)
+        candidates, discarded = split(
+            runs, by=lambda run: run.pred_path("ensemble").exists()
+        )
         all_discarded.update(discarded)
 
         if len(candidates) == 0:
-            self.logger.debug("No runs with predictions on ensemble data set")
-            return candidates, all_discarded
+            self.logger.debug("No runs with predictions on ensemble set, using dummies")
+            return dummies, all_discarded
 
-        if len(discarded) > 0:
-            self.logger.warning(f"Have no ensemble predictions for {discarded}")
+        for run in discarded:
+            self.logger.warning(f"Have no ensemble predictions for {run}")
 
         # Get all the ones that have a tangible loss
-        candidates, discarded = split(candidates, by=lambda r: r.loss < np.inf)
+        candidates, discarded = split(
+            candidates,
+            by=lambda r: r.loss < np.inf,
+        )
         all_discarded.update(discarded)
 
         if len(candidates) == 0:
-            self.logger.debug("No runs with a usable loss")
-            return candidates, all_discarded
-
-        # Further split the candidates into those that are real and dummies
-        dummies, candidates = split(candidates, by=lambda r: r.is_dummy())
-        n_real = len(candidates)
-
-        if len(dummies) == 0:
-            self.logger.error("Expected at least one dummy run")
-            raise ValueError("Expected at least one dummy run")
-
-        dummies = sorted(dummies, key=lambda r: r.loss)
-        dummy_cutoff = dummies[0].loss
-
-        if len(candidates) == 0:
-            self.logger.warning("No real runs, using dummies as candidates")
-            candidates = dummies
-            return candidates, all_discarded
+            self.logger.debug("No runs with a usable loss, using dummies")
+            return dummies, all_discarded
 
         if better_than_dummy:
+            dummies = sorted(dummies, key=lambda r: r.loss)
+            dummy_cutoff = dummies[0].loss
             self.logger.debug(f"Using {dummy_cutoff} to filter candidates")
 
             candidates, discarded = split(
@@ -694,32 +701,30 @@ class EnsembleBuilder:
 
             # If there are no real candidates left, use the dummies
             if len(candidates) == 0:
-                candidates = dummies
-                if n_real > 0:
-                    self.logger.warning(
-                        "No models better than random - using Dummy loss!"
-                        f"\n\tNumber of models besides current dummy model: {n_real}"
-                        f"\n\tNumber of dummy models: {len(dummies)}",
-                    )
-
-        n_candidates = len(candidates)
-
-        # Decide how many instanceto keep
-        nkeep: int | None
-        if isinstance(nbest, float):
-            nkeep = int(bound(n_candidates * nbest, bounds=(1, n_candidates)))
-        elif isinstance(nbest, int):
-            nkeep = int(bound(nbest, bounds=(1, n_candidates)))
-        else:
-            nkeep = None
+                self.logger.warning(
+                    "No models better than random - using Dummy loss!"
+                    f"\n\tModels besides current dummy model: {len(candidates)}"
+                    f"\n\tDummy models: {len(dummies)}",
+                )
+                return dummies, all_discarded
 
         # Sort the candidates so that they ordered by best loss, using num_run for tie
         candidates = sorted(candidates, key=lambda r: (r.loss, r.num_run))
 
-        if nkeep is not None:
+        if nbest is not None:
+            # Determine how many to keep, always keeping one
+            if isinstance(nbest, float):
+                nkeep = int(len(candidates) * nbest)
+
             candidates, discarded = cut(candidates, nkeep)
+            self.logger.info(f"Discarding {len(discarded)}/{len(candidates)} runs")
+
+            # Always preserve at least one, the best
+            if len(candidates) == 0:
+                candidates, discared = cut(discarded, 1)
+                self.logger.warning("nbest too aggresive, using best")
+
             all_discarded.update(discarded)
-            self.logger.info(f"Discarding {len(discarded)}/{n_candidates} runs")
 
         if performance_range_threshold is not None:
             x = performance_range_threshold
@@ -730,12 +735,12 @@ class EnsembleBuilder:
 
             candidates, discarded = cut(candidates, where=lambda r: r.loss >= cutoff)
 
-            all_discarded.update(discarded)
+            # Always preserve at least one, the best
+            if len(candidates) == 0:
+                candidates, discared = cut(discarded, 1)
+                self.logger.warning("No models in performance range, using best")
 
-        # Ensure there's always at least one candidate
-        if not any(candidates):
-            sorted_discarded = sorted(all_discarded, key=lambda r: r.loss)
-            candidates, all_discarded = sorted_discarded[:1], set(sorted_discarded[1:])
+            all_discarded.update(discarded)
 
         return candidates, all_discarded
 
@@ -828,7 +833,7 @@ class EnsembleBuilder:
         if memory_limit is None and max_models is None:
             return list(runs), set()
 
-        # Start with keep all runs and deleteing None
+        # Start with keep all runs and dummies, deleteing None
         keep = sorted(runs, key=lambda r: (r.loss, r.num_run))
         delete: set[Run] = set()
 
@@ -900,8 +905,8 @@ class EnsembleBuilder:
         runs : Sequence[Run]
             The runs to delete
         """
-        real_runs = iter(run for run in runs if not run.is_dummy())
-        for run in real_runs:
+        items = iter(run for run in runs if not run.is_dummy() and run.dir.exists())
+        for run in items:
             try:
                 shutil.rmtree(run.dir)
                 self.logger.info(f"Deleted files for {run}")
