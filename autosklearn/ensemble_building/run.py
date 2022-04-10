@@ -61,7 +61,6 @@ class Run:
         """Query for when the ens file was last modified"""
         recorded = self.recorded_mtimes.get("ensemble")
         last = self.pred_path().stat().st_mtime
-        print(recorded, last)
         return recorded != last
 
     def pred_path(self, kind: str = "ensemble") -> Path:
@@ -133,6 +132,9 @@ class Run:
 
     def __hash__(self) -> int:
         return hash(self.id)
+
+    def __repr__(self) -> str:
+        return f"Run(id={self.id}, loss={self.loss})"
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Run) and other.id == self.id

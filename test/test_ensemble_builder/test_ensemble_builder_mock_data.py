@@ -10,13 +10,7 @@ import numpy as np
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.ensemble_building.builder import (
-    Y_ENSEMBLE,
-    Y_TEST,
-    Y_VALID,
-    EnsembleBuilder,
-    Run,
-)
+from autosklearn.ensemble_building import EnsembleBuilder, Run
 from autosklearn.metrics import roc_auc
 
 from pytest_cases import fixture, parametrize
@@ -25,21 +19,20 @@ from unittest.mock import patch
 from test.conftest import DEFAULT_SEED
 
 
-@fixture
-def dummy_backend(
-    tmp_path: Path,
-    make_sklearn_dataset: Callable[..., XYDataManager],
-    make_backend: Callable[..., Backend],
-) -> Backend:
-    datamanager = make_sklearn_dataset(
-        name="breast_cancer",
-        task=BINARY_CLASSIFICATION,
-        feat_type="numerical",  # They're all numerical
-        as_datamanager=True,
-    )
-    backend = make_backend(path=tmp_path / "backend")
-    backend.save_datamanager(datamanager)
-    return backend
+def test_available_runs(make_ensemble_builder: Callable[..., EnsembleBuilder]) -> None:
+    builder = make_ensemble_builder()
+    runsdir = Path(builder.backend.get_runs_directory())
+
+    ids = {(0, i, 0.0) for i in range(1, 10)}
+    paths = [runsdir / f"{s}_{n}_{b}" for s, n, b in ids]
+
+    for path in paths:
+        path.mkdir()
+
+    available_runs = builder.available_runs()
+
+    for run_id in available_runs.keys():
+        assert run_id in ids
 
 
 @parametrize("n_models", [20, 50])
@@ -47,13 +40,15 @@ def dummy_backend(
 @parametrize("mem_largest_mult", [1, 2, 10])
 @parametrize("n_expected", [1, 3, 5, 10])
 @parametrize("largest_is_best", [True, False])
-def test_max_models_on_disc_with_float_selects_expected_models(
+def test_candidates_memory_limit(
     n_models: int,
     mem_model: int,
     mem_largest_mult: int,
     n_expected: int,
     largest_is_best: bool,
-    dummy_backend: Backend,
+    backend: Backend,
+    make_ensemble_builder: Callable[..., EnsembleBuilder],
+    make_run: Callable[..., Run],
 ) -> None:
     """
     Parameters
@@ -75,8 +70,8 @@ def test_max_models_on_disc_with_float_selects_expected_models(
 
     Fixtures
     --------
-    dummy_backend: Backend
-        Just a backend that's valid, contents don't matter for this test
+    make_ensemble_builder: Callable[..., EnsembleBuilder]
+    make_run: Callable[..., Run]
 
     Note
     ----
@@ -94,56 +89,36 @@ def test_max_models_on_disc_with_float_selects_expected_models(
     * The ensemble builder should select the expected number of models given the
       calculated `max_models_on_disc`.
     """
-
-    # These are arranged so the last one is best, with the lose loss
     runs = [
-        Run(
-            seed=DEFAULT_SEED,
-            num_run=n,
-            budget=0.0,
-            loss=10 * -n,
-            loaded=1,
-            mem_usage=mem_model,
-            ens_file=f"pred{n}",
-        )
+        make_run(id=n, loss=10 * n, mem_usage=mem_model, backend=backend)
         for n in range(1, n_models + 1)
     ]
 
     mem_largest = mem_model * mem_largest_mult
     if largest_is_best:
-        runs[-1].mem_usage = mem_largest
+        runs[-1]._mem_usage = mem_largest
     else:
-        runs[0].mem_usage = mem_largest
+        runs[0]._mem_usage = mem_largest
 
     nbest = sorted(runs, key=lambda run: run.loss)[:n_expected]
     mem_for_nbest = sum(run.mem_usage for run in nbest)
+    model_memory_limit = float(mem_for_nbest + mem_largest)  # type: ignore
 
-    slack = mem_largest  # Slack introduced is the size of the largest model
-    max_models_on_disc = float(mem_for_nbest + slack)  # type: ignore
-    print(max_models_on_disc)
-
-    ensbuilder = EnsembleBuilder(
-        backend=dummy_backend,
-        dataset_name="TEST",
-        task_type=BINARY_CLASSIFICATION,
-        metric=roc_auc,
-        seed=DEFAULT_SEED,  # important to find the test files
-        max_models_on_disc=max_models_on_disc,
-        memory_limit=None,
+    builder = make_ensemble_builder(
+        max_models_on_disc=model_memory_limit,
+        backend=backend,
     )
 
-    # Enter the models, with each model being progressibly better
-    ensbuilder._runs = {f"pred{i}": run for i, run in enumerate(runs, start=1)}
-    ensbuilder._run_predictions = {
-        f"pred{n}": {Y_ENSEMBLE: np.array([1])} for n in range(1, n_models + 1)
-    }
+    candidates, discarded = builder.candidates(
+        runs,
+        model_memory_limit=model_memory_limit,
+    )
 
-    sel_keys = ensbuilder.get_n_best_preds()
+    # We expect to save the first n runs as those are the ones with thel lowest loss
+    expected = runs[:n_expected]
 
-    # The last expected_to_save models should be saved, the range iters backwards
-    expected = [f"pred{n}" for n in range(n_models, n_models - n_expected, -1)]
-
-    assert len(sel_keys) == len(expected) and sel_keys == expected
+    assert expected == candidates
+    assert set(runs) - set(candidates) == set(discarded)
 
 
 @parametrize("n_models", [50, 10, 2, 1])

@@ -32,7 +32,7 @@ def tmp_dir(tmp_path: Path) -> str:
 
 
 @fixture
-def make_backend() -> Callable[..., Backend]:
+def make_backend(tmp_path: Path) -> Callable[..., Backend]:
     """Make a backend
 
     Parameters
@@ -50,9 +50,12 @@ def make_backend() -> Callable[..., Backend]:
     """
     # TODO redo once things use paths
     def _make(
-        path: str | Path,
+        path: str | Path | None = None,
         template: Path | Backend | None = None,
     ) -> Backend:
+        if path is None:
+            path = tmp_path / "backend"
+
         _path = Path(path) if not isinstance(path, Path) else path
         assert not _path.exists(), "Try passing path / 'backend'"
 

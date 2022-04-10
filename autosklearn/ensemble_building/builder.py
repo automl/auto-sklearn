@@ -420,8 +420,12 @@ class EnsembleBuilder:
             return self.ensemble_history, self.ensemble_nbest
 
         # Calculate the loss for those that require it
-        requires_update = self.requires_loss_update(runs, limit=self.read_at_most)
+        requires_update = self.requires_loss_update(runs)
+        if self.read_at_most:
+            requires_update = requires_update[: self.read_at_most]
+
         for run in requires_update:
+            run.record_modified_times()  # So we don't count as modified next time
             run.loss = self.loss(run, kind="ensemble")
 
         runs_keep, runs_delete = self.requires_deletion(
@@ -578,7 +582,10 @@ class EnsembleBuilder:
 
         return self.ensemble_history, self.ensemble_nbest
 
-    def requires_loss_update(self, runs: Sequence[Run], limit: int | None) -> list[Run]:
+    def requires_loss_update(
+        self,
+        runs: Sequence[Run],
+    ) -> list[Run]:
         """
 
         Parameters
@@ -592,19 +599,15 @@ class EnsembleBuilder:
             The runs that require a loss to be calculated
         """
         queue = []
-        for run in runs:
-            if run.loss is None or run.loss == np.inf:
+        for run in sorted(runs, key=lambda run: run.recorded_mtimes["ensemble"]):
+            if run.loss == np.inf:
                 queue.append(run)
 
-            elif run.loss is not None and run.was_modified():
+            elif run.was_modified():
                 self.logger.debug(f"{run.id} had its predictions modified?")
-                run.record_modified_times()  # re-mark modfied times
                 queue.append(run)
 
-        if limit is not None:
-            return queue[:limit]
-        else:
-            return queue
+        return queue
 
     def candidates(
         self,
@@ -671,15 +674,17 @@ class EnsembleBuilder:
             return candidates, all_discarded
 
         # Further split the candidates into those that are real and dummies
-        dummies, real = split(candidates, by=lambda r: r.is_dummy())
-        dummies = sorted(dummies, key=lambda r: r.loss)
-        dummy_cutoff = dummies[0].loss
+        dummies, candidates = split(candidates, by=lambda r: r.is_dummy())
+        n_real = len(candidates)
 
         if len(dummies) == 0:
             self.logger.error("Expected at least one dummy run")
-            raise RuntimeError("Expected at least one dummy run")
+            raise ValueError("Expected at least one dummy run")
 
-        if len(real) == 0:
+        dummies = sorted(dummies, key=lambda r: r.loss)
+        dummy_cutoff = dummies[0].loss
+
+        if len(candidates) == 0:
             self.logger.warning("No real runs, using dummies as candidates")
             candidates = dummies
             return candidates, all_discarded
@@ -687,16 +692,19 @@ class EnsembleBuilder:
         if better_than_dummy:
             self.logger.debug(f"Using {dummy_cutoff} to filter candidates")
 
-            candidates, discarded = split(real, by=lambda r: r.loss < dummy_cutoff)
+            candidates, discarded = split(
+                candidates,
+                by=lambda r: r.loss < dummy_cutoff,
+            )
             all_discarded.update(discarded)
 
             # If there are no real candidates left, use the dummies
             if len(candidates) == 0:
                 candidates = dummies
-                if len(real) > 0:
+                if n_real > 0:
                     self.logger.warning(
                         "No models better than random - using Dummy loss!"
-                        f"\n\tNumber of models besides current dummy model: {len(real)}"
+                        f"\n\tNumber of models besides current dummy model: {n_real}"
                         f"\n\tNumber of dummy models: {len(dummies)}",
                     )
 
@@ -706,8 +714,10 @@ class EnsembleBuilder:
         nkeep: int | None
         if isinstance(nbest, float):
             nkeep = int(bound(n_candidates * nbest, bounds=(1, n_candidates)))
+        elif isinstance(nbest, int):
+            nkeep = int(bound(nbest, bounds=(1, n_candidates)))
         else:
-            nkeep = nbest
+            nkeep = None
 
         # Sort the candidates so that they ordered by best loss, using num_run for tie
         candidates = sorted(candidates, key=lambda r: (r.loss, r.num_run))

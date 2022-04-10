@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Callable, Iterable, TypeVar
 
 from functools import reduce
+from itertools import tee, chain
 
 import numpy as np
 
@@ -87,7 +88,7 @@ def intersection(*items: Iterable[T]) -> set[T]:
 
 
 def cut(
-    lst: Iterable[T],
+    itr: Iterable[T],
     where: int | Callable[[T], bool],
 ) -> tuple[list[T], list[T]]:
     """Cut a list in two at a given index or predicate
@@ -106,17 +107,18 @@ def cut(
         The split items
     """
     if isinstance(where, int):
-        lst = list(lst)
+        lst = list(itr)
         return lst[:where], lst[where:]
     else:
         a = []
-        itr = iter(lst)
-        for x in itr:
+        itr2 = iter(itr)
+        for x in itr2:
             if not where(x):
                 a.append(x)
+            else:
                 break
 
-        return a, [x] + list(itr)
+        return a, [x] + list(itr2)
 
 
 def split(
@@ -197,3 +199,38 @@ def findwhere(itr: Iterable[T], func: Callable[[T], bool], *, default: int = -1)
         The first index where func was True
     """
     return next((i for i, t in enumerate(itr) if func(t)), default)
+
+
+def pairs(itr: Iterable[T]) -> Iterable[tuple[T, T]]:
+    """An iterator over pairs of items in the iterator
+
+    ..code:: python
+
+        # Check if sorted
+        if all(a < b for a, b in pairs(items)):
+            ...
+
+    Parameters
+    ----------
+    itr : Iterable[T]
+        An itr of items
+
+    Returns
+    -------
+    Iterable[tuple[T, T]]
+        An itr of sequential pairs of the items
+    """
+    itr1, itr2 = tee(itr)
+
+    # Skip first item
+    _ = next(itr2)
+
+    # Check there is a second element
+    peek = next(itr2, None)
+    if peek is None:
+        raise ValueError("Can't create a pair from iterable with 1 item")
+
+    # Put it back in
+    itr2 = chain([peek], itr2)
+
+    return iter((a, b) for a, b in zip(itr1, itr2))

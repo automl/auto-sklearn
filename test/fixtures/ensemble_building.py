@@ -1,13 +1,19 @@
 from __future__ import annotations
 
-from typing import Callable
+from typing import Any, Callable
 
+import sys
 import math
+import pickle
 from pathlib import Path
 
 import numpy as np
 
-from autosklearn.ensemble_building import Run
+from autosklearn.automl_common.common.utils.backend import Backend
+from autosklearn.constants import BINARY_CLASSIFICATION
+from autosklearn.data.xy_data_manager import XYDataManager
+from autosklearn.ensemble_building import EnsembleBuilder, Run
+from autosklearn.metrics import Scorer, accuracy
 
 from pytest_cases import fixture
 
@@ -17,27 +23,46 @@ from test.conftest import DEFAULT_SEED
 @fixture
 def make_run(tmp_path: Path) -> Callable[..., Run]:
     def _make(
-        id: int | None = 2,
+        id: int | None = None,
+        dummy: bool = False,
+        backend: Backend | None = None,
         seed: int = DEFAULT_SEED,
+        modified: bool = False,
         budget: float = 0.0,
         loss: float | None = None,
         model_size: int | None = None,
-        predictions: list[str] | dict[str, np.ndarray] | None = None,
+        mem_usage: float | None = None,
+        predictions: str | list[str] | dict[str, np.ndarray] | None = "ensemble",
     ) -> Run:
+        if dummy:
+            assert id is None
+            id = 1
+            loss = loss if loss is not None else 50_000
+
+        if id is None:
+            id = np.random.randint(sys.maxsize)
+
         model_id = f"{seed}_{id}_{budget}"
-        dir = tmp_path / model_id
+
+        # Use this backend to set things up
+        if backend is not None:
+            runsdir = Path(backend.get_runs_directory())
+        else:
+            runsdir = tmp_path
+
+        dir = runsdir / model_id
 
         if not dir.exists():
             dir.mkdir()
 
         # Populate if None
-        if predictions is None:
-            predictions = ["ensemble", "valid", "test"]
+        if isinstance(predictions, str):
+            predictions = [predictions]
 
         # Convert to dict
         if isinstance(predictions, list):
-            dummy = np.asarray([[0]])
-            predictions = {kind: dummy for kind in predictions}
+            preds = np.asarray([[0]])
+            predictions = {kind: preds for kind in predictions}
 
         # Write them
         if isinstance(predictions, dict):
@@ -48,8 +73,16 @@ def make_run(tmp_path: Path) -> Callable[..., Run]:
 
         run = Run(dir)
 
+        if modified:
+            assert predictions is not None, "Can only modify if predictions"
+            for k, v in run.recorded_mtimes.items():
+                run.recorded_mtimes[k] = v + 1e-4
+
         if loss is not None:
             run.loss = loss
+
+        if mem_usage is not None:
+            run._mem_usage = mem_usage
 
         # MB
         if model_size is not None:
@@ -59,5 +92,49 @@ def make_run(tmp_path: Path) -> Callable[..., Run]:
                 f.write(bytearray(n_bytes))
 
         return run
+
+    return _make
+
+
+@fixture
+def make_ensemble_builder(
+    make_backend: Callable[..., Backend],
+    make_sklearn_dataset: Callable[..., XYDataManager],
+) -> Callable[..., EnsembleBuilder]:
+    def _make(
+        *,
+        previous_candidates: list[Run] | None = None,
+        backend: Backend | None = None,
+        dataset_name: str = "TEST",
+        task_type: int = BINARY_CLASSIFICATION,
+        metric: Scorer = accuracy,
+        **kwargs: Any,
+    ) -> EnsembleBuilder:
+
+        if backend is None:
+            backend = make_backend()
+
+        if not Path(backend._get_datamanager_pickle_filename()).exists():
+            datamanager = make_sklearn_dataset(
+                name="breast_cancer",
+                task=BINARY_CLASSIFICATION,
+                feat_type="numerical",  # They're all numerical
+                as_datamanager=True,
+            )
+            backend.save_datamanager(datamanager)
+
+        builder = EnsembleBuilder(
+            backend=backend,
+            dataset_name=dataset_name,
+            task_type=task_type,
+            metric=metric,
+            **kwargs,
+        )
+
+        if previous_candidates is not None:
+            with builder.previous_candidates_path.open("wb") as f:
+                pickle.dump({run.id: run for run in previous_candidates}, f)
+
+        return builder
 
     return _make
