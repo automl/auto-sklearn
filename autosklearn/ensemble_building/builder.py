@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Sequence, cast
+from typing import Any, Iterable, Sequence, cast
 
 import logging.handlers
 import multiprocessing
@@ -428,7 +428,7 @@ class EnsembleBuilder:
             run.record_modified_times()  # So we don't count as modified next time
             run.loss = self.loss(run, kind="ensemble")
 
-        runs_keep, runs_delete = self.requires_deletion(
+        runs_keep, runs_to_delete = self.requires_deletion(
             runs,
             max_models=self.max_models_on_disk,
             memory_limit=self.model_memory_limit,
@@ -499,14 +499,8 @@ class EnsembleBuilder:
             pickle.dump({run.id: run for run in candidates}, f)
 
         # Delete files for models which were not considered candidates
-        if any(runs_delete):
-            for run in runs_delete:
-                if not run.is_dummy():
-                    try:
-                        shutil.rmtree(run.dir)
-                        self.logger.info(f"Deleted files for {run}")
-                    except Exception as e:
-                        self.logger.error(f"Failed to delete files for {run}: \n{e}")
+        if any(runs_to_delete):
+            self.delete_runs(runs_to_delete)
 
         # If there was any change from the previous run, either in terms of
         # runs or one of those runs had its loss updated, then we need to
@@ -895,3 +889,21 @@ class EnsembleBuilder:
             loss = np.inf
         finally:
             return loss
+
+    def delete_runs(self, runs: Iterable[Run]) -> None:
+        """Delete runs
+
+        Will not delete dummy runs
+
+        Parameters
+        ----------
+        runs : Sequence[Run]
+            The runs to delete
+        """
+        real_runs = iter(run for run in runs if not run.is_dummy())
+        for run in real_runs:
+            try:
+                shutil.rmtree(run.dir)
+                self.logger.info(f"Deleted files for {run}")
+            except Exception as e:
+                self.logger.error(f"Failed to delete files for {run}: \n{e}")
