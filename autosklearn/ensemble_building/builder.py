@@ -715,6 +715,8 @@ class EnsembleBuilder:
             # Determine how many to keep, always keeping one
             if isinstance(nbest, float):
                 nkeep = int(len(candidates) * nbest)
+            else:
+                nkeep = nbest
 
             candidates, discarded = cut(candidates, nkeep)
             self.logger.info(f"Discarding {len(discarded)}/{len(candidates)} runs")

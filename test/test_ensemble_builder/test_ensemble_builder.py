@@ -6,18 +6,10 @@ from pathlib import Path
 
 import numpy as np
 
-from autosklearn.automl_common.common.utils.backend import Backend
-from autosklearn.constants import BINARY_CLASSIFICATION
-from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.ensemble_building import EnsembleBuilder, Run
-from autosklearn.metrics import roc_auc
 from autosklearn.util.functional import bound, pairs
 
-import pytest
 from pytest_cases import fixture, parametrize
-from unittest.mock import patch
-
-from test.conftest import DEFAULT_SEED
 
 
 @fixture
@@ -56,15 +48,13 @@ def test_requires_loss_update_with_modified_runs(
     -------
     * Should include runs that were modified, even if they have a loss
     """
-    run_okay = [make_run(id=42, loss=1) for _ in range(5)]
-    run_modified = [make_run(id=13, loss=1, modified=True) for _ in range(5)]
+    run_okay = [make_run(loss=1) for _ in range(5)]
+    run_modified = [make_run(loss=1, modified=True) for _ in range(5)]
 
     runs = run_okay + run_modified
 
     requires_update = builder.requires_loss_update(runs)
 
-    print(run_modified)
-    print(requires_update)
     assert set(run_modified) == set(requires_update)
 
 
@@ -99,8 +89,9 @@ def test_candidates_no_filters(
     dummy = make_run(dummy=True)
     runs = [make_run(loss=n) for n in range(10)]
 
-    candidates, discarded = builder.candidates(
-        runs + [dummy],
+    candidates, discarded = builder.candidate_selection(
+        runs,
+        dummy,
         better_than_dummy=False,
         nbest=None,
         performance_range_threshold=None,
@@ -122,9 +113,9 @@ def test_candidates_filters_runs_with_no_predictions(
     dummy = make_run(dummy=True, loss=2)
     good_run = make_run(predictions="ensemble", loss=1)
 
-    runs = bad_runs + [dummy] + [good_run]
+    runs = bad_runs + [good_run]
 
-    candidates, discarded = builder.candidates(runs)
+    candidates, discarded = builder.candidate_selection(runs, dummy)
 
     assert len(candidates) == 1
     assert len(discarded) == len(bad_runs)
@@ -143,9 +134,9 @@ def test_candidates_filters_runs_with_no_loss(
     dummy_run = make_run(dummy=True, loss=2)
     good_run = make_run(loss=1)
 
-    runs = bad_runs + [dummy_run] + [good_run]
+    runs = bad_runs + [good_run]
 
-    candidates, discarded = builder.candidates(runs)
+    candidates, discarded = builder.candidate_selection(runs, dummy_run)
 
     assert len(candidates) == 1
     assert len(discarded) == len(bad_runs)
@@ -165,45 +156,17 @@ def test_candidates_filters_out_better_than_dummy(
     dummy_run = make_run(dummy=True, loss=0)
     good_runs = [make_run(loss=-1) for _ in range(3)]
 
-    runs = bad_runs + [dummy_run] + good_runs
+    runs = bad_runs + good_runs
 
-    candidates, discarded = builder.candidates(runs, better_than_dummy=True)
+    candidates, discarded = builder.candidate_selection(
+        runs, dummy_run, better_than_dummy=True
+    )
 
     assert len(candidates) == 3
     assert all(run.loss < dummy_run.loss for run in candidates)
 
     assert len(discarded) == 2
     assert all(run.loss >= dummy_run.loss for run in discarded)
-
-
-def test_candidates_expects_dummy(
-    builder: EnsembleBuilder,
-    make_run: Callable[..., Run],
-) -> None:
-    """
-    Expects
-    -------
-    * Should raise if not given a dummy run
-    """
-    runs = [make_run(dummy=False, loss=1) for _ in range(5)]
-    with pytest.raises(ValueError):
-        builder.candidates(runs)
-
-
-def test_candidates_uses_dummy_if_no_real(
-    builder: EnsembleBuilder,
-    make_run: Callable[..., Run],
-) -> None:
-    """
-    Expects
-    -------
-    * Should use dummy runs if no real candidates exist
-    """
-    runs = [make_run(dummy=True, loss=1) for _ in range(5)]
-    candidates, discarded = builder.candidates(runs)
-
-    assert len(discarded) == 0
-    assert all(run.is_dummy() for run in candidates)
 
 
 def test_candidates_uses_dummy_if_no_candidates_better(
@@ -216,12 +179,14 @@ def test_candidates_uses_dummy_if_no_candidates_better(
     * If no run is better than a dummy run, the candidates will then consist
       of the dummy runs.
     """
-    bad_runs = [make_run(loss=10) for _ in range(10)]
+    runs = [make_run(loss=10) for _ in range(10)]
     dummies = [make_run(dummy=True, loss=0) for _ in range(2)]
 
-    runs = bad_runs + dummies
-
-    candidates, discarded = builder.candidates(runs, better_than_dummy=True)
+    candidates, discarded = builder.candidate_selection(
+        runs,
+        dummies,
+        better_than_dummy=True,
+    )
 
     assert len(candidates) == 2
     assert all(run.is_dummy() for run in candidates)
@@ -243,8 +208,8 @@ def test_candidates_nbest_int(
     expected = int(bound(nbest, bounds=(1, n)))
 
     dummy = make_run(dummy=True)
-    runs = [make_run(loss=i) for i in range(n)] + [dummy]
-    candidates, discarded = builder.candidates(runs, nbest=nbest)
+    runs = [make_run(loss=i) for i in range(n)]
+    candidates, discarded = builder.candidate_selection(runs, dummy, nbest=nbest)
 
     assert len(candidates) == expected
 
@@ -272,8 +237,8 @@ def test_candidates_nbest_float(
     expected = int(bound(nbest * n, bounds=(1, n)))
 
     dummy = make_run(dummy=True, loss=0)
-    runs = [make_run(id=i, loss=i) for i in range(2, n + 2)] + [dummy]
-    candidates, discarded = builder.candidates(runs, nbest=nbest)
+    runs = [make_run(id=i, loss=i) for i in range(2, n + 2)]
+    candidates, discarded = builder.candidate_selection(runs, dummy, nbest=nbest)
 
     assert len(candidates) == expected
 
@@ -302,14 +267,13 @@ def test_candidates_performance_range_threshold(
     dummy_loss = 50
 
     boundary = threshold * best_loss + (1 - threshold) * dummy_loss
-    print("boundary", boundary)
 
     dummy = make_run(dummy=True, loss=dummy_loss)
     runs = [make_run(loss=loss) for loss in np.linspace(best_loss, worst_loss, 101)]
-    runs += [dummy]
 
-    candidates, discarded = builder.candidates(
+    candidates, discarded = builder.candidate_selection(
         runs,
+        dummy,
         performance_range_threshold=threshold,
     )
 
@@ -324,3 +288,24 @@ def test_candidates_performance_range_threshold(
 
         for run in discarded:
             assert run.loss >= boundary
+
+
+def test_requires_deletion_does_nothing_without_params(
+    builder: EnsembleBuilder,
+    make_run: Callable[..., Run],
+) -> None:
+    """
+    Expects
+    -------
+    * All runs should be kept
+    """
+    runs = [make_run() for _ in range(10)]
+
+    keep, delete = builder.requires_deletion(
+        runs,
+        max_models=None,
+        memory_limit=None,
+    )
+
+    assert set(runs) == set(keep)
+    assert len(delete) == 0
