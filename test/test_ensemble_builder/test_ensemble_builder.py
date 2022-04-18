@@ -309,3 +309,24 @@ def test_requires_deletion_does_nothing_without_params(
 
     assert set(runs) == set(keep)
     assert len(delete) == 0
+
+
+@parametrize("max_models", [0, 1, 2, 5])
+def test_requires_deletion_max_models(
+    builder: EnsembleBuilder,
+    max_models: int,
+    make_run: Callable[..., Run],
+) -> None:
+    """
+    Expects
+    -------
+    * Should keep exactly as many models as `max_models`
+    * Should not have any in common between keep and delete
+    """
+    runs = [make_run() for _ in range(10)]
+    keep, delete = builder.requires_deletion(runs=runs, max_models=max_models)
+
+    assert len(keep) == max_models
+    assert len(delete) == len(runs) - max_models
+
+    assert not any(set(keep) & set(delete))

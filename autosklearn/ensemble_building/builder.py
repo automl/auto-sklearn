@@ -839,9 +839,11 @@ class EnsembleBuilder:
         keep = sorted(runs, key=lambda r: (r.loss, r.num_run))
         delete: set[Run] = set()
 
-        if max_models is not None and max_models > len(runs):
+        if max_models is not None and max_models < len(runs):
             keep, to_delete = cut(keep, max_models)
-            delete.update(to_delete)
+
+            if any(to_delete):
+                delete.update(to_delete)
 
         if memory_limit is not None:
             largest = max(runs, key=lambda r: r.mem_usage)
