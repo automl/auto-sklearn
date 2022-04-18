@@ -12,10 +12,22 @@ from autosklearn.util.functional import bound, pairs
 
 from pytest_cases import fixture, parametrize
 
+from test.util import fails
+
 
 @fixture
 def builder(make_ensemble_builder: Callable[..., EnsembleBuilder]) -> EnsembleBuilder:
     return make_ensemble_builder()
+
+
+@parametrize("kind", ["ensemble", fails("valid", "Not supported anymore?"), "test"])
+def test_targets(builder: EnsembleBuilder, kind: str) -> None:
+    """
+    Expects
+    -------
+    * Should be able to load each of the targets
+    """
+    assert builder.targets(kind) is not None
 
 
 def test_available_runs(builder: EnsembleBuilder) -> None:
@@ -370,3 +382,37 @@ def test_requires_memory_limit(
 
     best_deleted = min(r.loss for r in delete)
     assert not any(run.loss > best_deleted for run in keep)
+
+
+@parametrize("kind", ["ensemble", "valid", "test"])
+def test_loss_with_no_ensemble_targets(
+    builder: EnsembleBuilder,
+    make_run: Callable[..., Run],
+    kind: str,
+) -> None:
+    """
+    Expects
+    -------
+    * Should give a loss of np.inf if run has no predictions of a given kind
+    """
+    run = make_run(predictions=None)
+
+    assert builder.loss(run, kind=kind) == np.inf
+
+
+@parametrize("kind", ["ensemble", fails("valid", "Not supported anymore?"), "test"])
+def test_loss_with_targets(
+    builder: EnsembleBuilder,
+    make_run: Callable[..., Run],
+    kind: str,
+) -> None:
+    """
+    Expects
+    -------
+    * Should give a loss < np.inf if the predictions exist
+    """
+    targets = builder.targets(kind)
+
+    run = make_run(predictions={kind: targets})
+
+    assert builder.loss(run, kind) < np.inf

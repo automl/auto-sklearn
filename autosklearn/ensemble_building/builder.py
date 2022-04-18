@@ -216,9 +216,10 @@ class EnsembleBuilder:
         np.ndarray | None
             The ensemble targets, if they can be loaded
         """
-        if kind == "ensemble" and self._y_ensemble is None:
-            if os.path.exists(self.backend._get_targets_ensemble_filename()):
-                self._y_ensemble = self.backend.load_targets_ensemble()
+        if kind == "ensemble":
+            if self._y_ensemble is None:
+                if os.path.exists(self.backend._get_targets_ensemble_filename()):
+                    self._y_ensemble = self.backend.load_targets_ensemble()
             return self._y_ensemble
 
         elif kind == "valid":
@@ -228,7 +229,7 @@ class EnsembleBuilder:
             return self._y_test
 
         else:
-            raise NotImplementedError()
+            raise NotImplementedError(kind)
 
     def run(
         self,

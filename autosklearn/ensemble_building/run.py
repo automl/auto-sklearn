@@ -102,6 +102,9 @@ class Run:
 
         path = self.pred_path(kind)
 
+        if not path.exists():
+            raise RuntimeError(f"No predictions for {kind}")
+
         with path.open("rb") as f:
             # TODO: We should probably remove this requirement. I'm not sure why model
             # predictions are being saved as pickled

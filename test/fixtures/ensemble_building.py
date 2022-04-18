@@ -123,6 +123,12 @@ def make_ensemble_builder(
             )
             backend.save_datamanager(datamanager)
 
+            # Annoyingly, some places use datamanger, some places use the file
+            # Hence, we take the y_train of the datamanager and use that as the
+            # the targets
+            if "Y_train" in datamanager.data:
+                backend.save_targets_ensemble(datamanager.data["Y_train"])
+
         builder = EnsembleBuilder(
             backend=backend,
             dataset_name=dataset_name,
