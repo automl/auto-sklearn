@@ -416,3 +416,43 @@ def test_loss_with_targets(
     run = make_run(predictions={kind: targets})
 
     assert builder.loss(run, kind) < np.inf
+
+
+def test_delete_runs(builder: EnsembleBuilder, make_run: Callable[..., Run]) -> None:
+    """
+    Expects
+    -------
+    * Should delete runs so they can not be found again by the ensemble builder
+    """
+    runs = [make_run(backend=builder.backend) for _ in range(5)]
+    assert all(run.dir.exists() for run in runs)
+
+    builder.delete_runs(runs)
+    assert not any(run.dir.exists() for run in runs)
+
+    loaded = builder.available_runs()
+    assert len(loaded) == 0
+
+
+def test_delete_runs_does_not_delete_dummy(
+    builder: EnsembleBuilder,
+    make_run: Callable[..., Run],
+) -> None:
+    """
+    Expects
+    -------
+    * Should
+    """
+    backend = builder.backend
+    normal_runs = [make_run(backend=backend) for _ in range(5)]
+    dummy_runs = [make_run(dummy=True, seed=i, backend=backend) for i in range(2)]
+
+    runs = normal_runs + dummy_runs
+    assert all(run.dir.exists() for run in runs)
+
+    builder.delete_runs(runs)
+    assert not any(run.dir.exists() for run in normal_runs)
+    assert all(dummy.dir.exists() for dummy in dummy_runs)
+
+    loaded = builder.available_runs()
+    assert set(loaded.values()) == set(dummy_runs)
