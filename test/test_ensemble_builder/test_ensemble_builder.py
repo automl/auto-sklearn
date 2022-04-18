@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Callable
 
+import random
 from pathlib import Path
 
 import numpy as np
@@ -330,3 +331,42 @@ def test_requires_deletion_max_models(
     assert len(delete) == len(runs) - max_models
 
     assert not any(set(keep) & set(delete))
+
+
+@parametrize("memory_limit, expected", [(0, 0), (100, 0), (200, 1), (5000, 49)])
+def test_requires_memory_limit(
+    builder: EnsembleBuilder,
+    make_run: Callable[..., Run],
+    memory_limit: int,
+    expected: int,
+) -> None:
+    """
+    Expects
+    -------
+    * Should keep the expected amount of models
+    * The kept models should be sorted by lowest loss
+    * Should not have any models in common between keep and delete
+    * All models kept should be better than those deleted
+    """
+    runs = [make_run(mem_usage=100, loss=-n) for n in range(50)]
+    random.shuffle(runs)
+
+    keep, delete = builder.requires_deletion(runs=runs, memory_limit=memory_limit)
+
+    # The cutoff for memory is (memory_limit - largest)
+    # E.g.
+    #   5 models at 100 ea = 500mb usage
+    #   largest = 100mb
+    #   memory_limit = 400mb
+    #   cutoff = memory_limit - largest  (400mb - 100mb) = 300mb
+    #   We can store 300mb which means the 3 best models
+    assert len(keep) == expected
+    assert len(delete) == len(runs) - expected
+
+    assert not any(set(keep) & set(delete))
+
+    if len(keep) > 2:
+        assert all(a.loss <= b.loss for a, b in pairs(keep))
+
+    best_deleted = min(r.loss for r in delete)
+    assert not any(run.loss > best_deleted for run in keep)

@@ -851,7 +851,7 @@ class EnsembleBuilder:
 
             accumulated_mem_usage = accumulate(r.mem_usage for r in runs)
 
-            cutpoint = findwhere(accumulated_mem_usage, lambda mem: mem >= cutoff)
+            cutpoint = findwhere(accumulated_mem_usage, lambda mem: mem > cutoff)
             keep, to_delete = cut(keep, cutpoint)
 
             if any(to_delete):
