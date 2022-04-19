@@ -267,22 +267,22 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
 
 
 def fit_and_return_ensemble(
+    iteration: int,
+    end_at: float,
     backend: Backend,
     dataset_name: str,
     task_type: int,
     metric: Scorer,
-    ensemble_size: int,
-    ensemble_nbest: int,
-    seed: int,
-    precision: int,
-    read_at_most: int,
-    end_at: float,
-    iteration: int,
     pynisher_context: str,
-    max_models_on_disc: Optional[Union[float, int]] = 100,
+    ensemble_size: int = 10,
+    ensemble_nbest: int | float = 100,
+    max_models_on_disc: int | float | None = None,
+    seed: int = 1,
+    precision: int = 32,
+    memory_limit: int | None = None,
+    read_at_most: int | None = 5,
     logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
-    memory_limit: Optional[int] = None,
-    random_state: Optional[Union[int, np.random.RandomState]] = None,
+    random_state: int | np.random.RandomState | None = None,
 ) -> tuple[list[dict[str, Any]], int | float]:
     """
 
@@ -291,69 +291,67 @@ def fit_and_return_ensemble(
 
     Parameters
     ----------
-        backend: util.backend.Backend
-            backend to write and read files
+    iteration: int
+        The current iteration
 
-        dataset_name: str
-            name of dataset
+    end_at: float
+        At what time the job must finish. Needs to be the endtime and not the
+        time left because we do not know when dask schedules the job.
 
-        metric: str
-            name of metric to compute the loss of the given predictions
+    backend: Backend
+        Backend to write and read files
 
-        task_type: int
-            type of ML task
+    dataset_name: str
+        name of dataset
 
-        ensemble_size: int
-            maximal size of ensemble (passed to autosklearn.ensemble.ensemble_selection)
+    task_type: int
+        type of ML task
 
-        ensemble_nbest: int/float
-            if int: consider only the n best prediction
-            if float: consider only this fraction of the best models
-            Both wrt to validation predictions
-            If performance_range_threshold > 0, might return less models
+    metric: Scorer
+        Metric to compute the loss of the given predictions
 
-        max_models_on_disc: Optional[int | float] = 100
-           Defines the maximum number of models that are kept in the disc.
+    pynisher_context: "fork" | "spawn" | "forkserver" = "fork"
+        Context to use for multiprocessing, can be either fork, spawn or forkserver.
 
-           If int, it must be greater or equal than 1, and dictates the max number of
-           models to keep.
+    ensemble_size: int = 10
+        Maximal size of ensemble
 
-           If float, it will be interpreted as the max megabytes allowed of disc space.
-           That is, if the number of ensemble candidates require more disc space than
-           this float value, the worst models will be deleted to keep within this
-           budget. Models and predictions of the worst-performing models will be
-           deleted then.
+    ensemble_nbest: int | float = 1000
+        If int: consider only the n best prediction
+        If float: consider only this fraction of the best models
+        If performance_range_threshold > 0, might return less models
 
-           If None, the feature is disabled.
-           It defines an upper bound on the models that can be used in the ensemble.
+    max_models_on_disc: int | float | None = 100
+       Defines the maximum number of models that are kept in the disc.
 
-        seed: int
-            random seed
+       If int, it must be greater or equal than 1, and dictates the max number of
+       models to keep.
 
-        precision: [16,32,64,128]
-            precision of floats to read the predictions
+       If float, it will be interpreted as the max megabytes allowed of disc space.
+       That is, if the number of ensemble candidates require more disc space than
+       this float value, the worst models will be deleted to keep within this
+       budget. Models and predictions of the worst-performing models will be
+       deleted then.
 
-        read_at_most: int
-            read at most n new prediction files in each iteration
+       If None, the feature is disabled.
 
-        end_at: float
-            At what time the job must finish. Needs to be the endtime and not the
-            time left because we do not know when dask schedules the job.
+    seed: int = 1
+        Seed used for training the models in the backend
 
-        iteration: int
-            The current iteration
+    precision: 16 | 32 | 64 | 128 = 32
+        Precision of floats to read the predictions
 
-        pynisher_context: str
-            Context to use for multiprocessing, can be either fork, spawn or forkserver.
+    memory_limit: int | None = None
+        Memory limit in mb. If ``None``, no memory limit is enforced.
 
-        logger_port: int = DEFAULT_TCP_LOGGING_PORT
-            The port where the logging server is listening to.
+    read_at_most: int = 5
+        Read at most n new prediction files in each iteration
 
-        memory_limit: Optional[int] = None
-            memory limit in mb. If ``None``, no memory limit is enforced.
+    logger_port: int = DEFAULT_TCP_LOGGING_PORT
+        The port where the logging server is listening to.
 
-        random_state: Optional[int | RandomState] = None
-            A random state used for the ensemble selection process.
+    random_state: int | RandomState | None = None
+        A random state used for the ensemble selection process.
 
     Returns
     -------
