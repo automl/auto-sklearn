@@ -304,8 +304,11 @@ class EnsembleBuilder:
                 logger=self.logger,
                 context=context,
             )(self.main)
+
             safe_ensemble_script(time_left, iteration)
-            if safe_ensemble_script.exit_status is pynisher.MemorylimitException:
+
+            status = safe_ensemble_script.exit_status
+            if isinstance(status, pynisher.MemorylimitException):
                 # if ensemble script died because of memory error,
                 # reduce nbest to reduce memory consumption and try it again
 
@@ -348,6 +351,8 @@ class EnsembleBuilder:
                         "less ensemble_nbest: %d" % self.ensemble_nbest
                     )
                     return [], self.ensemble_nbest
+            elif isinstance(status, pynisher.AnythingException):
+                return ([], self.ensemble_nbest)
             else:
                 return safe_ensemble_script.result
 
@@ -397,7 +402,7 @@ class EnsembleBuilder:
         # Can't load data, exit early
         if not os.path.exists(self.backend._get_targets_ensemble_filename()):
             self.logger.debug(f"No targets for ensemble: {traceback.format_exc()}")
-            return self.ensemble_history, self.ensemble_nbest
+            raise RuntimeError("No targets for ensemble")
 
         # Load in information from previous candidates and also runs
         available_runs = self.available_runs()
@@ -411,7 +416,7 @@ class EnsembleBuilder:
 
         if len(runs) == 0:
             self.logger.debug("Found no runs")
-            return self.ensemble_history, self.ensemble_nbest
+            raise RuntimeError("Found no runs")
 
         # Calculate the loss for those that require it
         requires_update = self.requires_loss_update(runs)
@@ -466,7 +471,7 @@ class EnsembleBuilder:
         intersect = valid_subset & test_subset
         if len(intersect) == 0 and len(test_subset) > 0 and len(valid_subset) > 0:
             self.logger.error("valid_set and test_set not empty but do not overlap")
-            return self.ensemble_history, self.ensemble_nbest
+            raise RuntimeError("valid_set and test_set not empty but do not overlap")
 
         # Try to use the runs which have the most kinds of preds, otherwise just use all
         if len(intersect) > 0:
@@ -518,6 +523,7 @@ class EnsembleBuilder:
             return self.ensemble_history, self.ensemble_nbest
 
         targets = cast(np.ndarray, self.targets("ensemble"))  # Sure they exist
+
         ensemble = self.fit_ensemble(
             candidates,
             targets=targets,
@@ -528,53 +534,51 @@ class EnsembleBuilder:
             random_state=self.random_state,
         )
 
-        if ensemble is not None:
-            self.logger.info(str(ensemble))
-            ens_perf = ensemble.get_validation_performance()
-            self.validation_performance_ = min(self.validation_performance_, ens_perf)
-            self.backend.save_ensemble(ensemble, iteration, self.seed)  # type: ignore
+        self.logger.info(str(ensemble))
+        ens_perf = ensemble.get_validation_performance()
+        self.validation_performance_ = min(self.validation_performance_, ens_perf)
+        self.backend.save_ensemble(ensemble, iteration, self.seed)  # type: ignore
 
         # Continue with evaluating the ensemble after making some space
-        if ensemble is not None:
-            performance_stamp = {"Timestamp": pd.Timestamp.now()}
+        performance_stamp = {"Timestamp": pd.Timestamp.now()}
 
-            for kind, score_name, models in [
-                ("ensemble", "optimization", candidates),
-                ("valid", "val", valid_models),
-                ("test", "test", test_models),
-            ]:
-                if len(models) == 0:
-                    continue
+        for kind, score_name, models in [
+            ("ensemble", "optimization", candidates),
+            ("valid", "val", valid_models),
+            ("test", "test", test_models),
+        ]:
+            if len(models) == 0:
+                continue
 
-                pred_targets = self.targets(kind)
-                if pred_targets is None:
-                    self.logger.warning(f"No ensemble targets for {kind}")
-                    continue
+            pred_targets = self.targets(kind)
+            if pred_targets is None:
+                self.logger.warning(f"No ensemble targets for {kind}")
+                continue
 
-                run_preds = [
-                    r.predictions(kind, precision=self.precision) for r in models
-                ]
-                pred = ensemble.predict(run_preds)
+            run_preds = [
+                r.predictions(kind, precision=self.precision) for r in models
+            ]
+            pred = ensemble.predict(run_preds)
 
-                # Pretty sure this whole step is uneeded but left over and afraid
-                # to touch
-                if self.task_type == BINARY_CLASSIFICATION:
-                    pred = pred[:, 1]
+            # Pretty sure this whole step is uneeded but left over and afraid
+            # to touch
+            if self.task_type == BINARY_CLASSIFICATION:
+                pred = pred[:, 1]
 
-                    if pred.ndim == 1 or pred.shape[1] == 1:
-                        pred = np.vstack(
-                            ((1 - pred).reshape((1, -1)), pred.reshape((1, -1)))
-                        ).transpose()
+                if pred.ndim == 1 or pred.shape[1] == 1:
+                    pred = np.vstack(
+                        ((1 - pred).reshape((1, -1)), pred.reshape((1, -1)))
+                    ).transpose()
 
-                score = calculate_score(
-                    solution=pred_targets,
-                    prediction=pred,
-                    task_type=self.task_type,
-                    metric=self.metric,
-                    scoring_functions=None,
-                )
-                performance_stamp[f"ensemble_{score_name}_score"] = score
-                self.ensemble_history.append(performance_stamp)
+            score = calculate_score(
+                solution=pred_targets,
+                prediction=pred,
+                task_type=self.task_type,
+                metric=self.metric,
+                scoring_functions=None,
+            )
+            performance_stamp[f"ensemble_{score_name}_score"] = score
+            self.ensemble_history.append(performance_stamp)
 
         return self.ensemble_history, self.ensemble_nbest
 
@@ -750,7 +754,7 @@ class EnsembleBuilder:
         metric: Scorer | None = None,
         precision: int | None = None,
         random_state: int | np.random.RandomState | None = None,
-    ) -> EnsembleSelection | None:
+    ) -> EnsembleSelection:
         """TODO
 
         Parameters
@@ -768,8 +772,6 @@ class EnsembleBuilder:
         metric = metric if metric is not None else self.metric
         rs = random_state if random_state is not None else self.random_state
 
-        ensemble: EnsembleSelection | None
-
         ensemble = EnsembleSelection(
             ensemble_size=size,
             task_type=task,
@@ -780,24 +782,20 @@ class EnsembleBuilder:
         self.logger.debug(f"Fitting ensemble on {len(runs)} models")
         start_time = time.time()
 
-        try:
-            precision = precision if precision is not None else self.precision
-            predictions_train = [
-                run.predictions("ensemble", precision=precision) for run in runs
-            ]
+        precision = precision if precision is not None else self.precision
+        predictions_train = [
+            run.predictions("ensemble", precision=precision) for run in runs
+        ]
 
-            ensemble.fit(
-                predictions=predictions_train,
-                labels=targets,
-                identifiers=[run.id for run in runs],
-            )
-        except Exception as e:
-            self.logger.error(f"Caught error {e}: {traceback.format_exc()}")
-            ensemble = None
-        finally:
-            duration = time.time() - start_time
-            self.logger.debug(f"Fitting the ensemble took {duration} seconds.")
-            return ensemble
+        ensemble.fit(
+            predictions=predictions_train,
+            labels=targets,
+            identifiers=[run.id for run in runs],
+        )
+
+        duration = time.time() - start_time
+        self.logger.debug(f"Fitting the ensemble took {duration} seconds.")
+        return ensemble
 
     def requires_deletion(
         self,
