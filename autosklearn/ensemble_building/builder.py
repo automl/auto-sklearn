@@ -361,7 +361,7 @@ class EnsembleBuilder:
     def main(
         self,
         time_left: float | None = None,
-        iteration: int | None = None,
+        iteration: int = 0,
     ) -> tuple[list[dict[str, Any]], int | float]:
         """Run the main loop of ensemble building
 
@@ -375,10 +375,10 @@ class EnsembleBuilder:
 
         Parameters
         ----------
-        time_left : float
+        time_left : float | None = None
             How much time is left for this run
 
-        iteration : int
+        iteration : int = 0
             The iteration of this run
 
         Returns
