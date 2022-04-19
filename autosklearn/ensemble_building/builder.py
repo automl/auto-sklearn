@@ -513,7 +513,7 @@ class EnsembleBuilder:
 
         updated_candidates = iter(run in candidates for run in requires_update)
 
-        if not any(difference) or any(updated_candidates):
+        if not any(difference) and not any(updated_candidates):
             self.logger.info("All ensemble candidates the same, no update required")
             return self.ensemble_history, self.ensemble_nbest
 
