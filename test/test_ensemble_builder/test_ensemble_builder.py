@@ -55,6 +55,25 @@ def test_available_runs(builder: EnsembleBuilder) -> None:
         assert run_id in ids
 
 
+def test_available_runs_with_bad_dir_contained(builder: EnsembleBuilder) -> None:
+    """
+    Expects
+    -------
+    * Should ignore dirs that aren't in format
+    """
+    runsdir = Path(builder.backend.get_runs_directory())
+
+    ids = {(0, i, 0.0) for i in range(1, 10)}
+    paths = [runsdir / f"{s}_{n}_{b}" for s, n, b in ids]
+
+    bad_path = runsdir / "Im_a_bad_path"
+
+    for path in paths + [bad_path]:
+        path.mkdir()
+
+    available_runs = builder.available_runs()
+    assert len(available_runs) == len(paths)
+
 def test_requires_loss_update_with_modified_runs(
     builder: EnsembleBuilder,
     make_run: Callable[..., Run],

@@ -202,7 +202,7 @@ class EnsembleBuilder:
             A dictionary from RunId's to the available runs
         """
         runs_dir = Path(self.backend.get_runs_directory())
-        runs = [Run(path=dir) for dir in runs_dir.iterdir()]
+        runs = iter(Run(path=dir) for dir in runs_dir.iterdir() if Run.valid(dir))
         return {run.id: run for run in runs}
 
     def targets(self, kind: str = "ensemble") -> np.ndarray | None:
