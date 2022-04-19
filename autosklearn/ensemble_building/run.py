@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Tuple
 
 from pathlib import Path
+import re
 
 import numpy as np
 
@@ -13,6 +14,8 @@ RunID = Tuple[int, int, float]
 
 class Run:
     """Class for storing information about a run used during ensemble building"""
+
+    re_model_dir = r'^([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*)$'
 
     def __init__(self, path: Path) -> None:
         """Creates a Run from a path point to the directory of a run
@@ -141,3 +144,18 @@ class Run:
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Run) and other.id == self.id
+
+    @staticmethod
+    def valid(path: Path) -> bool:
+        """
+        Parameters
+        ----------
+        path: Path
+            The path to check
+
+        Returns
+        -------
+        bool
+            Whether the path is a valid run dir
+        """
+        return re.match(Run.re_model_dir, path.name) is not None

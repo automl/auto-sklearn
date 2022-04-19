@@ -4,6 +4,7 @@ from typing import Callable
 
 import pickle
 import time
+from pathlib import Path
 
 import numpy as np
 
@@ -150,3 +151,23 @@ def test_equality(make_run: Callable[..., Run]) -> None:
 
     assert r1 != r3
     assert r2 != r3
+
+
+@parametrize(
+    "name, expected",
+    [
+        ("0_0_0.0", True),
+        ("1_152_64.24", True),
+        ("123412_3462_100.0", True),
+        ("tmp_sf12198", False),
+        ("tmp_0_0_0.0", False),
+    ],
+)
+def test_valid(name: str, expected: bool) -> None:
+    """
+    Expects
+    -------
+    * Should be able to correctly consider valid run dir names
+    """
+    path = Path(name)
+    assert Run.valid(path) == expected
