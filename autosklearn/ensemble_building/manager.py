@@ -28,13 +28,13 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         dataset_name: str,
         task: int,
         metric: Scorer,
-        ensemble_size: int,
-        ensemble_nbest: int,
+        ensemble_size: int = 10,
+        ensemble_nbest: int | float = 100,
         seed: int,
-        precision: int,
+        precision: int = 32,
         max_iterations: Optional[int],
         read_at_most: int,
-        ensemble_memory_limit: Optional[int],
+        memory_limit: Optional[int],
         random_state: Union[int, np.random.RandomState],
         max_models_on_disc: Optional[float | int] = 100,
         logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
@@ -111,7 +111,10 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
             The multiprocessing context for pynisher. One of spawn/fork/forkserver.
 
         """
+        # TODO delete
+        # Not used, overwritten later
         self.start_time = start_time
+
         self.time_left_for_ensembles = time_left_for_ensembles
         self.backend = backend
         self.dataset_name = dataset_name
@@ -235,7 +238,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
                         max_models_on_disc=self.max_models_on_disc,
                         seed=self.seed,
                         precision=self.precision,
-                        memory_limit=self.ensemble_memory_limit,
+                        memory_limit=self.memory_limit,
                         read_at_most=self.read_at_most,
                         random_state=self.random_state,
                         end_at=self.start_time + self.time_left_for_ensembles,
