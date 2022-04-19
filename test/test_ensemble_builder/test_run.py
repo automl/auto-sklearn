@@ -70,6 +70,10 @@ def test_predictions_pickled(make_run: Callable[..., Run]) -> None:
     Expects
     -------
     * Should be able to load pickled predictions
+
+    Note
+    ----
+    * Not sure this should be supported
     """
     run = make_run(predictions=[])
     x = np.array([0])
