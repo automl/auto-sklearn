@@ -223,7 +223,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
                 # wait for the below function to be done
                 self.futures.append(
                     dask_client.submit(
-                        fit_and_return_ensemble,
+                        EnsembleBuilderManager.fit_and_return_ensemble,
                         backend=self.backend,
                         dataset_name=self.dataset_name,
                         task_type=self.task,
@@ -261,116 +261,115 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
                 logger.critical(exception_traceback)
                 logger.critical(error_message)
 
+    @staticmethod
+    def fit_and_return_ensemble(
+        iteration: int,
+        end_at: float,
+        backend: Backend,
+        dataset_name: str,
+        task_type: int,
+        metric: Scorer,
+        pynisher_context: str,
+        ensemble_size: int = 10,
+        ensemble_nbest: int | float = 100,
+        max_models_on_disc: int | float | None = None,
+        seed: int = 1,
+        precision: int = 32,
+        memory_limit: int | None = None,
+        read_at_most: int | None = 5,
+        logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
+        random_state: int | np.random.RandomState | None = None,
+    ) -> tuple[list[dict[str, Any]], int | float]:
+        """
+        A short function to fit and create an ensemble. It is just a wrapper to easily
+        send a request to dask to create an ensemble and clean the memory when finished
 
-def fit_and_return_ensemble(
-    iteration: int,
-    end_at: float,
-    backend: Backend,
-    dataset_name: str,
-    task_type: int,
-    metric: Scorer,
-    pynisher_context: str,
-    ensemble_size: int = 10,
-    ensemble_nbest: int | float = 100,
-    max_models_on_disc: int | float | None = None,
-    seed: int = 1,
-    precision: int = 32,
-    memory_limit: int | None = None,
-    read_at_most: int | None = 5,
-    logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
-    random_state: int | np.random.RandomState | None = None,
-) -> tuple[list[dict[str, Any]], int | float]:
-    """
+        Parameters
+        ----------
+        iteration: int
+            The current iteration
 
-    A short function to fit and create an ensemble. It is just a wrapper to easily send
-    a request to dask to create an ensemble and clean the memory when finished
+        end_at: float
+            At what time the job must finish. Needs to be the endtime and not the
+            time left because we do not know when dask schedules the job.
 
-    Parameters
-    ----------
-    iteration: int
-        The current iteration
+        backend: Backend
+            Backend to write and read files
 
-    end_at: float
-        At what time the job must finish. Needs to be the endtime and not the
-        time left because we do not know when dask schedules the job.
+        dataset_name: str
+            name of dataset
 
-    backend: Backend
-        Backend to write and read files
+        task_type: int
+            type of ML task
 
-    dataset_name: str
-        name of dataset
+        metric: Scorer
+            Metric to compute the loss of the given predictions
 
-    task_type: int
-        type of ML task
+        pynisher_context: "fork" | "spawn" | "forkserver" = "fork"
+            Context to use for multiprocessing, can be either fork, spawn or forkserver.
 
-    metric: Scorer
-        Metric to compute the loss of the given predictions
+        ensemble_size: int = 10
+            Maximal size of ensemble
 
-    pynisher_context: "fork" | "spawn" | "forkserver" = "fork"
-        Context to use for multiprocessing, can be either fork, spawn or forkserver.
+        ensemble_nbest: int | float = 1000
+            If int: consider only the n best prediction
+            If float: consider only this fraction of the best models
+            If performance_range_threshold > 0, might return less models
 
-    ensemble_size: int = 10
-        Maximal size of ensemble
+        max_models_on_disc: int | float | None = 100
+           Defines the maximum number of models that are kept in the disc.
 
-    ensemble_nbest: int | float = 1000
-        If int: consider only the n best prediction
-        If float: consider only this fraction of the best models
-        If performance_range_threshold > 0, might return less models
+           If int, it must be greater or equal than 1, and dictates the max number of
+           models to keep.
 
-    max_models_on_disc: int | float | None = 100
-       Defines the maximum number of models that are kept in the disc.
+           If float, it will be interpreted as the max megabytes allowed of disc space.
+           That is, if the number of ensemble candidates require more disc space than
+           this float value, the worst models will be deleted to keep within this
+           budget. Models and predictions of the worst-performing models will be
+           deleted then.
 
-       If int, it must be greater or equal than 1, and dictates the max number of
-       models to keep.
+           If None, the feature is disabled.
 
-       If float, it will be interpreted as the max megabytes allowed of disc space.
-       That is, if the number of ensemble candidates require more disc space than
-       this float value, the worst models will be deleted to keep within this
-       budget. Models and predictions of the worst-performing models will be
-       deleted then.
+        seed: int = 1
+            Seed used for training the models in the backend
 
-       If None, the feature is disabled.
+        precision: 16 | 32 | 64 | 128 = 32
+            Precision of floats to read the predictions
 
-    seed: int = 1
-        Seed used for training the models in the backend
+        memory_limit: int | None = None
+            Memory limit in mb. If ``None``, no memory limit is enforced.
 
-    precision: 16 | 32 | 64 | 128 = 32
-        Precision of floats to read the predictions
+        read_at_most: int = 5
+            Read at most n new prediction files in each iteration
 
-    memory_limit: int | None = None
-        Memory limit in mb. If ``None``, no memory limit is enforced.
+        logger_port: int = DEFAULT_TCP_LOGGING_PORT
+            The port where the logging server is listening to.
 
-    read_at_most: int = 5
-        Read at most n new prediction files in each iteration
+        random_state: int | RandomState | None = None
+            A random state used for the ensemble selection process.
 
-    logger_port: int = DEFAULT_TCP_LOGGING_PORT
-        The port where the logging server is listening to.
-
-    random_state: int | RandomState | None = None
-        A random state used for the ensemble selection process.
-
-    Returns
-    -------
-    (ensemble_history: list[dict[str, Any]], nbest: int | float)
-        The ensemble history and the nbest chosen members
-    """
-    result = EnsembleBuilder(
-        backend=backend,
-        dataset_name=dataset_name,
-        task_type=task_type,
-        metric=metric,
-        ensemble_size=ensemble_size,
-        ensemble_nbest=ensemble_nbest,
-        max_models_on_disc=max_models_on_disc,
-        seed=seed,
-        precision=precision,
-        memory_limit=memory_limit,
-        read_at_most=read_at_most,
-        random_state=random_state,
-        logger_port=logger_port,
-    ).run(
-        end_at=end_at,
-        iteration=iteration,
-        pynisher_context=pynisher_context,
-    )
-    return result
+        Returns
+        -------
+        (ensemble_history: list[dict[str, Any]], nbest: int | float)
+            The ensemble history and the nbest chosen members
+        """
+        result = EnsembleBuilder(
+            backend=backend,
+            dataset_name=dataset_name,
+            task_type=task_type,
+            metric=metric,
+            ensemble_size=ensemble_size,
+            ensemble_nbest=ensemble_nbest,
+            max_models_on_disc=max_models_on_disc,
+            seed=seed,
+            precision=precision,
+            memory_limit=memory_limit,
+            read_at_most=read_at_most,
+            random_state=random_state,
+            logger_port=logger_port,
+        ).run(
+            end_at=end_at,
+            iteration=iteration,
+            pynisher_context=pynisher_context,
+        )
+        return result
