@@ -355,8 +355,8 @@ class EnsembleBuilder:
 
     def main(
         self,
-        time_left: float,
-        iteration: int,
+        time_left: float | None = None,
+        iteration: int | None = None,
     ) -> tuple[list[dict[str, Any]], int | float]:
         """Run the main loop of ensemble building
 
@@ -387,11 +387,12 @@ class EnsembleBuilder:
             port=self.logger_port,
         )
 
-        self.start_time = time.time()
-
-        used_time = time.time() - self.start_time
-        left_for_iter = time_left - used_time
-        self.logger.debug(f"Starting iteration {iteration}, time left: {left_for_iter}")
+        if time_left is not None:
+            self.start_time = time.time()
+            used_time = time.time() - self.start_time
+            left_for_iter = time_left - used_time
+            itr = iteration if str(iteration) is not None else ""
+            self.logger.debug(f"Starting iteration {itr}, time left: {left_for_iter}")
 
         # Can't load data, exit early
         if not os.path.exists(self.backend._get_targets_ensemble_filename()):
