@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Callable
 
 import random
+import time
 from pathlib import Path
 
 import numpy as np
@@ -11,6 +12,7 @@ from autosklearn.ensemble_building import EnsembleBuilder, Run
 from autosklearn.util.functional import bound, pairs
 
 from pytest_cases import fixture, parametrize
+from unittest.mock import patch
 
 from test.util import fails
 
@@ -501,3 +503,27 @@ def test_fit_with_error_gives_no_ensemble(
 
     ensemble = builder.fit_ensemble(runs, targets)
     assert ensemble is None
+
+
+@parametrize("time_buffer", [1, 5])
+@parametrize("duration", [10, 20])
+def test_run_end_at(builder: EnsembleBuilder, time_buffer: int, duration: int) -> None:
+    """
+    Expects
+    -------
+    * The limits enforced by pynisher should account for the time_buffer and duration
+      to run for + a little bit of overhead that gets rounded to a second.
+    """
+    with patch("pynisher.enforce_limits") as pynisher_mock:
+        builder.run(
+            end_at=time.time() + duration,
+            iteration=1,
+            time_buffer=time_buffer,
+            pynisher_context="forkserver",
+        )
+        # The 1 comes from the small overhead in conjuction with rounding down
+        expected = duration - time_buffer - 1
+
+        # The 1 comes from the small overhead in conjuction with rounding down
+        expected = duration - time_buffer - 1
+        assert pynisher_mock.call_args_list[0][1]["wall_time_in_s"] == expected
