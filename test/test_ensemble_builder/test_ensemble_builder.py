@@ -17,6 +17,7 @@ from test.util import fails
 
 @fixture
 def builder(make_ensemble_builder: Callable[..., EnsembleBuilder]) -> EnsembleBuilder:
+    """A default ensemble builder"""
     return make_ensemble_builder()
 
 
@@ -456,3 +457,47 @@ def test_delete_runs_does_not_delete_dummy(
 
     loaded = builder.available_runs()
     assert set(loaded.values()) == set(dummy_runs)
+
+
+def test_fit_ensemble_produces_ensemble(
+    builder: EnsembleBuilder,
+    make_run: Callable[..., Run],
+) -> None:
+    """
+    Expects
+    -------
+    * Should produce an ensemble if all runs have predictions
+    """
+    targets = builder.targets("ensemble")
+    assert targets is not None
+
+    predictions = targets
+    runs = [make_run(predictions={"ensemble": predictions}) for _ in range(10)]
+
+    ensemble = builder.fit_ensemble(runs, targets)
+
+    assert ensemble is not None
+
+
+def test_fit_with_error_gives_no_ensemble(
+    builder: EnsembleBuilder,
+    make_run: Callable[..., Run],
+) -> None:
+    """
+    Expects
+    -------
+    * A run without predictions will raise an error, causing the `fit_ensemble` to fail
+      and return None
+    """
+    targets = builder.targets("ensemble")
+    assert targets is not None
+
+    predictions = targets
+
+    runs = [make_run(predictions={"ensemble": predictions}) for _ in range(10)]
+    bad_run = make_run(predictions=None)
+
+    runs.append(bad_run)
+
+    ensemble = builder.fit_ensemble(runs, targets)
+    assert ensemble is None
