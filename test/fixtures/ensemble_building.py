@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
-import sys
 import math
 import pickle
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -12,7 +12,7 @@ import numpy as np
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.ensemble_building import EnsembleBuilder, Run
+from autosklearn.ensemble_building import EnsembleBuilder, EnsembleBuilderManager, Run
 from autosklearn.metrics import Scorer, accuracy
 
 from pytest_cases import fixture
@@ -142,5 +142,64 @@ def make_ensemble_builder(
                 pickle.dump({run.id: run for run in previous_candidates}, f)
 
         return builder
+
+    return _make
+
+
+@fixture
+def make_ensemble_builder_manager(
+    make_backend: Callable[..., Backend],
+    make_sklearn_dataset: Callable[..., XYDataManager],
+) -> Callable[..., EnsembleBuilderManager]:
+    """Use `make_run` to create runs for this manager
+
+    .. code:: python
+
+        def test_x(make_run, make_ensemble_builder_manager):
+            manager = make_ensemble_builder(...)
+
+            # Will use the backend to place runs correctly
+            runs = make_run(predictions={"ensemble": ...}, backend=manager.backend)
+
+            # ... test stuff
+
+
+    """
+
+    def _make(
+        *,
+        backend: Backend | None = None,
+        dataset_name: str = "TEST",
+        task: int = BINARY_CLASSIFICATION,
+        metric: Scorer = accuracy,
+        random_state: int | np.random.RandomState | None = DEFAULT_SEED,
+        **kwargs: Any,
+    ) -> EnsembleBuilderManager:
+        if backend is None:
+            backend = make_backend()
+
+        if not Path(backend._get_datamanager_pickle_filename()).exists():
+            datamanager = make_sklearn_dataset(
+                name="breast_cancer",
+                task=BINARY_CLASSIFICATION,
+                feat_type="numerical",  # They're all numerical
+                as_datamanager=True,
+            )
+            backend.save_datamanager(datamanager)
+
+            # Annoyingly, some places use datamanger, some places use the file
+            # Hence, we take the y_train of the datamanager and use that as the
+            # the targets
+            if "Y_train" in datamanager.data:
+                backend.save_targets_ensemble(datamanager.data["Y_train"])
+
+        return EnsembleBuilderManager(
+            backend=backend,
+            dataset_name=dataset_name,
+            task=task,
+            metric=metric,
+            random_state=random_state,
+            **kwargs,
+        )
 
     return _make
