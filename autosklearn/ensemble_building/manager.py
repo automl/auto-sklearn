@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Optional, Union
+from typing import Any
 
 import logging.handlers
 import time
@@ -110,10 +110,6 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
             The time when this job was started, to account for any latency in job
             allocation.
         """
-        # TODO delete
-        # Not used, overwritten later
-        self.start_time = start_time
-
         self.time_left_for_ensembles = time_left_for_ensembles
         self.backend = backend
         self.dataset_name = dataset_name
@@ -126,7 +122,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         self.precision = precision
         self.max_iterations = max_iterations
         self.read_at_most = read_at_most
-        self.ensemble_memory_limit = ensemble_memory_limit
+        self.memory_limit = memory_limit
         self.random_state = random_state
         self.logger_port = logger_port
         self.pynisher_context = pynisher_context
