@@ -1,14 +1,11 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 import pickle
 import shutil
-import traceback
 from functools import partial
 from pathlib import Path
-
-from autosklearn.automl import AutoML
 
 from pytest import FixtureRequest
 from pytest_cases import fixture
@@ -85,7 +82,7 @@ class Cache:
         """Path to an item for this cache"""
         return self.dir / name
 
-    def _load(self, name: str) -> Any:
+    def load(self, name: str) -> Any:
         """Load an item from the cache with a given name"""
         if self.verbose:
             print(f"Loading cached item {self.path(name)}")
@@ -93,7 +90,7 @@ class Cache:
         with self.path(name).open("rb") as f:
             return pickle.load(f)
 
-    def _save(self, item: Any, name: str) -> None:
+    def save(self, item: Any, name: str) -> None:
         """Dump an item to cache with a name"""
         if self.verbose:
             print(f"Saving cached item {self.path(name)}")
@@ -107,52 +104,13 @@ class Cache:
         self.dir.mkdir()
 
 
-class AutoMLCache(Cache):
-    def save(self, model: AutoML) -> None:
-        """Save the model"""
-        self._save(model, "model")
-
-    def model(self) -> Optional[AutoML]:
-        """Returns the saved model if it can.
-
-        In the case of an issue loading an existing model file, it will delete
-        this cache item.
-        """
-        if "model" not in self:
-            return None
-
-        # Try to load the model, if there was an issue, delete all cached items
-        # for the model and return None
-        try:
-            model = self._load("model")
-        except Exception:
-            model = None
-            print(traceback.format_exc())
-            self.reset()
-        finally:
-            return model
-
-    def backend_path(self) -> Path:
-        """The path for the backend of the automl model"""
-        return self.path("backend")
-
-
 @fixture
-def cache(request: FixtureRequest) -> Callable[[str], Cache]:
+def make_cache(request: FixtureRequest) -> Callable[[str], Cache]:
     """Gives the access to a cache."""
     pytest_cache = request.config.cache
     assert pytest_cache is not None
 
     cache_dir = pytest_cache.mkdir("autosklearn-cache")
-    return partial(Cache, cache_dir=cache_dir)
-
-
-@fixture
-def automl_cache(request: FixtureRequest) -> Callable[[str], AutoMLCache]:
-    """Gives access to an automl cache"""
-    pytest_cache = request.config.cache
-    assert pytest_cache is not None
-
-    cache_dir = pytest_cache.mkdir("autosklearn-cache")
     verbosity = request.config.getoption("verbose")
-    return partial(AutoMLCache, cache_dir=cache_dir, verbose=verbosity)
+
+    return partial(Cache, cache_dir=cache_dir, verbose=verbosity)

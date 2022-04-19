@@ -14,6 +14,51 @@ HERE = Path(__file__).parent.resolve()
 DATAPATH = HERE.parent / "data"
 
 
+def copy_backend(old: Backend | Path | str, new: Backend | Path | str) -> Backend:
+    """Transfers a backend to a new path
+
+    Parameters
+    ----------
+    old_backend: Backend | Path | str
+        The backend to transfer from
+
+    new_path: Backend | Path | str
+        Where to place the new backend
+
+    Returns
+    -------
+    Backend
+        The new backend with the contents of the old
+    """
+    if isinstance(new, str):
+        new_backend = create(
+            temporary_directory=new,
+            output_directory=None,
+            prefix="auto-sklearn",
+        )
+    elif isinstance(new, Path):
+        new_backend = create(
+            temporary_directory=str(new),
+            output_directory=None,
+            prefix="auto-sklearn",
+        )
+    else:
+        new_backend = new
+
+    dst = new_backend.temporary_directory
+
+    if isinstance(old, str):
+        src = old
+    elif isinstance(old, Path):
+        src = str(old)
+    else:
+        src = old.temporary_directory
+
+    copy_tree(src, dst)
+
+    return new_backend
+
+
 # TODO Update to return path once everything can use a path
 @fixture
 def tmp_dir(tmp_path: Path) -> str:
@@ -54,29 +99,22 @@ def make_backend(tmp_path: Path) -> Callable[..., Backend]:
         template: Path | Backend | None = None,
     ) -> Backend:
         if path is None:
-            path = tmp_path / "backend"
+            _path = Path(tmp_path) / "backend"
+        elif isinstance(path, str):
+            _path = Path(path)
+        else:
+            _path = path
 
-        _path = Path(path) if not isinstance(path, Path) else path
-        assert not _path.exists(), "Try passing path / 'backend'"
-
-        backend = create(
-            temporary_directory=str(_path),
-            output_directory=None,
-            prefix="auto-sklearn",
-        )
+        assert not _path.exists(), "Path exists, Try passing path / 'backend'"
 
         if template is not None:
-            dest = Path(backend.temporary_directory)
-
-            if isinstance(template, Backend):
-                template = Path(template.temporary_directory)
-
-            if isinstance(template, Path):
-                assert template.exists()
-                copy_tree(str(template), str(dest))
-
-            else:
-                raise NotImplementedError(template)
+            backend = copy_backend(old=template, new=_path)
+        else:
+            backend = create(
+                temporary_directory=str(_path),
+                output_directory=None,
+                prefix="auto-sklearn",
+            )
 
         return backend
 
