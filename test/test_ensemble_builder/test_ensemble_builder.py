@@ -118,6 +118,7 @@ def test_candidates_no_filters(
     """
     Expects
     -------
+    * Should have nothing in common between candidates and discarded
     * Should not filter out any viable runs if no filters set. Here a viable run
       has a loss and ensemble predictions
     """
@@ -132,6 +133,7 @@ def test_candidates_no_filters(
         performance_range_threshold=None,
     )
 
+    assert len(set(candidates) & discarded) == 0
     assert len(candidates) == len(runs)
     assert len(discarded) == 0
 
@@ -142,6 +144,7 @@ def test_candidates_filters_runs_with_no_predictions(
     """
     Expects
     -------
+    * Should have nothing in common between candidates and discarded
     * Should filter out runs with no "ensemble" predictions
     """
     bad_runs = [make_run(predictions=None) for _ in range(5)]
@@ -152,6 +155,7 @@ def test_candidates_filters_runs_with_no_predictions(
 
     candidates, discarded = builder.candidate_selection(runs, dummy)
 
+    assert len(set(candidates) & discarded) == 0
     assert len(candidates) == 1
     assert len(discarded) == len(bad_runs)
     assert candidates[0].pred_path("ensemble").exists()
@@ -196,6 +200,8 @@ def test_candidates_filters_out_better_than_dummy(
     candidates, discarded = builder.candidate_selection(
         runs, dummy_run, better_than_dummy=True
     )
+
+    assert set(candidates)
 
     assert len(candidates) == 3
     assert all(run.loss < dummy_run.loss for run in candidates)

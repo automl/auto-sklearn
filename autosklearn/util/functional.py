@@ -109,16 +109,21 @@ def cut(
     if isinstance(where, int):
         lst = list(itr)
         return lst[:where], lst[where:]
-    else:
-        a = []
-        itr2 = iter(itr)
-        for x in itr2:
-            if not where(x):
-                a.append(x)
-            else:
-                break
 
+    a = []
+    itr2 = iter(itr)
+    broke = False
+    for x in itr2:
+        if not where(x):
+            a.append(x)
+        else:
+            broke = True
+            break
+
+    if broke:
         return a, [x] + list(itr2)
+    else:
+        return a, []
 
 
 def split(
