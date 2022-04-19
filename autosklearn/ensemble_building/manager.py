@@ -22,58 +22,60 @@ from autosklearn.util.logging_ import get_named_client_logger
 class EnsembleBuilderManager(IncorporateRunResultCallback):
     def __init__(
         self,
-        start_time: float,
-        time_left_for_ensembles: float,
         backend: Backend,
         dataset_name: str,
         task: int,
         metric: Scorer,
+        time_left_for_ensembles: float = 10,
+        max_iterations: int | None = None,
+        pynisher_context: str = "fork",
         ensemble_size: int = 10,
         ensemble_nbest: int | float = 100,
-        seed: int,
+        max_models_on_disc: int | float | None = None,
+        seed: int = 1,
         precision: int = 32,
-        max_iterations: Optional[int],
-        read_at_most: int,
-        memory_limit: Optional[int],
-        random_state: Union[int, np.random.RandomState],
-        max_models_on_disc: Optional[float | int] = 100,
+        memory_limit: int | None = None,
+        read_at_most: int | None = 5,
         logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
-        pynisher_context: str = "fork",
+        random_state: int | np.random.RandomState | None = None,
+        start_time: float | None = None,
     ):
         """SMAC callback to handle ensemble building
 
         Parameters
         ----------
-        start_time: int
-            the time when this job was started, to account for any latency in job
-            allocation.
-
-        time_left_for_ensemble: int
-            How much time is left for the task. Job should finish within this
-            allocated time
-
-        backend: util.backend.Backend
+        backend: Backend
             backend to write and read files
 
         dataset_name: str
             name of dataset
 
-        task_type: int
-            type of ML task
+        task: int
+            Type of ML task
 
-        metric: str
-            name of metric to compute the loss of the given predictions
+        metric: Scorer
+            Metric to compute the loss of the given predictions
 
-        ensemble_size: int
+        time_left_for_ensemble: float = 10
+            How much time is left for the task in seconds.
+            Job should finish within this allocated time
+
+        max_iterations: int | None = None
+            maximal number of iterations to run this script. None indicates no limit
+            on iterations.
+
+        pynisher_context: "spawn" | "fork" | "forkserver" = "fork"
+            The multiprocessing context for pynisher.
+
+        ensemble_size: int = 10
             maximal size of ensemble
 
-        ensemble_nbest: int/float
-            if int: consider only the n best prediction
-            if float: consider only this fraction of the best models
-            Both wrt to validation predictions
+        ensemble_nbest: int | float = 100
+            If int: consider only the n best prediction
+            If float: consider only this fraction of the best models
             If performance_range_threshold > 0, might return less models
 
-        max_models_on_disc: Optional[int | float] = 100
+        max_models_on_disc: int | float | None = None
            Defines the maximum number of models that are kept in the disc.
 
            If int, it must be greater or equal than 1, and dictates the max
@@ -88,28 +90,25 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
            If None, the feature is disabled. It defines an upper bound on the
            models that can be used in the ensemble.
 
-        seed: int
-            random seed
+        seed: int = 1
+            Seed used for the inidividual runs
 
-        max_iterations: int
-            maximal number of iterations to run this script
-            (default None --> deactivated)
+        precision: 16 | 32 | 64 | 128 = 32
+            Precision of floats to read the predictions
 
-        precision: [16,32,64,128]
-            precision of floats to read the predictions
+        memory_limit: int | None = None
+            Memory limit in mb. If ``None``, no memory limit is enforced.
 
-        ensemble_memory_limit: Optional[int]
-            memory limit in mb. If ``None``, no memory limit is enforced.
+        read_at_most: int = 5
+            Read at most n new prediction files in each iteration
 
-        read_at_most: int
-            read at most n new prediction files in each iteration
+        logger_port: int = DEFAULT_TCP_LOGGING_PORT
+            Port that receives logging records
 
-        logger_port: int
-            port that receives logging records
-
-        pynisher_context: str
-            The multiprocessing context for pynisher. One of spawn/fork/forkserver.
-
+        start_time: float | None = None
+            DISABLED: Just using time.time() to set it
+            The time when this job was started, to account for any latency in job
+            allocation.
         """
         # TODO delete
         # Not used, overwritten later
