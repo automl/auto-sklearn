@@ -238,7 +238,6 @@ class EnsembleBuilder:
         time_left: float | None = None,
         end_at: float | None = None,
         time_buffer: int = 5,
-        return_predictions: bool = False,
     ) -> tuple[list[dict[str, Any]], int | float]:
         """Run the ensemble building process
 
@@ -261,9 +260,6 @@ class EnsembleBuilder:
         time_buffer : int = 5
             How much extra time to add as a buffer to this run. This means there is
             always some amount of time to do something useful.
-
-        return_predictions : bool = False
-            Whether run should also return predictions
 
         Returns
         -------
@@ -308,7 +304,7 @@ class EnsembleBuilder:
                 logger=self.logger,
                 context=context,
             )(self.main)
-            safe_ensemble_script(time_left, iteration, return_predictions)
+            safe_ensemble_script(time_left, iteration)
             if safe_ensemble_script.exit_status is pynisher.MemorylimitException:
                 # if ensemble script died because of memory error,
                 # reduce nbest to reduce memory consumption and try it again
@@ -361,7 +357,6 @@ class EnsembleBuilder:
         self,
         time_left: float,
         iteration: int,
-        return_predictions: bool = False,
     ) -> tuple[list[dict[str, Any]], int | float]:
         """Run the main loop of ensemble building
 
@@ -380,9 +375,6 @@ class EnsembleBuilder:
 
         iteration : int
             The iteration of this run
-
-        return_predictions : bool = False
-            Whether to return predictions or not
 
         Returns
         -------

@@ -240,7 +240,6 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
                         random_state=self.random_state,
                         end_at=self.start_time + self.time_left_for_ensembles,
                         iteration=self.iteration,
-                        return_predictions=False,
                         priority=100,
                         pynisher_context=self.pynisher_context,
                         logger_port=self.logger_port,
@@ -277,7 +276,6 @@ def fit_and_return_ensemble(
     read_at_most: int,
     end_at: float,
     iteration: int,
-    return_predictions: bool,
     pynisher_context: str,
     max_models_on_disc: Optional[Union[float, int]] = 100,
     logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
@@ -377,7 +375,6 @@ def fit_and_return_ensemble(
     ).run(
         end_at=end_at,
         iteration=iteration,
-        return_predictions=return_predictions,
         pynisher_context=pynisher_context,
     )
     return result
