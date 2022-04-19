@@ -7,7 +7,6 @@ import multiprocessing
 import numbers
 import os
 import pickle
-import shutil
 import time
 import traceback
 from itertools import accumulate
@@ -26,9 +25,16 @@ from autosklearn.metrics import Scorer, calculate_loss, calculate_score
 from autosklearn.util.functional import cut, findwhere, split
 from autosklearn.util.logging_ import get_named_client_logger
 from autosklearn.util.parallel import preload_modules
+from autosklearn.util.disk import rmtree
 
 
 class EnsembleBuilder:
+    """Builds ensembles out of runs that exist in the Backend
+
+    This is used by EnsembleBuilderManager and created in a dask-client
+    every time a run finishes and there is currently no EnsembleBuilder active.
+    """
+
     def __init__(
         self,
         backend: Backend,
@@ -904,7 +910,7 @@ class EnsembleBuilder:
         items = iter(run for run in runs if not run.is_dummy() and run.dir.exists())
         for run in items:
             try:
-                shutil.rmtree(run.dir)
+                rmtree(run.dir, atomic=True)
                 self.logger.info(f"Deleted files for {run}")
             except Exception as e:
                 self.logger.error(f"Failed to delete files for {run}: \n{e}")
