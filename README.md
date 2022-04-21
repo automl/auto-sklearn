@@ -26,15 +26,15 @@ predictions = cls.predict(X_test)
 
 If you use auto-sklearn in scientific publications, we would appreciate citations.
 
-**Efficient and Robust Automated Machine Learning**  
-*Matthias Feurer, Aaron Klein, Katharina Eggensperger, Jost Springenberg, Manuel Blum and Frank Hutter*  
-Advances in Neural Information Processing Systems 28 (2015)  
+**Efficient and Robust Automated Machine Learning**
+*Matthias Feurer, Aaron Klein, Katharina Eggensperger, Jost Springenberg, Manuel Blum and Frank Hutter*
+Advances in Neural Information Processing Systems 28 (2015)
 
 [Link](https://papers.neurips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf) to publication.
 ```
 @inproceedings{feurer-neurips15a,
     title     = {Efficient and Robust Automated Machine Learning},
-    author    = {Feurer, Matthias and Klein, Aaron and Eggensperger, Katharina  Springenberg, Jost and Blum, Manuel and Hutter, Frank},
+    author    = {Feurer, Matthias and Klein, Aaron and Eggensperger, Katharina and Springenberg, Jost and Blum, Manuel and Hutter, Frank},
     booktitle = {Advances in Neural Information Processing Systems 28 (2015)},
     pages     = {2962--2970},
     year      = {2015}
@@ -43,8 +43,8 @@ Advances in Neural Information Processing Systems 28 (2015)
 
 ----------------------------------------
 
-**Auto-Sklearn 2.0: The Next Generation**  
-*Matthias Feurer, Katharina Eggensperger, Stefan Falkner, Marius Lindauer and Frank Hutter**  
+**Auto-Sklearn 2.0: The Next Generation**
+*Matthias Feurer, Katharina Eggensperger, Stefan Falkner, Marius Lindauer and Frank Hutter**
 arXiv:2007.04074 [cs.LG], 2020
 
 [Link](https://arxiv.org/abs/2007.04074) to publication.
