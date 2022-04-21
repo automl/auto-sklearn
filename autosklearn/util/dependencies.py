@@ -17,6 +17,10 @@ def verify_packages(packages: Optional[Union[str, List[str]]]) -> None:
         if not package:
             continue
 
+        # Comment line
+        if package.startswith('#'):
+            continue
+
         match = RE_PATTERN.match(package)
         if match:
             name = match.group('name')
