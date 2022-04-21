@@ -265,14 +265,14 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    r2 score:  0.016645205141071484
-    {   2: {   'cost': 0.8573090379823846,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f1530b3ffd0>,
+    r2 score:  0.08669969340273087
+    {   2: {   'cost': 0.6673815966088392,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7ff061527640>,
                'ensemble_weight': 1.0,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f153439b970>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7ff060d03970>,
                'model_id': 2,
                'rank': 1,
-               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f153439b2e0>,
+               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7ff060d033d0>,
                'sklearn_regressor': KernelRidge(alpha=1.0, coef0=1.0, gamma=0.1, kernel='polynomial')}}
 
 
@@ -281,7 +281,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  12.792 seconds)
+   **Total running time of the script:** ( 0 minutes  14.576 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_regression.py:

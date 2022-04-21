@@ -96,8 +96,8 @@ accelerometer and gyroscope data collected by a phone. For more information see
       self.metafeatures = self.metafeatures.append(metafeatures)
     /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
       self.algorithm_runs[metric].append(runs)
-    Train score 0.9957142857142857
-    Test score 0.984
+    Train score 0.9951428571428571
+    Test score 0.982
 
 
 
@@ -153,12 +153,12 @@ in the `scikit-learn docs <https://scikit-learn.org/stable/modules/permutation_i
 
  .. code-block:: none
 
-    gyro_y    : 0.001 +/- 0.002
-    gyro_x    : 0.023 +/- 0.002
-    gyro_z    : 0.036 +/- 0.003
-    acceleration_x: 0.051 +/- 0.006
-    acceleration_z: 0.144 +/- 0.007
-    acceleration_y: 0.272 +/- 0.006
+    gyro_y    : 0.000 +/- 0.001
+    gyro_x    : 0.019 +/- 0.002
+    gyro_z    : 0.036 +/- 0.004
+    acceleration_x: 0.066 +/- 0.008
+    acceleration_z: 0.130 +/- 0.005
+    acceleration_y: 0.267 +/- 0.008
 
 
 
@@ -248,7 +248,7 @@ these features. Again, we'll look at acceleration_y and acceleration_z.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 3 minutes  58.193 seconds)
+   **Total running time of the script:** ( 3 minutes  59.325 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_inspect_predictions.py:
