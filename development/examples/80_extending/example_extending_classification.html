@@ -305,39 +305,49 @@ component for using in auto-sklearn.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.965034965034965
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.958041958041958
 {   2: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7ff0581b04f0&gt;,
-           &#39;cost&#39;: 0.028368794326241176,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7ff05ca64970&gt;,
-           &#39;ensemble_weight&#39;: 0.74,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7ff05db7c9d0&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fccf6c62370&gt;,
+           &#39;cost&#39;: 0.03546099290780147,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fccee497100&gt;,
+           &#39;ensemble_weight&#39;: 0.4,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fccf6c62e80&gt;,
            &#39;model_id&#39;: 2,
            &#39;rank&#39;: 1,
            &#39;sklearn_classifier&#39;: MLPClassifier(hidden_layer_sizes=(32,), random_state=1)},
-    5: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7ff058083e80&gt;,
-           &#39;cost&#39;: 0.3829787234042553,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7ff05caeeb80&gt;,
-           &#39;ensemble_weight&#39;: 0.16,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7ff058083850&gt;,
-           &#39;model_id&#39;: 5,
+    4: {   &#39;balancing&#39;: Balancing(random_state=1),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fccf3918d30&gt;,
+           &#39;cost&#39;: 0.05673758865248224,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fccf8300be0&gt;,
+           &#39;ensemble_weight&#39;: 0.04,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fccf4844460&gt;,
+           &#39;model_id&#39;: 4,
            &#39;rank&#39;: 3,
+           &#39;sklearn_classifier&#39;: MLPClassifier(alpha=0.9370622711515105, hidden_layer_sizes=(179, 179),
+              random_state=1, solver=&#39;lbfgs&#39;)},
+    5: {   &#39;balancing&#39;: Balancing(random_state=1),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fccf6a88d60&gt;,
+           &#39;cost&#39;: 0.36170212765957444,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fccf4e7bca0&gt;,
+           &#39;ensemble_weight&#39;: 0.12,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fccf6a88ac0&gt;,
+           &#39;model_id&#39;: 5,
+           &#39;rank&#39;: 4,
            &#39;sklearn_classifier&#39;: MLPClassifier(activation=&#39;logistic&#39;, alpha=0.6554997385843834,
               hidden_layer_sizes=(158, 158, 158), random_state=1, solver=&#39;sgd&#39;)},
     6: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7ff05c85e190&gt;,
-           &#39;cost&#39;: 0.049645390070921946,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7ff05de3b1c0&gt;,
-           &#39;ensemble_weight&#39;: 0.1,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7ff060c31790&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fccf05518b0&gt;,
+           &#39;cost&#39;: 0.03546099290780147,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fccf38c1fa0&gt;,
+           &#39;ensemble_weight&#39;: 0.44,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fccf0551100&gt;,
            &#39;model_id&#39;: 6,
            &#39;rank&#39;: 2,
            &#39;sklearn_classifier&#39;: MLPClassifier(activation=&#39;logistic&#39;, alpha=0.6724692077492787,
               hidden_layer_sizes=(128,), random_state=1, solver=&#39;sgd&#39;)}}
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  22.552 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  18.038 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-extending-classification-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_classification.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>
