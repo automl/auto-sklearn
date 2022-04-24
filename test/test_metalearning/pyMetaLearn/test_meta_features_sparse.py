@@ -209,7 +209,7 @@ def test_percentage_of_features_with_missing_values(sparse_data):
             X, y, logging.getLogger('Meta'), categorical))
     mf = meta_features.metafeatures["PercentageOfFeaturesWithMissingValues"](
         X, y, logging.getLogger('Meta'), categorical)
-    assert  mf.value == pytest.approx(0)
+    assert mf.value == pytest.approx(0)
 
 
 def test_num_symbols(sparse_data):
