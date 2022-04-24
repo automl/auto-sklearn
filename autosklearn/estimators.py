@@ -937,6 +937,25 @@ class AutoSklearnEstimator(BaseEstimator):
         #      tied together by ordering, might be better to store as tuple
         for i, weight in enumerate(self.automl_.ensemble_.weights_):
             (_, model_id, _) = self.automl_.ensemble_.identifiers_[i]
+
+            # We had issues where the model's in the ensembles are not in the runhistory
+            # collected. I have no clue why this is but to prevent failures, we fill
+            # the values with NaN
+            if model_id not in model_runs:
+                model_runs[model_id] = {
+                    "model_id": model_id,
+                    "seed": pd.NA,
+                    "budget": pd.NA,
+                    "duration": pd.NA,
+                    "config_id": pd.NA,
+                    "start_time": pd.NA,
+                    "end_time": pd.NA,
+                    "status": pd.NA,
+                    "cost": pd.NA,
+                    "train_loss": pd.NA,
+                    "config_origin": pd.NA,
+                }
+
             model_runs[model_id]["ensemble_weight"] = weight
 
         # Filter out non-ensemble members if needed, else fill in a default

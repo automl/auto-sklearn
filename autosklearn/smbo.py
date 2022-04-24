@@ -42,6 +42,7 @@ from autosklearn.metalearning.metalearning.meta_base import MetaBase
 from autosklearn.metalearning.mismbo import suggest_via_metalearning
 from autosklearn.util.logging_ import get_named_client_logger
 from autosklearn.util.parallel import preload_modules
+from autosklearn.util.stopwatch import StopWatch
 
 EXCLUDE_META_FEATURES_CLASSIFICATION = {
     "Landmark1NN",
@@ -86,35 +87,84 @@ def get_send_warnings_to_logger(logger):
 
 # metalearning helpers
 def _calculate_metafeatures(
-    data_feat_type, data_info_task, basename, x_train, y_train, watcher, logger_
+    data_feat_type,
+    data_info_task,
+    basename,
+    x_train,
+    y_train,
+    stopwatch: StopWatch,
+    logger_,
 ):
     with warnings.catch_warnings():
         warnings.showwarning = get_send_warnings_to_logger(logger_)
 
         # == Calculate metafeatures
-        task_name = "CalculateMetafeatures"
-        watcher.start_task(task_name)
+        with stopwatch.time("Calculate meta-features") as task_timer:
 
-        categorical = {
-            col: True if feat_type.lower() in {"categorical", "string"} else False
-            for col, feat_type in data_feat_type.items()
-        }
+            categorical = {
+                col: True if feat_type.lower() in {"categorical", "string"} else False
+                for col, feat_type in data_feat_type.items()
+            }
+
+            EXCLUDE_META_FEATURES = (
+                EXCLUDE_META_FEATURES_CLASSIFICATION
+                if data_info_task in CLASSIFICATION_TASKS
+                else EXCLUDE_META_FEATURES_REGRESSION
+            )
+
+            if data_info_task in [
+                MULTICLASS_CLASSIFICATION,
+                BINARY_CLASSIFICATION,
+                MULTILABEL_CLASSIFICATION,
+                REGRESSION,
+                MULTIOUTPUT_REGRESSION,
+            ]:
+                logger_.info("Start calculating metafeatures for %s", basename)
+                result = calculate_all_metafeatures_with_labels(
+                    x_train,
+                    y_train,
+                    categorical=categorical,
+                    dataset_name=basename,
+                    dont_calculate=EXCLUDE_META_FEATURES,
+                    logger=logger_,
+                )
+                for key in list(result.metafeature_values.keys()):
+                    if result.metafeature_values[key].type_ != "METAFEATURE":
+                        del result.metafeature_values[key]
+
+            else:
+                result = None
+                logger_.info("Metafeatures not calculated")
+
+        logger_.info(f"{task_timer.name} took {task_timer.wall_duration:5.2f}"),
+        return result
+
+
+def _calculate_metafeatures_encoded(
+    data_feat_type,
+    basename,
+    x_train,
+    y_train,
+    stopwatch: StopWatch,
+    task,
+    logger_,
+):
+    with warnings.catch_warnings():
+        warnings.showwarning = get_send_warnings_to_logger(logger_)
 
         EXCLUDE_META_FEATURES = (
             EXCLUDE_META_FEATURES_CLASSIFICATION
-            if data_info_task in CLASSIFICATION_TASKS
+            if task in CLASSIFICATION_TASKS
             else EXCLUDE_META_FEATURES_REGRESSION
         )
 
-        if data_info_task in [
-            MULTICLASS_CLASSIFICATION,
-            BINARY_CLASSIFICATION,
-            MULTILABEL_CLASSIFICATION,
-            REGRESSION,
-            MULTIOUTPUT_REGRESSION,
-        ]:
-            logger_.info("Start calculating metafeatures for %s", basename)
-            result = calculate_all_metafeatures_with_labels(
+        with stopwatch.time("Calculate meta-features encoded") as task_timer:
+            categorical = {
+                col: True if feat_type.lower() in {"categorical", "string"} else False
+                for col, feat_type in data_feat_type.items()
+            }
+
+            result = calculate_all_metafeatures_encoded_labels(
                 x_train,
                 y_train,
                 categorical=categorical,
@@ -126,52 +176,7 @@ def _calculate_metafeatures(
                 if result.metafeature_values[key].type_ != "METAFEATURE":
                     del result.metafeature_values[key]
 
-        else:
-            result = None
-            logger_.info("Metafeatures not calculated")
-        watcher.stop_task(task_name)
-        logger_.info(
-            "Calculating Metafeatures (categorical attributes) took %5.2f",
-            watcher.wall_elapsed(task_name),
-        )
-        return result
-
-
-def _calculate_metafeatures_encoded(
-    data_feat_type, basename, x_train, y_train, watcher, task, logger_
-):
-    with warnings.catch_warnings():
-        warnings.showwarning = get_send_warnings_to_logger(logger_)
-
-        EXCLUDE_META_FEATURES = (
-            EXCLUDE_META_FEATURES_CLASSIFICATION
-            if task in CLASSIFICATION_TASKS
-            else EXCLUDE_META_FEATURES_REGRESSION
-        )
-
-        task_name = "CalculateMetafeaturesEncoded"
-        watcher.start_task(task_name)
-        categorical = {
-            col: True if feat_type.lower() in {"categorical", "string"} else False
-            for col, feat_type in data_feat_type.items()
-        }
-
-        result = calculate_all_metafeatures_encoded_labels(
-            x_train,
-            y_train,
-            categorical=categorical,
-            dataset_name=basename,
-            dont_calculate=EXCLUDE_META_FEATURES,
-            logger=logger_,
-        )
-        for key in list(result.metafeature_values.keys()):
-            if result.metafeature_values[key].type_ != "METAFEATURE":
-                del result.metafeature_values[key]
-        watcher.stop_task(task_name)
-        logger_.info(
-            "Calculating Metafeatures (encoded attributes) took %5.2fsec",
-            watcher.wall_elapsed(task_name),
-        )
+        logger_.info(f"{task_timer.name} took {task_timer.wall_duration:5.2f}sec")
         return result
 
 
@@ -182,12 +187,10 @@ def _get_metalearning_configurations(
     configuration_space,
     task,
     initial_configurations_via_metalearning,
+    stopwatch: StopWatch,
     is_sparse,
-    watcher,
     logger,
 ):
-    task_name = "InitialConfigurations"
-    watcher.start_task(task_name)
     try:
         metalearning_configurations = suggest_via_metalearning(
             meta_base,
@@ -203,25 +206,8 @@ def _get_metalearning_configurations(
         logger.error(str(e))
         logger.error(traceback.format_exc())
         metalearning_configurations = []
-    watcher.stop_task(task_name)
+
     return metalearning_configurations
-
-
-def _print_debug_info_of_init_configuration(
-    initial_configurations, basename, time_for_task, logger, watcher
-):
-    logger.debug("Initial Configurations: (%d)" % len(initial_configurations))
-    for initial_configuration in initial_configurations:
-        logger.debug(initial_configuration)
-    logger.debug(
-        "Looking for initial configurations took %5.2fsec",
-        watcher.wall_elapsed("InitialConfigurations"),
-    )
-    logger.info(
-        "Time left for %s after finding initial configurations: %5.2fsec",
-        basename,
-        time_for_task - watcher.wall_elapsed(basename),
-    )
 
 
 def get_smac_object(
@@ -259,7 +245,7 @@ def get_smac_object(
     )
 
 
-class AutoMLSMBO(object):
+class AutoMLSMBO:
     def __init__(
         self,
         config_space,
@@ -269,7 +255,7 @@ class AutoMLSMBO(object):
         func_eval_time_limit,
         memory_limit,
         metric,
-        watcher,
+        stopwatch: StopWatch,
         n_jobs,
         dask_client: dask.distributed.Client,
         port: int,
@@ -319,7 +305,7 @@ class AutoMLSMBO(object):
         self.func_eval_time_limit = int(func_eval_time_limit)
         self.memory_limit = memory_limit
         self.data_memory_limit = data_memory_limit
-        self.watcher = watcher
+        self.stopwatch = stopwatch
         self.num_metalearning_cfgs = num_metalearning_cfgs
         self.config_file = config_file
         self.seed = seed
@@ -364,24 +350,29 @@ class AutoMLSMBO(object):
         self.task = self.datamanager.info["task"]
 
     def collect_metalearning_suggestions(self, meta_base):
-        metalearning_configurations = _get_metalearning_configurations(
-            meta_base=meta_base,
-            basename=self.dataset_name,
-            metric=self.metric,
-            configuration_space=self.config_space,
-            task=self.task,
-            is_sparse=self.datamanager.info["is_sparse"],
-            initial_configurations_via_metalearning=self.num_metalearning_cfgs,
-            watcher=self.watcher,
-            logger=self.logger,
-        )
-        _print_debug_info_of_init_configuration(
-            metalearning_configurations,
-            self.dataset_name,
-            self.total_walltime_limit,
-            self.logger,
-            self.watcher,
-        )
+
+        with self.stopwatch.time("Initial Configurations") as task:
+            metalearning_configurations = _get_metalearning_configurations(
+                meta_base=meta_base,
+                basename=self.dataset_name,
+                metric=self.metric,
+                configuration_space=self.config_space,
+                task=self.task,
+                is_sparse=self.datamanager.info["is_sparse"],
+                initial_configurations_via_metalearning=self.num_metalearning_cfgs,
+                stopwatch=self.stopwatch,
+                logger=self.logger,
+            )
+
+        self.logger.debug(f"Initial Configurations: {len(metalearning_configurations)}")
+        for config in metalearning_configurations:
+            self.logger.debug(config)
+
+        self.logger.debug(f"{task.name} took {task.wall_duration:5.2f}sec")
+
+        time_since_start = self.stopwatch.time_since(self.dataset_name, "start")
+        time_left = self.total_walltime_limit - time_since_start
+        self.logger.info(f"Time left for {task.name}: {time_left:5.2f}s")
 
         return metalearning_configurations
 
@@ -404,7 +395,7 @@ class AutoMLSMBO(object):
                 x_train=self.datamanager.data["X_train"],
                 y_train=self.datamanager.data["Y_train"],
                 basename=self.dataset_name,
-                watcher=self.watcher,
+                stopwatch=self.stopwatch,
                 logger_=self.logger,
             )
         except Exception as e:
@@ -431,7 +422,7 @@ class AutoMLSMBO(object):
                 x_train=self.datamanager.data["X_train"],
                 y_train=self.datamanager.data["Y_train"],
                 basename=self.dataset_name,
-                watcher=self.watcher,
+                stopwatch=self.stopwatch,
                 logger_=self.logger,
             )
         except Exception as e:
@@ -441,7 +432,7 @@ class AutoMLSMBO(object):
 
     def run_smbo(self):
 
-        self.watcher.start_task("SMBO")
+        self.stopwatch.start("SMBO")
 
         # == first things first: load the datamanager
         self.reset_data_manager()
@@ -488,8 +479,9 @@ class AutoMLSMBO(object):
         )
         ta = ExecuteTaFuncWithQueue
 
-        startup_time = self.watcher.wall_elapsed(self.dataset_name)
+        startup_time = self.stopwatch.time_since(self.dataset_name, "start")
         total_walltime_limit = self.total_walltime_limit - startup_time - 5
+
         scenario_dict = {
             "abort_on_first_run_crash": False,
             "save-results-instantly": True,
@@ -563,6 +555,8 @@ class AutoMLSMBO(object):
             self._budget_type = smac.solver.tae_runner.budget_type
         else:
             raise NotImplementedError(type(smac.solver.tae_runner))
+
+        self.stopwatch.stop("SMBO")
 
         return self.runhistory, self.trajectory, self._budget_type
 

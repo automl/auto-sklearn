@@ -42,6 +42,7 @@ sections = [
     "LOCALFOLDER"
 ] # section ordering
 multi_line_output = 3 # https://pycqa.github.io/isort/docs/configuration/multi_line_output_modes.html
+skip = ["autosklearn/automl_common"]  # Don't validate automl_common
 
 [tool.pydocstyle]
 convention = "numpy"

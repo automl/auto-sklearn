@@ -39,8 +39,7 @@ jobs:
       run: |
         pip install twine
         last_dist=$(ls -t dist/auto-sklearn-*.tar.gz | head -n 1)
-        twine_output=`twine check "$last_dist"`
-        if [[ "$twine_output" != "Checking $last_dist: PASSED" ]]; then echo $twine_output && exit 1;fi
+        twine check "$last_dist" --strict
 
     - name: Install dist
       run: |

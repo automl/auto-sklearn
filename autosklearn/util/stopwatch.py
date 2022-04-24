@@ -1,141 +1,219 @@
-# -*- encoding: utf-8 -*-
-"""Created on Dec 17, 2014.
+from __future__ import annotations
 
-@author: Katharina Eggensperger
-@project: AutoML2015
-
-"""
-from typing import Tuple
+from typing import Iterator, Mapping, Optional, Tuple
 
 import sys
 import time
-from collections import OrderedDict
+from contextlib import contextmanager
+from itertools import repeat
+
+from typing_extensions import Literal
 
 
-class TimingTask(object):
-    _cpu_tic = 0.0
-    _cpu_tac = 0.0
-    _cpu_dur = 0.0
-    _wall_tic = 0.0
-    _wall_tac = 0.0
-    _wall_dur = 0.0
+class TimingTask:
+    """A task to start"""
 
     def __init__(self, name: str):
-        self._name = name
-        self._cpu_tic = time.process_time()
-        self._wall_tic = time.time()
+        """
+        Parameters
+        ----------
+        name : str
+            The name of the task
+        """
+        self.name = name
+        self.cpu_start: Optional[float] = None
+        self.cpu_end: Optional[float] = None
+        self.wall_start: Optional[float] = None
+        self.wall_end: Optional[float] = None
+
+    def start(self) -> None:
+        """Start the task"""
+        if not self.started():
+            self.cpu_start = time.process_time()
+            self.wall_start = time.time()
 
     def stop(self) -> None:
-        if not self._cpu_tac:
-            self._cpu_tac = time.process_time()
-            self._wall_tac = time.time()
-            self._cpu_dur = self._cpu_tac - self._cpu_tic
-            self._wall_dur = self._wall_tac - self._wall_tic
+        """Stop the task"""
+        if not self.finished():
+            self.cpu_end = time.process_time()
+            self.wall_end = time.time()
+
+    def finished(self) -> bool:
+        """Whether this task has been finished"""
+        return self.cpu_end is not None
+
+    def started(self) -> bool:
+        """Whether this task has been started"""
+        return self.cpu_start is not None
+
+    @property
+    def cpu_duration(self) -> Optional[float]:
+        """The duration according to cpu clock time"""
+        if self.cpu_start and self.cpu_end:
+            return self.cpu_end - self.cpu_start
         else:
-            sys.stdout.write("Task has already stopped\n")
+            return None
 
     @property
-    def name(self) -> str:
-        return self._name
+    def wall_duration(self) -> Optional[float]:
+        """The duration according to wall clock time"""
+        if self.wall_end and self.wall_start:
+            return self.wall_end - self.wall_start
+        else:
+            return None
 
     @property
-    def cpu_tic(self) -> float:
-        return self._cpu_tic
-
-    @property
-    def cpu_tac(self) -> float:
-        return self._cpu_tac
-
-    @property
-    def cpu_dur(self) -> float:
-        return self._cpu_dur
-
-    @property
-    def wall_tic(self) -> float:
-        return self._wall_tic
-
-    @property
-    def wall_tac(self) -> float:
-        return self._wall_tac
-
-    @property
-    def wall_dur(self) -> float:
-        return self._wall_dur
-
-    @property
-    def dur(self) -> Tuple[float, float]:
-        return self._cpu_dur, self._wall_dur
+    def durations(self) -> Tuple[Optional[float], Optional[float]]:
+        """The durations (cpu, wall)"""
+        return self.cpu_duration, self.wall_duration
 
 
-class StopWatch:
-
-    """Class to collect all timing tasks."""
+class StopWatch(Mapping[str, TimingTask]):
+    """Class to collect timing tasks."""
 
     def __init__(self) -> None:
-        self._tasks = OrderedDict()
-        self._tasks["stopwatch_time"] = TimingTask("stopwatch_time")
+        self.tasks = {"_stopwatch_": TimingTask("_stopwatch_")}
+        self.tasks["_stopwatch_"].start()
 
-    def insert_task(self, name: str, cpu_dur: float, wall_dur: float) -> None:
-        if name not in self._tasks:
-            self._tasks[name] = TimingTask(name)
-            self._tasks[name].stop()
-            self._tasks[name]._wall_dur = wall_dur
-            self._tasks[name]._cpu_dur = cpu_dur
+    def __contains__(self, name: object) -> bool:
+        return name in self.tasks
 
-    def start_task(self, name: str) -> None:
-        if name not in self._tasks:
-            self._tasks[name] = TimingTask(name)
+    def __getitem__(self, name: str) -> TimingTask:
+        return self.tasks[name]
+
+    def __len__(self) -> int:
+        return len(self.tasks)
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self.tasks)
+
+    def start(self, name: str) -> None:
+        """Start a given task with a name"""
+        task = TimingTask(name)
+        self.tasks[name] = task
+        task.start()
+
+    def stop(self, name: str) -> None:
+        """Stop a given task"""
+        if name in self.tasks:
+            self.tasks[name].stop()
+        else:
+            sys.stderr.write(f"No task with name {name}")
+
+    def total_cpu(self) -> float:
+        """Return sum of CPU time for all so far finished tasks."""
+        tasks = self.tasks.values()
+        return sum([t.cpu_duration for t in tasks if t.cpu_duration is not None])
+
+    def total_wall(self) -> float:
+        """Return sum of wall clock time for all so far finished tasks."""
+        tasks = self.tasks.values()
+        return sum([t.wall_duration for t in tasks if t.wall_duration is not None])
+
+    def time_since(
+        self,
+        name: str,
+        phase: Literal["start", "end"] = "start",
+        default: float = 0.0,
+        raises: bool = False,
+    ) -> float:
+        """The wall clock time since a task either began or ended
+
+        Parameters
+        ----------
+        name : str
+            The name of the task
+
+        phase : Literal["start", "end"] = "start"
+            From which phase you want to know the time elapsed since
+
+        default: float = 0.0
+            If None (default) then an error is raised if an answer can't be given.
+
+        raises: bool = False
+            Whether the method should raise if it can't find a valid time
+
+        Returns
+        -------
+        float
+            The time elapsed
+
+        Raises
+        ------
+        ValueError
+            If no default is specified and
+            * the task has not been registered
+            * the "start" and the task never started
+            * the "end" and the task never started
+        """
+        task = self.tasks.get(name, None)
+
+        if task is None:
+            if raises:
+                raise ValueError(f"Task not listed in {list(self.tasks.keys())}")
+            else:
+                return default
+
+        if phase == "start":
+            event_time = task.wall_start
+        elif phase == "end":
+            event_time = task.wall_end
+        else:
+            raise NotImplementedError()
+
+        if event_time is None:
+            if raises:
+                raise ValueError(f"Task {task} has no time for {phase}")
+            else:
+                return default
+
+        return time.time() - event_time
 
     def wall_elapsed(self, name: str) -> float:
-        tmp = time.time()
-        if name in self._tasks:
-            if not self._tasks[name].wall_dur:
-                tsk_start = self._tasks[name].wall_tic
-                return tmp - tsk_start
-            else:
-                return self._tasks[name].wall_dur
-        return 0.0
+        """Get the currently elapsed wall time for a task"""
+        if name not in self.tasks:
+            return 0.0
+
+        task = self.tasks[name]
+        if task.wall_start is None:
+            return 0.0
+
+        if task.wall_duration is not None:
+            return task.wall_duration
+        else:
+            return time.time() - task.wall_start
 
     def cpu_elapsed(self, name: str) -> float:
-        tmp = time.process_time()
-        if name in self._tasks:
-            if not self._tasks[name].cpu_dur:
-                tsk_start = self._tasks[name].cpu_tic
-                return tmp - tsk_start
-            else:
-                return self._tasks[name].cpu_dur
-        return 0.0
+        """Get the currently elapsed cpu time for a task"""
+        if name not in self.tasks:
+            return 0.0
 
-    def stop_task(self, name: str) -> None:
-        try:
-            self._tasks[name].stop()
-        except KeyError:
-            sys.stderr.write("There is no such task: %s\n" % name)
+        task = self.tasks[name]
+        if task.cpu_start is None:
+            return 0.0
 
-    def get_cpu_dur(self, name: str) -> float:
-        try:
-            return self._tasks[name].cpu_dur
-        except KeyError:
-            sys.stderr.write("There is no such task: %s\n" % name)
-        return 0.0
+        if task.cpu_duration is not None:
+            return task.cpu_duration
+        else:
+            return time.time() - task.cpu_start
 
-    def get_wall_dur(self, name: str) -> float:
-        try:
-            return self._tasks[name].wall_dur
-        except KeyError:
-            sys.stderr.write("There is no such task: %s\n" % name)
-        return 0.0
+    @contextmanager
+    def time(self, name: str) -> Iterator[TimingTask]:
+        """Start timing a task
 
-    def cpu_sum(self) -> float:
-        """Return sum of CPU time for all so far finished tasks."""
-        return sum([max(0, self._tasks[tsk].cpu_dur) for tsk in self._tasks])
+        Parameters
+        ----------
+        name : str
+            The name of the task to measure
+        """
+        task = TimingTask(name)
+        self.tasks[name] = task
+        task.start()
+        yield task
+        task.stop()
 
-    def wall_sum(self) -> float:
-        """Return sum of CPU time for all so far finished tasks."""
-        return sum([max(0, self._tasks[tsk].wall_dur) for tsk in self._tasks])
-
-    def __repr__(self) -> str:
-        ret_str = "| %10s | %10s | %10s | %10s | %10s | %10s | %10s |\n" % (
+    def __str__(self) -> str:
+        headers = [
             "Name",
             "CPUStart",
             "CPUEnd",
@@ -143,19 +221,19 @@ class StopWatch:
             "WallStart",
             "WallEnd",
             "WallDur",
-        )
-        ret_str += "+" + "------------+" * 7 + "\n"
-        offset = self._tasks["stopwatch_time"].wall_tic
-        for tsk in self._tasks:
-            if self._tasks[tsk].wall_tac:
-                wall_tac = self._tasks[tsk].wall_tac - offset
-            ret_str += "| %10s | %10.5f | %10.5f | %10.5f | %10s | %10s | %10s |\n" % (
-                tsk,
-                self._tasks[tsk].cpu_tic,
-                self._tasks[tsk].cpu_tac,
-                self.cpu_elapsed(tsk),
-                self._tasks[tsk].wall_tic - offset,
-                wall_tac if self._tasks[tsk].wall_tac else False,
-                self.wall_elapsed(tsk),
+        ]
+        header = "|".join([f"{h:10s}" for h in headers])
+
+        sep = "-" * 12
+        seperator = "+" + "+".join(repeat(sep, len(headers))) + "+"
+
+        entries = []
+        for name, task in self.tasks.items():
+            entry = (
+                f"{task.name:10s} | {task.cpu_start:10.5f} | {task.cpu_end: 10.5f} | "
+                f"{task.cpu_duration:10.5f} | {task.wall_start: 10s} | "
+                f"{task.wall_end:10s} | {task.wall_duration:10s} |"
             )
-        return ret_str
+            entries.append(entry)
+
+        return "\n".join([header, seperator] + entries)
