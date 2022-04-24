@@ -5,14 +5,14 @@
 
 Computation times
 =================
-**06:11.835** total execution time for **examples_20_basic** files:
+**06:09.005** total execution time for **examples_20_basic** files:
 
 +-------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_20_basic_example_classification.py` (``example_classification.py``)                       | 02:02.479 | 0.0 MB |
+| :ref:`sphx_glr_examples_20_basic_example_classification.py` (``example_classification.py``)                       | 01:59.028 | 0.0 MB |
 +-------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_20_basic_example_multioutput_regression.py` (``example_multioutput_regression.py``)       | 01:57.448 | 0.0 MB |
+| :ref:`sphx_glr_examples_20_basic_example_multioutput_regression.py` (``example_multioutput_regression.py``)       | 01:56.799 | 0.0 MB |
 +-------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_20_basic_example_regression.py` (``example_regression.py``)                               | 01:55.506 | 0.0 MB |
+| :ref:`sphx_glr_examples_20_basic_example_regression.py` (``example_regression.py``)                               | 01:55.893 | 0.0 MB |
 +-------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_20_basic_example_multilabel_classification.py` (``example_multilabel_classification.py``) | 00:16.402 | 0.0 MB |
+| :ref:`sphx_glr_examples_20_basic_example_multilabel_classification.py` (``example_multilabel_classification.py``) | 00:17.285 | 0.0 MB |
 +-------------------------------------------------------------------------------------------------------------------+-----------+--------+

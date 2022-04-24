@@ -9,6 +9,16 @@
 Releases
 ========
 
+
+Version 0.14.7
+==============
+
+* HOTFIX #1445: Locks `ConfigSpace` to `<0.5.0` and `smac` to `<1.3`. Adds upper bounds on `automl` packages to help prevent further issues.
+
+Contributors v0.14.7
+********************
+* Eddie Bergman
+
 Version 0.14.6
 ==============
 

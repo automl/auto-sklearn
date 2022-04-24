@@ -237,16 +237,16 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    {   73: {   'balancing': Balancing(random_state=1),
-                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc096c5b9d0>,
+    {   31: {   'balancing': Balancing(random_state=1, strategy='weighting'),
+                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc4f574e6a0>,
                 'cost': 0.007092198581560294,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc0957fe280>,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc4f54d5970>,
                 'ensemble_weight': 1.0,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc096c5bf10>,
-                'model_id': 73,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc4f54d5f40>,
+                'model_id': 31,
                 'rank': 1,
-                'sklearn_classifier': SGDClassifier(alpha=0.00021011529264557935, eta0=0.01, loss='log', max_iter=32,
-                  random_state=1, tol=1.3873010009898928e-05, warm_start=True)}}
+                'sklearn_classifier': SGDClassifier(alpha=5.648891391907734e-07, eta0=0.01, loss='log', max_iter=32,
+                  random_state=1, tol=1.535384699341134e-05, warm_start=True)}}
 
 
 
@@ -281,7 +281,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  57.218 seconds)
+   **Total running time of the script:** ( 1 minutes  56.023 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_interpretable_models.py:

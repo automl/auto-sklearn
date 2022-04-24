@@ -161,55 +161,72 @@ Fit an user provided configuration
 
  .. code-block:: none
 
-    {'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc0ac3047f0>, 'balancing': Balancing(random_state=1), 'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc091d23af0>, 'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc091d23670>}
+    {'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc4f52971c0>, 'balancing': Balancing(random_state=1), 'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc4f182fbb0>, 'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fc4f1af7f40>}
     RunInfo(config=Configuration(values={
       'balancing:strategy': 'none',
       'classifier:__choice__': 'random_forest',
-      'classifier:random_forest:bootstrap': 'False',
-      'classifier:random_forest:criterion': 'gini',
+      'classifier:random_forest:bootstrap': 'True',
+      'classifier:random_forest:criterion': 'entropy',
       'classifier:random_forest:max_depth': 'None',
-      'classifier:random_forest:max_features': 0.5754414216471295,
+      'classifier:random_forest:max_features': 0.8931627198742284,
       'classifier:random_forest:max_leaf_nodes': 'None',
       'classifier:random_forest:min_impurity_decrease': 0.0,
-      'classifier:random_forest:min_samples_leaf': 3,
+      'classifier:random_forest:min_samples_leaf': 13,
       'classifier:random_forest:min_samples_split': 11,
       'classifier:random_forest:min_weight_fraction_leaf': 0.0,
       'data_preprocessor:__choice__': 'feature_type',
-      'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding',
-      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense',
-      'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent',
-      'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'minmax',
-      'feature_preprocessor:__choice__': 'pca',
-      'feature_preprocessor:pca:keep_variance': 0.5199040229311143,
-      'feature_preprocessor:pca:whiten': 'False',
+      'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding',
+      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer',
+      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0012977607772032176,
+      'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'median',
+      'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'robust_scaler',
+      'data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max': 0.9571577025825759,
+      'data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min': 0.19427769090224012,
+      'feature_preprocessor:__choice__': 'random_trees_embedding',
+      'feature_preprocessor:random_trees_embedding:bootstrap': 'True',
+      'feature_preprocessor:random_trees_embedding:max_depth': 8,
+      'feature_preprocessor:random_trees_embedding:max_leaf_nodes': 'None',
+      'feature_preprocessor:random_trees_embedding:min_samples_leaf': 4,
+      'feature_preprocessor:random_trees_embedding:min_samples_split': 8,
+      'feature_preprocessor:random_trees_embedding:min_weight_fraction_leaf': 1.0,
+      'feature_preprocessor:random_trees_embedding:n_estimators': 24,
     })
     , instance=None, instance_specific=None, seed=1, cutoff=60, capped=False, budget=0.0, source_id=0)
-    RunValue(cost=0.1431279620853081, time=3.7810888290405273, status=<StatusType.SUCCESS: 1>, starttime=1650538205.9263365, endtime=1650538209.7303553, additional_info={'duration': 3.6838784217834473, 'num_run': 2, 'train_loss': 0.011209715086408223, 'configuration_origin': None})
+    RunValue(cost=0.05308056872037914, time=9.298000574111938, status=<StatusType.SUCCESS: 1>, starttime=1650807722.979355, endtime=1650807732.3034892, additional_info={'duration': 9.193356990814209, 'num_run': 2, 'train_loss': 0.042970574497898206, 'configuration_origin': None})
     Passed Configuration: Configuration(values={
       'balancing:strategy': 'none',
       'classifier:__choice__': 'random_forest',
-      'classifier:random_forest:bootstrap': 'False',
-      'classifier:random_forest:criterion': 'gini',
+      'classifier:random_forest:bootstrap': 'True',
+      'classifier:random_forest:criterion': 'entropy',
       'classifier:random_forest:max_depth': 'None',
-      'classifier:random_forest:max_features': 0.5754414216471295,
+      'classifier:random_forest:max_features': 0.8931627198742284,
       'classifier:random_forest:max_leaf_nodes': 'None',
       'classifier:random_forest:min_impurity_decrease': 0.0,
-      'classifier:random_forest:min_samples_leaf': 3,
+      'classifier:random_forest:min_samples_leaf': 13,
       'classifier:random_forest:min_samples_split': 11,
       'classifier:random_forest:min_weight_fraction_leaf': 0.0,
       'data_preprocessor:__choice__': 'feature_type',
-      'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding',
-      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense',
-      'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent',
-      'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'minmax',
-      'feature_preprocessor:__choice__': 'pca',
-      'feature_preprocessor:pca:keep_variance': 0.5199040229311143,
-      'feature_preprocessor:pca:whiten': 'False',
+      'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding',
+      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer',
+      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0012977607772032176,
+      'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'median',
+      'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'robust_scaler',
+      'data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max': 0.9571577025825759,
+      'data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min': 0.19427769090224012,
+      'feature_preprocessor:__choice__': 'random_trees_embedding',
+      'feature_preprocessor:random_trees_embedding:bootstrap': 'True',
+      'feature_preprocessor:random_trees_embedding:max_depth': 8,
+      'feature_preprocessor:random_trees_embedding:max_leaf_nodes': 'None',
+      'feature_preprocessor:random_trees_embedding:min_samples_leaf': 4,
+      'feature_preprocessor:random_trees_embedding:min_samples_split': 8,
+      'feature_preprocessor:random_trees_embedding:min_weight_fraction_leaf': 1.0,
+      'feature_preprocessor:random_trees_embedding:n_estimators': 24,
     })
 
-    Random Forest: RandomForestClassifier(bootstrap=False, max_features=2, min_samples_leaf=3,
-                           min_samples_split=11, n_estimators=512, n_jobs=1,
-                           random_state=1, warm_start=True)
+    Random Forest: RandomForestClassifier(criterion='entropy', max_features=639,
+                           min_samples_leaf=13, min_samples_split=11,
+                           n_estimators=512, n_jobs=1, random_state=1,
+                           warm_start=True)
     /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
       self.metafeatures = self.metafeatures.append(metafeatures)
     /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
@@ -221,7 +238,7 @@ Fit an user provided configuration
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  8.185 seconds)
+   **Total running time of the script:** ( 2 minutes  15.445 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_single_configuration.py:

@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Multi-output Regression &#8212; AutoSklearn 0.14.6 documentation</title>
+    <title>Multi-output Regression &#8212; AutoSklearn 0.14.7 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.14.6</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.7</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -170,9 +170,10 @@ to download the full example code or to run this example in your browser via Bin
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight              type          cost  duration
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight              type      cost  duration
 model_id
-11           1              1.0  gaussian_process  6.589653e-10  5.296296
+16           1             0.96  gaussian_process  0.000003  4.130638
+14           2             0.04  gaussian_process  0.000013  3.489934
 </pre></div>
 </div>
 </div>
@@ -182,14 +183,25 @@ model_id
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   11: {   &#39;cost&#39;: 6.589653267496942e-10,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc09760f040&gt;,
-            &#39;ensemble_weight&#39;: 1.0,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc0975fef70&gt;,
-            &#39;model_id&#39;: 11,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   14: {   &#39;cost&#39;: 1.3435095716829437e-05,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc4f4dcebe0&gt;,
+            &#39;ensemble_weight&#39;: 0.04,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc4ef5bbbe0&gt;,
+            &#39;model_id&#39;: 14,
+            &#39;rank&#39;: 2,
+            &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fc4ef5bbb50&gt;,
+            &#39;sklearn_regressor&#39;: GaussianProcessRegressor(alpha=0.0001892420474677165,
+                         kernel=RBF(length_scale=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]),
+                         n_restarts_optimizer=10, normalize_y=True,
+                         random_state=1)},
+    16: {   &#39;cost&#39;: 2.889164665398347e-06,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fc4f4d9f040&gt;,
+            &#39;ensemble_weight&#39;: 0.96,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fc4f92d6850&gt;,
+            &#39;model_id&#39;: 16,
             &#39;rank&#39;: 1,
-            &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fc0975fe6d0&gt;,
-            &#39;sklearn_regressor&#39;: GaussianProcessRegressor(alpha=1.6650724498551164e-11,
+            &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fc4f54bce80&gt;,
+            &#39;sklearn_regressor&#39;: GaussianProcessRegressor(alpha=3.4314736521904505e-06,
                          kernel=RBF(length_scale=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]),
                          n_restarts_optimizer=10, normalize_y=True,
                          random_state=1)}}
@@ -203,7 +215,7 @@ model_id
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.9999999994112173
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.9999969304962466
 </pre></div>
 </div>
 </div>
@@ -404,7 +416,7 @@ model_id
     (Forbidden: regressor:__choice__ == &#39;random_forest&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  57.448 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  56.799 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-20-basic-example-multioutput-regression-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/20_basic/example_multioutput_regression.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo.svg" width="150px" /></a>
