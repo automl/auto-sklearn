@@ -18,7 +18,7 @@ def verify_packages(packages: Optional[Union[str, List[str]]]) -> None:
             continue
 
         # Ignore comments
-        if package.startswith("#")
+        if package.startswith("#"):
             continue
 
         match = RE_PATTERN.match(package)
