@@ -1061,7 +1061,7 @@ class PCASkewnessFirstPC(MetaFeature):
 
 
 def calculate_all_metafeatures_encoded_labels(
-    X, y, categorical, dataset_name, logger, calculate=None, dont_calculate=None
+    X, y, feat_type, dataset_name, logger, calculate=None, dont_calculate=None
 ):
     """
     Calculate only metafeatures for which a 1HotEncoded feature matrix is necessery.
@@ -1073,7 +1073,7 @@ def calculate_all_metafeatures_encoded_labels(
     return calculate_all_metafeatures(
         X,
         y,
-        categorical,
+        feat_type,
         dataset_name,
         calculate=calculate,
         dont_calculate=dont_calculate,
@@ -1082,7 +1082,7 @@ def calculate_all_metafeatures_encoded_labels(
 
 
 def calculate_all_metafeatures_with_labels(
-    X, y, categorical, dataset_name, logger, calculate=None, dont_calculate=None
+    X, y, feat_type, dataset_name, logger, calculate=None, dont_calculate=None
 ):
     if dont_calculate is None:
         dont_calculate = set()
@@ -1092,7 +1092,7 @@ def calculate_all_metafeatures_with_labels(
     return calculate_all_metafeatures(
         X,
         y,
-        categorical,
+        feat_type,
         dataset_name,
         calculate=calculate,
         dont_calculate=dont_calculate,
@@ -1103,7 +1103,7 @@ def calculate_all_metafeatures_with_labels(
 def calculate_all_metafeatures(
     X,
     y,
-    categorical,
+    feat_type,
     dataset_name,
     logger,
     calculate=None,
@@ -1138,19 +1138,7 @@ def calculate_all_metafeatures(
                 # sparse matrices because of wrong sparse format)
                 sparse = scipy.sparse.issparse(X)
 
-                feat_type = {
-                    key: "categorical" if value else "numerical"
-                    for key, value in categorical.items()
-                }
-
-                # TODO make this more cohesive to the overall structure (quick bug fix)
-                if isinstance(X, pd.DataFrame):
-                    for key in X.select_dtypes(include="string").columns:
-                        feat_type[key] = "string"
-
                 DPP = FeatTypeSplit(
-                    # The difference between feat_type and categorical, is that
-                    # categorical has True/False instead of categorical/numerical
                     feat_type=feat_type,
                     force_sparse_output=True,
                 )
@@ -1189,7 +1177,10 @@ def calculate_all_metafeatures(
         else:
             X_ = X
             y_ = y
-            categorical_ = categorical
+            categorical_ = {
+                col: True if feat_type.lower() == "categorical" else False
+                for col, feat_type in feat_type.items()
+            }
 
         dependency = metafeatures.get_dependency(name)
         if dependency is not None:

@@ -53,8 +53,8 @@ def meta_train_data(request):
         for name, type_ in dataset["attributes"][:-1]
     ]
 
-    categorical = {
-        i: True if attribute == "nominal" else False
+    feat_type = {
+        i: "categorical" if attribute == "nominal" else "numerical"
         for i, attribute in enumerate(attribute_types)
     }
 
@@ -65,20 +65,20 @@ def meta_train_data(request):
     logger = logging.getLogger("Meta")
     meta_features.helper_functions.set_value(
         "MissingValues",
-        meta_features.helper_functions["MissingValues"](X, y, logger, categorical),
+        meta_features.helper_functions["MissingValues"](X, y, logger, feat_type),
     )
     meta_features.helper_functions.set_value(
         "NumSymbols",
-        meta_features.helper_functions["NumSymbols"](X, y, logger, categorical),
+        meta_features.helper_functions["NumSymbols"](X, y, logger, feat_type),
     )
     meta_features.helper_functions.set_value(
         "ClassOccurences",
         meta_features.helper_functions["ClassOccurences"](X, y, logger),
     )
     if request.param == "numpy":
-        return X, y, categorical
+        return X, y, feat_type
     elif request.param == "pandas":
-        return pd.DataFrame(X), y, categorical
+        return pd.DataFrame(X), y, feat_type
     else:
         raise ValueError(request.param)
 
@@ -97,8 +97,8 @@ def meta_train_data_transformed(request):
         "numeric" if type(type_) != list else "nominal"
         for name, type_ in dataset["attributes"][:-1]
     ]
-    categorical = {
-        i: True if attribute == "nominal" else False
+    feat_type = {
+        i: "categorical" if attribute == "nominal" else "numerical"
         for i, attribute in enumerate(attribute_types)
     }
 
@@ -109,28 +109,30 @@ def meta_train_data_transformed(request):
     logger = logging.getLogger("Meta")
     meta_features.helper_functions.set_value(
         "MissingValues",
-        meta_features.helper_functions["MissingValues"](X, y, logger, categorical),
+        meta_features.helper_functions["MissingValues"](X, y, logger, feat_type),
     )
     meta_features.helper_functions.set_value(
         "NumSymbols",
-        meta_features.helper_functions["NumSymbols"](X, y, logger, categorical),
+        meta_features.helper_functions["NumSymbols"](X, y, logger, feat_type),
     )
     meta_features.helper_functions.set_value(
         "ClassOccurences",
         meta_features.helper_functions["ClassOccurences"](X, y, logger),
     )
 
-    DPP = FeatTypeSplit(
-        feat_type={
-            col: "categorical" if category else "numerical"
-            for col, category in categorical.items()
-        }
-    )
+    DPP = FeatTypeSplit(feat_type=feat_type)
     X_transformed = DPP.fit_transform(X)
 
-    number_numerical = np.sum(~np.array(list(categorical.values())))
+    number_numerical = np.sum(
+        [True if feat_type[i] == "numerical" else False for i in feat_type.keys()]
+    )
+    number_string = np.sum(
+        [True if feat_type[i] == "string" else False for i in feat_type.keys()]
+    )
     categorical_transformed = {
-        i: True if i < (X_transformed.shape[1] - number_numerical) else False
+        i: True
+        if i < (X_transformed.shape[1] - number_numerical - number_string)
+        else False
         for i in range(X_transformed.shape[1])
     }
 
@@ -846,9 +848,9 @@ def test_1NN_multilabel(multilabel_train_data):
 def test_calculate_all_metafeatures_multilabel(multilabel_train_data):
     meta_features.helper_functions.clear()
     X, y = multilabel_train_data
-    categorical = {i: False for i in range(10)}
+    feat_type = {i: "numerical" for i in range(10)}
     mf = meta_features.calculate_all_metafeatures(
-        X, y, categorical, "Generated", logger=logging.getLogger("TestMeta")
+        X, y, feat_type, "Generated", logger=logging.getLogger("TestMeta")
     )
     assert 52 == len(mf.metafeature_values)
 
@@ -860,11 +862,12 @@ def test_calculate_all_metafeatures_same_results_across_datatypes():
     all metafeatures work in this complex dataset
     """
     X, y = fetch_openml(data_id=2, return_X_y=True, as_frame=True)
-    categorical = {
-        col: True if X[col].dtype.name == "category" else False for col in X.columns
+    feat_type = {
+        col: "categorical" if X[col].dtype.name == "category" else "numerical"
+        for col in X.columns
     }
     mf = meta_features.calculate_all_metafeatures(
-        X, y, categorical, "2", logger=logging.getLogger("Meta")
+        X, y, feat_type, "2", logger=logging.getLogger("Meta")
     )
     assert 52 == len(mf.metafeature_values)
     expected = {
@@ -925,13 +928,12 @@ def test_calculate_all_metafeatures_same_results_across_datatypes():
 
     # Then do numpy!
     X, y = fetch_openml(data_id=2, return_X_y=True, as_frame=False)
-    categorical = {
-        i: True if category else False
-        for i, category in enumerate(categorical.values())
-    }
+    feat_type = {i: feat_type[key] for i, key in enumerate(feat_type.keys())}
+
     mf = meta_features.calculate_all_metafeatures(
-        X, y, categorical, "2", logger=logging.getLogger("Meta")
+        X, y, feat_type, "2", logger=logging.getLogger("Meta")
     )
+
     assert {k: mf[k].value for k in expected.keys()} == pytest.approx(expected)
 
     # The column-reorder of pandas and numpy array are different after
