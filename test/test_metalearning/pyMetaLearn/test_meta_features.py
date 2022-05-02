@@ -58,6 +58,11 @@ def meta_train_data(request):
         for i, attribute in enumerate(attribute_types)
     }
 
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
+
     data = np.array(dataset["data"], dtype=np.float64)
     X = data[:, :-1]
     y = data[:, -1].reshape((-1,))
@@ -65,11 +70,11 @@ def meta_train_data(request):
     logger = logging.getLogger("Meta")
     meta_features.helper_functions.set_value(
         "MissingValues",
-        meta_features.helper_functions["MissingValues"](X, y, logger, feat_type),
+        meta_features.helper_functions["MissingValues"](X, y, logger, categorical_),
     )
     meta_features.helper_functions.set_value(
         "NumSymbols",
-        meta_features.helper_functions["NumSymbols"](X, y, logger, feat_type),
+        meta_features.helper_functions["NumSymbols"](X, y, logger, categorical_),
     )
     meta_features.helper_functions.set_value(
         "ClassOccurences",
@@ -163,36 +168,52 @@ def meta_train_data_transformed(request):
 
 
 def test_number_of_instance(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.metafeatures["NumberOfInstances"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert mf.value == 898
     assert isinstance(mf, MetaFeatureValue)
 
 
 def test_number_of_classes(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.metafeatures["NumberOfClasses"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert mf.value == 5
     assert isinstance(mf, MetaFeatureValue)
 
 
 def test_number_of_features(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.metafeatures["NumberOfFeatures"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert mf.value == 38
     assert isinstance(mf, MetaFeatureValue)
 
 
 def test_missing_values(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.helper_functions["MissingValues"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert isinstance(mf.value, pd.DataFrame if hasattr(X, "iloc") else np.ndarray)
     assert mf.value.shape == X.shape
@@ -200,162 +221,226 @@ def test_missing_values(meta_train_data):
 
 
 def test_number_of_Instances_with_missing_values(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.metafeatures["NumberOfInstancesWithMissingValues"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert mf.value == 898
     assert isinstance(mf, MetaFeatureValue)
 
 
 def test_percentage_of_Instances_with_missing_values(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     meta_features.metafeatures.set_value(
         "NumberOfInstancesWithMissingValues",
         meta_features.metafeatures["NumberOfInstancesWithMissingValues"](
-            X, y, logging.getLogger("Meta"), categorical
+            X, y, logging.getLogger("Meta"), categorical_
         ),
     )
     mf = meta_features.metafeatures["PercentageOfInstancesWithMissingValues"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert pytest.approx(mf.value) == 1.0
     assert isinstance(mf, MetaFeatureValue)
 
 
 def test_number_of_features_with_missing_values(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.metafeatures["NumberOfFeaturesWithMissingValues"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert mf.value == 29
     assert isinstance(mf, MetaFeatureValue)
 
 
 def test_percentage_of_features_with_missing_values(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     meta_features.metafeatures.set_value(
         "NumberOfFeaturesWithMissingValues",
         meta_features.metafeatures["NumberOfFeaturesWithMissingValues"](
-            X, y, logging.getLogger("Meta"), categorical
+            X, y, logging.getLogger("Meta"), categorical_
         ),
     )
     mf = meta_features.metafeatures["PercentageOfFeaturesWithMissingValues"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert pytest.approx(mf.value) == float(29) / float(38)
     assert isinstance(mf, MetaFeatureValue)
 
 
 def test_number_of_missing_values(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     np.save("/tmp/debug", X)
     mf = meta_features.metafeatures["NumberOfMissingValues"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert mf.value == 22175
     assert isinstance(mf, MetaFeatureValue)
 
 
 def test_percentage_missing_values(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     meta_features.metafeatures.set_value(
         "NumberOfMissingValues",
         meta_features.metafeatures["NumberOfMissingValues"](
-            X, y, logging.getLogger("Meta"), categorical
+            X, y, logging.getLogger("Meta"), categorical_
         ),
     )
     mf = meta_features.metafeatures["PercentageOfMissingValues"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert pytest.approx(mf.value) == (float(22175) / float(38 * 898))
     assert isinstance(mf, MetaFeatureValue)
 
 
 def test_number_of_numeric_features(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.metafeatures["NumberOfNumericFeatures"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert mf.value == 6
     assert isinstance(mf, MetaFeatureValue)
 
 
 def test_number_of_categorical_features(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.metafeatures["NumberOfCategoricalFeatures"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert mf.value == 32
     assert isinstance(mf, MetaFeatureValue)
 
 
 def test_ratio_numerical_to_categorical(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.metafeatures["RatioNumericalToNominal"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert pytest.approx(mf.value) == (float(6) / float(32))
     assert isinstance(mf, MetaFeatureValue)
 
 
 def test_ratio_categorical_to_numerical(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.metafeatures["RatioNominalToNumerical"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert pytest.approx(mf.value) == (float(32) / float(6))
     assert isinstance(mf, MetaFeatureValue)
 
 
 def test_dataset_ratio(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.metafeatures["DatasetRatio"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert pytest.approx(mf.value) == (float(38) / float(898))
     assert isinstance(mf, MetaFeatureValue)
 
 
 def test_inverse_dataset_ratio(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.metafeatures["InverseDatasetRatio"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert pytest.approx(mf.value) == (float(898) / float(38))
     assert isinstance(mf, MetaFeatureValue)
 
 
 def test_class_occurences(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.helper_functions["ClassOccurences"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert mf.value == {0.0: 8.0, 1.0: 99.0, 2.0: 684.0, 4.0: 67.0, 5.0: 40.0}
 
 
 def test_class_probability_min(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.metafeatures["ClassProbabilityMin"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert pytest.approx(mf.value) == (float(8) / float(898))
     assert isinstance(mf, MetaFeatureValue)
 
 
 def test_class_probability_max(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.metafeatures["ClassProbabilityMax"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert pytest.approx(mf.value) == (float(684) / float(898))
     assert isinstance(mf, MetaFeatureValue)
 
 
 def test_class_probability_mean(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.metafeatures["ClassProbabilityMean"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     classes = np.array((8, 99, 684, 67, 40), dtype=np.float64)
     prob_mean = (classes / float(898)).mean()
@@ -364,9 +449,13 @@ def test_class_probability_mean(meta_train_data):
 
 
 def test_class_probability_std(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.metafeatures["ClassProbabilitySTD"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     classes = np.array((8, 99, 684, 67, 40), dtype=np.float64)
     prob_std = (classes / float(898)).std()
@@ -375,9 +464,13 @@ def test_class_probability_std(meta_train_data):
 
 
 def test_num_symbols(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.helper_functions["NumSymbols"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     symbol_frequency = [
         2,
@@ -417,26 +510,38 @@ def test_num_symbols(meta_train_data):
 
 
 def test_symbols_min(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.metafeatures["SymbolsMin"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert mf.value == 1
 
 
 def test_symbols_max(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     # this is attribute steel
     mf = meta_features.metafeatures["SymbolsMax"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert mf.value == 7
 
 
 def test_symbols_mean(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.metafeatures["SymbolsMean"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     # Empty looking spaces denote empty attributes
     symbol_frequency = [
@@ -471,9 +576,13 @@ def test_symbols_mean(meta_train_data):
 
 
 def test_symbols_std(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.metafeatures["SymbolsSTD"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     symbol_frequency = [
         2,
@@ -507,17 +616,25 @@ def test_symbols_std(meta_train_data):
 
 
 def test_symbols_sum(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.metafeatures["SymbolsSum"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     assert mf.value == 49
 
 
 def test_class_entropy(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
+    categorical_ = {
+        col: True if feat_type.lower() == "categorical" else False
+        for col, feat_type in feat_type.items()
+    }
     mf = meta_features.metafeatures["ClassEntropy"](
-        X, y, logging.getLogger("Meta"), categorical
+        X, y, logging.getLogger("Meta"), categorical_
     )
     classes = np.array((8, 99, 684, 67, 40), dtype=np.float64)
     classes = classes / sum(classes)
@@ -527,9 +644,9 @@ def test_class_entropy(meta_train_data):
 
 
 def test_calculate_all_metafeatures(meta_train_data):
-    X, y, categorical = meta_train_data
+    X, y, feat_type = meta_train_data
     mf = meta_features.calculate_all_metafeatures(
-        X, y, categorical, "2", logger=logging.getLogger("Meta")
+        X, y, feat_type, "2", logger=logging.getLogger("Meta")
     )
     assert 52 == len(mf.metafeature_values)
     assert mf.metafeature_values["NumberOfCategoricalFeatures"].value == 32
