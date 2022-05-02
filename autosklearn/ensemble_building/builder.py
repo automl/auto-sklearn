@@ -132,8 +132,8 @@ class EnsembleBuilder:
         if max_models_on_disc is not None and max_models_on_disc < 0:
             raise ValueError("max_models_on_disc must be positive or None")
 
-        if read_at_most is not None and read_at_most < 1:
-            raise ValueError("Read at most must be greater than 1")
+        if read_at_most is not None and (read_at_most < 1 or read_at_most == np.inf):
+            raise ValueError("Read at most must be int greater than 1 or None")
 
         # Setup the logger
         self.logger = get_named_client_logger(name="EnsembleBuilder", port=logger_port)
@@ -423,7 +423,8 @@ class EnsembleBuilder:
 
         # Calculate the loss for those that require it
         requires_update = self.requires_loss_update(runs)
-        if self.read_at_most:
+        print("HERE----\n\n", str(self.read_at_most))
+        if self.read_at_most is not None:
             requires_update = requires_update[: self.read_at_most]
 
         for run in requires_update:

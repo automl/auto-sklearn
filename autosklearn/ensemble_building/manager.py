@@ -339,7 +339,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         memory_limit: int | None = None
             Memory limit in mb. If ``None``, no memory limit is enforced.
 
-        read_at_most: int = 5
+        read_at_most: int | None = 5
             Read at most n new prediction files in each iteration
 
         logger_port: int = DEFAULT_TCP_LOGGING_PORT
