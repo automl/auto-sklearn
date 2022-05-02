@@ -28,7 +28,7 @@ import autosklearn.estimators  # noqa F401
 import autosklearn.pipeline.util as putil
 from autosklearn.automl import AutoMLClassifier
 from autosklearn.data.validation import InputValidator
-from autosklearn.ensemble_building.builder import MODEL_FN_RE
+from autosklearn.ensemble_building.run import Run
 from autosklearn.estimators import (
     AutoSklearnClassifier,
     AutoSklearnEstimator,
@@ -110,7 +110,9 @@ def test_fit_n_jobs(tmp_dir):
     seeds = set()
     for prediction in predictions:
         prediction = os.path.split(prediction)[1]
-        match = re.match(MODEL_FN_RE, prediction.replace("predictions_ensemble", ""))
+        match = re.match(
+            Run.RE_MODEL_DIR, prediction.replace("predictions_ensemble", "")
+        )
         if match:
             num_run = int(match.group(2))
             available_predictions.add(num_run)

@@ -22,10 +22,12 @@ from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.ensemble_building.run import Run, RunID
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.metrics import Scorer, calculate_loss, calculate_score
+from autosklearn.util.disk import rmtree
 from autosklearn.util.functional import cut, findwhere, split
 from autosklearn.util.logging_ import get_named_client_logger
 from autosklearn.util.parallel import preload_modules
-from autosklearn.util.disk import rmtree
+
+CANDIDATES_FILENAME = "previous_ensemble_building_candidates.pkl"
 
 
 class EnsembleBuilder:
@@ -175,15 +177,13 @@ class EnsembleBuilder:
 
         # Data we may need
         datamanager: XYDataManager = self.backend.load_datamanager()
-        self._y_valid: np.ndarray | None = datamanager.data.get("Y_valid", None)
         self._y_test: np.ndarray | None = datamanager.data.get("Y_test", None)
         self._y_ensemble: np.ndarray | None = None
 
     @property
     def previous_candidates_path(self) -> Path:
         """Path to the cached losses we store between runs"""
-        fname = "previous_ensemble_building_candidates.pkl"
-        return Path(self.backend.internals_directory) / fname
+        return Path(self.backend.internals_directory) / CANDIDATES_FILENAME
 
     def previous_candidates(self) -> dict[RunID, Run]:
         """Load any previous candidates that were saved from previous runs
@@ -228,9 +228,6 @@ class EnsembleBuilder:
                     self._y_ensemble = self.backend.load_targets_ensemble()
             return self._y_ensemble
 
-        elif kind == "valid":
-            return self._y_valid
-
         elif kind == "test":
             return self._y_test
 
@@ -269,7 +266,7 @@ class EnsembleBuilder:
 
         Returns
         -------
-        (ensemble_history, nbest, train_preds, valid_preds, test_preds)
+        (ensemble_history, nbest)
         """
         if time_left is None and end_at is None:
             raise ValueError("Must provide either time_left or end_at.")
@@ -435,6 +432,7 @@ class EnsembleBuilder:
 
         # Get the dummy and real runs
         dummies, candidates = split(runs, by=lambda r: r.is_dummy())
+        print(dummies, candidates)
 
         # We see if we need to delete any of the real runs before we waste compute
         # on evaluating their candidacy for ensemble building
@@ -467,43 +465,19 @@ class EnsembleBuilder:
             candidates = dummies
             self.logger.warning("No real runs to build ensemble from")
 
-        # Get a set representation of them as we will begin doing intersections
-        # Not here that valid_set and test_set are both subsets of candidates_set
-        # ... then find intersect and use that to fit the ensemble
+        # If there's an intersect with models that have some predictions on the
+        # test subset, use that subset, otherwise use all of the candidates
         candidates_set = set(candidates)
-        valid_subset = {r for r in candidates if r.pred_path("valid").exists()}
         test_subset = {r for r in candidates if r.pred_path("test").exists()}
 
-        intersect = valid_subset & test_subset
-        if len(intersect) == 0 and len(test_subset) > 0 and len(valid_subset) > 0:
-            self.logger.error("valid_set and test_set not empty but do not overlap")
-            raise RuntimeError("valid_set and test_set not empty but do not overlap")
-
-        # Try to use the runs which have the most kinds of preds, otherwise just use all
-        if len(intersect) > 0:
-            candidates = sorted(intersect, key=lambda r: r.id)
-            valid_models = candidates
-            test_models = candidates
-
-            self.delete_runs(candidates_set - intersect)
-
-        elif len(valid_subset) > 0:
-            candidates = sorted(valid_subset, key=lambda r: r.id)
-            valid_models = candidates
-            test_models = []
-
-            self.delete_runs(candidates_set - valid_subset)
-
-        elif len(test_subset) > 0:
+        if len(test_subset) > 0:
             candidates = sorted(test_subset, key=lambda r: r.id)
-            valid_models = []
             test_models = candidates
 
             self.delete_runs(candidates_set - test_subset)
 
         else:
             candidates = sorted(candidates_set, key=lambda r: r.id)
-            valid_models = []
             test_models = []
 
         # To save on pickle and to allow for fresh predictions, unload the cache
@@ -550,7 +524,6 @@ class EnsembleBuilder:
 
         for kind, score_name, models in [
             ("ensemble", "optimization", candidates),
-            ("valid", "val", valid_models),
             ("test", "test", test_models),
         ]:
             if len(models) == 0:
@@ -561,9 +534,7 @@ class EnsembleBuilder:
                 self.logger.warning(f"No ensemble targets for {kind}")
                 continue
 
-            run_preds = [
-                r.predictions(kind, precision=self.precision) for r in models
-            ]
+            run_preds = [r.predictions(kind, precision=self.precision) for r in models]
             pred = ensemble.predict(run_preds)
 
             # Pretty sure this whole step is uneeded but left over and afraid
@@ -761,12 +732,34 @@ class EnsembleBuilder:
         precision: int | None = None,
         random_state: int | np.random.RandomState | None = None,
     ) -> EnsembleSelection:
-        """TODO
+        """Fit an ensemble from the provided runs.
+
+        Note
+        ----
+        Expects all runs to have the "ensemble" predictions present
 
         Parameters
         ----------
-        selected_keys: list[str]
-            List of selected keys of self.runs
+        runs: list[Run]
+            List of runs to build an ensemble from
+
+        targets: np.ndarray
+            The targets to build the ensemble with
+
+        size: int | None = None
+            The size of the ensemble to build
+
+        task: int | None = None
+            The kind of task performed
+
+        metric: Scorer | None = None
+            The metric to use when comparing run predictions to the targets
+
+        precision: int | None = None
+            The precision with which to load run predictions
+
+        random_state: int | RandomState | None = None
+            The random state to use
 
         Returns
         -------

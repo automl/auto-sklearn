@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Callable, Iterable, TypeVar
 
 from functools import reduce
-from itertools import tee, chain
+from itertools import chain, tee
 
 import numpy as np
 

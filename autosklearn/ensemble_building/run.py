@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Tuple
 
-from pathlib import Path
 import re
+from pathlib import Path
 
 import numpy as np
 
@@ -15,7 +15,7 @@ RunID = Tuple[int, int, float]
 class Run:
     """Class for storing information about a run used during ensemble building"""
 
-    re_model_dir = r'^([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*)$'
+    RE_MODEL_DIR = r"^([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*)$"
 
     def __init__(self, path: Path) -> None:
         """Creates a Run from a path point to the directory of a run
@@ -44,7 +44,7 @@ class Run:
         # Items that will be delete when the run is saved back to file
         self._cache: dict[str, np.ndarray] = {}
 
-        # The recorded time of ensemble/test/valid predictions modified
+        # The recorded time of ensemble/test predictions modified
         self.recorded_mtimes: dict[str, float] = {}
         self.record_modified_times()
 
@@ -74,10 +74,24 @@ class Run:
     def record_modified_times(self) -> None:
         """Records the last time each prediction file type was modified, if it exists"""
         self.recorded_mtimes = {}
-        for kind in ["ensemble", "valid", "test"]:
+        for kind in ["ensemble", "test"]:
             path = self.pred_path(kind)  # type: ignore
             if path.exists():
                 self.recorded_mtimes[kind] = path.stat().st_mtime
+
+    def has_predictions(self, kind: str = "ensemble") -> bool:
+        """
+        Parameters
+        ----------
+        kind: "ensemble" | "test" = "ensemble"
+            The kind of predictions to query for
+
+        Returns
+        -------
+        bool
+            Whether this run has the kind of predictions queried for
+        """
+        return self.pred_path(kind).exists()
 
     def predictions(
         self,
@@ -88,7 +102,7 @@ class Run:
 
         Parameters
         ----------
-        kind : "ensemble" | "test" | "valid"
+        kind : "ensemble" | "test"
             The kind of predictions to load
 
         precisions : type | None = None
@@ -104,9 +118,6 @@ class Run:
             return self._cache[key]
 
         path = self.pred_path(kind)
-
-        if not path.exists():
-            raise RuntimeError(f"No predictions for {kind}")
 
         with path.open("rb") as f:
             # TODO: We should probably remove this requirement. I'm not sure why model
@@ -158,4 +169,4 @@ class Run:
         bool
             Whether the path is a valid run dir
         """
-        return re.match(Run.re_model_dir, path.name) is not None
+        return re.match(Run.RE_MODEL_DIR, path.name) is not None

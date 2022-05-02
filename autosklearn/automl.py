@@ -798,7 +798,7 @@ class AutoML(BaseEstimator):
                     precision=self.precision,
                     max_iterations=None,
                     read_at_most=np.inf,
-                    ensemble_memory_limit=self._memory_limit,
+                    memory_limit=self._memory_limit,
                     random_state=self._seed,
                     logger_port=self._logger_port,
                     pynisher_context=self._multiprocessing_context,
@@ -911,7 +911,7 @@ class AutoML(BaseEstimator):
                 )
                 result = proc_ensemble.futures.pop().result()
                 if result:
-                    ensemble_history, _, _, _, _ = result
+                    ensemble_history, _ = result
                     self.ensemble_performance_history.extend(ensemble_history)
                 self._logger.info("Ensemble script finished, continue shutdown.")
 

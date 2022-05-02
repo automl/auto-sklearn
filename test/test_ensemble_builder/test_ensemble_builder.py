@@ -11,10 +11,9 @@ import numpy as np
 from autosklearn.ensemble_building import EnsembleBuilder, Run
 from autosklearn.util.functional import bound, pairs
 
+import pytest
 from pytest_cases import fixture, parametrize
 from unittest.mock import patch
-
-from test.util import fails
 
 
 @fixture
@@ -23,7 +22,7 @@ def builder(make_ensemble_builder: Callable[..., EnsembleBuilder]) -> EnsembleBu
     return make_ensemble_builder()
 
 
-@parametrize("kind", ["ensemble", fails("valid", "Not supported anymore?"), "test"])
+@parametrize("kind", ["ensemble", "test"])
 def test_targets(builder: EnsembleBuilder, kind: str) -> None:
     """
     Expects
@@ -73,6 +72,7 @@ def test_available_runs_with_bad_dir_contained(builder: EnsembleBuilder) -> None
 
     available_runs = builder.available_runs()
     assert len(available_runs) == len(paths)
+
 
 def test_requires_loss_update_with_modified_runs(
     builder: EnsembleBuilder,
@@ -412,7 +412,7 @@ def test_requires_memory_limit(
     assert not any(run.loss > best_deleted for run in keep)
 
 
-@parametrize("kind", ["ensemble", "valid", "test"])
+@parametrize("kind", ["ensemble", "test"])
 def test_loss_with_no_ensemble_targets(
     builder: EnsembleBuilder,
     make_run: Callable[..., Run],
@@ -428,7 +428,7 @@ def test_loss_with_no_ensemble_targets(
     assert builder.loss(run, kind=kind) == np.inf
 
 
-@parametrize("kind", ["ensemble", fails("valid", "Not supported anymore?"), "test"])
+@parametrize("kind", ["ensemble", "test"])
 def test_loss_with_targets(
     builder: EnsembleBuilder,
     make_run: Callable[..., Run],
@@ -513,8 +513,8 @@ def test_fit_with_error_gives_no_ensemble(
     """
     Expects
     -------
-    * A run without predictions will raise an error, causing the `fit_ensemble` to fail
-      and return None
+    * A run without predictions will raise an error will cause `fit_ensemble` to fail
+      as it requires all runs to have valid predictions
     """
     targets = builder.targets("ensemble")
     assert targets is not None
@@ -526,8 +526,8 @@ def test_fit_with_error_gives_no_ensemble(
 
     runs.append(bad_run)
 
-    ensemble = builder.fit_ensemble(runs, targets)
-    assert ensemble is None
+    with pytest.raises(FileNotFoundError):
+        builder.fit_ensemble(runs, targets)
 
 
 @parametrize("time_buffer", [1, 5])
