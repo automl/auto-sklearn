@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 from functools import partial
 from itertools import product
@@ -388,7 +388,7 @@ def calculate_score(
     solution: np.ndarray,
     prediction: np.ndarray,
     task_type: int,
-    metric: Scorer,
+    metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
     scoring_functions: Optional[List[Scorer]] = None,
 ) -> Union[float, Dict[str, float]]:
     """
@@ -417,64 +417,70 @@ def calculate_score(
     if task_type not in TASK_TYPES:
         raise NotImplementedError(task_type)
 
+    to_score = []
     if scoring_functions:
-        score_dict = dict()
-        if task_type in REGRESSION_TASKS:
-            for metric_ in scoring_functions + [metric]:
+        to_score.extend(scoring_functions)
+    if isinstance(metric, (list, tuple)):
+        to_score.extend(metric)
+    else:
+        to_score.append(metric)
 
-                try:
-                    score_dict[metric_.name] = _compute_scorer(
-                        metric_, prediction, solution, task_type
-                    )
-                except ValueError as e:
-                    print(e, e.args[0])
-                    if (
-                        e.args[0]
-                        == "Mean Squared Logarithmic Error cannot be used when "
-                        "targets contain negative values."
-                    ):
-                        continue
-                    else:
-                        raise e
+    score_dict = dict()
+    if task_type in REGRESSION_TASKS:
+        for metric_ in to_score:
 
-        else:
-            for metric_ in scoring_functions + [metric]:
-
-                # TODO maybe annotate metrics to define which cases they can
-                # handle?
-
-                try:
-                    score_dict[metric_.name] = _compute_scorer(
-                        metric_, prediction, solution, task_type
-                    )
-                except ValueError as e:
-                    if e.args[0] == "multiclass format is not supported":
-                        continue
-                    elif (
-                        e.args[0] == "Samplewise metrics are not available "
-                        "outside of multilabel classification."
-                    ):
-                        continue
-                    elif (
-                        e.args[0] == "Target is multiclass but "
-                        "average='binary'. Please choose another average "
-                        "setting, one of [None, 'micro', 'macro', 'weighted']."
-                    ):
-                        continue
-                    else:
-                        raise e
-
-        return score_dict
+            try:
+                score_dict[metric_.name] = _compute_scorer(
+                    metric_, prediction, solution, task_type
+                )
+            except ValueError as e:
+                print(e, e.args[0])
+                if (
+                    e.args[0] == "Mean Squared Logarithmic Error cannot be used when "
+                    "targets contain negative values."
+                ):
+                    continue
+                else:
+                    raise e
 
     else:
-        return _compute_scorer(metric, prediction, solution, task_type)
+        for metric_ in to_score:
+
+            # TODO maybe annotate metrics to define which cases they can
+            # handle?
+
+            try:
+                score_dict[metric_.name] = _compute_scorer(
+                    metric_, prediction, solution, task_type
+                )
+            except ValueError as e:
+                if e.args[0] == "multiclass format is not supported":
+                    continue
+                elif (
+                    e.args[0] == "Samplewise metrics are not available "
+                    "outside of multilabel classification."
+                ):
+                    continue
+                elif (
+                    e.args[0] == "Target is multiclass but "
+                    "average='binary'. Please choose another average "
+                    "setting, one of [None, 'micro', 'macro', 'weighted']."
+                ):
+                    continue
+                else:
+                    raise e
+
+    if scoring_functions is None and isinstance(metric, Scorer):
+        return score_dict[metric.name]
+    else:
+        return score_dict
 
 
 def calculate_loss(
     solution: np.ndarray,
     prediction: np.ndarray,
     task_type: int,
-    metric: Scorer,
+    metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
     scoring_functions: Optional[List[Scorer]] = None,
 ) -> Union[float, Dict[str, float]]:
     """
@@ -510,11 +516,13 @@ def calculate_loss(
         scoring_functions=scoring_functions,
     )
 
-    if scoring_functions:
+    if scoring_functions or isinstance(metric, (list, tuple)):
         score = cast(Dict, score)
+        scoring_functions = cast(List, scoring_functions)
+        metric_list = list(cast(List, metric))  # Please mypy
         # we expect a dict() object for which we should calculate the loss
         loss_dict = dict()
-        for metric_ in scoring_functions + [metric]:
+        for metric_ in scoring_functions + metric_list:
             # TODO: When metrics are annotated with type_of_target support
             # we can remove this check
             if metric_.name not in score:

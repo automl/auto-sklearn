@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Iterable, Mapping, Optional, Tuple
+from typing import Any, Callable, Iterable, List, Mapping, Optional, Tuple, Union
 
 import copy
 import io
@@ -210,7 +210,7 @@ class AutoML(BaseEstimator):
         get_smac_object_callback: Optional[Callable] = None,
         smac_scenario_args: Optional[Mapping] = None,
         logging_config: Optional[Mapping] = None,
-        metric: Optional[Scorer] = None,
+        metric: Optional[Union[Scorer, List[Scorer], Tuple[Scorer]]] = None,
         scoring_functions: Optional[list[Scorer]] = None,
         get_trials_callback: Optional[IncorporateRunResultCallback] = None,
         dataset_compression: bool | Mapping[str, Any] = True,
@@ -265,7 +265,7 @@ class AutoML(BaseEstimator):
             initial_configurations_via_metalearning
         )
 
-        self._scoring_functions = scoring_functions or {}
+        self._scoring_functions = scoring_functions or []
         self._resampling_strategy_arguments = resampling_strategy_arguments or {}
 
         # Single core, local runs should use fork to prevent the __main__ requirements
@@ -692,10 +692,14 @@ class AutoML(BaseEstimator):
         # defined in the estimator fit call
         if self._metric is None:
             raise ValueError("No metric given.")
-        if not isinstance(self._metric, Scorer):
-            raise ValueError(
-                "Metric must be instance of " "autosklearn.metrics.Scorer."
-            )
+        if isinstance(self._metric, (List, Tuple)):
+            for entry in self._metric:
+                if not isinstance(entry, Scorer):
+                    raise ValueError(
+                        "Metric must be instance of autosklearn.metrics.Scorer."
+                    )
+        elif not isinstance(self._metric, Scorer):
+            raise ValueError("Metric must be instance of autosklearn.metrics.Scorer.")
 
         # If no dask client was provided, we create one, so that we can
         # start a ensemble process in parallel to smbo optimize
@@ -790,7 +794,11 @@ class AutoML(BaseEstimator):
                     backend=copy.deepcopy(self._backend),
                     dataset_name=dataset_name,
                     task=self._task,
-                    metric=self._metric,
+                    metric=(
+                        self._metric[0]
+                        if isinstance(self._metric, (List, Tuple))
+                        else self._metric
+                    ),
                     ensemble_size=self._ensemble_size,
                     ensemble_nbest=self._ensemble_nbest,
                     max_models_on_disc=self._max_models_on_disc,
@@ -1492,7 +1500,11 @@ class AutoML(BaseEstimator):
             backend=copy.deepcopy(self._backend),
             dataset_name=dataset_name if dataset_name else self._dataset_name,
             task=task if task else self._task,
-            metric=self._metric,
+            metric=(
+                self._metric[0]
+                if isinstance(self._metric, (List, Tuple))
+                else self._metric
+            ),
             ensemble_size=ensemble_size if ensemble_size else self._ensemble_size,
             ensemble_nbest=ensemble_nbest if ensemble_nbest else self._ensemble_nbest,
             max_models_on_disc=self._max_models_on_disc,
@@ -1912,7 +1924,6 @@ class AutoML(BaseEstimator):
         .. code-block:: python
 
             import sklearn.datasets
-            import sklearn.metrics
             import autosklearn.regression
 
             X, y = sklearn.datasets.load_diabetes(return_X_y=True)

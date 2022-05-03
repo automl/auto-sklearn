@@ -1,5 +1,5 @@
 import typing
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple, Union
 
 import copy
 import json
@@ -16,6 +16,7 @@ from smac.callbacks import IncorporateRunResultCallback
 from smac.facade.smac_ac_facade import SMAC4AC
 from smac.intensification.intensification import Intensifier
 from smac.intensification.simple_intensifier import SimpleIntensifier
+from smac.optimizer.multi_objective.parego import ParEGO
 from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
 from smac.scenario.scenario import Scenario
 from smac.tae.dask_runner import DaskParallelRunner
@@ -40,6 +41,7 @@ from autosklearn.metalearning.metafeatures.metafeatures import (
 )
 from autosklearn.metalearning.metalearning.meta_base import MetaBase
 from autosklearn.metalearning.mismbo import suggest_via_metalearning
+from autosklearn.metrics import Scorer
 from autosklearn.util.logging_ import get_named_client_logger
 from autosklearn.util.parallel import preload_modules
 from autosklearn.util.stopwatch import StopWatch
@@ -218,6 +220,8 @@ def get_smac_object(
     metalearning_configurations,
     n_jobs,
     dask_client,
+    multi_objective_algorithm,
+    multi_objective_kwargs,
 ):
     if len(scenario_dict["instances"]) > 1:
         intensifier = Intensifier
@@ -242,6 +246,8 @@ def get_smac_object(
         intensifier=intensifier,
         dask_client=dask_client,
         n_jobs=n_jobs,
+        multi_objective_algorithm=multi_objective_algorithm,
+        multi_objective_kwargs=multi_objective_kwargs,
     )
 
 
@@ -254,7 +260,7 @@ class AutoMLSMBO:
         total_walltime_limit,
         func_eval_time_limit,
         memory_limit,
-        metric,
+        metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
         stopwatch: StopWatch,
         n_jobs,
         dask_client: dask.distributed.Client,
@@ -355,7 +361,11 @@ class AutoMLSMBO:
             metalearning_configurations = _get_metalearning_configurations(
                 meta_base=meta_base,
                 basename=self.dataset_name,
-                metric=self.metric,
+                metric=(
+                    self.metric[0]
+                    if isinstance(self.metric, (List, Tuple))
+                    else self.metric
+                ),
                 configuration_space=self.config_space,
                 task=self.task,
                 is_sparse=self.datamanager.info["is_sparse"],
@@ -535,6 +545,10 @@ class AutoMLSMBO:
             "n_jobs": self.n_jobs,
             "dask_client": self.dask_client,
         }
+        if not isinstance(self.metric, Scorer):
+            smac_args["multi_objective_algorithm"] = ParEGO
+            smac_args["multi_objective_kwargs"] = {"rho": 0.05}
+            scenario_dict["multi_objectives"] = [metric.name for metric in self.metric]
         if self.get_smac_object_callback is not None:
             smac = self.get_smac_object_callback(**smac_args)
         else:

@@ -184,7 +184,7 @@ class AbstractEvaluator(object):
         self,
         backend: Backend,
         queue: multiprocessing.Queue,
-        metric: Scorer,
+        metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
         additional_components: Dict[str, ThirdPartyComponents],
         port: Optional[int],
         configuration: Optional[Union[int, Configuration]] = None,
@@ -326,7 +326,6 @@ class AbstractEvaluator(object):
         self,
         y_true: np.ndarray,
         y_hat: np.ndarray,
-        scoring_functions: Optional[List[Scorer]] = None,
     ) -> Union[float, Dict[str, float]]:
         """Auto-sklearn follows a minimization goal.
         The calculate_loss internally translate a score function to
@@ -338,21 +337,30 @@ class AbstractEvaluator(object):
         ----------
             y_true
         """
-        scoring_functions = (
-            self.scoring_functions if scoring_functions is None else scoring_functions
-        )
         if not isinstance(self.configuration, Configuration):
-            if scoring_functions:
-                return {self.metric.name: self.metric._worst_possible_result}
+            if self.scoring_functions:
+                if isinstance(self.metric, Scorer):
+                    return {self.metric.name: self.metric._worst_possible_result}
+                else:
+                    return {
+                        metric.name: metric._worst_possible_result
+                        for metric in self.metric
+                    }
             else:
-                return self.metric._worst_possible_result
+                if isinstance(self.metric, Scorer):
+                    return self.metric._worst_possible_result
+                else:
+                    return {
+                        metric.name: metric._worst_possible_result
+                        for metric in self.metric
+                    }
 
         return calculate_loss(
             y_true,
             y_hat,
             self.task_type,
             self.metric,
-            scoring_functions=scoring_functions,
+            scoring_functions=self.scoring_functions,
         )
 
     def finish_up(
@@ -402,7 +410,10 @@ class AbstractEvaluator(object):
 
         if isinstance(loss, dict):
             loss_ = loss
-            loss = loss_[self.metric.name]
+            if isinstance(self.metric, Scorer):
+                loss = loss_[self.metric.name]
+            else:
+                loss = {metric: loss_[metric] for metric in loss_}
         else:
             loss_ = {}
 

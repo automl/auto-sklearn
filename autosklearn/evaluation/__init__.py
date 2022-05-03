@@ -85,10 +85,13 @@ def fit_predict_try_except_decorator(
         queue.close()
 
 
-def get_cost_of_crash(metric: Scorer) -> float:
+def get_cost_of_crash(
+    metric: Union[Scorer, List[Scorer], Tuple[Scorer]]
+) -> Union[float, List[float]]:
 
-    # The metric must always be defined to extract optimum/worst
-    if not isinstance(metric, Scorer):
+    if isinstance(metric, (List, Tuple)):
+        return [cast(float, get_cost_of_crash(metric_)) for metric_ in metric]
+    elif not isinstance(metric, Scorer):
         raise ValueError("The metric must be stricly be an instance of Scorer")
 
     # Autosklearn optimizes the err. This function translates
@@ -126,7 +129,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         resampling_strategy: Union[
             str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit
         ],
-        metric: Scorer,
+        metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
         cost_for_crash: float,
         abort_on_first_run_crash: bool,
         port: int,
@@ -144,7 +147,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         disable_file_output: bool = False,
         init_params: Optional[Dict[str, Any]] = None,
         budget_type: Optional[str] = None,
-        ta: Optional[Callable] = None,
+        ta: Optional[Callable] = None,  # Required by SMAC's parent class
         **resampling_strategy_args: Any,
     ):
         if resampling_strategy == "holdout":
@@ -186,6 +189,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             par_factor=par_factor,
             cost_for_crash=self.worst_possible_result,
             abort_on_first_run_crash=abort_on_first_run_crash,
+            multi_objectives=multi_objectives,
         )
 
         self.backend = backend
@@ -550,4 +554,32 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         autosklearn.evaluation.util.empty_queue(queue)
         self.logger.info("Finished evaluating configuration %d" % config_id)
+
+        # Do some sanity checking (for multi objective)
+        if len(self.multi_objectives) > 1:
+            error = (
+                f"Returned costs {cost} does not match the number of objectives"
+                f" {len(self.multi_objectives)}."
+            )
+
+            # If dict convert to array
+            # Make sure the ordering is correct
+            if isinstance(cost, dict):
+                ordered_cost = []
+                for name in self.multi_objectives:
+                    if name not in cost:
+                        raise RuntimeError(
+                            f"Objective {name} was not found in the returned costs."
+                        )
+
+                    ordered_cost.append(cost[name])
+                cost = ordered_cost
+
+            if isinstance(cost, list):
+                if len(cost) != len(self.multi_objectives):
+                    raise RuntimeError(error)
+
+            if isinstance(cost, float):
+                raise RuntimeError(error)
+
         return status, cost, runtime, additional_run_info

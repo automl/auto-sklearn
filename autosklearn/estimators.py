@@ -46,7 +46,7 @@ class AutoSklearnEstimator(BaseEstimator):
         smac_scenario_args=None,
         logging_config=None,
         metadata_directory=None,
-        metric=None,
+        metric: Optional[Union[Scorer, List[Scorer], Tuple[Scorer]]] = None,
         scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
         get_trials_callback=None,

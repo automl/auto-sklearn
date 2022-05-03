@@ -182,7 +182,7 @@ class TrainEvaluator(AbstractEvaluator):
         self,
         backend: Backend,
         queue: multiprocessing.Queue,
-        metric: Scorer,
+        metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
         additional_components: Dict[str, ThirdPartyComponents],
         port: Optional[int],
         configuration: Optional[Union[int, Configuration]] = None,
@@ -645,19 +645,31 @@ class TrainEvaluator(AbstractEvaluator):
             # train_losses is a list of either scalars or dicts. If it contains dicts,
             # then train_loss is computed using the target metric (self.metric).
             if all(isinstance(elem, dict) for elem in train_losses):
-                train_loss = np.average(
-                    [
-                        train_losses[i][str(self.metric)]
-                        for i in range(self.num_cv_folds)
-                    ],
-                    weights=train_fold_weights,
-                )
+                if isinstance(self.metric, Scorer):
+                    train_loss = np.average(
+                        [
+                            train_losses[i][str(self.metric)]
+                            for i in range(self.num_cv_folds)
+                        ],
+                        weights=train_fold_weights,
+                    )
+                else:
+                    train_loss = [
+                        np.average(
+                            [
+                                train_losses[i][str(metric)]
+                                for i in range(self.num_cv_folds)
+                            ],
+                            weights=train_fold_weights,
+                        )
+                        for metric in self.metric
+                    ]
             else:
                 train_loss = np.average(train_losses, weights=train_fold_weights)
 
             # if all_scoring_function is true, return a dict of opt_loss. Otherwise,
             # return a scalar.
-            if self.scoring_functions:
+            if self.scoring_functions or not isinstance(self.metric, Scorer):
                 opt_loss = {}
                 for metric in opt_losses[0].keys():
                     opt_loss[metric] = np.average(
@@ -1316,7 +1328,7 @@ def eval_holdout(
         str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit
     ],
     resampling_strategy_args: Dict[str, Optional[Union[float, int, str]]],
-    metric: Scorer,
+    metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
     seed: int,
     num_run: int,
     instance: str,
@@ -1363,7 +1375,7 @@ def eval_iterative_holdout(
         str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit
     ],
     resampling_strategy_args: Dict[str, Optional[Union[float, int, str]]],
-    metric: Scorer,
+    metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
     seed: int,
     num_run: int,
     instance: str,
@@ -1410,7 +1422,7 @@ def eval_partial_cv(
         str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit
     ],
     resampling_strategy_args: Dict[str, Optional[Union[float, int, str]]],
-    metric: Scorer,
+    metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
     seed: int,
     num_run: int,
     instance: str,
@@ -1463,7 +1475,7 @@ def eval_partial_cv_iterative(
         str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit
     ],
     resampling_strategy_args: Dict[str, Optional[Union[float, int, str]]],
-    metric: Scorer,
+    metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
     seed: int,
     num_run: int,
     instance: str,
@@ -1511,7 +1523,7 @@ def eval_cv(
         str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit
     ],
     resampling_strategy_args: Dict[str, Optional[Union[float, int, str]]],
-    metric: Scorer,
+    metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
     seed: int,
     num_run: int,
     instance: str,
@@ -1559,7 +1571,7 @@ def eval_iterative_cv(
         str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit
     ],
     resampling_strategy_args: Dict[str, Optional[Union[float, int, str]]],
-    metric: Scorer,
+    metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
     seed: int,
     num_run: int,
     instance: str,
