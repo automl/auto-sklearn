@@ -162,9 +162,9 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
             sklearn_transf_spec = [
                 (name, transformer, feature_columns)
                 for name, transformer, feature_columns in [
-                    ("text_transformer", self.txt_ppl, text_features),
                     ("categorical_transformer", self.categ_ppl, categorical_features),
                     ("numerical_transformer", self.numer_ppl, numerical_features),
+                    ("text_transformer", self.txt_ppl, text_features),
                 ]
                 if len(feature_columns) > 0
             ]
