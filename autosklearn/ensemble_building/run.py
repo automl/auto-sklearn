@@ -15,6 +15,12 @@ RunID = Tuple[int, int, float]
 class Run:
     """Class for storing information about a run used during ensemble building"""
 
+    # For matching prediction files
+    RE_MODEL_PREDICTION_FILE = (
+        r"^predictions_ensemble_([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*).npy$"
+    )
+
+    # For matching run directories
     RE_MODEL_DIR = r"^([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*)$"
 
     def __init__(self, path: Path) -> None:

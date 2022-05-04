@@ -35,7 +35,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         seed: int = 1,
         precision: int = 32,
         memory_limit: int | None = None,
-        read_at_most: int | None = 5,
+        read_at_most: int | None = None,
         logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
         random_state: int | np.random.RandomState | None = None,
         start_time: float | None = None,
@@ -99,7 +99,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         memory_limit: int | None = None
             Memory limit in mb. If ``None``, no memory limit is enforced.
 
-        read_at_most: int = 5
+        read_at_most: int | None = 5
             Read at most n new prediction files in each iteration
 
         logger_port: int = DEFAULT_TCP_LOGGING_PORT
@@ -196,13 +196,10 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
             if self.futures[0].done():
                 result = self.futures.pop().result()
                 if result:
-                    ensemble_history, self.ensemble_nbest, _, _, _ = result
+                    ensemble_history, self.ensemble_nbest = result
                     logger.debug(
-                        "iteration={} @ elapsed_time={} has history={}".format(
-                            self.iteration,
-                            elapsed_time,
-                            ensemble_history,
-                        )
+                        f"iteration={self.iteration} @ elapsed_time={elapsed_time}"
+                        f" has history={ensemble_history}"
                     )
                     self.history.extend(ensemble_history)
 
@@ -238,7 +235,6 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
                         random_state=self.random_state,
                         end_at=self.start_time + self.time_left_for_ensembles,
                         iteration=self.iteration,
-                        priority=100,
                         pynisher_context=self.pynisher_context,
                         logger_port=self.logger_port,
                     )

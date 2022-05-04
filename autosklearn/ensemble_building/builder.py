@@ -50,7 +50,7 @@ class EnsembleBuilder:
         seed: int = 1,
         precision: int = 32,
         memory_limit: int | None = 1024,
-        read_at_most: int | None = 5,
+        read_at_most: int | None = None,
         logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
         random_state: int | np.random.RandomState | None = None,
     ):
@@ -157,12 +157,12 @@ class EnsembleBuilder:
         self.ensemble_nbest = ensemble_nbest
         self.performance_range_threshold = performance_range_threshold
 
-        # Decide if self.max_models_on_disk is a memory limit or model limit
+        # Decide if self.max_models_on_disc is a memory limit or model limit
         self.max_models_on_disc: int | None = None
         self.model_memory_limit: float | None = None
 
         if isinstance(max_models_on_disc, int):
-            self.max_models_on_disk = self.max_models_on_disc
+            self.max_models_on_disc = self.max_models_on_disc
         elif isinstance(self.max_models_on_disc, float):
             self.model_memory_limit = self.max_models_on_disc
 
@@ -423,7 +423,6 @@ class EnsembleBuilder:
 
         # Calculate the loss for those that require it
         requires_update = self.requires_loss_update(runs)
-        print("HERE----\n\n", str(self.read_at_most))
         if self.read_at_most is not None:
             requires_update = requires_update[: self.read_at_most]
 
@@ -433,14 +432,13 @@ class EnsembleBuilder:
 
         # Get the dummy and real runs
         dummies, candidates = split(runs, by=lambda r: r.is_dummy())
-        print(dummies, candidates)
 
         # We see if we need to delete any of the real runs before we waste compute
         # on evaluating their candidacy for ensemble building
         if any(candidates):
             candidates, to_delete = self.requires_deletion(
                 candidates,
-                max_models=self.max_models_on_disk,
+                max_models=self.max_models_on_disc,
                 memory_limit=self.model_memory_limit,
             )
 
@@ -497,9 +495,9 @@ class EnsembleBuilder:
         current_candidate_ids = set(run.id for run in candidates)
         difference = previous_candidate_ids ^ current_candidate_ids
 
-        updated_candidates = iter(run in candidates for run in requires_update)
+        was_updated_candidates = list(run in candidates for run in requires_update)
 
-        if not any(difference) and not any(updated_candidates):
+        if not any(difference) and not any(was_updated_candidates):
             self.logger.info("All ensemble candidates the same, no update required")
             return self.ensemble_history, self.ensemble_nbest
 
@@ -518,7 +516,9 @@ class EnsembleBuilder:
         self.logger.info(str(ensemble))
         ens_perf = ensemble.get_validation_performance()
         self.validation_performance_ = min(self.validation_performance_, ens_perf)
-        self.backend.save_ensemble(ensemble, iteration, self.seed)  # type: ignore
+        self.backend.save_ensemble(
+            ensemble=ensemble, idx=iteration, seed=self.seed  # type: ignore
+        )
 
         # Continue with evaluating the ensemble after making some space
         performance_stamp = {"Timestamp": pd.Timestamp.now()}
@@ -901,6 +901,7 @@ class EnsembleBuilder:
         runs : Sequence[Run]
             The runs to delete
         """
+        print("deleted", runs)
         items = iter(run for run in runs if not run.is_dummy() and run.dir.exists())
         for run in items:
             try:

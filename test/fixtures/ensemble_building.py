@@ -9,6 +9,7 @@ from pathlib import Path
 
 import numpy as np
 
+from autosklearn.automl import AutoML
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.data.xy_data_manager import XYDataManager
@@ -103,6 +104,7 @@ def make_ensemble_builder(
 ) -> Callable[..., EnsembleBuilder]:
     def _make(
         *,
+        automl: AutoML | None = None,
         previous_candidates: list[Run] | None = None,
         backend: Backend | None = None,
         dataset_name: str = "TEST",
@@ -111,9 +113,25 @@ def make_ensemble_builder(
         **kwargs: Any,
     ) -> EnsembleBuilder:
 
+        if automl:
+            backend = automl._backend
+            dataset_name = automl._dataset_name
+            task_type = automl._task
+            metric = automl._metric
+            kwargs = {
+                "ensemble_size": automl._ensemble_size,
+                "ensemble_nbest": automl._ensemble_nbest,
+                "max_models_on_disc": automl._max_models_on_disc,
+                "precision": automl.precision,
+                "read_at_most": automl._read_at_most,
+                "memory_limit": automl._memory_limit,
+                "logger_port": automl._logger_port,
+            }
+
         if backend is None:
             backend = make_backend()
 
+        # If there's no datamanager, just try populate it with some generic one,
         if not Path(backend._get_datamanager_pickle_filename()).exists():
             datamanager = make_sklearn_dataset(
                 name="breast_cancer",

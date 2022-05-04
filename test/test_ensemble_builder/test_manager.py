@@ -6,7 +6,6 @@ from autosklearn.automl import AutoML
 from autosklearn.ensemble_building import EnsembleBuilderManager
 
 from pytest_cases import parametrize_with_cases
-from unittest.mock import MagicMock, patch
 
 import test.test_automl.cases as cases
 from test.conftest import DEFAULT_SEED

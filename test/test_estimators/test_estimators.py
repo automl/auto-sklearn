@@ -92,13 +92,18 @@ def test_fit_n_jobs(tmp_dir):
     assert getattr(get_smac_object_wrapper_instance, "dask_n_jobs") == 2
     assert getattr(get_smac_object_wrapper_instance, "dask_client_n_jobs") == 2
 
+    # DEBUG
+    print(os.listdir(automl.automl_._backend.get_runs_directory()))
+
     available_num_runs = set()
+    print(automl.automl_.runhistory_.data)
     for run_key, run_value in automl.automl_.runhistory_.data.items():
         if (
             run_value.additional_info is not None
             and "num_run" in run_value.additional_info
         ):
             available_num_runs.add(run_value.additional_info["num_run"])
+
     available_predictions = set()
     predictions = glob.glob(
         os.path.join(
@@ -110,15 +115,15 @@ def test_fit_n_jobs(tmp_dir):
     seeds = set()
     for prediction in predictions:
         prediction = os.path.split(prediction)[1]
-        match = re.match(
-            Run.RE_MODEL_DIR, prediction.replace("predictions_ensemble", "")
-        )
+        match = re.match(Run.RE_MODEL_PREDICTION_FILE, prediction)
         if match:
-            num_run = int(match.group(2))
-            available_predictions.add(num_run)
-            seed = int(match.group(1))
-            seeds.add(seed)
+            seed, num_run, _ = match.groups()
+            available_predictions.add(int(num_run))
+            seeds.add(int(seed))
 
+    print(predictions)
+    print(available_predictions)
+    print(available_num_runs)
     # Remove the dummy prediction, it is not part of the runhistory
     available_predictions.remove(1)
     assert available_num_runs.issubset(available_predictions)

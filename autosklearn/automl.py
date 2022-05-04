@@ -297,6 +297,8 @@ class AutoML(BaseEstimator):
         self._label_num = None
         self._parser = None
         self._can_predict = False
+        self._read_at_most = None
+        self._max_ensemble_build_iterations = None
         self.models_: Optional[dict] = None
         self.cv_models_: Optional[dict] = None
         self.ensemble_ = None
@@ -796,8 +798,8 @@ class AutoML(BaseEstimator):
                     max_models_on_disc=self._max_models_on_disc,
                     seed=self._seed,
                     precision=self.precision,
-                    max_iterations=None,
-                    read_at_most=None,
+                    max_iterations=self._max_ensemble_build_iterations,
+                    read_at_most=self._read_at_most,
                     memory_limit=self._memory_limit,
                     random_state=self._seed,
                     logger_port=self._logger_port,
@@ -2047,6 +2049,15 @@ class AutoML(BaseEstimator):
             ensemble_dict[model_id] = model_dict
 
         return ensemble_dict
+
+    def has_ensemble(self) -> bool:
+        """
+        Returns
+        -------
+        bool
+            Whether this AutoML instance has an ensemble
+        """
+        return self.ensemble_ is not None
 
     def _create_search_space(
         self,

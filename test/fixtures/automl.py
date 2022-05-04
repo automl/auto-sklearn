@@ -7,7 +7,7 @@ from functools import partial
 from autosklearn.automl import AutoML, AutoMLClassifier, AutoMLRegressor
 from autosklearn.automl_common.common.utils.backend import Backend
 
-from pytest import fixture
+from pytest import FixtureRequest, fixture
 from unittest.mock import Mock
 
 from test.conftest import DEFAULT_SEED
@@ -16,6 +16,7 @@ from test.fixtures.dask import create_test_dask_client
 
 def _create_automl(
     automl_type: Type[AutoML] = AutoML,
+    _id: str | None = None,
     **kwargs: Any,
 ) -> AutoML:
     """
@@ -24,6 +25,10 @@ def _create_automl(
     ----------
     automl_type : Type[AutoML] = AutoML
         The type of AutoML object to use
+
+    _id: str | None = None
+        If no dask client is provided, a unique id is required to create one
+        so that it can be shut down after the test ends
 
     **kwargs: Any
         Options to pass on to the AutoML type for construction
@@ -53,7 +58,8 @@ def _create_automl(
     opts: Dict[str, Any] = {**test_defaults, **kwargs}
 
     if "dask_client" not in opts:
-        client = create_test_dask_client(n_workers=opts["n_jobs"])
+        assert _id is not None
+        client = create_test_dask_client(id=_id, n_workers=opts["n_jobs"])
         opts["dask_client"] = client
 
     auto = automl_type(**opts)
@@ -61,21 +67,21 @@ def _create_automl(
 
 
 @fixture
-def make_automl() -> Callable[..., Tuple[AutoML, Callable]]:
+def make_automl(request: FixtureRequest) -> Callable[..., Tuple[AutoML, Callable]]:
     """See `_create_automl`"""
-    yield partial(_create_automl, automl_type=AutoML)
+    yield partial(_create_automl, automl_type=AutoML, _id=request.node.nodeid)
 
 
 @fixture
-def make_automl_classifier() -> Callable[..., AutoMLClassifier]:
+def make_automl_classifier(request: FixtureRequest) -> Callable[..., AutoMLClassifier]:
     """See `_create_automl`"""
-    yield partial(_create_automl, automl_type=AutoMLClassifier)
+    yield partial(_create_automl, automl_type=AutoMLClassifier, _id=request.node.nodeid)
 
 
 @fixture
-def make_automl_regressor() -> Callable[..., AutoMLRegressor]:
+def make_automl_regressor(request: FixtureRequest) -> Callable[..., AutoMLRegressor]:
     """See `_create_automl`"""
-    yield partial(_create_automl, automl_type=AutoMLRegressor)
+    yield partial(_create_automl, automl_type=AutoMLRegressor, _id=request.node.nodeid)
 
 
 class AutoMLStub(AutoML):
