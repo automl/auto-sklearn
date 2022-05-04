@@ -113,7 +113,7 @@ def eval_t(
     queue: multiprocessing.Queue,
     config: Union[int, Configuration],
     backend: Backend,
-    metric: Union[Scorer | Sequence[Scorer]],
+    metrics: Sequence[Scorer],
     seed: int,
     num_run: int,
     instance: Dict[str, Any],
@@ -131,7 +131,7 @@ def eval_t(
     evaluator = TestEvaluator(
         configuration=config,
         backend=backend,
-        metric=metric,
+        metric=metrics,
         seed=seed,
         port=port,
         queue=queue,

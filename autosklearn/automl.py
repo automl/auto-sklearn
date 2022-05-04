@@ -447,7 +447,9 @@ class AutoML(BaseEstimator):
             resampling_strategy=self._resampling_strategy,
             initial_num_run=dummy_run_num,
             stats=stats,
-            metric=self._metric,
+            metrics=(
+                [self._metric] if isinstance(self._metric, Scorer) else self._metric
+            ),
             memory_limit=memory_limit,
             disable_file_output=self._disable_evaluator_output,
             abort_on_first_run_crash=False,

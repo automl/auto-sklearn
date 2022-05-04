@@ -1003,9 +1003,9 @@ class EnsembleBuilder(object):
                     solution=self.y_true_ensemble,
                     prediction=y_ensemble,
                     task_type=self.task_type,
-                    metric=self.metric,
+                    metrics=[self.metric],
                     scoring_functions=None,
-                )
+                )[self.metric.name]
 
                 if np.isfinite(self.read_losses[y_ens_fn]["ens_loss"]):
                     self.logger.debug(
@@ -1515,9 +1515,9 @@ class EnsembleBuilder(object):
                 solution=self.y_true_ensemble,
                 prediction=train_pred,
                 task_type=self.task_type,
-                metric=self.metric,
+                metrics=[self.metric],
                 scoring_functions=None,
-            ),
+            )[self.metric.name],
         }
         if valid_pred is not None:
             # TODO: valid_pred are a legacy from competition manager
@@ -1526,9 +1526,9 @@ class EnsembleBuilder(object):
                 solution=self.y_valid,
                 prediction=valid_pred,
                 task_type=self.task_type,
-                metric=self.metric,
+                metrics=[self.metric],
                 scoring_functions=None,
-            )
+            )[self.metric.name]
 
         # In case test_pred was provided
         if test_pred is not None:

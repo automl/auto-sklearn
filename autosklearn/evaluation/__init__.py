@@ -105,7 +105,10 @@ def get_cost_of_crash(
     if isinstance(metric, Sequence):
         return [cast(float, get_cost_of_crash(metric_)) for metric_ in metric]
     elif not isinstance(metric, Scorer):
-        raise ValueError("The metric must be stricly be an instance of Scorer")
+        raise ValueError(
+            "The metric must be stricly be an instance of Scorer or a sequence of "
+            "Scorers"
+        )
 
     # Autosklearn optimizes the err. This function translates
     # worst_possible_result to be a minimization problem.
@@ -142,7 +145,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         resampling_strategy: Union[
             str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit
         ],
-        metric: Union[Scorer | Sequence[Scorer]],
+        metrics: Sequence[Scorer],
         cost_for_crash: float,
         abort_on_first_run_crash: bool,
         port: int,
@@ -209,7 +212,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.autosklearn_seed = autosklearn_seed
         self.resampling_strategy = resampling_strategy
         self.initial_num_run = initial_num_run
-        self.metric = metric
+        self.metrics = metrics
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_args = resampling_strategy_args
         self.scoring_functions = scoring_functions
@@ -373,7 +376,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             config=config,
             backend=self.backend,
             port=self.port,
-            metric=self.metric,
+            metrics=self.metrics,
             seed=self.autosklearn_seed,
             num_run=num_run,
             scoring_functions=self.scoring_functions,

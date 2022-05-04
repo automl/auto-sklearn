@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Sequence, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Sequence
 
 from functools import partial
 from itertools import product
@@ -390,9 +390,9 @@ def calculate_score(
     solution: np.ndarray,
     prediction: np.ndarray,
     task_type: int,
-    metric: Scorer | Sequence[Scorer],
+    metrics: Sequence[Scorer],
     scoring_functions: Optional[List[Scorer]] = None,
-) -> Union[float, Dict[str, float]]:
+) -> Dict[str, float]:
     """
     Returns a score (a magnitude that allows casting the
     optimization problem as a maximization one) for the
@@ -407,25 +407,21 @@ def calculate_score(
     task_type: int
         To understand if the problem task is classification
         or regression
-    metric: Scorer
-        Object that host a function to calculate how good the
+    metrics: Sequence[Scorer]
+        A lost of objets that host a function to calculate how good the
         prediction is according to the solution.
     scoring_functions: List[Scorer]
         A list of metrics to calculate multiple losses
     Returns
     -------
-    float or Dict[str, float]
+    Dict[str, float]
     """
     if task_type not in TASK_TYPES:
         raise NotImplementedError(task_type)
 
-    to_score = []
+    to_score = list(metrics)
     if scoring_functions:
         to_score.extend(scoring_functions)
-    if isinstance(metric, Sequence):
-        to_score.extend(metric)
-    else:
-        to_score.append(metric)
 
     score_dict = dict()
     if task_type in REGRESSION_TASKS:
@@ -472,19 +468,16 @@ def calculate_score(
                 else:
                     raise e
 
-    if scoring_functions is None and isinstance(metric, Scorer):
-        return score_dict[metric.name]
-    else:
-        return score_dict
+    return score_dict
 
 
 def calculate_loss(
     solution: np.ndarray,
     prediction: np.ndarray,
     task_type: int,
-    metric: Scorer | Sequence[Scorer],
+    metrics: Sequence[Scorer],
     scoring_functions: Optional[List[Scorer]] = None,
-) -> Union[float, Dict[str, float]]:
+) -> Dict[str, float]:
     """
     Returns a loss (a magnitude that allows casting the
     optimization problem as a minimization one) for the
@@ -499,44 +492,38 @@ def calculate_loss(
     task_type: int
         To understand if the problem task is classification
         or regression
-    metric: Scorer
-        Object that host a function to calculate how good the
+    metric: Sequence[Scorer]
+        A lost of objets that host a function to calculate how good the
         prediction is according to the solution.
     scoring_functions: List[Scorer]
         A list of metrics to calculate multiple losses
 
     Returns
     -------
-    float or Dict[str, float]
+    Dict[str, float]
         A loss function for each of the provided scorer objects
     """
     score = calculate_score(
         solution=solution,
         prediction=prediction,
         task_type=task_type,
-        metric=metric,
+        metrics=metrics,
         scoring_functions=scoring_functions,
     )
+    scoring_functions = scoring_functions if scoring_functions else []
 
-    if scoring_functions or isinstance(metric, Sequence):
-        score = cast(Dict, score)
-        scoring_functions = cast(List, scoring_functions)
-        metric_list = list(cast(List, metric))  # Please mypy
-        # we expect a dict() object for which we should calculate the loss
-        loss_dict = dict()
-        for metric_ in scoring_functions + metric_list:
-            # TODO: When metrics are annotated with type_of_target support
-            # we can remove this check
-            if metric_.name not in score:
-                continue
-            # maybe metric argument is not in scoring_functions
-            # so append it to the list. Rather than check if such
-            # is the case, redefining loss_dict[metric] is less expensive
-            loss_dict[metric_.name] = metric_._optimum - score[metric_.name]
-        return loss_dict
-    else:
-        rval = metric._optimum - cast(float, score)
-        return rval
+    # we expect a dict() object for which we should calculate the loss
+    loss_dict = dict()
+    for metric_ in scoring_functions + list(metrics):
+        # TODO: When metrics are annotated with type_of_target support
+        # we can remove this check
+        if metric_.name not in score:
+            continue
+        # maybe metric argument is not in scoring_functions
+        # so append it to the list. Rather than check if such
+        # is the case, redefining loss_dict[metric] is less expensive
+        loss_dict[metric_.name] = metric_._optimum - score[metric_.name]
+    return loss_dict
 
 
 def calculate_metric(
