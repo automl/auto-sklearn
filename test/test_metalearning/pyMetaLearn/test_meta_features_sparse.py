@@ -29,8 +29,8 @@ def sparse_data():
         "numeric" if type(type_) != list else "nominal"
         for name, type_ in dataset["attributes"][:-1]
     ]
-    categorical = {
-        i: True if attribute == "nominal" else False
+    feat_type = {
+        i: "categorical" if attribute == "nominal" else "numerical"
         for i, attribute in enumerate(attribute_types)
     }
 
@@ -53,21 +53,21 @@ def sparse_data():
     # Precompute some helper functions
     helpers.set_value(
         "MissingValues",
-        helpers["MissingValues"](X, y, logger, categorical),
+        helpers["MissingValues"](X, y, logger, feat_type),
     )
     mf.set_value(
         "NumberOfMissingValues",
-        mf["NumberOfMissingValues"](X, y, logger, categorical),
+        mf["NumberOfMissingValues"](X, y, logger, feat_type),
     )
     helpers.set_value(
         "NumSymbols",
-        helpers["NumSymbols"](X, y, logger, categorical),
+        helpers["NumSymbols"](X, y, logger, feat_type),
     )
     helpers.set_value(
         "ClassOccurences",
         helpers["ClassOccurences"](X, y, logger),
     )
-    return X, y, categorical
+    return X, y, feat_type
 
 
 @pytest.fixture
@@ -84,8 +84,8 @@ def sparse_data_transformed():
         "numeric" if type(type_) != list else "nominal"
         for name, type_ in dataset["attributes"][:-1]
     ]
-    categorical = {
-        i: True if attribute == "nominal" else False
+    feat_type = {
+        i: "categorical" if attribute == "nominal" else "numerical"
         for i, attribute in enumerate(attribute_types)
     }
 
@@ -100,12 +100,7 @@ def sparse_data_transformed():
     X_sparse[NaNs] = 0
     X_sparse = sparse.csr_matrix(X_sparse)
 
-    ohe = FeatTypeSplit(
-        feat_type={
-            col: "categorical" if category else "numerical"
-            for col, category in categorical.items()
-        }
-    )
+    ohe = FeatTypeSplit(feat_type=feat_type)
     X_transformed = X_sparse.copy()
     X_transformed = ohe.fit_transform(X_transformed)
     imp = SimpleImputer(copy=False)
@@ -114,9 +109,18 @@ def sparse_data_transformed():
     X_transformed = standard_scaler.fit_transform(X_transformed)
 
     # Transform the array which indicates the categorical metafeatures
-    number_numerical = np.sum(~np.array(list(categorical.values())))
-    categorical_transformed = {
-        i: True if i < (X_transformed.shape[1] - number_numerical) else False
+    number_not_categorical = np.sum(
+        np.array(
+            [
+                False if value.lower() == "categorical" else True
+                for value in feat_type.values()
+            ]
+        )
+    )
+    feat_type_transformed = {
+        i: "categorical"
+        if i < (X_transformed.shape[1] - number_not_categorical)
+        else "numerical"
         for i in range(X_transformed.shape[1])
     }
 
@@ -134,15 +138,15 @@ def sparse_data_transformed():
     )
     helpers.set_value(
         "MissingValues",
-        helpers["MissingValues"](X, y, logger, categorical),
+        helpers["MissingValues"](X, y, logger, feat_type),
     )
     mf.set_value(
         "NumberOfMissingValues",
-        mf["NumberOfMissingValues"](X, y, logger, categorical),
+        mf["NumberOfMissingValues"](X, y, logger, feat_type),
     )
     helpers.set_value(
         "NumSymbols",
-        helpers["NumSymbols"](X, y, logger, categorical),
+        helpers["NumSymbols"](X, y, logger, feat_type),
     )
     helpers.set_value(
         "ClassOccurences",
@@ -150,13 +154,13 @@ def sparse_data_transformed():
     )
     helpers.set_value(
         "Skewnesses",
-        helpers["Skewnesses"](X_transformed, y, logger, categorical_transformed),
+        helpers["Skewnesses"](X_transformed, y, logger, feat_type_transformed),
     )
     helpers.set_value(
         "Kurtosisses",
-        helpers["Kurtosisses"](X_transformed, y, logger, categorical_transformed),
+        helpers["Kurtosisses"](X_transformed, y, logger, feat_type_transformed),
     )
-    return X_transformed, y, categorical_transformed
+    return X_transformed, y, feat_type_transformed
 
 
 def test_missing_values(sparse_data):
@@ -419,11 +423,8 @@ def test_pca_skewness_first_pc(sparse_data_transformed):
 
 
 def test_calculate_all_metafeatures(sparse_data):
-    X, y, categorical = sparse_data
-    feat_type = {
-        key: "categorical" if categorical[key] else "numerical"
-        for key in categorical.keys()
-    }
+    X, y, feat_type = sparse_data
+    print(feat_type)
     mf = meta_features.calculate_all_metafeatures(
         X, y, feat_type, "2", logger=logging.getLogger("Meta")
     )
