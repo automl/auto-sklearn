@@ -1536,9 +1536,9 @@ class EnsembleBuilder(object):
                 solution=self.y_test,
                 prediction=test_pred,
                 task_type=self.task_type,
-                metric=self.metric,
+                metrics=[self.metric],
                 scoring_functions=None,
-            )
+            )[self.metric.name]
 
         self.ensemble_history.append(performance_stamp)
 

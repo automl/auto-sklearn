@@ -670,15 +670,16 @@ class TrainEvaluator(AbstractEvaluator):
 
             # if all_scoring_function is true, return a dict of opt_loss. Otherwise,
             # return a scalar.
-            if self.scoring_functions or len(self.metrics) > 1:
-                opt_loss = {}
-                for metric in opt_losses[0].keys():
-                    opt_loss[metric] = np.average(
-                        [opt_losses[i][metric] for i in range(self.num_cv_folds)],
-                        weights=opt_fold_weights,
-                    )
-            else:
-                opt_loss = np.average(opt_losses, weights=opt_fold_weights)
+            opt_loss = {}
+            for metric_name in list(opt_losses[0].keys()) + [
+                metric.name for metric in self.metrics
+            ]:
+                opt_loss[metric_name] = np.average(
+                    [opt_losses[i][metric_name] for i in range(self.num_cv_folds)],
+                    weights=opt_fold_weights,
+                )
+            if len(self.metrics) == 1:
+                opt_loss = opt_loss[self.metrics[0].name]
 
             Y_targets = self.Y_targets
             Y_train_targets = self.Y_train_targets

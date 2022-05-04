@@ -794,6 +794,9 @@ class AutoSklearnEstimator(BaseEstimator):
             What column to sort by. If that column is not present, the
             sorting defaults to the ``"model_id"`` index column.
 
+            Defaults to the metric optimized. Sort by the first objective
+            in case of a multi-objective optimization problem
+
         sort_order: "auto" or "ascending" or "descending" = "auto"
             Which sort order to apply to the ``sort_by`` column. If left
             as ``"auto"``, it will sort by a sensible default where "better" is
@@ -886,7 +889,7 @@ class AutoSklearnEstimator(BaseEstimator):
                 "start_time": rval.starttime,
                 "end_time": rval.endtime,
                 "status": str(rval.status),
-                "cost": rval.cost,
+                "cost": rval.cost if isinstance(rval.cost, float) else rval.cost[0],
                 "train_loss": rval.additional_info["train_loss"]
                 if has_key(rval, "train_loss")
                 else None,

@@ -547,6 +547,9 @@ class AutoMLSMBO:
             smac_args["multi_objective_algorithm"] = ParEGO
             smac_args["multi_objective_kwargs"] = {"rho": 0.05}
             scenario_dict["multi_objectives"] = [metric.name for metric in self.metrics]
+        else:
+            smac_args["multi_objective_algorithm"] = None
+            smac_args["multi_objective_kwargs"] = {}
         if self.get_smac_object_callback is not None:
             smac = self.get_smac_object_callback(**smac_args)
         else:

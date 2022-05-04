@@ -37,6 +37,8 @@ def get_smac_object_callback(budget_type):
         metalearning_configurations,
         n_jobs,
         dask_client,
+        multi_objective_algorithm,  # This argument will be ignored as SH does not yet support multi-objective optimization
+        multi_objective_kwargs,
     ):
         from smac.facade.smac_ac_facade import SMAC4AC
         from smac.intensification.successive_halving import SuccessiveHalving

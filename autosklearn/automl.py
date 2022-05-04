@@ -1299,7 +1299,13 @@ class AutoML(BaseEstimator):
         if "resampling_strategy" not in kwargs:
             kwargs["resampling_strategy"] = self._resampling_strategy
         if "metric" not in kwargs:
-            kwargs["metric"] = self._metric
+            kwargs["metric"] = (
+                [self._metric] if isinstance(self._metric, Scorer) else self._metric
+            )
+        elif "metric" in kwargs and isinstance(kwargs["metric"], Scorer):
+            kwargs["metric"] = [kwargs["metric"]]
+        kwargs["metrics"] = kwargs["metric"]
+        del kwargs["metric"]
         if "disable_file_output" not in kwargs:
             kwargs["disable_file_output"] = self._disable_evaluator_output
         if "pynisher_context" not in kwargs:
@@ -1317,7 +1323,7 @@ class AutoML(BaseEstimator):
             autosklearn_seed=self._seed,
             abort_on_first_run_crash=False,
             multi_objectives=["cost"],
-            cost_for_crash=get_cost_of_crash(kwargs["metric"]),
+            cost_for_crash=get_cost_of_crash(kwargs["metrics"]),
             port=self._logger_port,
             **kwargs,
             **self._resampling_strategy_arguments,
@@ -1644,7 +1650,7 @@ class AutoML(BaseEstimator):
         )
 
     def _get_runhistory_models_performance(self):
-        metric = self._metric
+        metric = self._metric if isinstance(self._metric, Scorer) else self._metric[0]
         data = self.runhistory_.data
         performance_list = []
         for run_key, run_value in data.items():
@@ -1656,7 +1662,10 @@ class AutoML(BaseEstimator):
             endtime = pd.Timestamp(
                 time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(run_value.endtime))
             )
-            val_score = metric._optimum - (metric._sign * run_value.cost)
+            cost = run_value.cost
+            if not isinstance(self._metric, Scorer):
+                cost = cost[0]
+            val_score = metric._optimum - (metric._sign * cost)
             train_score = metric._optimum - (
                 metric._sign * run_value.additional_info["train_loss"]
             )
@@ -1668,9 +1677,10 @@ class AutoML(BaseEstimator):
             # Append test-scores, if data for test_loss are available.
             # This is the case, if X_test and y_test where provided.
             if "test_loss" in run_value.additional_info:
-                test_score = metric._optimum - (
-                    metric._sign * run_value.additional_info["test_loss"]
-                )
+                test_loss = run_value.additional_info["test_loss"]
+                if not isinstance(self._metric, Scorer):
+                    test_loss = test_loss[0]
+                test_score = metric._optimum - (metric._sign * test_loss)
                 scores["single_best_test_score"] = test_score
 
             performance_list.append(scores)
