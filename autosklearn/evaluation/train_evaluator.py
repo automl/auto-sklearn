@@ -1,4 +1,6 @@
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from __future__ import annotations
+
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union, cast
 
 import copy
 import json
@@ -182,7 +184,7 @@ class TrainEvaluator(AbstractEvaluator):
         self,
         backend: Backend,
         queue: multiprocessing.Queue,
-        metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
+        metric: Union[Scorer | Sequence[Scorer]],
         additional_components: Dict[str, ThirdPartyComponents],
         port: Optional[int],
         configuration: Optional[Union[int, Configuration]] = None,
@@ -1328,7 +1330,7 @@ def eval_holdout(
         str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit
     ],
     resampling_strategy_args: Dict[str, Optional[Union[float, int, str]]],
-    metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
+    metric: Union[Scorer | Sequence[Scorer]],
     seed: int,
     num_run: int,
     instance: str,
@@ -1375,7 +1377,7 @@ def eval_iterative_holdout(
         str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit
     ],
     resampling_strategy_args: Dict[str, Optional[Union[float, int, str]]],
-    metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
+    metric: Union[Scorer | Sequence[Scorer]],
     seed: int,
     num_run: int,
     instance: str,
@@ -1422,7 +1424,7 @@ def eval_partial_cv(
         str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit
     ],
     resampling_strategy_args: Dict[str, Optional[Union[float, int, str]]],
-    metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
+    metric: Union[Scorer | Sequence[Scorer]],
     seed: int,
     num_run: int,
     instance: str,
@@ -1475,7 +1477,7 @@ def eval_partial_cv_iterative(
         str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit
     ],
     resampling_strategy_args: Dict[str, Optional[Union[float, int, str]]],
-    metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
+    metric: Union[Scorer | Sequence[Scorer]],
     seed: int,
     num_run: int,
     instance: str,
@@ -1523,7 +1525,7 @@ def eval_cv(
         str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit
     ],
     resampling_strategy_args: Dict[str, Optional[Union[float, int, str]]],
-    metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
+    metric: Union[Scorer | Sequence[Scorer]],
     seed: int,
     num_run: int,
     instance: str,
@@ -1571,7 +1573,7 @@ def eval_iterative_cv(
         str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit
     ],
     resampling_strategy_args: Dict[str, Optional[Union[float, int, str]]],
-    metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
+    metric: Union[Scorer | Sequence[Scorer]],
     seed: int,
     num_run: int,
     instance: str,

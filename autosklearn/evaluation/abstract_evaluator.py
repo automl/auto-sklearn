@@ -1,4 +1,6 @@
-from typing import Any, Dict, List, Optional, TextIO, Tuple, Type, Union, cast
+from __future__ import annotations
+
+from typing import Any, Dict, List, Optional, Sequence, TextIO, Tuple, Type, Union, cast
 
 import logging
 import multiprocessing
@@ -184,7 +186,7 @@ class AbstractEvaluator(object):
         self,
         backend: Backend,
         queue: multiprocessing.Queue,
-        metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
+        metric: Union[Scorer | Sequence[Scorer]],
         additional_components: Dict[str, ThirdPartyComponents],
         port: Optional[int],
         configuration: Optional[Union[int, Configuration]] = None,
@@ -338,6 +340,7 @@ class AbstractEvaluator(object):
             y_true
         """
         if not isinstance(self.configuration, Configuration):
+            # Dummy prediction
             if self.scoring_functions:
                 if isinstance(self.metric, Scorer):
                     return {self.metric.name: self.metric._worst_possible_result}

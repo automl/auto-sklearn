@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import typing
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Sequence
 
 import copy
 import json
@@ -260,7 +262,7 @@ class AutoMLSMBO:
         total_walltime_limit,
         func_eval_time_limit,
         memory_limit,
-        metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
+        metric: Scorer | Sequence[Scorer],
         stopwatch: StopWatch,
         n_jobs,
         dask_client: dask.distributed.Client,
@@ -362,9 +364,7 @@ class AutoMLSMBO:
                 meta_base=meta_base,
                 basename=self.dataset_name,
                 metric=(
-                    self.metric[0]
-                    if isinstance(self.metric, (List, Tuple))
-                    else self.metric
+                    self.metric[0] if isinstance(self.metric, Sequence) else self.metric
                 ),
                 configuration_space=self.config_space,
                 task=self.task,

@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from abc import ABCMeta, abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Sequence, Union, cast
 
 from functools import partial
 from itertools import product
@@ -388,7 +390,7 @@ def calculate_score(
     solution: np.ndarray,
     prediction: np.ndarray,
     task_type: int,
-    metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
+    metric: Scorer | Sequence[Scorer],
     scoring_functions: Optional[List[Scorer]] = None,
 ) -> Union[float, Dict[str, float]]:
     """
@@ -420,7 +422,7 @@ def calculate_score(
     to_score = []
     if scoring_functions:
         to_score.extend(scoring_functions)
-    if isinstance(metric, (list, tuple)):
+    if isinstance(metric, Sequence):
         to_score.extend(metric)
     else:
         to_score.append(metric)
@@ -480,7 +482,7 @@ def calculate_loss(
     solution: np.ndarray,
     prediction: np.ndarray,
     task_type: int,
-    metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
+    metric: Scorer | Sequence[Scorer],
     scoring_functions: Optional[List[Scorer]] = None,
 ) -> Union[float, Dict[str, float]]:
     """
@@ -516,7 +518,7 @@ def calculate_loss(
         scoring_functions=scoring_functions,
     )
 
-    if scoring_functions or isinstance(metric, (list, tuple)):
+    if scoring_functions or isinstance(metric, Sequence):
         score = cast(Dict, score)
         scoring_functions = cast(List, scoring_functions)
         metric_list = list(cast(List, metric))  # Please mypy

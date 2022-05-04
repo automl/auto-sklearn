@@ -1,5 +1,7 @@
 # -*- encoding: utf-8 -*-
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, Union
+from __future__ import annotations
+
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple, Union
 
 import dask.distributed
 import joblib
@@ -46,7 +48,7 @@ class AutoSklearnEstimator(BaseEstimator):
         smac_scenario_args=None,
         logging_config=None,
         metadata_directory=None,
-        metric: Optional[Union[Scorer, List[Scorer], Tuple[Scorer]]] = None,
+        metric: Optional[Scorer | Sequence[Scorer]] = None,
         scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
         get_trials_callback=None,

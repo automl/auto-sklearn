@@ -1,5 +1,18 @@
 # -*- encoding: utf-8 -*-
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
+from __future__ import annotations
+
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 import functools
 import json
@@ -86,10 +99,10 @@ def fit_predict_try_except_decorator(
 
 
 def get_cost_of_crash(
-    metric: Union[Scorer, List[Scorer], Tuple[Scorer]]
+    metric: Union[Scorer | Sequence[Scorer]],
 ) -> Union[float, List[float]]:
 
-    if isinstance(metric, (List, Tuple)):
+    if isinstance(metric, Sequence):
         return [cast(float, get_cost_of_crash(metric_)) for metric_ in metric]
     elif not isinstance(metric, Scorer):
         raise ValueError("The metric must be stricly be an instance of Scorer")
@@ -129,7 +142,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         resampling_strategy: Union[
             str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit
         ],
-        metric: Union[Scorer, List[Scorer], Tuple[Scorer]],
+        metric: Union[Scorer | Sequence[Scorer]],
         cost_for_crash: float,
         abort_on_first_run_crash: bool,
         port: int,

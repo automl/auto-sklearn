@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Iterable, List, Mapping, Optional, Tuple, Union
+from typing import Any, Callable, Iterable, Mapping, Optional, Sequence, Tuple
 
 import copy
 import io
@@ -210,7 +210,7 @@ class AutoML(BaseEstimator):
         get_smac_object_callback: Optional[Callable] = None,
         smac_scenario_args: Optional[Mapping] = None,
         logging_config: Optional[Mapping] = None,
-        metric: Optional[Union[Scorer, List[Scorer], Tuple[Scorer]]] = None,
+        metric: Optional[Scorer | Sequence[Scorer]] = None,
         scoring_functions: Optional[list[Scorer]] = None,
         get_trials_callback: Optional[IncorporateRunResultCallback] = None,
         dataset_compression: bool | Mapping[str, Any] = True,
@@ -692,7 +692,7 @@ class AutoML(BaseEstimator):
         # defined in the estimator fit call
         if self._metric is None:
             raise ValueError("No metric given.")
-        if isinstance(self._metric, (List, Tuple)):
+        if isinstance(self._metric, Sequence):
             for entry in self._metric:
                 if not isinstance(entry, Scorer):
                     raise ValueError(
@@ -796,7 +796,7 @@ class AutoML(BaseEstimator):
                     task=self._task,
                     metric=(
                         self._metric[0]
-                        if isinstance(self._metric, (List, Tuple))
+                        if isinstance(self._metric, Sequence)
                         else self._metric
                     ),
                     ensemble_size=self._ensemble_size,
@@ -1501,9 +1501,7 @@ class AutoML(BaseEstimator):
             dataset_name=dataset_name if dataset_name else self._dataset_name,
             task=task if task else self._task,
             metric=(
-                self._metric[0]
-                if isinstance(self._metric, (List, Tuple))
-                else self._metric
+                self._metric[0] if isinstance(self._metric, Sequence) else self._metric
             ),
             ensemble_size=ensemble_size if ensemble_size else self._ensemble_size,
             ensemble_nbest=ensemble_nbest if ensemble_nbest else self._ensemble_nbest,
