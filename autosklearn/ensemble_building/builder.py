@@ -448,7 +448,13 @@ class EnsembleBuilder:
                 candidates = [best]
                 to_delete.remove(best)
 
-            self.delete_runs(to_delete)
+            if any(to_delete):
+                self.logger.info(
+                    f"Deleting runs {to_delete} due to"
+                    f" max_models={self.max_models_on_disc} and/or"
+                    f" memory_limit={self.model_memory_limit}"
+                )
+                self.delete_runs(to_delete)
 
         # If there are any candidates, perform candidates selection
         if any(candidates):
@@ -459,7 +465,13 @@ class EnsembleBuilder:
                 nbest=self.ensemble_nbest,
                 performance_range_threshold=self.performance_range_threshold,
             )
-            self.delete_runs(to_delete)
+            if any(to_delete):
+                self.logger.info(
+                    f"Deleting runs {to_delete} due to"
+                    f" nbest={self.ensemble_nbest} and/or"
+                    f" performance_range_threshold={self.performance_range_threshold}"
+                )
+                self.delete_runs(to_delete)
         else:
             candidates = dummies
             self.logger.warning("No real runs to build ensemble from")
@@ -473,7 +485,15 @@ class EnsembleBuilder:
             candidates = sorted(test_subset, key=lambda r: r.id)
             test_models = candidates
 
-            self.delete_runs(candidates_set - test_subset)
+            to_delete = candidates_set - test_subset
+            if any(to_delete):
+                self.logger.info(
+                    f"Deleting runs {to_delete} due to runs not"
+                    ' having "test_predictions" while others do not:'
+                    f"\nHave test_predictions = {test_subset}"
+                    f"\nNo test_predictions = {to_delete}"
+                )
+                self.delete_runs(candidates_set - test_subset)
 
         else:
             candidates = sorted(candidates_set, key=lambda r: r.id)
@@ -901,7 +921,6 @@ class EnsembleBuilder:
         runs : Sequence[Run]
             The runs to delete
         """
-        print("deleted", runs)
         items = iter(run for run in runs if not run.is_dummy() and run.dir.exists())
         for run in items:
             try:

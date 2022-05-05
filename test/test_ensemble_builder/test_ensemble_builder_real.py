@@ -8,7 +8,6 @@ from typing import Callable
 from autosklearn.automl import AutoML
 from autosklearn.ensemble_building.builder import EnsembleBuilder
 
-import pytest
 from pytest_cases import parametrize_with_cases
 from pytest_cases.filters import has_tag
 from unittest.mock import MagicMock, patch
@@ -75,6 +74,10 @@ def test_run_builds_valid_ensemble(builder: EnsembleBuilder) -> None:
     candidate_ids = {run.id for run in candidates}
     assert ensemble_ids <= candidate_ids
 
+    # Could be the case no run is deleted
+    if not mock_delete.called:
+        return
+
     args, _ = mock_delete.call_args
     deleted = args[0]  # `delete_runs(runs)`
 
@@ -93,28 +96,3 @@ def test_run_builds_valid_ensemble(builder: EnsembleBuilder) -> None:
         a = (worst_candidate.loss, worst_candidate.num_run)
         b = (best_deleted.loss, best_deleted.num_run)
         assert a <= b
-
-
-@parametrize_with_cases("builder", cases=case_real_runs)
-def test_does_not_update_ensemble_with_no_new_runs(builder: EnsembleBuilder) -> None:
-    """
-    Expects
-    -------
-    * No new ensemble should be fitted with no new runs and no runs updated.
-      Since this is from a real AutoML run, running the builder again without having
-      trained any new models should mean that the `fit_ensemble` is never run in the
-      EnsembleBuilder.
-    """
-    if not builder.previous_candidates_path.exists():
-        pytest.skip("Test only valid when builder has previous candidates")
-
-    prev_history = builder.ensemble_history
-    prev_nbest = builder.ensemble_nbest
-
-    # So we can wrap and test if fit ensemble gets called
-    with patch.object(builder, "fit_ensemble", wraps=builder.fit_ensemble) as mock_fit:
-        history, nbest = builder.main()
-
-    assert history == prev_history
-    assert prev_nbest == nbest
-    assert mock_fit.call_count == 0

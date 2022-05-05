@@ -27,13 +27,3 @@ def case_real_runs(
         random_state=DEFAULT_SEED,
     )
     return manager
-
-
-@parametrize_with_cases("manager", cases=case_real_runs)
-def test_run_builds_valid_ensemble(manager: EnsembleBuilderManager) -> None:
-    ...
-
-
-@parametrize_with_cases("builder", cases=case_real_runs)
-def test_main(builder: EnsembleBuilderManager) -> None:
-    ...

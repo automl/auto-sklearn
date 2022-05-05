@@ -1515,7 +1515,7 @@ class AutoML(BaseEstimator):
                 "Error building the ensemble - please check the log file and command "
                 "line output for error messages."
             )
-        self.ensemble_performance_history, _, _, _, _ = result
+        self.ensemble_performance_history, _ = result
         self._ensemble_size = ensemble_size
 
         self._load_models()
