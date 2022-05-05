@@ -424,7 +424,6 @@ def test_pca_skewness_first_pc(sparse_data_transformed):
 
 def test_calculate_all_metafeatures(sparse_data):
     X, y, feat_type = sparse_data
-    print(feat_type)
     mf = meta_features.calculate_all_metafeatures(
         X, y, feat_type, "2", logger=logging.getLogger("Meta")
     )

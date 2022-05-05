@@ -48,14 +48,9 @@ def meta_train_data(request):
         dataset = decoder.decode(fh, encode_nominal=True)
 
     # -1 because the last attribute is the class
-    attribute_types = [
-        "numeric" if type(type_) != list else "nominal"
-        for name, type_ in dataset["attributes"][:-1]
-    ]
-
     feat_type = {
-        i: "categorical" if attribute == "nominal" else "numerical"
-        for i, attribute in enumerate(attribute_types)
+        idx: "numerical" if type(type_) != list else "categorical"
+        for idx, (name, type_) in enumerate(dataset["attributes"][:-1])
     }
 
     data = np.array(dataset["data"], dtype=np.float64)
@@ -78,7 +73,19 @@ def meta_train_data(request):
     if request.param == "numpy":
         return X, y, feat_type
     elif request.param == "pandas":
-        return pd.DataFrame(X), y, feat_type
+        dtypes = {}
+        for key, value in feat_type.items():
+            if value == "categorical":
+                dtypes[key] = "category"
+            elif value == "numerical":
+                dtypes[key] = "float64"
+            elif value == "string":
+                dtypes[key] = "string"
+            else:
+                raise KeyError
+
+        X = pd.DataFrame(X).astype(dtypes)
+        return X, y, feat_type
     else:
         raise ValueError(request.param)
 
@@ -93,13 +100,9 @@ def meta_train_data_transformed(request):
         dataset = decoder.decode(fh, encode_nominal=True)
 
     # -1 because the last attribute is the class
-    attribute_types = [
-        "numeric" if type(type_) != list else "nominal"
-        for name, type_ in dataset["attributes"][:-1]
-    ]
     feat_type = {
-        i: "categorical" if attribute == "nominal" else "numerical"
-        for i, attribute in enumerate(attribute_types)
+        idx: "numerical" if type(type_) != list else "categorical"
+        for idx, (name, type_) in enumerate(dataset["attributes"][:-1])
     }
 
     data = np.array(dataset["data"], dtype=np.float64)

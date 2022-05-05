@@ -268,21 +268,17 @@ class PercentageOfMissingValues(MetaFeature):
 @metafeatures.define("NumberOfNumericFeatures")
 class NumberOfNumericFeatures(MetaFeature):
     def _calculate(self, X, y, logger, feat_type):
-        categorical = {
-            key: True if value.lower() == "categorical" else False
-            for key, value in feat_type.items()
-        }
-        return len(feat_type) - np.sum(list(categorical.values()))
+        return np.sum(
+            [True if value == "numerical" else False for value in feat_type.values()]
+        )
 
 
 @metafeatures.define("NumberOfCategoricalFeatures")
 class NumberOfCategoricalFeatures(MetaFeature):
     def _calculate(self, X, y, logger, feat_type):
-        categorical = {
-            key: True if value.lower() == "categorical" else False
-            for key, value in feat_type.items()
-        }
-        return np.sum(list(categorical.values()))
+        return np.sum(
+            [True if value == "categorical" else False for value in feat_type.values()]
+        )
 
 
 @metafeatures.define("RatioNumericalToNominal")
@@ -531,13 +527,13 @@ class SymbolsSum(MetaFeature):
 @helper_functions.define("Kurtosisses")
 class Kurtosisses(HelperFunction):
     def _calculate(self, X, y, logger, feat_type):
-        categorical = {
-            key: True if value.lower() == "categorical" else False
+        numerical = {
+            key: True if value.lower() == "numerical" else False
             for key, value in feat_type.items()
         }
         kurts = []
         for i in range(X.shape[1]):
-            if not categorical[X.columns[i] if hasattr(X, "columns") else i]:
+            if numerical[X.columns[i] if hasattr(X, "columns") else i]:
                 kurts.append(
                     scipy.stats.kurtosis(
                         X.iloc[:, i] if hasattr(X, "iloc") else X[:, i]
@@ -546,14 +542,14 @@ class Kurtosisses(HelperFunction):
         return kurts
 
     def _calculate_sparse(self, X, y, logger, feat_type):
-        categorical = {
-            key: True if value.lower() == "categorical" else False
+        numerical = {
+            key: True if value.lower() == "numerical" else False
             for key, value in feat_type.items()
         }
         kurts = []
         X_new = X.tocsc()
         for i in range(X_new.shape[1]):
-            if not categorical[X.columns[i] if hasattr(X, "columns") else i]:
+            if numerical[X.columns[i] if hasattr(X, "columns") else i]:
                 start = X_new.indptr[i]
                 stop = X_new.indptr[i + 1]
                 kurts.append(scipy.stats.kurtosis(X_new.data[start:stop]))
@@ -595,27 +591,27 @@ class KurtosisSTD(MetaFeature):
 @helper_functions.define("Skewnesses")
 class Skewnesses(HelperFunction):
     def _calculate(self, X, y, logger, feat_type):
-        categorical = {
-            key: True if value.lower() == "categorical" else False
+        numerical = {
+            key: True if value.lower() == "numerical" else False
             for key, value in feat_type.items()
         }
         skews = []
         for i in range(X.shape[1]):
-            if not categorical[X.columns[i] if hasattr(X, "columns") else i]:
+            if numerical[X.columns[i] if hasattr(X, "columns") else i]:
                 skews.append(
                     scipy.stats.skew(X.iloc[:, i] if hasattr(X, "iloc") else X[:, i])
                 )
         return skews
 
     def _calculate_sparse(self, X, y, logger, feat_type):
-        categorical = {
-            key: True if value.lower() == "categorical" else False
+        numerical = {
+            key: True if value.lower() == "numerical" else False
             for key, value in feat_type.items()
         }
         skews = []
         X_new = X.tocsc()
         for i in range(X_new.shape[1]):
-            if not categorical[X.columns[i] if hasattr(X, "columns") else i]:
+            if numerical[X.columns[i] if hasattr(X, "columns") else i]:
                 start = X_new.indptr[i]
                 stop = X_new.indptr[i + 1]
                 skews.append(scipy.stats.skew(X_new.data[start:stop]))
