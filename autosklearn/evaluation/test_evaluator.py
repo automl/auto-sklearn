@@ -1,6 +1,4 @@
 # -*- encoding: utf-8 -*-
-from __future__ import annotations
-
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import multiprocessing
@@ -25,7 +23,7 @@ class TestEvaluator(AbstractEvaluator):
         self,
         backend: Backend,
         queue: multiprocessing.Queue,
-        metric: Union[Scorer | Sequence[Scorer]],
+        metrics: Sequence[Scorer],
         additional_components: Dict[str, ThirdPartyComponents],
         port: Optional[int],
         configuration: Optional[Union[int, Configuration]] = None,
@@ -41,7 +39,7 @@ class TestEvaluator(AbstractEvaluator):
             queue=queue,
             port=port,
             configuration=configuration,
-            metric=metric,
+            metrics=metrics,
             additional_components=additional_components,
             scoring_functions=scoring_functions,
             seed=seed,

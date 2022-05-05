@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from abc import ABCMeta, abstractmethod
 from typing import Any, Callable, Dict, List, Optional, Sequence
 
@@ -408,7 +406,7 @@ def calculate_score(
         To understand if the problem task is classification
         or regression
     metrics: Sequence[Scorer]
-        A lost of objets that host a function to calculate how good the
+        A list of objects that hosts a function to calculate how good the
         prediction is according to the solution.
     scoring_functions: List[Scorer]
         A list of metrics to calculate multiple losses
@@ -428,7 +426,7 @@ def calculate_score(
         for metric_ in to_score:
 
             try:
-                score_dict[metric_.name] = _compute_scorer(
+                score_dict[metric_.name] = _compute_single_scorer(
                     metric_, prediction, solution, task_type
                 )
             except ValueError as e:
@@ -448,7 +446,7 @@ def calculate_score(
             # handle?
 
             try:
-                score_dict[metric_.name] = _compute_scorer(
+                score_dict[metric_.name] = _compute_single_scorer(
                     metric_, prediction, solution, task_type
                 )
             except ValueError as e:
@@ -493,7 +491,7 @@ def calculate_loss(
         To understand if the problem task is classification
         or regression
     metric: Sequence[Scorer]
-        A lost of objets that host a function to calculate how good the
+        A list of objects that hosts a function to calculate how good the
         prediction is according to the solution.
     scoring_functions: List[Scorer]
         A list of metrics to calculate multiple losses
@@ -526,7 +524,7 @@ def calculate_loss(
     return loss_dict
 
 
-def calculate_metric(
+def compute_single_metric(
     metric: Scorer, prediction: np.ndarray, solution: np.ndarray, task_type: int
 ) -> float:
     """
@@ -550,7 +548,7 @@ def calculate_metric(
     -------
     float
     """
-    score = _compute_scorer(
+    score = _compute_single_scorer(
         solution=solution,
         prediction=prediction,
         metric=metric,
@@ -559,7 +557,7 @@ def calculate_metric(
     return metric._sign * score
 
 
-def _compute_scorer(
+def _compute_single_scorer(
     metric: Scorer, prediction: np.ndarray, solution: np.ndarray, task_type: int
 ) -> float:
     """

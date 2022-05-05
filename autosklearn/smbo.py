@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import typing
 from typing import Dict, List, Optional, Sequence
 
@@ -262,7 +260,7 @@ class AutoMLSMBO:
         total_walltime_limit,
         func_eval_time_limit,
         memory_limit,
-        metric: Scorer | Sequence[Scorer],
+        metrics: Sequence[Scorer],
         stopwatch: StopWatch,
         n_jobs,
         dask_client: dask.distributed.Client,
@@ -289,7 +287,7 @@ class AutoMLSMBO:
         # data related
         self.dataset_name = dataset_name
         self.datamanager = None
-        self.metrics = metric if isinstance(metric, Sequence) else [metric]
+        self.metrics = metrics
         self.task = None
         self.backend = backend
         self.port = port

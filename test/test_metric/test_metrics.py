@@ -6,7 +6,7 @@ from smac.utils.constants import MAXINT
 
 import autosklearn.metrics
 from autosklearn.constants import BINARY_CLASSIFICATION, REGRESSION
-from autosklearn.metrics import calculate_loss, calculate_metric, calculate_score
+from autosklearn.metrics import calculate_loss, calculate_score, compute_single_metric
 
 import pytest
 import unittest
@@ -702,7 +702,7 @@ def test_calculate_metric():
     y_pred = np.array([0, 1, 0, 1, 1, 1, 0, 0, 0, 0])
     y_true = np.array([0, 1, 0, 1, 1, 0, 0, 0, 0, 0])
     score = sklearn.metrics.accuracy_score(y_true, y_pred)
-    assert pytest.approx(score) == calculate_metric(
+    assert pytest.approx(score) == compute_single_metric(
         solution=y_true,
         prediction=y_pred,
         task_type=BINARY_CLASSIFICATION,
@@ -713,7 +713,7 @@ def test_calculate_metric():
     y_true = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
     y_pred = np.array([0.11, 0.22, 0.33, 0.44, 0.55, 0.66])
     score = sklearn.metrics.mean_squared_error(y_true, y_pred)
-    assert pytest.approx(score) == calculate_metric(
+    assert pytest.approx(score) == compute_single_metric(
         solution=y_true,
         prediction=y_pred,
         task_type=REGRESSION,

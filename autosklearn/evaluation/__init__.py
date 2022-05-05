@@ -98,29 +98,30 @@ def fit_predict_try_except_decorator(
         queue.close()
 
 
-def get_cost_of_crash(
-    metric: Union[Scorer | Sequence[Scorer]],
-) -> Union[float, List[float]]:
+def get_cost_of_crash(metrics: Sequence[Scorer]) -> List[float] | float:
+    """Return the cost of crash.
 
-    if isinstance(metric, Sequence):
-        return [cast(float, get_cost_of_crash(metric_)) for metric_ in metric]
-    elif not isinstance(metric, Scorer):
-        raise ValueError(
-            "The metric must be stricly be an instance of Scorer or a sequence of "
-            "Scorers"
-        )
+    Return value can be either a list (multi-objective optimization) or a
+    raw float (single objective) because SMAC assumes different types in the
+    two different cases.
+    """
+    costs = []
+    for metric in metrics:
+        if not isinstance(metric, Scorer):
+            raise ValueError("The metric {metric} must be an instance of Scorer")
 
-    # Autosklearn optimizes the err. This function translates
-    # worst_possible_result to be a minimization problem.
-    # For metrics like accuracy that are bounded to [0,1]
-    # metric.optimum==1 is the worst cost.
-    # A simple guide is to use greater_is_better embedded as sign
-    if metric._sign < 0:
-        worst_possible_result = metric._worst_possible_result
-    else:
-        worst_possible_result = metric._optimum - metric._worst_possible_result
+        # Autosklearn optimizes the err. This function translates
+        # worst_possible_result to be a minimization problem.
+        # For metrics like accuracy that are bounded to [0,1]
+        # metric.optimum==1 is the worst cost.
+        # A simple guide is to use greater_is_better embedded as sign
+        if metric._sign < 0:
+            worst_possible_result = metric._worst_possible_result
+        else:
+            worst_possible_result = metric._optimum - metric._worst_possible_result
+        costs.append(worst_possible_result)
 
-    return worst_possible_result
+    return costs if len(costs) > 1 else costs[0]
 
 
 def _encode_exit_status(

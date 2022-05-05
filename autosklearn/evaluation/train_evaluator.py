@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union, cast
 
 import copy
@@ -439,25 +437,18 @@ class TrainEvaluator(AbstractEvaluator):
                         w / sum(opt_fold_weights) for w in opt_fold_weights
                     ]
 
-                    if len(self.metrics) == 1:
-                        train_loss = np.average(
+                    train_loss = [
+                        np.average(
                             [
-                                train_losses[i][str(self.metrics[0])]
+                                train_losses[i][str(metric)]
                                 for i in range(self.num_cv_folds)
                             ],
                             weights=train_fold_weights_percentage,
                         )
-                    else:
-                        train_loss = [
-                            np.average(
-                                [
-                                    train_losses[i][str(metric)]
-                                    for i in range(self.num_cv_folds)
-                                ],
-                                weights=train_fold_weights_percentage,
-                            )
-                            for metric in self.metrics
-                        ]
+                        for metric in self.metrics
+                    ]
+                    if len(self.metrics) == 1:
+                        train_loss = train_loss[self.metrics[0].name]
 
                     # if all_scoring_function is true, return a dict of opt_loss.
                     # Otherwise, return a scalar.
@@ -648,25 +639,15 @@ class TrainEvaluator(AbstractEvaluator):
             ]
             opt_fold_weights = [w / sum(opt_fold_weights) for w in opt_fold_weights]
 
-            if len(self.metrics) == 1:
-                train_loss = np.average(
-                    [
-                        train_losses[i][str(self.metrics[0])]
-                        for i in range(self.num_cv_folds)
-                    ],
+            train_loss = [
+                np.average(
+                    [train_losses[i][str(metric)] for i in range(self.num_cv_folds)],
                     weights=train_fold_weights,
                 )
-            else:
-                train_loss = [
-                    np.average(
-                        [
-                            train_losses[i][str(metric)]
-                            for i in range(self.num_cv_folds)
-                        ],
-                        weights=train_fold_weights,
-                    )
-                    for metric in self.metrics
-                ]
+                for metric in self.metrics
+            ]
+            if len(self.metrics) == 1:
+                train_loss = train_loss[self.metrics[0].name]
 
             # if all_scoring_function is true, return a dict of opt_loss. Otherwise,
             # return a scalar.

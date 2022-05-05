@@ -66,7 +66,7 @@ from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, _fit_with_budget
-from autosklearn.metrics import Scorer, calculate_metric, default_metric_for_task
+from autosklearn.metrics import Scorer, compute_single_metric, default_metric_for_task
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.components.classification import ClassifierChoice
 from autosklearn.pipeline.components.data_preprocessing.categorical_encoding import (
@@ -210,7 +210,7 @@ class AutoML(BaseEstimator):
         get_smac_object_callback: Optional[Callable] = None,
         smac_scenario_args: Optional[Mapping] = None,
         logging_config: Optional[Mapping] = None,
-        metric: Optional[Scorer | Sequence[Scorer]] = None,
+        metrics: Sequence[Scorer] | None = None,
         scoring_functions: Optional[list[Scorer]] = None,
         get_trials_callback: Optional[IncorporateRunResultCallback] = None,
         dataset_compression: bool | Mapping[str, Any] = True,
@@ -244,7 +244,7 @@ class AutoML(BaseEstimator):
         self._delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
         self._time_for_task = time_left_for_this_task
         self._per_run_time_limit = per_run_time_limit
-        self._metric = metric
+        self._metrics = metrics
         self._ensemble_size = ensemble_size
         self._ensemble_nbest = ensemble_nbest
         self._max_models_on_disc = max_models_on_disc
@@ -422,8 +422,8 @@ class AutoML(BaseEstimator):
         if self._resampling_strategy in ["partial-cv", "partial-cv-iterative-fit"]:
             return
 
-        if self._metric is None:
-            raise ValueError("Metric was not set")
+        if self._metrics is None:
+            raise ValueError("Metric/Metrics was/were not set")
 
         # Dummy prediction always have num_run set to 1
         dummy_run_num = 1
@@ -447,13 +447,11 @@ class AutoML(BaseEstimator):
             resampling_strategy=self._resampling_strategy,
             initial_num_run=dummy_run_num,
             stats=stats,
-            metrics=(
-                [self._metric] if isinstance(self._metric, Scorer) else self._metric
-            ),
+            metrics=self._metrics,
             memory_limit=memory_limit,
             disable_file_output=self._disable_evaluator_output,
             abort_on_first_run_crash=False,
-            cost_for_crash=get_cost_of_crash(self._metric),
+            cost_for_crash=get_cost_of_crash(self._metrics),
             port=self._logger_port,
             pynisher_context=self._multiprocessing_context,
             **self._resampling_strategy_arguments,
@@ -613,8 +611,8 @@ class AutoML(BaseEstimator):
             self._task = task
 
         # Assign a metric if it doesnt exist
-        if self._metric is None:
-            self._metric = default_metric_for_task[self._task]
+        if self._metrics is None:
+            self._metrics = [default_metric_for_task[self._task]]
 
         if dataset_name is None:
             dataset_name = str(uuid.uuid1(clock_seq=os.getpid()))
@@ -692,16 +690,19 @@ class AutoML(BaseEstimator):
         # The metric must exist as of this point
         # It can be provided in the constructor, or automatically
         # defined in the estimator fit call
-        if self._metric is None:
-            raise ValueError("No metric given.")
-        if isinstance(self._metric, Sequence):
-            for entry in self._metric:
+        if self._metrics is None:
+            raise ValueError("No metrics given.")
+        if isinstance(self._metrics, Sequence):
+            for entry in self._metrics:
                 if not isinstance(entry, Scorer):
                     raise ValueError(
-                        "Metric must be instance of autosklearn.metrics.Scorer."
+                        "Metric {entry} must be instance of autosklearn.metrics.Scorer."
                     )
-        elif not isinstance(self._metric, Scorer):
-            raise ValueError("Metric must be instance of autosklearn.metrics.Scorer.")
+        else:
+            raise ValueError(
+                "Metric must be a sequence of instances of "
+                "autosklearn.metrics.Scorer."
+            )
 
         # If no dask client was provided, we create one, so that we can
         # start a ensemble process in parallel to smbo optimize
@@ -796,11 +797,7 @@ class AutoML(BaseEstimator):
                     backend=copy.deepcopy(self._backend),
                     dataset_name=dataset_name,
                     task=self._task,
-                    metric=(
-                        self._metric[0]
-                        if isinstance(self._metric, Sequence)
-                        else self._metric
-                    ),
+                    metric=self._metrics[0],
                     ensemble_size=self._ensemble_size,
                     ensemble_nbest=self._ensemble_nbest,
                     max_models_on_disc=self._max_models_on_disc,
@@ -872,7 +869,7 @@ class AutoML(BaseEstimator):
                     config_file=configspace_path,
                     seed=self._seed,
                     metadata_directory=self._metadata_directory,
-                    metric=self._metric,
+                    metrics=self._metrics,
                     resampling_strategy=self._resampling_strategy,
                     resampling_strategy_args=self._resampling_strategy_arguments,
                     include=self._include,
@@ -1011,7 +1008,10 @@ class AutoML(BaseEstimator):
         )
         self._logger.debug("  smac_scenario_args: %s", str(self._smac_scenario_args))
         self._logger.debug("  logging_config: %s", str(self.logging_config))
-        self._logger.debug("  metric: %s", str(self._metric))
+        if len(self._metrics) == 1:
+            self._logger.debug("  metric: %s", str(self._metrics[0]))
+        else:
+            self._logger.debug("  metrics: %s", str(self._metrics))
         self._logger.debug("Done printing arguments to auto-sklearn")
         self._logger.debug("Starting to print available components")
         for choice in (
@@ -1264,8 +1264,8 @@ class AutoML(BaseEstimator):
             self._task = task
 
         # Assign a metric if it doesnt exist
-        if self._metric is None:
-            self._metric = default_metric_for_task[self._task]
+        if self._metrics is None:
+            self._metrics = [default_metric_for_task[self._task]]
 
         # Get the configuration space
         # This also ensures that the Backend has processed the
@@ -1298,12 +1298,8 @@ class AutoML(BaseEstimator):
             kwargs["memory_limit"] = self._memory_limit
         if "resampling_strategy" not in kwargs:
             kwargs["resampling_strategy"] = self._resampling_strategy
-        if "metric" not in kwargs:
-            kwargs["metric"] = (
-                [self._metric] if isinstance(self._metric, Scorer) else self._metric
-            )
-        elif "metric" in kwargs and isinstance(kwargs["metric"], Scorer):
-            kwargs["metric"] = [kwargs["metric"]]
+        if "metrics" not in kwargs:
+            kwargs["metric"] = self._metrics
         kwargs["metrics"] = kwargs["metric"]
         del kwargs["metric"]
         if "disable_file_output" not in kwargs:
@@ -1508,9 +1504,7 @@ class AutoML(BaseEstimator):
             backend=copy.deepcopy(self._backend),
             dataset_name=dataset_name if dataset_name else self._dataset_name,
             task=task if task else self._task,
-            metric=(
-                self._metric[0] if isinstance(self._metric, Sequence) else self._metric
-            ),
+            metric=self._metric[0],
             ensemble_size=ensemble_size if ensemble_size else self._ensemble_size,
             ensemble_nbest=ensemble_nbest if ensemble_nbest else self._ensemble_nbest,
             max_models_on_disc=self._max_models_on_disc,
@@ -1608,7 +1602,7 @@ class AutoML(BaseEstimator):
 
         # SingleBest contains the best model found by AutoML
         ensemble = SingleBest(
-            metric=self._metric,
+            metric=self._metrics[0],
             seed=self._seed,
             run_history=self.runhistory_,
             backend=self._backend,
@@ -1642,15 +1636,15 @@ class AutoML(BaseEstimator):
         # same representation domain
         prediction = self.InputValidator.target_validator.transform(prediction)
 
-        return calculate_metric(
+        return compute_single_metric(
             solution=y,
             prediction=prediction,
             task_type=self._task,
-            metric=self._metric,
+            metric=self._metrics[0],
         )
 
     def _get_runhistory_models_performance(self):
-        metric = self._metric if isinstance(self._metric, Scorer) else self._metric[0]
+        metric = self._metrics[0]
         data = self.runhistory_.data
         performance_list = []
         for run_key, run_value in data.items():
@@ -1663,7 +1657,7 @@ class AutoML(BaseEstimator):
                 time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(run_value.endtime))
             )
             cost = run_value.cost
-            if not isinstance(self._metric, Scorer):
+            if len(self._metrics) > 1:
                 cost = cost[0]
             val_score = metric._optimum - (metric._sign * cost)
             train_score = metric._optimum - (
@@ -1678,7 +1672,7 @@ class AutoML(BaseEstimator):
             # This is the case, if X_test and y_test where provided.
             if "test_loss" in run_value.additional_info:
                 test_loss = run_value.additional_info["test_loss"]
-                if not isinstance(self._metric, Scorer):
+                if len(self._metrics) > 1:
                     test_loss = test_loss[0]
                 test_score = metric._optimum - (metric._sign * test_loss)
                 scores["single_best_test_score"] = test_score
