@@ -4,7 +4,7 @@
 [tool.pytest.ini_options]
 testpaths = ["test"]
 minversion = "3.7"
-#addopts = "--cov=autosklearn"
+addopts = "--forked"
 
 [tool.coverage.run]
 branch = true

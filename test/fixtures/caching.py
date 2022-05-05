@@ -2,13 +2,19 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
+import os
 import pickle
 import shutil
+import tempfile
 from functools import partial
 from pathlib import Path
 
+from filelock import FileLock
+
 from pytest import FixtureRequest
 from pytest_cases import fixture
+
+LOCK_DIR = Path(tempfile.gettempdir())
 
 
 class Cache:
@@ -68,8 +74,10 @@ class Cache:
         verbose : int = 0
             Whether to be verbose or not. Currently only has one level (> 0)
         """
+        self.key = key
         self.dir = cache_dir / key
         self.verbose = verbose > 0
+        self._lock: FileLock = None
 
     def items(self) -> list[Path]:
         """Get any paths associated to items in this dir"""
@@ -102,6 +110,22 @@ class Cache:
         """Delete this caches items"""
         shutil.rmtree(self.dir)
         self.dir.mkdir()
+
+    def __enter__(self):
+        if int(os.environ.get("PYTEST_XDIST_WORKER_COUNT", 1)) <= 1:
+            return self
+        else:
+            path = LOCK_DIR / f"{self.key}.lock"
+            self._lock = FileLock(path)
+            self._lock.acquire(poll_interval=1.0)
+            if self.verbose:
+                print(f"locked cache {path}")
+
+            return self
+
+    def __exit__(self, *args, **kwargs):
+        if self._lock is not None:
+            self._lock.release()
 
 
 @fixture

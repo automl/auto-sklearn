@@ -71,25 +71,25 @@ def case_classifier_fitted_holdout_iterative(
     resampling_strategy = "holdout-iterative-fit"
 
     key = f"case_classifier_{resampling_strategy}_{dataset}"
-    cache = make_cache(key)
 
-    if "model" not in cache:
-        # Make the model in the cache
-        model = make_automl_classifier(
-            temporary_directory=cache.path("backend"),
-            delete_tmp_folder_after_terminate=False,
-            resampling_strategy=resampling_strategy,
-        )
+    # This locks the cache for this item while we check, required for pytest-xdist
+    with make_cache(key) as cache:
+        if "model" not in cache:
+            # Make the model in the cache
+            model = make_automl_classifier(
+                temporary_directory=cache.path("backend"),
+                delete_tmp_folder_after_terminate=False,
+                resampling_strategy=resampling_strategy,
+            )
 
-        X, y, Xt, yt = make_sklearn_dataset(name=dataset)
-        model.fit(X, y, dataset_name=dataset)
+            X, y, Xt, yt = make_sklearn_dataset(name=dataset)
+            model.fit(X, y, dataset_name=dataset)
 
-        # Save the model
-        cache.save(model, "model")
+            # Save the model
+            cache.save(model, "model")
 
     # Try the model from the cache
     model = cache.load("model")
-    assert model is not None
     model._backend = copy_backend(old=model._backend, new=make_backend())
 
     return model
@@ -108,23 +108,25 @@ def case_classifier_fitted_cv(
     resampling_strategy = "cv"
 
     key = f"case_classifier_{resampling_strategy}_{dataset}"
-    cache = make_cache(key)
 
-    if "model" not in cache:
-        model = make_automl_classifier(
-            resampling_strategy=resampling_strategy,
-            temporary_directory=cache.path("backend"),
-            delete_tmp_folder_after_terminate=False,
-        )
+    # This locks the cache for this item while we check, required for pytest-xdist
+    with make_cache(key) as cache:
+        if "model" not in cache:
+            model = make_automl_classifier(
+                resampling_strategy=resampling_strategy,
+                temporary_directory=cache.path("backend"),
+                delete_tmp_folder_after_terminate=False,
+                time_left_for_this_task=60,  # Give some more for CV
+                per_run_time_limit=10,
+            )
 
-        X, y, Xt, yt = make_sklearn_dataset(name=dataset)
-        model.fit(X, y, dataset_name=dataset)
+            X, y, Xt, yt = make_sklearn_dataset(name=dataset)
+            model.fit(X, y, dataset_name=dataset)
 
-        cache.save(model, "model")
+            cache.save(model, "model")
 
     # Try the model from the cache
     model = cache.load("model")
-    assert model is not None
     model._backend = copy_backend(old=model._backend, new=make_backend())
 
     return model
@@ -139,28 +141,27 @@ def case_regressor_fitted_holdout(
     make_automl_regressor: Callable[..., AutoMLRegressor],
     make_sklearn_dataset: Callable[..., Tuple[np.ndarray, ...]],
 ) -> AutoMLRegressor:
-    """Case of fitted regressor with cv resampling"""
+    """Case of fitted regressor with holdout"""
     resampling_strategy = "holdout"
 
     key = f"case_regressor_{resampling_strategy}_{dataset}"
-    cache = make_cache(key)
 
-    if "model" not in cache:
-        model = make_automl_regressor(
-            temporary_directory=cache.path("backend"),
-            resampling_strategy=resampling_strategy,
-            delete_tmp_folder_after_terminate=False,
-        )
+    # This locks the cache for this item while we check, required for pytest-xdist
+    with make_cache(key) as cache:
+        if "model" not in cache:
+            model = make_automl_regressor(
+                temporary_directory=cache.path("backend"),
+                resampling_strategy=resampling_strategy,
+                delete_tmp_folder_after_terminate=False,
+            )
 
-        X, y, Xt, yt = make_sklearn_dataset(name=dataset)
-        model.fit(X, y, dataset_name=dataset)
+            X, y, Xt, yt = make_sklearn_dataset(name=dataset)
+            model.fit(X, y, dataset_name=dataset)
 
-        cache.save(model, "model")
+            cache.save(model, "model")
 
     # Try the model from the cache
     model = cache.load("model")
-    assert model is not None
-
     model._backend = copy_backend(old=model._backend, new=make_backend())
 
     return model
@@ -177,26 +178,27 @@ def case_regressor_fitted_cv(
 ) -> AutoMLRegressor:
     """Case of fitted regressor with cv resampling"""
     resampling_strategy = "cv"
-
     key = f"case_regressor_{resampling_strategy}_{dataset}"
-    cache = make_cache(key)
 
-    if "model" not in cache:
-        model = make_automl_regressor(
-            temporary_directory=cache.path("backend"),
-            resampling_strategy=resampling_strategy,
-            delete_tmp_folder_after_terminate=False,
-        )
+    # This locks the cache for this item while we check, required for pytest-xdist
+    with make_cache(key) as cache:
 
-        X, y, Xt, yt = make_sklearn_dataset(name=dataset)
-        model.fit(X, y, dataset_name=dataset)
+        if "model" not in cache:
+            model = make_automl_regressor(
+                temporary_directory=cache.path("backend"),
+                resampling_strategy=resampling_strategy,
+                delete_tmp_folder_after_terminate=False,
+                time_left_for_this_task=60,  # Some extra time for CV
+                per_run_time_limit=10,
+            )
 
-        cache.save(model, "model")
+            X, y, Xt, yt = make_sklearn_dataset(name=dataset)
+            model.fit(X, y, dataset_name=dataset)
+
+            cache.save(model, "model")
 
     # Try the model from the cache
     model = cache.load("model")
-    assert model is not None
-
     model._backend = copy_backend(old=model._backend, new=make_backend())
 
     return model
@@ -213,23 +215,23 @@ def case_classifier_fitted_no_ensemble(
 ) -> AutoMLClassifier:
     """Case of a fitted classifier but enemble_size was set to 0"""
     key = f"case_classifier_fitted_no_ensemble_{dataset}"
-    cache = make_cache(key)
 
-    if "model" not in cache:
-        model = make_automl_classifier(
-            temporary_directory=cache.path("backend"),
-            delete_tmp_folder_after_terminate=False,
-            ensemble_size=0,
-        )
+    # This locks the cache for this item while we check, required for pytest-xdist
+    with make_cache(key) as cache:
 
-        X, y, Xt, yt = make_sklearn_dataset(name=dataset)
-        model.fit(X, y, dataset_name=dataset)
+        if "model" not in cache:
+            model = make_automl_classifier(
+                temporary_directory=cache.path("backend"),
+                delete_tmp_folder_after_terminate=False,
+                ensemble_size=0,
+            )
 
-        cache.save(model, "model")
+            X, y, Xt, yt = make_sklearn_dataset(name=dataset)
+            model.fit(X, y, dataset_name=dataset)
+
+            cache.save(model, "model")
 
     model = cache.load("model")
-    assert model is not None
-
     model._backend = copy_backend(old=model._backend, new=make_backend())
 
     return model
