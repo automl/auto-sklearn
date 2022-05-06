@@ -268,17 +268,13 @@ class PercentageOfMissingValues(MetaFeature):
 @metafeatures.define("NumberOfNumericFeatures")
 class NumberOfNumericFeatures(MetaFeature):
     def _calculate(self, X, y, logger, feat_type):
-        return np.sum(
-            [True if value == "numerical" else False for value in feat_type.values()]
-        )
+        return np.sum([value == "numerical" for value in feat_type.values()])
 
 
 @metafeatures.define("NumberOfCategoricalFeatures")
 class NumberOfCategoricalFeatures(MetaFeature):
     def _calculate(self, X, y, logger, feat_type):
-        return np.sum(
-            [True if value == "categorical" else False for value in feat_type.values()]
-        )
+        return np.sum([value == "categorical" for value in feat_type.values()])
 
 
 @metafeatures.define("RatioNumericalToNominal")
